@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.env
+.env.*
+!.env.example
+data/.cache/
+coverage/
+.mavis
+.claude/settings.local.json

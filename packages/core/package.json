@@ -1,0 +1,22 @@
+{
+  "name": "@open-curated/core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Core schemas, importers, health analysis, and validation for Open Curated.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "yaml": "^2.9.0",
+    "zod": "^4.4.3"
+  }
+}

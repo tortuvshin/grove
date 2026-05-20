@@ -1,0 +1,22 @@
+{
+  "name": "open-curated",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CLI and static framework for turning awesome lists into living, health-aware developer directories.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "check": "pnpm -r check",
+    "test": "pnpm -r test",
+    "dev": "pnpm --filter @open-curated/cli dev"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "typescript": "^6.0.3"
+  }
+}
