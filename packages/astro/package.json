@@ -1,0 +1,23 @@
+{
+  "name": "@open-curated/astro",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Astro UI primitives for Open Curated directories.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css",
+    "./components/ItemCard.astro": "./src/components/ItemCard.astro",
+    "./components/HealthBadge.astro": "./src/components/HealthBadge.astro",
+    "./layouts/BaseLayout.astro": "./src/layouts/BaseLayout.astro"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"No astro package tests yet\""
+  },
+  "dependencies": {
+    "@open-curated/core": "workspace:*",
+    "astro": "^6.4.4"
+  }
+}

@@ -1,0 +1,12 @@
+---
+import type { HealthStatus } from "@open-curated/core";
+
+interface Props {
+  status?: HealthStatus;
+}
+
+const { status = "unknown" } = Astro.props;
+const label = status.replace(/_/g, " ");
+---
+
+<span class={`oc-health oc-health-${status}`}>{label}</span>

@@ -1,0 +1,119 @@
+:root {
+  color-scheme: light;
+  --oc-bg: #fafafa;
+  --oc-panel: #ffffff;
+  --oc-text: #171717;
+  --oc-muted: #666666;
+  --oc-border: #dddddd;
+  --oc-accent: #0f766e;
+  --oc-warn: #a16207;
+  --oc-danger: #b91c1c;
+}
+
+body {
+  margin: 0;
+  background: var(--oc-bg);
+  color: var(--oc-text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.oc-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.oc-card {
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: var(--oc-panel);
+  padding: 16px;
+}
+
+.oc-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.oc-card-title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.oc-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.oc-card-title a:hover {
+  text-decoration: underline;
+}
+
+.oc-card-category,
+.oc-card-description,
+.oc-card-meta {
+  color: var(--oc-muted);
+}
+
+.oc-card-category {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.oc-card-description {
+  margin: 12px 0 0;
+  line-height: 1.55;
+}
+
+.oc-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 12px;
+  font-size: 0.8125rem;
+}
+
+.oc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  margin: 12px 0 0;
+  list-style: none;
+}
+
+.oc-tags li,
+.oc-health {
+  border-radius: 999px;
+  border: 1px solid var(--oc-border);
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.oc-health {
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.oc-health-active,
+.oc-health-mature {
+  border-color: color-mix(in srgb, var(--oc-accent), white 60%);
+  color: var(--oc-accent);
+}
+
+.oc-health-stale,
+.oc-health-needs_review {
+  border-color: color-mix(in srgb, var(--oc-warn), white 60%);
+  color: var(--oc-warn);
+}
+
+.oc-health-inactive,
+.oc-health-archived {
+  border-color: color-mix(in srgb, var(--oc-danger), white 60%);
+  color: var(--oc-danger);
+}

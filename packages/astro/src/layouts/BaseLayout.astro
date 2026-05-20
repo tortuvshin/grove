@@ -1,0 +1,25 @@
+---
+import "../styles.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "A living, health-aware developer directory." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <main class="oc-shell">
+      <slot />
+    </main>
+  </body>
+</html>
