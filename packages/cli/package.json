@@ -1,0 +1,27 @@
+{
+  "name": "@open-curated/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CLI for Open Curated project repos.",
+  "license": "MIT",
+  "bin": {
+    "open-curated": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/**/*.test.js",
+    "dev": "tsx src/index.ts --help"
+  },
+  "dependencies": {
+    "@open-curated/core": "workspace:*",
+    "commander": "^14.0.2",
+    "tsx": "^4.21.0"
+  }
+}
