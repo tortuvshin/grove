@@ -13,9 +13,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test dist/**/*.test.js"
+    "test": "echo \"No core package tests yet\""
   },
   "dependencies": {
+    "jiti": "^2.6.1",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   }

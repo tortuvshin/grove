@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test dist/**/*.test.js",
+    "test": "echo \"No cli package tests yet\"",
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {

@@ -124,7 +124,15 @@ export const curatedConfigSchema = z.object({
       decisions: z.string().default("data/decisions.yml"),
       overrides: z.string().default("data/overrides.yml"),
     })
-    .default({}),
+    .default({
+      sourcesDir: "sources",
+      dataDir: "data",
+      contentDir: "content",
+      items: "data/items.yml",
+      health: "data/health.yml",
+      decisions: "data/decisions.yml",
+      overrides: "data/overrides.yml",
+    }),
 });
 
 export type HealthStatus = z.infer<typeof healthStatusSchema>;

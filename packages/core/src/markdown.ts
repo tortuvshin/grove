@@ -90,15 +90,17 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
     }
 
     const description = extractDescription(body);
+    const links: CuratedItem["links"] = {
+      ...(github ? { github } : {}),
+      ...(!github ? { website: primary.url } : {}),
+      ...(options.sourceUrl ? { source: options.sourceUrl } : {}),
+    };
+
     items.push({
       id,
       name: primary.label,
       description: description || primary.label,
-      links: {
-        ...(github ? { github } : {}),
-        ...(!github ? { website: primary.url } : {}),
-        source: options.sourceUrl,
-      },
+      links,
       source: {
         type: "markdown",
         file: options.file,

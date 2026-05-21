@@ -11,6 +11,7 @@
     "@open-curated/astro": "workspace:*",
     "@open-curated/cli": "workspace:*",
     "@open-curated/core": "workspace:*",
-    "astro": "^6.4.4"
+    "astro": "^6.4.4",
+    "yaml": "^2.9.0"
   }
 }
