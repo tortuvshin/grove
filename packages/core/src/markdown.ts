@@ -24,6 +24,7 @@ export function detectGithubRepo(url: string): string | undefined {
 function extractDescription(body: string): string {
   return body
     .replace(markdownLinkPattern, "")
+    .trim()
     .replace(/^[-:—–]\s*/, "")
     .replace(/\s+/g, " ")
     .trim();
