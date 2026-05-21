@@ -1,0 +1,27 @@
+items:
+  - id: astro
+    name: Astro
+    description: Web framework for content-driven sites.
+    links:
+      github: https://github.com/withastro/astro
+      website: https://astro.build
+    source:
+      type: manual
+    taxonomy:
+      category: Web Frameworks
+      tags:
+        - static-site
+        - javascript
+  - id: zod
+    name: Zod
+    description: TypeScript-first schema validation.
+    links:
+      github: https://github.com/colinhacks/zod
+      website: https://zod.dev
+    source:
+      type: manual
+    taxonomy:
+      category: Developer Tools
+      tags:
+        - validation
+        - typescript

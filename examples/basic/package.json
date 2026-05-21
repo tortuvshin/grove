@@ -1,0 +1,16 @@
+{
+  "name": "open-curated-basic-example",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "validate": "open-curated validate",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@open-curated/astro": "workspace:*",
+    "@open-curated/cli": "workspace:*",
+    "@open-curated/core": "workspace:*",
+    "astro": "^6.4.4"
+  }
+}

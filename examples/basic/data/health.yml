@@ -1,0 +1,41 @@
+health:
+  - id: astro
+    github:
+      fullName: withastro/astro
+      stars: 52000
+      forks: 2800
+      archived: false
+      pushedAt: "2026-06-01T00:00:00Z"
+      latestReleaseAt: "2026-05-20T00:00:00Z"
+      license: MIT
+      topics:
+        - static-site-generator
+      language: TypeScript
+    health:
+      status: mature
+      maturity: mature
+      confidence: high
+      reasons:
+        - Recent repository activity
+        - Recent release found
+        - Clear license found
+  - id: zod
+    github:
+      fullName: colinhacks/zod
+      stars: 38000
+      forks: 1200
+      archived: false
+      pushedAt: "2026-05-28T00:00:00Z"
+      latestReleaseAt: "2026-05-18T00:00:00Z"
+      license: MIT
+      topics:
+        - typescript
+      language: TypeScript
+    health:
+      status: mature
+      maturity: mature
+      confidence: high
+      reasons:
+        - Recent repository activity
+        - Recent release found
+        - Clear license found
