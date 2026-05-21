@@ -68,22 +68,22 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
     if (!/^\s*[-*+]\s+/.test(line)) continue;
 
     const body = line.replace(/^\s*[-*+]\s+/, "").trim();
-    const links = [...body.matchAll(markdownLinkPattern)].map((match) => ({
+    const parsedLinks = [...body.matchAll(markdownLinkPattern)].map((match) => ({
       label: match[1].trim(),
       url: match[2].trim(),
     }));
-    if (links.length === 0) {
+    if (parsedLinks.length === 0) {
       skipped++;
       continue;
     }
 
-    const primary = links[0];
+    const primary = parsedLinks[0];
     if (!primary) {
       skipped++;
       continue;
     }
 
-    const github = links.map((link) => detectGithubRepo(link.url)).find(Boolean);
+    const github = parsedLinks.map((link) => detectGithubRepo(link.url)).find(Boolean);
     const id = uniqueSlug(primary.label, seen);
     if (id !== (primary.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "item")) {
       duplicateSlugs++;
