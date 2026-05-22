@@ -2,9 +2,11 @@
 import BaseLayout from "@open-curated/astro/layouts/BaseLayout.astro";
 import DirectoryFilters from "@open-curated/astro/components/DirectoryFilters.astro";
 import ItemCard from "@open-curated/astro/components/ItemCard.astro";
-import { filteredRecords } from "../../lib/directory";
+import { readDirectory } from "../../lib/directory";
+import { sortRecords } from "@open-curated/astro";
 
-const directory = filteredRecords(Astro.url);
+const directory = readDirectory();
+const records = sortRecords(directory.records);
 const filterCategoryNames = directory.categories.map((entry) => entry.name);
 ---
 
@@ -16,26 +18,129 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
         <h1>Browse projects</h1>
         <p class="oc-lede">Search, compare, and filter projects by health, category, language, license, and maintenance signals.</p>
       </div>
-      <p>{directory.results.length} of {directory.records.length} projects</p>
+      <p id="result-count">{records.length} of {records.length} projects</p>
     </div>
     <DirectoryFilters
-      q={directory.filters.q}
-      category={directory.filters.category}
-      tag={directory.filters.tag}
-      language={directory.filters.language}
-      license={directory.filters.license}
-      health={directory.filters.health}
-      maintained={directory.filters.maintained}
-      hideArchived={directory.filters.hideArchived}
-      hasRecentRelease={directory.filters.hasRecentRelease}
       categories={filterCategoryNames}
       tags={directory.tags}
       languages={directory.languages}
       licenses={directory.licenses}
     />
   </section>
-  <section class="oc-grid">
-    {directory.results.map((record) => <ItemCard item={record.item} health={record.health} />)}
+  <section class="oc-grid" id="project-results">
+    {records.map((record) => {
+      const item = record.item;
+      const status = record.health?.health.status ?? "unknown";
+      const language = item.taxonomy.language ?? record.health?.github?.language ?? "";
+      const license = record.health?.github?.license ?? "";
+      const hasRecentRelease = record.health?.github?.latestReleaseAt ? "1" : "0";
+      const search = [
+        item.name,
+        item.description,
+        item.taxonomy.category,
+        language,
+        license,
+        ...item.taxonomy.tags,
+        ...(record.health?.github?.topics ?? []),
+      ].join(" ").toLowerCase();
+      return (
+        <div
+          class="oc-project-result"
+          data-search={search}
+          data-category={item.taxonomy.category}
+          data-tags={item.taxonomy.tags.join(",")}
+          data-language={language}
+          data-license={license}
+          data-health={status}
+          data-release={hasRecentRelease}
+        >
+          <ItemCard item={item} health={record.health} />
+        </div>
+      );
+    })}
   </section>
-  {directory.results.length === 0 && <p>No projects match these filters.</p>}
+  <p id="empty-results" hidden>No projects match these filters.</p>
 </BaseLayout>
+
+<script>
+  const form = document.querySelector(".oc-filters");
+  const cards = Array.from(document.querySelectorAll(".oc-project-result"));
+  const count = document.querySelector("#result-count");
+  const empty = document.querySelector("#empty-results");
+
+  function setFormFromUrl() {
+    if (!(form instanceof HTMLFormElement)) return;
+    const params = new URLSearchParams(window.location.search);
+    for (const element of Array.from(form.elements)) {
+      if (!(element instanceof HTMLInputElement || element instanceof HTMLSelectElement)) continue;
+      if (!element.name) continue;
+      if (element instanceof HTMLInputElement && element.type === "checkbox") {
+        element.checked = params.get(element.name) === "1";
+      } else {
+        element.value = params.get(element.name) ?? (element.name === "health" ? "all" : "");
+      }
+    }
+  }
+
+  function readFilters() {
+    if (!(form instanceof HTMLFormElement)) return {};
+    const data = new FormData(form);
+    return {
+      q: String(data.get("q") ?? "").trim().toLowerCase(),
+      category: String(data.get("category") ?? ""),
+      tag: String(data.get("tag") ?? ""),
+      language: String(data.get("language") ?? ""),
+      license: String(data.get("license") ?? ""),
+      health: String(data.get("health") ?? "all"),
+      maintained: data.get("maintained") === "1",
+      hideArchived: data.get("hideArchived") === "1",
+      hasRecentRelease: data.get("hasRecentRelease") === "1",
+    };
+  }
+
+  function applyFilters(updateUrl = false) {
+    const filters = readFilters();
+    let visible = 0;
+    for (const card of cards) {
+      if (!(card instanceof HTMLElement)) continue;
+      const tags = (card.dataset.tags ?? "").split(",").filter(Boolean);
+      const status = card.dataset.health ?? "unknown";
+      const matches =
+        (!filters.q || (card.dataset.search ?? "").includes(filters.q)) &&
+        (!filters.category || card.dataset.category === filters.category) &&
+        (!filters.tag || tags.includes(filters.tag)) &&
+        (!filters.language || card.dataset.language === filters.language) &&
+        (!filters.license || card.dataset.license === filters.license) &&
+        (!filters.health || filters.health === "all" || status === filters.health) &&
+        (!filters.maintained || ["active", "mature"].includes(status)) &&
+        (!filters.hideArchived || status !== "archived") &&
+        (!filters.hasRecentRelease || card.dataset.release === "1");
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    }
+    if (count) count.textContent = `${visible} of ${cards.length} projects`;
+    if (empty instanceof HTMLElement) empty.hidden = visible !== 0;
+
+    if (updateUrl && form instanceof HTMLFormElement) {
+      const params = new URLSearchParams();
+      const data = new FormData(form);
+      for (const [key, value] of data.entries()) {
+        const text = String(value);
+        if (!text || text === "all") continue;
+        params.set(key, text);
+      }
+      const query = params.toString();
+      history.replaceState(null, "", query ? `${location.pathname}?${query}` : location.pathname);
+    }
+  }
+
+  setFormFromUrl();
+  applyFilters(false);
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      applyFilters(true);
+    });
+    form.addEventListener("change", () => applyFilters(true));
+  }
+</script>
