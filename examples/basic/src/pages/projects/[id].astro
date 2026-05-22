@@ -1,0 +1,38 @@
+---
+import BaseLayout from "@open-curated/astro/layouts/BaseLayout.astro";
+import ProjectDetail from "@open-curated/astro/components/ProjectDetail.astro";
+import ItemCard from "@open-curated/astro/components/ItemCard.astro";
+import { readDirectory } from "../../lib/directory";
+
+export function getStaticPaths() {
+  const directory = readDirectory();
+  return directory.records.map((record) => ({
+    params: { id: record.item.id },
+    props: { record },
+  }));
+}
+
+const { record } = Astro.props;
+const directory = readDirectory();
+const related = directory.records
+  .filter((candidate) => candidate.item.id !== record.item.id && candidate.item.taxonomy.category === record.item.taxonomy.category)
+  .slice(0, 3);
+---
+
+<BaseLayout title={`${record.item.name} - Open Curated`}>
+  <ProjectDetail item={record.item} health={record.health} decision={record.decision} />
+  {related.length > 0 && (
+    <section class="oc-section">
+      <div class="oc-section-header">
+        <div>
+          <p class="oc-eyebrow">Related</p>
+          <h2>More in {record.item.taxonomy.category}</h2>
+        </div>
+        <a href={`/categories/${record.item.taxonomy.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`}>View category</a>
+      </div>
+      <div class="oc-grid">
+        {related.map((candidate) => <ItemCard item={candidate.item} health={candidate.health} />)}
+      </div>
+    </section>
+  )}
+</BaseLayout>

@@ -1,0 +1,32 @@
+---
+import type { DirectoryStats } from "../index.js";
+
+interface Props {
+  name: string;
+  tagline: string;
+  stats: DirectoryStats;
+}
+
+const { name, tagline, stats } = Astro.props;
+---
+
+<section class="oc-hero">
+  <div>
+    <p class="oc-eyebrow">Open Curated</p>
+    <h1>{name}</h1>
+    <p class="oc-lede">{tagline}</p>
+  </div>
+  <form class="oc-hero-search" action="/projects" role="search">
+    <label>
+      <span class="oc-sr-only">Search projects</span>
+      <input type="search" name="q" placeholder="Search projects, tags, licenses..." />
+    </label>
+    <button type="submit">Search</button>
+  </form>
+  <dl class="oc-stats">
+    <div><dt>Projects</dt><dd>{stats.total}</dd></div>
+    <div><dt>Active</dt><dd>{stats.active}</dd></div>
+    <div><dt>Mature</dt><dd>{stats.mature}</dd></div>
+    <div><dt>Needs review</dt><dd>{stats.needsReview}</dd></div>
+  </dl>
+</section>

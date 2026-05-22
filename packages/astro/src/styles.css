@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --oc-bg: #fafafa;
+  --oc-bg: #f7f7f4;
   --oc-panel: #ffffff;
   --oc-text: #171717;
   --oc-muted: #666666;
@@ -17,10 +17,247 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+a {
+  color: inherit;
+}
+
+.oc-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--oc-border);
+  background: color-mix(in srgb, var(--oc-panel), transparent 8%);
+  padding: 12px max(16px, calc((100vw - 1120px) / 2));
+  backdrop-filter: blur(14px);
+}
+
+.oc-brand {
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.oc-topbar nav {
+  display: flex;
+  gap: 14px;
+  color: var(--oc-muted);
+  font-size: 0.875rem;
+}
+
+.oc-topbar nav a {
+  text-decoration: none;
+}
+
+.oc-topbar nav a:hover {
+  color: var(--oc-text);
+}
+
 .oc-shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
   padding: 32px 0 56px;
+}
+
+.oc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.oc-eyebrow {
+  margin: 0 0 8px;
+  color: var(--oc-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.oc-lede {
+  max-width: 68ch;
+  color: var(--oc-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.oc-hero {
+  display: grid;
+  gap: 24px;
+  padding: 28px 0 20px;
+}
+
+.oc-hero h1,
+.oc-detail h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+}
+
+.oc-hero-search,
+.oc-filters {
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: var(--oc-panel);
+}
+
+.oc-hero-search {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 8px;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--oc-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--oc-text);
+  padding: 10px 11px;
+}
+
+.oc-hero-search input {
+  height: 44px;
+  border: 0;
+  padding-inline: 12px;
+}
+
+button,
+.oc-filter-actions a,
+.oc-card-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 1px solid var(--oc-text);
+  border-radius: 6px;
+  background: var(--oc-text);
+  color: #ffffff;
+  padding: 0 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.oc-filter-actions a,
+.oc-card-actions a {
+  border-color: var(--oc-border);
+  background: var(--oc-panel);
+  color: var(--oc-text);
+}
+
+.oc-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.oc-stats div,
+.oc-category-card,
+.oc-detail-grid section {
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: var(--oc-panel);
+  padding: 16px;
+}
+
+.oc-stats dt {
+  color: var(--oc-muted);
+  font-size: 0.75rem;
+}
+
+.oc-stats dd {
+  margin: 4px 0 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.oc-section {
+  margin-top: 36px;
+}
+
+.oc-section-header,
+.oc-detail-header,
+.oc-results-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.oc-section-header h2,
+.oc-detail-grid h2 {
+  margin: 0;
+}
+
+.oc-category-grid,
+.oc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.oc-category-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+}
+
+.oc-category-card strong {
+  color: var(--oc-accent);
+}
+
+.oc-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(5, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+  padding: 14px;
+}
+
+.oc-filters label span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--oc-muted);
+  font-size: 0.75rem;
+}
+
+.oc-filter-toggles,
+.oc-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.oc-filter-toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--oc-text);
+  font-size: 0.875rem;
+}
+
+.oc-filter-toggles input {
+  width: auto;
 }
 
 .oc-card {
@@ -56,6 +293,18 @@ body {
 .oc-card-description,
 .oc-card-meta {
   color: var(--oc-muted);
+}
+
+.oc-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.oc-card-actions a {
+  min-height: 30px;
+  font-size: 0.8125rem;
 }
 
 .oc-card-category {
@@ -116,4 +365,88 @@ body {
 .oc-health-archived {
   border-color: color-mix(in srgb, var(--oc-danger), white 60%);
   color: var(--oc-danger);
+}
+
+.oc-methodology,
+.oc-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.oc-methodology {
+  margin-top: 36px;
+  border-top: 1px solid var(--oc-border);
+  padding-top: 24px;
+}
+
+.oc-methodology p,
+.oc-methodology li,
+.oc-detail p,
+.oc-detail li {
+  color: var(--oc-muted);
+  line-height: 1.6;
+}
+
+.oc-detail-grid {
+  margin-top: 24px;
+}
+
+.oc-link-list,
+.oc-signal-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+}
+
+.oc-fact-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.oc-fact-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--oc-border);
+  padding-bottom: 8px;
+}
+
+.oc-fact-list dt {
+  color: var(--oc-muted);
+}
+
+.oc-fact-list dd {
+  margin: 0;
+  text-align: right;
+}
+
+.oc-source {
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 860px) {
+  .oc-stats,
+  .oc-filters,
+  .oc-methodology,
+  .oc-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .oc-section-header,
+  .oc-detail-header,
+  .oc-results-header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .oc-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .oc-hero-search {
+    grid-template-columns: 1fr;
+  }
 }

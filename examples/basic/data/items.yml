@@ -12,6 +12,7 @@ items:
       tags:
         - static-site
         - javascript
+      language: TypeScript
   - id: zod
     name: Zod
     description: TypeScript-first schema validation.
@@ -25,3 +26,62 @@ items:
       tags:
         - validation
         - typescript
+      language: TypeScript
+  - id: hono
+    name: Hono
+    description: Fast, lightweight web framework for edge and server runtimes.
+    links:
+      github: https://github.com/honojs/hono
+      website: https://hono.dev
+      docs: https://hono.dev/docs
+    source:
+      type: manual
+    taxonomy:
+      category: Web Frameworks
+      tags:
+        - web
+        - edge
+        - api
+      language: TypeScript
+  - id: pagefind
+    name: Pagefind
+    description: Static search library built for fully static websites.
+    links:
+      github: https://github.com/CloudCannon/pagefind
+      website: https://pagefind.app
+      docs: https://pagefind.app/docs
+    source:
+      type: manual
+    taxonomy:
+      category: Search
+      tags:
+        - search
+        - static-site
+      language: Rust
+  - id: legacy-router
+    name: Legacy Router
+    description: Historical routing library kept for compatibility research.
+    links:
+      github: https://github.com/example/legacy-router
+      website: https://example.com/legacy-router
+    source:
+      type: manual
+    taxonomy:
+      category: Historical
+      tags:
+        - routing
+        - historical
+      language: JavaScript
+  - id: tiny-cli
+    name: Tiny CLI
+    description: Small command-line starter that needs maintainer review.
+    links:
+      github: https://github.com/example/tiny-cli
+    source:
+      type: manual
+    taxonomy:
+      category: Developer Tools
+      tags:
+        - cli
+        - starter
+      language: TypeScript

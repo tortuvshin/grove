@@ -7,6 +7,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css",
+    "./components/CategoryGrid.astro": "./src/components/CategoryGrid.astro",
+    "./components/DirectoryFilters.astro": "./src/components/DirectoryFilters.astro",
+    "./components/DirectoryHero.astro": "./src/components/DirectoryHero.astro",
+    "./components/MethodologyPanel.astro": "./src/components/MethodologyPanel.astro",
+    "./components/ProjectDetail.astro": "./src/components/ProjectDetail.astro",
     "./components/ItemCard.astro": "./src/components/ItemCard.astro",
     "./components/HealthBadge.astro": "./src/components/HealthBadge.astro",
     "./layouts/BaseLayout.astro": "./src/layouts/BaseLayout.astro"

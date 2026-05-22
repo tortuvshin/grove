@@ -1,0 +1,36 @@
+---
+import BaseLayout from "@open-curated/astro/layouts/BaseLayout.astro";
+import MethodologyPanel from "@open-curated/astro/components/MethodologyPanel.astro";
+---
+
+<BaseLayout title="Methodology">
+  <section>
+    <p class="oc-eyebrow">Trust</p>
+    <h1>Methodology</h1>
+    <p class="oc-lede">
+      Open Curated uses repository metadata to surface maintenance signals, but human curation controls final visibility.
+    </p>
+  </section>
+  <MethodologyPanel />
+  <section class="oc-detail-grid">
+    <section>
+      <h2>Status labels</h2>
+      <ul class="oc-signal-list">
+        <li>active: recent activity.</li>
+        <li>mature: strong adoption plus maintenance signals.</li>
+        <li>stale: activity has slowed and should be checked.</li>
+        <li>inactive: no meaningful activity for a long time.</li>
+        <li>archived: repository is archived on GitHub.</li>
+        <li>needs review: metadata is unclear or borderline.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Human decisions</h2>
+      <p>
+        Maintainers can mark projects as highlighted, kept, hidden, removed, historical,
+        or needs review in <code>data/decisions.yml</code>. The CLI should never delete
+        a project automatically.
+      </p>
+    </section>
+  </section>
+</BaseLayout>

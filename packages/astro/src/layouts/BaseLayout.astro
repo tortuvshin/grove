@@ -18,6 +18,13 @@ const { title, description = "A living, health-aware developer directory." } = A
     <title>{title}</title>
   </head>
   <body>
+    <header class="oc-topbar">
+      <a href="/" class="oc-brand">Open Curated</a>
+      <nav aria-label="Primary">
+        <a href="/projects">Directory</a>
+        <a href="/methodology">Methodology</a>
+      </nav>
+    </header>
     <main class="oc-shell">
       <slot />
     </main>

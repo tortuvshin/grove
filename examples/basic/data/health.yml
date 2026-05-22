@@ -39,3 +39,85 @@ health:
         - Recent repository activity
         - Recent release found
         - Clear license found
+  - id: hono
+    github:
+      fullName: honojs/hono
+      stars: 24500
+      forks: 720
+      archived: false
+      pushedAt: "2026-06-01T00:00:00Z"
+      latestReleaseAt: "2026-05-20T00:00:00Z"
+      license: MIT
+      topics:
+        - typescript
+        - web-framework
+        - edge
+      language: TypeScript
+    health:
+      status: active
+      maturity: mature
+      confidence: high
+      reasons:
+        - Recent repository activity
+        - Recent release found
+        - Clear license found
+  - id: pagefind
+    github:
+      fullName: CloudCannon/pagefind
+      stars: 12000
+      forks: 390
+      archived: false
+      pushedAt: "2026-02-12T00:00:00Z"
+      latestReleaseAt: "2025-12-10T00:00:00Z"
+      license: MIT
+      topics:
+        - search
+        - static-site
+      language: Rust
+    health:
+      status: active
+      maturity: useful
+      confidence: high
+      reasons:
+        - Recent repository activity
+        - Recent release found
+        - Clear license found
+  - id: legacy-router
+    github:
+      fullName: example/legacy-router
+      stars: 900
+      forks: 44
+      archived: true
+      pushedAt: "2021-03-10T00:00:00Z"
+      latestReleaseAt: "2020-12-01T00:00:00Z"
+      license: MIT
+      topics:
+        - routing
+      language: JavaScript
+    health:
+      status: archived
+      maturity: unknown
+      confidence: high
+      reasons:
+        - Repository is archived on GitHub
+        - No commits in the last 24 months
+        - Clear license found
+  - id: tiny-cli
+    github:
+      fullName: example/tiny-cli
+      stars: 28
+      forks: 3
+      archived: false
+      pushedAt: "2024-07-01T00:00:00Z"
+      latestReleaseAt: null
+      license: null
+      topics:
+        - cli
+      language: TypeScript
+    health:
+      status: needs_review
+      maturity: experimental
+      confidence: medium
+      reasons:
+        - Repository activity is old enough to need review
+        - License is missing or unclear

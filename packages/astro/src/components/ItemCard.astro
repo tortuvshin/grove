@@ -8,7 +8,7 @@ interface Props {
 }
 
 const { item, health } = Astro.props;
-const href = item.links.website ?? item.links.github ?? "#";
+const href = `/projects/${item.id}`;
 const tags = item.taxonomy.tags.slice(0, 4);
 ---
 
@@ -27,6 +27,11 @@ const tags = item.taxonomy.tags.slice(0, 4);
     {health?.github?.stars != null && <span>{health.github.stars.toLocaleString()} stars</span>}
     {health?.github?.license && <span>{health.github.license}</span>}
     {health?.github?.language && <span>{health.github.language}</span>}
+  </div>
+  <div class="oc-card-actions">
+    <a href={`/projects/${item.id}`}>Details</a>
+    {item.links.github && <a href={item.links.github}>GitHub</a>}
+    {item.links.docs && <a href={item.links.docs}>Docs</a>}
   </div>
   {tags.length > 0 && (
     <ul class="oc-tags" aria-label="Tags">

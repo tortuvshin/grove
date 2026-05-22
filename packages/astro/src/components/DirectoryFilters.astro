@@ -1,0 +1,100 @@
+---
+import type { HealthStatus } from "@open-curated/core";
+
+interface Props {
+  q?: string;
+  category?: string;
+  tag?: string;
+  language?: string;
+  license?: string;
+  health?: string;
+  maintained?: boolean;
+  hideArchived?: boolean;
+  hasRecentRelease?: boolean;
+  categories: string[];
+  tags: string[];
+  languages: string[];
+  licenses: string[];
+  action?: string;
+}
+
+const {
+  q = "",
+  category = "",
+  tag = "",
+  language = "",
+  license = "",
+  health = "all",
+  maintained = false,
+  hideArchived = false,
+  hasRecentRelease = false,
+  categories,
+  tags,
+  languages,
+  licenses,
+  action = "/projects",
+} = Astro.props;
+
+const healthOptions: Array<HealthStatus | "all"> = [
+  "all",
+  "mature",
+  "active",
+  "stale",
+  "needs_review",
+  "inactive",
+  "archived",
+  "unknown",
+];
+---
+
+<form class="oc-filters" action={action} method="get" role="search">
+  <label class="oc-filter-search">
+    <span>Search</span>
+    <input type="search" name="q" value={q} placeholder="Name, description, tag, license..." />
+  </label>
+  <label>
+    <span>Category</span>
+    <select name="category">
+      <option value="">All categories</option>
+      {categories.map((value) => <option value={value} selected={value === category}>{value}</option>)}
+    </select>
+  </label>
+  <label>
+    <span>Health</span>
+    <select name="health">
+      {healthOptions.map((value) => (
+        <option value={value} selected={value === health}>{value.replace(/_/g, " ")}</option>
+      ))}
+    </select>
+  </label>
+  <label>
+    <span>Tag</span>
+    <select name="tag">
+      <option value="">All tags</option>
+      {tags.map((value) => <option value={value} selected={value === tag}>{value}</option>)}
+    </select>
+  </label>
+  <label>
+    <span>Language</span>
+    <select name="language">
+      <option value="">All languages</option>
+      {languages.map((value) => <option value={value} selected={value === language}>{value}</option>)}
+    </select>
+  </label>
+  <label>
+    <span>License</span>
+    <select name="license">
+      <option value="">All licenses</option>
+      {licenses.map((value) => <option value={value} selected={value === license}>{value}</option>)}
+    </select>
+  </label>
+  <div class="oc-filter-toggles">
+    <label><input type="checkbox" name="maintained" value="1" checked={maintained} /> Maintained only</label>
+    <label><input type="checkbox" name="hideArchived" value="1" checked={hideArchived} /> Hide archived</label>
+    <label><input type="checkbox" name="hasRecentRelease" value="1" checked={hasRecentRelease} /> Recent release</label>
+  </div>
+  <div class="oc-filter-actions">
+    <button type="submit">Apply</button>
+    <a href={action}>Reset</a>
+  </div>
+</form>

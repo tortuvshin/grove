@@ -1,72 +1,39 @@
 ---
 import BaseLayout from "@open-curated/astro/layouts/BaseLayout.astro";
 import ItemCard from "@open-curated/astro/components/ItemCard.astro";
-import { buildDirectoryStats, healthForItem } from "@open-curated/astro";
-import { itemsFileSchema, healthFileSchema, unwrapHealth, unwrapItems } from "@open-curated/core";
-import { readFileSync } from "node:fs";
-import { parse } from "yaml";
+import DirectoryHero from "@open-curated/astro/components/DirectoryHero.astro";
+import CategoryGrid from "@open-curated/astro/components/CategoryGrid.astro";
+import MethodologyPanel from "@open-curated/astro/components/MethodologyPanel.astro";
+import { buildDirectoryStats, sortRecords } from "@open-curated/astro";
+import { readDirectory } from "../lib/directory";
 
-const items = unwrapItems(itemsFileSchema.parse(parse(readFileSync("data/items.yml", "utf8"))));
-const health = unwrapHealth(healthFileSchema.parse(parse(readFileSync("data/health.yml", "utf8"))));
-const stats = buildDirectoryStats(items, health);
+const directory = readDirectory();
+const stats = buildDirectoryStats(directory.items, directory.health);
+const featured = sortRecords(directory.records).slice(0, 3);
 ---
 
 <BaseLayout title="Basic Open Curated Example">
-  <section>
-    <p class="eyebrow">Open Curated</p>
-    <h1>Basic Open Curated Example</h1>
-    <p>A tiny static directory generated from file-based project data.</p>
-    <dl class="stats">
-      <div><dt>Total</dt><dd>{stats.total}</dd></div>
-      <div><dt>Active</dt><dd>{stats.active}</dd></div>
-      <div><dt>Mature</dt><dd>{stats.mature}</dd></div>
-      <div><dt>Needs review</dt><dd>{stats.needsReview}</dd></div>
-    </dl>
+  <DirectoryHero
+    name="Basic Open Curated Example"
+    tagline="A searchable, filterable, health-aware developer directory generated from files."
+    stats={stats}
+  />
+
+  <section class="oc-section">
+    <div class="oc-section-header">
+      <div>
+        <p class="oc-eyebrow">Featured</p>
+        <h2>Useful maintained projects</h2>
+      </div>
+      <a href="/projects">Browse directory</a>
+    </div>
+    <div class="oc-grid">
+      {featured.map((record) => (
+        <ItemCard item={record.item} health={record.health} />
+      ))}
+    </div>
   </section>
-  <section class="grid">
-    {items.map((item) => <ItemCard item={item} health={healthForItem(item, health)} />)}
-  </section>
+
+  <CategoryGrid categories={directory.categories} />
+  <MethodologyPanel />
 </BaseLayout>
-
-<style>
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-  }
-
-  .eyebrow {
-    margin: 0 0 8px;
-    color: #0f766e;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-  }
-
-  .stats,
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-  }
-
-  .stats {
-    margin: 24px 0;
-  }
-
-  .stats div {
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    background: #ffffff;
-    padding: 12px;
-  }
-
-  dt {
-    color: #666666;
-    font-size: 0.75rem;
-  }
-
-  dd {
-    margin: 4px 0 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-</style>
