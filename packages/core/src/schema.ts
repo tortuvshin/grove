@@ -20,6 +20,39 @@ export const decisionVisibilitySchema = z.enum([
   "historical",
 ]);
 
+export const scoreSchema = z.object({
+  activity: z.number().min(0).max(100).optional(),
+  maturity: z.number().min(0).max(100).optional(),
+  learning: z.number().min(0).max(100).optional(),
+  contribution: z.number().min(0).max(100).optional(),
+  docs: z.number().min(0).max(100).optional(),
+  overall: z.number().min(0).max(100).optional(),
+});
+
+export const distributionChannelSchema = z.object({
+  type: z.enum([
+    "app-store",
+    "play-store",
+    "fdroid",
+    "github-releases",
+    "apk",
+    "testflight",
+    "website",
+    "snapcraft",
+    "flathub",
+    "microsoft-store",
+    "package-registry",
+    "docs",
+    "demo",
+    "other",
+  ]),
+  platform: z.string().optional(),
+  label: z.string().optional(),
+  url: z.string().url(),
+  verified: z.boolean().optional(),
+  notes: z.string().optional(),
+});
+
 export const itemSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -48,6 +81,35 @@ export const itemSchema = z.object({
       language: z.string().optional(),
     })
     .default({ category: "uncategorized", tags: [] }),
+  labels: z.array(z.string()).default([]),
+  lenses: z.array(z.string()).default([]),
+  distribution: z
+    .object({
+      channels: z.array(distributionChannelSchema).default([]),
+    })
+    .default({ channels: [] }),
+  curation: z
+    .object({
+      projectType: z.enum(["production", "reference", "library", "tool", "demo", "template", "historical"]).optional(),
+      difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+      codebaseSize: z.enum(["small", "medium", "large", "huge"]).optional(),
+      bestFor: z.array(z.string()).default([]),
+      whyListed: z.array(z.string()).default([]),
+      caveats: z.array(z.string()).default([]),
+      goodFirstIssues: z.union([z.boolean(), z.string().url()]).optional(),
+      contributionGuide: z.union([z.boolean(), z.string().url()]).optional(),
+      reviewed: z.boolean().optional(),
+      reviewedBy: z.string().optional(),
+      reviewedAt: z.string().optional(),
+      notes: z.string().optional(),
+      scores: scoreSchema.default({}),
+    })
+    .default({
+      bestFor: [],
+      whyListed: [],
+      caveats: [],
+      scores: {},
+    }),
 });
 
 export const itemsFileSchema = z.union([
@@ -71,6 +133,19 @@ export const githubMetadataSchema = z.object({
   topics: z.array(z.string()).default([]),
   language: z.string().nullable().optional(),
   defaultBranch: z.string().optional(),
+  languages: z.record(z.string(), z.number()).optional(),
+  contributorsKnown: z.number().int().nonnegative().optional(),
+  totalCommitsKnown: z.number().int().nonnegative().optional(),
+  openPullRequests: z.number().int().nonnegative().optional(),
+  files: z.record(z.string(), z.boolean()).optional(),
+  monthlyCommits: z
+    .array(
+      z.object({
+        month: z.string(),
+        commits: z.number().int().nonnegative(),
+      }),
+    )
+    .optional(),
 });
 
 export const healthEntrySchema = z.object({
@@ -137,6 +212,8 @@ export const curatedConfigSchema = z.object({
 
 export type HealthStatus = z.infer<typeof healthStatusSchema>;
 export type DecisionVisibility = z.infer<typeof decisionVisibilitySchema>;
+export type CuratedScores = z.infer<typeof scoreSchema>;
+export type DistributionChannel = z.infer<typeof distributionChannelSchema>;
 export type CuratedItem = z.infer<typeof itemSchema>;
 export type ItemsFile = z.infer<typeof itemsFileSchema>;
 export type GithubMetadata = z.infer<typeof githubMetadataSchema>;
