@@ -1,0 +1,20 @@
+---
+import type { DirectoryFilters } from "../index.js";
+import { activeFilterChips } from "../index.js";
+
+interface Props {
+  filters: DirectoryFilters;
+}
+
+const { filters } = Astro.props;
+const chips = activeFilterChips(filters);
+---
+
+{chips.length > 0 && (
+  <div class="oc-active-chips" aria-label="Active filters">
+    {chips.map((chip) => (
+      <span data-filter-chip={chip.key}>{chip.label}</span>
+    ))}
+    <a href="/projects">Clear all</a>
+  </div>
+)}

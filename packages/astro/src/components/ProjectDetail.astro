@@ -1,6 +1,8 @@
 ---
 import type { CuratedItem, HealthEntry, Decision } from "@open-curated/core";
 import HealthBadge from "./HealthBadge.astro";
+import ScoreBars from "./ScoreBars.astro";
+import { SCORE_LABELS, SCORE_REASONING } from "../index.js";
 
 interface Props {
   item: CuratedItem;
@@ -10,6 +12,21 @@ interface Props {
 
 const { item, health, decision } = Astro.props;
 const links = Object.entries(item.links).filter(([, href]) => Boolean(href));
+const channels = item.distribution.channels ?? [];
+const languages = health?.github?.languages
+  ? Object.entries(health.github.languages).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  : [];
+const totalLanguageBytes = Math.max(1, languages.reduce((sum, [, bytes]) => sum + bytes, 0));
+const files = health?.github?.files ?? {};
+const fileSignals = [
+  ["README", files.readme],
+  ["Contributing", files.contributing],
+  ["Security", files.security],
+  ["Issue templates", files.issueTemplates],
+  ["PR template", files.pullRequestTemplate],
+].filter(([, ok]) => ok !== undefined);
+const monthly = health?.github?.monthlyCommits ?? [];
+const maxCommits = Math.max(1, ...monthly.map((entry) => entry.commits));
 ---
 
 <article class="oc-detail">
@@ -23,11 +40,33 @@ const links = Object.entries(item.links).filter(([, href]) => Boolean(href));
   </header>
 
   <div class="oc-detail-grid">
+    <section class="oc-detail-wide">
+      <h2>Curation Scores</h2>
+      <ScoreBars scores={item.curation.scores} />
+      <dl class="oc-score-reasons">
+        {(Object.keys(SCORE_LABELS) as Array<keyof typeof SCORE_LABELS>).map((key) => (
+          <div>
+            <dt>{SCORE_LABELS[key]}</dt>
+            <dd>{SCORE_REASONING[key]}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
     <section>
       <h2>Links</h2>
       <ul class="oc-link-list">
         {links.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
       </ul>
+      {channels.length > 0 && (
+        <>
+          <h3>Distribution</h3>
+          <ul class="oc-link-list">
+            {channels.map((channel) => (
+              <li><a href={channel.url}>{channel.label ?? channel.type}</a>{channel.platform ? ` · ${channel.platform}` : ""}</li>
+            ))}
+          </ul>
+        </>
+      )}
     </section>
     <section>
       <h2>Metadata</h2>
@@ -38,6 +77,8 @@ const links = Object.entries(item.links).filter(([, href]) => Boolean(href));
         <div><dt>Language</dt><dd>{item.taxonomy.language ?? health?.github?.language ?? "Unknown"}</dd></div>
         <div><dt>Last activity</dt><dd>{health?.github?.pushedAt?.slice(0, 10) ?? "Unknown"}</dd></div>
         <div><dt>Latest release</dt><dd>{health?.github?.latestReleaseAt?.slice(0, 10) ?? "Unknown"}</dd></div>
+        <div><dt>Contributors</dt><dd>{health?.github?.contributorsKnown?.toLocaleString() ?? "Unknown"}</dd></div>
+        <div><dt>Open PRs</dt><dd>{health?.github?.openPullRequests?.toLocaleString() ?? "Unknown"}</dd></div>
       </dl>
     </section>
     <section>
@@ -53,7 +94,73 @@ const links = Object.entries(item.links).filter(([, href]) => Boolean(href));
       ) : (
         <p>No manual curation decision has been recorded yet.</p>
       )}
+      {item.curation.reviewed !== undefined && (
+        <p>{item.curation.reviewed ? "Curator reviewed" : "Generated curation pending review"}{item.curation.reviewedBy ? ` by ${item.curation.reviewedBy}` : ""}.</p>
+      )}
       {item.source.file && <p class="oc-source">Source: {item.source.file}{item.source.line ? `:${item.source.line}` : ""}</p>}
     </section>
+    {(item.curation.bestFor.length > 0 || item.curation.whyListed.length > 0 || item.curation.caveats.length > 0) && (
+      <section class="oc-detail-wide">
+        <h2>Why Included</h2>
+        <div class="oc-curation-columns">
+          {item.curation.bestFor.length > 0 && (
+            <div>
+              <h3>Best for</h3>
+              <ul class="oc-signal-list">{item.curation.bestFor.map((value) => <li>{value}</li>)}</ul>
+            </div>
+          )}
+          {item.curation.whyListed.length > 0 && (
+            <div>
+              <h3>Why listed</h3>
+              <ul class="oc-signal-list">{item.curation.whyListed.map((value) => <li>{value}</li>)}</ul>
+            </div>
+          )}
+          {item.curation.caveats.length > 0 && (
+            <div>
+              <h3>Caveats</h3>
+              <ul class="oc-signal-list">{item.curation.caveats.map((value) => <li>{value}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+    {(languages.length > 0 || fileSignals.length > 0 || monthly.length > 0) && (
+      <section class="oc-detail-wide">
+        <h2>Repository Signals</h2>
+        <div class="oc-repo-signals">
+          {languages.length > 0 && (
+            <div>
+              <h3>Languages</h3>
+              <dl class="oc-language-bars">
+                {languages.map(([language, bytes]) => (
+                  <div>
+                    <dt>{language}</dt>
+                    <dd><span style={`width: ${(bytes / totalLanguageBytes) * 100}%`}></span></dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+          {fileSignals.length > 0 && (
+            <div>
+              <h3>Contribution files</h3>
+              <ul class="oc-signal-list">
+                {fileSignals.map(([label, ok]) => <li>{ok ? "Found" : "Missing"}: {label}</li>)}
+              </ul>
+            </div>
+          )}
+          {monthly.length > 0 && (
+            <div>
+              <h3>Monthly activity</h3>
+              <div class="oc-activity-bars">
+                {monthly.map((entry) => (
+                  <span title={`${entry.month}: ${entry.commits} commits`} style={`height: ${Math.max(8, (entry.commits / maxCommits) * 48)}px`}></span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    )}
   </div>
 </article>

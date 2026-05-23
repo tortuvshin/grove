@@ -1,0 +1,112 @@
+---
+interface Props {
+  repoUrl?: string;
+}
+
+const { repoUrl = "" } = Astro.props;
+---
+
+<section class="oc-submit-grid">
+  <form class="oc-submit-form" id="submit-form">
+    <label>
+      <span>GitHub URL</span>
+      <input id="repo-url" type="url" required placeholder="https://github.com/owner/repo" value={repoUrl} />
+    </label>
+    <div class="oc-two-col">
+      <label><span>Name</span><input id="project-name" type="text" /></label>
+      <label><span>Slug</span><input id="project-slug" type="text" /></label>
+    </div>
+    <label><span>Description</span><textarea id="project-description" rows="3"></textarea></label>
+    <div class="oc-two-col">
+      <label><span>Category</span><input id="project-category" type="text" placeholder="Developer Tools" /></label>
+      <label><span>Language</span><input id="project-language" type="text" placeholder="TypeScript" /></label>
+    </div>
+    <label><span>Tags</span><input id="project-tags" type="text" placeholder="cli, static-site, search" /></label>
+    <label><span>Best for</span><textarea id="project-best-for" rows="3" placeholder="One line per use case"></textarea></label>
+  </form>
+  <aside class="oc-submit-preview">
+    <div class="oc-section-header">
+      <h2>YAML draft</h2>
+      <button type="button" id="copy-yaml">Copy</button>
+    </div>
+    <pre><code id="yaml-preview">Paste a GitHub URL to generate a draft.</code></pre>
+    <p id="submit-status" aria-live="polite"></p>
+  </aside>
+</section>
+
+<script>
+  const fields = {
+    repoUrl: document.querySelector("#repo-url"),
+    name: document.querySelector("#project-name"),
+    slug: document.querySelector("#project-slug"),
+    description: document.querySelector("#project-description"),
+    category: document.querySelector("#project-category"),
+    language: document.querySelector("#project-language"),
+    tags: document.querySelector("#project-tags"),
+    bestFor: document.querySelector("#project-best-for"),
+    preview: document.querySelector("#yaml-preview"),
+    status: document.querySelector("#submit-status"),
+    copy: document.querySelector("#copy-yaml"),
+  };
+
+  function slugify(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function parseRepo(value) {
+    const match = String(value).match(/github\.com\/([^/]+)\/([^/?#]+)/);
+    if (!match) return null;
+    return { owner: match[1], repo: match[2].replace(/\.git$/, "") };
+  }
+
+  function list(values, indent) {
+    return values.length ? values.map((value) => `${" ".repeat(indent)}- ${value}`).join("\n") : `${" ".repeat(indent)}[]`;
+  }
+
+  function quote(value) {
+    return `"${String(value ?? "").replace(/"/g, '\\"')}"`;
+  }
+
+  function generate() {
+    const repo = parseRepo(fields.repoUrl?.value);
+    if (!repo) {
+      if (fields.preview) fields.preview.textContent = "Paste a valid GitHub repository URL.";
+      return;
+    }
+    const name = fields.name?.value || repo.repo;
+    const slug = fields.slug?.value || slugify(name);
+    const tags = String(fields.tags?.value ?? "").split(",").map((tag) => tag.trim()).filter(Boolean);
+    const bestFor = String(fields.bestFor?.value ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
+    const yaml = [
+      `id: ${slug}`,
+      `name: ${quote(name)}`,
+      `description: ${quote(fields.description?.value || name)}`,
+      "links:",
+      `  github: https://github.com/${repo.owner}/${repo.repo}`,
+      "source:",
+      "  type: manual",
+      "taxonomy:",
+      `  category: ${quote(fields.category?.value || "uncategorized")}`,
+      "  tags:",
+      list(tags, 4),
+      ...(fields.language?.value ? [`  language: ${quote(fields.language.value)}`] : []),
+      "curation:",
+      "  bestFor:",
+      list(bestFor, 4),
+      "  whyListed: []",
+      "  caveats: []",
+    ].join("\n");
+    if (fields.preview) fields.preview.textContent = yaml;
+  }
+
+  for (const input of Object.values(fields)) {
+    if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
+      input.addEventListener("input", generate);
+    }
+  }
+  fields.copy?.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(fields.preview?.textContent ?? "");
+    if (fields.status) fields.status.textContent = "Copied YAML draft.";
+  });
+  generate();
+</script>

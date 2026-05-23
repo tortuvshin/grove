@@ -1,0 +1,26 @@
+---
+import { LENSES } from "../index.js";
+
+interface Props {
+  current?: string;
+  action?: string;
+}
+
+const { current = "all", action = "/projects" } = Astro.props;
+---
+
+<nav class="oc-lenses" aria-label="Curated lenses">
+  {LENSES.map((lens) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(lens.params)) {
+      params.set(key, String(value));
+    }
+    const href = lens.id === "all" ? action : `${action}?${params.toString()}`;
+    const active = current === lens.id || (current === "all" && lens.id === "all");
+    return (
+      <a href={href} data-lens-id={lens.id} aria-current={active ? "page" : undefined} title={lens.description}>
+        {lens.label}
+      </a>
+    );
+  })}
+</nav>

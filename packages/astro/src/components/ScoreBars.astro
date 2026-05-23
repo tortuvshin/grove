@@ -1,0 +1,32 @@
+---
+import type { CuratedScores } from "@open-curated/core";
+import { SCORE_LABELS, scoreTier } from "../index.js";
+
+interface Props {
+  scores?: CuratedScores;
+  showOverall?: boolean;
+  compact?: boolean;
+}
+
+const { scores = {}, showOverall = true, compact = false } = Astro.props;
+const dimensions = (["activity", "maturity", "learning", "contribution", "docs", "overall"] as const)
+  .filter((dimension) => showOverall || dimension !== "overall");
+const hasAny = Object.values(scores).some((value) => typeof value === "number");
+---
+
+<dl class="oc-scores" aria-label="Curation scores">
+  {!hasAny && <span class="oc-muted">Scores not yet curated</span>}
+  {hasAny && dimensions.map((dimension) => {
+    const value = scores[dimension];
+    const tier = scoreTier(value);
+    return (
+      <div>
+        <dt>{SCORE_LABELS[dimension]}</dt>
+        {!compact && <dd class="oc-score-value">{typeof value === "number" ? Math.round(value) : "-"}</dd>}
+        <dd class="oc-score-bar" aria-label={`${SCORE_LABELS[dimension]} ${value ?? 0} of 100`}>
+          {[0, 1, 2, 3].map((index) => <span class={index < tier ? "is-filled" : ""}></span>)}
+        </dd>
+      </div>
+    );
+  })}
+</dl>
