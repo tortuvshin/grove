@@ -248,6 +248,57 @@ button,
   grid-column: 1 / -1;
 }
 
+.oc-lenses,
+.oc-active-chips,
+.oc-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.oc-lenses {
+  margin-top: 18px;
+}
+
+.oc-lenses a,
+.oc-active-chips span,
+.oc-active-chips a,
+.oc-pagination a,
+.oc-pagination span {
+  border: 1px solid var(--oc-border);
+  border-radius: 6px;
+  background: var(--oc-panel);
+  padding: 7px 10px;
+  color: var(--oc-muted);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+.oc-lenses a[aria-current="page"] {
+  border-color: var(--oc-text);
+  background: var(--oc-text);
+  color: #ffffff;
+}
+
+.oc-active-chips {
+  margin: -8px 0 18px;
+}
+
+.oc-active-chips span {
+  color: var(--oc-text);
+}
+
+.oc-pagination {
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.oc-pagination a[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
 .oc-filter-toggles label {
   display: inline-flex;
   align-items: center;
@@ -305,6 +356,10 @@ button,
 .oc-card-actions a {
   min-height: 30px;
   font-size: 0.8125rem;
+}
+
+.oc-project-result[hidden] {
+  display: none;
 }
 
 .oc-card-category {
@@ -392,6 +447,172 @@ button,
   margin-top: 24px;
 }
 
+.oc-detail-wide {
+  grid-column: 1 / -1;
+}
+
+.oc-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: 14px 0 0;
+}
+
+.oc-scores div {
+  display: inline-grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.oc-scores dt {
+  color: var(--oc-muted);
+  font-size: 0.8125rem;
+}
+
+.oc-score-value {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.oc-score-bar {
+  display: flex;
+  gap: 2px;
+  width: 48px;
+  margin: 0;
+}
+
+.oc-score-bar span {
+  height: 7px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--oc-border);
+}
+
+.oc-score-bar .is-filled {
+  background: var(--oc-accent);
+}
+
+.oc-score-reasons,
+.oc-language-bars {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+}
+
+.oc-score-reasons div,
+.oc-language-bars div {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+}
+
+.oc-score-reasons dt,
+.oc-language-bars dt {
+  color: var(--oc-text);
+  font-weight: 650;
+}
+
+.oc-score-reasons dd {
+  margin: 0;
+  color: var(--oc-muted);
+}
+
+.oc-curation-columns,
+.oc-repo-signals,
+.oc-submit-grid,
+.oc-two-col {
+  display: grid;
+  gap: 14px;
+}
+
+.oc-curation-columns,
+.oc-repo-signals {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.oc-language-bars dd {
+  height: 8px;
+  margin: 7px 0 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--oc-border);
+}
+
+.oc-language-bars span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--oc-accent);
+}
+
+.oc-activity-bars {
+  display: flex;
+  align-items: end;
+  gap: 5px;
+  height: 56px;
+}
+
+.oc-activity-bars span {
+  width: 12px;
+  border-radius: 3px 3px 0 0;
+  background: var(--oc-accent);
+}
+
+.oc-submit-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  margin-top: 24px;
+}
+
+.oc-submit-form,
+.oc-submit-preview {
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: var(--oc-panel);
+  padding: 16px;
+}
+
+.oc-submit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.oc-two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+.oc-submit-form label span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--oc-muted);
+  font-size: 0.75rem;
+}
+
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--oc-border);
+  border-radius: 6px;
+  padding: 10px 11px;
+  color: var(--oc-text);
+  font: inherit;
+}
+
+.oc-submit-preview pre {
+  min-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: #f3f3ef;
+  padding: 12px;
+  font-size: 0.8125rem;
+}
+
+.oc-muted {
+  color: var(--oc-muted);
+}
+
 .oc-link-list,
 .oc-signal-list {
   margin: 12px 0 0;
@@ -429,7 +650,9 @@ button,
   .oc-stats,
   .oc-filters,
   .oc-methodology,
-  .oc-detail-grid {
+  .oc-detail-grid,
+  .oc-submit-grid,
+  .oc-two-col {
     grid-template-columns: 1fr;
   }
 
