@@ -14,6 +14,8 @@ import {
   filterRecords,
   slugForCategory,
   sortRecords,
+  paginateRecords,
+  totalPages,
   visibleRecords,
   type DirectoryFilters,
 } from "@open-curated/astro";
@@ -40,6 +42,9 @@ export function readDirectory() {
 export function filtersFromUrl(url: URL): DirectoryFilters {
   const params = url.searchParams;
   const health = params.get("health") || "all";
+  const page = Number(params.get("page"));
+  const sort = params.get("sort") || undefined;
+  const density = params.get("density") === "compact" ? "compact" : "comfortable";
   return {
     q: params.get("q") || undefined,
     category: params.get("category") || undefined,
@@ -47,6 +52,11 @@ export function filtersFromUrl(url: URL): DirectoryFilters {
     language: params.get("language") || undefined,
     license: params.get("license") || undefined,
     health: health as HealthStatus | "all",
+    label: params.get("label") || undefined,
+    lens: params.get("lens") || undefined,
+    sort: sort as DirectoryFilters["sort"],
+    density,
+    page: Number.isFinite(page) && page > 0 ? Math.floor(page) : 1,
     maintained: params.get("maintained") === "1",
     hideArchived: params.get("hideArchived") === "1",
     hasRecentRelease: params.get("hasRecentRelease") === "1",
@@ -56,10 +66,15 @@ export function filtersFromUrl(url: URL): DirectoryFilters {
 export function filteredRecords(url: URL) {
   const directory = readDirectory();
   const filters = filtersFromUrl(url);
+  const sorted = sortRecords(filterRecords(directory.records, filters), filters.sort ?? "recently-updated");
+  const pages = totalPages(sorted.length);
+  const page = Math.min(filters.page ?? 1, pages);
   return {
     ...directory,
-    filters,
-    results: sortRecords(filterRecords(directory.records, filters)),
+    filters: { ...filters, page },
+    results: sorted,
+    pageResults: paginateRecords(sorted, page),
+    pages,
   };
 }
 

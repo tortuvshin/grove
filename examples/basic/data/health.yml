@@ -11,6 +11,32 @@ health:
       topics:
         - static-site-generator
       language: TypeScript
+      languages:
+        TypeScript: 1200000
+        Astro: 420000
+        JavaScript: 180000
+      contributorsKnown: 620
+      totalCommitsKnown: 18000
+      openPullRequests: 42
+      files:
+        readme: true
+        contributing: true
+        security: true
+        issueTemplates: true
+        pullRequestTemplate: true
+      monthlyCommits:
+        - month: "2026-01"
+          commits: 180
+        - month: "2026-02"
+          commits: 210
+        - month: "2026-03"
+          commits: 190
+        - month: "2026-04"
+          commits: 230
+        - month: "2026-05"
+          commits: 240
+        - month: "2026-06"
+          commits: 120
     health:
       status: mature
       maturity: mature
@@ -31,6 +57,14 @@ health:
       topics:
         - typescript
       language: TypeScript
+      contributorsKnown: 180
+      openPullRequests: 18
+      files:
+        readme: true
+        contributing: true
+        security: false
+        issueTemplates: true
+        pullRequestTemplate: true
     health:
       status: mature
       maturity: mature
@@ -53,6 +87,14 @@ health:
         - web-framework
         - edge
       language: TypeScript
+      contributorsKnown: 210
+      openPullRequests: 24
+      files:
+        readme: true
+        contributing: true
+        security: true
+        issueTemplates: true
+        pullRequestTemplate: true
     health:
       status: active
       maturity: mature
@@ -74,6 +116,14 @@ health:
         - search
         - static-site
       language: Rust
+      contributorsKnown: 45
+      openPullRequests: 6
+      files:
+        readme: true
+        contributing: false
+        security: false
+        issueTemplates: true
+        pullRequestTemplate: false
     health:
       status: active
       maturity: useful
@@ -94,6 +144,14 @@ health:
       topics:
         - routing
       language: JavaScript
+      contributorsKnown: 8
+      openPullRequests: 0
+      files:
+        readme: true
+        contributing: false
+        security: false
+        issueTemplates: false
+        pullRequestTemplate: false
     health:
       status: archived
       maturity: unknown
@@ -114,6 +172,14 @@ health:
       topics:
         - cli
       language: TypeScript
+      contributorsKnown: 2
+      openPullRequests: 1
+      files:
+        readme: true
+        contributing: false
+        security: false
+        issueTemplates: false
+        pullRequestTemplate: false
     health:
       status: needs_review
       maturity: experimental
