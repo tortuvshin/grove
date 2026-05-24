@@ -1,0 +1,56 @@
+---
+import Container from "../layout/Container.astro";
+
+const points = [
+  {
+    title: "Real codebases",
+    body: "Not just tutorials or packages — apps that actually run.",
+  },
+  {
+    title: "Searchable context",
+    body: "Find apps by stack, platform, category, license, and activity.",
+  },
+  {
+    title: "Open data",
+    body: "Static site. GitHub-based data. Community maintained.",
+  },
+];
+---
+
+<section id="about" class="section scroll-mt-20">
+  <Container size="narrow">
+    <span
+      class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400"
+      >About</span
+    >
+    <h2
+      class="mt-1 text-[1.5rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0"
+    >
+      Why this exists
+    </h2>
+    <p
+      class="mt-3 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400 m-0"
+    >
+      Most app examples are either toy projects, abandoned lists, or hard to
+      search. Open Source Apps focuses on real application codebases that
+      developers can study, compare, and contribute to.
+    </p>
+
+    <ul
+      class="mt-6 grid list-none grid-cols-1 gap-3 p-0 m-0 sm:grid-cols-3"
+    >
+      {
+        points.map((p) => (
+          <li class="card p-4">
+            <h3 class="m-0 text-[0.875rem] font-semibold text-ink-900 dark:text-ink-100">
+              {p.title}
+            </h3>
+            <p class="mt-1 m-0 text-2xs leading-relaxed text-ink-500 dark:text-ink-400">
+              {p.body}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

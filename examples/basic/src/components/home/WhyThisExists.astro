@@ -1,0 +1,81 @@
+---
+import Container from "../layout/Container.astro";
+
+const points = [
+  {
+    title: "Real apps",
+    body: "Not SDKs, templates, or tiny demos. Focused on complete applications you can actually run.",
+    icon: "app",
+  },
+  {
+    title: "Codebase context",
+    body: "Stack, platform, license, activity, maturity, and contribution signals — one card per app.",
+    icon: "code",
+  },
+  {
+    title: "Searchable discovery",
+    body: "Browse by category, stack, platform, stars, recency, and status — not a flat README list.",
+    icon: "search",
+  },
+];
+---
+
+<section id="about" class="section scroll-mt-20 border-b border-ink-200 dark:border-ink-800">
+  <Container>
+    <div class="flex flex-col gap-2">
+      <span
+        class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400"
+        >Why this exists</span
+      >
+      <h2
+        class="text-[1.5rem] sm:text-[1.75rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0 max-w-[40ch]"
+      >
+        Most open-source app discovery is fragmented.
+      </h2>
+      <p
+        class="text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400 m-0 max-w-[64ch]"
+      >
+        GitHub search shows repositories, not always usable products. Awesome
+        lists are helpful, but they tend to become long static README files.
+        This project focuses on real applications: projects with source code,
+        product context, stack information, activity signals, and enough
+        structure to help developers learn, compare, and contribute.
+      </p>
+    </div>
+
+    <ul
+      class="mt-7 grid list-none grid-cols-1 gap-3 p-0 m-0 sm:grid-cols-3"
+    >
+      {
+        points.map((p) => (
+          <li class="card p-4">
+            <div
+              class="mb-3 flex h-8 w-8 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300"
+              aria-hidden="true"
+            >
+              {p.icon === "app" ? (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M3 2.75A2.25 2.25 0 0 1 5.25.5h5.5A2.25 2.25 0 0 1 13 2.75v10.5A2.25 2.25 0 0 1 10.75 15.5h-5.5A2.25 2.25 0 0 1 3 13.25V2.75ZM5.25 2a.75.75 0 0 0-.75.75v10.5c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75V2.75a.75.75 0 0 0-.75-.75h-5.5Z"/>
+                </svg>
+              ) : p.icon === "code" ? (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M4.72 3.22a.75.75 0 0 1 1.06 1.06L2.06 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25Zm6.56 0a.75.75 0 1 1 1.06-1.06l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L13.94 8l-3.66-3.72Z"/>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/>
+                </svg>
+              )}
+            </div>
+            <h3 class="m-0 text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
+              {p.title}
+            </h3>
+            <p class="mt-1.5 m-0 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
+              {p.body}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

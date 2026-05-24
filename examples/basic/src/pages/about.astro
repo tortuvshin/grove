@@ -1,0 +1,432 @@
+---
+import BaseLayout from "../components/layout/BaseLayout.astro";
+import Container from "../components/layout/Container.astro";
+
+const githubUrl = "https://github.com/tortuvshin/open-apps";
+
+// What the directory adds per app — used as chip list in the
+// "What this project provides" card.
+const directoryFields = [
+  "App name and repository",
+  "Stack and language",
+  "Supported platforms",
+  "Category and tags",
+  "License",
+  "GitHub stars and forks",
+  "Activity status",
+  "Maturity level",
+  "Learning value",
+  "Contribution readiness",
+  "Caveats or missing information",
+];
+
+// Why real app codebases matter — patterns you can actually study.
+const realAppPatterns = [
+  "Project structure",
+  "Navigation patterns",
+  "State management",
+  "API integration",
+  "Authentication",
+  "Local storage",
+  "Platform setup",
+  "Build and release configuration",
+  "Documentation and contribution practices",
+];
+
+// The questions a developer actually has when scanning a list
+// of repos. Drives the curation schema on detail pages.
+const scanQuestions = [
+  "Is this a real app or only a demo?",
+  "What stack does it use?",
+  "Which platforms does it support?",
+  "Is it actively maintained?",
+  "Is it mature or new?",
+  "Is it useful for learning?",
+  "Is it beginner-friendly or complex?",
+  "Does it have a clear license?",
+  "Are there similar apps worth checking?",
+];
+
+// Different shapes an app can take. The directory makes those
+// dimensions visible instead of treating every repo as "just
+// another project".
+const appShapes = [
+  { label: "Mature and stable", note: "Long-running, production-ish" },
+  { label: "New and interesting", note: "Recent, worth watching" },
+  { label: "Good for studying architecture", note: "Patterns worth reading" },
+  { label: "Easier for beginners", note: "Smaller, readable" },
+  { label: "Useful but inactive", note: "Stale, still a reference" },
+  { label: "Archived but worth learning from", note: "Patterns outlive the repo" },
+];
+
+// Mobile stacks. Flutter is the original; others are being
+// added in order.
+const mobileStacks = [
+  { name: "Flutter", status: "original", note: "Original collection" },
+  { name: "React Native", status: "growing", note: "Second mobile stack" },
+  { name: "Native iOS", status: "growing", note: "Swift / SwiftUI" },
+  { name: "Native Android", status: "growing", note: "Kotlin / Compose" },
+  { name: "Kotlin Multiplatform", status: "growing", note: "Shared mobile + desktop" },
+  { name: "Ionic & Capacitor", status: "planned", note: "Web-tech mobile" },
+];
+
+const title = "About — Open Source Apps";
+const description =
+  "About Open Source Apps — a static, community-curated directory of real open-source application codebases. Mobile first.";
+---
+
+<BaseLayout title={title} description={description}>
+      <Container size="narrow">
+        <article class="py-12 sm:py-16">
+          <nav class="text-2xs text-ink-500 dark:text-ink-400" aria-label="Breadcrumb">
+            <a href="/" class="hover:text-ink-900 dark:hover:text-ink-100">Home</a>
+            <span class="mx-1.5 text-ink-300 dark:text-ink-700">/</span>
+            <span class="text-ink-700 dark:text-ink-300">About</span>
+          </nav>
+
+          {/* ── Hero ─────────────────────────────────────────────────── */}
+          <header class="mt-5">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              About
+            </span>
+            <h1 class="mt-1 m-0 text-[1.75rem] sm:text-[2.25rem] font-semibold tracking-[-0.02em] leading-[1.1] text-ink-900 dark:text-ink-100">
+              About Open Source Apps
+            </h1>
+            <p class="mt-4 m-0 text-[1rem] sm:text-[1.0625rem] leading-relaxed text-ink-700 dark:text-ink-200 max-w-[62ch]">
+              Open Source Apps is a static, community-curated directory of real
+              open-source application codebases.
+            </p>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400 max-w-[62ch]">
+              The project started from the Open Source Flutter Apps collection
+              and is now being expanded into a broader directory, starting with
+              mobile apps.
+            </p>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200 max-w-[62ch]">
+              The goal is simple:{" "}
+              <em class="not-italic font-medium text-ink-900 dark:text-ink-100">
+                make real open-source apps easier to find, understand, compare,
+                and learn from.
+              </em>
+            </p>
+          </header>
+
+          {/* ── Problem ──────────────────────────────────────────────── */}
+          <section class="card mt-8 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              Problem
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Why this exists
+            </h2>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Open-source app repositories are already available on GitHub.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              But finding useful real app codebases is still not easy.
+            </p>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              A developer often needs to know more than just the repository name
+              and description:
+            </p>
+
+            <ul class="m-0 mt-3 grid list-none grid-cols-1 gap-x-5 gap-y-1.5 p-0 sm:grid-cols-2 text-[0.875rem] text-ink-700 dark:text-ink-200">
+              {scanQuestions.map((q) => (
+                <li class="flex items-baseline gap-2">
+                  <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">·</span>
+                  <span>{q}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              A plain README list becomes hard to scan as the number of apps
+              grows.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Open Source Apps turns that list into a structured directory.
+            </p>
+          </section>
+
+          {/* ── What this project provides ───────────────────────────── */}
+          <section class="card mt-4 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              What the directory adds
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              What this project provides
+            </h2>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Each app is organized with useful metadata, not just a link. The
+              directory can show information such as:
+            </p>
+
+            <ul class="m-0 mt-4 list-none space-y-1.5 p-0">
+              {directoryFields.map((f) => (
+                <li class="flex items-baseline gap-2 text-[0.875rem] text-ink-700 dark:text-ink-200">
+                  <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              This makes it easier to decide whether a repository is worth
+              opening.
+            </p>
+          </section>
+
+          {/* ── Why real apps matter ─────────────────────────────────── */}
+          <section class="card mt-4 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              Why real apps matter
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Why real app codebases matter
+            </h2>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Small examples and tutorials are useful, but they do not show how
+              real applications grow.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Real app codebases can show:
+            </p>
+
+            <ul class="m-0 mt-4 flex flex-wrap gap-1.5 p-0">
+              {realAppPatterns.map((p) => (
+                <li class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-2 py-1 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">
+                  {p}
+                </li>
+              ))}
+            </ul>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              This project helps developers discover those real examples faster.
+            </p>
+          </section>
+
+          {/* ── AI hype ──────────────────────────────────────────────── */}
+          <section class="card mt-4 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              AI hype
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Why this list is still needed
+            </h2>
+
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              A lot of developer attention right now is on AI coding tools. The
+              pitch is familiar: describe the app, the model builds it, ship
+              it.
+            </p>
+
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              This project does not pretend to compete with that. It does
+              something different.
+            </p>
+
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              AI can generate code. It can also generate code that{" "}
+              <em class="not-italic font-medium text-ink-900 dark:text-ink-100">looks like an app, runs like an app, and breaks like an app</em>.
+            </p>
+
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              A generated prototype is not the same as a real application. Real
+              apps have structure that survives years of changes, decisions,
+              edge cases, and contributors. They handle authentication,
+              navigation, storage, releases, deprecation. They have bugs and
+              they fix them.
+            </p>
+
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              That part does not come from prompting a model.
+            </p>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Open Source Apps is a list of those real applications. Curated by
+              humans. Useful as a reference for:
+            </p>
+
+            <ul class="m-0 mt-3 list-none space-y-1.5 p-0 text-[0.875rem] text-ink-700 dark:text-ink-200">
+              <li class="flex items-baseline gap-2">
+                <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+                <span>Studying how a real app is structured</span>
+              </li>
+              <li class="flex items-baseline gap-2">
+                <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+                <span>Comparing two real approaches to the same problem</span>
+              </li>
+              <li class="flex items-baseline gap-2">
+                <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+                <span>Finding a codebase to learn from</span>
+              </li>
+              <li class="flex items-baseline gap-2">
+                <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+                <span>Finding a codebase to contribute to</span>
+              </li>
+              <li class="flex items-baseline gap-2">
+                <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+                <span>Finding a codebase to use as a reference when generating new code</span>
+              </li>
+            </ul>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              AI tools are useful. A curated directory of real codebases is
+              also useful. They are not the same thing, and one does not
+              replace the other.
+            </p>
+
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              If you are using an AI tool to build something, you can also use
+              this directory to find real apps to point it at.{" "}
+              <em class="not-italic font-medium text-ink-900 dark:text-ink-100">
+                "Build me an app like this one"
+              </em>{" "}
+              is a stronger instruction than{" "}
+              <em class="not-italic font-medium text-ink-900 dark:text-ink-100">
+                "build me an app."
+              </em>
+            </p>
+
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              That is the idea.
+            </p>
+          </section>
+
+          {/* ── What makes an app valuable here ──────────────────────── */}
+          <section class="card mt-4 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              Different shapes
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              What makes an app valuable here
+            </h2>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Not every repository is useful in the same way.
+            </p>
+
+            <ul class="m-0 mt-4 list-none space-y-2 p-0">
+              {appShapes.map((s) => (
+                <li class="flex items-baseline gap-3 text-[0.9375rem]">
+                  <span aria-hidden="true" class="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-ink-400 dark:bg-ink-600"></span>
+                  <span class="font-medium text-ink-900 dark:text-ink-100">{s.label}</span>
+                  <span class="text-ink-500 dark:text-ink-400">— {s.note}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              The directory should make those differences visible.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Instead of treating every repository as the same, Open Source
+              Apps adds context around each app.
+            </p>
+          </section>
+
+          {/* ── Open data ────────────────────────────────────────────── */}
+          <section class="card mt-4 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              How data works
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Open data
+            </h2>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              The project is open-source by design.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              The app data lives in the repository. The website is generated
+              from static data. Metadata can be reviewed and improved through
+              GitHub issues and pull requests.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              This keeps the project simple, transparent, and
+              community-maintainable.
+            </p>
+          </section>
+
+          {/* ── Current focus ────────────────────────────────────────── */}
+          <section class="card mt-4 p-5 sm:p-6">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              Scope right now
+            </span>
+            <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Current focus
+            </h2>
+            <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              The first focus is mobile apps.
+            </p>
+            <p class="mt-2 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              The original collection is Flutter-based, so Flutter is the
+              strongest starting point. The directory is also designed to
+              support other mobile stacks over time:
+            </p>
+
+            <ul class="m-0 mt-4 list-none space-y-1.5 p-0">
+              {mobileStacks.map((s) => (
+                <li class="flex items-baseline gap-3 text-[0.9375rem]">
+                  <span
+                    aria-hidden="true"
+                    class={`mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full ${
+                      s.status === "original"
+                        ? "bg-emerald-500"
+                        : s.status === "growing"
+                          ? "bg-amber-500"
+                          : "bg-ink-300 dark:bg-ink-700"
+                    }`}
+                  ></span>
+                  <span class="font-medium text-ink-900 dark:text-ink-100">{s.name}</span>
+                  <span class="text-ink-500 dark:text-ink-400">— {s.note}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p class="mt-4 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Later, the same structure can support other app types such as
+              desktop apps.
+            </p>
+          </section>
+
+          {/* ── Principle ────────────────────────────────────────────── */}
+          <section class="mt-8 rounded-lg border border-ink-200 bg-ink-50/60 p-6 sm:p-7 dark:border-ink-800 dark:bg-ink-900/40">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              The principle
+            </span>
+            <p class="mt-2 m-0 text-[1.125rem] sm:text-[1.375rem] font-semibold leading-[1.25] tracking-tight text-ink-900 dark:text-ink-100">
+              Real apps are easier to learn from when they are organized with
+              context.
+            </p>
+            <p class="mt-3 m-0 text-[0.9375rem] sm:text-[1rem] leading-relaxed text-ink-700 dark:text-ink-200">
+              Open Source Apps exists to make open-source application
+              codebases easier to discover, evaluate, and study.
+            </p>
+          </section>
+
+          {/* ── CTA ──────────────────────────────────────────────────── */}
+          <section class="mt-8 flex flex-wrap items-center gap-3">
+            <a
+              href="/apps"
+              class="btn-primary"
+            >
+              Browse the directory
+            </a>
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-outline"
+            >
+              View on GitHub
+            </a>
+            <a
+              href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-ghost"
+            >
+              Submit an app →
+            </a>
+          </section>
+        </article>
+      </Container>
+</BaseLayout>

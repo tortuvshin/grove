@@ -1,39 +1,65 @@
 ---
-import BaseLayout from "@open-curated/astro/layouts/BaseLayout.astro";
-import ItemCard from "@open-curated/astro/components/ItemCard.astro";
-import DirectoryHero from "@open-curated/astro/components/DirectoryHero.astro";
-import CategoryGrid from "@open-curated/astro/components/CategoryGrid.astro";
-import MethodologyPanel from "@open-curated/astro/components/MethodologyPanel.astro";
-import { buildDirectoryStats, sortRecords } from "@open-curated/astro";
-import { readDirectory } from "../lib/directory";
+import BaseLayout from "../components/layout/BaseLayout.astro";
+import Hero from "../components/home/Hero.astro";
+import WhyThisExists from "../components/home/WhyThisExists.astro";
+import AppSection from "../components/home/AppSection.astro";
+import StackGrid from "../components/home/StackGrid.astro";
+import CategoryGrid from "../components/home/CategoryGrid.astro";
+import ContributorsGrid from "../components/home/ContributorsGrid.astro";
+import OriginalCollection from "../components/home/OriginalCollection.astro";
 
-const directory = readDirectory();
-const stats = buildDirectoryStats(directory.items, directory.health);
-const featured = sortRecords(directory.records).slice(0, 3);
+import { newApps, hotApps, matureApps } from "../data/apps";
+import { stacks } from "../data/stacks";
+import { categories } from "../data/categories";
+import { contributors } from "../data/contributors";
+import { stats } from "../data/stats";
+
+const hotList = hotApps().slice(0, 6);
+const newList = newApps().slice(0, 6);
+const matureList = matureApps().slice(0, 6);
+
+const title = "Open Source Apps — A directory of real open-source applications";
+const description =
+  "A searchable directory of real open-source applications — organized by stack, category, platform, license, activity, and maturity.";
 ---
 
-<BaseLayout title="Basic Open Curated Example">
-  <DirectoryHero
-    name="Basic Open Curated Example"
-    tagline="A searchable, filterable, health-aware developer directory generated from files."
-    stats={stats}
-  />
+<BaseLayout title={title} description={description}>
+      <Hero />
 
-  <section class="oc-section">
-    <div class="oc-section-header">
-      <div>
-        <p class="oc-eyebrow">Featured</p>
-        <h2>Useful maintained projects</h2>
-      </div>
-      <a href="/projects">Browse directory</a>
-    </div>
-    <div class="oc-grid">
-      {featured.map((record) => (
-        <ItemCard item={record.item} health={record.health} />
-      ))}
-    </div>
-  </section>
+      <WhyThisExists />
 
-  <CategoryGrid categories={directory.categories} />
-  <MethodologyPanel />
+      <AppSection
+        id="hot"
+        title="Hot open-source apps"
+        description="Projects gaining stars, activity, or attention recently."
+        apps={hotList}
+        viewAllHref="/apps?label=hot"
+        viewAllLabel="View hot apps"
+      />
+
+      <AppSection
+        id="new"
+        title="New open-source apps"
+        description="Recently added apps from the community."
+        apps={newList}
+        viewAllHref="/apps?label=new"
+        viewAllLabel="View all new"
+      />
+
+      <AppSection
+        id="mature"
+        title="Mature open-source apps"
+        description="Established apps with strong history, active maintainers, and real-world usage."
+        apps={matureList}
+        viewAllHref="/apps?label=mature"
+        viewAllLabel="View mature apps"
+      />
+
+      <StackGrid stacks={stacks} />
+
+      <CategoryGrid categories={categories} />
+
+      <ContributorsGrid contributors={contributors} />
+
+      <OriginalCollection stats={stats} />
 </BaseLayout>

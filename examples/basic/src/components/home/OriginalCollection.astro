@@ -1,0 +1,144 @@
+---
+import type { SiteStats } from "../../data/stats";
+import Container from "../layout/Container.astro";
+
+interface Props {
+  stats: SiteStats;
+}
+
+const { stats } = Astro.props;
+const repoUrl = stats.originalRepo;
+
+function formatCount(n: number): string {
+  if (n >= 1000) {
+    const k = n / 1000;
+    return (k >= 10 ? Math.round(k).toString() : k.toFixed(1)) + "k";
+  }
+  return n.toString();
+}
+
+const starsLabel = formatCount(stats.stars);
+const forksLabel = formatCount(stats.forks);
+---
+
+<section
+  id="original"
+  class="section scroll-mt-20 border-b border-ink-200 dark:border-ink-800"
+>
+  <Container>
+    <div
+      class="card flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8"
+    >
+      <div class="max-w-2xl">
+        <span
+          class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400"
+          >Origin</span
+        >
+        <h2
+          class="mt-1 text-[1.375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0"
+        >
+          Started from Open Source Flutter Apps.
+        </h2>
+        <p
+          class="mt-2 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400 m-0"
+        >
+          The project began as a curated Flutter app list and is now expanding
+          into a broader open-source app directory, starting with mobile.
+        </p>
+
+        <dl class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <div class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 16 16"
+              width="14"
+              height="14"
+              aria-hidden="true"
+              fill="currentColor"
+              class="text-amber-500"
+            >
+              <path
+                d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"
+              />
+            </svg>
+            <dd class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              <span class="font-mono">{starsLabel}+</span>
+              <span class="ml-1 text-2xs font-normal text-ink-500 dark:text-ink-400">stars</span>
+            </dd>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 16 16"
+              width="14"
+              height="14"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              class="text-ink-500 dark:text-ink-400"
+            >
+              <circle cx="4" cy="3" r="1.5"/>
+              <circle cx="12" cy="3" r="1.5"/>
+              <circle cx="8" cy="8" r="1.5"/>
+              <circle cx="4" cy="13" r="1.5"/>
+              <circle cx="12" cy="13" r="1.5"/>
+              <path d="M5 4.2 7 6.8M11 4.2 9 6.8M5 11.8 7 9.2M11 11.8 9 9.2"/>
+            </svg>
+            <dd class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              <span class="font-mono">{forksLabel}+</span>
+              <span class="ml-1 text-2xs font-normal text-ink-500 dark:text-ink-400">forks</span>
+            </dd>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 16 16"
+              width="14"
+              height="14"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              class="text-ink-500 dark:text-ink-400"
+            >
+              <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Z"/>
+              <path d="M5 6.5a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 5 6.5Zm.75 2.25a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5Z"/>
+            </svg>
+            <dd class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              <span class="font-mono">{stats.contributors}+</span>
+              <span class="ml-1 text-2xs font-normal text-ink-500 dark:text-ink-400">contributors</span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+        <a
+          href={repoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary"
+        >
+          <svg
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            aria-hidden="true"
+            fill="currentColor"
+          >
+            <path
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"
+            />
+          </svg>
+          View on GitHub
+        </a>
+        <a
+          href={`${repoUrl}/blob/main/CONTRIBUTING.md`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-2xs text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+        >
+          How to contribute →
+        </a>
+      </div>
+    </div>
+  </Container>
+</section>

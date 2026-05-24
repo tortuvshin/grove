@@ -1,0 +1,144 @@
+---
+import { stats } from "../../data/stats";
+
+const githubUrl = stats.originalRepo;
+const year = new Date().getFullYear();
+
+// One-line positioning. Should be the same on every page so the
+// project's identity is consistent.
+const positioning =
+  "A searchable directory of real open-source applications — organized by stack, category, platform, license, activity, and maturity.";
+---
+
+<footer class="mt-16 border-t border-ink-200 bg-white text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
+  <div
+    class="mx-auto grid max-w-wide grid-cols-2 gap-8 px-5 py-12 md:grid-cols-4 sm:px-7"
+  >
+    <div class="col-span-2 md:col-span-1">
+      <div
+        class="mb-2 inline-flex items-center gap-2 text-[0.95rem] font-semibold text-ink-900 dark:text-ink-100"
+      >
+        <span
+          aria-hidden="true"
+          class="inline-block h-3.5 w-3.5 rounded bg-ink-900 dark:bg-ink-100"
+        ></span>
+        <span>Open Source Apps</span>
+      </div>
+      <p class="m-0 max-w-[36ch] text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
+        {positioning}
+      </p>
+      <p class="mt-3 m-0 text-2xs text-ink-500 dark:text-ink-400">
+        <span class="font-mono">{stats.apps}</span> apps
+        <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+        <span class="font-mono">{stats.categories}</span> categories
+        <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+        <span class="font-mono">{stats.contributors}</span> contributors
+      </p>
+    </div>
+
+    <div>
+      <h4
+        class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100"
+      >
+        Discover
+      </h4>
+      <ul class="m-0 flex list-none flex-col gap-2 p-0">
+        <li><a href="#hot" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Hot apps</a></li>
+        <li><a href="#new" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">New apps</a></li>
+        <li><a href="#mature" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Mature apps</a></li>
+        <li><a href="#stacks" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">By stack</a></li>
+        <li><a href="#categories" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">By category</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h4
+        class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100"
+      >
+        Contribute
+      </h4>
+      <ul class="m-0 flex list-none flex-col gap-2 p-0">
+        <li>
+          <a
+            href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Submit via GitHub</a
+          >
+        </li>
+        <li><a href="#contributors" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Contributors</a></li>
+        <li>
+          <a
+            href={`${githubUrl}/issues`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Report an issue</a
+          >
+        </li>
+        <li>
+          <a
+            href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Contributing guide</a
+          >
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h4
+        class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100"
+      >
+        Project
+      </h4>
+      <ul class="m-0 flex list-none flex-col gap-2 p-0">
+        <li>
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Source on GitHub</a
+          >
+        </li>
+        <li><a href="#about" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Why this exists</a></li>
+        <li>
+          <a
+            href={`${githubUrl}/blob/main/README.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >README</a
+          >
+        </li>
+        <li>
+          <a
+            href="/about"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >About</a
+          >
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-ink-200 dark:border-ink-800">
+    <div
+      class="mx-auto flex max-w-wide flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
+    >
+      <span>© {year} Open Source Apps. Content under CC BY-SA 4.0.</span>
+      <span class="text-ink-300 dark:text-ink-700">·</span>
+      <a
+        href={githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+        >View source on GitHub</a
+      >
+    </div>
+  </div>
+</footer>
