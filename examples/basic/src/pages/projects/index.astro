@@ -1,13 +1,16 @@
 ---
 import BaseLayout from "@open-curated/astro/layouts/BaseLayout.astro";
 import DirectoryFilters from "@open-curated/astro/components/DirectoryFilters.astro";
+import LensTabs from "@open-curated/astro/components/LensTabs.astro";
+import ActiveFilterChips from "@open-curated/astro/components/ActiveFilterChips.astro";
+import Pagination from "@open-curated/astro/components/Pagination.astro";
 import ItemCard from "@open-curated/astro/components/ItemCard.astro";
-import { readDirectory } from "../../lib/directory";
-import { sortRecords } from "@open-curated/astro";
+import { filteredRecords } from "../../lib/directory";
+import { SORT_OPTIONS } from "@open-curated/astro";
 
-const directory = readDirectory();
-const records = sortRecords(directory.records);
+const directory = filteredRecords(Astro.url);
 const filterCategoryNames = directory.categories.map((entry) => entry.name);
+const currentLens = directory.filters.lens ?? directory.filters.label ?? (directory.filters.health === "mature" ? "mature" : "all");
 ---
 
 <BaseLayout title="Browse Projects">
@@ -18,17 +21,40 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
         <h1>Browse projects</h1>
         <p class="oc-lede">Search, compare, and filter projects by health, category, language, license, and maintenance signals.</p>
       </div>
-      <p id="result-count">{records.length} of {records.length} projects</p>
+      <p id="result-count">{directory.results.length} of {directory.records.length} projects</p>
     </div>
+    <LensTabs current={currentLens} />
     <DirectoryFilters
+      q={directory.filters.q}
+      category={directory.filters.category}
+      tag={directory.filters.tag}
+      language={directory.filters.language}
+      license={directory.filters.license}
+      health={directory.filters.health}
+      maintained={directory.filters.maintained}
+      hideArchived={directory.filters.hideArchived}
+      hasRecentRelease={directory.filters.hasRecentRelease}
       categories={filterCategoryNames}
       tags={directory.tags}
       languages={directory.languages}
       licenses={directory.licenses}
     />
+    <div class="oc-browse-toolbar">
+      <label>
+        <span>Sort</span>
+        <select id="sort-select" name="sort">
+          {SORT_OPTIONS.map((option) => <option value={option.value} selected={option.value === (directory.filters.sort ?? "recently-updated")}>{option.label}</option>)}
+        </select>
+      </label>
+      <div class="oc-density" role="group" aria-label="Density">
+        <a href="/projects" data-density="comfortable" aria-current={directory.filters.density !== "compact" ? "true" : undefined}>Comfortable</a>
+        <a href="/projects?density=compact" data-density="compact" aria-current={directory.filters.density === "compact" ? "true" : undefined}>Compact</a>
+      </div>
+    </div>
+    <ActiveFilterChips filters={directory.filters} />
   </section>
-  <section class="oc-grid" id="project-results">
-    {records.map((record) => {
+  <section class={`oc-grid ${directory.filters.density === "compact" ? "is-compact" : ""}`} id="project-results" data-page-size="12">
+    {directory.results.map((record, index) => {
       const item = record.item;
       const status = record.health?.health.status ?? "unknown";
       const language = item.taxonomy.language ?? record.health?.github?.language ?? "";
@@ -53,6 +79,7 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
           data-license={license}
           data-health={status}
           data-release={hasRecentRelease}
+          data-index={index}
         >
           <ItemCard item={item} health={record.health} />
         </div>
@@ -60,6 +87,7 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
     })}
   </section>
   <p id="empty-results" hidden>No projects match these filters.</p>
+  <Pagination page={directory.filters.page ?? 1} pages={directory.pages} />
 </BaseLayout>
 
 <script>
@@ -92,6 +120,8 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
       language: String(data.get("language") ?? ""),
       license: String(data.get("license") ?? ""),
       health: String(data.get("health") ?? "all"),
+      sort: document.querySelector("#sort-select")?.value ?? "recently-updated",
+      density: document.querySelector(".oc-density a[aria-current=\"true\"]")?.dataset.density ?? "comfortable",
       maintained: data.get("maintained") === "1",
       hideArchived: data.get("hideArchived") === "1",
       hasRecentRelease: data.get("hasRecentRelease") === "1",
@@ -101,6 +131,9 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
   function applyFilters(updateUrl = false) {
     const filters = readFilters();
     let visible = 0;
+    const pageSize = Number(document.querySelector("#project-results")?.dataset.pageSize ?? 12);
+    const params = new URLSearchParams(window.location.search);
+    const page = Math.max(1, Number(params.get("page") ?? 1) || 1);
     for (const card of cards) {
       if (!(card instanceof HTMLElement)) continue;
       const tags = (card.dataset.tags ?? "").split(",").filter(Boolean);
@@ -115,7 +148,9 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
         (!filters.maintained || ["active", "mature"].includes(status)) &&
         (!filters.hideArchived || status !== "archived") &&
         (!filters.hasRecentRelease || card.dataset.release === "1");
-      card.hidden = !matches;
+      const visibleIndex = visible;
+      const onPage = visibleIndex >= (page - 1) * pageSize && visibleIndex < page * pageSize;
+      card.hidden = !matches || !onPage;
       if (matches) visible += 1;
     }
     if (count) count.textContent = `${visible} of ${cards.length} projects`;
@@ -129,6 +164,8 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
         if (!text || text === "all") continue;
         params.set(key, text);
       }
+      if (filters.sort && filters.sort !== "recently-updated") params.set("sort", filters.sort);
+      if (filters.density && filters.density !== "comfortable") params.set("density", filters.density);
       const query = params.toString();
       history.replaceState(null, "", query ? `${location.pathname}?${query}` : location.pathname);
     }
@@ -143,4 +180,23 @@ const filterCategoryNames = directory.categories.map((entry) => entry.name);
     });
     form.addEventListener("change", () => applyFilters(true));
   }
+  document.querySelector("#sort-select")?.addEventListener("change", () => {
+    const params = new URLSearchParams(window.location.search);
+    const value = document.querySelector("#sort-select")?.value;
+    if (value && value !== "recently-updated") params.set("sort", value);
+    else params.delete("sort");
+    params.delete("page");
+    location.assign(`${location.pathname}${params.toString() ? `?${params}` : ""}`);
+  });
+  document.querySelectorAll(".oc-density a").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const params = new URLSearchParams(window.location.search);
+      const density = event.currentTarget?.dataset?.density;
+      if (density === "compact") params.set("density", "compact");
+      else params.delete("density");
+      params.delete("page");
+      location.assign(`${location.pathname}${params.toString() ? `?${params}` : ""}`);
+    });
+  });
 </script>
