@@ -12,7 +12,7 @@
 // that opt out by setting `noindex` in their SEO props.
 
 import type { APIRoute } from "astro";
-import generatedJson from "../../data/generated/apps.json";
+import { apps } from "../data/apps";
 
 type GeneratedApp = {
   slug: string;
@@ -20,8 +20,6 @@ type GeneratedApp = {
   lastCommitAt?: string;
   activity?: { lastCommitAt?: string };
 };
-
-const apps = (generatedJson as { apps?: GeneratedApp[] }).apps ?? [];
 
 const STATIC_PAGES: { path: string; priority: string; changefreq: string }[] = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
@@ -51,7 +49,7 @@ function urlEntry(loc: string, lastmod?: string, priority = "0.7", changefreq = 
 }
 
 export const GET: APIRoute = ({ site }) => {
-  const base = (site?.toString() ?? "https://open-apps.dev.mn").replace(/\/$/, "");
+  const base = (site?.toString() ?? "https://example.com").replace(/\/$/, "");
   const today = new Date().toISOString().slice(0, 10);
 
   const lines: string[] = [];
