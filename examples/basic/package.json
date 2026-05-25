@@ -11,7 +11,9 @@
     "@open-curated/astro": "workspace:*",
     "@open-curated/cli": "workspace:*",
     "@open-curated/core": "workspace:*",
+    "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.4",
+    "tailwindcss": "^4.3.0",
     "yaml": "^2.9.0"
   }
 }
