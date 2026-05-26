@@ -25,7 +25,7 @@ function statusFor(value: string | undefined): AppStatus {
 }
 
 function labelsFor(item: (typeof items)[number], stars = 0, status?: string): AppLabel[] {
-  const explicit = item.labels.filter((label): label is AppLabel =>
+  const explicit = (item.labels ?? []).filter((label): label is AppLabel =>
     label === "new" || label === "hot" || label === "mature" || label === "featured",
   );
   if (explicit.length > 0) return explicit;
@@ -62,7 +62,7 @@ function normalize(): OpenSourceApp[] {
       homepageUrl: item.links.website,
       stack: item.taxonomy.language ?? github?.language ?? "Unknown",
       stacks: [...new Set([...(item.taxonomy.tags ?? []), ...(github?.topics ?? [])])].slice(0, 6),
-      platforms: item.distribution.channels?.map((channel) => channel.platform).filter((value): value is string => Boolean(value)) ?? ["web"],
+      platforms: item.distribution?.channels?.map((channel) => channel.platform).filter((value): value is string => Boolean(value)) ?? ["web"],
       distribution: item.distribution,
       category: item.taxonomy.category,
       tags: item.taxonomy.tags,
@@ -84,7 +84,7 @@ function normalize(): OpenSourceApp[] {
       caveats: item.curation.caveats,
       goodFirstIssues: item.curation.goodFirstIssues,
       contributionGuide: item.curation.contributionGuide,
-      lenses: item.lenses,
+      lenses: item.lenses ?? [],
       scores: item.curation.scores && Object.values(item.curation.scores).some((v) => typeof v === "number")
         ? {
             activity: item.curation.scores.activity ?? 0,
