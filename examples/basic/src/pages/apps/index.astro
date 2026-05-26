@@ -85,9 +85,9 @@ if (initialFilters.licenses?.length)
 if (initialFilters.labels?.length) filterSummary.push(`label: ${initialFilters.labels.join(", ")}`);
 if (initialLens) filterSummary.push(`lens: ${initialLens}`);
 
-const title = "Browse open-source apps — Open Source Apps";
+const title = "Browse open-source projects — Open Curated";
 const description =
-  "Search and filter real open-source applications by platform, stack, category, license, and activity.";
+  "Search and filter real open-source projectlications by platform, stack, category, license, and activity.";
 ---
 
 <BaseLayout title={title} description={description}>
@@ -104,12 +104,12 @@ const description =
             <h1
               class="mt-1 m-0 text-[1.75rem] sm:text-[2rem] font-semibold tracking-[-0.02em] leading-[1.1] text-ink-900 dark:text-ink-100"
             >
-              Browse open-source apps
+              Browse open-source projects
             </h1>
             <p
               class="mt-2 m-0 max-w-[64ch] text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400"
             >
-              Search and filter real open-source applications by platform,
+              Search and filter real open-source projectlications by platform,
               stack, category, license, and activity. Every entry is a real
               codebase with hand-curated context.
             </p>
@@ -347,7 +347,7 @@ const description =
             <h2
               class="m-0 text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
             >
-              Know a real open-source app that belongs here?
+              Know a real open-source project that belongs here?
             </h2>
             <p
               class="m-0 max-w-[48ch] text-[0.875rem] text-ink-500 dark:text-ink-400"

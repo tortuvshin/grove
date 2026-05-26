@@ -23,8 +23,8 @@ const distributionOptions = [
   { type: "website", label: "Website download", platform: "web", placeholder: "https://example.com/download" },
 ];
 
-const title = "Submit App - Open Source Apps";
-const description = "Submit an open-source app to Open Source Apps.";
+const title = "Submit App - Open Curated";
+const description = "Submit an open-source project to Open Curated.";
 // The submit page is a thin wrapper around a GitHub Issues form —
 // no content of its own. Keep it out of search results and out of
 // the sitemap.
@@ -376,7 +376,7 @@ const noindex = true;
           filename: `data/apps/${slug}.yml`,
           value: yaml,
         });
-        openPrLink.href = `https://github.com/tortuvshin/open-apps/new/main?${params.toString()}`;
+        openPrLink.href = `https://github.com/tortuvshin/open-curated/new/main?${params.toString()}`;
         openPrLink.classList.remove("pointer-events-none", "opacity-50");
       }
 

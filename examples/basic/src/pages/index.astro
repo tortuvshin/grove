@@ -18,9 +18,9 @@ const hotList = hotApps().slice(0, 6);
 const newList = newApps().slice(0, 6);
 const matureList = matureApps().slice(0, 6);
 
-const title = "Open Source Apps — A directory of real open-source applications";
+const title = "Open Curated — A directory of real open-source projectlications";
 const description =
-  "A searchable directory of real open-source applications — organized by stack, category, platform, license, activity, and maturity.";
+  "A searchable directory of real open-source projectlications — organized by stack, category, platform, license, activity, and maturity.";
 ---
 
 <BaseLayout title={title} description={description}>
@@ -30,7 +30,7 @@ const description =
 
       <AppSection
         id="hot"
-        title="Hot open-source apps"
+        title="Hot open-source projects"
         description="Projects gaining stars, activity, or attention recently."
         apps={hotList}
         viewAllHref="/apps?label=hot"
@@ -39,7 +39,7 @@ const description =
 
       <AppSection
         id="new"
-        title="New open-source apps"
+        title="New open-source projects"
         description="Recently added apps from the community."
         apps={newList}
         viewAllHref="/apps?label=new"
@@ -48,7 +48,7 @@ const description =
 
       <AppSection
         id="mature"
-        title="Mature open-source apps"
+        title="Mature open-source projects"
         description="Established apps with strong history, active maintainers, and real-world usage."
         apps={matureList}
         viewAllHref="/apps?label=mature"

@@ -41,7 +41,7 @@ const {
   jsonLd,
 } = Astro.props;
 
-const site = Astro.site ?? new URL("https://open-apps.dev");
+const site = Astro.site ?? new URL("https://open-curated.dev");
 const canonical = new URL(Astro.url.pathname, site).toString();
 const ogImage = new URL(image, site).toString();
 
@@ -58,9 +58,9 @@ const shortDescription = truncate(description, 200);
 const websiteLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Open Source Apps",
+  name: "Open Curated",
   description:
-    "A curated, self-refreshing directory of real open-source application codebases.",
+    "A curated, self-refreshing directory of real open-source projectlication codebases.",
   url: site.toString().replace(/\/$/, ""),
   inLanguage: "en",
   potentialAction: {
@@ -73,10 +73,10 @@ const websiteLd = {
 const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Open Source Apps",
+  name: "Open Curated",
   url: site.toString().replace(/\/$/, ""),
   logo: new URL("/og-image.svg", site).toString(),
-  sameAs: ["https://github.com/tortuvshin/open-apps"],
+  sameAs: ["https://github.com/tortuvshin/open-curated"],
 };
 ---
 
@@ -94,8 +94,8 @@ const organizationLd = {
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Open Source Apps — a directory of real open-source apps" />
-<meta property="og:site_name" content="Open Source Apps" />
+<meta property="og:image:alt" content="Open Curated — a directory of real open-source projects" />
+<meta property="og:site_name" content="Open Curated" />
 <meta property="og:locale" content="en" />
 
 <!-- Twitter Card -->
@@ -103,7 +103,7 @@ const organizationLd = {
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={shortDescription} />
 <meta name="twitter:image" content={ogImage} />
-<meta name="twitter:image:alt" content="Open Source Apps — a directory of real open-source apps" />
+<meta name="twitter:image:alt" content="Open Curated — a directory of real open-source projects" />
 
 <!-- JSON-LD: site-wide identity -->
 <script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />

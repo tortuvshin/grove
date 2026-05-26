@@ -1,4 +1,4 @@
-# robots.txt for open-apps.dev.mn
+# robots.txt for open-curated.dev
 #
 # Search engines, AI crawlers, and link preview bots are all welcome.
 # The directory is intended to be fully indexable.
@@ -47,7 +47,7 @@ User-agent: Amazonbot
 Allow: /
 
 # Sitemaps
-Sitemap: https://open-apps.dev.mn/sitemap.xml
+Sitemap: https://example.com/sitemap.xml
 
 # LLM context
-LLM-Content: https://open-apps.dev.mn/llms.txt
+LLM-Content: https://example.com/llms.txt
