@@ -48,11 +48,17 @@ function normalize(): OpenSourceApp[] {
     const decision = decisionById.get(item.id);
     const repo = repoParts(item.links.github);
     const labels = labelsFor(item, github?.stars, h?.health.status);
-    const projectType = item.curation.projectType === "library" || item.curation.projectType === "tool"
+    const curation = item.curation ?? {
+      bestFor: [],
+      whyListed: [],
+      caveats: [],
+      scores: {},
+    };
+    const projectType = curation.projectType === "library" || curation.projectType === "tool"
       ? "reference"
-      : item.curation.projectType === "historical"
+      : curation.projectType === "historical"
         ? "reference"
-        : item.curation.projectType;
+        : curation.projectType;
 
     return {
       slug: item.id,
@@ -75,31 +81,31 @@ function normalize(): OpenSourceApp[] {
       projectType: projectType === "production" || projectType === "reference" || projectType === "demo" || projectType === "template"
         ? projectType
         : undefined,
-      difficulty: item.curation.difficulty,
-      codebaseSize: item.curation.codebaseSize,
-      bestFor: item.curation.bestFor,
-      whyListed: item.curation.whyListed.length > 0
-        ? item.curation.whyListed
+      difficulty: curation.difficulty,
+      codebaseSize: curation.codebaseSize,
+      bestFor: curation.bestFor,
+      whyListed: curation.whyListed.length > 0
+        ? curation.whyListed
         : decision ? [decision.decision.reason] : undefined,
-      caveats: item.curation.caveats,
-      goodFirstIssues: item.curation.goodFirstIssues,
-      contributionGuide: item.curation.contributionGuide,
+      caveats: curation.caveats,
+      goodFirstIssues: curation.goodFirstIssues,
+      contributionGuide: curation.contributionGuide,
       lenses: item.lenses ?? [],
-      scores: item.curation.scores && Object.values(item.curation.scores).some((v) => typeof v === "number")
+      scores: curation.scores && Object.values(curation.scores).some((v) => typeof v === "number")
         ? {
-            activity: item.curation.scores.activity ?? 0,
-            maturity: item.curation.scores.maturity ?? 0,
-            learning: item.curation.scores.learning ?? 0,
-            contribution: item.curation.scores.contribution ?? 0,
-            docs: item.curation.scores.docs ?? 0,
-            overall: item.curation.scores.overall ?? 0,
+            activity: curation.scores.activity ?? 0,
+            maturity: curation.scores.maturity ?? 0,
+            learning: curation.scores.learning ?? 0,
+            contribution: curation.scores.contribution ?? 0,
+            docs: curation.scores.docs ?? 0,
+            overall: curation.scores.overall ?? 0,
           }
         : undefined,
-      curation: item.curation.reviewed === undefined ? undefined : {
-        reviewed: item.curation.reviewed,
-        by: item.curation.reviewedBy,
-        date: item.curation.reviewedAt,
-        notes: item.curation.notes,
+      curation: curation.reviewed === undefined ? undefined : {
+        reviewed: curation.reviewed,
+        by: curation.reviewedBy,
+        date: curation.reviewedAt,
+        notes: curation.notes,
       },
       github: github ? {
         repository: {

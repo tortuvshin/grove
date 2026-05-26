@@ -112,6 +112,17 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
         category: currentCategory,
         tags: [],
       },
+      labels: [],
+      lenses: [],
+      distribution: {
+        channels: [],
+      },
+      curation: {
+        bestFor: [],
+        whyListed: [],
+        caveats: [],
+        scores: {},
+      },
     });
   }
 
