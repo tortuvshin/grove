@@ -1,0 +1,140 @@
+---
+// SPDX-License-Identifier: MIT
+
+/**
+ * /contributors — full shout-out page. Every contributor is listed
+ * with avatar, name (if known), and a link to their GitHub
+ * profile. The page is what the homepage "View all" link points
+ * to, so visitors can see who has actually shaped the directory
+ * over time. Order matches the synced list (most active first)
+ * but the page intentionally avoids leaderboard framing — no
+ * commit counts, no rank numbering.
+ */
+import BaseLayout from "../components/layout/BaseLayout.astro";
+import Container from "../components/layout/Container.astro";
+import { contributors as allContributors } from "../data/contributors";
+
+// `contributors.ts` is already sorted by contributions desc by the
+// sync script; the spread + sort is kept only as a defensive copy
+// in case the source order ever changes upstream.
+const contributors = [...allContributors].sort(
+  (a, b) => (b.contributions ?? 0) - (a.contributions ?? 0),
+);
+const total = contributors.length;
+const withNames = contributors.filter((c) => c.name).length;
+
+const title = "Contributors — Open Curated";
+const description = `Every person who has shaped the Open Curated directory. ${total} contributors.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <Container>
+    <div class="py-14 sm:py-20">
+      <span
+        class="inline-flex items-center gap-1.5 text-2xs font-medium text-ink-500 dark:text-ink-400"
+      >
+        <span
+          aria-hidden="true"
+          class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500"
+        ></span>
+        Community · {total} contributors
+      </span>
+
+      <h1
+        class="mt-3 text-[2.25rem] sm:text-[2.75rem] md:text-[3rem] font-semibold tracking-[-0.02em] leading-[1.05] text-ink-900 dark:text-ink-100 m-0"
+      >
+        Thanks to every contributor.
+      </h1>
+
+      <p
+        class="mt-4 text-[0.9375rem] sm:text-[1rem] leading-relaxed text-ink-500 dark:text-ink-400 m-0 max-w-[64ch]"
+      >
+        This directory exists because {total} people keep discovering,
+        submitting, reviewing, curating, and maintaining open-source project
+        references. Below is the full list.
+        {withNames > 0 && (
+          <span class="block mt-1 text-ink-400 dark:text-ink-500">
+            {withNames} of {total} have a public display name on GitHub; the rest are known by their username.
+          </span>
+        )}
+      </p>
+
+      <ul
+        class="mt-8 grid list-none grid-cols-1 gap-x-6 gap-y-3 p-0 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {
+          contributors.map((c) => (
+            <li
+              class="flex items-center gap-3 rounded-lg border border-ink-200 bg-white p-3 transition-colors hover:border-ink-300 dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-700"
+            >
+              <img
+                src={c.avatarUrl}
+                alt={`${c.name ?? c.username} avatar`}
+                loading="lazy"
+                width="40"
+                height="40"
+                class="h-10 w-10 shrink-0 rounded-full border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900"
+              />
+              <div class="min-w-0 flex-1">
+                <a
+                  href={c.profileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block truncate text-sm font-medium text-ink-900 hover:underline dark:text-ink-100"
+                >
+                  {c.name ?? c.username}
+                </a>
+                {c.name && (
+                  <div class="mt-0.5 truncate text-2xs text-ink-500 dark:text-ink-400">
+                    @{c.username}
+                  </div>
+                )}
+              </div>
+              <a
+                href={c.profileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${c.name ?? c.username} on GitHub`}
+                class="shrink-0 text-ink-400 hover:text-ink-700 dark:text-ink-500 dark:hover:text-ink-200"
+              >
+                <svg
+                  viewBox="0 0 16 16"
+                  width="14"
+                  height="14"
+                  aria-hidden="true"
+                  fill="currentColor"
+                >
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 8 0Z" />
+                </svg>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div
+        class="mt-10 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-ink-200 bg-ink-50 p-4 text-sm text-ink-500 dark:border-ink-800 dark:bg-ink-900/40 dark:text-ink-400"
+      >
+        <span>
+          Want to be on this list? Submit an app, fix a typo, or
+          open a PR — every commit counts.
+        </span>
+        <a
+          href="/submit"
+          class="font-medium text-ink-700 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+        >
+          Submit an app →
+        </a>
+        <span aria-hidden="true">·</span>
+        <a
+          href="https://github.com/tortuvshin/open-curated/graphs/contributors"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-medium text-ink-700 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+        >
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

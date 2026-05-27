@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Capacitor brand: dark navy background, white capacitor symbol -->
+  <rect width="100" height="100" rx="20" fill="#142B45"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left plate (vertical line) -->
+    <line x1="34" y1="30" x2="34" y2="70"/>
+    <!-- Right plate (vertical line) -->
+    <line x1="66" y1="30" x2="66" y2="70"/>
+    <!-- Left arc connecting top and bottom of left plate -->
+    <path d="M34 30 C20 34 20 66 34 70"/>
+    <!-- Right arc connecting top and bottom of right plate -->
+    <path d="M66 30 C80 34 80 66 66 70"/>
+  </g>
+</svg>

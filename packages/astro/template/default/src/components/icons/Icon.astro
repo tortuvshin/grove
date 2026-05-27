@@ -1,0 +1,148 @@
+---
+// Brand icon registry.
+//
+// Strategy: icons live as static SVGs in `public/icons/`. The fetch
+// script (`scripts/fetch-icons.mjs`) downloads the well-known
+// brand icons from the public `xandemon/developer-icons` repo on
+// prebuild. Missing icons (windows, web, desktop, chromeos,
+// embedded, ionic, capacitor) are hand-rolled in `public/icons/`.
+//
+// Theme-aware variants: some icons (Apple for iOS / macOS) ship
+// in light and dark silhouettes and need to be swapped with
+// the page's color scheme. The Icon component renders BOTH img
+// tags and uses Tailwind's `dark:hidden` / `hidden dark:block` to
+// show only the right one.
+//
+// Usage:
+//   <Icon name="Flutter" category="stack"   size={12} />
+//   <Icon name="iOS"      category="platform" size={12} />
+//
+// Falls back to a small generic dot if no icon is found so the chip
+// still has visual weight.
+
+interface Props {
+  /** Friendly name, e.g. "Flutter", "React Native", "iOS", "Web". */
+  name: string;
+  /** "stack" or "platform" — controls where we look in /icons/. */
+  category?: "stack" | "platform";
+  size?: number;
+  class?: string;
+  title?: string;
+}
+
+const { name, category = "stack", size = 12, class: className = "", title } = Astro.props;
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/\+/g, "plus")
+    .replace(/\./g, "")
+    .replace(/[\s/]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
+// Friendly name → icon filename. Add a new alias when a chip needs
+// to render an icon that lives under a different filename.
+const ALIASES: Record<string, string> = {
+  // stacks
+  react: "react",
+  "react-native": "react-native",
+  "node-js": "nodejs",
+  nodejs: "nodejs",
+  "node.js": "nodejs",
+  mongodb: "mongodb",
+  tensorflow: "tensorflow",
+  ionic: "ionic",
+  "ionic-capacitor": "ionic",
+  ionicframework: "ionic",
+  capacitor: "capacitor",  // distinct from ionic — proper Capacitor brand mark
+  "kotlin-multiplatform": "kotlin",
+  kmp: "kotlin",
+  // platforms
+  ios: "ios",
+  ipados: "ios",
+  macos: "macos",
+  osx: "macos",
+  "mac-os": "macos",
+  web: "web",
+  chromeos: "chromeos",
+  "chrome-os": "chromeos",
+  windows: "windows",
+  win: "windows",
+  desktop: "desktop",
+  embedded: "embedded",
+};
+
+// These icons have explicit light + dark variants. We render both
+// and let CSS swap based on the `.dark` class on <html>.
+const THEME_AWARE = new Set([
+  "ios",         // maps to apple-dark (light) + apple-light (dark)
+  "macos",       // maps to apple-light (light) + apple-dark (dark)
+]);
+
+const slug = slugify(name);
+const resolved = ALIASES[slug] ?? slug;
+const baseDir = category === "platform" ? "platforms" : "stacks";
+const url = (file: string) => `/icons/${baseDir}/${file}.svg`;
+
+const isThemeAware = THEME_AWARE.has(resolved);
+
+// Map theme-aware platform → { light: file, dark: file }
+const THEME_PAIRS: Record<string, { light: string; dark: string }> = {
+  ios:   { light: "apple-dark",  dark: "apple-light" },
+  macos: { light: "apple-light", dark: "apple-dark"  },
+};
+---
+
+{
+  isThemeAware ? (
+    <>
+      {/* Light theme → light variant */}
+      <img
+        src={url(THEME_PAIRS[resolved].light)}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        aria-hidden={title ? undefined : "true"}
+        class={`inline-block shrink-0 object-contain select-none dark:hidden ${className}`}
+        style={`width:${size}px;height:${size}px;`}
+      />
+      {/* Dark theme → dark variant */}
+      <img
+        src={url(THEME_PAIRS[resolved].dark)}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        aria-hidden={title ? undefined : "true"}
+        class={`inline-block shrink-0 object-contain select-none hidden dark:inline-block ${className}`}
+        style={`width:${size}px;height:${size}px;`}
+      />
+    </>
+  ) : resolved ? (
+    <img
+      src={url(resolved)}
+      alt=""
+      width={size}
+      height={size}
+      loading="lazy"
+      decoding="async"
+      aria-hidden={title ? undefined : "true"}
+      class={`inline-block shrink-0 object-contain select-none ${className}`}
+      style={`width:${size}px;height:${size}px;`}
+    />
+  ) : (
+    <span
+      aria-hidden="true"
+      class={`inline-block shrink-0 rounded-full bg-current opacity-40 ${className}`}
+      style={`width:${size}px;height:${size}px;`}
+    />
+  )
+}
+{title && <span class="sr-only">{title}</span>}

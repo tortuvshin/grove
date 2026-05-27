@@ -1,0 +1,72 @@
+---
+import { SCORE_DIMENSIONS, SCORE_LABELS, scoreTier, scoreLabel } from "../../lib/scores";
+import type { AppScores } from "../../data/types";
+
+interface Props {
+  scores?: AppScores;
+  /** Show the "Overall" dimension too (default true). */
+  showOverall?: boolean;
+  /** Compact mode: hide value text, bar only. */
+  compact?: boolean;
+  class?: string;
+}
+
+const { scores, showOverall = true, compact = false, class: className = "" } = Astro.props;
+const dims = showOverall ? SCORE_DIMENSIONS : SCORE_DIMENSIONS.filter((d) => d !== "overall");
+const hasAny = scores && Object.values(scores).some((v) => typeof v === "number");
+---
+
+<dl
+  class={`flex flex-wrap items-center gap-x-3 gap-y-1.5 text-2xs ${className}`}
+  aria-label="App scores"
+>
+  {!hasAny && (
+    <span class="text-ink-400 dark:text-ink-500">Scores not yet curated</span>
+  )}
+  {hasAny &&
+    dims.map((dim) => {
+      const v = scores![dim];
+      const tier = typeof v === "number" ? scoreTier(v) : 0;
+      const isOverall = dim === "overall";
+      return (
+        <div class="inline-flex items-center gap-1.5">
+          <dt
+            class={`${
+              isOverall
+                ? "font-semibold text-ink-700 dark:text-ink-200"
+                : "text-ink-500 dark:text-ink-400"
+            }`}
+          >
+            {SCORE_LABELS[dim]}
+          </dt>
+          {!compact && (
+            <dd
+              class={`font-mono ${
+                isOverall
+                  ? "text-ink-900 dark:text-ink-100"
+                  : "text-ink-700 dark:text-ink-300"
+              }`}
+            >
+              {scoreLabel(v)}
+            </dd>
+          )}
+          <dd
+            class="flex h-1.5 w-10 gap-px"
+            aria-label={`${SCORE_LABELS[dim]} ${scoreLabel(v)} of 100`}
+          >
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                class={`flex-1 rounded-sm ${
+                  i < tier
+                    ? isOverall
+                      ? "bg-ink-700 dark:bg-ink-200"
+                      : "bg-ink-500 dark:bg-ink-400"
+                    : "bg-ink-200 dark:bg-ink-800"
+                }`}
+              />
+            ))}
+          </dd>
+        </div>
+      );
+    })}
+</dl>

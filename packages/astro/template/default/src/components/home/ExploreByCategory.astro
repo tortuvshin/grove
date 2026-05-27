@@ -1,0 +1,74 @@
+---
+import type { Category } from "../../data/categories";
+import Container from "../layout/Container.astro";
+import { countByCategory } from "../../lib/taxonomy-counts";
+
+interface Props {
+  categories: Category[];
+  class?: string;
+}
+
+const { categories, class: className = "" } = Astro.props;
+const counts = countByCategory();
+
+// Sort by count desc, drop empty (already done in CategoryGrid, but
+// re-apply here for safety in case the consumer rendered a raw list).
+const visible = categories
+  .map((c) => ({ ...c, count: counts.get(c.name) ?? 0 }))
+  .filter((c) => c.count > 0)
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 12);
+---
+
+<section
+  id="explore-categories"
+  class={`section scroll-mt-20 border-t border-ink-200 dark:border-ink-800 ${className}`}
+>
+  <Container>
+    <div class="flex flex-col gap-1.5">
+      <span
+        class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400"
+        >Explore</span
+      >
+      <h2
+        class="m-0 text-[1.5rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+      >
+        Browse by category
+      </h2>
+      <p
+        class="m-0 text-[0.875rem] text-ink-500 dark:text-ink-400"
+      >
+        Jump straight to a category — links take you to a filtered list,
+        not a static browse page.
+      </p>
+    </div>
+
+    <ul class="mt-5 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        visible.map((c) => (
+          <li>
+            <a
+              href={`/apps?category=${encodeURIComponent(c.name)}`}
+              class="card card-hover group flex h-full items-start gap-3 p-3.5 no-underline"
+            >
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <h3 class="m-0 text-[0.875rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+                  {c.name}
+                </h3>
+                <p class="m-0 truncate text-2xs text-ink-500 dark:text-ink-400">
+                  {c.blurb}
+                </p>
+              </div>
+              <span
+                class="shrink-0 inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400"
+                title={`${c.count} apps in this category`}
+              >
+                {c.count}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</section>

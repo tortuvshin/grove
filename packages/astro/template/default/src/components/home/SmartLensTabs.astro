@@ -1,0 +1,65 @@
+---
+import { LENSES, PRIMARY_LENSES, isLensActive, type LensId } from "../../lib/lenses";
+
+interface Props {
+  currentParams: URLSearchParams;
+  class?: string;
+}
+
+const { currentParams, class: className = "" } = Astro.props;
+
+// Render only the 6 primary lenses, in declared order.
+const tabs = PRIMARY_LENSES.map((id) => LENSES.find((l) => l.id === id)!).filter(Boolean);
+
+// Build href for a lens: merge lens's params on top of current search.
+function hrefFor(lensId: LensId): string {
+  const sp = new URLSearchParams(currentParams);
+  // Clear any existing lens
+  sp.delete("lens");
+  if (lensId !== "all") {
+    const def = LENSES.find((l) => l.id === lensId);
+    if (def) {
+      for (const [k, v] of Object.entries(def.toParams())) {
+        if (Array.isArray(v)) {
+          sp.delete(k);
+          for (const item of v) sp.append(k, item);
+        } else {
+          sp.set(k, v);
+        }
+      }
+    }
+  }
+  const qs = sp.toString();
+  return qs ? `/apps?${qs}` : "/apps";
+}
+---
+
+<nav
+  class={`overflow-x-auto ${className}`}
+  aria-label="Curated lenses"
+>
+  <ul class="m-0 flex list-none items-center gap-1 p-0 whitespace-nowrap">
+    {
+      tabs.map((lens) => {
+        const isActive = isLensActive(lens.id, currentParams);
+        return (
+          <li>
+            <a
+              href={hrefFor(lens.id)}
+              data-lens-id={lens.id}
+              class={`lens-tab inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-2xs font-medium transition-colors ${
+                isActive
+                  ? "border-ink-900 bg-ink-900 text-white dark:border-ink-100 dark:bg-ink-100 dark:text-ink-900"
+                  : "border-ink-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-ink-50 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:hover:bg-ink-900/60"
+              }`}
+              aria-current={isActive ? "page" : undefined}
+              title={lens.description}
+            >
+              {lens.label}
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</nav>
