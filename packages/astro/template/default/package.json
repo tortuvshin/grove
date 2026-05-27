@@ -1,5 +1,5 @@
 {
-  "name": "open-curated-basic-example",
+  "name": "open-curated-site",
   "type": "module",
   "private": true,
   "scripts": {
@@ -8,9 +8,9 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@open-curated/astro": "workspace:*",
-    "@open-curated/cli": "workspace:*",
-    "@open-curated/core": "workspace:*",
+    "@open-curated/astro": "^0.1.0",
+    "@open-curated/cli": "^0.1.0",
+    "@open-curated/core": "^0.1.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.4",
     "tailwindcss": "^4.3.0",

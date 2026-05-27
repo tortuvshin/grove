@@ -4,6 +4,11 @@
   "type": "module",
   "description": "Astro UI primitives for Open Curated directories.",
   "license": "MIT",
+  "files": [
+    "dist",
+    "src",
+    "template"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css",
