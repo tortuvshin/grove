@@ -50,6 +50,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@open-curated/astro':
+        specifier: workspace:*
+        version: link:../astro
       '@open-curated/core':
         specifier: workspace:*
         version: link:../core

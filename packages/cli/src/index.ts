@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
 import { Command } from "commander";
 import {
   classifyHealth,
@@ -21,6 +22,7 @@ import {
 } from "@open-curated/core";
 
 const program = new Command();
+const require = createRequire(import.meta.url);
 
 program
   .name("open-curated")
@@ -51,6 +53,40 @@ async function writeIfMissing(path: string, content: string): Promise<void> {
   }
 }
 
+function packageNameFromProjectName(projectName: string): string {
+  const name = projectName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return name || "open-curated-site";
+}
+
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await readFile(path, "utf8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function defaultTemplateDir(): string {
+  const entrypoint = require.resolve("@open-curated/astro");
+  return resolve(dirname(entrypoint), "..", "template", "default");
+}
+
+async function copyDefaultTemplate(root: string): Promise<void> {
+  await cp(defaultTemplateDir(), root, {
+    recursive: true,
+    force: false,
+    errorOnExist: false,
+  });
+}
+
+async function updateGeneratedPackageJson(path: string, projectName: string): Promise<void> {
+  const content = await readFile(path, "utf8");
+  const packageJson = JSON.parse(content) as { name?: string };
+  packageJson.name = packageNameFromProjectName(projectName);
+  await writeFile(path, `${JSON.stringify(packageJson, null, 2)}\n`, "utf8");
+}
+
 program
   .command("init")
   .argument("[name]", "project directory name", ".")
@@ -58,7 +94,10 @@ program
   .action(async (name: string) => {
     const root = resolve(name);
     const projectName = name === "." ? "Open Curated Directory" : name;
+    const packageJsonPath = join(root, "package.json");
+    const hadPackageJson = await fileExists(packageJsonPath);
     await mkdir(root, { recursive: true });
+    await copyDefaultTemplate(root);
     await Promise.all([
       mkdir(join(root, "sources"), { recursive: true }),
       mkdir(join(root, "data"), { recursive: true }),
@@ -67,35 +106,13 @@ program
     ]);
     await writeIfMissing(join(root, "curated.config.ts"), projectConfig(projectName));
     await writeIfMissing(join(root, "data", "items.yml"), "items: []\n");
+    await writeIfMissing(join(root, "data", "health.yml"), "health: []\n");
     await writeIfMissing(join(root, "data", "decisions.yml"), "decisions: []\n");
     await writeIfMissing(
       join(root, "content", "methodology.md"),
       "# Methodology\n\nOpen Curated uses repository metadata as a signal. Human curation decisions control final visibility.\n",
     );
-    await writeIfMissing(
-      join(root, "package.json"),
-      JSON.stringify(
-        {
-          name: projectName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-          type: "module",
-          private: true,
-          scripts: {
-            import: "open-curated import",
-            analyze: "open-curated analyze",
-            validate: "open-curated validate",
-            build: "astro build",
-            preview: "astro preview",
-          },
-          dependencies: {
-            "@open-curated/core": "^0.1.0",
-            "@open-curated/astro": "^0.1.0",
-            astro: "^6.4.4",
-          },
-        },
-        null,
-        2,
-      ) + "\n",
-    );
+    if (!hadPackageJson) await updateGeneratedPackageJson(packageJsonPath, projectName);
     console.log(`Created Open Curated project at ${root}`);
   });
 

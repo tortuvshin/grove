@@ -20,6 +20,7 @@
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
+    "@open-curated/astro": "workspace:*",
     "@open-curated/core": "workspace:*",
     "commander": "^14.0.2",
     "tsx": "^4.21.0"
