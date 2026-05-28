@@ -1,5 +1,3 @@
-import { apps } from "./apps";
-
 export type Stack = {
   slug: string;
   name: string;
@@ -7,15 +5,43 @@ export type Stack = {
   status: "live" | "expanding" | "planned";
 };
 
-function slugify(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
-
-export const stacks: Stack[] = [...new Set(apps.map((app) => app.stack).filter(Boolean))]
-  .sort((a, b) => a.localeCompare(b))
-  .map((name) => ({
-    slug: slugify(name),
-    name,
-    blurb: `Projects whose primary language or stack is ${name}.`,
+// Static taxonomy. Counts are NOT stored here — they are computed at
+// build time from data/generated/apps.json. See src/lib/stack-counts.ts.
+export const stacks: Stack[] = [
+  {
+    slug: "flutter",
+    name: "Flutter",
+    blurb: "Dart-based, cross-platform mobile apps.",
     status: "live",
-  }));
+  },
+  {
+    slug: "react-native",
+    name: "React Native",
+    blurb: "JavaScript / TypeScript mobile apps using React.",
+    status: "expanding",
+  },
+  {
+    slug: "ios",
+    name: "iOS",
+    blurb: "Native Swift apps from the App Store and the open-source community.",
+    status: "expanding",
+  },
+  {
+    slug: "android",
+    name: "Android",
+    blurb: "Native Kotlin / Java apps with a long, mature history.",
+    status: "expanding",
+  },
+  {
+    slug: "kmp",
+    name: "Kotlin Multiplatform",
+    blurb: "Shared Kotlin codebases targeting iOS and Android.",
+    status: "planned",
+  },
+  {
+    slug: "capacitor",
+    name: "Capacitor",
+    blurb: "Hybrid mobile apps built on web standards.",
+    status: "planned",
+  },
+];

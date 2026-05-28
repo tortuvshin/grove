@@ -112,7 +112,7 @@ export type AppDistribution = {
  */
 export type CurationInfo = {
   reviewed: boolean;
-  /** Curator handle, e.g. "@username" or "Open Curated editors". */
+  /** Curator handle, e.g. "@username" or "<site> editors". */
   by?: string;
   /** ISO date the curation was authored or last reviewed. */
   date?: string;
@@ -122,7 +122,7 @@ export type CurationInfo = {
 
 // ── The app record ──────────────────────────────────────────────────
 /**
- * One open-source project entry.
+ * One open-source app entry.
  *
  * Fields split into two layers:
  *
