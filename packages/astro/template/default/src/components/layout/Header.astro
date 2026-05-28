@@ -1,4 +1,5 @@
 ---
+import { siteConfig } from "../../data/config";
 import ThemeToggle from "./ThemeToggle.astro";
 import { stats } from "../../data/stats";
 import { compact } from "../../lib/format";
@@ -37,12 +38,12 @@ const starsLabel = compact(stats.stars);
     >
       <span
         aria-hidden="true"
-        class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100"
+        class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100`
       ></span>
-      <span>Open Curated</span>
+      <span>{siteConfig.name}</span>
     </a>
 
-    <nav class="hidden flex-1 md:block" aria-label="Primary">
+    <nav class=`hidden flex-1 md:block" aria-label="Primary">
       <ul class="m-0 flex list-none gap-5 p-0">
         {
           navItems.map((item) => (
@@ -67,7 +68,7 @@ const starsLabel = compact(stats.stars);
         <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="currentColor">
           <path d="M7.75 2a.75.75 0 0 1 .75.75v3.5h3.5a.75.75 0 0 1 0 1.5h-3.5v3.5a.75.75 0 0 1-1.5 0v-3.5h-3.5a.75.75 0 0 1 0-1.5h3.5v-3.5A.75.75 0 0 1 7.75 2Z"/>
         </svg>
-        <span>Submit project</span>
+        <span>Submit app</span>
       </a>
 
       {/* GitHub button. The star count is rendered as text, not an

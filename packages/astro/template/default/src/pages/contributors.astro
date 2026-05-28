@@ -1,4 +1,5 @@
 ---
+import { siteConfig } from "../data/config";
 // SPDX-License-Identifier: MIT
 
 /**
@@ -23,8 +24,8 @@ const contributors = [...allContributors].sort(
 const total = contributors.length;
 const withNames = contributors.filter((c) => c.name).length;
 
-const title = "Contributors — Open Curated";
-const description = `Every person who has shaped the Open Curated directory. ${total} contributors.`;
+const title = `Contributors — ${siteConfig.name}`;
+const description = `Every person who has shaped the ${siteConfig.name} directory. ${total} contributors.`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -50,7 +51,7 @@ const description = `Every person who has shaped the Open Curated directory. ${t
         class="mt-4 text-[0.9375rem] sm:text-[1rem] leading-relaxed text-ink-500 dark:text-ink-400 m-0 max-w-[64ch]"
       >
         This directory exists because {total} people keep discovering,
-        submitting, reviewing, curating, and maintaining open-source project
+        submitting, reviewing, curating, and maintaining open-source app
         references. Below is the full list.
         {withNames > 0 && (
           <span class="block mt-1 text-ink-400 dark:text-ink-500">
@@ -127,7 +128,7 @@ const description = `Every person who has shaped the Open Curated directory. ${t
         </a>
         <span aria-hidden="true">·</span>
         <a
-          href="https://github.com/tortuvshin/open-curated/graphs/contributors"
+          href="https://github.com/tortuvshin/open-apps/graphs/contributors"
           target="_blank"
           rel="noopener noreferrer"
           class="font-medium text-ink-700 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
