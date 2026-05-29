@@ -1,4 +1,5 @@
 ---
+import { siteConfig } from "../../data/config";
 import BaseLayout from "../../components/layout/BaseLayout.astro";
 import type { OpenSourceApp } from "../../data/types";
 import { apps } from "../../data/apps";
@@ -111,7 +112,7 @@ const distributionLabel = (type: string) => ({
   other: "Download",
 }[type] ?? "Download");
 
-const title = `${app.name} — Open Curated`;
+const title = `${app.name} — ${siteConfig.name}`;
 const description = `${app.name} — ${app.description}`;
 
 // JSON-LD structured data for this app. Uses schema.org's
@@ -120,7 +121,7 @@ const description = `${app.name} — ${app.description}`;
 // Google show rich results (programming language, license, last
 // commit date) on app detail pages.
 const jsonLd: Record<string, unknown> = {
-  "@context": "https://schema.org",
+  `@context": "https://schema.org",
   "@type": "SoftwareSourceCode",
   name: app.name,
   headline: app.name,

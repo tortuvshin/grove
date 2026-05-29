@@ -44,6 +44,48 @@ export default defineConfig({
 `;
 }
 
+function projectReadme(projectName: string): string {
+  return `# ${projectName}
+
+A living, health-aware developer directory built with [Open Curated](https://github.com/tortuvshin/open-curated).
+
+## What this is
+
+This repository is **data + branding + decisions**, not the framework.
+The CLI and static framework live in the separate \`open-curated\` repo.
+
+## Workflow
+
+\`\`\`bash
+open-curated import <source>
+open-curated analyze
+open-curated review
+open-curated validate
+open-curated build
+\`\`\`
+
+## Files
+
+- \`curated.config.ts\` — site name, tagline, and data paths.
+- \`sources/\` — original Markdown lists that feed the directory.
+- \`data/items.yml\` — parsed project list (commit this).
+- \`data/health.yml\` — generated GitHub health metadata (regenerate on demand).
+- \`data/overrides.yml\` — manual corrections to items.
+- \`data/decisions.yml\` — human curation decisions.
+- \`content/methodology.md\` — the public methodology page.
+- \`public/\` — logo, OG image, and other static assets.
+
+## Health & Curation
+
+Open Curated never deletes projects automatically. It produces signals
+(\`active\`, \`mature\`, \`stale\`, \`inactive\`, \`archived\`, \`unknown\`,
+\`historical\`, \`needs_review\`). Humans make the final call via
+\`data/decisions.yml\`.
+
+See \`content/methodology.md\` for the full methodology.
+`;
+}
+
 async function writeIfMissing(path: string, content: string): Promise<void> {
   try {
     await readFile(path, "utf8");
@@ -105,9 +147,11 @@ program
       mkdir(join(root, "public"), { recursive: true }),
     ]);
     await writeIfMissing(join(root, "curated.config.ts"), projectConfig(projectName));
+    await writeIfMissing(join(root, "README.md"), projectReadme(projectName));
     await writeIfMissing(join(root, "data", "items.yml"), "items: []\n");
     await writeIfMissing(join(root, "data", "health.yml"), "health: []\n");
     await writeIfMissing(join(root, "data", "decisions.yml"), "decisions: []\n");
+    await writeIfMissing(join(root, "data", "overrides.yml"), "overrides: []\n");
     await writeIfMissing(
       join(root, "content", "methodology.md"),
       "# Methodology\n\nOpen Curated uses repository metadata as a signal. Human curation decisions control final visibility.\n",

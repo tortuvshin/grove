@@ -27,14 +27,9 @@ export default {
         950: '#09090b',
       },
       accent: {
-        // Subtle blue-grey. Not a SaaS purple. Just a touch of color
-        // for active states and the search focus ring.
         DEFAULT: '#1f6feb',
         muted: '#388bfd1a',
       },
-      // A tiny accent palette used only for status badges
-      // (new / hot / mature / activity). Everything else stays
-      // in the ink grayscale.
       emerald: {
         50: '#ecfdf5',
         300: '#6ee7b7',

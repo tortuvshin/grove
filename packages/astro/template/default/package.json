@@ -1,16 +1,32 @@
 {
   "name": "open-curated-site",
   "type": "module",
+  "version": "0.1.0",
   "private": true,
+  "description": "A static, health-aware developer directory powered by Open Curated.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "validate": "open-curated validate",
-    "build": "astro build",
-    "preview": "astro preview"
+    "validate:data": "open-curated validate",
+    "build:data": "open-curated build-data",
+    "build:llms-full": "open-curated build-llms-full",
+    "build": "pnpm run build:data && pnpm run build:llms-full && astro build",
+    "dev": "pnpm run build:data && astro dev",
+    "start": "astro dev",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "refresh:activity": "open-curated analyze",
+    "enrich:github": "open-curated enrich"
   },
   "dependencies": {
-    "@open-curated/astro": "^0.1.0",
-    "@open-curated/cli": "^0.1.0",
-    "@open-curated/core": "^0.1.0",
+    "@astrojs/check": "^0.9.9",
+    "@open-curated/astro": "workspace:*",
+    "@open-curated/cli": "workspace:*",
+    "@open-curated/core": "workspace:*",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.4",
     "tailwindcss": "^4.3.0",
