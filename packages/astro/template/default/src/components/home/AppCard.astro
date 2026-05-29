@@ -48,8 +48,8 @@ const initials = app.name
   .toUpperCase();
 
 // Resolve a logo URL for this app:
-//   1. Explicit `logoUrl` on the app
-//   2. GitHub owner avatar (extracted from `repoUrl`)
+//   1. Explicit "logoUrl" on the app
+//   2. GitHub owner avatar (extracted from "repoUrl")
 //   3. Initials placeholder.
 const { owner, repo } = getOwnerAndRepoFromRepoUrl(app.repoUrl);
 const logoUrl = app.logoUrl ?? getOwnerAvatarUrl(owner, 80);
