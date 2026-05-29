@@ -7,7 +7,7 @@ import { compact } from "../../lib/format";
 const githubUrl = stats.originalRepo;
 
 // Nav items. Order is information-architecture: discover → browse → act.
-// `Contributors` is intentionally not a top-level item — it lives lower
+// "Contributors" is intentionally not a top-level item — it lives lower
 // on the page. The watchlist was removed in v0.1 (see CHANGELOG).
 //
 // All links point to /apps with a filter rather than in-page anchors.
@@ -38,12 +38,12 @@ const starsLabel = compact(stats.stars);
     >
       <span
         aria-hidden="true"
-        class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100`
+        class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100"
       ></span>
       <span>{siteConfig.name}</span>
     </a>
 
-    <nav class=`hidden flex-1 md:block" aria-label="Primary">
+    <nav class="hidden flex-1 md:block" aria-label="Primary">
       <ul class="m-0 flex list-none gap-5 p-0">
         {
           navItems.map((item) => (
