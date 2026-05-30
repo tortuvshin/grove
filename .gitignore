@@ -9,3 +9,9 @@ data/.cache/
 coverage/
 .mavis
 .claude/settings.local.json
+.tmp-test/
+.idea/
+.vscode/
+*.log
+*.tsbuildinfo
+*.svelte-kit/
