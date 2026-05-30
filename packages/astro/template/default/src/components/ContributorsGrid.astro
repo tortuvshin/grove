@@ -1,0 +1,105 @@
+---
+// SPDX-License-Identifier: MIT
+
+/**
+ * Contributors grid for the home page. Renders all contributors at a
+ * uniform avatar size (no big/small distinction — the previous
+ * "top 10 + rest" layout implied a hierarchy that doesn't exist).
+ *
+ * When the contributor count is large enough that the homepage
+ * layout would feel cluttered, a "View all" link points to the
+ * dedicated `/contributors` page where the full list lives.
+ */
+import type { Contributor } from "../data/contributors";
+import SectionHeader from "./layout/SectionHeader.astro";
+import Container from "./layout/Container.astro";
+
+interface Props {
+  contributors: Contributor[];
+}
+
+const { contributors } = Astro.props;
+const total = contributors.length;
+// Threshold above which we link out to the full /contributors page
+// instead of inlining every avatar on the homepage.
+const INLINE_LIMIT = 100;
+const isCapped = total > INLINE_LIMIT;
+const visible = isCapped ? contributors.slice(0, INLINE_LIMIT) : contributors;
+const more = Math.max(0, total - INLINE_LIMIT);
+---
+
+<section
+  id="contributors"
+  class="section scroll-mt-20 border-b border-ink-200 dark:border-ink-800"
+>
+  <Container>
+    <SectionHeader
+      eyebrow="Community"
+      title="Thanks to every contributor."
+      description="This directory exists because people keep discovering, submitting, reviewing, and maintaining open-source app references."
+    />
+
+    <ul
+      class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-x-3 gap-y-5 p-0"
+    >
+      {
+        visible.map((c) => (
+          <li class="flex flex-col items-center gap-1.5 text-center">
+            <a
+              href={c.profileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${c.name ?? c.username} on GitHub`}
+              title={`${c.name ?? c.username}${typeof c.contributions === "number" ? ` · ${c.contributions} contributions` : ""}`}
+              class="block transition-opacity hover:opacity-80"
+            >
+              <img
+                src={c.avatarUrl}
+                alt={`${c.name ?? c.username} avatar`}
+                loading="lazy"
+                width="40"
+                height="40"
+                class="h-10 w-10 rounded-full border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900"
+              />
+            </a>
+            <a
+              href={c.profileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={c.name ?? c.username}
+              class="block max-w-full truncate text-2xs text-ink-500 transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+            >
+              {c.username}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div
+      class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-2xs text-ink-500 dark:text-ink-400"
+    >
+      <span>
+        {isCapped
+          ? <>Showing {visible.length} of {total} contributors on the homepage.</>
+          : <>Showing all {total} contributors.</>}
+      </span>
+      <a
+        href="/contributors"
+        class="inline-flex items-center gap-1 font-medium text-ink-700 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+      >
+        View all
+        {more > 0 ? ` (${more} more)` : ""} →
+      </a>
+      <span aria-hidden="true">·</span>
+      <a
+        href="https://github.com/tortuvshin/open-apps/graphs/contributors"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-ink-700 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+      >
+        GitHub contributors graph
+      </a>
+    </div>
+  </Container>
+</section>
