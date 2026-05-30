@@ -46,9 +46,9 @@ const groups: FilterGroup[] = [
 /** Build the trigger label: "Stack" when empty, "Stack: 2" when 2 selected. */
 function triggerLabel(g: FilterGroup): string {
   const n = g.initial.length;
-  if (n === 0) return `${g.label}: Any`;
-  if (n === 1) return `${g.label}: ${g.initial[0]}`;
-  return `${g.label}: ${n} selected`;
+  if (n === 0) return `${g.label}: Any";
+  if (n === 1) return "${g.label}: ${g.initial[0]}";
+  return "${g.label}: ${n} selected`;
 }
 ---
 
@@ -164,9 +164,9 @@ function triggerLabel(g: FilterGroup): string {
    * Dropdown behavior for each filter group:
    *   - click trigger → toggle popover
    *   - click outside / ESC → close
-   *   - Apply / Clear / Single-select fire `applyFilterPatch()` which
-   *     is a host-page hook (defined in `src/pages/apps/index.astro`).
-   *     The hook updates the URL via `history.pushState` (no reload)
+   *   - Apply / Clear / Single-select fire "applyFilterPatch()" which
+   *     is a host-page hook (defined in "src/pages/apps/index.astro").
+   *     The hook updates the URL via "history.pushState" (no reload)
    *     and re-runs the row filter so the result list updates
    *     immediately. Static pages don't filter on the server, so
    *     this is the only way the filter actually narrows the list.

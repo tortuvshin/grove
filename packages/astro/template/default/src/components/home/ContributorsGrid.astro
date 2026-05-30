@@ -8,7 +8,7 @@
  *
  * When the contributor count is large enough that the homepage
  * layout would feel cluttered, a "View all" link points to the
- * dedicated `/contributors` page where the full list lives.
+ * dedicated "/contributors" page where the full list lives.
  */
 import type { Contributor } from "../../data/contributors";
 import SectionHeader from "../layout/SectionHeader.astro";
@@ -50,7 +50,7 @@ const more = Math.max(0, total - INLINE_LIMIT);
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${c.name ?? c.username} on GitHub`}
-              title={`${c.name ?? c.username}${typeof c.contributions === "number" ? ` · ${c.contributions} contributions` : ""}`}
+              title={`${c.name ?? c.username}${typeof c.contributions === "number" ? " · ${c.contributions} contributions" : ""}"}
               class="block transition-opacity hover:opacity-80"
             >
               <img
@@ -89,7 +89,7 @@ const more = Math.max(0, total - INLINE_LIMIT);
         class="inline-flex items-center gap-1 font-medium text-ink-700 hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
       >
         View all
-        {more > 0 ? ` (${more} more)` : ""} →
+        {more > 0 ? " (${more} more)" : ""} →
       </a>
       <span aria-hidden="true">·</span>
       <a
