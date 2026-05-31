@@ -98,25 +98,22 @@ const latestReleaseAt =
 const contributorsKnown = app.github?.activity?.contributorsKnown;
 const totalCommitsKnown = app.github?.activity?.totalCommitsKnown;
 const distributionChannels = app.distribution?.channels ?? [];
-const distributionLabel = (type: string): string => {
-  const labels: Record<string, string> = {
-    "app-store": "App Store",
-    "play-store": "Play Store",
-    fdroid: "F-Droid",
-    "github-releases": "GitHub Releases",
-    apk: "APK",
-    testflight: "TestFlight",
-    website: "Website",
-    snapcraft: "Snapcraft",
-    flathub: "Flathub",
-    "microsoft-store": "Microsoft Store",
-    other: "Download",
-  };
-  return labels[type] ?? "Download";
-};
+const distributionLabel = (type: string) => ({
+  "app-store": "App Store",
+  "play-store": "Play Store",
+  fdroid: "F-Droid",
+  "github-releases": "GitHub Releases",
+  apk: "APK",
+  testflight: "TestFlight",
+  website: "Website",
+  snapcraft: "Snapcraft",
+  flathub: "Flathub",
+  "microsoft-store": "Microsoft Store",
+  other: "Download",
+}[type] ?? "Download");
 
-const title = `${app.name} — ${siteConfig.name}";
-const description = "${app.name} — ${app.description}`;
+const title = `${app.name} — ${siteConfig.name}`;
+const description = `${app.name} — ${app.description}`;
 
 // JSON-LD structured data for this app. Uses schema.org's
 // SoftwareSourceCode type — that's the right fit for a source
@@ -700,7 +697,7 @@ const jsonLd: Record<string, unknown> = {
         </article>
       </Container>
     <style>
-      @reference "../../styles/global.css";
+      @reference "../styles/global.css";
 
       .chip {
         @apply inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300;

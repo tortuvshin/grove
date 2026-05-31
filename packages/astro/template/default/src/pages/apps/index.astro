@@ -2,12 +2,12 @@
 import { siteConfig } from "../../data/config";
 import BaseLayout from "../../components/layout/BaseLayout.astro";
 import Container from "../../components/layout/Container.astro";
-import SmartLensTabs from "../../components/home/SmartLensTabs.astro";
-import RefinePanel from "../../components/home/RefinePanel.astro";
-import AppsIndexRow from "../../components/home/AppsIndexRow.astro";
-import AppsPagination from "../../components/home/AppsPagination.astro";
-import ExploreByCategory from "../../components/home/ExploreByCategory.astro";
-import ExploreByStack from "../../components/home/ExploreByStack.astro";
+import SmartLensTabs from "../../components/SmartLensTabs.astro";
+import RefinePanel from "../../components/RefinePanel.astro";
+import AppsIndexRow from "../../components/AppsIndexRow.astro";
+import AppsPagination from "../../components/AppsPagination.astro";
+import ExploreByCategory from "../../components/ExploreByCategory.astro";
+import ExploreByStack from "../../components/ExploreByStack.astro";
 
 import { apps } from "../../data/apps";
 import {
@@ -58,14 +58,14 @@ function hrefForPage(target: number): string {
   const next: AppsFilters = { ...initialFilters, page: target };
   const sp = searchParamsFromFilters(next);
   const qs = sp.toString();
-  return qs ? `/apps?${qs}" : "/apps";
+  return qs ? `/apps?${qs}` : "/apps";
 }
 
 function hrefForDensity(value: "comfortable" | "compact"): string {
   const next: AppsFilters = { ...initialFilters, density: value, page: 1 };
   const sp = searchParamsFromFilters(next);
   const qs = sp.toString();
-  return qs ? `/apps?${qs}" : "/apps";
+  return qs ? `/apps?${qs}` : "/apps";
 }
 
 function hrefForClearAll(): string {
@@ -75,18 +75,18 @@ function hrefForClearAll(): string {
 // Human-readable summary line under the search.
 const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Recently updated";
 const filterSummary: string[] = [];
-if (initialFilters.q) filterSummary.push(`matching "${initialFilters.q}"");
-if (initialFilters.stacks?.length) filterSummary.push("stack: ${initialFilters.stacks.join(", ")}");
+if (initialFilters.q) filterSummary.push(`matching "${initialFilters.q}"`);
+if (initialFilters.stacks?.length) filterSummary.push(`stack: ${initialFilters.stacks.join(", ")}`);
 if (initialFilters.platforms?.length)
-  filterSummary.push("platform: ${initialFilters.platforms.join(", ")}");
+  filterSummary.push(`platform: ${initialFilters.platforms.join(", ")}`);
 if (initialFilters.categories?.length)
-  filterSummary.push("category: ${initialFilters.categories.join(", ")}");
+  filterSummary.push(`category: ${initialFilters.categories.join(", ")}`);
 if (initialFilters.licenses?.length)
-  filterSummary.push("license: ${initialFilters.licenses.join(", ")}");
-if (initialFilters.labels?.length) filterSummary.push("label: ${initialFilters.labels.join(", ")}");
-if (initialLens) filterSummary.push("lens: ${initialLens}");
+  filterSummary.push(`license: ${initialFilters.licenses.join(", ")}`);
+if (initialFilters.labels?.length) filterSummary.push(`label: ${initialFilters.labels.join(", ")}`);
+if (initialLens) filterSummary.push(`lens: ${initialLens}`);
 
-const title = "Browse open-source apps — ${siteConfig.name}`;
+const title = "Browse open-source apps — ${siteConfig.name}";
 const description =
   "Search and filter real open-source applications by platform, stack, category, license, and activity.";
 ---
@@ -382,23 +382,23 @@ const description =
       function writeFilters(f: AppsFilters) {
         const sp = searchParamsFromFilters(f);
         const qs = sp.toString();
-        const url = qs ? `?${qs}" : location.pathname;
+        const url = qs ? `?${qs}` : location.pathname;
         location.assign(url);
       }
 
       // ── Client-side row filter ─────────────────────────────────────
       //
       // The page is statically rendered (one HTML for every URL), so
-      // "?stack=flutter" etc. don't re-render the result list on the
-      // server. The RefinePanel calls "window.__applyFilters({...})" to
+      // `?stack=flutter` etc. don't re-render the result list on the
+      // server. The RefinePanel calls `window.__applyFilters({...})` to
       // push a new filter state; we hide non-matching rows, update the
       // active-chip strip, the summary line, and the trigger labels
       // — all without a full page reload.
       //
-      // Each ".apps-row" already carries "data-stack", "data-stacks",
-      // "data-category", "data-platforms", "data-labels", "data-status",
-      // "data-license", "data-stars", "data-updated", "data-name",
-      // "data-q" (description, lowercased) for matching.
+      // Each `.apps-row` already carries `data-stack`, `data-stacks`,
+      // `data-category`, `data-platforms`, `data-labels`, `data-status`,
+      // `data-license`, `data-stars`, `data-updated`, `data-name`,
+      // `data-q` (description, lowercased) for matching.
 
       type RowEl = HTMLElement & {
         dataset: {
@@ -486,9 +486,9 @@ const description =
         };
         const base = map[key] ?? key;
         const arr = (f as unknown as Record<string, string[] | undefined>)[key] ?? [];
-        if (arr.length === 0) return `${base}: Any";
-        if (arr.length === 1) return "${base}: ${arr[0]}";
-        return "${base}: ${arr.length} selected`;
+        if (arr.length === 0) return `${base}: Any`;
+        if (arr.length === 1) return `${base}: ${arr[0]}`;
+        return `${base}: ${arr.length} selected`;
       }
 
       function applyRowFilter(f: AppsFilters): number {
@@ -509,8 +509,8 @@ const description =
 
           let show = true;
           if (q) {
-            // Match the server-side "filterApps" haystack: name, owner,
-            // description, category. Without "owner" here, live search
+            // Match the server-side `filterApps` haystack: name, owner,
+            // description, category. Without `owner` here, live search
             // would miss apps a user is searching for by owner name.
             const hay = `${d.name ?? ""} ${d.owner ?? ""} ${d.q ?? ""} ${d.category ?? ""}`;
             if (!hay.includes(q)) show = false;
@@ -548,12 +548,12 @@ const description =
       function renderSummary(f: AppsFilters) {
         if (!filtersSummary) return;
         const parts: string[] = [];
-        if (f.q) parts.push(`matching “${f.q}”");
-        if (f.stacks?.length) parts.push("stack: ${f.stacks.join(", ")}");
-        if (f.platforms?.length) parts.push("platform: ${f.platforms.join(", ")}");
-        if (f.categories?.length) parts.push("category: ${f.categories.join(", ")}");
-        if (f.licenses?.length) parts.push("license: ${f.licenses.join(", ")}");
-        if (f.labels?.length) parts.push("label: ${f.labels.join(", ")}`);
+        if (f.q) parts.push(`matching “${f.q}”`);
+        if (f.stacks?.length) parts.push(`stack: ${f.stacks.join(", ")}`);
+        if (f.platforms?.length) parts.push(`platform: ${f.platforms.join(", ")}`);
+        if (f.categories?.length) parts.push(`category: ${f.categories.join(", ")}`);
+        if (f.licenses?.length) parts.push(`license: ${f.licenses.join(", ")}`);
+        if (f.labels?.length) parts.push(`label: ${f.labels.join(", ")}`);
         filtersSummary.textContent = parts.length ? parts.join(" · ") : "";
       }
 
@@ -590,7 +590,7 @@ const description =
           f.page = 1;
           const sp = searchParamsFromFilters(f);
           const qs = sp.toString();
-          const url = qs ? `?${qs}" : location.pathname;
+          const url = qs ? `?${qs}` : location.pathname;
           history.pushState({ filters: f }, "", url);
           applyAll(f);
         };
@@ -617,7 +617,7 @@ const description =
           return;
         }
         // Density toggle: behave like a real <button> — anchor was a
-        // misuse of "aria-pressed" (which belongs on buttons). Now
+        // misuse of `aria-pressed` (which belongs on buttons). Now
         // we navigate to the URL on click instead of using <a href>.
         const densityBtn = target.closest<HTMLButtonElement>("[data-density-toggle]");
         if (densityBtn) {

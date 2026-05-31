@@ -1,10 +1,9 @@
 /**
  * Site config exposed to Astro pages.
  *
- * This is generated at build time by `open-curated build-data`, which
- * reads `curated.config.ts` from the project root and emits this file.
- * The build pipeline makes it the single source of truth for branding
- * strings so every component can import the same values.
+ * This file is the typed view of `curated.config.ts`. The CLI builds it
+ * from the project-root config at `open-curated build-data` time. Astro
+ * pages and components import it directly for branding strings.
  *
  * Do not edit by hand. Re-run `open-curated build-data` after changing
  * `curated.config.ts`.

@@ -1,13 +1,13 @@
 ---
 import { siteConfig } from "../data/config";
 import BaseLayout from "../components/layout/BaseLayout.astro";
-import Hero from "../components/home/Hero.astro";
-import WhyThisExists from "../components/home/WhyThisExists.astro";
-import AppSection from "../components/home/AppSection.astro";
-import StackGrid from "../components/home/StackGrid.astro";
-import CategoryGrid from "../components/home/CategoryGrid.astro";
-import ContributorsGrid from "../components/home/ContributorsGrid.astro";
-import OriginalCollection from "../components/home/OriginalCollection.astro";
+import Hero from "../components/Hero.astro";
+import WhyThisExists from "../components/WhyThisExists.astro";
+import AppSection from "../components/AppSection.astro";
+import StackGrid from "../components/StackGrid.astro";
+import CategoryGrid from "../components/CategoryGrid.astro";
+import ContributorsGrid from "../components/ContributorsGrid.astro";
+import OriginalCollection from "../components/OriginalCollection.astro";
 
 import { newApps, hotApps, matureApps } from "../data/apps";
 import { stacks } from "../data/stacks";
@@ -19,7 +19,7 @@ const hotList = hotApps().slice(0, 6);
 const newList = newApps().slice(0, 6);
 const matureList = matureApps().slice(0, 6);
 
-const title = `${siteConfig.name} — A directory of real open-source applications`;
+const title = "${siteConfig.name} — A directory of real open-source applications";
 const description =
   "A searchable directory of real open-source applications — organized by stack, category, platform, license, activity, and maturity.";
 ---
