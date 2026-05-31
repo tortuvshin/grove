@@ -1,5 +1,5 @@
 ---
-import { siteConfig } from "../../data/config";
+import { siteConfig } from "../data/config";
 // SPDX-License-Identifier: MIT
 
 /**
@@ -13,10 +13,10 @@ import { siteConfig } from "../../data/config";
  *   - Open Graph (og:*) for Facebook, LinkedIn, Discord, Slack, etc.
  *   - Twitter Card (twitter:*) for X / Twitter
  *   - JSON-LD WebSite + Organization on every page
- *   - JSON-LD SoftwareSourceCode (or custom) when "jsonLd" is provided
+ *   - JSON-LD SoftwareSourceCode (or custom) when `jsonLd` is provided
  *     (e.g. on /apps/[slug] for the per-app structured data)
  *
- * Noindex is opt-in via the "noindex" prop. By default everything is
+ * Noindex is opt-in via the `noindex` prop. By default everything is
  * indexable; the only noindex target today is the thin /submit wrapper.
  */
 
@@ -59,14 +59,14 @@ const shortDescription = truncate(description, 200);
 const websiteLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: `${siteConfig.name}`,
+  name: "${siteConfig.name}",
   description:
     "A curated, self-refreshing directory of real open-source application codebases.",
   url: site.toString().replace(/\/$/, ""),
   inLanguage: "en",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${site.toString().replace(/\/`/, "")}/apps?q={search_term_string}`,
+    target: `${site.toString().replace(/\/$/, "")}/apps?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };
@@ -74,7 +74,7 @@ const websiteLd = {
 const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: `${siteConfig.name}`,
+  name: "${siteConfig.name}",
   url: site.toString().replace(/\/$/, ""),
   logo: new URL("/og-image.svg", site).toString(),
   sameAs: ["https://github.com/tortuvshin/open-apps"],

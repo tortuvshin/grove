@@ -1,13 +1,13 @@
 ---
-import { siteConfig } from "../../data/config";
+import { siteConfig } from "../data/config";
 import ThemeToggle from "./ThemeToggle.astro";
-import { stats } from "../../data/stats";
-import { compact } from "../../lib/format";
+import { stats } from "../data/stats";
+import { compact } from "../lib/format";
 
 const githubUrl = stats.originalRepo;
 
 // Nav items. Order is information-architecture: discover → browse → act.
-// "Contributors" is intentionally not a top-level item — it lives lower
+// `Contributors` is intentionally not a top-level item — it lives lower
 // on the page. The watchlist was removed in v0.1 (see CHANGELOG).
 //
 // All links point to /apps with a filter rather than in-page anchors.

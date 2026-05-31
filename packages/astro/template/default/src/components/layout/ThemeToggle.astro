@@ -1,13 +1,13 @@
 ---
 // A three-position theme switcher: light / dark / system.
 //
-// State is persisted in "localStorage" under the key "open-apps-theme".
+// State is persisted in `localStorage` under the key "open-apps-theme".
 // On mount it reads the stored value (or "system" if none), applies
 // the corresponding class to <html>, and re-syncs when the OS
 // preference changes (only meaningful when mode is "system").
 //
 // Implementation note: the actual <html class="dark"> toggle happens
-// in the inline script in "src/components/layout/BaseLayout.astro"
+// in the inline script in `src/components/layout/BaseLayout.astro`
 // (THEME_INIT). That script runs before paint so the user never sees
 // a flash of the wrong theme.
 

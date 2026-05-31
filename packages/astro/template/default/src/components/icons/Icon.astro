@@ -1,16 +1,16 @@
 ---
 // Brand icon registry.
 //
-// Strategy: icons live as static SVGs in "public/icons/". The fetch
-// script ("scripts/fetch-icons.mjs") downloads the well-known
-// brand icons from the public "xandemon/developer-icons" repo on
+// Strategy: icons live as static SVGs in `public/icons/`. The fetch
+// script (`scripts/fetch-icons.mjs`) downloads the well-known
+// brand icons from the public `xandemon/developer-icons` repo on
 // prebuild. Missing icons (windows, web, desktop, chromeos,
-// embedded, ionic, capacitor) are hand-rolled in "public/icons/".
+// embedded, ionic, capacitor) are hand-rolled in `public/icons/`.
 //
 // Theme-aware variants: some icons (Apple for iOS / macOS) ship
 // in light and dark silhouettes and need to be swapped with
 // the page's color scheme. The Icon component renders BOTH img
-// tags and uses Tailwind's "dark:hidden" / "hidden dark:block" to
+// tags and uses Tailwind's `dark:hidden` / `hidden dark:block` to
 // show only the right one.
 //
 // Usage:
@@ -77,7 +77,7 @@ const ALIASES: Record<string, string> = {
 };
 
 // These icons have explicit light + dark variants. We render both
-// and let CSS swap based on the ".dark" class on <html>.
+// and let CSS swap based on the `.dark` class on <html>.
 const THEME_AWARE = new Set([
   "ios",         // maps to apple-dark (light) + apple-light (dark)
   "macos",       // maps to apple-light (light) + apple-dark (dark)

@@ -1,6 +1,6 @@
 ---
-import { siteConfig } from "../../data/config";
-import { stats } from "../../data/stats";
+import { siteConfig } from "../data/config";
+import { stats } from "../data/stats";
 
 const githubUrl = stats.originalRepo;
 const year = new Date().getFullYear();
@@ -109,7 +109,7 @@ const positioning =
         <li><a href="#about" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Why this exists</a></li>
         <li>
           <a
-            href={`${githubUrl}/blob/main/README.md"}
+            href={`${githubUrl}/blob/main/README.md`}
             target="_blank"
             rel="noopener noreferrer"
             class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
