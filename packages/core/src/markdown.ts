@@ -183,6 +183,8 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
       taxonomy: {
         category: currentCategory,
         tags: [],
+        stacks: [],
+        platforms: [],
       },
       labels: [],
       lenses: [],
