@@ -1,5 +1,5 @@
 ---
-import { siteConfig } from "../data/config";
+import { siteConfig } from "../../data/config";
 // SPDX-License-Identifier: MIT
 
 /**
@@ -59,7 +59,7 @@ const shortDescription = truncate(description, 200);
 const websiteLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "${siteConfig.name}",
+  name: `${siteConfig.name}`,
   description:
     "A curated, self-refreshing directory of real open-source application codebases.",
   url: site.toString().replace(/\/$/, ""),
@@ -74,7 +74,7 @@ const websiteLd = {
 const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "${siteConfig.name}",
+  name: `${siteConfig.name}`,
   url: site.toString().replace(/\/$/, ""),
   logo: new URL("/og-image.svg", site).toString(),
   sameAs: ["https://github.com/tortuvshin/open-apps"],
