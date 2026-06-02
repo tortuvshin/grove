@@ -1,4 +1,4 @@
-import type { GithubMetadata, HealthEntry, HealthStatus } from "./schema.js";
+import type { GithubMetadata, HealthEntry, HealthStatus, HealthTier } from "./schema.js";
 
 function daysSince(value: string | null | undefined): number {
   if (!value) return Infinity;
@@ -14,6 +14,10 @@ export function classifyHealth(id: string, github?: GithubMetadata): HealthEntry
       health: {
         status: "unknown",
         maturity: "unknown",
+        tier: "experimental",
+        visibility: "keep",
+        cleanupCandidate: false,
+        staleReason: null,
         confidence: "low",
         reasons: ["No GitHub metadata available"],
       },
@@ -64,12 +68,32 @@ export function classifyHealth(id: string, github?: GithubMetadata): HealthEntry
   if (hasLicense) reasons.push("Clear license found");
   if (!hasLicense) reasons.push("License is missing or unclear");
 
+  const tier: HealthTier =
+    status === "archived" || status === "inactive" || status === "unavailable"
+      ? "hidden"
+      : popular
+        ? "curated"
+        : github.stars >= 50
+          ? "listed"
+          : "experimental";
+
   return {
     id,
     github,
     health: {
       status,
       maturity,
+      tier,
+      visibility: tier === "hidden" ? "hide" : "keep",
+      cleanupCandidate: status === "stale" || status === "archived" || status === "inactive",
+      staleReason:
+        status === "inactive"
+          ? "no_commits_24_months"
+          : status === "stale"
+            ? "no_commits_365_days"
+            : status === "archived"
+              ? "github_archived"
+              : null,
       confidence: github.fullName ? "high" : "medium",
       reasons,
     },
