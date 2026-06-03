@@ -1,4 +1,4 @@
-import type { CuratedItem, CuratedScores, Decision, HealthEntry, HealthStatus } from "@open-curated/core";
+import type { AppLabel, CuratedItem, Decision, HealthEntry, HealthStatus, Score as CuratedScores } from "@open-curated/core";
 
 export interface DirectoryStats {
   total: number;
@@ -123,7 +123,7 @@ export function filterRecords(records: DirectoryRecord[], filters: DirectoryFilt
     if (filters.language && (item.taxonomy.language ?? health?.github?.language) !== filters.language) return false;
     if (filters.license && health?.github?.license !== filters.license) return false;
     if (filters.health && filters.health !== "all" && status !== filters.health) return false;
-    if (filters.label && !item.labels.includes(filters.label)) return false;
+    if (filters.label && !(item.labels as string[]).includes(filters.label)) return false;
     if (filters.lens && !item.lenses.includes(filters.lens)) return false;
     if (filters.maintained && !["active", "mature"].includes(status)) return false;
     if (filters.hideArchived && status === "archived") return false;

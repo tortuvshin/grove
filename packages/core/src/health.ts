@@ -69,7 +69,7 @@ export function classifyHealth(id: string, github?: GithubMetadata): HealthEntry
   if (!hasLicense) reasons.push("License is missing or unclear");
 
   const tier: HealthTier =
-    status === "archived" || status === "inactive" || status === "unavailable"
+    status === "archived" || status === "inactive"
       ? "hidden"
       : popular
         ? "curated"
