@@ -138,7 +138,8 @@ function updatedTime(record: DirectoryRecord): number {
 }
 
 function scoreValue(record: DirectoryRecord, key: keyof CuratedScores): number {
-  return record.item.curation.scores?.[key] ?? 0;
+  const scores = (record.item.curation.scores ?? {}) as CuratedScores;
+  return (scores[key] as number | undefined) ?? 0;
 }
 
 export function sortRecords(records: DirectoryRecord[], sort: DirectorySort = "recently-updated"): DirectoryRecord[] {
