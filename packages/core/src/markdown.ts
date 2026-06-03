@@ -195,6 +195,7 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
         bestFor: [],
         whyListed: [],
         caveats: [],
+        launchAsk: [],
         scores: {},
       },
     });
