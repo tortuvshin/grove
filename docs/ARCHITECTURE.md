@@ -1,6 +1,6 @@
 # Architecture
 
-Open Curated is a generic engine for living developer directories.
+Grove is a generic engine for living developer directories.
 
 ## Boundaries
 
@@ -30,15 +30,15 @@ The framework repo must not contain real Open Apps, MCP, agent, or other project
 
 ## Package Responsibilities
 
-### `@open-curated/core`
+### `@grove/core`
 
 Core is environment-light TypeScript. It owns schemas, config loading, Markdown parsing, item normalization, YAML IO, GitHub fetching, health classification, and validation.
 
-### `@open-curated/cli`
+### `@grove/cli`
 
 CLI is a thin orchestration layer over core. Commands should be predictable and scriptable, with project files as the source of truth.
 
-### `@open-curated/astro`
+### `@grove/astro`
 
 Astro provides reusable UI primitives for project repositories. The web output remains static and should be easy to customize in each project repo.
 
@@ -46,16 +46,16 @@ Astro provides reusable UI primitives for project repositories. The web output r
 
 ```txt
 sources/README.md
-  -> open-curated import
+  -> grove import
   -> data/items.yml
-  -> open-curated analyze
+  -> grove analyze
   -> data/health.yml
   -> data/decisions.yml + data/overrides.yml
-  -> open-curated validate
-  -> open-curated build
+  -> grove validate
+  -> grove build
   -> static directory
 ```
 
 ## Health Philosophy
 
-Open Curated emits signals, not final judgments. A stale or inactive status should invite review rather than deletion. `decisions.yml` is the human curation layer that decides whether an item is highlighted, kept, hidden, removed, or preserved as historical.
+Grove emits signals, not final judgments. A stale or inactive status should invite review rather than deletion. `decisions.yml` is the human curation layer that decides whether an item is highlighted, kept, hidden, removed, or preserved as historical.

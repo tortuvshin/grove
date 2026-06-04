@@ -1,5 +1,5 @@
 /**
- * Shared GitHub API helpers used by the open-curated CLI.
+ * Shared GitHub API helpers used by the grove CLI.
  *
  *   - ghFetch:      fetch + JSON parse + 2-attempt exponential backoff
  *   - rateLimitWaitMs: read X-RateLimit-Reset header and return ms to wait
@@ -14,7 +14,7 @@
 const DEFAULT_HEADERS: Record<string, string> = {
   Accept: "application/vnd.github+json",
   "X-GitHub-Api-Version": "2022-11-28",
-  "User-Agent": "open-curated-bot",
+  "User-Agent": "grove-bot",
 };
 
 export interface GhFetchOptions {

@@ -19,7 +19,7 @@ async function githubJson(path: string, token?: string): Promise<unknown | null>
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
-    "User-Agent": "open-curated",
+    "User-Agent": "grove",
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 

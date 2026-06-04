@@ -22,7 +22,7 @@ export interface EnrichedFields {
 
 const HEADERS: Record<string, string> = {
   Accept: "text/html,application/xhtml+xml",
-  "User-Agent": "open-curated-enricher",
+  "User-Agent": "grove-enricher",
 };
 
 async function fetchHtml(owner: string, repo: string): Promise<

@@ -99,7 +99,7 @@ Tasks:
 Definition of done: CLI flags stale items for review and humans make the final
 visibility call through `decisions.yml`.
 
-Known gap: `open-curated review` command is not yet implemented. Manual
+Known gap: `grove review` command is not yet implemented. Manual
 editing of `data/decisions.yml` is the current path.
 
 ## Milestone 6 - Open Apps Alignment (not started)

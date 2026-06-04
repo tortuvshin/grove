@@ -2,7 +2,7 @@
  * Parse a legacy awesome-list README into structured entries.
  *
  * Legacy format: `- [Name](repoUrl) - description` (or em-dash),
- * grouped under `### Category` headings. Used by `open-curated import`
+ * grouped under `### Category` headings. Used by `grove import`
  * when the source is a flat awesome list rather than a schema-v1
  * per-app directory.
  */

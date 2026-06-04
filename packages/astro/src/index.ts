@@ -1,4 +1,4 @@
-import type { AppLabel, CuratedItem, Decision, HealthEntry, HealthStatus, Score as CuratedScores } from "@open-curated/core";
+import type { AppLabel, CuratedItem, Decision, HealthEntry, HealthStatus, Score as CuratedScores } from "@grove/core";
 
 export interface DirectoryStats {
   total: number;

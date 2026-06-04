@@ -1,11 +1,11 @@
 {
-  "name": "@open-curated/cli",
+  "name": "@grove/cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "CLI for Open Curated project repos.",
+  "description": "CLI for Grove project repos.",
   "license": "MIT",
   "bin": {
-    "open-curated": "./dist/index.js"
+    "grove": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -20,8 +20,8 @@
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
-    "@open-curated/astro": "workspace:*",
-    "@open-curated/core": "workspace:*",
+    "@grove/astro": "workspace:*",
+    "@grove/core": "workspace:*",
     "commander": "^14.0.2",
     "tsx": "^4.21.0"
   }

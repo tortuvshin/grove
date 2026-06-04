@@ -1,8 +1,8 @@
 {
-  "name": "@open-curated/core",
+  "name": "@grove/core",
   "version": "0.1.0",
   "type": "module",
-  "description": "Core schemas, importers, health analysis, and validation for Open Curated.",
+  "description": "Core schemas, importers, health analysis, and validation for Grove.",
   "license": "MIT",
   "exports": {
     ".": {

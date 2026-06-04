@@ -1,16 +1,16 @@
-# Open Curated
+# Grove
 
-Open Curated is a CLI and static framework that turns awesome lists and curated GitHub repositories into living developer directories.
+Grove is a CLI and static framework that turns awesome lists and curated GitHub repositories into living developer directories.
 
-Awesome lists show links. Open Curated shows what is still useful.
+Awesome lists show links. Grove shows what is still useful.
 
 It imports Markdown lists, extracts project metadata, checks repository health, flags outdated or inactive projects, highlights mature and useful projects, and builds a searchable web directory developers can use to learn, compare, adopt, and contribute.
 
 ## Positioning
 
-Open Curated is not a replacement for awesome lists. It is a maintenance and web layer for them.
+Grove is not a replacement for awesome lists. It is a maintenance and web layer for them.
 
-Awesome lists are easy to start, but hard to search, validate, enrich, and maintain. Open Curated keeps the simplicity of Markdown and structured files while adding repository health, metadata enrichment, search, filters, SEO pages, and human curation workflows.
+Awesome lists are easy to start, but hard to search, validate, enrich, and maintain. Grove keeps the simplicity of Markdown and structured files while adding repository health, metadata enrichment, search, filters, SEO pages, and human curation workflows.
 
 ## Architecture
 
@@ -22,7 +22,7 @@ Project repo = data + config + source + curation decisions
 This repository contains the framework only:
 
 ```txt
-open-curated/
+grove/
 ├── packages/
 │   ├── core/
 │   ├── cli/
@@ -39,26 +39,26 @@ Open Apps is the reference implementation for the web experience, but its data d
 ## V1 Flow
 
 ```bash
-open-curated init awesome-mcps
-open-curated import https://github.com/owner/awesome-list
-open-curated analyze
-open-curated validate
-open-curated build
+grove init awesome-mcps
+grove import https://github.com/owner/awesome-list
+grove analyze
+grove validate
+grove build
 ```
 
 Or from a local README:
 
 ```bash
-open-curated import ./README.md
+grove import ./README.md
 ```
 
 The result is a searchable, filterable, SEO-friendly static web directory with project health, maturity signals, and human curation decisions.
 
 ## Packages
 
-- `@open-curated/core` - config loading, schemas, Markdown import, GitHub metadata, health classification, validation, YAML IO.
-- `@open-curated/cli` - `init`, `import`, `analyze`, `validate`, `build`, and `preview` commands.
-- `@open-curated/astro` - reusable Astro components and styles for project repos.
+- `@grove/core` - config loading, schemas, Markdown import, GitHub metadata, health classification, validation, YAML IO.
+- `@grove/cli` - `init`, `import`, `analyze`, `validate`, `build`, and `preview` commands.
+- `@grove/astro` - reusable Astro components and styles for project repos.
 
 ## Data Files
 
@@ -78,7 +78,7 @@ The CLI never automatically removes projects. It produces signals; humans make c
 
 ## Health Statuses
 
-Open Curated uses careful public labels:
+Grove uses careful public labels:
 
 - `active`
 - `mature`

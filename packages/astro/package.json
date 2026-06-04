@@ -1,8 +1,8 @@
 {
-  "name": "@open-curated/astro",
+  "name": "@grove/astro",
   "version": "0.1.0",
   "type": "module",
-  "description": "Astro UI primitives for Open Curated directories.",
+  "description": "Astro UI primitives for Grove directories.",
   "license": "MIT",
   "files": [
     "dist",
@@ -32,7 +32,7 @@
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
-    "@open-curated/core": "workspace:*",
+    "@grove/core": "workspace:*",
     "astro": "^6.4.4"
   }
 }
