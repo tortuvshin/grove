@@ -28,7 +28,7 @@ import {
   writeYamlFile,
   type CuratedConfig,
   type HealthEntry,
-} from "@grove/core";
+} from "@grove-dev/core";
 
 const program = new Command();
 const require = createRequire(import.meta.url);
@@ -43,7 +43,7 @@ async function ensureParent(path: string): Promise<void> {
 }
 
 function projectConfig(projectName: string): string {
-  return `import { defineConfig } from "@grove/core";
+  return `import { defineConfig } from "@grove-dev/core";
 
 export default defineConfig({
   name: "${projectName}",
@@ -401,7 +401,7 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 function defaultTemplateDir(): string {
-  const entrypoint = require.resolve("@grove/astro");
+  const entrypoint = require.resolve("@grove-dev/astro");
   return resolve(dirname(entrypoint), "..", "template", "default");
 }
 

@@ -30,32 +30,36 @@ The framework repo must not contain real Open Apps, MCP, agent, or other project
 
 ## Package Responsibilities
 
-### `@grove/core`
+### `@grove-dev/core`
 
-Core is environment-light TypeScript. It owns schemas, config loading, Markdown parsing, item normalization, YAML IO, GitHub fetching, health classification, and validation.
+Environment-light TypeScript. Owns Zod schemas, config loading, Markdown parsing, item normalization, taxonomy types, YAML IO, GitHub metadata, health classification, validation, HTML-scrape enrichment, and rate-limit-aware HTTP helpers (`ghFetch`, `pLimit`).
 
-### `@grove/cli`
+### `@grove-dev/cli`
 
-CLI is a thin orchestration layer over core. Commands should be predictable and scriptable, with project files as the source of truth.
+Thin orchestration layer over core. Commands are predictable and scriptable; project files are the source of truth.
 
-### `@grove/astro`
+### `@grove-dev/astro`
 
-Astro provides reusable UI primitives for project repositories. The web output remains static and should be easy to customize in each project repo.
+Reusable Astro components and a `template/default/` directory that `init` copies into a new project. The web output is static and easy to customize per project.
 
 ## Data Flow
 
 ```txt
 sources/README.md
   -> grove import
-  -> data/items.yml
+  -> data/apps/<slug>.yml   (or data/items.yml)
   -> grove analyze
   -> data/health.yml
   -> data/decisions.yml + data/overrides.yml
+  -> grove build-data
+  -> data/generated/apps.{full,index}.json + src/data/config.ts
+  -> grove build-llms-full
+  -> public/llms.txt + public/llms-full.txt
   -> grove validate
-  -> grove build
-  -> static directory
+  -> grove build (astro build)
+  -> static site
 ```
 
 ## Health Philosophy
 
-Grove emits signals, not final judgments. A stale or inactive status should invite review rather than deletion. `decisions.yml` is the human curation layer that decides whether an item is highlighted, kept, hidden, removed, or preserved as historical.
+Grove emits signals, not final judgments. A stale or inactive status invites review rather than deletion. `decisions.yml` is the human curation layer that controls visibility: `highlight`, `keep`, `needs_review`, `hide`, `remove`, or `historical`.

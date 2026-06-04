@@ -13,7 +13,7 @@
     "build": "pnpm -r build",
     "check": "pnpm -r check",
     "test": "pnpm -r test",
-    "dev": "pnpm --filter @grove/cli dev"
+    "dev": "pnpm --filter @grove-dev/cli dev"
   },
   "devDependencies": {
     "@types/node": "^25.9.2",

@@ -1,5 +1,5 @@
 {
-  "name": "@grove/cli",
+  "name": "@grove-dev/cli",
   "version": "0.1.0",
   "type": "module",
   "description": "CLI for Grove project repos.",
@@ -20,8 +20,8 @@
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
-    "@grove/astro": "workspace:*",
-    "@grove/core": "workspace:*",
+    "@grove-dev/astro": "workspace:*",
+    "@grove-dev/core": "workspace:*",
     "commander": "^14.0.2",
     "tsx": "^4.21.0"
   }

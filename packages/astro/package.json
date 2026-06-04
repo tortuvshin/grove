@@ -1,5 +1,5 @@
 {
-  "name": "@grove/astro",
+  "name": "@grove-dev/astro",
   "version": "0.1.0",
   "type": "module",
   "description": "Astro UI primitives for Grove directories.",
@@ -32,7 +32,7 @@
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
-    "@grove/core": "workspace:*",
+    "@grove-dev/core": "workspace:*",
     "astro": "^6.4.4"
   }
 }

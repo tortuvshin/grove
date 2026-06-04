@@ -84,35 +84,40 @@ Definition of done: a populated project repo renders a usable directory.
 Verified: `examples/basic` and a fresh `init` project both build a working
 directory end-to-end (init → import → analyze → validate → build).
 
-## Milestone 5 - Human Curation Workflow (in progress)
+## Milestone 5 - Human Curation Workflow (done)
 
-Goal: `decisions.yml` controls final display while CLI flags review candidates.
+Goal: `decisions.yml` controls final display while the CLI flags review candidates.
 
 Tasks:
 
 - `decisions.yml` schema (highlight / keep / needs_review / hide / remove / historical)
 - visibility rules
-- review report
-- CLI `review` command basic version
+- `grove review` command
+- review report (`data/generated/review-report.json`)
 - methodology page content
 
-Definition of done: CLI flags stale items for review and humans make the final
-visibility call through `decisions.yml`.
+Definition of done: CLI flags stale items for review; humans make the final
+visibility call through `data/decisions.yml`.
 
-Known gap: `grove review` command is not yet implemented. Manual
-editing of `data/decisions.yml` is the current path.
+Verified: `grove review` writes `data/generated/review-report.json` with
+status, tier, stale reason, last commit, and stars per candidate.
 
-## Milestone 6 - Open Apps Alignment (not started)
+## Milestone 6 - Open Apps Alignment (done)
 
-Goal: Open Apps can migrate to, or at least become compatible with, the generic schema.
+Goal: a real project repo (the Open Source Apps dataset) can run on Grove's
+generic engine with no manual scripting.
 
 Tasks:
 
-- Audit Open Apps current schema
-- Map Open Apps data to generic item schema
-- Add health metadata
-- Add methodology page
-- Prepare migration notes
+- Audit Open Apps' schema (19 scripts, 4 taxonomies, 5 workflows)
+- Port schema, GitHub client, enrichment, parser to TypeScript in `@grove-dev/core`
+- Add `grove build-data`, `grove enrich`, `grove review`, `grove build-llms-full`
+- Verify end-to-end on real Open Apps data (85 apps, 16 categories, 82 contributors)
 
-Definition of done: Open Apps is ready to migrate, or at minimum becomes
-schema-compatible with the generic engine.
+Definition of done: the Open Source Apps dataset runs on Grove with the
+generic CLI flow.
+
+Verified: 85 apps imported as `data/apps/*.yml`, `grove build-data` produces
+`apps.full.json` + `apps.index.json`, `grove build` produces 90 static pages
+(index + about + contributors + submit + sitemap + llms.txt + 85 per-app pages),
+`grove dev` serves the directory on `http://localhost:4321`.

@@ -1,5 +1,5 @@
 {
-  "name": "@grove/core",
+  "name": "@grove-dev/core",
   "version": "0.1.0",
   "type": "module",
   "description": "Core schemas, importers, health analysis, and validation for Grove.",

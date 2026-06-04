@@ -17,7 +17,7 @@ importers:
 
   packages/astro:
     dependencies:
-      '@grove/core':
+      '@grove-dev/core':
         specifier: workspace:*
         version: link:../core
       astro:
@@ -26,10 +26,10 @@ importers:
 
   packages/cli:
     dependencies:
-      '@grove/astro':
+      '@grove-dev/astro':
         specifier: workspace:*
         version: link:../astro
-      '@grove/core':
+      '@grove-dev/core':
         specifier: workspace:*
         version: link:../core
       commander:
