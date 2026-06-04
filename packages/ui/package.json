@@ -1,0 +1,21 @@
+{
+  "name": "@grove-dev/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Framework-agnostic UI primitives (filters, sort, stats, scores, slug) for Grove.",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"No ui package tests yet\""
+  },
+  "dependencies": {
+    "@grove-dev/core": "workspace:*"
+  }
+}
