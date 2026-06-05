@@ -20,6 +20,9 @@ importers:
       '@grove-dev/core':
         specifier: workspace:*
         version: link:../core
+      '@grove-dev/ui':
+        specifier: workspace:*
+        version: link:../ui
       astro:
         specifier: ^6.4.4
         version: 6.4.4(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
@@ -50,6 +53,12 @@ importers:
       zod:
         specifier: ^4.4.3
         version: 4.4.3
+
+  packages/ui:
+    dependencies:
+      '@grove-dev/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
