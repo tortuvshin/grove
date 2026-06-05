@@ -1,0 +1,669 @@
+---
+import { siteConfig } from "../../data/config";
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import Container from "../../components/layout/Container.astro";
+import SmartLensTabs from "../../components/SmartLensTabs.astro";
+import RefinePanel from "../../components/RefinePanel.astro";
+import AppsIndexRow from "../../components/AppsIndexRow.astro";
+import AppsPagination from "../../components/AppsPagination.astro";
+import ExploreByCategory from "../../components/ExploreByCategory.astro";
+import ExploreByStack from "../../components/ExploreByStack.astro";
+
+import { apps } from "../../data/apps";
+import {
+  buildFacets,
+  filtersFromSearchParams,
+  searchParamsFromFilters,
+  filterApps,
+  activeFilterChips,
+  applySort,
+  paginate,
+  totalPages,
+  PAGE_SIZE,
+  effectiveSort,
+  effectivePage,
+  effectiveDensity,
+  SORT_OPTIONS,
+  type AppsFilters,
+} from "../../lib/apps-search";
+import { lensFromSearchParams } from "../../lib/lenses";
+import { categories } from "../../data/categories";
+import { stacks } from "../../data/stacks";
+import { stats } from "../../data/stats";
+
+// Parse URL → filters, then derive the effective (post-default) values.
+const initialFilters = filtersFromSearchParams(Astro.url.searchParams);
+const initialLens = lensFromSearchParams(Astro.url.searchParams);
+const facets = buildFacets(apps);
+const sort = effectiveSort(initialFilters);
+const page = effectivePage(initialFilters);
+const density = effectiveDensity(initialFilters);
+const initialChips = activeFilterChips(initialFilters);
+
+// Apply filter → sort → paginate server-side. URL is the source of
+// truth; this page is fully SSR. No client-side render loop.
+const filtered = filterApps(apps, initialFilters);
+const sorted = applySort(filtered, sort);
+const totalFiltered = sorted.length;
+const totalFilteredPages = totalPages(totalFiltered);
+const safePage = Math.min(page, totalFilteredPages);
+const pageApps = paginate(sorted, safePage);
+const initialChipsTotal = initialChips.length;
+
+const githubUrl = stats.originalRepo;
+
+// Build a "next page" / "prev page" href that preserves every other
+// filter param. Reused by the pagination component.
+function hrefForPage(target: number): string {
+  const next: AppsFilters = { ...initialFilters, page: target };
+  const sp = searchParamsFromFilters(next);
+  const qs = sp.toString();
+  return qs ? `/apps?${qs}` : "/apps";
+}
+
+function hrefForDensity(value: "comfortable" | "compact"): string {
+  const next: AppsFilters = { ...initialFilters, density: value, page: 1 };
+  const sp = searchParamsFromFilters(next);
+  const qs = sp.toString();
+  return qs ? `/apps?${qs}` : "/apps";
+}
+
+function hrefForClearAll(): string {
+  return "/apps";
+}
+
+// Human-readable summary line under the search.
+const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Recently updated";
+const filterSummary: string[] = [];
+if (initialFilters.q) filterSummary.push(`matching "${initialFilters.q}"`);
+if (initialFilters.stacks?.length) filterSummary.push(`stack: ${initialFilters.stacks.join(", ")}`);
+if (initialFilters.platforms?.length)
+  filterSummary.push(`platform: ${initialFilters.platforms.join(", ")}`);
+if (initialFilters.categories?.length)
+  filterSummary.push(`category: ${initialFilters.categories.join(", ")}`);
+if (initialFilters.licenses?.length)
+  filterSummary.push(`license: ${initialFilters.licenses.join(", ")}`);
+if (initialFilters.labels?.length) filterSummary.push(`label: ${initialFilters.labels.join(", ")}`);
+if (initialLens) filterSummary.push(`lens: ${initialLens}`);
+
+const title = "Browse open-source apps — ${siteConfig.name}";
+const description =
+  "Search and filter real open-source applications by platform, stack, category, license, and activity.";
+---
+
+<BaseLayout title={title} description={description}>
+      {/* ── Top: title + search + sticky toolbar ── */}
+      <section
+        class="border-b border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-950"
+      >
+        <Container>
+          <div class="py-8 sm:py-10">
+            <span
+              class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400"
+              >Apps</span
+            >
+            <h1
+              class="mt-1 m-0 text-[1.75rem] sm:text-[2rem] font-semibold tracking-[-0.02em] leading-[1.1] text-ink-900 dark:text-ink-100"
+            >
+              Browse open-source apps
+            </h1>
+            <p
+              class="mt-2 m-0 max-w-[64ch] text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400"
+            >
+              Search and filter real open-source applications by platform,
+              stack, category, license, and activity. Every entry is a real
+              codebase with hand-curated context.
+            </p>
+
+            {/* Sticky toolbar. Holds: search, results summary, sort,
+                density toggle. Once it sticks on scroll, the chips
+                layer + refine button follow along below. */}
+            <div
+              id="apps-toolbar"
+              class="sticky top-[57px] z-30 mt-6 -mx-5 border-y border-ink-200 bg-white/95 px-5 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-ink-800 dark:bg-ink-950/95 dark:supports-[backdrop-filter]:bg-ink-950/80 sm:-mx-7 sm:px-7"
+            >
+              <form
+                id="search-form"
+                class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center"
+                role="search"
+              >
+                <label class="relative flex-1">
+                  <span class="sr-only">Search apps by name, description, owner, category</span>
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="16"
+                    height="16"
+                    aria-hidden="true"
+                    class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
+                    fill="currentColor"
+                  >
+                    <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z" />
+                  </svg>
+                  <input
+                    id="search-input"
+                    type="search"
+                    name="q"
+                    value={initialFilters.q ?? ""}
+                    placeholder="Search by app name, category, stack, platform, or license..."
+                    autocomplete="off"
+                    class="w-full rounded-md border border-ink-200 bg-white py-2 pl-9 pr-3 text-[0.875rem] text-ink-900 placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100 dark:placeholder:text-ink-500 dark:focus:border-ink-100 dark:focus:ring-ink-100/15"
+                  />
+                </label>
+
+                {/* Sort dropdown */}
+                <label class="relative">
+                  <span class="sr-only">Sort apps</span>
+                  <select
+                    id="sort-select"
+                    class="h-9 cursor-pointer appearance-none rounded-md border border-ink-200 bg-white py-1.5 pl-3 pr-8 text-[0.8125rem] font-medium text-ink-700 transition-colors hover:border-ink-300 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:focus:border-ink-100 dark:focus:ring-ink-100/15"
+                  >
+                    {SORT_OPTIONS.map((o) => (
+                      <option value={o.value} selected={o.value === sort}>{o.label}</option>
+                    ))}
+                  </select>
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="11"
+                    height="11"
+                    aria-hidden="true"
+                    class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400"
+                    fill="currentColor"
+                  >
+                    <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"/>
+                  </svg>
+                </label>
+
+                {/* Density toggle: comfortable / compact */}
+                <div
+                  class="inline-flex h-9 items-center rounded-md border border-ink-200 bg-white p-0.5 dark:border-ink-800 dark:bg-ink-950"
+                  role="group"
+                  aria-label="List density"
+                >
+                  <button
+                    type="button"
+                    data-density-toggle="comfortable"
+                    data-href={hrefForDensity("comfortable")}
+                    class={`inline-flex h-7 items-center rounded-[5px] px-2 text-[0.75rem] font-medium transition-colors ${
+                      density === "comfortable"
+                        ? "bg-ink-900 text-white dark:bg-ink-100 dark:text-ink-900"
+                        : "text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+                    }`}
+                    aria-pressed={density === "comfortable" ? "true" : "false"}
+                  >
+                    Comfortable
+                  </button>
+                  <button
+                    type="button"
+                    data-density-toggle="compact"
+                    data-href={hrefForDensity("compact")}
+                    class={`inline-flex h-7 items-center rounded-[5px] px-2 text-[0.75rem] font-medium transition-colors ${
+                      density === "compact"
+                        ? "bg-ink-900 text-white dark:bg-ink-100 dark:text-ink-900"
+                        : "text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+                    }`}
+                    aria-pressed={density === "compact" ? "true" : "false"}
+                  >
+                    Compact
+                  </button>
+                </div>
+              </form>
+
+              {/* Result count summary + active filter chips row. */}
+              <div
+                id="result-summary"
+                class="flex flex-col gap-2 border-t border-ink-100 py-2.5 text-2xs dark:border-ink-900 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <p class="m-0 text-ink-500 dark:text-ink-400">
+                  <span
+                    id="apps-results-count"
+                    class="font-mono text-ink-900 dark:text-ink-100"
+                    data-total={totalFiltered}
+                    data-page-count={pageApps.length}
+                    data-page-size={PAGE_SIZE}
+                    data-page={safePage}
+                    data-pages={totalFilteredPages}
+                  >
+                    {totalFiltered} {totalFiltered === 1 ? "app" : "apps"} found
+                  </span>
+                  {filterSummary.length > 0 && (
+                    <span id="apps-filters-summary" class="text-ink-400 dark:text-ink-500">
+                      {" · "}filtered by {filterSummary.join(" · ")}
+                    </span>
+                  )}
+                  <span class="text-ink-400 dark:text-ink-500">
+                    {" · "}sorted by {sortLabel}
+                  </span>
+                  {totalFilteredPages > 1 && (
+                    <span class="text-ink-400 dark:text-ink-500">
+                      {" · "}page {safePage} of {totalFilteredPages}
+                    </span>
+                  )}
+                </p>
+
+                {initialChipsTotal > 0 && (
+                  <div
+                    id="apps-active-chips"
+                    class="flex flex-wrap items-center gap-1.5"
+                    aria-label="Active filters"
+                  >
+                    {initialChips.map((chip) => (
+                      <button
+                        type="button"
+                        class="apps-active-chip group inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors hover:border-ink-300 hover:bg-ink-50 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:hover:bg-ink-900/60"
+                        data-remove-key={chip.key}
+                        data-remove-value={chip.value}
+                        aria-label={`Remove filter ${chip.label}`}
+                      >
+                        <span>{chip.label}</span>
+                        <span aria-hidden="true" class="text-ink-400 group-hover:text-ink-700 dark:text-ink-500 dark:group-hover:text-ink-200">×</span>
+                      </button>
+                    ))}
+                    <a
+                      id="apps-clear-all"
+                      href={hrefForClearAll()}
+                      class="text-2xs text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+                    >
+                      Clear all
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Lenses + Filter bar — single toolbar that combines
+            "what lens am I in" (curated views) with "what fields
+            are filtered" (drop-down filters). Stays compact. ── */}
+      <section class="border-b border-ink-200 dark:border-ink-800">
+        <Container>
+          <div class="flex flex-col gap-3 py-4">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span
+                class="text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+                >Lenses</span
+              >
+              <SmartLensTabs currentParams={Astro.url.searchParams} />
+            </div>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span
+                class="text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+                >Filters</span
+              >
+              <RefinePanel
+                facets={facets}
+                initial={initialFilters}
+              />
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Results ── */}
+      <section class="border-b border-ink-200 dark:border-ink-800">
+        <Container>
+          <div class="py-8 sm:py-10">
+            {pageApps.length === 0 ? (
+              <div
+                id="empty-state"
+                class="flex flex-col items-center gap-2 py-16 text-center"
+              >
+                <p class="m-0 text-[0.9375rem] font-medium text-ink-700 dark:text-ink-200">
+                  No apps match these filters.
+                </p>
+                <p class="m-0 max-w-[40ch] text-2xs text-ink-500 dark:text-ink-400">
+                  Try removing a filter, clearing the search, or picking a
+                  different lens.
+                </p>
+                <a href={hrefForClearAll()} class="mt-3 btn-outline">Clear all filters</a>
+              </div>
+            ) : (
+              <div
+                id="apps-results-list"
+                data-density={density}
+                class={`flex flex-col gap-3 ${density === "compact" ? "apps-density-compact" : ""}`}
+              >
+                {pageApps.map((app) => <AppsIndexRow app={app} />)}
+              </div>
+            )}
+
+            <AppsPagination
+              current={safePage}
+              total={totalFilteredPages}
+              hrefFor={hrefForPage}
+            />
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Explore: navigation (not filters) ── */}
+      <ExploreByCategory categories={categories} />
+      <ExploreByStack stacks={stacks} />
+
+      {/* ── Submit CTA ── */}
+      <section class="border-t border-ink-200 dark:border-ink-800">
+        <Container>
+          <div class="flex flex-col items-center gap-3 py-12 text-center">
+            <h2
+              class="m-0 text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+            >
+              Know a real open-source app that belongs here?
+            </h2>
+            <p
+              class="m-0 max-w-[48ch] text-[0.875rem] text-ink-500 dark:text-ink-400"
+            >
+              Open a pull request with a YAML file. We review every
+              submission against the bar — no marketing, no tutorials.
+            </p>
+            <a
+              href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary"
+              >Submit via GitHub</a
+            >
+          </div>
+        </Container>
+      </section>
+    {/* Initial state for the search form is server-rendered; this script
+        only handles debounced search updates + chip removal so the URL
+        stays canonical and SSR matches client expectations. */}
+    <script>
+      import {
+        filtersFromSearchParams,
+        searchParamsFromFilters,
+        type AppsFilters,
+      } from "../../lib/apps-search";
+
+      function readFilters(): AppsFilters {
+        return filtersFromSearchParams(new URLSearchParams(location.search));
+      }
+      function writeFilters(f: AppsFilters) {
+        const sp = searchParamsFromFilters(f);
+        const qs = sp.toString();
+        const url = qs ? `?${qs}` : location.pathname;
+        location.assign(url);
+      }
+
+      // ── Client-side row filter ─────────────────────────────────────
+      //
+      // The page is statically rendered (one HTML for every URL), so
+      // `?stack=flutter` etc. don't re-render the result list on the
+      // server. The RefinePanel calls `window.__applyFilters({...})` to
+      // push a new filter state; we hide non-matching rows, update the
+      // active-chip strip, the summary line, and the trigger labels
+      // — all without a full page reload.
+      //
+      // Each `.apps-row` already carries `data-stack`, `data-stacks`,
+      // `data-category`, `data-platforms`, `data-labels`, `data-status`,
+      // `data-license`, `data-stars`, `data-updated`, `data-name`,
+      // `data-q` (description, lowercased) for matching.
+
+      type RowEl = HTMLElement & {
+        dataset: {
+          stack?: string;
+          stacks?: string;
+          category?: string;
+          platforms?: string;
+          labels?: string;
+          status?: string;
+          license?: string;
+          stars?: string;
+          updated?: string;
+          name?: string;
+          q?: string;
+        };
+      };
+
+      const rows = Array.from(
+        document.querySelectorAll<RowEl>(".apps-row[data-slug]"),
+      );
+      const resultsList = document.getElementById("apps-results-list");
+      const emptyState = document.getElementById("apps-empty-state");
+      const resultsCount = document.getElementById("apps-results-count");
+      const filtersSummary = document.getElementById("apps-filters-summary");
+      const sortSelect = document.getElementById("sort-select") as HTMLSelectElement | null;
+      const searchInput = document.getElementById("search-input") as HTMLInputElement | null;
+      const activeChipsEl = document.getElementById("apps-active-chips");
+      const clearAllBtn = document.getElementById("apps-clear-all") as HTMLAnchorElement | null;
+      const triggerLabels = new Map<string, HTMLElement>();
+
+      document.querySelectorAll<HTMLElement>(".apps-filter").forEach((g) => {
+        const key = g.dataset.filterGroupKey!;
+        const label = g.querySelector<HTMLElement>(".apps-filter-trigger > span:first-child");
+        if (label) triggerLabels.set(key, label);
+      });
+
+      function pillFor(key: string, value: string): HTMLElement {
+        const el = document.createElement("button");
+        el.type = "button";
+        el.className =
+          "apps-active-chip inline-flex items-center gap-1 rounded-full border border-ink-200 bg-white px-2.5 py-1 text-2xs text-ink-700 transition-colors hover:border-ink-300 dark:border-ink-700 dark:bg-ink-900/40 dark:text-ink-200";
+        el.dataset.removeKey = key;
+        el.dataset.removeValue = value;
+        const v = document.createElement("span");
+        v.textContent = value;
+        el.appendChild(v);
+        const x = document.createElement("span");
+        x.setAttribute("aria-hidden", "true");
+        x.textContent = "×";
+        el.appendChild(x);
+        return el;
+      }
+
+      function renderChips(f: AppsFilters) {
+        if (!activeChipsEl) return;
+        activeChipsEl.innerHTML = "";
+        const chips: HTMLElement[] = [];
+        if (f.q) {
+          const e = pillFor("q", f.q);
+          const v = e.querySelector("span")!;
+          v.textContent = `“${f.q}”`;
+          chips.push(e);
+        }
+        for (const v of f.stacks ?? []) chips.push(pillFor("stacks", v));
+        for (const v of f.platforms ?? []) chips.push(pillFor("platforms", v));
+        for (const v of f.categories ?? []) chips.push(pillFor("categories", v));
+        for (const v of f.labels ?? []) chips.push(pillFor("labels", v));
+        for (const v of f.licenses ?? []) chips.push(pillFor("licenses", v));
+        for (const e of chips) activeChipsEl.appendChild(e);
+        if (clearAllBtn) {
+          if (chips.length > 0) {
+            clearAllBtn.classList.remove("hidden");
+          } else {
+            clearAllBtn.classList.add("hidden");
+          }
+        }
+      }
+
+      function triggerLabelText(key: string, f: AppsFilters): string {
+        const map: Record<string, string> = {
+          stacks: "Stack",
+          platforms: "Platform",
+          categories: "Category",
+          licenses: "License",
+        };
+        const base = map[key] ?? key;
+        const arr = (f as unknown as Record<string, string[] | undefined>)[key] ?? [];
+        if (arr.length === 0) return `${base}: Any`;
+        if (arr.length === 1) return `${base}: ${arr[0]}`;
+        return `${base}: ${arr.length} selected`;
+      }
+
+      function applyRowFilter(f: AppsFilters): number {
+        const q = f.q?.trim().toLowerCase() ?? "";
+        const stacks = new Set(f.stacks ?? []);
+        const platforms = new Set(f.platforms ?? []);
+        const categories = new Set(f.categories ?? []);
+        const labels = new Set(f.labels ?? []);
+        const licenses = new Set(f.licenses ?? []);
+        const statuses = new Set(f.statuses ?? []);
+
+        let visible = 0;
+        for (const row of rows) {
+          const d = row.dataset;
+          const rowStacks = (d.stacks || "").split("|").filter(Boolean);
+          const rowPlatforms = (d.platforms || "").split("|").filter(Boolean);
+          const rowLabels = (d.labels || "").split("|").filter(Boolean);
+
+          let show = true;
+          if (q) {
+            // Match the server-side `filterApps` haystack: name, owner,
+            // description, category. Without `owner` here, live search
+            // would miss apps a user is searching for by owner name.
+            const hay = `${d.name ?? ""} ${d.owner ?? ""} ${d.q ?? ""} ${d.category ?? ""}`;
+            if (!hay.includes(q)) show = false;
+          }
+          if (show && stacks.size > 0) {
+            if (![d.stack ?? "", ...rowStacks].some((s) => stacks.has(s))) show = false;
+          }
+          if (show && platforms.size > 0) {
+            if (!rowPlatforms.some((p) => platforms.has(p))) show = false;
+          }
+          if (show && categories.size > 0) {
+            if (!categories.has(d.category ?? "")) show = false;
+          }
+          if (show && labels.size > 0) {
+            if (!rowLabels.some((l) => labels.has(l))) show = false;
+          }
+          if (show && licenses.size > 0) {
+            if (!d.license || !licenses.has(d.license)) show = false;
+          }
+          if (show && statuses.size > 0) {
+            if (!d.status || !statuses.has(d.status)) show = false;
+          }
+          row.hidden = !show;
+          if (show) visible++;
+        }
+        if (resultsList) resultsList.hidden = visible === 0 && rows.length > 0;
+        if (emptyState) emptyState.hidden = visible !== 0;
+        if (resultsCount) {
+          const total = rows.length;
+          resultsCount.textContent = `${visible} of ${total}`;
+        }
+        return visible;
+      }
+
+      function renderSummary(f: AppsFilters) {
+        if (!filtersSummary) return;
+        const parts: string[] = [];
+        if (f.q) parts.push(`matching “${f.q}”`);
+        if (f.stacks?.length) parts.push(`stack: ${f.stacks.join(", ")}`);
+        if (f.platforms?.length) parts.push(`platform: ${f.platforms.join(", ")}`);
+        if (f.categories?.length) parts.push(`category: ${f.categories.join(", ")}`);
+        if (f.licenses?.length) parts.push(`license: ${f.licenses.join(", ")}`);
+        if (f.labels?.length) parts.push(`label: ${f.labels.join(", ")}`);
+        filtersSummary.textContent = parts.length ? parts.join(" · ") : "";
+      }
+
+      function applyAll(f: AppsFilters) {
+        applyRowFilter(f);
+        renderChips(f);
+        renderSummary(f);
+        for (const [key, el] of triggerLabels) {
+          el.textContent = triggerLabelText(key, f);
+        }
+        if (searchInput && (searchInput.value ?? "") !== (f.q ?? "")) {
+          searchInput.value = f.q ?? "";
+        }
+        if (sortSelect && f.sort && sortSelect.value !== f.sort) {
+          sortSelect.value = f.sort;
+        }
+      }
+
+      // Initial render from URL.
+      applyAll(readFilters());
+
+      // Hook called by RefinePanel: patch the filter state, push the
+      // new URL, re-filter rows.
+      (window as unknown as { __applyFilters: (p: Record<string, string[] | null>) => void }).__applyFilters =
+        (patch) => {
+          const f = readFilters();
+          for (const [key, val] of Object.entries(patch)) {
+            if (val === null) {
+              (f as unknown as Record<string, unknown>)[key] = undefined;
+            } else {
+              (f as unknown as Record<string, unknown>)[key] = val;
+            }
+          }
+          f.page = 1;
+          const sp = searchParamsFromFilters(f);
+          const qs = sp.toString();
+          const url = qs ? `?${qs}` : location.pathname;
+          history.pushState({ filters: f }, "", url);
+          applyAll(f);
+        };
+
+      // Sort dropdown: navigate to new URL (server-side render).
+      sortSelect?.addEventListener("change", () => {
+        const f = readFilters();
+        f.sort = (sortSelect.value as AppsFilters["sort"]) || undefined;
+        f.page = 1;
+        writeFilters(f);
+      });
+
+      // Active chip removal (delegated) — also works on chips rendered
+      // by the client-side filter above.
+      document.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const removeBtn = target.closest<HTMLElement>(".apps-active-chip");
+        if (removeBtn) {
+          e.preventDefault();
+          const key = removeBtn.dataset.removeKey as keyof AppsFilters;
+          (window as unknown as { __applyFilters?: (p: Record<string, string[] | null>) => void }).__applyFilters?.({
+            [key]: null,
+          });
+          return;
+        }
+        // Density toggle: behave like a real <button> — anchor was a
+        // misuse of `aria-pressed` (which belongs on buttons). Now
+        // we navigate to the URL on click instead of using <a href>.
+        const densityBtn = target.closest<HTMLButtonElement>("[data-density-toggle]");
+        if (densityBtn) {
+          const href = densityBtn.dataset.href;
+          if (href) location.assign(href);
+        }
+      });
+
+      // Search input: debounced client-side patch (no reload).
+      if (searchInput) {
+        let timer: number | undefined;
+        searchInput.addEventListener("input", () => {
+          if (timer) window.clearTimeout(timer);
+          timer = window.setTimeout(() => {
+            (window as unknown as { __applyFilters?: (p: Record<string, string[] | null>) => void }).__applyFilters?.({
+              q: searchInput.value.trim() ? [searchInput.value.trim()] : null,
+            });
+          }, 220);
+        });
+        document.getElementById("search-form")?.addEventListener("submit", (e) => {
+          e.preventDefault();
+          (window as unknown as { __applyFilters?: (p: Record<string, string[] | null>) => void }).__applyFilters?.({
+            q: searchInput.value.trim() ? [searchInput.value.trim()] : null,
+          });
+        });
+      }
+
+      // Back/forward: re-apply the filter from the new URL.
+      window.addEventListener("popstate", () => {
+        applyAll(readFilters());
+      });
+    </script>
+
+    <style>
+      /* Compact density: hide description + chips, keep header /
+         metadata / actions. Toggle is a single class on the parent
+         container, so we can flip density without re-rendering rows. */
+      .apps-density-compact :global(.apps-row) {
+        padding: 0.625rem 0.875rem;
+        gap: 0.5rem;
+      }
+      .apps-density-compact :global(.apps-row-desc) {
+        display: none;
+      }
+      .apps-density-compact :global(.apps-row-chips) {
+        display: none;
+      }
+    </style>
+</BaseLayout>

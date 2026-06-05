@@ -1,0 +1,120 @@
+---
+import { siteConfig } from "../../data/config";
+// SPDX-License-Identifier: MIT
+
+/**
+ * Per-page SEO: <title>, description, canonical, Open Graph, Twitter Card,
+ * and JSON-LD structured data. Designed to be used inside <head> by the
+ * BaseLayout. Pages pass the rich props they care about; everything else
+ * has a sensible default derived from the site config and the Astro URL.
+ *
+ * Renders:
+ *   - <title>, meta description, canonical link
+ *   - Open Graph (og:*) for Facebook, LinkedIn, Discord, Slack, etc.
+ *   - Twitter Card (twitter:*) for X / Twitter
+ *   - JSON-LD WebSite + Organization on every page
+ *   - JSON-LD SoftwareSourceCode (or custom) when `jsonLd` is provided
+ *     (e.g. on /apps/[slug] for the per-app structured data)
+ *
+ * Noindex is opt-in via the `noindex` prop. By default everything is
+ * indexable; the only noindex target today is the thin /submit wrapper.
+ */
+
+interface Props {
+  title: string;
+  description: string;
+  /** Open Graph / Twitter image. Default: /og-image.svg. Should be absolute or root-relative. */
+  image?: string;
+  /** og:type. Default: "website". Use "article" for blog posts / changelog. */
+  type?: "website" | "article" | "profile";
+  /** Set true to add noindex,nofollow. */
+  noindex?: boolean;
+  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on app pages. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  image = "/og-image.svg",
+  type = "website",
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const site = Astro.site ?? new URL("https://open-apps.dev");
+const canonical = new URL(Astro.url.pathname, site).toString();
+const ogImage = new URL(image, site).toString();
+
+// Truncate description for OG/Twitter where longer is worse (160–200 chars).
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1).trimEnd() + "\u2026";
+}
+const shortDescription = truncate(description, 200);
+
+// WebSite + Organization JSON-LD. These are site-wide identity signals
+// that should appear on every page (Google uses them for site links
+// and the knowledge panel).
+const websiteLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: `${siteConfig.name}`,
+  description:
+    "A curated, self-refreshing directory of real open-source application codebases.",
+  url: site.toString().replace(/\/$/, ""),
+  inLanguage: "en",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${site.toString().replace(/\/$/, "")}/apps?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const organizationLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: `${siteConfig.name}`,
+  url: site.toString().replace(/\/$/, ""),
+  logo: new URL("/og-image.svg", site).toString(),
+  sameAs: ["https://github.com/tortuvshin/open-apps"],
+};
+---
+
+<!-- Primary meta -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={shortDescription} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="{siteConfig.name} — a directory of real open-source apps" />
+<meta property="og:site_name" content="{siteConfig.name}" />
+<meta property="og:locale" content="en" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={shortDescription} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content="{siteConfig.name} — a directory of real open-source apps" />
+
+<!-- JSON-LD: site-wide identity -->
+<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(organizationLd)} />
+
+<!-- JSON-LD: per-page (SoftwareSourceCode for /apps/[slug], etc.) -->
+{jsonLd && (
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify(Array.isArray(jsonLd) ? jsonLd : [jsonLd])}
+  />
+)}

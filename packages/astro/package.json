@@ -2,37 +2,33 @@
   "name": "@grove-dev/astro",
   "version": "0.1.0",
   "type": "module",
-  "description": "Astro UI primitives for Grove directories.",
+  "description": "Astro UI primitives for Grove directories. Templates live in templates/ and are copied by `grove new`.",
   "license": "MIT",
   "files": [
     "dist",
     "src",
-    "template"
+    "templates"
   ],
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./styles.css": "./src/styles.css",
-    "./components/CategoryGrid.astro": "./src/components/CategoryGrid.astro",
-    "./components/ActiveFilterChips.astro": "./src/components/ActiveFilterChips.astro",
-    "./components/DirectoryFilters.astro": "./src/components/DirectoryFilters.astro",
-    "./components/DirectoryHero.astro": "./src/components/DirectoryHero.astro",
-    "./components/LensTabs.astro": "./src/components/LensTabs.astro",
-    "./components/MethodologyPanel.astro": "./src/components/MethodologyPanel.astro",
-    "./components/Pagination.astro": "./src/components/Pagination.astro",
-    "./components/ProjectDetail.astro": "./src/components/ProjectDetail.astro",
-    "./components/ScoreBars.astro": "./src/components/ScoreBars.astro",
-    "./components/SubmitDraft.astro": "./src/components/SubmitDraft.astro",
-    "./components/ItemCard.astro": "./src/components/ItemCard.astro",
-    "./components/HealthBadge.astro": "./src/components/HealthBadge.astro",
-    "./layouts/BaseLayout.astro": "./src/layouts/BaseLayout.astro"
+    "./components/*": "./src/components/*.astro",
+    "./layouts/*": "./src/layouts/*.astro"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "check": "tsc -p tsconfig.json --noEmit",
+    "build": "astro build",
+    "check": "astro check",
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
     "@grove-dev/core": "workspace:*",
+    "@grove-dev/ui": "workspace:*",
     "astro": "^6.4.4"
+  },
+  "peerDependencies": {
+    "astro": "^6.0.0"
   }
 }

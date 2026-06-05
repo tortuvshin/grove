@@ -1,0 +1,35 @@
+{
+  "name": "grove-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A static, health-aware developer directory powered by Grove.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate:data": "grove validate",
+    "build:data": "grove build-data",
+    "build:llms-full": "grove build-llms-full",
+    "build": "pnpm run build:data && pnpm run build:llms-full && astro build",
+    "dev": "pnpm run build:data && astro dev",
+    "start": "astro dev",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "refresh:activity": "grove analyze",
+    "enrich:github": "grove enrich"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@grove-dev/astro": "workspace:*",
+    "@grove-dev/cli": "workspace:*",
+    "@grove-dev/core": "workspace:*",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^6.4.4",
+    "tailwindcss": "^4.3.0",
+    "yaml": "^2.9.0"
+  }
+}

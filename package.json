@@ -16,6 +16,7 @@
     "dev": "pnpm --filter @grove-dev/cli dev"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@types/node": "^25.9.2",
     "typescript": "^6.0.3"
   }

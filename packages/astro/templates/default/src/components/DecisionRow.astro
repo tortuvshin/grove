@@ -1,0 +1,219 @@
+---
+import type { OpenSourceApp } from "../data/types";
+import Icon from "./icons/Icon.astro";
+import {
+  getOwnerAndRepoFromRepoUrl,
+  getOwnerAvatarUrl,
+} from "../lib/repo";
+import { formatStars } from "../lib/format";
+
+interface Props {
+  app: OpenSourceApp;
+}
+
+const { app } = Astro.props;
+
+const { owner, repo } = getOwnerAndRepoFromRepoUrl(app.repoUrl);
+const avatar = app.logoUrl ?? getOwnerAvatarUrl(owner, 80);
+
+const label =
+  app.labels?.find((l) => l === "new" || l === "hot" || l === "mature") ??
+  app.labels?.[0];
+
+const allStacks = [app.stack, ...(app.stacks ?? [])].filter(Boolean);
+const visibleStacks = allStacks.slice(0, 5);
+const stackOverflow = allStacks.length - visibleStacks.length;
+
+const visiblePlatforms = app.platforms.slice(0, 5);
+const platformOverflow = app.platforms.length - visiblePlatforms.length;
+
+const detailHref = `/apps/${app.slug}`;
+
+const isCurated = !!app.curation;
+
+const projectTypeLabel = (() => {
+  switch (app.projectType) {
+    case "real-app": return "Real app";
+    case "production": return "Production";
+    case "reference": return "Reference";
+    case "demo": return "Demo";
+    case "template": return "Template";
+    default: return null;
+  }
+})();
+
+const starsLabel = formatStars(app.stars);
+---
+
+<article
+  class="decision-row group relative flex flex-col gap-3 rounded-lg border border-ink-200 bg-white p-4 transition-colors hover:border-ink-300 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_-2px_rgba(0,0,0,0.06)] dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-700 dark:hover:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_4px_12px_-2px_rgba(0,0,0,0.3)]"
+  data-slug={app.slug}
+>
+  {/* Avatar + name + badges */}
+  <header class="flex items-start gap-3">
+    <a
+      href={detailHref}
+      class="relative z-10 flex shrink-0"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      {avatar ? (
+        <img
+          src={avatar}
+          alt={`${app.name} avatar`}
+          width="44"
+          height="44"
+          loading="lazy"
+          decoding="async"
+          class="h-11 w-11 rounded-md border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900"
+        />
+      ) : (
+        <span
+          aria-hidden="true"
+          class="flex h-11 w-11 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-sm font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300"
+        >
+          {app.name.slice(0, 2).toUpperCase()}
+        </span>
+      )}
+    </a>
+
+    <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div class="flex flex-wrap items-baseline gap-x-2">
+        <h3 class="m-0 text-[1rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          <a
+            href={detailHref}
+            class="relative z-10 text-inherit no-underline hover:underline"
+          >
+            {app.name}
+          </a>
+        </h3>
+        {projectTypeLabel && (
+          <span class="inline-flex items-center rounded border border-ink-200 bg-ink-50 px-1.5 py-0 text-[10px] font-medium uppercase tracking-wider text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">
+            {projectTypeLabel}
+          </span>
+        )}
+        {label && (
+          <span
+            class={`inline-flex items-center rounded border px-1.5 py-0 text-[10px] font-medium uppercase tracking-wider ${
+              label === "new"
+                ? "border-emerald-300/60 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300"
+                : label === "hot"
+                  ? "border-orange-300/60 bg-orange-50 text-orange-800 dark:border-orange-800/60 dark:bg-orange-950/40 dark:text-orange-300"
+                  : "border-blue-300/60 bg-blue-50 text-blue-800 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300"
+            }`}
+          >
+            {label}
+          </span>
+        )}
+        {isCurated && !app.curation?.reviewed && (
+          <span class="inline-flex items-center gap-1 rounded border border-amber-300/60 bg-amber-50 px-1.5 py-0 text-[10px] font-medium text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300">
+            <svg viewBox="0 0 16 16" width="9" height="9" aria-hidden="true" fill="currentColor">
+              <path d="M8 1.5a.75.75 0 0 1 .65.376l5.7 9.788A.75.75 0 0 1 13.7 12.75H2.3a.75.75 0 0 1-.65-1.086l5.7-9.788A.75.75 0 0 1 8 1.5ZM8 6a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 6Zm0 6.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"/>
+            </svg>
+            Auto-curated · Needs review
+          </span>
+        )}
+        {isCurated && app.curation?.reviewed && (
+          <span class="inline-flex items-center gap-1 rounded border border-emerald-300/60 bg-emerald-50 px-1.5 py-0 text-[10px] font-medium text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <svg viewBox="0 0 16 16" width="9" height="9" aria-hidden="true" fill="currentColor">
+              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+            </svg>
+            Curator reviewed
+          </span>
+        )}
+      </div>
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-ink-500 dark:text-ink-400">
+        {owner && (
+          <a
+            href={app.repoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="relative z-10 font-mono hover:text-ink-900 dark:hover:text-ink-100"
+          >
+            <span class="text-ink-400 dark:text-ink-500">@</span>{owner}
+            {repo && <span class="text-ink-400 dark:text-ink-500">/{repo}</span>}
+          </a>
+        )}
+        <span class="text-ink-300 dark:text-ink-700">·</span>
+        <span>{app.category}</span>
+        {app.status && (
+          <>
+            <span class="text-ink-300 dark:text-ink-700">·</span>
+            <span class="capitalize">{app.status}</span>
+          </>
+        )}
+        {starsLabel && (
+          <>
+            <span class="text-ink-300 dark:text-ink-700">·</span>
+            <span class="inline-flex items-center gap-0.5 font-mono">
+              <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
+                <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+              </svg>
+              {starsLabel}
+            </span>
+          </>
+        )}
+      </div>
+    </div>
+
+    <a
+      href={detailHref}
+      class="relative z-10 hidden shrink-0 self-start text-2xs font-medium text-ink-500 hover:text-ink-900 sm:inline dark:text-ink-400 dark:hover:text-ink-100"
+    >
+      View details →
+    </a>
+  </header>
+
+  {/* One-line summary */}
+  <p class="m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-300">
+    {app.description}
+  </p>
+
+  {/* Metadata grid: stack, platforms, license — compact one-liner each */}
+  <dl class="grid grid-cols-1 gap-x-4 gap-y-1 text-2xs sm:grid-cols-3">
+    <div class="flex items-baseline gap-1.5">
+      <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stack</dt>
+      <dd class="flex flex-wrap items-center gap-1 text-ink-700 dark:text-ink-300">
+        {visibleStacks.map((s) => (
+          <span class="inline-flex items-center gap-0.5">
+            <Icon name={s} category="stack" size={10} class="h-2.5 w-2.5" />
+            <span>{s}</span>
+          </span>
+        ))}
+        {stackOverflow > 0 && <span class="text-ink-400 dark:text-ink-500">+{stackOverflow}</span>}
+      </dd>
+    </div>
+    <div class="flex items-baseline gap-1.5">
+      <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Platforms</dt>
+      <dd class="flex flex-wrap items-center gap-1 text-ink-700 dark:text-ink-300">
+        {visiblePlatforms.map((p) => (
+          <span class="inline-flex items-center gap-0.5">
+            <Icon name={p} category="platform" size={10} class="h-2.5 w-2.5" />
+            <span>{p}</span>
+          </span>
+        ))}
+        {platformOverflow > 0 && <span class="text-ink-400 dark:text-ink-500">+{platformOverflow}</span>}
+      </dd>
+    </div>
+    <div class="flex items-baseline gap-1.5">
+      <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">License</dt>
+      <dd class="font-mono text-ink-700 dark:text-ink-300">
+        {app.license ?? "—"}
+        {app.codebaseSize && (
+          <>
+            <span class="ml-2 text-ink-300 dark:text-ink-700">·</span>
+            <span class="ml-1 text-ink-500 dark:text-ink-400">{app.codebaseSize}</span>
+          </>
+        )}
+        {app.difficulty && (
+          <>
+            <span class="ml-2 text-ink-300 dark:text-ink-700">·</span>
+            <span class="ml-1 text-ink-500 dark:text-ink-400">{app.difficulty}</span>
+          </>
+        )}
+      </dd>
+    </div>
+  </dl>
+
+  {/* Scores row — kept off the list to avoid bloat. See detail page. */}
+</article>
