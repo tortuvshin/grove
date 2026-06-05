@@ -35,7 +35,9 @@ const { repoUrl = "" } = Astro.props;
 </section>
 
 <script>
-  const fields = {
+  type FormField = HTMLInputElement | HTMLTextAreaElement | HTMLElement | null;
+
+  const fields: Record<string, FormField> = {
     repoUrl: document.querySelector("#repo-url"),
     name: document.querySelector("#project-name"),
     slug: document.querySelector("#project-slug"),
@@ -49,54 +51,73 @@ const { repoUrl = "" } = Astro.props;
     copy: document.querySelector("#copy-yaml"),
   };
 
-  function slugify(value) {
+  function valueOf(name: string): string {
+    const el = fields[name];
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el.value;
+    return "";
+  }
+
+  function setText(name: string, text: string): void {
+    const el = fields[name];
+    if (el) el.textContent = text;
+  }
+
+  function slugify(value: string): string {
     return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   }
 
-  function parseRepo(value) {
+  function parseRepo(value: string): { owner: string; repo: string } | null {
     const match = String(value).match(/github\.com\/([^/]+)\/([^/?#]+)/);
     if (!match) return null;
     return { owner: match[1], repo: match[2].replace(/\.git$/, "") };
   }
 
-  function list(values, indent) {
-    return values.length ? values.map((value) => `${" ".repeat(indent)}- ${value}`).join("\n") : `${" ".repeat(indent)}[]`;
+  function list(values: string[], indent: number): string {
+    return values.length
+      ? values.map((v) => `${" ".repeat(indent)}- ${v}`).join("\n")
+      : `${" ".repeat(indent)}[]`;
   }
 
-  function quote(value) {
+  function quote(value: string): string {
     return `"${String(value ?? "").replace(/"/g, '\\"')}"`;
   }
 
-  function generate() {
-    const repo = parseRepo(fields.repoUrl?.value);
+  function generate(): void {
+    const repo = parseRepo(valueOf("repoUrl"));
     if (!repo) {
-      if (fields.preview) fields.preview.textContent = "Paste a valid GitHub repository URL.";
+      setText("preview", "Paste a valid GitHub repository URL.");
       return;
     }
-    const name = fields.name?.value || repo.repo;
-    const slug = fields.slug?.value || slugify(name);
-    const tags = String(fields.tags?.value ?? "").split(",").map((tag) => tag.trim()).filter(Boolean);
-    const bestFor = String(fields.bestFor?.value ?? "").split("\n").map((line) => line.trim()).filter(Boolean);
+    const name = valueOf("name") || repo.repo;
+    const slug = valueOf("slug") || slugify(name);
+    const tags = valueOf("tags")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const bestFor = valueOf("bestFor")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
     const yaml = [
       `id: ${slug}`,
       `name: ${quote(name)}`,
-      `description: ${quote(fields.description?.value || name)}`,
+      `description: ${quote(valueOf("description") || name)}`,
       "links:",
       `  github: https://github.com/${repo.owner}/${repo.repo}`,
       "source:",
       "  type: manual",
       "taxonomy:",
-      `  category: ${quote(fields.category?.value || "uncategorized")}`,
+      `  category: ${quote(valueOf("category") || "uncategorized")}`,
       "  tags:",
       list(tags, 4),
-      ...(fields.language?.value ? [`  language: ${quote(fields.language.value)}`] : []),
+      ...(valueOf("language") ? [`  language: ${quote(valueOf("language"))}`] : []),
       "curation:",
       "  bestFor:",
       list(bestFor, 4),
       "  whyListed: []",
       "  caveats: []",
     ].join("\n");
-    if (fields.preview) fields.preview.textContent = yaml;
+    setText("preview", yaml);
   }
 
   for (const input of Object.values(fields)) {
@@ -104,9 +125,13 @@ const { repoUrl = "" } = Astro.props;
       input.addEventListener("input", generate);
     }
   }
-  fields.copy?.addEventListener("click", async () => {
-    await navigator.clipboard.writeText(fields.preview?.textContent ?? "");
-    if (fields.status) fields.status.textContent = "Copied YAML draft.";
-  });
+  const copyBtn = fields.copy;
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const previewEl = fields.preview;
+      await navigator.clipboard.writeText(previewEl?.textContent ?? "");
+      setText("status", "Copied YAML draft.");
+    });
+  }
   generate();
 </script>

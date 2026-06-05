@@ -6,8 +6,7 @@
   "license": "MIT",
   "files": [
     "dist",
-    "src",
-    "templates"
+    "src"
   ],
   "exports": {
     ".": {
@@ -16,11 +15,13 @@
     },
     "./styles.css": "./src/styles.css",
     "./components/*": "./src/components/*.astro",
-    "./layouts/*": "./src/layouts/*.astro"
+    "./layouts/*": "./src/layouts/*.astro",
+    "./package.json": "./package.json",
+    "./templates/*": "./templates/*"
   },
   "scripts": {
-    "build": "astro build",
-    "check": "astro check",
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {

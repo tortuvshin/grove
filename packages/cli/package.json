@@ -2,7 +2,7 @@
   "name": "@grove-dev/cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "CLI for Grove project repos.",
+  "description": "CLI for Grove project repos. Orchestrates @grove-dev/core and copies framework templates from @grove-dev/<framework> packages.",
   "license": "MIT",
   "bin": {
     "grove": "./dist/index.js"
@@ -20,9 +20,11 @@
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
-    "@grove-dev/astro": "workspace:*",
     "@grove-dev/core": "workspace:*",
-    "commander": "^14.0.2",
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "@grove-dev/astro": "workspace:*",
     "tsx": "^4.21.0"
   }
 }

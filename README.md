@@ -1,149 +1,130 @@
 # Grove
 
-A CLI and static framework that turns awesome lists and curated GitHub repositories into living, health-aware developer directories.
+> **Grow useful community knowledge.**
+
+Grove is an open-source framework that helps communities collect, structure, maintain, and improve the projects, tools, resources, and knowledge they rely on.
 
 ```txt
-Awesome lists show links. Grove shows what is still useful.
+Grove is not built only for open-source app directories.
 ```
 
-Grove is not a replacement for awesome lists. It is a maintenance and web layer for them. You keep the simplicity of a Markdown list; Grove adds repository health, metadata enrichment, search, filters, SEO pages, taxonomy, and human curation workflows on top.
+It works for any community knowledge space — a local tech ecosystem, an AI resource library, a tools directory, a learning collection, a startup map. Each one is a **Grove space**: a living, browseable, contributor-friendly site backed by plain files and a static generator.
 
 ---
 
-## Install
+## Why Grove
 
-```bash
-pnpm add -g @grove-dev/cli   # or use it via pnpm dlx
-```
+Communities carry knowledge in many places: awesome lists on GitHub, READMEs, spreadsheets, internal docs, Notion pages, Slack threads. They all decay. Links rot, projects go stale, descriptions drift, contributions stop landing.
+
+Grove treats community knowledge as something to **grow, maintain, prune, and improve** — not as a static list to publish and forget.
+
+- **Collect** — import from Markdown lists, YAML, or hand-authored records.
+- **Structure** — categories, topics, tags, maintainers, organizations.
+- **Maintain** — optional signals (GitHub activity, releases, archive state) flag what needs review.
+- **Improve** — human curators make the final call via plain, reviewable data files.
+- **Prune** — visibility decisions (`highlight` / `keep` / `needs_review` / `hide` / `remove` / `historical`) keep the space healthy over years.
+
+Every artifact is a file. No database. No CMS. No admin dashboard. The whole space is forkable, diffable, and PR-friendly.
+
+---
+
+## Spaces built with Grove
+
+A few example spaces that show what Grove can do:
+
+- **Open Apps** — production-ready open-source applications.
+- **oss.dev.mn** — the Mongolian open-source ecosystem.
+- **tools.dev.mn** — developer tools, SDKs, and integrations.
+- **ai.dev.mn** — practical AI resources for builders.
+- **startups.dev.mn** — a map of the Mongolian tech ecosystem.
+
+Each space is its own repository, with its own data, branding, and community rules. Grove is the shared engine underneath.
+
+---
 
 ## Quick start
 
-In a fresh directory:
-
 ```bash
-grove init                        # scaffolds curated.config.ts, data/, .github/, etc.
+# Scaffold a new space (defaults to Astro)
+pnpm create grove my-space
+
+cd my-space
+pnpm install
+
+# Add resources
 grove import https://github.com/avelino/awesome-go
-grove analyze                    # fetches GitHub metadata, writes data/health.yml
-grove build-data                 # generates data/generated/apps.{full,index}.json
-grove review                     # lists cleanup candidates for human review
-grove validate                    # schema + reference checks
-grove build-llms-full             # public/llms.txt + llms-full.txt
-grove build                      # static site via Astro
-grove dev                        # http://localhost:4321
+
+# Refresh signals (optional — works without a GitHub token)
+grove analyze
+
+# Build the static site
+grove build
 ```
 
-The result is a searchable, filterable, SEO-friendly static directory with project health, maturity signals, taxonomy, and human curation decisions.
+`grove` scaffolds a `curated.config.ts`, a `data/` tree, GitHub Actions for refresh + deploy, and an Astro project. The site is fully static — easy to host on Vercel, Netlify, Cloudflare Pages, or GitHub Pages.
 
-## How it works
-
-A project repo has two things:
-
-1. A `curated.config.ts` — site name, tagline, and paths.
-2. A `data/` directory — projects (per-app YAML or a flat `items.yml`), GitHub health, decisions, taxonomy, and overrides.
-
-The CLI never deletes projects. It produces signals; humans make curation decisions through `data/decisions.yml`.
+---
 
 ## What you get
 
-- **Search and filter** by category, stack, language, platform, license, health, lens, label, and free text.
-- **Health signals** for every project: `active`, `mature`, `stale`, `inactive`, `archived`, `unknown`, `needs_review`, `historical`.
-- **Two curation layers**:
-  - `decisions.yml` controls visibility (`highlight` / `keep` / `needs_review` / `hide` / `remove` / `historical`).
-  - `overrides.yml` patches parsed items without re-running import.
-- **Token-free GitHub enrichment** (HTML scraping + shields.io fallback for license, language, topics, homepage).
-- **GitHub Activity** in monthly buckets via the API.
-- **LLM-friendly output**: `llms.txt` (sitewide index) and `llms-full.txt` (per-project detail).
-- **SEO**: per-project pages, sitemap, robots.txt, JSON-LD structured data.
-- **Light and dark theme** out of the box.
+- **File-based data** — every resource is a YAML record. No database, no admin UI.
+- **Search, filter, and topic pages** — out of the box, fully static, SEO-friendly.
+- **Contribution workflow** — submission via issue template, validated via pull request.
+- **Optional maintenance signals** — GitHub activity, archive state, latest release, license presence.
+- **LLM-friendly output** — `llms.txt` and `llms-full.txt` for AI assistants that need structured context.
+- **Static by default** — fast, cheap, forkable, archive-friendly.
+- **Easy to customize** — the engine is small; spaces fork the parts they want to change.
+
+---
 
 ## Repository layout
-
-This is the framework repo. It contains only the engine:
 
 ```txt
 grove/
 ├── packages/
-│   ├── core/      # Zod schemas, config loader, markdown importer, GitHub client, health classifier, validators, YAML IO, taxonomy types
-│   ├── cli/       # `init`, `import`, `analyze`, `validate`, `build-data`, `review`, `enrich`, `build-llms-full`, `build`, `preview`
-│   └── astro/     # Reusable Astro components, layouts, and a project template (`template/default/`)
+│   ├── core/       # Generic resource schema, config, importers, validators, optional GitHub signal sync
+│   ├── ui/         # Framework-agnostic UI primitives: filters, sort, scores, stats, slug
+│   ├── cli/        # `new`, `import`, `analyze`, `validate`, `build-data`, `sitemap`, `build`, `dev`
+│   └── astro/      # Astro adapter: components, layouts, tokens, theme. Includes a default template
+├── examples/       # Real Grove-powered spaces (oss-dev-mn, open-apps, ...)
 ├── docs/
 │   ├── ARCHITECTURE.md
-│   └── MILESTONES.md
-├── package.json   # private pnpm workspace
+│   ├── vision.md
+│   └── roadmap.md
+├── package.json    # private pnpm workspace
 └── README.md
 ```
 
-Each project repo you create lives in its own repository and contains only data + branding:
+Each space is its own repo and only contains data + branding:
 
 ```txt
-my-directory/
-├── curated.config.ts
+my-space/
+├── curated.config.ts          # name, tagline, paths
 ├── data/
-│   ├── apps/                 # one YAML per project (recommended)
-│   ├── taxonomy/             # stacks.yml, platforms.yml, categories.yml, distribution-channels.yml
-│   ├── generated/            # build output (gitignored)
-│   ├── items.yml             # alternative: flat list of items
-│   ├── health.yml
-│   ├── decisions.yml
-│   └── overrides.yml
-├── content/
-│   └── methodology.md
-├── public/                   # logo, OG image, custom assets
-├── .github/                  # workflows + issue templates (scaffolded by `init`)
-├── LICENSE                   # MIT (scaffolded by `init`)
-├── astro.config.mjs          # from `template/default/`
-├── package.json
-├── tailwind.config.mjs
-└── README.md
+│   ├── resources/             # one YAML per resource (recommended)
+│   ├── taxonomy/              # categories, topics, tags
+│   ├── generated/             # build output (gitignored)
+│   ├── health.yml             # optional: maintenance signals
+│   └── decisions.yml          # visibility decisions
+├── content/                   # methodology, about, guides
+├── public/                    # logo, OG image, custom assets
+├── .github/                   # workflows + issue templates
+└── astro.config.mjs           # framework wiring
 ```
 
-## Packages
+---
 
-- **`@grove-dev/core`** — Environment-light TypeScript. Owns Zod schemas, config loading, Markdown parsing, item normalization, taxonomy types, YAML IO, GitHub metadata, health classification, validation, HTML-scrape enrichment, and rate-limit-aware HTTP helpers.
-- **`@grove-dev/cli`** — Thin orchestration layer over core. All commands are predictable and scriptable. Project files are the source of truth.
-- **`@grove-dev/astro`** — Reusable Astro components (`ItemCard`, `HealthBadge`, `ScoreBars`, `DirectoryFilters`, `LensTabs`, `MethodologyPanel`, etc.) and a `template/default/` directory that `init` copies into a new project.
+## Architecture
 
-## CLI commands
+Three layers, each with a single responsibility:
 
-### V1 (core flow)
+1. **Grove Core** (`@grove-dev/core`) — generic, framework-free. Owns the resource schema, config loader, importers, validators, taxonomy types, optional GitHub signal sync, sitemap, llms.txt generation, and the build pipeline.
+2. **Grove UI** (`@grove-dev/ui`) — framework-agnostic UI primitives: filters, sort, stats, scores, slug helpers. Pure TypeScript, no Astro / React / Svelte.
+3. **Grove framework adapters** (`@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`) — thin wrappers that ship components, layouts, tokens, and a default template per framework. Each adapter's template contains only pages, layouts, static config, and `.github/`. No business logic.
 
-| Command | Purpose |
-|---|---|
-| `grove init [name]` | Create a file-based project wrapper (config, data dirs, taxonomy, workflows, issue templates, LICENSE). |
-| `grove import <source>` | Parse a Markdown awesome list (GitHub URL, raw URL, or local path) into `data/apps/*.yml`. |
-| `grove analyze [--limit N]` | Fetch GitHub metadata for each project, write `data/health.yml`. Use `--limit` for rate-limited demos. |
-| `grove validate` | Schema + reference checks (duplicate ids, missing descriptions, broken categories, unknown decisions). |
-| `grove build-data` | Compile `data/apps/*.yml` and `curated.config.ts` into `data/generated/apps.{full,index}.json` plus a typed `src/data/config.ts`. |
-| `grove build-llms-full` | Emit `public/llms.txt` (sitewide index) and `public/llms-full.txt` (per-project detail). |
-| `grove review` | List cleanup candidates from `data/health.yml` to `data/generated/review-report.json`. |
-| `grove build` / `grove preview` | Run the project's `astro build` / `astro preview` script. |
+Spaces are made by forking a framework template and editing it. Business logic stays in Core / UI, so theme changes never reach into the engine.
 
-### V1.1
-
-| Command | Purpose |
-|---|---|
-| `grove enrich [--limit N]` | Token-free HTML-scrape GitHub enrichment (license, language, topics, homepage). Re-runs are no-ops. |
-
-## Health philosophy
-
-Grove produces signals, not verdicts.
-
-| Status | Meaning |
-|---|---|
-| `active` | Pushed within ~6 months. |
-| `mature` | Active and well-adopted. |
-| `stale` | No commits in 6–18 months. |
-| `inactive` | No commits in 18+ months. |
-| `archived` | The repo is archived on GitHub. |
-| `unknown` | No GitHub metadata available. |
-| `needs_review` | Borderline — invites human review. |
-| `historical` | Kept on purpose for reference; the curator's call. |
-
-A project is never deleted by the CLI. Humans decide what to `highlight`, `keep`, `needs_review`, `hide`, `remove`, or preserve as `historical` in `data/decisions.yml`.
-
-## MVP boundaries
-
-V1 is static and file-based. Grove does not include a database, auth, CMS, admin dashboard, plugin system, AI classification layer, marketplace, or multi-tenant SaaS. If you need those, host a different layer on top of the generated `dist/`.
+---
 
 ## Develop the framework
 
@@ -153,6 +134,14 @@ pnpm -r build
 pnpm --filter @grove-dev/cli dev   # tsx src/index.ts --help
 ```
 
+To scaffold a new space inside the workspace for local development:
+
+```bash
+node packages/cli/dist/index.js new examples/my-space --framework astro --deploy github-pages
+```
+
+---
+
 ## License
 
-MIT — see `LICENSE` in the framework and every scaffolded project.
+MIT — see `LICENSE` in the framework and every scaffolded space.
