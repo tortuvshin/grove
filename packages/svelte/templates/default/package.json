@@ -1,0 +1,39 @@
+{
+  "name": "grove-svelte-default",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Grove-powered space built with the SvelteKit framework adapter.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate:data": "grove validate",
+    "build:data": "grove build-data",
+    "build:llms-full": "grove build-llms-full",
+    "build": "pnpm run build:data && pnpm run build:llms-full && vite build",
+    "dev": "pnpm run build:data && vite dev",
+    "preview": "vite preview",
+    "svelte-kit": "svelte-kit",
+    "refresh:activity": "grove analyze",
+    "enrich:github": "grove enrich"
+  },
+  "dependencies": {
+    "@grove-dev/core": "*",
+    "@grove-dev/svelte": "*",
+    "@grove-dev/ui": "*",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.4.0"
+  }
+}
