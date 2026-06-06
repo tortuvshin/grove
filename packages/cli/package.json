@@ -2,7 +2,7 @@
   "name": "@grove-dev/cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "CLI for Grove project repos. Orchestrates @grove-dev/core and copies framework templates from @grove-dev/<framework> packages.",
+  "description": "CLI for Grove project repos. Orchestrates @grove-dev/core and copies framework templates from optional peer @grove-dev/<framework> packages.",
   "license": "MIT",
   "bin": {
     "grove": "./dist/index.js"
@@ -23,8 +23,13 @@
     "@grove-dev/core": "workspace:*",
     "commander": "^14.0.2"
   },
+  "peerDependencies": {
+    "@grove-dev/astro": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@grove-dev/astro": { "optional": true }
+  },
   "devDependencies": {
-    "@grove-dev/astro": "workspace:*",
     "tsx": "^4.21.0"
   }
 }

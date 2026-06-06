@@ -32,6 +32,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@grove-dev/astro':
+        specifier: workspace:*
+        version: link:../astro
       '@grove-dev/core':
         specifier: workspace:*
         version: link:../core
@@ -39,9 +42,6 @@ importers:
         specifier: ^14.0.2
         version: 14.0.3
     devDependencies:
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../astro
       tsx:
         specifier: ^4.21.0
         version: 4.22.4

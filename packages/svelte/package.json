@@ -1,0 +1,36 @@
+{
+  "name": "@grove-dev/svelte",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SvelteKit framework adapter for Grove spaces. Components, layouts, tokens, and a default template. Shipped to enable `grove new --framework svelte`.",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "src",
+    "templates"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./src/styles.css",
+    "./components/*": "./src/components/*.svelte",
+    "./layouts/*": "./src/layouts/*.svelte",
+    "./package.json": "./package.json",
+    "./templates/*": "./templates/*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"No svelte package tests yet\""
+  },
+  "dependencies": {
+    "@grove-dev/core": "workspace:*",
+    "@grove-dev/ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "@sveltejs/kit": ">=2.0.0",
+    "svelte": ">=4.0.0"
+  }
+}
