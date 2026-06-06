@@ -24,10 +24,14 @@
     "commander": "^14.0.2"
   },
   "peerDependencies": {
-    "@grove-dev/astro": "workspace:*"
+    "@grove-dev/astro": "workspace:*",
+    "@grove-dev/nextjs": "workspace:*",
+    "@grove-dev/svelte": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@grove-dev/astro": { "optional": true }
+    "@grove-dev/astro": { "optional": true },
+    "@grove-dev/nextjs": { "optional": true },
+    "@grove-dev/svelte": { "optional": true }
   },
   "devDependencies": {
     "tsx": "^4.21.0"
