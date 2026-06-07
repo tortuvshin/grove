@@ -2,14 +2,39 @@
   "name": "@grove-dev/ui",
   "version": "0.1.0",
   "type": "module",
-  "description": "Framework-agnostic UI primitives (filters, sort, stats, scores, slug) for Grove.",
+  "description": "Framework-agnostic UI primitives for Grove: filters, sort, pagination, scoring, stats, slug helpers.",
   "license": "MIT",
+  "keywords": [
+    "grove",
+    "ui",
+    "filter",
+    "sort",
+    "pagination",
+    "framework-agnostic"
+  ],
+  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/tortuvshin/grove/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",

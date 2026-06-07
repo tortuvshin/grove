@@ -2,14 +2,41 @@
   "name": "@grove-dev/core",
   "version": "0.1.0",
   "type": "module",
-  "description": "Core schemas, importers, health analysis, and validation for Grove.",
+  "description": "Headless engine for Grove: resource schema, config, importers, validators, taxonomy, sitemap, llms.txt, and the data build pipeline.",
   "license": "MIT",
+  "keywords": [
+    "grove",
+    "directory",
+    "curated",
+    "community",
+    "knowledge",
+    "zod",
+    "yaml",
+    "cli"
+  ],
+  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/tortuvshin/grove/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",

@@ -2,8 +2,29 @@
   "name": "@grove-dev/cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "CLI for Grove project repos. Orchestrates @grove-dev/core and copies framework templates from optional peer @grove-dev/<framework> packages.",
+  "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
   "license": "MIT",
+  "keywords": [
+    "grove",
+    "cli",
+    "scaffold",
+    "directory",
+    "community",
+    "knowledge"
+  ],
+  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/tortuvshin/grove/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "bin": {
     "grove": "./dist/index.js"
   },
@@ -13,6 +34,10 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",

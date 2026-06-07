@@ -2,12 +2,34 @@
   "name": "@grove-dev/svelte",
   "version": "0.1.0",
   "type": "module",
-  "description": "SvelteKit framework adapter for Grove spaces. Components, layouts, tokens, and a default template. Shipped to enable `grove new --framework svelte`.",
+  "description": "SvelteKit framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",
+  "keywords": [
+    "grove",
+    "svelte",
+    "sveltekit",
+    "ui",
+    "template",
+    "components"
+  ],
+  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
+    "directory": "packages/svelte"
+  },
+  "bugs": {
+    "url": "https://github.com/tortuvshin/grove/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "files": [
     "dist",
     "src",
-    "templates"
+    "templates",
+    "README.md"
   ],
   "exports": {
     ".": {

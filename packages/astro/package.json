@@ -2,11 +2,34 @@
   "name": "@grove-dev/astro",
   "version": "0.1.0",
   "type": "module",
-  "description": "Astro UI primitives for Grove directories. Templates live in templates/ and are copied by `grove new`.",
+  "description": "Astro framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",
+  "keywords": [
+    "grove",
+    "astro",
+    "ui",
+    "template",
+    "components",
+    "static-site"
+  ],
+  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
+    "directory": "packages/astro"
+  },
+  "bugs": {
+    "url": "https://github.com/tortuvshin/grove/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "files": [
     "dist",
-    "src"
+    "src",
+    "templates",
+    "README.md"
   ],
   "exports": {
     ".": {
