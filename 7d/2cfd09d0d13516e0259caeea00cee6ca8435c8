@@ -1,0 +1,27 @@
+examples/basic/src/components/layout/Seo.astro
+  s_7387c7349c2c1c::t_13e30078f26985 63
+examples/basic/src/pages/index.astro
+  s_7387c7349c2c1c::t_13e30078f26985 21,23
+examples/basic/src/components/layout/Footer.astro
+  s_7387c7349c2c1c::t_13e30078f26985 10
+examples/basic/src/pages/about.astro
+  s_7387c7349c2c1c::t_13e30078f26985 75,97,400
+examples/basic/src/pages/apps/index.astro
+  s_7387c7349c2c1c::t_13e30078f26985 90,112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "7d2cfd09d0d13516e0259caeea00cee6ca8435c8",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
