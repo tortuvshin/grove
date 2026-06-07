@@ -1,0 +1,32 @@
+packages/core/src/schema.ts
+  s_7387c7349c2c1c::t_9e3b3f8bddca51 127-135
+packages/cli/package.json
+  s_7387c7349c2c1c::t_9e3b3f8bddca51 19
+examples/basic/package.json
+  s_7387c7349c2c1c::t_9e3b3f8bddca51 14-15
+packages/core/package.json
+  s_7387c7349c2c1c::t_9e3b3f8bddca51 16,19
+packages/core/src/markdown.ts
+  s_7387c7349c2c1c::t_e82edd6d928a56 93-94
+packages/core/src/config.ts
+  s_7387c7349c2c1c::t_e82edd6d928a56 8
+  s_7387c7349c2c1c::t_9e3b3f8bddca51 2,7
+tsconfig.base.json
+  s_7387c7349c2c1c::t_e82edd6d928a56 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "b80f5082a536b9672d88c1f3b55a50a503b4fc51",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
