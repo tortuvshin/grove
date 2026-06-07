@@ -1,0 +1,29 @@
+examples/basic/src/data/categories.ts
+  s_7387c7349c2c1c::t_c7e2974c6e0e53 1-19
+examples/basic/src/data/stats.ts
+  s_7387c7349c2c1c::t_c7e2974c6e0e53 1-30
+examples/basic/src/data/stacks.ts
+  s_7387c7349c2c1c::t_c7e2974c6e0e53 1-21
+examples/basic/src/data/contributors.ts
+  s_7387c7349c2c1c::t_c7e2974c6e0e53 1-17
+examples/basic/src/data/apps.ts
+  s_7387c7349c2c1c::t_c7e2974c6e0e53 1-163
+examples/basic/src/lib/taxonomy-counts.ts
+  s_7387c7349c2c1c::t_c7e2974c6e0e53 1,4-6,10-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "8c3095a9e3fc5e7d2f512b72a2ad8105d13dc89b",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
