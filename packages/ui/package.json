@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/ui",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "type": "module",
   "description": "Framework-agnostic UI primitives for Grove: filters, sort, pagination, scoring, stats, slug helpers.",
   "license": "MIT",
@@ -41,6 +41,6 @@
     "test": "echo \"No ui package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "workspace:*"
+    "@grove-dev/core": "0.1.1"
   }
 }

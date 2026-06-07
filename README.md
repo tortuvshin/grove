@@ -140,6 +140,22 @@ To scaffold a new space inside the workspace for local development:
 node packages/cli/dist/index.js new examples/my-space --framework astro --deploy github-pages
 ```
 
+## Release
+
+A single command builds, bumps versions, and publishes all six packages to npm in dependency order (`core` → `ui` → `astro`/`nextjs`/`svelte` → `cli`):
+
+```bash
+pnpm release               # patch bump (0.1.0 -> 0.1.1)
+pnpm release --minor       # minor bump (0.1.0 -> 0.2.0)
+pnpm release --major       # major bump (0.1.0 -> 1.0.0)
+pnpm release --bump=2.3.4  # explicit version
+pnpm release:dry           # build + bump + dry-run publish (no actual publish)
+```
+
+The release script lives in `scripts/release.mjs`. It bumps every package's `version`, rewrites every `workspace:*` dep to the new version, reinstalls, rebuilds, and publishes with `--no-git-checks --access public`.
+
+Authentication comes from `~/.npmrc`. Run `npm login` first if you have not yet authenticated this machine.
+
 ---
 
 ## License

@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/cli",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "type": "module",
   "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
   "license": "MIT",
@@ -45,18 +45,24 @@
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
-    "@grove-dev/core": "workspace:*",
+    "@grove-dev/core": "0.1.1",
     "commander": "^14.0.2"
   },
   "peerDependencies": {
-    "@grove-dev/astro": "workspace:*",
-    "@grove-dev/nextjs": "workspace:*",
-    "@grove-dev/svelte": "workspace:*"
+    "@grove-dev/astro": "0.1.1",
+    "@grove-dev/nextjs": "0.1.1",
+    "@grove-dev/svelte": "0.1.1"
   },
   "peerDependenciesMeta": {
-    "@grove-dev/astro": { "optional": true },
-    "@grove-dev/nextjs": { "optional": true },
-    "@grove-dev/svelte": { "optional": true }
+    "@grove-dev/astro": {
+      "optional": true
+    },
+    "@grove-dev/nextjs": {
+      "optional": true
+    },
+    "@grove-dev/svelte": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "tsx": "^4.21.0"
