@@ -1,0 +1,60 @@
+examples/basic/src/components/layout/BaseLayout.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 58
+examples/basic/src/pages/apps/[slug].astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 114
+examples/basic/src/pages/submit.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 26-27,379
+examples/basic/src/components/home/OriginalCollection.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 46
+examples/basic/src/components/layout/Header.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 42,70
+examples/basic/src/pages/about.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 5,73,75,93,96-97,107,146,188,233,245,400
+examples/basic/src/pages/contributors.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 26-27,53,130
+examples/basic/src/pages/apps/index.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 88,90,107,112,350
+examples/basic/src/components/layout/Footer.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 10,25,133
+examples/basic/src/components/layout/ThemeToggle.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 4,62
+examples/basic/src/pages/llms.txt.ts
+  s_7387c7349c2c1c::t_f9899f97d330a1 1-35
+examples/basic/src/components/layout/Seo.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 44,61,63,76,79,97-98,106
+examples/basic/public/robots.txt
+  s_7387c7349c2c1c::t_ae07413cade8e4 1
+  s_7387c7349c2c1c::t_f9899f97d330a1 50,53
+examples/basic/public/og-image.svg
+  s_7387c7349c2c1c::t_ae07413cade8e4 28,31,40
+examples/basic/src/components/home/MinimalAbout.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 35
+examples/basic/src/components/home/Hero.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 9,40,55,68
+examples/basic/src/components/home/ContributorsGrid.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 39,96
+examples/basic/src/data/types.ts
+  s_7387c7349c2c1c::t_ae07413cade8e4 115,125
+examples/basic/src/components/home/WhyThisExists.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 33,40
+examples/basic/src/pages/index.astro
+  s_7387c7349c2c1c::t_ae07413cade8e4 21,23,33,42,51
+examples/basic/src/pages/llms-full.txt.ts
+  s_7387c7349c2c1c::t_f9899f97d330a1 1-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "ffe9fa66e83815cba8341bcd2884cc48e3478051",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
