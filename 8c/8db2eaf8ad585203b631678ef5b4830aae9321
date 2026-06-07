@@ -1,0 +1,21 @@
+examples/basic/src/data/apps.ts
+  s_7387c7349c2c1c::t_1c46288906f6a5 51-57,59,61,84-88,90-92,94,96-101,104-108
+packages/core/src/markdown.ts
+  s_7387c7349c2c1c::t_ec95059cd2aa88 115-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "8c8db2eaf8ad585203b631678ef5b4830aae9321",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
