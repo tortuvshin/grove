@@ -1,0 +1,23 @@
+packages/cli/tsconfig.json
+  s_7387c7349c2c1c::t_4faedc0309bf58 1-8
+packages/cli/package.json
+  s_7387c7349c2c1c::t_4faedc0309bf58 1-27
+packages/cli/src/index.ts
+  s_7387c7349c2c1c::t_4faedc0309bf58 1-193
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "966364e097e8294296eb6f0e252600dca8bf22d8",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
