@@ -1,0 +1,27 @@
+packages/core/src/health.ts
+  s_7387c7349c2c1c::t_f906feb331bd64 1-77
+packages/core/src/importer.ts
+  s_7387c7349c2c1c::t_f906feb331bd64 1-25
+packages/core/src/index.ts
+  s_7387c7349c2c1c::t_f906feb331bd64 1-9
+packages/core/src/github.ts
+  s_7387c7349c2c1c::t_f906feb331bd64 1-71
+packages/core/src/validate.ts
+  s_7387c7349c2c1c::t_f906feb331bd64 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "e868d62b965d1f6f7f7742e96bd91263e27c6cd3",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
