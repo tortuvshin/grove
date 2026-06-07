@@ -1,0 +1,191 @@
+packages/astro/template/default/src/data/stacks.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-21
+packages/astro/template/default/public/icons/platforms/apple-light.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/DecisionRow.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-219
+packages/astro/template/default/src/components/home/Hero.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-175
+packages/astro/template/default/src/pages/apps/index.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-668
+packages/astro/template/default/public/icons/platforms/ubuntu.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/CategoryGrid.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-80
+packages/astro/template/default/public/og-image.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-48
+packages/astro/template/default/public/icons/stacks/kotlin.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/public/icons/platforms/windows.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-6
+packages/astro/template/default/public/icons/stacks/flutter.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/SmartLensTabs.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-65
+packages/astro/template/default/public/icons/platforms/embedded.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-5
+packages/astro/template/default/public/icons/stacks/mongodb.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/src/components/home/RefinePanel.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-272
+packages/astro/template/default/public/icons/stacks/apple-dark.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/package.json
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1-19
+packages/astro/template/default/public/robots.txt
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1-53
+packages/astro/template/default/src/pages/apps/[slug].astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-708
+packages/astro/template/default/public/icons/platforms/desktop.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-4
+packages/astro/template/default/src/lib/format.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-64
+packages/astro/template/default/src/components/home/ExploreByStack.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-102
+packages/astro/template/default/src/lib/lenses.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-186
+packages/astro/template/default/public/icons/stacks/python.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/AppsIndexRow.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-230
+packages/astro/template/default/src/pages/llms-full.txt.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-49
+packages/astro/template/default/public/icons/stacks/nodejs.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/src/data/stats.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-30
+packages/astro/template/default/src/components/home/AppSection.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-58
+packages/astro/template/default/src/lib/taxonomy-counts.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-13
+packages/astro/template/default/src/components/home/AppsPagination.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-147
+packages/astro/template/default/src/lib/repo.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-32
+packages/astro/template/default/src/pages/about.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-432
+packages/astro/template/default/public/icons/stacks/tensorflow.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/public/icons/platforms/chromeos.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-5
+packages/astro/template/default/src/components/layout/Seo.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-119
+packages/astro/template/default/src/styles/global.css
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-84
+packages/astro/template/default/public/icons/platforms/linux.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/pages/sitemap.xml.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-75
+packages/astro/template/default/src/components/layout/Footer.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-144
+packages/astro/template/default/src/components/home/OriginalCollection.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-144
+packages/astro/template/default/public/icons/stacks/typescript.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/src/components/home/ContributorsGrid.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-105
+packages/astro/template/default/src/data/types.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-248
+packages/astro/template/default/src/pages/index.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-65
+packages/astro/template/default/public/icons/stacks/apple-light.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/public/icons/platforms/macos.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/public/icons/platforms/chrome.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/public/icons/stacks/rust.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/ExploreByCategory.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-74
+packages/astro/template/default/public/icons/platforms/apple-dark.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/public/icons/stacks/firebase.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/WhyThisExists.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-81
+packages/astro/template/default/public/icons/stacks/java.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/public/icons/stacks/react.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/public/icons/stacks/solidity.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/layout/ThemeToggle.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-97
+packages/astro/template/default/public/icons/stacks/javascript.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/components/home/AppCard.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-248
+packages/astro/template/default/astro.config.mjs
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1-13
+packages/astro/template/default/src/components/home/StackGrid.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-95
+packages/astro/template/default/src/lib/apps-search.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-327
+packages/astro/template/default/public/icons/stacks/ionic.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1-4
+packages/astro/template/default/src/components/layout/BaseLayout.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-94
+packages/astro/template/default/src/components/layout/Header.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-143
+packages/astro/template/default/src/components/layout/Container.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-18
+packages/astro/template/default/public/icons/stacks/capacitor.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1-14
+packages/astro/template/default/public/icons/stacks/react-native.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/pages/contributors.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-140
+packages/astro/template/default/src/lib/scores.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-83
+packages/astro/template/default/src/pages/submit.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-415
+packages/astro/template/default/src/components/home/MinimalAbout.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-56
+packages/astro/template/default/public/icons/stacks/swift.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/public/icons/stacks/graphql.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/src/data/categories.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-19
+packages/astro/template/default/public/icons/stacks/dart.svg
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1
+packages/astro/template/default/src/components/icons/Icon.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-148
+packages/astro/template/default/src/pages/llms.txt.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-35
+packages/astro/template/default/src/components/layout/SectionHeader.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-42
+packages/astro/template/default/src/components/home/ScoreBars.astro
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-72
+packages/astro/template/default/public/icons/stacks/android.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/data/apps.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-169
+packages/astro/template/default/public/icons/platforms/android.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+packages/astro/template/default/src/data/contributors.ts
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-17
+packages/astro/template/default/public/icons/platforms/web.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1-5
+packages/astro/template/default/tailwind.config.mjs
+  s_7387c7349c2c1c::t_2e4db843e52cc4 1-135
+packages/astro/template/default/public/icons/platforms/ios.svg
+  s_7387c7349c2c1c::t_797c5efb87ba6f 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "11266106ae3fcdf1fa9dbabcc123768319400eb6",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
