@@ -1,0 +1,31 @@
+packages/astro/src/components/Pagination.astro
+  s_7387c7349c2c1c::t_a304806a776a91 1-24
+packages/astro/package.json
+  s_7387c7349c2c1c::t_a304806a776a91 11,14,16,18-19
+packages/astro/src/components/ScoreBars.astro
+  s_7387c7349c2c1c::t_a304806a776a91 1-32
+packages/astro/src/components/ProjectDetail.astro
+  s_7387c7349c2c1c::t_ef6ef189547067 4-5,15-29,43-54,60-69,80-81,97-99,102-164
+packages/astro/src/components/SubmitDraft.astro
+  s_7387c7349c2c1c::t_a304806a776a91 1-112
+packages/astro/src/components/LensTabs.astro
+  s_7387c7349c2c1c::t_a304806a776a91 1-26
+packages/astro/src/components/ActiveFilterChips.astro
+  s_7387c7349c2c1c::t_a304806a776a91 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "3743d848e06bdf22d1e07859d63d87a6fe50a44f",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
