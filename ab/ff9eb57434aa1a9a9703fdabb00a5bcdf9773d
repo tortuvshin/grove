@@ -1,0 +1,31 @@
+packages/astro/src/index.ts
+  s_7387c7349c2c1c::t_895204fd788d32 1-24
+packages/astro/package.json
+  s_7387c7349c2c1c::t_895204fd788d32 1-23
+packages/astro/tsconfig.json
+  s_7387c7349c2c1c::t_895204fd788d32 1-9
+packages/astro/src/components/HealthBadge.astro
+  s_7387c7349c2c1c::t_895204fd788d32 1-12
+packages/astro/src/components/ItemCard.astro
+  s_7387c7349c2c1c::t_895204fd788d32 1-36
+packages/astro/src/layouts/BaseLayout.astro
+  s_7387c7349c2c1c::t_895204fd788d32 1-25
+packages/astro/src/styles.css
+  s_7387c7349c2c1c::t_895204fd788d32 1-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "abff9eb57434aa1a9a9703fdabb00a5bcdf9773d",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
