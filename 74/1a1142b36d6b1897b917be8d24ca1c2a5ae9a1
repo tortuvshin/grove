@@ -1,0 +1,23 @@
+examples/basic/data/items.yml
+  s_7387c7349c2c1c::t_a7014bb9d0a78e 16-48,63-84,101-123,139-166,181-201,215-236
+examples/basic/src/lib/directory.ts
+  s_7387c7349c2c1c::t_d0692f8fa195dc 17-18,45-47,55-59,69-71,74-77
+examples/basic/data/health.yml
+  s_7387c7349c2c1c::t_a7014bb9d0a78e 14-39,60-67,90-97,119-126,147-154,175-182
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "741a1142b36d6b1897b917be8d24ca1c2a5ae9a1",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
