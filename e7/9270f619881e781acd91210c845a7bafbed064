@@ -1,0 +1,19 @@
+examples/basic/src/pages/sitemap.xml.ts
+  s_7387c7349c2c1c::t_910594b93fc285 15,52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "e79270f619881e781acd91210c845a7bafbed064",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
