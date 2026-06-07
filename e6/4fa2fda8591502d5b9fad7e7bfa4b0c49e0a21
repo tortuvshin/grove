@@ -1,0 +1,55 @@
+packages/astro/src/components/ProjectDetail.astro
+  s_7387c7349c2c1c::t_179cd52183f562 1-59
+packages/astro/package.json
+  s_7387c7349c2c1c::t_179cd52183f562 10-14
+examples/basic/data/items.yml
+  s_7387c7349c2c1c::t_deb31f563ec0c2 15,29-87
+examples/basic/src/lib/directory.ts
+  s_7387c7349c2c1c::t_940be5743e76a4 1-75
+packages/astro/src/styles.css
+  s_7387c7349c2c1c::t_4c520f999c4637 3,20-57,64-262,298-309,369-451
+examples/basic/src/pages/categories/[slug].astro
+  s_7387c7349c2c1c::t_940be5743e76a4 1-27
+packages/astro/src/index.ts
+  s_7387c7349c2c1c::t_179cd52183f562 1,9-11,16,19-25,32-155
+examples/basic/src/pages/methodology/index.astro
+  s_7387c7349c2c1c::t_940be5743e76a4 1-36
+packages/astro/src/components/DirectoryHero.astro
+  s_7387c7349c2c1c::t_179cd52183f562 1-32
+examples/basic/data/decisions.yml
+  s_7387c7349c2c1c::t_deb31f563ec0c2 1-19
+examples/basic/src/pages/projects/index.astro
+  s_7387c7349c2c1c::t_940be5743e76a4 1-41
+examples/basic/data/health.yml
+  s_7387c7349c2c1c::t_deb31f563ec0c2 42-123
+packages/astro/src/components/CategoryGrid.astro
+  s_7387c7349c2c1c::t_179cd52183f562 1-27
+packages/astro/src/components/MethodologyPanel.astro
+  s_7387c7349c2c1c::t_179cd52183f562 1-20
+examples/basic/src/pages/projects/[id].astro
+  s_7387c7349c2c1c::t_940be5743e76a4 1-38
+packages/astro/src/components/DirectoryFilters.astro
+  s_7387c7349c2c1c::t_179cd52183f562 1-100
+packages/astro/src/components/ItemCard.astro
+  s_7387c7349c2c1c::t_4c520f999c4637 11,31-34
+packages/astro/src/layouts/BaseLayout.astro
+  s_7387c7349c2c1c::t_4c520f999c4637 21-27
+examples/basic/src/pages/index.astro
+  s_7387c7349c2c1c::t_940be5743e76a4 4-12,16-34,37-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "e64fa2fda8591502d5b9fad7e7bfa4b0c49e0a21",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
