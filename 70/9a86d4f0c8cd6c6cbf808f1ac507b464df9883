@@ -1,0 +1,21 @@
+examples/basic/astro.config.mjs
+  s_7387c7349c2c1c::t_dad5b80c17111c 2,6-12
+examples/basic/package.json
+  s_7387c7349c2c1c::t_dad5b80c17111c 14,16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "709a86d4f0c8cd6c6cbf808f1ac507b464df9883",
+  "prompts": {},
+  "sessions": {
+    "s_7387c7349c2c1c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea33b-754c-7a91-9bbb-4d9bccce6ea8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
