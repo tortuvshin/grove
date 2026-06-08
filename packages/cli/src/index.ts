@@ -156,7 +156,7 @@ program
           p.cancel("Aborted.");
           process.exit(0);
         }
-        framework = f;
+        framework = f as Framework;
       }
 
       // ── 3. Template name ───────────────────────────────────────
@@ -186,7 +186,7 @@ program
           p.cancel("Aborted.");
           process.exit(0);
         }
-        deploy = d;
+        deploy = d as DeployProvider;
       }
 
       // ── 5. git init? ───────────────────────────────────────────
@@ -272,7 +272,7 @@ program
       // ── 8. git init ────────────────────────────────────────────
       if (initGit) {
         try {
-          await runExternal("git", ["init", "-b", "main"], { stdio: "ignore" }, root);
+          await runExternal("git", ["init", "-b", "main"], { stdio: "ignore", cwd: root });
           p.log.step("Initialized git repo on `main`");
         } catch {
           p.log.warn("git not found — skipping git init");
@@ -284,7 +284,7 @@ program
         const installSpinner = p.spinner();
         installSpinner.start("Installing dependencies");
         try {
-          await runExternal("pnpm", ["install"], { stdio: "ignore" }, root);
+          await runExternal("pnpm", ["install"], { stdio: "ignore", cwd: root });
           installSpinner.stop("Installed dependencies");
         } catch (err) {
           installSpinner.stop("Install failed");
