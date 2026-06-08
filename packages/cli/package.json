@@ -45,6 +45,7 @@
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
+    "@clack/prompts": "^1.5.1",
     "@grove-dev/core": "0.1.1",
     "commander": "^14.0.2"
   },

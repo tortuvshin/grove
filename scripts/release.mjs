@@ -51,6 +51,7 @@ function parseArgs(argv) {
     else if (a === "--skip-build") out["skip-build"] = true;
     else if (a === "--skip-bump") out["skip-bump"] = true;
     else if (a.startsWith("--bump=")) out.bump = a.slice("--bump=".length);
+    else if (a.startsWith("--otp=")) out.otp = a.slice("--otp=".length);
   }
   return out;
 }
@@ -122,9 +123,14 @@ async function buildAll() {
 
 async function publishAll() {
   logSection(`Publishing (${DRY_RUN ? "dry-run" : "live"})`);
+  // If the npm account has 2FA enabled, the user can pass a one-time
+  // password via the NPM_OTP env var or the --otp=<code> flag. The
+  // release script forwards it to every `pnpm publish` invocation.
+  const otp = process.env.NPM_OTP ?? args.otp;
   for (const p of PACKAGES) {
     const args = ["--filter", p.name, "publish", "--no-git-checks", "--access", "public"];
     if (DRY_RUN) args.push("--dry-run");
+    if (otp) args.push(`--otp=${otp}`);
     try {
       await run("pnpm", args);
       logOk(`Published ${p.name}`);

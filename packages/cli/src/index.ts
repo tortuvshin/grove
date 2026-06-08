@@ -11,6 +11,7 @@ import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { Command } from "commander";
+import * as p from "@clack/prompts";
 import {
   buildData,
   buildLlmsFiles,
@@ -42,11 +43,26 @@ import {
   isFramework,
   listTemplates,
   renameProjectInTemplate,
+  SUPPORTED_FRAMEWORKS,
   type DeployProvider,
   type Framework,
 } from "./template-loader.js";
 
 const program = new Command();
+
+const DEPLOY_PROVIDERS = ["vercel", "netlify", "cloudflare", "github-pages", "none"] as const;
+const DEPLOY_LABELS: Record<DeployProvider, { label: string; hint: string }> = {
+  vercel: { label: "Vercel", hint: "Vercel — best for Next.js and SSR" },
+  netlify: { label: "Netlify", hint: "Netlify — strong form handling and edge" },
+  cloudflare: { label: "Cloudflare Pages", hint: "Cloudflare Pages — global edge" },
+  "github-pages": { label: "GitHub Pages", hint: "GitHub Pages — free for public repos" },
+  none: { label: "None", hint: "I'll bring my own deploy — no workflow" },
+};
+const FRAMEWORK_LABELS: Record<Framework, { label: string; hint: string }> = {
+  astro: { label: "Astro", hint: "Static-first, great for content sites" },
+  nextjs: { label: "Next.js", hint: "App router + RSC, React ecosystem" },
+  svelte: { label: "SvelteKit", hint: "Compact, fast, single-file components" },
+};
 
 program
   .name("grove")
@@ -56,43 +72,163 @@ program
 // ──────────────────────────────────────────────────────────────────────
 // grove new
 //
-// Scaffold a brand-new project repo. Copies a framework template
-// (default: @grove-dev/astro/templates/default) into <dir>, optionally
-// adds GitHub Actions workflows for the chosen deploy provider.
+// Scaffold a brand-new project repo. Interactive by default
+// (matches `pnpm create astro`, `create-next-app`, etc.); every
+// prompt has a CLI flag for non-interactive use.
 // ──────────────────────────────────────────────────────────────────────
 program
   .command("new")
-  .argument("[name]", "project directory name", ".")
+  .argument("[name]", "project directory name (current dir if omitted)")
   .description("Scaffold a new Grove project from a framework template.")
-  .option("-f, --framework <name>", "framework: astro | nextjs | svelte", "astro")
+  .option("-f, --framework <name>", "framework: astro | nextjs | svelte")
   .option("-t, --template <name>", "template name", "default")
-  .option("-d, --deploy <provider>", "deploy provider: vercel | netlify | cloudflare | github-pages | none", "github-pages")
-  .option("--no-install", "skip writing starter files (test only)")
+  .option("-d, --deploy <provider>", `deploy provider: ${DEPLOY_PROVIDERS.join(" | ")}`)
+  .option("--no-git", "skip `git init` after scaffolding")
+  .option("--no-install", "skip `pnpm install` after scaffolding")
+  .option("-y, --yes", "accept defaults for every prompt (CI / scripted use)")
   .action(
     async (
-      name: string,
-      opts: { framework: string; template: string; deploy: string; install: boolean },
+      name: string | undefined,
+      opts: {
+        framework?: string;
+        template: string;
+        deploy?: string;
+        git?: boolean;
+        install?: boolean;
+        yes?: boolean;
+      },
     ) => {
-      if (!isFramework(opts.framework)) {
-        console.error(`Unknown framework: ${opts.framework}. Try one of: astro, nextjs, svelte.`);
-        process.exit(1);
+      p.intro("🌱 Grow a new Grove space");
+
+      // ── 1. Project name ────────────────────────────────────────
+      const projectDirRaw =
+        opts.yes && !name
+          ? "."
+          : await p.text({
+              message: "Where should the new space live?",
+              placeholder: "." ,
+              defaultValue: name ?? ".",
+              validate: (value) => {
+                if (!value || value.trim().length === 0) return "Directory name is required";
+              },
+            });
+      if (p.isCancel(projectDirRaw)) {
+        p.cancel("Aborted.");
+        process.exit(0);
       }
-      const framework: Framework = opts.framework;
+      const projectDir: string = String(projectDirRaw);
+      const projectNameRaw: string | symbol =
+        projectDir === "."
+          ? await p.text({
+              message: "What is the name of this space?",
+              placeholder: "Grove Directory",
+              defaultValue: "Grove Directory",
+              validate: (v) => (v && v.trim().length > 0 ? undefined : "Name is required"),
+            })
+          : projectDir;
+      if (p.isCancel(projectNameRaw)) {
+        p.cancel("Aborted.");
+        process.exit(0);
+      }
+      const projectName: string = String(projectNameRaw);
+
+      // ── 2. Framework ───────────────────────────────────────────
+      let framework: Framework;
+      if (opts.framework && isFramework(opts.framework)) {
+        framework = opts.framework;
+      } else if (opts.framework) {
+        p.log.error(`Unknown framework: ${opts.framework}.`);
+        p.log.info(`Try one of: ${SUPPORTED_FRAMEWORKS.join(", ")}`);
+        process.exit(1);
+      } else if (opts.yes) {
+        framework = "astro";
+      } else {
+        const f = await p.select({
+          message: "Pick a framework",
+          options: SUPPORTED_FRAMEWORKS.map((f) => ({
+            value: f,
+            label: FRAMEWORK_LABELS[f].label,
+            hint: FRAMEWORK_LABELS[f].hint,
+          })),
+          initialValue: "astro",
+        });
+        if (p.isCancel(f)) {
+          p.cancel("Aborted.");
+          process.exit(0);
+        }
+        framework = f;
+      }
+
+      // ── 3. Template name ───────────────────────────────────────
+      const template = opts.template;
+
+      // ── 4. Deploy provider ─────────────────────────────────────
+      let deploy: DeployProvider;
+      if (opts.deploy && (DEPLOY_PROVIDERS as readonly string[]).includes(opts.deploy)) {
+        deploy = opts.deploy as DeployProvider;
+      } else if (opts.deploy) {
+        p.log.error(`Unknown deploy provider: ${opts.deploy}.`);
+        p.log.info(`Try one of: ${DEPLOY_PROVIDERS.join(", ")}`);
+        process.exit(1);
+      } else if (opts.yes) {
+        deploy = "github-pages";
+      } else {
+        const d = await p.select({
+          message: "Where will this space be deployed?",
+          options: DEPLOY_PROVIDERS.map((d) => ({
+            value: d,
+            label: DEPLOY_LABELS[d].label,
+            hint: DEPLOY_LABELS[d].hint,
+          })),
+          initialValue: "github-pages",
+        });
+        if (p.isCancel(d)) {
+          p.cancel("Aborted.");
+          process.exit(0);
+        }
+        deploy = d;
+      }
+
+      // ── 5. git init? ───────────────────────────────────────────
+      const initGit = opts.yes
+        ? (opts.git ?? true)
+        : await p.confirm({
+            message: "Initialize a git repository?",
+            initialValue: opts.git ?? true,
+          });
+      if (p.isCancel(initGit)) {
+        p.cancel("Aborted.");
+        process.exit(0);
+      }
+
+      // ── 6. install deps? ───────────────────────────────────────
+      const installDeps = opts.yes
+        ? (opts.install ?? true)
+        : await p.confirm({
+            message: "Install dependencies with pnpm?",
+            initialValue: opts.install ?? true,
+          });
+      if (p.isCancel(installDeps)) {
+        p.cancel("Aborted.");
+        process.exit(0);
+      }
+
+      // ── 7. scaffold ────────────────────────────────────────────
+      const root = resolve(projectDir);
       const templates = await listTemplates(framework);
-      const tpl = templates.find((t) => t.template === opts.template) ?? templates[0];
+      const tpl = templates.find((t) => t.template === template) ?? templates[0];
       if (!tpl) {
-        console.error(`No templates found for ${framework}.`);
+        p.log.error(`No templates found for ${framework}.`);
         process.exit(1);
       }
 
-      const root = resolve(name);
-      const projectName = name === "." ? "Grove Directory" : name;
-      await mkdir(root, { recursive: true });
+      const s = p.spinner();
+      s.start("Scaffolding");
 
+      await mkdir(root, { recursive: true });
       await copyTemplate(framework, root, tpl.template);
       await renameProjectInTemplate(framework, root, projectName, tpl.template);
 
-      // Project data files
       await Promise.all([
         ensureDir(join(root, "sources")),
         ensureDir(join(root, "data")),
@@ -123,20 +259,46 @@ program
         join(root, "content", "methodology.md"),
         "# Methodology\n\nGrove uses repository metadata as a signal. Human curation decisions control final visibility.\n",
       );
-
-      // GitHub workflows
       await writeIfMissing(join(root, ".github", "workflows", "validate-data.yml"), workflowValidate());
       await writeIfMissing(join(root, ".github", "workflows", "import.yml"), workflowImport());
-      await writeIfMissing(
-        join(root, ".github", "workflows", "deploy.yml"),
-        workflowDeploy(opts.deploy as DeployProvider, framework),
-      );
+      await writeIfMissing(join(root, ".github", "workflows", "deploy.yml"), workflowDeploy(deploy, framework));
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "app_submission.md"), issueTemplateSubmission());
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "bug_report.md"), issueTemplateBug());
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "feature_request.md"), issueTemplateFeature());
       await writeIfMissing(join(root, "LICENSE"), licenseMIT(projectName));
 
-      console.log(`Created Grove project at ${root} (${framework}/${tpl.template})`);
+      s.stop("Scaffolded");
+
+      // ── 8. git init ────────────────────────────────────────────
+      if (initGit) {
+        try {
+          await runExternal("git", ["init", "-b", "main"], { stdio: "ignore" }, root);
+          p.log.step("Initialized git repo on `main`");
+        } catch {
+          p.log.warn("git not found — skipping git init");
+        }
+      }
+
+      // ── 9. pnpm install ────────────────────────────────────────
+      if (installDeps) {
+        const installSpinner = p.spinner();
+        installSpinner.start("Installing dependencies");
+        try {
+          await runExternal("pnpm", ["install"], { stdio: "ignore" }, root);
+          installSpinner.stop("Installed dependencies");
+        } catch (err) {
+          installSpinner.stop("Install failed");
+          p.log.warn(`Run \`pnpm install\` inside ${root} to retry.`);
+        }
+      }
+
+      p.outro(
+        `🌳 ${projectName} is ready at ${root}\n\n` +
+          `Next steps:\n` +
+          `  cd ${projectDir}\n` +
+          `  grove import <awesome-list-url>\n` +
+          `  grove build\n`,
+      );
     },
   );
 
@@ -230,7 +392,7 @@ program
   .action(async () => {
     const framework = await detectFramework();
     const cmd = frameworkBuildCommand(framework);
-    runExternal(cmd, { stdio: "inherit" });
+    runExternal(cmd[0], cmd[1], { stdio: "inherit" });
   });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -242,7 +404,7 @@ program
   .action(async () => {
     const framework = await detectFramework();
     const cmd = frameworkDevCommand(framework);
-    runExternal(cmd, { stdio: "inherit" });
+    runExternal(cmd[0], cmd[1], { stdio: "inherit" });
   });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -458,14 +620,21 @@ function frameworkDevCommand(fw: Framework): [string, string[]] {
   }
 }
 
-function runExternal(cmd: [string, string[]], opts: { stdio: "inherit" | "ignore" } = { stdio: "inherit" }): void {
-  const [bin, args] = cmd;
-  const child = spawn(bin, args, {
-    stdio: opts.stdio,
-    shell: process.platform === "win32",
-  });
-  child.on("exit", (code) => {
-    process.exitCode = code ?? 1;
+function runExternal(
+  bin: string,
+  args: string[],
+  opts: { stdio?: "inherit" | "ignore"; cwd?: string } = {},
+): Promise<void> {
+  return new Promise((resolveP, rejectP) => {
+    const child = spawn(bin, args, {
+      stdio: opts.stdio ?? "inherit",
+      cwd: opts.cwd,
+      shell: process.platform === "win32",
+    });
+    child.on("exit", (code) => {
+      if (code === 0) resolveP();
+      else rejectP(new Error(`${bin} ${args.join(" ")} exited with code ${code}`));
+    });
   });
 }
 

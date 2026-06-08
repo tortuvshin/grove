@@ -39,7 +39,17 @@ function templatesRoot(framework: Framework): string {
   try {
     entrypoint = require.resolve(`${pkg}/package.json`, { paths: [process.cwd()] });
   } catch {
-    entrypoint = require.resolve(`${pkg}/package.json`);
+    try {
+      entrypoint = require.resolve(`${pkg}/package.json`);
+    } catch {
+      throw new Error(
+        `Framework package ${pkg} is not installed.\n` +
+          `Run one of:\n` +
+          `  pnpm add -g ${pkg}\n` +
+          `  pnpm add -D ${pkg}\n` +
+          (framework === "astro" ? "then retry: grove new <dir> --framework astro" : ""),
+      );
+    }
   }
   return resolve(dirname(entrypoint), "templates");
 }
