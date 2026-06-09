@@ -7,12 +7,9 @@
  * just works after `pnpm add @grove-dev/<framework>`.
  */
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-
-const require = createRequire(import.meta.url);
 
 export type Framework = "astro" | "nextjs" | "svelte";
 export type DeployProvider = "vercel" | "netlify" | "cloudflare" | "github-pages" | "none";
@@ -33,15 +30,24 @@ export function isFramework(value: string): value is Framework {
 
 function templatesRoot(framework: Framework): string {
   const pkg = `@grove-dev/${framework}`;
-  // Resolve from the CLI's own location so the framework package is
-  // found whether it was installed as a dep of the consumer's project
-  // or as a workspace sibling during local dev.
-  let entrypoint: string;
+  // Resolve the package's *root* entrypoint. We do not ask for
+  // `pkg/package.json` because the V1 package's `exports` field
+  // intentionally does not list that subpath — only the
+  // user-facing entrypoints (`./components/*`, `./layouts/*`,
+  // `./styles.css`) are public. The package root directory is
+  // then used to look up `templates/` and `package.json`
+  // directly via the filesystem.
+  let packageRoot: string;
   try {
-    entrypoint = require.resolve(`${pkg}/package.json`, { paths: [process.cwd()] });
+    // Walking the node_modules ancestry from the CLI's own
+    // location: this works whether the framework adapter was
+    // installed as a dep of the consumer's project, as a
+    // workspace sibling, or as a global package.
+    const here = dirname(fileURLToPath(import.meta.url));
+    packageRoot = resolvePackageRoot(pkg, here);
   } catch {
     try {
-      entrypoint = require.resolve(`${pkg}/package.json`);
+      packageRoot = resolvePackageRoot(pkg, process.cwd());
     } catch {
       throw new Error(
         `Framework package ${pkg} is not installed.\n` +
@@ -52,7 +58,17 @@ function templatesRoot(framework: Framework): string {
       );
     }
   }
-  return resolve(dirname(entrypoint), "templates");
+  return resolve(packageRoot, "templates");
+}
+
+function resolvePackageRoot(pkg: string, from: string): string {
+  let cursor = from;
+  for (let i = 0; i < 8; i++) {
+    const candidate = join(cursor, "node_modules", pkg);
+    if (existsSync(candidate)) return candidate;
+    cursor = resolve(cursor, "..");
+  }
+  throw new Error(`Could not find ${pkg} from ${from}`);
 }
 
 /** List every available template for a framework. */
@@ -75,10 +91,12 @@ export function templatePath(framework: Framework, name = "default"): string {
  * from the npm registry instead of from the local monorepo workspace.
  */
 export function frameworkVersion(framework: Framework): string {
-  const entrypoint = require.resolve(`@grove-dev/${framework}/package.json`);
-  const pkg = JSON.parse(readFileSync(entrypoint, "utf8")) as { version?: string };
+  const here = dirname(fileURLToPath(import.meta.url));
+  const root = resolvePackageRoot(`@grove-dev/${framework}`, here);
+  const pkgPath = join(root, "package.json");
+  const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { version?: string };
   if (!pkg.version) {
-    throw new Error(`Could not read version of @grove-dev/${framework} from ${entrypoint}`);
+    throw new Error(`Could not read version of @grove-dev/${framework} from ${pkgPath}`);
   }
   return pkg.version;
 }
