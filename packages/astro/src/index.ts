@@ -1,17 +1,55 @@
 /**
- * @grove-dev/astro — Astro UI primitives for Grove.
+ * @grove-dev/astro — Astro framework adapter for Grove.
  *
- * This package only owns Astro components, layouts, styles, and
- * Astro-specific integrations. Generic filter/sort/stats/score
- * helpers live in `@grove-dev/ui` and are re-exported from here for
- * convenience.
- *
- * Astro components are not exported from this barrel — consumers
- * import them by path, e.g.:
- *   import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
- *   import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
- *
- * That keeps the barrel type-only and lets `astro check` validate
- * the .astro files in their own context.
+ * Provides:
+ *  - `default` export: an Astro integration that wires the
+ *    `@grove-dev/astro/components/*` and `@grove-dev/astro/layouts/*`
+ *    subpath imports into Vite so consumer projects can write:
+ *        import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
+ *    and have Vite resolve the source `.astro` file (the package's
+ *    `dist/` only contains TypeScript helpers, not the components
+ *    themselves).
+ *  - Re-exports the framework-agnostic `Resource` types from
+ *    `@grove-dev/core` so the component prop signatures stay
+ *    type-safe without forcing a dependency on the core package
+ *    in every consumer file.
  */
-export * from "@grove-dev/ui";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+import type { AstroIntegration } from "astro";
+
+export * from "@grove-dev/core";
+
+const here = dirname(fileURLToPath(import.meta.url));
+// `here` is the compiled `dist/` directory. The components and
+// layouts live in the source tree (the `dist/` is for the
+// integration helper only). Walk up one level to reach `src/`
+// before resolving the subpath roots.
+const srcRoot = resolve(here, "..", "src");
+const componentsDir = resolve(srcRoot, "components");
+const layoutsDir = resolve(srcRoot, "layouts");
+
+export default function groveAstro(): AstroIntegration {
+  return {
+    name: "@grove-dev/astro",
+    hooks: {
+      "astro:config:setup": ({ updateConfig }) => {
+        // Alias the components/layouts source directories so
+        // consumer builds can import from
+        //   @grove-dev/astro/components/ItemCard.astro
+        // without us shipping a glob-shaped `exports` map that
+        // Vite/Rollup does not expand reliably.
+        updateConfig({
+          vite: {
+            resolve: {
+              alias: {
+                "@grove-dev/astro/components": componentsDir,
+                "@grove-dev/astro/layouts": layoutsDir,
+              },
+            },
+          },
+        });
+      },
+    },
+  };
+}
