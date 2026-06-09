@@ -32,35 +32,109 @@ This wave is what is in `main` today. The waves below reorganize and extend it.
 
 > Goal: the codebase reflects the vision. `core` is framework-free. `ui` is framework-free. Framework adapters are thin. Templates contain only pages, layouts, and `.github/`. No business logic in templates.
 
-### 1.1 Resource model generalization
+### 1.1 Blueprint model (V1)
 
-- Replace the GitHub-first `AppRecord` with a generic `Resource` schema.
-- `name`, `description`, `type`, `url`, `repository?`, `topics[]`, `tags[]`, `status?`, `maintainers[]`, `organizations[]`, `metadata`.
-- `repository` is optional; spaces that do not have a GitHub repo skip signal sync.
-- `ResourceType` is a string union that spaces extend via taxonomy.
+Grove V1 ships three fixed blueprints. Each blueprint binds a
+record `kind` to a schema, a default route, and the filters a
+space exposes. Records are a discriminated union keyed by `kind`:
 
-### 1.2 Framework split
+- **`project-directory`** → `kind: project`. Structured
+  collections of projects, tools, apps, packages, services,
+  repositories, or internal systems. GitHub metadata is
+  optional. **Built first, fully reusable.**
+- **`resource-hub`** → `kind: resource`. Guides, comparisons,
+  explainers, links, and practical knowledge collections. Has
+  a `type` and a `topic`. **MVP in V1, full implementation in
+  Wave 2.**
+- **`ecosystem-map`** → `kind: entity`. Organizations, products,
+  people, communities, schools, services, ecosystem actors.
+  Has a `type` (company / community / school / ...) and
+  optional `founded` / `location` / `members`. **MVP in V1,
+  full implementation in Wave 2.**
 
-- `@grove-dev/core` — schemas, config, importers, validators, taxonomy, build pipeline, sitemap, llms.txt. **No Astro/React/Svelte dependencies.**
-- `@grove-dev/ui` — framework-agnostic primitives: filterRecords, sortRecords, paginateRecords, buildDirectoryStats, scoreTier, slugForCategory, etc. **No framework dependencies.**
-- `@grove-dev/astro` — Astro components, layouts, tokens, Astro integrations, **and** a `templates/default/` directory. Templates contain only pages, layouts, public assets, `astro.config.mjs`, `tailwind.config.mjs`, and `.github/`. No `lib/`, no business logic.
-- `@grove-dev/nextjs` and `@grove-dev/svelte` — same shape, scaffolded but not yet battle-tested.
-- `@grove-dev/cli` — `new` (scaffolds from any framework adapter's template), `import`, `analyze`, `validate`, `build-data`, `sitemap`, `build-llms-full`, `review`, `build`, `dev`. **No framework dependencies** in the CLI itself; framework commands are detected from the project's `package.json` and spawned.
+The `kind` field is required and must match the blueprint
+configured in `grove.config.ts`. A site running
+`project-directory` rejects records with `kind: resource` or
+`kind: entity` at validation time.
 
-### 1.3 Theme/template hygiene
+**No custom blueprint API in V1.** If a real space needs fields
+the V1 schemas don't carry, Wave 2 will extend the union — not
+the per-site API.
 
-- `packages/astro/templates/default/` is the canonical starting point. It contains pages, layouts, public assets, `astro.config.mjs`, `tailwind.config.mjs`, and a placeholder `data/` tree.
-- All filter / sort / score / facet logic is imported from `@grove-dev/ui`, not re-implemented in the template.
-- The `template/` (singular) legacy directory is removed; only `templates/default/` remains.
+### 1.2 Resource schema (under the blueprints)
 
-### 1.4 Documentation
+- Generic `Resource` discriminated union with three concrete
+  shapes: `ProjectRecord`, `ResourceRecord`, `EntityRecord`.
+- Common base: `slug`, `description`, `category`, `tags[]`,
+  `links{ github?, website?, docs?, source? }`, optional
+  `content:` (path to a Markdown body), `source:` (provenance
+  block), `curation:` (human-curation block), `scores:`.
+- Per-kind extensions: `ProjectRecord` carries `stack` /
+  `platforms` / `projectType` / GitHub-shaped `github:` block;
+  `ResourceRecord` carries `type` / `topic` / `related`; the
+  `EntityRecord` carries `type` / `founded` / `location` /
+  `members` / `parent`.
 
-- `README.md` rewritten to match the vision. Hero says "Grow useful community knowledge." Open Apps is one of several example spaces.
-- `docs/vision.md` (this file) committed.
+### 1.3 Framework split
+
+- `@grove-dev/core` — schemas, config, importers, validators,
+  taxonomy, build pipeline, sitemap, llms.txt. **No
+  Astro/React/Svelte dependencies.**
+- `@grove-dev/ui` — **roadmap only in V1.** The V0 primitives
+  (`filterRecords`, `sortRecords`, `paginateRecords`,
+  `scoreTier`, ...) all hang off the flat `CuratedItem` type
+  and cannot carry over to the discriminated `Resource`
+  union. V1 ships a stub that re-exports the new types and
+  an identity helper. Wave 2 rebuilds the primitives on top
+  of `Resource`.
+- `@grove-dev/astro` — V1 renderer. Components, layouts,
+  tokens, `templates/default/`. Templates contain only pages,
+  layouts, public assets, `astro.config.mjs`, and `.github/`.
+  No `lib/`, no business logic.
+- `@grove-dev/nextjs` and `@grove-dev/svelte` — roadmap only
+  in V1. Skeleton packages; the full implementation waits for
+  Wave 2 when the framework-agnostic core/ui primitives are
+  rebuilt on top of `Resource`.
+- `@grove-dev/cli` — `new` (scaffolds from any framework
+  adapter's template), `import`, `validate`, `generate`,
+  `sitemap`, `llms`, `sync github`, `cleanup stale`, `build`,
+  `dev`. **No framework dependencies** in the CLI itself;
+  framework commands are detected from the project's
+  `package.json` and spawned.
+
+### 1.4 Theme/template hygiene
+
+- `packages/astro/templates/default/` is the canonical
+  starting point. It contains pages, layouts, public assets,
+  `astro.config.mjs`, `tailwind.config.mjs`, and a placeholder
+  `data/` tree.
+- All filter / sort / score / facet logic lives in
+  `@grove-dev/core` or `@grove-dev/ui`. V1 ships a minimal
+  template without the V0 page-fragment richness (lenses,
+  faceted filters, score bars, distribution channels, monthly
+  commit activity). The schema still carries the data, so
+  rebuilding the components is a Wave 2 task.
+- The `template/` (singular) legacy directory is removed; only
+  `templates/default/` remains.
+
+### 1.5 Documentation
+
+- `README.md` rewritten to match the vision. Hero says "Grow
+  useful community knowledge." Open Apps is one of several
+  example spaces.
+- `docs/vision.md` committed.
 - `docs/roadmap.md` (this file) committed.
-- `docs/ARCHITECTURE.md` updated to describe the core / ui / adapter / template split.
+- `docs/ARCHITECTURE.md` updated to describe the
+  core / ui / adapter / template split and the blueprint
+  model.
 
-**Wave 1 exit criteria:** `pnpm -r build` is green. `grove new` scaffolds a working space from `@grove-dev/astro/templates/default` with no `workspace:*` deps in the generated `package.json`. The README reads as a community knowledge framework, not an OSS directory.
+**Wave 1 exit criteria:** `pnpm -r build` is green. `grove new`
+scaffolds a working space from
+`@grove-dev/astro/templates/default` with `workspace:*` deps in
+the generated `package.json`. The README reads as a community
+knowledge framework, not an OSS directory. `grove validate`,
+`grove generate`, `grove sync github`, `grove cleanup stale`
+all work end-to-end against `data/records/*.yml`.
 
 ---
 
@@ -68,65 +142,110 @@ This wave is what is in `main` today. The waves below reorganize and extend it.
 
 > Goal: **one** Grove-powered space ships in production. Everything else is roadmap.
 
-We pick the one that most clearly proves the vision. Candidates:
+The first space is also where the blueprint model gets
+exercised in the wild. We pick the one that most clearly
+proves the vision, and the one whose blueprint best stresses
+the discriminated `Resource` union:
 
-1. **Open Apps** — already has data, already has community signal, already validates the file-based model.
-2. **oss.dev.mn** — local open-source ecosystem; tightest expression of "growing community knowledge"; the strongest narrative.
-3. A new space — riskier, but if neither Open Apps nor oss.dev.mn has a champion, build a small one first.
+1. **Open Apps** — `project-directory` blueprint. Already has
+   data, already has community signal, already validates the
+   file-based model. **Likely reference space.**
+2. **oss.dev.mn** — `ecosystem-map` blueprint. Local
+   open-source ecosystem; tightest expression of "growing
+   community knowledge"; the strongest narrative. The
+   `entity` kind carries the most schema (founded / location
+   / members / parent), so a real ecosystem map exercises the
+   union more than a project directory.
+3. A new space — riskier, but if neither Open Apps nor
+   oss.dev.mn has a champion, build a small one first.
 
-The choice is a community decision, not an architecture decision. Whatever space ships first becomes the **reference space** for everything after.
+The choice is a community decision, not an architecture
+decision. Whatever space ships first becomes the **reference
+space** for everything after, and its blueprint is the one we
+nail down first.
 
 ### 2.1 Pick a reference space and migrate
 
 - Pick the space, name the gardener, open the repo.
-- Migrate from the old `apps.yml` model to the generic `Resource` model.
-- Re-author the data files to match the new schema.
-- Build the static site, deploy it, point a real domain at it.
+- Pick the matching blueprint (`project-directory` for Open
+  Apps, `ecosystem-map` for oss.dev.mn).
+- Migrate from the old `apps.yml` / `items.yml` model to
+  `data/records/<slug>.yml` with the blueprint's `kind` on
+  every record.
+- Re-author the data files to match the new schema. Records
+  that don't fit the chosen blueprint are split into their
+  own space, not crammed into one blueprint's kind.
+- Build the static site, deploy it, point a real domain at
+  it.
 
-### 2.2 Hardening the generic model
+### 2.2 Hardening the blueprint
 
-The first real space will surface things the generic model cannot yet express. We extend the schema to accommodate it, not the other way around. Common likely additions:
+The first real space will surface things the V1 schema
+cannot yet express. We extend the union to accommodate it,
+not the other way around. Common likely additions:
 
-- A canonical "kind" of resource per space (`type: "open-source-project" | "tool" | "learning-resource" | "company" | ...`).
-- A `language` field for spaces that filter by programming language.
-- A `platforms` field for cross-platform OSS spaces.
-- A `license` field that is independent of `repository.license`.
+- A `language` field for spaces that filter by programming
+  language.
+- A canonical `kind`-specific extension when one blueprint
+  consistently needs the same extra field.
+- A `meta:` block for one-off annotations that don't deserve
+  a schema slot.
 
-Each addition is a real-space-driven decision, not a hypothetical.
+Each addition is a real-space-driven decision, not a
+hypothetical. We do not add fields "in case".
 
 ### 2.3 Contribution workflow
 
-- A submission issue template that mirrors the resource schema fields.
-- A bot or GitHub Action that turns submissions into PRs against `data/resources/*.yml`.
-- A docs page that explains the workflow to a first-time contributor.
+- A submission issue template that mirrors the resource
+  schema fields for the chosen blueprint.
+- A bot or GitHub Action that turns submissions into PRs
+  against `data/records/*.yml`.
+- A docs page that explains the workflow to a first-time
+  contributor.
 
-**Wave 2 exit criteria:** a real space, on a real domain, with real contributions landing via PR. The README's "Spaces built with Grove" list has its first entry.
+**Wave 2 exit criteria:** a real space, on a real domain,
+with real contributions landing via PR. The README's
+"Spaces built with Grove" list has its first entry.
 
 ---
 
-## Wave 3 — Multiple spaces, one engine
+## Wave 3 — Multiple spaces, multiple blueprints
 
-> Goal: at least three spaces in production, all on the same core / ui / adapter stack with no duplicated logic.
+> Goal: at least three spaces in production across at least
+> two blueprints, all on the same core / adapter stack with
+> no duplicated logic.
 
 ### 3.1 Second space
 
-- A second community adopts Grove.
-- We rebuild the second space from the framework template, not by forking the first space.
-- Divergences in branding and data shape are handled via space-level overrides, not by patching `core` or `ui`.
+- A second community adopts Grove, on a different blueprint
+  than the first.
+- We rebuild the second space from the framework template,
+  not by forking the first.
+- Divergences in branding and data shape are handled via
+  space-level overrides, not by patching `core` or the
+  adapters.
 
 ### 3.2 Adapter parity
 
-- `@grove-dev/nextjs` ships a working template.
-- `@grove-dev/svelte` ships a working template.
-- Each template contains the same set of pages and the same contribution workflow.
+- `@grove-dev/nextjs` ships a working template that
+  understands the V1 `Resource` union and renders each
+  blueprint's kind.
+- `@grove-dev/svelte` ships the same.
+- Each template contains the same set of pages and the same
+  contribution workflow.
 
 ### 3.3 Spaces dashboard (read-only)
 
 - A static page that lists every known Grove space.
-- Each space reports its URL and a one-line description via a simple JSON file in its repo.
-- No central database, no scraping, no auth — just curated links.
+- Each space reports its URL, blueprint, and a one-line
+  description via a simple JSON file in its repo.
+- No central database, no scraping, no auth — just curated
+  links.
 
-**Wave 3 exit criteria:** two more spaces live, all on the same engine, no copy-pasted logic between them. A first-time contributor can fork a template and ship a new space in a weekend.
+**Wave 3 exit criteria:** two more spaces live, all on the
+same engine, no copy-pasted logic between them. A
+first-time contributor can fork a template, pick a
+blueprint, and ship a new space in a weekend.
 
 ---
 
@@ -134,23 +253,43 @@ Each addition is a real-space-driven decision, not a hypothetical.
 
 > Status: optional in MVP. Becomes real when spaces need it.
 
-This is the GitHub signal sync that exists today. It is a value-add, not the core identity. We re-introduce it carefully:
+This is the GitHub signal sync that exists today. It is a
+value-add, not the core identity. We re-introduce it
+carefully:
 
-- Signal sync lives entirely in `@grove-dev/core` as an opt-in command (`grove analyze`).
-- Spaces without GitHub repos skip it. Spaces with mixed resources sync only the ones that have a `repository`.
-- Health signals (`active`, `mature`, `stale`, `inactive`, `archived`, `unknown`, `needs_review`, `historical`) are stored in `data/health.yml` and are never the source of truth — `data/decisions.yml` is.
+- Signal sync lives entirely in `@grove-dev/core` as an
+  opt-in command (`grove sync github`).
+- **Blueprint-aware**: spaces running `project-directory` can
+  sync GitHub metadata for `kind: project` records that
+  have a `links.github`. Spaces running `resource-hub` or
+  `ecosystem-map` skip signal sync — the V1 schemas for
+  those kinds don't carry a `github:` block. The CLI exits
+  early with a friendly message if a space's blueprint has
+  no GitHub-shaped records.
+- Health signals (`active`, `mature`, `stale`, `inactive`,
+  `archived`, `unknown`, `needs_review`, `historical`) live
+  on each record's `health:` block. `data/decisions.yml` is
+  still the human curation layer.
 
 ### 4.1 Scoring
 
-- Optional `scores: { activity, maturity, learning, contribution, docs, overall }` per resource.
-- Curator-assigned, not algorithmically generated, by default. The framework stores and surfaces them; the gardener decides what they mean.
+- Optional `scores: { activity, maturity, learning,
+  contribution, docs, overall }` per record. The V1 schema
+  already carries the block; the V1 UI just doesn't surface
+  it. Wave 4 turns on the surface.
+- Curator-assigned, not algorithmically generated, by
+  default. The framework stores and surfaces them; the
+  gardener decides what they mean.
 
 ### 4.2 AI-assisted curation (gated)
 
-- Optional CLI pass that suggests topics, tags, and descriptions for uncurated resources.
+- Optional CLI pass that suggests topics, tags, and
+  descriptions for uncurated records.
 - Always a suggestion, never a write. Humans approve.
 
-**Wave 4 exit criteria:** at least one space uses signal sync productively, and the gardeners confirm it makes curation easier, not noisier.
+**Wave 4 exit criteria:** at least one space uses signal
+sync productively, and the gardeners confirm it makes
+curation easier, not noisier.
 
 ---
 
