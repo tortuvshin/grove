@@ -1,0 +1,183 @@
+---
+import { siteConfig, indexSlug } from "../../data/site-config";
+import { recordBySlug, records } from "../../data/records";
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import Container from "../../components/layout/Container.astro";
+import type { ProjectRecord, ResourceRecord, EntityRecord } from "@grove-dev/core";
+
+export function getStaticPaths() {
+  return records.map((record) => ({
+    params: { slug: record.slug },
+  }));
+}
+
+interface Props {
+  slug: string;
+}
+
+const slug = indexSlug();
+const recordSlug = Astro.params.slug ?? "";
+const record = recordBySlug(recordSlug);
+
+if (!record) {
+  return Astro.redirect(`/${slug}`);
+}
+
+const isProject = record.kind === "project";
+const isResource = record.kind === "resource";
+const isEntity = record.kind === "entity";
+
+const project = isProject ? (record as ProjectRecord) : null;
+const resource = isResource ? (record as ResourceRecord) : null;
+const entity = isEntity ? (record as EntityRecord) : null;
+
+const name = resource ? resource.title : record.kind === "entity" ? entity!.name : project!.name;
+const title = `${name} — ${siteConfig.name}`;
+const description = record.description ?? `${name} on ${siteConfig.name}`;
+
+const gh = (record as { github?: { repository?: { html_url?: string; stargazers_count?: number; pushed_at?: string | null; description?: string | null } } }).github?.repository;
+const repoUrl = record.links?.github ?? gh?.html_url ?? "";
+const homepageUrl = record.links?.website ?? "";
+const stars = gh?.stargazers_count ?? 0;
+const lastCommit = gh?.pushed_at ?? null;
+---
+
+<BaseLayout title={title} description={description}>
+  <Container>
+    <article class="py-10 sm:py-14">
+      <nav class="text-2xs text-ink-500 dark:text-ink-400" aria-label="Breadcrumb">
+        <a href={`/${slug}`} class="hover:text-ink-900 dark:hover:text-ink-100 capitalize">
+          {slug}
+        </a>
+        <span class="mx-1.5 text-ink-300 dark:text-ink-700">/</span>
+        <span class="text-ink-700 dark:text-ink-300">{name}</span>
+      </nav>
+
+      <header class="mt-5 flex flex-col gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-ink-700 dark:border-ink-800 dark:text-ink-300">
+            {record.kind}
+          </span>
+          <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
+            {record.category}
+          </span>
+        </div>
+        <h1 class="m-0 text-[1.75rem] sm:text-[2rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {name}
+        </h1>
+        <p class="m-0 max-w-[68ch] text-base text-ink-700 dark:text-ink-200">
+          {record.description}
+        </p>
+        <div class="flex flex-wrap gap-2">
+          {repoUrl && (
+            <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="rounded-md bg-ink-900 px-4 py-2 text-sm font-medium text-white hover:bg-ink-700 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white">
+              View on GitHub
+            </a>
+          )}
+          {homepageUrl && (
+            <a href={homepageUrl} target="_blank" rel="noopener noreferrer" class="rounded-md border border-ink-200 px-4 py-2 text-sm font-medium text-ink-700 hover:border-ink-300 dark:border-ink-800 dark:text-ink-300">
+              Homepage
+            </a>
+          )}
+        </div>
+      </header>
+
+      {record.tags && record.tags.length > 0 && (
+        <div class="mt-6 flex flex-wrap items-center gap-1.5">
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            Tags
+          </span>
+          {record.tags.map((t) => (
+            <a
+              href={`/${slug}?tag=${encodeURIComponent(t)}`}
+              class="rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors hover:border-ink-300 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300"
+            >
+              {t}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {isProject && project && (
+        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-ink-200 bg-ink-200 text-2xs sm:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
+          {project.stack && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stack</dt>
+              <dd class="text-ink-900 dark:text-ink-100 font-mono">{project.stack}</dd>
+            </div>
+          )}
+          {project.platforms && project.platforms.length > 0 && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Platforms</dt>
+              <dd class="text-ink-900 dark:text-ink-100">{project.platforms.join(", ")}</dd>
+            </div>
+          )}
+          {stars > 0 && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stars</dt>
+              <dd class="text-ink-900 dark:text-ink-100 font-mono">{stars}</dd>
+            </div>
+          )}
+          {lastCommit && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Last commit</dt>
+              <dd class="text-ink-900 dark:text-ink-100 font-mono">{lastCommit.slice(0, 10)}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+
+      {isResource && resource && (
+        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-ink-200 bg-ink-200 text-2xs sm:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
+          <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+            <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Type</dt>
+            <dd class="text-ink-900 dark:text-ink-100 capitalize">{resource.type}</dd>
+          </div>
+          <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+            <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Topic</dt>
+            <dd class="text-ink-900 dark:text-ink-100">{resource.topic}</dd>
+          </div>
+          {resource.author && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Author</dt>
+              <dd class="text-ink-900 dark:text-ink-100">{resource.author}</dd>
+            </div>
+          )}
+          {resource.publishedAt && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Published</dt>
+              <dd class="text-ink-900 dark:text-ink-100 font-mono">{resource.publishedAt.slice(0, 10)}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+
+      {isEntity && entity && (
+        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-ink-200 bg-ink-200 text-2xs sm:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
+          <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+            <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Type</dt>
+            <dd class="text-ink-900 dark:text-ink-100 capitalize">{entity.type}</dd>
+          </div>
+          {entity.founded && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Founded</dt>
+              <dd class="text-ink-900 dark:text-ink-100 font-mono">{entity.founded}</dd>
+            </div>
+          )}
+          {entity.location && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Location</dt>
+              <dd class="text-ink-900 dark:text-ink-100">{entity.location}</dd>
+            </div>
+          )}
+          {entity.members && (
+            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
+              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Members</dt>
+              <dd class="text-ink-900 dark:text-ink-100 font-mono">{entity.members}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+    </article>
+  </Container>
+</BaseLayout>

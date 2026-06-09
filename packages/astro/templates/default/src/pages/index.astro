@@ -1,66 +1,67 @@
 ---
-import { siteConfig } from "../data/config";
-import BaseLayout from "../components/layout/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import WhyThisExists from "../components/WhyThisExists.astro";
-import AppSection from "../components/AppSection.astro";
-import StackGrid from "../components/StackGrid.astro";
-import CategoryGrid from "../components/CategoryGrid.astro";
-import ContributorsGrid from "../components/ContributorsGrid.astro";
-import OriginalCollection from "../components/OriginalCollection.astro";
+import { siteConfig, indexSlug, itemLabel } from "../../data/site-config";
+import { records } from "../../data/records";
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import Container from "../../components/layout/Container.astro";
+import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
 
-import { newApps, hotApps, matureApps } from "../data/apps";
-import { stacks } from "../data/stacks";
-import { categories } from "../data/categories";
-import { contributors } from "../data/contributors";
-import { stats } from "../data/stats";
+const slug = indexSlug();
+const featured = records
+  .filter((r) => r.curation?.labels?.includes("featured"))
+  .slice(0, 6);
+const recent = records.slice(0, 6);
+const list = featured.length > 0 ? featured : recent;
 
-const hotList = hotApps().slice(0, 6);
-const newList = newApps().slice(0, 6);
-const matureList = matureApps().slice(0, 6);
-
-const title = `${siteConfig.name} — A directory of real open-source applications`;
+const title = `${siteConfig.name} — ${siteConfig.tagline}`;
 const description =
-  "A searchable directory of real open-source applications — organized by stack, category, platform, license, activity, and maturity.";
+  siteConfig.description ?? `A growing community knowledge site powered by Grove.`;
 ---
 
 <BaseLayout title={title} description={description}>
-      <Hero />
+  <section class="border-b border-ink-200 dark:border-ink-800">
+    <Container>
+      <div class="py-12 sm:py-16">
+        <h1 class="m-0 text-[2rem] sm:text-[2.5rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {siteConfig.name}
+        </h1>
+        <p class="mt-3 max-w-[60ch] text-lg text-ink-700 dark:text-ink-200 m-0">
+          {siteConfig.tagline}
+        </p>
+        <p class="mt-3 max-w-[60ch] text-sm text-ink-500 dark:text-ink-400 m-0">
+          {description}
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-2">
+          <a
+            href={`/${slug}`}
+            class="rounded-md bg-ink-900 px-4 py-2 text-sm font-medium text-white hover:bg-ink-700 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white"
+          >
+            Browse {slug}
+          </a>
+          <a
+            href="/about"
+            class="rounded-md border border-ink-200 px-4 py-2 text-sm font-medium text-ink-700 hover:border-ink-300 dark:border-ink-800 dark:text-ink-300"
+          >
+            About
+          </a>
+        </div>
+      </div>
+    </Container>
+  </section>
 
-      <WhyThisExists />
-
-      <AppSection
-        id="hot"
-        title="Hot open-source apps"
-        description="Projects gaining stars, activity, or attention recently."
-        apps={hotList}
-        viewAllHref="/apps?label=hot"
-        viewAllLabel="View hot apps"
-      />
-
-      <AppSection
-        id="new"
-        title="New open-source apps"
-        description="Recently added apps from the community."
-        apps={newList}
-        viewAllHref="/apps?label=new"
-        viewAllLabel="View all new"
-      />
-
-      <AppSection
-        id="mature"
-        title="Mature open-source apps"
-        description="Established apps with strong history, active maintainers, and real-world usage."
-        apps={matureList}
-        viewAllHref="/apps?label=mature"
-        viewAllLabel="View mature apps"
-      />
-
-      <StackGrid stacks={stacks} />
-
-      <CategoryGrid categories={categories} />
-
-      <ContributorsGrid contributors={contributors} />
-
-      <OriginalCollection stats={stats} />
+  {list.length > 0 && (
+    <section>
+      <Container>
+        <div class="py-8 sm:py-10">
+          <h2 class="m-0 text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            Featured {itemLabel()}s
+          </h2>
+          <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((record) => (
+              <ItemCard record={record} href={`/${slug}/${record.slug}`} />
+            ))}
+          </div>
+        </div>
+      </Container>
+    </section>
+  )}
 </BaseLayout>
