@@ -1,41 +1,130 @@
 ---
-import type { CuratedItem, HealthEntry } from "@grove-dev/core";
-import HealthBadge from "./HealthBadge.astro";
+import type { Resource } from "@grove-dev/core";
 
 interface Props {
-  item: CuratedItem;
-  health?: HealthEntry;
+  record: Resource;
+  href: string;
 }
 
-const { item, health } = Astro.props;
-const href = `/projects/${item.id}`;
-const tags = item.taxonomy.tags.slice(0, 4);
+const { record, href } = Astro.props;
+
+const name =
+  record.kind === "resource"
+    ? record.title
+    : record.name;
+const tags = (record.tags ?? []).slice(0, 4);
 ---
 
-<article class="oc-card">
-  <div class="oc-card-header">
+<article class="grove-card">
+  <div class="grove-card-header">
     <div>
-      <h2 class="oc-card-title">
-        <a href={href}>{item.name}</a>
+      <h2 class="grove-card-title">
+        <a href={href}>{name}</a>
       </h2>
-      <p class="oc-card-category">{item.taxonomy.category}</p>
+      <p class="grove-card-meta">
+        <span class="grove-badge">{record.kind}</span>
+        <span class="grove-card-category">{record.category}</span>
+      </p>
     </div>
-    <HealthBadge status={health?.health.status} />
   </div>
-  <p class="oc-card-description">{item.description}</p>
-  <div class="oc-card-meta">
-    {health?.github?.stars != null && <span>{health.github.stars.toLocaleString()} stars</span>}
-    {health?.github?.license && <span>{health.github.license}</span>}
-    {health?.github?.language && <span>{health.github.language}</span>}
-  </div>
-  <div class="oc-card-actions">
-    <a href={`/projects/${item.id}`}>Details</a>
-    {item.links.github && <a href={item.links.github}>GitHub</a>}
-    {item.links.docs && <a href={item.links.docs}>Docs</a>}
-  </div>
+  <p class="grove-card-description">{record.description}</p>
   {tags.length > 0 && (
-    <ul class="oc-tags" aria-label="Tags">
-      {tags.map((tag) => <li>{tag}</li>)}
+    <ul class="grove-tags" aria-label="Tags">
+      {tags.map((tag) => <li class="grove-tag">{tag}</li>)}
     </ul>
   )}
+  <div class="grove-card-actions">
+    <a href={href}>Details</a>
+    {record.links?.github && <a href={record.links.github}>GitHub</a>}
+    {record.links?.website && <a href={record.links.website}>Website</a>}
+  </div>
 </article>
+
+<style>
+  .grove-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--grove-border, #e5e7eb);
+    border-radius: var(--grove-radius, 0.5rem);
+    background: var(--grove-surface, #fff);
+    color: var(--grove-text, #111827);
+  }
+  .grove-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .grove-card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .grove-card-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .grove-card-title a:hover {
+    text-decoration: underline;
+  }
+  .grove-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0.25rem 0 0 0;
+    font-size: 0.75rem;
+    color: var(--grove-text-muted, #6b7280);
+  }
+  .grove-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--grove-border, #e5e7eb);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .grove-card-description {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--grove-text-muted, #4b5563);
+  }
+  .grove-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .grove-tag {
+    display: inline-flex;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--grove-surface-muted, #f3f4f6);
+    font-size: 0.6875rem;
+    color: var(--grove-text-muted, #4b5563);
+  }
+  .grove-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+  .grove-card-actions a {
+    font-size: 0.8125rem;
+    color: var(--grove-text, #111827);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .grove-card-actions a:hover {
+    border-bottom-color: currentColor;
+  }
+</style>
