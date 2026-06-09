@@ -21,11 +21,11 @@ importers:
   packages/astro:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
       '@grove-dev/ui':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../ui
       astro:
         specifier: ^6.4.4
         version: 6.4.4(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
@@ -39,8 +39,8 @@ importers:
         specifier: workspace:*
         version: link:../astro
       '@grove-dev/core':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
       '@grove-dev/nextjs':
         specifier: workspace:*
         version: link:../nextjs
@@ -50,6 +50,9 @@ importers:
       commander:
         specifier: ^14.0.2
         version: 14.0.3
+      yaml:
+        specifier: ^2.6.0
+        version: 2.9.0
     devDependencies:
       tsx:
         specifier: ^4.21.0
@@ -70,11 +73,11 @@ importers:
   packages/nextjs:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
       '@grove-dev/ui':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../ui
       next:
         specifier: '>=14.0.0'
         version: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -88,11 +91,11 @@ importers:
   packages/svelte:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
       '@grove-dev/ui':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../ui
       '@sveltejs/kit':
         specifier: '>=2.0.0'
         version: 2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
@@ -103,8 +106,8 @@ importers:
   packages/ui:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.1.1
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
@@ -513,12 +516,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@grove-dev/core@0.1.1':
-    resolution: {integrity: sha512-9Z+EZRxEOudI+6huRGinmHtQKfeeFZmucFa199vCj6BgUbkfh6h6xgdE9kio6d0zcgoXNoTFRMjf+oSQOT2CJw==}
-
-  '@grove-dev/ui@0.1.1':
-    resolution: {integrity: sha512-myL20tyrUHZI/8fndELe3gFQoDPYI679Q7I1WxuZ5bk1xTsBcy99qFvltKUazj+BVRVN/j7U4S8koYFHpBi1+g==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2585,16 +2582,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.0':
     optional: true
-
-  '@grove-dev/core@0.1.1':
-    dependencies:
-      jiti: 2.7.0
-      yaml: 2.9.0
-      zod: 4.4.3
-
-  '@grove-dev/ui@0.1.1':
-    dependencies:
-      '@grove-dev/core': 0.1.1
 
   '@img/colour@1.1.0':
     optional: true
