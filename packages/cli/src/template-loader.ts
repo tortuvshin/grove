@@ -131,11 +131,16 @@ export async function renameProjectInTemplate(
 }
 
 /**
- * In-place: replace `workspace:*` (and `workspace:^x.y.z`) for any
- * `@grove-dev/*` package with the supplied published version. The
- * monorepo's templates are written that way so the framework adapter
+ * In-place: pin every `@grove-dev/*` dependency in the template's
+ * `package.json` to the supplied published version. The templates
+ * ship with placeholders like `workspace:*` (monorepo-internal
+ * mode) or `*` (any version — too loose) so the framework adapter
  * can be developed against its own sibling packages, but a fresh
- * scaffold is not part of that monorepo and would fail to install.
+ * scaffold is not part of that monorepo and needs a real version
+ * pin or `pnpm install` will either fail (`workspace:*` has no
+ * registry match) or pull a breaking change (`*` is unpinned).
+ *
+ * Non-Grove deps are left untouched.
  */
 function rewriteWorkspaceDeps(
   pkg: {
@@ -150,9 +155,15 @@ function rewriteWorkspaceDeps(
     const map = pkg[section];
     if (!map) continue;
     for (const [name, value] of Object.entries(map)) {
-      if (name.startsWith("@grove-dev/") && value.startsWith("workspace:")) {
-        map[name] = version;
+      if (!name.startsWith("@grove-dev/")) continue;
+      if (value === version) continue;
+      // Pin anything that's a placeholder: workspace:* (monorepo), *
+      // (any version), git/file URLs that don't exist in the
+      // scaffold, or versions that don't look like a real semver.
+      const looksPinned = /^[~^]?\d/.test(value);
+      if (!looksPinned) {
         rewritten.push(`${name}: ${value} -> ${version}`);
+        map[name] = version;
       }
     }
   }

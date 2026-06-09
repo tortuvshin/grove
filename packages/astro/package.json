@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/astro",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "type": "module",
   "description": "Astro framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",
