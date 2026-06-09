@@ -15,3 +15,6 @@ coverage/
 *.log
 *.tsbuildinfo
 *.svelte-kit/
+
+# Local scaffold smoke tests — never commit a `grove new` scratch site.
+examples/*/
