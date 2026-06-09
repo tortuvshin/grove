@@ -2,6 +2,39 @@ import { z } from "zod";
 import { parse, stringify } from "yaml";
 
 // ──────────────────────────────────────────────────────────────────────
+// Blueprints and kinds
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * A blueprint defines the shape and behavior of a Grove site.
+ *
+ * V1 ships three fixed blueprints. They are not extensible — no custom
+ * blueprint API in V1.
+ */
+export const blueprintSchema = z.enum([
+  "project-directory",
+  "resource-hub",
+  "ecosystem-map",
+]);
+
+export type Blueprint = z.infer<typeof blueprintSchema>;
+
+/**
+ * Each blueprint is bound to a single resource kind. Records are
+ * discriminated by `kind`, which must match the blueprint of the site
+ * that owns them.
+ */
+export const resourceKindSchema = z.enum(["project", "resource", "entity"]);
+
+export type ResourceKind = z.infer<typeof resourceKindSchema>;
+
+export const blueprintKind: Record<Blueprint, ResourceKind> = {
+  "project-directory": "project",
+  "resource-hub": "resource",
+  "ecosystem-map": "entity",
+};
+
+// ──────────────────────────────────────────────────────────────────────
 // Health & decision labels
 // ──────────────────────────────────────────────────────────────────────
 
@@ -35,7 +68,7 @@ export const healthTierSchema = z.enum([
 ]);
 
 // ──────────────────────────────────────────────────────────────────────
-// Curation: project shape
+// Curation enums (shared)
 // ──────────────────────────────────────────────────────────────────────
 
 export const projectTypeSchema = z.enum([
@@ -49,8 +82,34 @@ export const projectTypeSchema = z.enum([
   "historical",
 ]);
 
-export const difficultySchema = z.enum(["beginner", "intermediate", "advanced"]);
-export const codebaseSizeSchema = z.enum(["small", "medium", "large", "huge"]);
+export const resourceTypeSchema = z.enum([
+  "guide",
+  "comparison",
+  "link",
+  "explainer",
+  "tool",
+  "video",
+  "article",
+  "course",
+  "book",
+  "podcast",
+  "other",
+]);
+
+export const entityTypeSchema = z.enum([
+  "company",
+  "organization",
+  "community",
+  "school",
+  "university",
+  "research-lab",
+  "agency",
+  "service",
+  "product",
+  "person",
+  "other",
+]);
+
 export const appLabelSchema = z.enum(["new", "hot", "mature", "featured"]);
 
 export const scoreSchema = z.object({
@@ -63,37 +122,21 @@ export const scoreSchema = z.object({
 });
 
 // ──────────────────────────────────────────────────────────────────────
-// Distribution channels
+// Links
 // ──────────────────────────────────────────────────────────────────────
 
-export const distributionChannelTypeSchema = z.enum([
-  "app-store",
-  "play-store",
-  "fdroid",
-  "github-releases",
-  "apk",
-  "testflight",
-  "website",
-  "snapcraft",
-  "flathub",
-  "microsoft-store",
-  "package-registry",
-  "docs",
-  "demo",
-  "other",
-]);
-
-export const distributionChannelSchema = z.object({
-  type: distributionChannelTypeSchema,
-  platform: z.string().optional(),
-  label: z.string().optional(),
-  url: z.string().url(),
-  verified: z.boolean().optional(),
-  notes: z.string().optional(),
-});
+export const linksSchema = z
+  .object({
+    github: z.string().url().optional(),
+    website: z.string().url().optional(),
+    docs: z.string().url().optional(),
+    source: z.string().url().optional(),
+  })
+  .catchall(z.string().url())
+  .default({});
 
 // ──────────────────────────────────────────────────────────────────────
-// GitHub-shaped metadata
+// Health metadata
 // ──────────────────────────────────────────────────────────────────────
 
 export const githubLicenseSchema = z
@@ -140,222 +183,6 @@ export const githubRepositorySchema = z
   })
   .passthrough();
 
-// ──────────────────────────────────────────────────────────────────────
-// Stack (registry-backed taxonomy)
-// ──────────────────────────────────────────────────────────────────────
-
-export const stackTechnologySchema = z
-  .object({
-    id: z.string().min(1),
-    role: z.string().optional(),
-  })
-  .passthrough();
-
-export const stackSchema = z
-  .object({
-    primary: z.string().min(1),
-    families: z.array(z.string()).optional(),
-    technologies: z.array(stackTechnologySchema).optional(),
-  })
-  .passthrough();
-
-export const stackRefSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  family: z.string().optional(),
-  languages: z.array(z.string()).optional(),
-  platforms: z.array(z.string()).optional(),
-  icon: z.string().optional(),
-  status: z.enum(["live", "expanding", "planned"]).optional(),
-  blurb: z.string().optional(),
-});
-
-export const platformRefSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  icon: z.string().optional(),
-});
-
-export const categoryRefSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  blurb: z.string().optional(),
-});
-
-export const distributionChannelRefSchema = z.object({
-  id: distributionChannelTypeSchema,
-  name: z.string().min(1),
-  platforms: z.array(z.string()).optional(),
-});
-
-// ──────────────────────────────────────────────────────────────────────
-// Item — generic open-source project record
-// ──────────────────────────────────────────────────────────────────────
-
-export const itemSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  description: z.string().default(""),
-  links: z
-    .object({
-      github: z.string().url().optional(),
-      website: z.string().url().optional(),
-      docs: z.string().url().optional(),
-      source: z.string().url().optional(),
-    })
-    .catchall(z.string().url())
-    .default({}),
-  source: z
-    .object({
-      type: z.enum(["markdown", "manual", "github-topic", "awesome-list", "submit"]).default("manual"),
-      file: z.string().optional(),
-      line: z.number().int().positive().optional(),
-      url: z.string().optional(),
-      provider: z.string().optional(),
-      owner: z.string().optional(),
-      repo: z.string().optional(),
-    })
-    .default({ type: "manual" }),
-  taxonomy: z
-    .object({
-      category: z.string().min(1).default("uncategorized"),
-      tags: z.array(z.string()).default([]),
-      language: z.string().optional(),
-      stack: z.string().optional(),
-      stacks: z.array(z.string()).default([]),
-      platforms: z.array(z.string()).default([]),
-    })
-    .default({
-      category: "uncategorized",
-      tags: [],
-      stacks: [],
-      platforms: [],
-    }),
-  labels: z.array(appLabelSchema).default([]),
-  lenses: z.array(z.string()).default([]),
-  distribution: z
-    .object({
-      channels: z.array(distributionChannelSchema).default([]),
-    })
-    .default({ channels: [] }),
-  curation: z
-    .object({
-      projectType: projectTypeSchema.optional(),
-      difficulty: difficultySchema.optional(),
-      codebaseSize: codebaseSizeSchema.optional(),
-      stateManagement: z.string().optional(),
-      backend: z.string().optional(),
-      architecture: z.string().optional(),
-      bestFor: z.array(z.string()).default([]),
-      whyListed: z.array(z.string()).default([]),
-      caveats: z.array(z.string()).default([]),
-      goodFirstIssues: z.union([z.boolean(), z.string().url()]).optional(),
-      contributionGuide: z.union([z.boolean(), z.string().url()]).optional(),
-      launchedBy: z.string().optional(),
-      launchAsk: z.array(z.string()).default([]),
-      reviewed: z.boolean().optional(),
-      reviewedBy: z.string().optional(),
-      reviewedAt: z.string().optional(),
-      notes: z.string().optional(),
-      scores: scoreSchema.default({}),
-    })
-    .default({
-      bestFor: [],
-      whyListed: [],
-      caveats: [],
-      launchAsk: [],
-      scores: {},
-    }),
-});
-
-export const itemsFileSchema = z.union([
-  z.array(itemSchema),
-  z.object({ items: z.array(itemSchema) }),
-]);
-
-// ──────────────────────────────────────────────────────────────────────
-// GitHub-shaped app record (schema v1)
-// ──────────────────────────────────────────────────────────────────────
-
-const isoLike = z.string().min(4).nullable().optional();
-
-const finalAppSchema = z
-  .object({
-    schemaVersion: z.number().optional(),
-    id: z.string().optional(),
-    slug: z.string().min(1),
-    source: z
-      .object({
-        provider: z.literal("github"),
-        owner: z.string().min(1),
-        repo: z.string().min(1),
-        url: z.string().url().optional(),
-      })
-      .passthrough(),
-    app: z
-      .object({
-        name: z.string().min(1),
-        description: z.string().min(1),
-        category: z.string().min(1),
-        projectType: z.string().optional(),
-        platforms: z.array(z.string()).min(1),
-        tags: z.array(z.string()).optional(),
-        distribution: z
-          .object({
-            channels: z
-              .array(
-                z
-                  .object({
-                    type: z.string().min(1),
-                    platform: z.string().optional(),
-                    label: z.string().optional(),
-                    url: z.string().url(),
-                    verified: z.boolean().optional(),
-                    notes: z.string().optional(),
-                  })
-                  .passthrough(),
-              )
-              .optional(),
-          })
-          .passthrough()
-          .optional(),
-      })
-      .passthrough(),
-    stack: stackSchema,
-    github: z
-      .object({
-        repository: githubRepositorySchema.optional(),
-        languages: z.record(z.string(), z.number()).optional(),
-        latestRelease: z.record(z.string(), z.unknown()).nullable().optional(),
-        activity: z.record(z.string(), z.unknown()).optional(),
-        files: z.record(z.string(), z.boolean()).optional(),
-        labels: z.array(z.record(z.string(), z.unknown())).optional(),
-        sync: z.record(z.string(), z.unknown()).optional(),
-      })
-      .passthrough()
-      .optional(),
-    health: z.record(z.string(), z.unknown()).optional(),
-    curation: z.record(z.string(), z.unknown()).optional(),
-  })
-  .passthrough();
-
-const legacyAppSchema = z
-  .object({
-    slug: z.string().min(1),
-    name: z.string().min(1),
-    repoUrl: z.string().url(),
-    description: z.string().min(1),
-    stack: z.union([z.string(), z.record(z.string(), z.unknown())]),
-    stacks: z.array(z.string()).optional(),
-    platforms: z.array(z.string()).default([]),
-    category: z.string().min(1),
-  })
-  .passthrough();
-
-// ──────────────────────────────────────────────────────────────────────
-// Health metadata
-// ──────────────────────────────────────────────────────────────────────
-
 export const githubMetadataSchema = z.object({
   fullName: z.string().optional(),
   stars: z.number().int().nonnegative().default(0),
@@ -391,19 +218,21 @@ export const githubMetadataSchema = z.object({
     .optional(),
 });
 
+export const healthBlockSchema = z.object({
+  status: healthStatusSchema.default("unknown"),
+  maturity: z.enum(["experimental", "useful", "mature", "unknown"]).default("unknown"),
+  tier: healthTierSchema.default("experimental"),
+  visibility: decisionVisibilitySchema.default("keep"),
+  cleanupCandidate: z.boolean().default(false),
+  staleReason: z.string().nullable().optional(),
+  confidence: z.enum(["low", "medium", "high"]).default("medium"),
+  reasons: z.array(z.string()).default([]),
+});
+
 export const healthEntrySchema = z.object({
   id: z.string().min(1),
   github: githubMetadataSchema.optional(),
-  health: z.object({
-    status: healthStatusSchema,
-    maturity: z.enum(["experimental", "useful", "mature", "unknown"]).default("unknown"),
-    tier: healthTierSchema.default("experimental"),
-    visibility: decisionVisibilitySchema.default("keep"),
-    cleanupCandidate: z.boolean().default(false),
-    staleReason: z.string().nullable().optional(),
-    confidence: z.enum(["low", "medium", "high"]).default("medium"),
-    reasons: z.array(z.string()).default([]),
-  }),
+  health: healthBlockSchema,
 });
 
 export const healthFileSchema = z.union([
@@ -431,7 +260,7 @@ export const decisionsFileSchema = z.union([
 ]);
 
 // ──────────────────────────────────────────────────────────────────────
-// Overrides (manual corrections to imported items)
+// Overrides (manual corrections to imported records)
 // ──────────────────────────────────────────────────────────────────────
 
 export const overrideSchema = z.object({
@@ -445,78 +274,256 @@ export const overridesFileSchema = z.union([
 ]);
 
 // ──────────────────────────────────────────────────────────────────────
-// Curated config
+// Curation: shared block
 // ──────────────────────────────────────────────────────────────────────
 
-export const curatedConfigSchema = z.object({
+const curationBlockSchema = z
+  .object({
+    reviewed: z.boolean().default(false),
+    reviewedBy: z.string().optional(),
+    reviewedAt: z.string().optional(),
+    notes: z.string().optional(),
+    labels: z.array(appLabelSchema).default([]),
+    lenses: z.array(z.string()).default([]),
+  })
+  .default({ reviewed: false, labels: [], lenses: [] });
+
+// ──────────────────────────────────────────────────────────────────────
+// Resource base (shared by all blueprints)
+// ──────────────────────────────────────────────────────────────────────
+
+const resourceBaseSchema = z.object({
+  slug: z.string().min(1),
+  description: z.string().default(""),
+  category: z.string().min(1).default("uncategorized"),
+  tags: z.array(z.string()).default([]),
+  links: linksSchema,
+  content: z.string().optional(), // path to markdown body under content/records/
+  source: z
+    .object({
+      type: z.enum(["manual", "github-topic", "awesome-list", "submit", "import"])
+        .default("manual"),
+      file: z.string().optional(),
+      url: z.string().optional(),
+      provider: z.string().optional(),
+      owner: z.string().optional(),
+      repo: z.string().optional(),
+    })
+    .default({ type: "manual" }),
+  curation: curationBlockSchema,
+  scores: scoreSchema.default({}),
+});
+
+// ──────────────────────────────────────────────────────────────────────
+// Blueprint: project-directory — kind: project
+// ──────────────────────────────────────────────────────────────────────
+
+export const projectRecordSchema = resourceBaseSchema.extend({
+  kind: z.literal("project"),
   name: z.string().min(1),
-  tagline: z.string().default("A living, health-aware developer directory."),
-  description: z.string().optional(),
-  siteUrl: z.string().url().optional(),
-  repoUrl: z.string().url().optional(),
-  itemLabel: z.string().default("project"),
+  projectType: projectTypeSchema.optional(),
+  stack: z.string().optional(),
+  stacks: z.array(z.string()).default([]),
+  platforms: z.array(z.string()).default([]),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
+  codebaseSize: z.enum(["small", "medium", "large", "huge"]).optional(),
+  bestFor: z.array(z.string()).default([]),
+  whyListed: z.array(z.string()).default([]),
+  caveats: z.array(z.string()).default([]),
+  distribution: z
+    .object({
+      channels: z
+        .array(
+          z
+            .object({
+              type: z.string().min(1),
+              platform: z.string().optional(),
+              label: z.string().optional(),
+              url: z.string().url(),
+              verified: z.boolean().optional(),
+              notes: z.string().optional(),
+            })
+            .passthrough(),
+        )
+        .default([]),
+    })
+    .default({ channels: [] }),
+  github: z
+    .object({
+      repository: githubRepositorySchema.optional(),
+      languages: z.record(z.string(), z.number()).optional(),
+      latestRelease: z.record(z.string(), z.unknown()).nullable().optional(),
+      activity: z.record(z.string(), z.unknown()).optional(),
+      files: z.record(z.string(), z.boolean()).optional(),
+      labels: z.array(z.record(z.string(), z.unknown())).optional(),
+      sync: z.record(z.string(), z.unknown()).optional(),
+    })
+    .passthrough()
+    .optional(),
+  health: healthBlockSchema.optional(),
+});
+
+export type ProjectRecord = z.infer<typeof projectRecordSchema>;
+
+// ──────────────────────────────────────────────────────────────────────
+// Blueprint: resource-hub — kind: resource
+// ──────────────────────────────────────────────────────────────────────
+
+export const resourceRecordSchema = resourceBaseSchema.extend({
+  kind: z.literal("resource"),
+  title: z.string().min(1),
+  type: resourceTypeSchema,
+  topic: z.string().min(1),
+  related: z.array(z.string()).default([]), // slugs of related resources
+  publishedAt: z.string().optional(),
+  author: z.string().optional(),
+});
+
+export type ResourceRecord = z.infer<typeof resourceRecordSchema>;
+
+// ──────────────────────────────────────────────────────────────────────
+// Blueprint: ecosystem-map — kind: entity
+// ──────────────────────────────────────────────────────────────────────
+
+export const entityRecordSchema = resourceBaseSchema.extend({
+  kind: z.literal("entity"),
+  name: z.string().min(1),
+  type: entityTypeSchema,
+  founded: z.string().optional(),
+  location: z.string().optional(),
+  members: z.number().int().nonnegative().optional(),
+  parent: z.string().optional(), // slug of parent entity
+});
+
+export type EntityRecord = z.infer<typeof entityRecordSchema>;
+
+// ──────────────────────────────────────────────────────────────────────
+// Discriminated union: Resource
+// ──────────────────────────────────────────────────────────────────────
+
+export const resourceSchema = z.discriminatedUnion("kind", [
+  projectRecordSchema,
+  resourceRecordSchema,
+  entityRecordSchema,
+]);
+
+export type Resource = z.infer<typeof resourceSchema>;
+
+// ──────────────────────────────────────────────────────────────────────
+// Records file (one or many resources per file is also supported)
+// ──────────────────────────────────────────────────────────────────────
+
+export const recordsFileSchema = z.union([
+  z.array(resourceSchema),
+  z.object({ records: z.array(resourceSchema) }),
+]);
+
+export type RecordsFile = z.infer<typeof recordsFileSchema>;
+
+// ──────────────────────────────────────────────────────────────────────
+// Grove config
+// ──────────────────────────────────────────────────────────────────────
+
+export const navItemSchema = z.object({
+  label: z.string().min(1),
+  href: z.string().min(1),
+});
+
+export const githubIntegrationSchema = z.union([
+  z.boolean(),
+  z.object({
+    metadata: z.boolean().default(false),
+    contributors: z.boolean().default(false),
+    health: z.boolean().default(false),
+  }),
+]);
+
+export const themeSchema = z.object({
+  primaryColor: z.string().default("#16a34a"),
+  radius: z.enum(["none", "soft", "round"]).default("soft"),
+  density: z.enum(["compact", "comfortable", "spacious"]).default("comfortable"),
+  containerWidth: z.string().default("72rem"),
+});
+
+export const componentOverrideSchema = z.object({
+  Header: z.string().optional(),
+  Footer: z.string().optional(),
+  Hero: z.string().optional(),
+  ItemCard: z.string().optional(),
+  DetailHeader: z.string().optional(),
+});
+
+export const groveConfigSchema = z.object({
+  blueprint: blueprintSchema.default("project-directory"),
+
+  site: z.object({
+    name: z.string().min(1),
+    tagline: z.string().default("A growing community knowledge site."),
+    description: z.string().optional(),
+    url: z.string().url().optional(),
+    repoUrl: z.string().url().optional(),
+  }),
+
+  nav: z.array(navItemSchema).default([]),
+
+  facets: z.array(z.string()).default(["category", "tags"]),
+
+  integrations: z
+    .object({
+      github: githubIntegrationSchema.default(false),
+    })
+    .default({ github: false }),
+
+  theme: themeSchema.default({
+    primaryColor: "#16a34a",
+    radius: "soft",
+    density: "comfortable",
+    containerWidth: "72rem",
+  }),
+
+  components: componentOverrideSchema.default({}),
+
   paths: z
     .object({
-      sourcesDir: z.string().default("sources"),
       dataDir: z.string().default("data"),
       contentDir: z.string().default("content"),
-      appsDir: z.string().default("data/apps"),
+      recordsDir: z.string().default("data/records"),
+      pagesDir: z.string().default("content/pages"),
+      bodiesDir: z.string().default("content/records"),
+      publicDir: z.string().default("public"),
       taxonomyDir: z.string().default("data/taxonomy"),
       generatedDir: z.string().default("data/generated"),
-      items: z.string().default("data/items.yml"),
       health: z.string().default("data/health.yml"),
       decisions: z.string().default("data/decisions.yml"),
       overrides: z.string().default("data/overrides.yml"),
     })
     .default({
-      sourcesDir: "sources",
       dataDir: "data",
       contentDir: "content",
-      appsDir: "data/apps",
+      recordsDir: "data/records",
+      pagesDir: "content/pages",
+      bodiesDir: "content/records",
+      publicDir: "public",
       taxonomyDir: "data/taxonomy",
       generatedDir: "data/generated",
-      items: "data/items.yml",
       health: "data/health.yml",
       decisions: "data/decisions.yml",
       overrides: "data/overrides.yml",
     }),
 });
 
-// ──────────────────────────────────────────────────────────────────────
-// Type exports
-// ──────────────────────────────────────────────────────────────────────
-
-export type HealthStatus = z.infer<typeof healthStatusSchema>;
-export type DecisionVisibility = z.infer<typeof decisionVisibilitySchema>;
-export type HealthTier = z.infer<typeof healthTierSchema>;
-export type ProjectType = z.infer<typeof projectTypeSchema>;
-export type Difficulty = z.infer<typeof difficultySchema>;
-export type CodebaseSize = z.infer<typeof codebaseSizeSchema>;
-export type AppLabel = z.infer<typeof appLabelSchema>;
-export type Score = z.infer<typeof scoreSchema>;
-export type DistributionChannelType = z.infer<typeof distributionChannelTypeSchema>;
-export type DistributionChannel = z.infer<typeof distributionChannelSchema>;
-export type GithubMetadata = z.infer<typeof githubMetadataSchema>;
-export type HealthEntry = z.infer<typeof healthEntrySchema>;
-export type Decision = z.infer<typeof decisionSchema>;
-export type Override = z.infer<typeof overrideSchema>;
-export type CuratedItem = z.infer<typeof itemSchema>;
-export type ItemsFile = z.infer<typeof itemsFileSchema>;
-export type HealthFile = z.infer<typeof healthFileSchema>;
-export type DecisionsFile = z.infer<typeof decisionsFileSchema>;
-export type OverridesFile = z.infer<typeof overridesFileSchema>;
-export type CuratedConfig = z.infer<typeof curatedConfigSchema>;
-export type StackRef = z.infer<typeof stackRefSchema>;
-export type PlatformRef = z.infer<typeof platformRefSchema>;
-export type CategoryRef = z.infer<typeof categoryRefSchema>;
-export type DistributionChannelRef = z.infer<typeof distributionChannelRefSchema>;
+export type GroveConfig = z.infer<typeof groveConfigSchema>;
+export type NavItem = z.infer<typeof navItemSchema>;
+export type GithubIntegration = z.infer<typeof githubIntegrationSchema>;
+export type Theme = z.infer<typeof themeSchema>;
+export type ComponentOverride = z.infer<typeof componentOverrideSchema>;
 
 // ──────────────────────────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────────────────────────
 
-export function unwrapItems(value: ItemsFile): CuratedItem[] {
-  return Array.isArray(value) ? value : value.items;
+export function unwrapRecords(value: RecordsFile): Resource[] {
+  return Array.isArray(value) ? value : value.records;
 }
 
 export function unwrapHealth(value: HealthFile): HealthEntry[] {
@@ -531,82 +538,146 @@ export function unwrapOverrides(value: OverridesFile): Override[] {
   return Array.isArray(value) ? value : value.overrides;
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// App record (Open Apps schema v1)
-// ──────────────────────────────────────────────────────────────────────
+/**
+ * Parse a single record YAML mapping into a typed Resource. The
+ * `kind` field on the YAML selects which blueprint schema to apply.
+ */
+export function parseRecordYaml(
+  text: string,
+  fileSlug: string,
+): Record<string, unknown> {
+  const raw = parse(text) ?? {};
+  if (typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error(`${fileSlug}: record file must contain a YAML mapping`);
+  }
+  return raw;
+}
 
-export interface AppRecord {
-  slug: string;
-  schemaVersion: number;
-  name: string;
-  description: string;
-  repoUrl: string;
-  homepageUrl?: string;
-  stack: string;
-  stacks: string[];
-  platforms: string[];
-  category: string;
-  tags: string[];
-  distribution: { channels: DistributionChannel[] };
-  license?: string;
-  status: HealthStatus;
-  tier: HealthTier;
-  visibility: DecisionVisibility;
-  cleanupCandidate: boolean;
-  staleReason: string | null;
-  stars?: number;
-  forks?: number;
-  openIssues?: number;
-  lastCommitAt?: string | null;
-  addedAt?: string;
-  labels: AppLabel[];
-  lenses: string[];
-  projectType?: ProjectType;
-  difficulty?: Difficulty;
-  codebaseSize?: CodebaseSize;
-  bestFor: string[];
-  whyListed: string[];
-  caveats: string[];
-  scores: Score;
-  curation: {
-    reviewed: boolean;
-    reviewedBy?: string;
-    reviewedAt?: string;
-    notes?: string;
+export function stringifyRecordYaml(record: Record<string, unknown>): string {
+  return stringify(record, {
+    lineWidth: 100,
+    singleQuote: false,
+    defaultStringType: "PLAIN",
+  });
+}
+
+export function getOwnerRepoFromUrl(
+  repoUrl: string | undefined | null,
+): { owner: string; repo: string } | null {
+  if (!repoUrl) return null;
+  const m = String(repoUrl).match(/github\.com\/([^/]+)\/([^/?#]+)/);
+  if (!m) return null;
+  return { owner: m[1], repo: m[2].replace(/\.git$/, "") };
+}
+
+/**
+ * Normalize a raw record mapping into a typed Resource. The `kind`
+ * field must match the blueprint of the site that owns the record;
+ * mismatch produces a clear ZodError.
+ */
+export function normalizeRecord(
+  raw: Record<string, unknown>,
+  fileSlug: string,
+  blueprint: Blueprint = "project-directory",
+): Resource {
+  const expectedKind = blueprintKind[blueprint];
+  if (!raw.kind) {
+    raw = { ...raw, kind: expectedKind };
+  } else if (raw.kind !== expectedKind) {
+    throw new Error(
+      `${fileSlug}: kind "${raw.kind}" does not match blueprint "${blueprint}" (expected "${expectedKind}")`,
+    );
+  }
+  return resourceSchema.parse(raw) as Resource;
+}
+
+export function validateRecord(
+  raw: Record<string, unknown>,
+  fileSlug: string,
+  blueprint?: Blueprint,
+): string[] {
+  try {
+    normalizeRecord(raw, fileSlug, blueprint);
+    return [];
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return err.issues.map(
+        (issue) => `${fileSlug}: ${issue.path.join(".") || "(root)"} ${issue.message}`,
+      );
+    }
+    return [`${fileSlug}: ${(err as Error).message}`];
+  }
+}
+
+/**
+ * Project a Resource to a stable, search-index-friendly summary
+ * object. Strips out blueprint-specific heavy fields and leaves
+ * only what the public list/detail UIs need.
+ */
+export function toIndexRecord(record: Resource): Record<string, unknown> {
+  const base = {
+    slug: record.slug,
+    kind: record.kind,
+    category: record.category,
+    tags: record.tags ?? [],
+    links: record.links,
+    description: record.description,
+    content: record.content,
+    curation: record.curation,
   };
-  github?: {
-    repository?: z.infer<typeof githubRepositorySchema>;
-    languages?: Record<string, number>;
-    latestRelease?: Record<string, unknown> | null;
-    activity?: {
-      monthlyCommits?: Array<number | { month: string; commits: number }>;
-      totalCommitsKnown?: number;
-      contributorsKnown?: number;
-      openPullRequests?: number;
+
+  if (record.kind === "project") {
+    return {
+      ...base,
+      name: record.name,
+      stack: record.stack,
+      stacks: record.stacks ?? [],
+      platforms: record.platforms ?? [],
+      projectType: record.projectType,
+      bestFor: record.bestFor,
+      whyListed: record.whyListed,
+      caveats: record.caveats,
+      github: record.github?.repository
+        ? {
+            fullName: record.github.repository.full_name,
+            stars: record.github.repository.stargazers_count ?? 0,
+            forks: record.github.repository.forks_count ?? 0,
+            openIssues: record.github.repository.open_issues_count ?? 0,
+            language: record.github.repository.language ?? null,
+            pushedAt: record.github.repository.pushed_at ?? null,
+            archived: Boolean(record.github.repository.archived),
+          }
+        : undefined,
     };
-    files?: Record<string, boolean>;
-    labels?: Array<Record<string, unknown>>;
-    sync?: Record<string, unknown>;
-  };
-  health: {
-    status: HealthStatus;
-    tier: HealthTier;
-    visibility: DecisionVisibility;
-    cleanupCandidate: boolean;
-    staleReason: string | null;
+  }
+
+  if (record.kind === "resource") {
+    return {
+      ...base,
+      title: record.title,
+      type: record.type,
+      topic: record.topic,
+      related: record.related,
+      publishedAt: record.publishedAt,
+      author: record.author,
+    };
+  }
+
+  // entity
+  return {
+    ...base,
+    name: record.name,
+    type: record.type,
+    founded: record.founded,
+    location: record.location,
+    members: record.members,
+    parent: record.parent,
   };
 }
 
-function compactArray<T>(values: T[] | undefined | null): T[] {
-  return [...new Set((values ?? []).filter(Boolean))];
-}
-
-function formatDateOnly(value: string | null | undefined): string | undefined {
-  if (!value) return undefined;
-  const d = new Date(value);
-  if (Number.isNaN(d.valueOf())) return String(value);
-  return d.toISOString().slice(0, 10);
-}
+// ──────────────────────────────────────────────────────────────────────
+// Health signal derivation
+// ──────────────────────────────────────────────────────────────────────
 
 function daysSince(value: string | null | undefined): number {
   if (!value) return Infinity;
@@ -618,15 +689,14 @@ function daysSince(value: string | null | undefined): number {
 export function healthFromSignals(params: {
   repo?: z.infer<typeof githubRepositorySchema>;
   monthlyCommits?: Array<number | { month: string; commits: number }>;
-  legacyStatus?: HealthStatus;
 }): {
-  status: HealthStatus;
-  tier: HealthTier;
-  visibility: DecisionVisibility;
+  status: z.infer<typeof healthStatusSchema>;
+  tier: z.infer<typeof healthTierSchema>;
+  visibility: z.infer<typeof decisionVisibilitySchema>;
   cleanupCandidate: boolean;
   staleReason: string | null;
 } {
-  const { repo, monthlyCommits, legacyStatus } = params;
+  const { repo, monthlyCommits } = params;
   const stars = repo?.stargazers_count ?? 0;
   const lastCommitAt = repo?.pushed_at;
   const archived = Boolean(repo?.archived);
@@ -639,7 +709,7 @@ export function healthFromSignals(params: {
       }).length
     : 0;
 
-  const status: HealthStatus = archived
+  const status: z.infer<typeof healthStatusSchema> = archived
     ? "archived"
     : disabled
       ? "unavailable"
@@ -651,7 +721,7 @@ export function healthFromSignals(params: {
             ? "stale"
             : "inactive";
 
-  const tier: HealthTier =
+  const tier: z.infer<typeof healthTierSchema> =
     status === "archived" || status === "unavailable"
       ? "hidden"
       : stars >= 500 || activeMonths >= 4
@@ -661,10 +731,14 @@ export function healthFromSignals(params: {
           : "experimental";
 
   return {
-    status: legacyStatus ?? status,
+    status,
     tier,
     visibility: tier === "hidden" ? "hide" : "keep",
-    cleanupCandidate: status === "stale" || status === "archived" || status === "inactive" || status === "unavailable",
+    cleanupCandidate:
+      status === "stale" ||
+      status === "archived" ||
+      status === "inactive" ||
+      status === "unavailable",
     staleReason:
       status === "inactive"
         ? "no_commits_24_months"
@@ -675,230 +749,5 @@ export function healthFromSignals(params: {
             : status === "unavailable"
               ? "github_unavailable"
               : null,
-  };
-}
-
-export function parseAppYaml(text: string, fileSlug: string): Record<string, unknown> {
-  const raw = parse(text) ?? {};
-  if (typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error(`${fileSlug}: app file must contain a YAML mapping`);
-  }
-  return raw;
-}
-
-export function stringifyAppYaml(app: Record<string, unknown>): string {
-  return stringify(app, {
-    lineWidth: 100,
-    singleQuote: false,
-    defaultStringType: "PLAIN",
-  });
-}
-
-export function getOwnerRepoFromUrl(repoUrl: string | undefined | null): { owner: string; repo: string } | null {
-  if (!repoUrl) return null;
-  const m = String(repoUrl).match(/github\.com\/([^/]+)\/([^/?#]+)/);
-  if (!m) return null;
-  return { owner: m[1], repo: m[2].replace(/\.git$/, "") };
-}
-
-export function normalizeAppRecord(raw: Record<string, unknown>, fileSlug: string): AppRecord {
-  const hasFinalShape =
-    typeof raw.app === "object" &&
-    raw.app !== null &&
-    typeof raw.source === "object" &&
-    raw.source !== null &&
-    raw.github !== undefined;
-  if (hasFinalShape) {
-    return normalizeFinal(raw, fileSlug);
-  }
-  return normalizeLegacy(raw, fileSlug);
-}
-
-function normalizeFinal(raw: Record<string, unknown>, fileSlug: string): AppRecord {
-  const parsed = finalAppSchema.parse(raw);
-  const repo = parsed.github?.repository;
-  const repoUrl =
-    parsed.source.url ?? repo?.html_url ?? `https://github.com/${parsed.source.owner}/${parsed.source.repo}`;
-  const activity = parsed.github?.activity ?? {};
-  const monthlyCommits = activity.monthlyCommits as
-    | Array<number | { month: string; commits: number }>
-    | undefined;
-  const health = {
-    ...healthFromSignals({ repo, monthlyCommits }),
-    ...(parsed.health as object),
-  } as {
-    status: HealthStatus;
-    tier: HealthTier;
-    visibility: DecisionVisibility;
-    cleanupCandidate: boolean;
-    staleReason: string | null;
-  };
-  const technologies = compactArray((parsed.stack.technologies ?? []).map((t) => t.id));
-  const secondaryStacks = technologies.filter((id) => id !== parsed.stack.primary);
-  const curation = (parsed.curation as Record<string, unknown>) ?? {};
-
-  return {
-    ...(parsed as unknown as AppRecord),
-    schemaVersion: 1,
-    slug: parsed.slug || fileSlug,
-    name: parsed.app.name,
-    description: parsed.app.description,
-    repoUrl,
-    homepageUrl: repo?.homepage || (raw.homepageUrl as string | undefined) || undefined,
-    stack: parsed.stack.primary,
-    stacks: secondaryStacks,
-    platforms: parsed.app.platforms,
-    distribution: (parsed.app.distribution as { channels: DistributionChannel[] } | undefined) ?? { channels: [] },
-    category: parsed.app.category,
-    tags: compactArray([...(parsed.app.tags ?? []), ...(repo?.topics ?? [])]),
-    license: repo?.license?.spdx_id || undefined,
-    status: health.status,
-    stars: repo?.stargazers_count,
-    forks: repo?.forks_count,
-    openIssues: repo?.open_issues_count,
-    lastCommitAt: formatDateOnly(repo?.pushed_at) ?? null,
-    labels: (curation.labels as AppLabel[] | undefined) ?? [],
-    lenses: (curation.lenses as string[] | undefined) ?? [],
-    projectType: parsed.app.projectType as ProjectType | undefined,
-    difficulty: curation.difficulty as Difficulty | undefined,
-    codebaseSize: curation.codebaseSize as CodebaseSize | undefined,
-    bestFor: (curation.bestFor as string[] | undefined) ?? [],
-    whyListed: (curation.whyListed as string[] | undefined) ?? [],
-    caveats: (curation.caveats as string[] | undefined) ?? [],
-    scores: (curation.scores as Score) ?? {},
-    curation: {
-      reviewed: Boolean(curation.reviewed),
-      reviewedBy: curation.reviewedBy as string | undefined,
-      reviewedAt: curation.reviewedAt as string | undefined,
-      notes: curation.notes as string | undefined,
-    },
-    github: parsed.github as AppRecord["github"],
-    health,
-    tier: health.tier,
-  };
-}
-
-function normalizeLegacy(raw: Record<string, unknown>, fileSlug: string): AppRecord {
-  const parsed = legacyAppSchema.parse({ ...raw, slug: raw.slug ?? fileSlug });
-  const ownerRepo = getOwnerRepoFromUrl(parsed.repoUrl);
-  const activity = (parsed as Record<string, unknown>).activity as Record<string, unknown> ?? {};
-  const repo = {
-    full_name: ownerRepo ? `${ownerRepo.owner}/${ownerRepo.repo}` : undefined,
-    name: ownerRepo?.repo,
-    html_url: parsed.repoUrl,
-    homepage: parsed.homepageUrl,
-    description: parsed.description,
-    fork: false,
-    archived: parsed.status === "archived",
-    disabled: false,
-    private: false,
-    visibility: "public",
-    language: typeof parsed.stack === "string" ? parsed.stack : undefined,
-    license: parsed.license ? { spdx_id: parsed.license as string } : undefined,
-    stargazers_count: (activity.stars as number | undefined) ?? parsed.stars,
-    watchers_count: activity.watchers as number | undefined,
-    forks_count: (activity.forks as number | undefined) ?? parsed.forks,
-    open_issues_count: activity.openIssues as number | undefined,
-    subscribers_count: activity.contributors as number | undefined,
-    pushed_at: activity.lastCommitAt as string | undefined,
-    updated_at: activity.updatedAt as string | undefined,
-  } as z.infer<typeof githubRepositorySchema>;
-  const monthlyCommits = (activity.monthlyCommits as Array<number | { month: string; commits: number }>) ?? [];
-  const primaryStack = typeof parsed.stack === "string" ? parsed.stack : (parsed.stack as Record<string, unknown>).primary as string;
-  const health = healthFromSignals({ repo, monthlyCommits, legacyStatus: parsed.status as HealthStatus });
-
-  return {
-    schemaVersion: 0,
-    slug: parsed.slug,
-    name: parsed.name,
-    description: parsed.description,
-    repoUrl: parsed.repoUrl,
-    visibility: health.visibility,
-    cleanupCandidate: health.cleanupCandidate,
-    staleReason: health.staleReason,
-    homepageUrl: parsed.homepageUrl as string | undefined,
-    stack: primaryStack as string,
-    stacks: compactArray([...(parsed.stacks ?? [])]),
-    platforms: parsed.platforms,
-    distribution: (parsed.distribution as { channels: DistributionChannel[] } | undefined) ?? { channels: [] },
-    category: parsed.category,
-    tags: compactArray((parsed.tags ?? []) as string[]),
-    license: parsed.license as string | undefined,
-    status: health.status,
-    stars: repo.stargazers_count,
-    forks: repo.forks_count,
-    openIssues: repo.open_issues_count,
-    lastCommitAt: formatDateOnly(repo.pushed_at) ?? null,
-    labels: ((parsed as Record<string, unknown>).labels as AppLabel[] | undefined) ?? [],
-    lenses: ((parsed as Record<string, unknown>).lenses as string[] | undefined) ?? [],
-    projectType: parsed.projectType as ProjectType | undefined,
-    difficulty: (parsed as Record<string, unknown>).difficulty as Difficulty | undefined,
-    codebaseSize: (parsed as Record<string, unknown>).codebaseSize as CodebaseSize | undefined,
-    bestFor: ((parsed as Record<string, unknown>).bestFor as string[] | undefined) ?? [],
-    whyListed: ((parsed as Record<string, unknown>).whyListed as string[] | undefined) ?? [],
-    caveats: ((parsed as Record<string, unknown>).caveats as string[] | undefined) ?? [],
-    scores: ((parsed as Record<string, unknown>).scores as Score) ?? {},
-    curation: {
-      reviewed: false,
-    },
-    github: {
-      repository: repo,
-      activity: {
-        monthlyCommits,
-        totalCommitsKnown: activity.totalCommitsKnown as number | undefined,
-        contributorsKnown: activity.contributors as number | undefined,
-        openPullRequests: activity.openPullRequests as number | undefined,
-      },
-      sync: {
-        syncedAt: activity.updatedAt as string | undefined,
-        source: "legacy-activity-block",
-      },
-    },
-    health: {
-      status: health.status,
-      tier: health.tier,
-      visibility: health.visibility,
-      cleanupCandidate: health.cleanupCandidate,
-      staleReason: health.staleReason,
-    },
-    tier: health.tier,
-  };
-}
-
-export function validateAppRecord(raw: Record<string, unknown>, fileSlug: string): string[] {
-  try {
-    normalizeAppRecord(raw, fileSlug);
-    return [];
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      return err.issues.map((issue) => `${fileSlug}: ${issue.path.join(".") || "(root)"} ${issue.message}`);
-    }
-    return [`${fileSlug}: ${(err as Error).message}`];
-  }
-}
-
-export function toIndexApp(app: AppRecord): Record<string, unknown> {
-  return {
-    slug: app.slug,
-    name: app.name,
-    description: app.description,
-    repoUrl: app.repoUrl,
-    homepageUrl: app.homepageUrl,
-    category: app.category,
-    platforms: app.platforms ?? [],
-    distribution: app.distribution,
-    primaryStack: app.stack,
-    stack: app.stack,
-    stacks: app.stacks ?? [],
-    technologies: compactArray([app.stack, ...(app.stacks ?? [])]),
-    tier: app.health?.tier ?? app.tier,
-    status: app.health?.status ?? app.status,
-    visibility: app.health?.visibility ?? "keep",
-    stars: app.github?.repository?.stargazers_count ?? app.stars,
-    forks: app.github?.repository?.forks_count,
-    openIssues: app.github?.repository?.open_issues_count,
-    license: app.github?.repository?.license?.spdx_id ?? app.license,
-    lastCommitAt: formatDateOnly(app.github?.repository?.pushed_at ?? app.lastCommitAt),
-    tags: app.tags ?? [],
   };
 }
