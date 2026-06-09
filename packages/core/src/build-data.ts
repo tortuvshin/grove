@@ -1,13 +1,15 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
+import { parse as parseYaml } from "yaml";
 import {
   blueprintKind,
+  recordsFileSchema,
   toIndexRecord,
+  unwrapRecords,
   type GroveConfig,
   type Resource,
 } from "./schema.js";
 import { loadConfig } from "./config.js";
-import { loadRecords } from "./validate.js";
 
 /**
  * The full payload written to data/generated/records.full.json.
@@ -35,12 +37,16 @@ export interface RecordsIndexPayload {
 }
 
 /**
- * Read every records/*.yml in the project, normalize, and build:
+ * `generate` reads every records/*.yml in the project, normalizes them
+ * via the blueprint schema, and writes:
  *  - data/generated/records.full.json   (full records, all visibility)
  *  - data/generated/records.index.json  (slim, visible-only)
- *  - data/generated/records.json        (compatibility alias of records.full.json)
+ *  - data/generated/records.json        (alias of records.full.json)
+ *
+ * Replaces the V0 `buildData` function. Returns file paths and
+ * counters; throws on schema errors.
  */
-export interface BuildDataResult {
+export interface GenerateResult {
   totalRecords: number;
   visibleRecords: number;
   fullPath: string;
@@ -49,10 +55,10 @@ export interface BuildDataResult {
   errors: string[];
 }
 
-export async function buildData(
+export async function generate(
   cwd = process.cwd(),
   config?: GroveConfig,
-): Promise<BuildDataResult> {
+): Promise<GenerateResult> {
   const cfg = config ?? (await loadConfig(cwd));
   const recordsDir = resolve(cwd, cfg.paths.recordsDir);
   const outDir = resolve(cwd, cfg.paths.generatedDir);
@@ -62,21 +68,17 @@ export async function buildData(
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
 
-  const records: Resource[] = [];
+  const out: Resource[] = [];
   const errors: string[] = [];
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
     try {
       const text = await readFile(join(recordsDir, file), "utf8");
-      const { parse } = await import("yaml");
-      const raw = (parse(text) ?? {}) as Record<string, unknown>;
+      const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
       if (!raw.kind) raw.kind = expectedKind;
-      const records = (await import("./schema.js")).recordsFileSchema;
-      const normalized = (await import("./schema.js")).unwrapRecords(
-        records.parse([raw]),
-      )[0];
+      const normalized = unwrapRecords(recordsFileSchema.parse([raw]))[0];
       normalized.slug = fileSlug;
-      records.push(normalized);
+      out.push(normalized);
     } catch (err) {
       errors.push(`${file}: ${(err as Error).message}`);
     }
@@ -87,13 +89,9 @@ export async function buildData(
     throw e;
   }
 
-  records.sort((a, b) => {
-    const na = nameOf(a);
-    const nb = nameOf(b);
-    return na.localeCompare(nb);
-  });
+  out.sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
 
-  const indexRecords = records
+  const indexRecords = out
     .map((record) => toIndexRecord(record))
     .filter((r) => {
       const vis = (r as { visibility?: string }).visibility;
@@ -105,9 +103,9 @@ export async function buildData(
     schemaVersion: 1,
     blueprint: cfg.blueprint,
     generatedAt,
-    totalRecords: records.length,
+    totalRecords: out.length,
     visibleRecords: indexRecords.length,
-    records: records as unknown as Array<Record<string, unknown>>,
+    records: out as unknown as Array<Record<string, unknown>>,
   };
   const indexPayload: RecordsIndexPayload = {
     schemaVersion: 1,
@@ -125,7 +123,7 @@ export async function buildData(
   await writeFile(aliasPath, JSON.stringify(fullPayload, null, 2), "utf8");
 
   return {
-    totalRecords: records.length,
+    totalRecords: out.length,
     visibleRecords: indexRecords.length,
     fullPath,
     indexPath,
@@ -138,11 +136,3 @@ function nameOf(record: Resource): string {
   if (record.kind === "resource") return record.title;
   return record.name;
 }
-
-/**
- * `generate` is the V1 name for what was previously `build-data`.
- * Reads records, normalizes them, writes the slim + full JSON
- * payloads, and returns the file paths for downstream steps
- * (sitemap, llms, etc).
- */
-export const generate = buildData;
