@@ -7,6 +7,7 @@
  * just works after `pnpm add @grove-dev/<framework>`.
  */
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -67,6 +68,22 @@ export function templatePath(framework: Framework, name = "default"): string {
 }
 
 /**
+ * Read the version of the framework adapter package
+ * (`@grove-dev/<framework>`) that shipped the templates. We use this
+ * to rewrite `workspace:*` dependencies in the scaffolded `package.json`
+ * into a real published version, so the new project can `pnpm install`
+ * from the npm registry instead of from the local monorepo workspace.
+ */
+export function frameworkVersion(framework: Framework): string {
+  const entrypoint = require.resolve(`@grove-dev/${framework}/package.json`);
+  const pkg = JSON.parse(readFileSync(entrypoint, "utf8")) as { version?: string };
+  if (!pkg.version) {
+    throw new Error(`Could not read version of @grove-dev/${framework} from ${entrypoint}`);
+  }
+  return pkg.version;
+}
+
+/**
  * Copy a template directory into a project root. Honors `force: false`
  * by default so an existing project isn't clobbered.
  */
@@ -87,22 +104,59 @@ export async function copyTemplate(
 
 /**
  * Read the framework's `package.json` from the template and rewrite
- * the `name` to a project-friendly slug. Leaves everything else
- * intact (deps, scripts) so the new project starts with the right
- * wiring.
+ * the `name` to a project-friendly slug, then rewrite any
+ * `workspace:*` Grove dependencies into the published version of
+ * the framework adapter so the new project installs from npm
+ * instead of trying to resolve local monorepo paths.
  */
 export async function renameProjectInTemplate(
   framework: Framework,
   targetRoot: string,
   projectName: string,
   templateName = "default",
-): Promise<{ packageJsonPath: string; finalName: string }> {
+): Promise<{ packageJsonPath: string; finalName: string; rewrittenDeps: string[] }> {
   const packageJsonPath = join(targetRoot, "package.json");
   const raw = await readFile(packageJsonPath, "utf8");
-  const pkg = JSON.parse(raw) as { name?: string; [k: string]: unknown };
+  const pkg = JSON.parse(raw) as {
+    name?: string;
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+    [k: string]: unknown;
+  };
   pkg.name = packageNameFromProjectName(projectName, framework, templateName);
+  const rewrittenDeps = rewriteWorkspaceDeps(pkg, frameworkVersion(framework));
   await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
-  return { packageJsonPath, finalName: pkg.name };
+  return { packageJsonPath, finalName: pkg.name, rewrittenDeps };
+}
+
+/**
+ * In-place: replace `workspace:*` (and `workspace:^x.y.z`) for any
+ * `@grove-dev/*` package with the supplied published version. The
+ * monorepo's templates are written that way so the framework adapter
+ * can be developed against its own sibling packages, but a fresh
+ * scaffold is not part of that monorepo and would fail to install.
+ */
+function rewriteWorkspaceDeps(
+  pkg: {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+  },
+  version: string,
+): string[] {
+  const rewritten: string[] = [];
+  for (const section of ["dependencies", "devDependencies", "peerDependencies"] as const) {
+    const map = pkg[section];
+    if (!map) continue;
+    for (const [name, value] of Object.entries(map)) {
+      if (name.startsWith("@grove-dev/") && value.startsWith("workspace:")) {
+        map[name] = version;
+        rewritten.push(`${name}: ${value} -> ${version}`);
+      }
+    }
+  }
+  return rewritten;
 }
 
 function packageNameFromProjectName(name: string, framework: Framework, templateName: string): string {

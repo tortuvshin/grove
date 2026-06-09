@@ -101,36 +101,16 @@ program
       p.intro("🌱 Grow a new Grove space");
 
       // ── 1. Project name ────────────────────────────────────────
-      const projectDirRaw =
-        opts.yes && !name
-          ? "."
-          : await p.text({
-              message: "Where should the new space live?",
-              placeholder: "." ,
-              defaultValue: name ?? ".",
-              validate: (value) => {
-                if (!value || value.trim().length === 0) return "Directory name is required";
-              },
-            });
-      if (p.isCancel(projectDirRaw)) {
-        p.cancel("Aborted.");
-        process.exit(0);
-      }
-      const projectDir: string = String(projectDirRaw);
-      const projectNameRaw: string | symbol =
-        projectDir === "."
-          ? await p.text({
-              message: "What is the name of this space?",
-              placeholder: "Grove Directory",
-              defaultValue: "Grove Directory",
-              validate: (v) => (v && v.trim().length > 0 ? undefined : "Name is required"),
-            })
-          : projectDir;
-      if (p.isCancel(projectNameRaw)) {
-        p.cancel("Aborted.");
-        process.exit(0);
-      }
-      const projectName: string = String(projectNameRaw);
+      // Non-interactive path: if --yes was passed OR a name positional was
+      // given, skip both text prompts and derive values from the args.
+      // Without this, the CLI hangs on `p.text` in non-TTY environments
+      // (CI, agent shells, piped stdin) because clack has no TTY to read from.
+      const projectDir: string =
+        opts.yes || name ? name ?? "." : await resolveText("Where should the new space live?", ".");
+      const projectName: string =
+        opts.yes || name
+          ? (projectDir === "." ? "Grove Directory" : projectDir)
+          : await resolveText("What is the name of this space?", "Grove Directory");
 
       // ── 2. Framework ───────────────────────────────────────────
       let framework: Framework;
@@ -227,7 +207,12 @@ program
 
       await mkdir(root, { recursive: true });
       await copyTemplate(framework, root, tpl.template);
-      await renameProjectInTemplate(framework, root, projectName, tpl.template);
+      const renameResult = await renameProjectInTemplate(framework, root, projectName, tpl.template);
+      if (renameResult.rewrittenDeps.length > 0) {
+        p.log.step(
+          `Rewrote workspace deps to published version: ${renameResult.rewrittenDeps.join(", ")}`,
+        );
+      }
 
       await Promise.all([
         ensureDir(join(root, "sources")),
@@ -642,6 +627,26 @@ function runExternal(
 // Templated project files (these stay in the CLI; they're emitted
 // per-project and have nothing to do with the framework adapter).
 // ──────────────────────────────────────────────────────────────────────
+
+async function resolveText(
+  message: string,
+  fallback: string,
+  placeholder?: string,
+): Promise<string> {
+  const result = await p.text({
+    message,
+    placeholder,
+    defaultValue: fallback,
+    validate: (value) => {
+      if (!value || value.trim().length === 0) return `${message} is required`;
+    },
+  });
+  if (p.isCancel(result)) {
+    p.cancel("Aborted.");
+    process.exit(0);
+  }
+  return String(result);
+}
 
 async function writeIfMissing(path: string, content: string): Promise<void> {
   try {
