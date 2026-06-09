@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
+import groveAstro from '@grove-dev/astro';
 
 // `site` is the canonical URL the build uses for absolute links
 // (sitemap, OpenGraph, canonical tags, JSON-LD). The CLI injects
@@ -14,6 +15,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: process.env.SITE_URL || 'https://example.com',
   trailingSlash: 'ignore',
+  integrations: [groveAstro()],
   vite: {
     plugins: [tailwindcss()],
   },

@@ -4,10 +4,32 @@
  * Grove V1 design tokens. Theme is overridable from `grove.config.ts`
  * at scaffold time; we expose the same names as CSS variables so
  * consumers can layer their own brand colors in without forking.
+ *
+ * The `ink-*` color scale is preserved from the V0 template because
+ * the page-level classes (`text-ink-900`, `bg-ink-50`, ...) still
+ * reference it. New pages should prefer the default Tailwind
+ * `gray-*` / `slate-*` palettes; the ink scale exists for
+ * back-compat with the V1 minimal template.
  */
+@theme {
+  --color-ink-50: #fafafa;
+  --color-ink-100: #f4f4f5;
+  --color-ink-200: #e4e4e7;
+  --color-ink-300: #d4d4d8;
+  --color-ink-400: #a1a1aa;
+  --color-ink-500: #71717a;
+  --color-ink-600: #52525b;
+  --color-ink-700: #3f3f46;
+  --color-ink-800: #27272a;
+  --color-ink-900: #18181b;
+  --color-ink-950: #09090b;
+
+  --color-grove-primary: #16a34a;
+}
+
 @layer base {
   :root {
-    --grove-color-primary: #16a34a;
+    --grove-color-primary: var(--color-grove-primary);
     --grove-radius: 0.5rem;
     --grove-container-width: 72rem;
 
@@ -21,10 +43,16 @@
   }
 
   body {
-    @apply bg-white text-ink-900 dark:bg-ink-950 dark:text-ink-100;
+    background: #ffffff;
+    color: var(--color-ink-900);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
       "Helvetica Neue", Arial, sans-serif;
     font-size: 15px;
     line-height: 1.55;
+  }
+
+  body.dark {
+    background: var(--color-ink-950);
+    color: var(--color-ink-100);
   }
 }
