@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { type CuratedConfig, loadConfig } from "./config.js";
+import { type GroveConfig, loadConfig } from "./config.js";
 
-export interface LlmsAppInput {
+export interface LlmsRecordInput {
   slug: string;
   name: string;
   description?: string;
@@ -10,7 +10,6 @@ export interface LlmsAppInput {
   stack?: string;
   stars?: number;
   visibility?: string;
-  /** Detail page body — markdown. Used for llms-full.txt sections. */
   detail?: string;
   homepageUrl?: string;
   repoUrl?: string;
@@ -22,7 +21,7 @@ export interface LlmsAppInput {
 export interface LlmsInput {
   siteUrl?: string;
   generatedAt: string;
-  apps: LlmsAppInput[];
+  records: LlmsRecordInput[];
 }
 
 export interface LlmsResult {
@@ -31,100 +30,121 @@ export interface LlmsResult {
   indexed: number;
 }
 
+const BLUEPRINT_INDEX: Record<string, string> = {
+  "project-directory": "projects",
+  "resource-hub": "resources",
+  "ecosystem-map": "entities",
+};
+
+const BLUEPRINT_PLURAL: Record<string, string> = {
+  "project-directory": "Projects",
+  "resource-hub": "Resources",
+  "ecosystem-map": "Entities",
+};
+
 function slug(value: string): string {
-  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function truncate(value: string, max: number): string {
   return value.replace(/\s+/g, " ").slice(0, max);
 }
 
-function buildIndexLine(app: LlmsAppInput): string {
-  const desc = truncate(app.description ?? "", 120);
-  const cat = app.category ?? "—";
-  const stack = app.stack ?? "—";
-  const stars = app.stars ?? 0;
-  return `- [${app.name}](#${slug(app.slug)}) — ${cat} · ${stack} · ${stars}★ — ${desc}`;
+function buildIndexLine(record: LlmsRecordInput): string {
+  const desc = truncate(record.description ?? "", 120);
+  const cat = record.category ?? "—";
+  const stack = record.stack ?? "—";
+  const stars = record.stars ?? 0;
+  return `- [${record.name}](#${slug(record.slug)}) — ${cat} · ${stack} · ${stars}★ — ${desc}`;
 }
 
-function buildDetailSection(app: LlmsAppInput, siteUrl: string, indexSlug: string): string {
+function buildDetailSection(
+  record: LlmsRecordInput,
+  siteUrl: string,
+  indexSlug: string,
+): string {
   const lines: string[] = [
-    `### ${app.name}`,
+    `### ${record.name}`,
     "",
-    app.description ? `${app.description}` : "",
+    record.description ? `${record.description}` : "",
     "",
-    `- slug: ${app.slug}`,
-    `- category: ${app.category ?? "—"}`,
-    `- stack: ${app.stack ?? "—"}`,
-    `- stars: ${app.stars ?? 0}`,
-    app.license ? `- license: ${app.license}` : "",
-    app.repoUrl ? `- repo: ${app.repoUrl}` : "",
-    app.homepageUrl ? `- homepage: ${app.homepageUrl}` : "",
-    `- url: ${siteUrl}/${indexSlug}/${app.slug}`,
-    app.lastCommitAt ? `- lastCommit: ${app.lastCommitAt.slice(0, 10)}` : "",
-    app.addedAt ? `- added: ${app.addedAt.slice(0, 10)}` : "",
+    `- slug: ${record.slug}`,
+    `- category: ${record.category ?? "—"}`,
+    `- stack: ${record.stack ?? "—"}`,
+    `- stars: ${record.stars ?? 0}`,
+    record.license ? `- license: ${record.license}` : "",
+    record.repoUrl ? `- repo: ${record.repoUrl}` : "",
+    record.homepageUrl ? `- homepage: ${record.homepageUrl}` : "",
+    `- url: ${siteUrl}/${indexSlug}/${record.slug}`,
+    record.lastCommitAt ? `- lastCommit: ${record.lastCommitAt.slice(0, 10)}` : "",
+    record.addedAt ? `- added: ${record.addedAt.slice(0, 10)}` : "",
   ].filter(Boolean);
-  if (app.detail) {
-    lines.push("", "#### Detail", "", app.detail);
+  if (record.detail) {
+    lines.push("", "#### Detail", "", record.detail);
   }
   return lines.join("\n");
 }
 
-/** Build the llms.txt string — short pointer to llms-full.txt. */
-export function buildLlmsTxt(input: LlmsInput, config: CuratedConfig): string {
-  const siteUrl = (input.siteUrl ?? config.siteUrl ?? "").replace(/\/$/, "");
-  const visible = input.apps.filter((a) => a.visibility !== "hide" && a.visibility !== "remove");
-  const indexSlug = config.itemLabel === "app" ? "apps" : "projects";
-  return `# ${config.name}
+export function buildLlmsTxt(input: LlmsInput, config: GroveConfig): string {
+  const siteUrl = (input.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
+  const indexSlug = BLUEPRINT_INDEX[config.blueprint] ?? "items";
+  const visible = input.records.filter(
+    (r) => r.visibility !== "hide" && r.visibility !== "remove",
+  );
+  return `# ${config.site.name}
 
-${config.description ?? config.tagline}
+${config.site.description ?? config.site.tagline}
 
 Directory: ${siteUrl}/${indexSlug}
-Projects indexed: ${visible.length}
-Categories: ${new Set(visible.map((a) => a.category).filter(Boolean)).size}
+Records indexed: ${visible.length}
+Categories: ${new Set(visible.map((r) => r.category).filter(Boolean)).size}
 
 ## Usage
 
-Use /llms-full.txt for project-level details. Prefer project detail pages for citations.
+Use /llms-full.txt for record-level details. Prefer detail pages for citations.
 `;
 }
 
-/** Build the llms-full.txt string — index + per-app sections. */
-export function buildLlmsFullTxt(input: LlmsInput, config: CuratedConfig): string {
-  const siteUrl = (input.siteUrl ?? config.siteUrl ?? "").replace(/\/$/, "");
-  const indexSlug = config.itemLabel === "app" ? "apps" : "projects";
-  const visible = input.apps.filter((a) => a.visibility !== "hide" && a.visibility !== "remove");
+export function buildLlmsFullTxt(input: LlmsInput, config: GroveConfig): string {
+  const siteUrl = (input.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
+  const indexSlug = BLUEPRINT_INDEX[config.blueprint] ?? "items";
+  const visible = input.records.filter(
+    (r) => r.visibility !== "hide" && r.visibility !== "remove",
+  );
+  const plural = BLUEPRINT_PLURAL[config.blueprint] ?? "Items";
   const index = visible.map(buildIndexLine).join("\n");
   const sections = visible
-    .map((app) => buildDetailSection(app, siteUrl, indexSlug))
+    .map((record) => buildDetailSection(record, siteUrl, indexSlug))
     .join("\n\n");
   return [
-    `# ${config.name} — full directory`,
+    `# ${config.site.name} — full directory`,
     "",
-    `> Generated ${input.generatedAt} from ${input.apps.length} app records.`,
-    `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`grove build-llms-full\`.`,
+    `> Generated ${input.generatedAt} from ${input.records.length} records.`,
+    `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`grove generate\`.`,
     "",
-    "Each section below mirrors one app detail page.",
+    "Each section below mirrors one record detail page.",
     "",
     "## Index",
     "",
     index,
     "",
-    sections ? "## Projects" : "",
+    sections ? `## ${plural}` : "",
     "",
     sections,
     "",
   ].join("\n");
 }
 
-/** Write public/llms.txt and public/llms-full.txt. */
 export async function buildLlmsFiles(
   input: LlmsInput,
   cwd = process.cwd(),
-  config?: CuratedConfig,
+  config?: GroveConfig,
 ): Promise<LlmsResult> {
   const cfg = config ?? (await loadConfig(cwd));
-  const publicDir = resolve(cwd, "public");
+  const publicDir = resolve(cwd, cfg.paths.publicDir);
   await mkdir(publicDir, { recursive: true });
   const txtPath = join(publicDir, "llms.txt");
   const fullPath = join(publicDir, "llms-full.txt");
@@ -133,6 +153,8 @@ export async function buildLlmsFiles(
   return {
     txtPath,
     fullPath,
-    indexed: input.apps.filter((a) => a.visibility !== "hide" && a.visibility !== "remove").length,
+    indexed: input.records.filter(
+      (r) => r.visibility !== "hide" && r.visibility !== "remove",
+    ).length,
   };
 }

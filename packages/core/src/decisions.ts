@@ -1,12 +1,19 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { type AppRecord, normalizeAppRecord, parseAppYaml } from "./schema.js";
-import { type CuratedConfig, loadConfig } from "./config.js";
+import { parse as parseYaml } from "yaml";
+import {
+  blueprintKind,
+  recordsFileSchema,
+  unwrapRecords,
+  type GroveConfig,
+  type Resource,
+} from "./schema.js";
+import { loadConfig } from "./config.js";
 
-export interface ReviewCandidate {
+export interface CleanupCandidate {
   slug: string;
   name: string;
-  repoUrl: string;
+  url: string;
   status: string;
   tier: string;
   staleReason: string | null;
@@ -14,69 +21,86 @@ export interface ReviewCandidate {
   stars: number;
 }
 
-export interface ReviewReport {
+export interface CleanupReport {
   generatedAt: string;
+  blueprint: string;
   totalCandidates: number;
-  candidates: ReviewCandidate[];
+  candidates: CleanupCandidate[];
 }
 
-function toCandidate(app: AppRecord): ReviewCandidate {
+function toCandidate(record: Resource): CleanupCandidate {
+  const name = record.kind === "resource" ? record.title : record.name;
+  const url =
+    record.links?.github ?? record.links?.website ?? record.links?.source ?? "";
+  const health = (record as { health?: { status?: string; tier?: string; staleReason?: string | null } })
+    .health;
+  const gh = (record as { github?: { repository?: { pushed_at?: string; stargazers_count?: number } } })
+    .github?.repository;
   return {
-    slug: app.slug,
-    name: app.name,
-    repoUrl: app.repoUrl,
-    status: app.status,
-    tier: app.tier,
-    staleReason: app.staleReason,
-    lastCommitAt: app.lastCommitAt ?? null,
-    stars: app.stars ?? 0,
+    slug: record.slug,
+    name,
+    url,
+    status: health?.status ?? "unknown",
+    tier: health?.tier ?? "experimental",
+    staleReason: health?.staleReason ?? null,
+    lastCommitAt: gh?.pushed_at ?? null,
+    stars: gh?.stargazers_count ?? 0,
   };
 }
 
-/** Compute the set of review candidates from normalized app records. */
-export function pickReviewCandidates(apps: AppRecord[]): AppRecord[] {
-  return apps.filter(
-    (app) =>
-      app.cleanupCandidate ||
-      app.status === "unknown" ||
-      app.status === "needs_review",
-  );
+/** Filter records down to the ones that need a human curation pass. */
+export function pickCleanupCandidates(records: Resource[]): Resource[] {
+  return records.filter((r) => {
+    const health = (r as { health?: { cleanupCandidate?: boolean; status?: string } }).health;
+    if (health?.cleanupCandidate) return true;
+    if (health?.status === "unknown" || health?.status === "needs_review") return true;
+    return false;
+  });
 }
 
 /**
- * Read every apps/*.yml, normalize, then write data/generated/review-report.json
- * with cleanup candidates (unknown / needs_review / cleanupCandidate).
+ * Read every record YAML under `config.paths.recordsDir`, normalize,
+ * then write `data/generated/cleanup-report.json` with the list of
+ * records that need human attention (stale / unknown / cleanup).
+ *
+ * V1 name for what was previously `review`.
  */
-export async function buildReviewReport(
+export async function cleanupStale(
   cwd = process.cwd(),
-  config?: CuratedConfig,
-): Promise<{ report: ReviewReport; path: string }> {
+  config?: GroveConfig,
+): Promise<{ report: CleanupReport; path: string }> {
   const cfg = config ?? (await loadConfig(cwd));
-  const appsDir = resolve(cwd, cfg.paths.appsDir);
+  const recordsDir = resolve(cwd, cfg.paths.recordsDir);
   const outDir = resolve(cwd, cfg.paths.generatedDir);
   await mkdir(outDir, { recursive: true });
 
-  let entries: string[] = [];
-  try {
-    entries = await readdir(appsDir);
-  } catch {
-    entries = [];
-  }
+  const expectedKind = blueprintKind[cfg.blueprint];
+  const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
-  const apps: AppRecord[] = [];
+
+  const records: Resource[] = [];
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
-    const text = await readFile(join(appsDir, file), "utf8");
-    const raw = parseAppYaml(text, fileSlug);
-    apps.push(normalizeAppRecord(raw, fileSlug));
+    const text = await readFile(join(recordsDir, file), "utf8");
+    const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
+    if (!raw.kind) raw.kind = expectedKind;
+    try {
+      const normalized = unwrapRecords(recordsFileSchema.parse([raw]))[0];
+      normalized.slug = fileSlug;
+      records.push(normalized);
+    } catch {
+      // skip — validation surfaces the error
+    }
   }
-  const candidates = pickReviewCandidates(apps).map(toCandidate);
-  const report: ReviewReport = {
+
+  const candidates = pickCleanupCandidates(records).map(toCandidate);
+  const report: CleanupReport = {
     generatedAt: new Date().toISOString(),
+    blueprint: cfg.blueprint,
     totalCandidates: candidates.length,
     candidates,
   };
-  const path = join(outDir, "review-report.json");
+  const path = join(outDir, "cleanup-report.json");
   await writeFile(path, JSON.stringify(report, null, 2), "utf8");
   return { report, path };
 }

@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { type CuratedConfig, loadConfig } from "./config.js";
+import { type GroveConfig, loadConfig } from "./config.js";
 
 export interface SitemapEntry {
   loc: string;
@@ -10,22 +10,14 @@ export interface SitemapEntry {
 }
 
 export interface SitemapInput {
-  /** Site base URL. Falls back to config.siteUrl. */
   siteUrl?: string;
-  /** ISO timestamp used as <lastmod> for the directory index. */
   generatedAt: string;
-  /**
-   * Build a list of items (apps, projects) to include.
-   * Typically `data/generated/apps.full.json` after `grove build-data`.
-   */
   items: Array<{
     slug: string;
-    name?: string;
     visibility?: string;
     lastCommitAt?: string | null;
     addedAt?: string | null;
   }>;
-  /** Slug of the index page (e.g. "apps" or "projects"). */
   indexSlug?: string;
 }
 
@@ -53,7 +45,6 @@ function entryToXml(entry: SitemapEntry): string {
   return lines.join("\n");
 }
 
-/** Build a sitemap.xml string from a list of entries. */
 export function buildSitemapXml(entries: SitemapEntry[]): string {
   const body = entries.map(entryToXml).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -63,21 +54,26 @@ ${body}
 `;
 }
 
+const BLUEPRINT_INDEX: Record<string, string> = {
+  "project-directory": "projects",
+  "resource-hub": "resources",
+  "ecosystem-map": "entities",
+};
+
 /**
- * Build a sitemap from generated apps data + curated config.
- * Writes to public/sitemap.xml by default.
+ * Build a sitemap from generated records data + Grove config.
+ * Writes to public/sitemap.xml.
  */
 export async function buildSitemap(
   input: SitemapInput,
   cwd = process.cwd(),
-  config?: CuratedConfig,
+  config?: GroveConfig,
 ): Promise<SitemapResult> {
   const cfg = config ?? (await loadConfig(cwd));
-  const siteUrl = (input.siteUrl ?? cfg.siteUrl ?? "https://example.com").replace(/\/$/, "");
-  const indexSlug = input.indexSlug ?? "apps";
+  const siteUrl = (input.siteUrl ?? cfg.site.url ?? "https://example.com").replace(/\/$/, "");
+  const indexSlug = input.indexSlug ?? BLUEPRINT_INDEX[cfg.blueprint] ?? "items";
   const entries: SitemapEntry[] = [];
 
-  // Home + directory index
   entries.push({
     loc: `${siteUrl}/`,
     lastmod: input.generatedAt,
@@ -91,7 +87,6 @@ export async function buildSitemap(
     priority: 0.9,
   });
 
-  // Per-item pages — only visible items
   for (const item of input.items) {
     if (item.visibility === "hide" || item.visibility === "remove") continue;
     const lastmod = item.lastCommitAt ?? item.addedAt ?? input.generatedAt;
@@ -104,7 +99,7 @@ export async function buildSitemap(
   }
 
   const xml = buildSitemapXml(entries);
-  const publicDir = resolve(cwd, "public");
+  const publicDir = resolve(cwd, cfg.paths.publicDir);
   await mkdir(publicDir, { recursive: true });
   const path = join(publicDir, "sitemap.xml");
   await writeFile(path, xml, "utf8");

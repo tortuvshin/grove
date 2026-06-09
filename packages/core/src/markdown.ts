@@ -1,16 +1,28 @@
-import type { CuratedItem } from "./schema.js";
-import { uniqueSlug } from "./slug.js";
+import { mkdir, writeFile } from "node:fs/promises";
+import { basename, join, resolve } from "node:path";
+import { stringify as stringifyYaml } from "yaml";
+import { blueprintKind, type Blueprint, type ProjectRecord } from "./schema.js";
+
+export interface ImportedRecord {
+  slug: string;
+  name: string;
+  description: string;
+  category: string;
+  links: { github?: string; website?: string; source?: string };
+}
+
+export interface ImportSummary {
+  imported: number;
+  skipped: number;
+  categories: string[];
+  duplicateSlugs: number;
+  tocSkipped: number;
+  anchorLinksSkipped: number;
+}
 
 export interface ImportResult {
-  items: CuratedItem[];
-  report: {
-    imported: number;
-    skipped: number;
-    categories: string[];
-    duplicateSlugs: number;
-    tocSkipped: number;
-    anchorLinksSkipped: number;
-  };
+  records: ImportedRecord[];
+  report: ImportSummary;
 }
 
 const markdownLinkPattern = /\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
@@ -24,20 +36,24 @@ const TOC_TITLES = new Set([
   "contributors",
 ]);
 
+const EMOJIS = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
+
 function stripAnchor(name: string): string {
   return name
     .replace(/<a\s+name="[^"]+"><\/a>/gi, "")
     .replace(/🔗/g, "")
-    .replace(/🚀|🎨|📐|👨‍💻|🤖|🖥️|💬|🗣️|🔑|👤|🗄️|📊|💻|🔒|🧮|📟|🎓|🛒|🌳|📂|💰|🎮|🏠|🧠|⚖️|🗺️|🎯|📋|🏠|🔬|🔎|🌐|🔮|🏃|🎧|🌎|🎙️|🚆|🔄|🏢|🛠️/g, "")
+    .replace(EMOJIS, "")
     .replace(/\s+/g, " ")
     .trim();
 }
+
+const REPO_RESERVED = new Set(["issues", "pulls", "stargazers", "network"]);
 
 export function detectGithubRepo(url: string): string | undefined {
   const match = url.match(/^https?:\/\/github\.com\/([^/\s]+)\/([^/#?\s]+)(?:[/?#].*)?$/i);
   if (!match) return undefined;
   const repo = match[2].replace(/\.git$/, "");
-  if (!repo || ["issues", "pulls", "stargazers", "network"].includes(repo)) return undefined;
+  if (!repo || REPO_RESERVED.has(repo)) return undefined;
   return `https://github.com/${match[1]}/${repo}`;
 }
 
@@ -67,19 +83,35 @@ function headingText(line: string): string | undefined {
   return stripAnchor(line.match(/^#{2,6}\s+(.+?)\s*$/)?.[1]?.trim() ?? "");
 }
 
-export function parseAwesomeMarkdown(text: string, options: { file?: string; sourceUrl?: string } = {}): ImportResult {
+function slugify(label: string, seen: Map<string, number>): string {
+  const base =
+    label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) ||
+    "item";
+  const existing = seen.get(base) ?? 0;
+  seen.set(base, existing + 1);
+  return existing === 0 ? base : `${base}-${existing}`;
+}
+
+function githubReadmeUrl(input: string): string | undefined {
+  const match = input.match(/^https?:\/\/github\.com\/([^/\s]+)\/([^/#?\s]+)\/?$/i);
+  if (!match) return undefined;
+  return `https://raw.githubusercontent.com/${match[1]}/${match[2]}/HEAD/README.md`;
+}
+
+export function parseAwesomeMarkdown(
+  text: string,
+  options: { file?: string; sourceUrl?: string } = {},
+): ImportResult {
   const lines = text.split(/\r?\n/);
   const seen = new Map<string, number>();
   const categories = new Set<string>();
-  const items: CuratedItem[] = [];
+  const records: ImportedRecord[] = [];
   let currentCategory = "uncategorized";
-  let categoryDepth = 2;
   let skipped = 0;
   let duplicateSlugs = 0;
   let tocSkipped = 0;
   let anchorLinksSkipped = 0;
   let inTocBlock = false;
-  let consecutiveBlankLines = 0;
 
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index] ?? "";
@@ -89,33 +121,21 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
       inTocBlock = TOC_TITLES.has(title.toLowerCase());
       if (title && !inTocBlock) {
         currentCategory = title;
-        categoryDepth = depth;
         categories.add(currentCategory);
       }
-      consecutiveBlankLines = 0;
       continue;
     }
 
     if (inTocBlock) {
-      // TOC blocks: skip list items entirely. Exit when we see a non-list, non-blank line.
-      if (!line.trim()) {
-        consecutiveBlankLines++;
-        continue;
-      }
+      if (!line.trim()) continue;
       if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+\.\s+/.test(line)) {
         tocSkipped++;
-        consecutiveBlankLines = 0;
         continue;
       }
-      // First non-list, non-blank line ends the TOC block.
       inTocBlock = false;
     }
 
-    if (!/^\s*[-*+]\s+/.test(line)) {
-      consecutiveBlankLines = line.trim() ? 0 : consecutiveBlankLines + 1;
-      continue;
-    }
-    consecutiveBlankLines = 0;
+    if (!/^\s*[-*+]\s+/.test(line)) continue;
 
     const body = line.replace(/^\s*[-*+]\s+/, "").trim();
     const parsedLinks = [...body.matchAll(markdownLinkPattern)].map((match) => ({
@@ -126,8 +146,6 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
       skipped++;
       continue;
     }
-
-    // Filter out items whose primary link is an in-page anchor (TOC-style leftover).
     const primary = parsedLinks[0];
     if (!primary) {
       skipped++;
@@ -137,74 +155,50 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
       anchorLinksSkipped++;
       continue;
     }
-
-    // Only keep items that have at least one external URL (HTTP/HTTPS or protocol-relative).
-    // Project directories need a real link, not just text + bare words.
-    const hasExternal = parsedLinks.some((link) => isExternalUrl(link.url) && !isAnchorLink(link.url));
+    const hasExternal = parsedLinks.some(
+      (link) => isExternalUrl(link.url) && !isAnchorLink(link.url),
+    );
     if (!hasExternal) {
       skipped++;
       continue;
     }
-
-    // Prefer the first external link as the primary, ignoring any leading anchor links.
-    const primaryExternal = parsedLinks.find((link) => isExternalUrl(link.url) && !isAnchorLink(link.url));
+    const primaryExternal = parsedLinks.find(
+      (link) => isExternalUrl(link.url) && !isAnchorLink(link.url),
+    );
     if (!primaryExternal) {
       skipped++;
       continue;
     }
-
-    const github = parsedLinks.map((link) => detectGithubRepo(link.url)).find(Boolean);
-    const id = uniqueSlug(primaryExternal.label, seen);
-    if (
-      id !==
-      (primaryExternal.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "item")
-    ) {
-      duplicateSlugs++;
-    }
-
+    const github = parsedLinks
+      .map((link) => detectGithubRepo(link.url))
+      .find((u): u is string => Boolean(u));
+    const id = slugify(primaryExternal.label, seen);
+    const lowerSlug =
+      primaryExternal.label
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80) || "item";
+    if (id !== lowerSlug) duplicateSlugs++;
     const description = extractDescription(body);
-    const links: CuratedItem["links"] = {
+    const links: ImportedRecord["links"] = {
       ...(github ? { github } : {}),
       ...(!github ? { website: primaryExternal.url } : {}),
       ...(options.sourceUrl ? { source: options.sourceUrl } : {}),
     };
-
-    items.push({
-      id,
+    records.push({
+      slug: id,
       name: primaryExternal.label,
       description: description || primaryExternal.label,
+      category: currentCategory,
       links,
-      source: {
-        type: "markdown",
-        file: options.file,
-        line: index + 1,
-        url: options.sourceUrl,
-      },
-      taxonomy: {
-        category: currentCategory,
-        tags: [],
-        stacks: [],
-        platforms: [],
-      },
-      labels: [],
-      lenses: [],
-      distribution: {
-        channels: [],
-      },
-      curation: {
-        bestFor: [],
-        whyListed: [],
-        caveats: [],
-        launchAsk: [],
-        scores: {},
-      },
     });
   }
 
   return {
-    items,
+    records,
     report: {
-      imported: items.length,
+      imported: records.length,
       skipped,
       categories: [...categories].filter((c) => c && c !== "uncategorized"),
       duplicateSlugs,
@@ -212,4 +206,71 @@ export function parseAwesomeMarkdown(text: string, options: { file?: string; sou
       anchorLinksSkipped,
     },
   };
+}
+
+export async function importAwesomeList(input: string): Promise<ImportResult> {
+  const remote =
+    githubReadmeUrl(input) ?? (/^https?:\/\//.test(input) ? input : undefined);
+  let text: string;
+  let file: string | undefined;
+  let sourceUrl: string | undefined;
+  if (remote) {
+    const response = await fetch(remote);
+    if (!response.ok) {
+      throw new Error(
+        `Could not fetch ${remote}: ${response.status} ${response.statusText}`,
+      );
+    }
+    text = await response.text();
+    file = "sources/README.md";
+    sourceUrl = input;
+  } else {
+    const path = resolve(input);
+    const { readFile } = await import("node:fs/promises");
+    text = await readFile(path, "utf8");
+    file = basename(path);
+  }
+  return parseAwesomeMarkdown(text, { file, sourceUrl });
+}
+
+/**
+ * Write imported records out as `data/records/<slug>.yml`, one per
+ * record. Each file is shaped for the `project-directory` blueprint
+ * (kind: project). Other blueprints should use a separate importer.
+ */
+export async function writeImportedRecords(
+  result: ImportResult,
+  cwd = process.cwd(),
+  blueprint: Blueprint = "project-directory",
+): Promise<{ written: number; dir: string }> {
+  const expectedKind = blueprintKind[blueprint];
+  const dir = resolve(cwd, "data", "records");
+  await mkdir(dir, { recursive: true });
+  let written = 0;
+  for (const record of result.records) {
+    let yamlObj: Record<string, unknown>;
+    if (expectedKind === "project") {
+      const project: Partial<ProjectRecord> = {
+        kind: "project",
+        slug: record.slug,
+        name: record.name,
+        description: record.description,
+        category: record.category,
+        tags: [],
+        links: record.links,
+        source: { type: "import" },
+      };
+      yamlObj = project as Record<string, unknown>;
+    } else {
+      yamlObj = { ...record, kind: expectedKind };
+    }
+    const path = join(dir, `${record.slug}.yml`);
+    await writeFile(
+      path,
+      stringifyYaml(yamlObj, { lineWidth: 100 }),
+      "utf8",
+    );
+    written++;
+  }
+  return { written, dir };
 }
