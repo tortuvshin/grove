@@ -517,6 +517,22 @@ export type NavItem = z.infer<typeof navItemSchema>;
 export type GithubIntegration = z.infer<typeof githubIntegrationSchema>;
 export type Theme = z.infer<typeof themeSchema>;
 export type ComponentOverride = z.infer<typeof componentOverrideSchema>;
+export type GithubMetadata = z.infer<typeof githubMetadataSchema>;
+export type GithubRepository = z.infer<typeof githubRepositorySchema>;
+export type HealthStatus = z.infer<typeof healthStatusSchema>;
+export type HealthTier = z.infer<typeof healthTierSchema>;
+export type HealthFile = z.infer<typeof healthFileSchema>;
+export type HealthEntry = z.infer<typeof healthEntrySchema>;
+export type DecisionsFile = z.infer<typeof decisionsFileSchema>;
+export type Decision = z.infer<typeof decisionSchema>;
+export type OverridesFile = z.infer<typeof overridesFileSchema>;
+export type Override = z.infer<typeof overrideSchema>;
+export type ProjectType = z.infer<typeof projectTypeSchema>;
+export type ResourceType = z.infer<typeof resourceTypeSchema>;
+export type EntityType = z.infer<typeof entityTypeSchema>;
+export type AppLabel = z.infer<typeof appLabelSchema>;
+export type Score = z.infer<typeof scoreSchema>;
+export type Links = z.infer<typeof linksSchema>;
 
 // ──────────────────────────────────────────────────────────────────────
 // Helpers

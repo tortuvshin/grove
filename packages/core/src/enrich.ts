@@ -7,8 +7,8 @@
  * the page render doesn't include the standard "X license" link text.
  *
  * The returned shape is compatible with the GitHub REST `repository`
- * block used in `data/apps/<slug>.yml`, so a subsequent token-backed
- * sync can fill in the rest of the fields.
+ * block used in `data/records/<slug>.yml` for `kind: project` records,
+ * so a subsequent token-backed sync can fill in the rest of the fields.
  */
 
 import { getOwnerRepoFromUrl } from "./schema.js";

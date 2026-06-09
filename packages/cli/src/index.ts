@@ -1,11 +1,19 @@
 #!/usr/bin/env node
 /**
- * Grove CLI — turns awesome lists into living, health-aware developer directories.
+ * Grove CLI — scaffolds Grove-powered spaces and orchestrates
+ * `@grove-dev/core` commands.
  *
- * Layered on top of `@grove-dev/core`. The CLI is intentionally
- * framework-agnostic: it orchestrates `core` functions and asks the
- * matching framework adapter (e.g. `@grove-dev/astro`) for templates
- * to scaffold a project.
+ * V1 command surface:
+ *   grove new <name>      scaffold a new project (asks blueprint + framework)
+ *   grove import <src>    turn an awesome list into records/*.yml
+ *   grove validate        check records, taxonomy, health, decisions
+ *   grove generate        build data/generated/records.{full,index}.json
+ *   grove sitemap         write public/sitemap.xml
+ *   grove llms            write public/llms.txt and llms-full.txt
+ *   grove sync github     optional: enrich records with GitHub metadata
+ *   grove cleanup stale   flag records that need human review
+ *   grove build           run the framework's build command
+ *   grove dev             run the framework's dev server
  */
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -13,30 +21,28 @@ import { dirname, join, resolve } from "node:path";
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import {
-  buildData,
-  buildLlmsFiles,
-  buildReviewReport,
-  buildSitemap,
-  classifyHealth,
+  cleanupStale,
   enrichFromGithubHtml,
   fetchGithubMetadata,
-  healthFromSignals,
-  importAwesomeList,
-  itemsFileSchema,
-  loadConfig,
-  parseAppYaml,
-  parseGithubRepoUrl,
-  pLimit,
-  readYamlFile,
-  toIndexApp,
-  type CuratedConfig,
+  generate,
+  blueprintKind,
+  type Blueprint,
+  type GroveConfig,
   type HealthEntry,
-  normalizeAppRecord,
-  stringifyAppYaml,
+  type Resource,
+  importAwesomeList,
+  loadConfig,
+  parseGithubRepoUrl,
+  stringifyRecordYaml,
   validateProject,
   writeTextFile,
   writeYamlFile,
+  type HealthStatus,
+  type HealthTier,
+  type DecisionVisibility,
+  healthFromSignals,
 } from "@grove-dev/core";
+import { parse as parseYaml } from "yaml";
 import {
   copyTemplate,
   ensureDir,
@@ -59,28 +65,30 @@ const DEPLOY_LABELS: Record<DeployProvider, { label: string; hint: string }> = {
   none: { label: "None", hint: "I'll bring my own deploy — no workflow" },
 };
 const FRAMEWORK_LABELS: Record<Framework, { label: string; hint: string }> = {
-  astro: { label: "Astro", hint: "Static-first, great for content sites" },
-  nextjs: { label: "Next.js", hint: "App router + RSC, React ecosystem" },
-  svelte: { label: "SvelteKit", hint: "Compact, fast, single-file components" },
+  astro: { label: "Astro", hint: "Static-first, great for content sites (V1 supported)" },
+  nextjs: { label: "Next.js", hint: "Roadmap only — not in V1" },
+  svelte: { label: "SvelteKit", hint: "Roadmap only — not in V1" },
+};
+const BLUEPRINT_LABELS: Record<Blueprint, { label: string; hint: string }> = {
+  "project-directory": { label: "project-directory", hint: "Structured projects/tools/apps" },
+  "resource-hub": { label: "resource-hub", hint: "Guides, comparisons, resources" },
+  "ecosystem-map": { label: "ecosystem-map", hint: "Orgs, products, communities" },
 };
 
 program
   .name("grove")
-  .description("Turn awesome lists into living, health-aware developer directories.")
-  .version("0.1.0");
+  .description("Grove — grow a community knowledge site.")
+  .version("0.1.5");
 
 // ──────────────────────────────────────────────────────────────────────
 // grove new
-//
-// Scaffold a brand-new project repo. Interactive by default
-// (matches `pnpm create astro`, `create-next-app`, etc.); every
-// prompt has a CLI flag for non-interactive use.
 // ──────────────────────────────────────────────────────────────────────
 program
   .command("new")
   .argument("[name]", "project directory name (current dir if omitted)")
   .description("Scaffold a new Grove project from a framework template.")
-  .option("-f, --framework <name>", "framework: astro | nextjs | svelte")
+  .option("-b, --blueprint <name>", "blueprint: project-directory | resource-hub | ecosystem-map")
+  .option("-f, --framework <name>", "framework: astro | nextjs | svelte (V1: astro)")
   .option("-t, --template <name>", "template name", "default")
   .option("-d, --deploy <provider>", `deploy provider: ${DEPLOY_PROVIDERS.join(" | ")}`)
   .option("--no-git", "skip `git init` after scaffolding")
@@ -90,6 +98,7 @@ program
     async (
       name: string | undefined,
       opts: {
+        blueprint?: string;
         framework?: string;
         template: string;
         deploy?: string;
@@ -100,11 +109,6 @@ program
     ) => {
       p.intro("🌱 Grow a new Grove space");
 
-      // ── 1. Project name ────────────────────────────────────────
-      // Non-interactive path: if --yes was passed OR a name positional was
-      // given, skip both text prompts and derive values from the args.
-      // Without this, the CLI hangs on `p.text` in non-TTY environments
-      // (CI, agent shells, piped stdin) because clack has no TTY to read from.
       const projectDir: string =
         opts.yes || name ? name ?? "." : await resolveText("Where should the new space live?", ".");
       const projectName: string =
@@ -112,7 +116,52 @@ program
           ? (projectDir === "." ? "Grove Directory" : projectDir)
           : await resolveText("What is the name of this space?", "Grove Directory");
 
-      // ── 2. Framework ───────────────────────────────────────────
+      // Blueprint
+      let blueprint: Blueprint;
+      const validBlueprints = Object.keys(BLUEPRINT_LABELS) as Blueprint[];
+      if (opts.blueprint && (validBlueprints as string[]).includes(opts.blueprint)) {
+        blueprint = opts.blueprint as Blueprint;
+      } else if (opts.blueprint) {
+        p.log.error(`Unknown blueprint: ${opts.blueprint}.`);
+        p.log.info(`Try one of: ${validBlueprints.join(", ")}`);
+        process.exit(1);
+      } else if (opts.yes) {
+        blueprint = "project-directory";
+      } else {
+        const b = await p.select({
+          message: "Pick a blueprint",
+          options: validBlueprints.map((b) => ({
+            value: b,
+            label: BLUEPRINT_LABELS[b].label,
+            hint: BLUEPRINT_LABELS[b].hint,
+          })),
+          initialValue: "project-directory",
+        });
+        if (p.isCancel(b)) {
+          p.cancel("Aborted.");
+          process.exit(0);
+        }
+        blueprint = b as Blueprint;
+      }
+
+      // GitHub integration
+      const githubMode: "none" | "public" =
+        opts.yes
+          ? "none"
+          : (await p.select({
+              message: "GitHub integration?",
+              options: [
+                { value: "none", label: "None / private site", hint: "No GitHub token, no API calls" },
+                { value: "public", label: "Public GitHub metadata", hint: "Optional, gated by token" },
+              ],
+              initialValue: "none",
+            })) as "none" | "public";
+      if (p.isCancel(githubMode)) {
+        p.cancel("Aborted.");
+        process.exit(0);
+      }
+
+      // Framework
       let framework: Framework;
       if (opts.framework && isFramework(opts.framework)) {
         framework = opts.framework;
@@ -124,7 +173,7 @@ program
         framework = "astro";
       } else {
         const f = await p.select({
-          message: "Pick a framework",
+          message: "Pick a framework (V1 only supports astro)",
           options: SUPPORTED_FRAMEWORKS.map((f) => ({
             value: f,
             label: FRAMEWORK_LABELS[f].label,
@@ -139,10 +188,8 @@ program
         framework = f as Framework;
       }
 
-      // ── 3. Template name ───────────────────────────────────────
       const template = opts.template;
 
-      // ── 4. Deploy provider ─────────────────────────────────────
       let deploy: DeployProvider;
       if (opts.deploy && (DEPLOY_PROVIDERS as readonly string[]).includes(opts.deploy)) {
         deploy = opts.deploy as DeployProvider;
@@ -169,7 +216,6 @@ program
         deploy = d as DeployProvider;
       }
 
-      // ── 5. git init? ───────────────────────────────────────────
       const initGit = opts.yes
         ? (opts.git ?? true)
         : await p.confirm({
@@ -181,7 +227,6 @@ program
         process.exit(0);
       }
 
-      // ── 6. install deps? ───────────────────────────────────────
       const installDeps = opts.yes
         ? (opts.install ?? true)
         : await p.confirm({
@@ -193,7 +238,6 @@ program
         process.exit(0);
       }
 
-      // ── 7. scaffold ────────────────────────────────────────────
       const root = resolve(projectDir);
       const templates = await listTemplates(framework);
       const tpl = templates.find((t) => t.template === template) ?? templates[0];
@@ -207,7 +251,12 @@ program
 
       await mkdir(root, { recursive: true });
       await copyTemplate(framework, root, tpl.template);
-      const renameResult = await renameProjectInTemplate(framework, root, projectName, tpl.template);
+      const renameResult = await renameProjectInTemplate(
+        framework,
+        root,
+        projectName,
+        tpl.template,
+      );
       if (renameResult.rewrittenDeps.length > 0) {
         p.log.step(
           `Rewrote workspace deps to published version: ${renameResult.rewrittenDeps.join(", ")}`,
@@ -215,46 +264,32 @@ program
       }
 
       await Promise.all([
-        ensureDir(join(root, "sources")),
         ensureDir(join(root, "data")),
-        ensureDir(join(root, "data", "apps")),
+        ensureDir(join(root, "data", "records")),
         ensureDir(join(root, "data", "taxonomy")),
         ensureDir(join(root, "data", "generated")),
         ensureDir(join(root, "content")),
+        ensureDir(join(root, "content", "pages")),
+        ensureDir(join(root, "content", "records")),
         ensureDir(join(root, "public")),
         ensureDir(join(root, ".github")),
         ensureDir(join(root, ".github", "ISSUE_TEMPLATE")),
         ensureDir(join(root, ".github", "workflows")),
       ]);
-      await writeIfMissing(join(root, "curated.config.ts"), projectConfig(projectName));
-      await writeIfMissing(join(root, "README.md"), projectReadme(projectName, framework));
+      await writeIfMissing(join(root, "grove.config.ts"), projectConfig(projectName, blueprint, githubMode));
+      await writeIfMissing(join(root, "README.md"), projectReadme(projectName, blueprint, framework));
       await writeIfMissing(join(root, ".gitignore"), gitignoreTemplate());
-      await writeIfMissing(join(root, "data", "items.yml"), "items: []\n");
-      await writeIfMissing(join(root, "data", "health.yml"), "health: []\n");
       await writeIfMissing(join(root, "data", "decisions.yml"), "decisions: []\n");
-      await writeIfMissing(join(root, "data", "overrides.yml"), "overrides: []\n");
-      await writeIfMissing(join(root, "data", "taxonomy", "stacks.yml"), taxonomyStacks());
-      await writeIfMissing(join(root, "data", "taxonomy", "platforms.yml"), taxonomyPlatforms());
-      await writeIfMissing(join(root, "data", "taxonomy", "categories.yml"), taxonomyCategories());
-      await writeIfMissing(
-        join(root, "data", "taxonomy", "distribution-channels.yml"),
-        taxonomyDistribution(),
-      );
-      await writeIfMissing(
-        join(root, "content", "methodology.md"),
-        "# Methodology\n\nGrove uses repository metadata as a signal. Human curation decisions control final visibility.\n",
-      );
+      await writeIfMissing(join(root, "content", "methodology.md"), "# Methodology\n\nGrove uses repository metadata as a signal. Human curation decisions control final visibility.\n");
       await writeIfMissing(join(root, ".github", "workflows", "validate-data.yml"), workflowValidate());
-      await writeIfMissing(join(root, ".github", "workflows", "import.yml"), workflowImport());
-      await writeIfMissing(join(root, ".github", "workflows", "deploy.yml"), workflowDeploy(deploy, framework));
-      await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "app_submission.md"), issueTemplateSubmission());
+      await writeIfMissing(join(root, ".github", "workflows", "build.yml"), workflowBuild(framework));
+      await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "record_submission.md"), issueTemplateSubmission(blueprint));
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "bug_report.md"), issueTemplateBug());
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "feature_request.md"), issueTemplateFeature());
       await writeIfMissing(join(root, "LICENSE"), licenseMIT(projectName));
 
       s.stop("Scaffolded");
 
-      // ── 8. git init ────────────────────────────────────────────
       if (initGit) {
         try {
           await runExternal("git", ["init", "-b", "main"], { stdio: "ignore", cwd: root });
@@ -264,14 +299,13 @@ program
         }
       }
 
-      // ── 9. pnpm install ────────────────────────────────────────
       if (installDeps) {
         const installSpinner = p.spinner();
         installSpinner.start("Installing dependencies");
         try {
           await runExternal("pnpm", ["install"], { stdio: "ignore", cwd: root });
           installSpinner.stop("Installed dependencies");
-        } catch (err) {
+        } catch {
           installSpinner.stop("Install failed");
           p.log.warn(`Run \`pnpm install\` inside ${root} to retry.`);
         }
@@ -279,9 +313,12 @@ program
 
       p.outro(
         `🌳 ${projectName} is ready at ${root}\n\n` +
+          `Blueprint: ${blueprint}\n` +
+          `GitHub integration: ${githubMode}\n\n` +
           `Next steps:\n` +
           `  cd ${projectDir}\n` +
-          `  grove import <awesome-list-url>\n` +
+          `  grove validate\n` +
+          `  grove generate\n` +
           `  grove build\n`,
       );
     },
@@ -293,54 +330,39 @@ program
 program
   .command("import")
   .argument("<source>", "GitHub awesome-list URL, raw README URL, or local README.md")
-  .description("Import Markdown links into data/items.yml.")
+  .description("Import Markdown links into data/records/*.yml for the current blueprint.")
   .action(async (source: string) => {
     const config = await loadConfig();
     const result = await importAwesomeList(source);
-    await writeYamlFile(config.paths.items, { items: result.items });
-    const report = [
-      "# Import Report",
-      "",
-      `Source: ${source}`,
-      `Imported: ${result.report.imported}`,
-      `Skipped: ${result.report.skipped}`,
-      `Categories: ${result.report.categories.length}`,
-      `Duplicate slugs adjusted: ${result.report.duplicateSlugs}`,
-      "",
-      "## Categories",
-      "",
-      ...result.report.categories.map((category) => `- ${category}`),
-      "",
-    ].join("\n");
-    await writeTextFile(join(config.paths.sourcesDir, "import-report.md"), report);
-    console.log(`Imported ${result.items.length} items into ${config.paths.items}`);
-  });
-
-// ──────────────────────────────────────────────────────────────────────
-// grove analyze
-// ──────────────────────────────────────────────────────────────────────
-program
-  .command("analyze")
-  .description("Fetch GitHub metadata and generate data/health.yml.")
-  .option("--limit <n>", "limit analyzed items for demos/rate limits", (value) => Number(value))
-  .action(async (options: { limit?: number }) => {
-    const config = await loadConfig();
-    const items = itemsFileSchema.parse(await readYamlFile(config.paths.items));
-    const list = "items" in items ? items.items : items;
-    const selected = typeof options.limit === "number" ? list.slice(0, options.limit) : list;
-    const health: HealthEntry[] = [];
-    for (const item of selected) {
-      const ref = parseGithubRepoUrl(item.links.github);
-      if (!ref) {
-        health.push(classifyHealth(item.id));
-        continue;
+    const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
+    await mkdir(recordsDir, { recursive: true });
+    const expectedKind = blueprintKind[config.blueprint];
+    let written = 0;
+    for (const record of result.records) {
+      const yamlObj: Record<string, unknown> = {
+        kind: expectedKind,
+        slug: record.slug,
+        description: record.description,
+        category: record.category,
+        tags: [],
+        links: record.links,
+        source: { type: "import" },
+      };
+      if (expectedKind === "project") {
+        yamlObj.name = record.name;
+      } else if (expectedKind === "resource") {
+        yamlObj.title = record.name;
+        yamlObj.type = "link";
+        yamlObj.topic = record.category;
+      } else if (expectedKind === "entity") {
+        yamlObj.name = record.name;
+        yamlObj.type = "other";
       }
-      console.log(`Analyzing ${ref.owner}/${ref.repo}`);
-      const metadata = await fetchGithubMetadata(ref);
-      health.push(classifyHealth(item.id, metadata));
+      const path = join(recordsDir, `${record.slug}.yml`);
+      await writeFile(path, stringifyRecordYaml(yamlObj), "utf8");
+      written++;
     }
-    await writeYamlFile(config.paths.health, { health });
-    console.log(`Wrote ${health.length} health entries to ${config.paths.health}`);
+    console.log(`Imported ${written} record(s) into ${recordsDir}`);
   });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -348,9 +370,9 @@ program
 // ──────────────────────────────────────────────────────────────────────
 program
   .command("validate")
-  .description("Validate project data files.")
+  .description("Validate project data files against the configured blueprint.")
   .action(async () => {
-    const config: CuratedConfig = await loadConfig();
+    const config: GroveConfig = await loadConfig();
     const result = await validateProject(config);
     for (const issue of result.issues) {
       console.log(`${issue.code}: ${issue.message}`);
@@ -364,47 +386,18 @@ program
   });
 
 // ──────────────────────────────────────────────────────────────────────
-// grove build
-//
-// Build the static site in the current project. Discovers the
-// framework by reading the project's package.json (deps on
-// @grove-dev/<framework>), then runs the matching build command
-// (`astro build`, `next build`, `vite build`).
+// grove generate
 // ──────────────────────────────────────────────────────────────────────
 program
-  .command("build")
-  .description("Build the static directory in the current project repo.")
+  .command("generate")
+  .description("Build data/generated/records.{full,index}.json from data/records/*.yml.")
   .action(async () => {
-    const framework = await detectFramework();
-    const cmd = frameworkBuildCommand(framework);
-    runExternal(cmd[0], cmd[1], { stdio: "inherit" });
-  });
-
-// ──────────────────────────────────────────────────────────────────────
-// grove dev
-// ──────────────────────────────────────────────────────────────────────
-program
-  .command("dev")
-  .description("Start the framework dev server in the current project repo.")
-  .action(async () => {
-    const framework = await detectFramework();
-    const cmd = frameworkDevCommand(framework);
-    runExternal(cmd[0], cmd[1], { stdio: "inherit" });
-  });
-
-// ──────────────────────────────────────────────────────────────────────
-// grove build-data
-// ──────────────────────────────────────────────────────────────────────
-program
-  .command("build-data")
-  .description("Build data/generated/*.json from data/apps/*.yml + curated.config.ts.")
-  .action(async () => {
-    const result = await buildData();
+    const result = await generate();
     console.log(
-      `[build-data] ${result.totalApps} full, ${result.visibleApps} visible index\n` +
+      `[generate] ${result.totalRecords} total, ${result.visibleRecords} visible\n` +
         `  full:  ${result.fullPath}\n` +
         `  index: ${result.indexPath}\n` +
-        `  config: ${result.configTsPath}`,
+        `  alias: ${result.aliasPath}`,
     );
   });
 
@@ -413,19 +406,26 @@ program
 // ──────────────────────────────────────────────────────────────────────
 program
   .command("sitemap")
-  .description("Generate public/sitemap.xml from data/generated/apps.full.json + curated.config.ts.")
+  .description("Generate public/sitemap.xml from data/generated/records.full.json.")
   .action(async () => {
     const config = await loadConfig();
-    const appsPath = join(process.cwd(), config.paths.generatedDir, "apps.full.json");
-    let payload: { generatedAt?: string; apps?: Array<Record<string, unknown>> };
+    const { buildSitemap } = await import("@grove-dev/core");
+    const recordsPath = join(
+      process.cwd(),
+      config.paths.generatedDir,
+      "records.full.json",
+    );
+    let payload: {
+      generatedAt?: string;
+      records?: Array<Record<string, unknown>>;
+    };
     try {
-      payload = JSON.parse(await readFile(appsPath, "utf8"));
+      payload = JSON.parse(await readFile(recordsPath, "utf8"));
     } catch {
-      payload = { apps: [] };
+      payload = { records: [] };
     }
-    const items = (payload.apps ?? []) as Array<{
+    const items = (payload.records ?? []) as Array<{
       slug: string;
-      name?: string;
       visibility?: string;
       lastCommitAt?: string | null;
       addedAt?: string | null;
@@ -438,108 +438,32 @@ program
   });
 
 // ──────────────────────────────────────────────────────────────────────
-// grove enrich
+// grove llms
 // ──────────────────────────────────────────────────────────────────────
 program
-  .command("enrich")
-  .description("Enrich data/apps/*.yml with HTML-scrape GitHub metadata (no token required).")
-  .option("--limit <n>", "limit enriched apps for rate limits", (value) => Number(value))
-  .action(async (options: { limit?: number }) => {
-    const config = await loadConfig();
-    const appsDir = resolve(process.cwd(), config.paths.appsDir);
-    const { readdir } = await import("node:fs/promises");
-    let entries: string[];
-    try {
-      entries = await readdir(appsDir);
-    } catch (err) {
-      console.error(`[enrich] ${appsDir} does not exist.`);
-      process.exit(1);
-    }
-    const files = entries.filter((f) => f.endsWith(".yml")).sort();
-    const selected = typeof options.limit === "number" ? files.slice(0, options.limit) : files;
-    let updated = 0;
-    let skipped = 0;
-    const failed: string[] = [];
-    for (const file of selected) {
-      const path = join(appsDir, file);
-      const text = await readFile(path, "utf8");
-      const raw = parseAppYaml(text, file.replace(/\.yml$/, ""));
-      const app = normalizeAppRecord(raw, file.replace(/\.yml$/, ""));
-      if (!app.repoUrl) {
-        skipped++;
-        continue;
-      }
-      process.stdout.write(`[enrich] ${app.slug} ... `);
-      const res = await enrichFromGithubHtml(app.repoUrl);
-      if (res.notFound) {
-        process.stdout.write("skip (404)\n");
-        skipped++;
-        continue;
-      }
-      if (res.rateLimited) {
-        process.stdout.write("rate-limited\n");
-        failed.push(`${app.slug}: rate-limited`);
-        continue;
-      }
-      if (res.error) {
-        process.stdout.write(`error: ${res.error}\n`);
-        failed.push(`${app.slug}: ${res.error}`);
-        continue;
-      }
-      const f = res.fields;
-      const repo = (raw.github as Record<string, unknown>)?.repository as Record<string, unknown> | undefined;
-      const next = {
-        ...(repo ?? {}),
-        ...(f.license ? { license: { spdx_id: f.license, key: null, name: null, url: null } } : {}),
-        ...(f.language ? { language: f.language } : {}),
-        ...(f.topics.length > 0 ? { topics: f.topics } : {}),
-        ...(f.homepage ? { homepage: f.homepage } : {}),
-      } as Record<string, unknown>;
-      const nextDoc = { ...raw, github: { ...((raw.github as object) ?? {}), repository: next } };
-      const out = stringifyAppYaml(nextDoc);
-      if (out !== text) {
-        await writeFile(path, out, "utf8");
-        process.stdout.write(`updated (license=${f.license ?? "—"} lang=${f.language ?? "—"})\n`);
-        updated++;
-      } else {
-        process.stdout.write("no change\n");
-      }
-    }
-    console.log(`\n[enrich] ${updated} updated, ${skipped} skipped, ${failed.length} failed`);
-  });
-
-// ──────────────────────────────────────────────────────────────────────
-// grove review
-// ──────────────────────────────────────────────────────────────────────
-program
-  .command("review")
-  .description("List items that need human curation (cleanup candidates, unknown, etc).")
-  .action(async () => {
-    const { report, path } = await buildReviewReport();
-    console.log(`[review] ${report.totalCandidates} candidate(s) → ${path}`);
-    for (const c of report.candidates.slice(0, 10)) {
-      console.log(`  - ${c.slug} (${c.status}, ${c.stars}★)`);
-    }
-  });
-
-// ──────────────────────────────────────────────────────────────────────
-// grove build-llms-full
-// ──────────────────────────────────────────────────────────────────────
-program
-  .command("build-llms-full")
-  .description("Generate public/llms.txt and public/llms-full.txt from generated apps data.")
+  .command("llms")
+  .description("Generate public/llms.txt and public/llms-full.txt.")
   .action(async () => {
     const config = await loadConfig();
-    const appsPath = join(process.cwd(), config.paths.generatedDir, "apps.full.json");
-    let payload: { generatedAt?: string; apps?: Array<Record<string, unknown>> };
+    const { buildLlmsFiles } = await import("@grove-dev/core");
+    const recordsPath = join(
+      process.cwd(),
+      config.paths.generatedDir,
+      "records.full.json",
+    );
+    let payload: {
+      generatedAt?: string;
+      records?: Array<Record<string, unknown>>;
+    };
     try {
-      payload = JSON.parse(await readFile(appsPath, "utf8"));
+      payload = JSON.parse(await readFile(recordsPath, "utf8"));
     } catch {
-      payload = { apps: [] };
+      payload = { records: [] };
     }
-    const apps = (payload.apps ?? []) as Array<{
+    const records = (payload.records ?? []) as Array<{
       slug: string;
-      name: string;
+      name?: string;
+      title?: string;
       description?: string;
       category?: string;
       stack?: string;
@@ -548,21 +472,129 @@ program
     }>;
     const result = await buildLlmsFiles({
       generatedAt: payload.generatedAt ?? new Date().toISOString(),
-      apps: apps.map((a) => ({
-        slug: a.slug,
-        name: a.name,
-        description: a.description,
-        category: a.category,
-        stack: a.stack,
-        stars: a.stars,
-        visibility: a.visibility,
+      records: records.map((r) => ({
+        slug: r.slug,
+        name: r.name ?? r.title ?? r.slug,
+        description: r.description,
+        category: r.category,
+        stack: r.stack,
+        stars: r.stars,
+        visibility: r.visibility,
       })),
     });
-    console.log(`[build-llms-full] ${result.indexed} indexed → ${result.txtPath} + ${result.fullPath}`);
+    console.log(`[llms] ${result.indexed} indexed → ${result.txtPath} + ${result.fullPath}`);
   });
 
 // ──────────────────────────────────────────────────────────────────────
-// Framework discovery + command resolution
+// grove sync github
+// ──────────────────────────────────────────────────────────────────────
+program
+  .command("sync")
+  .argument("<target>", "github | contributors")
+  .description("Optional GitHub integration: enrich records with GitHub metadata.")
+  .option("--limit <n>", "limit records to sync (rate-limit guard)", (value) => Number(value))
+  .action(async (target: string, options: { limit?: number }) => {
+    const config = await loadConfig();
+    if (target !== "github" && target !== "contributors") {
+      console.error(`Unknown sync target: ${target}. Use "github" or "contributors".`);
+      process.exit(1);
+    }
+    if (target === "contributors") {
+      console.log("[sync contributors] contributor sync is not yet implemented in V1.");
+      return;
+    }
+    const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
+    const { readdir } = await import("node:fs/promises");
+    let entries: string[] = [];
+    try {
+      entries = await readdir(recordsDir);
+    } catch {
+      console.error(`[sync github] ${recordsDir} does not exist.`);
+      process.exit(1);
+    }
+    const files = entries.filter((f) => f.endsWith(".yml")).sort();
+    const selected =
+      typeof options.limit === "number" ? files.slice(0, options.limit) : files;
+    let updated = 0;
+    let failed = 0;
+    for (const file of selected) {
+      const path = join(recordsDir, file);
+      const text = await readFile(path, "utf8");
+      const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
+      const links = (raw.links as Record<string, string> | undefined) ?? {};
+      if (!links.github) continue;
+      const ref = parseGithubRepoUrl(links.github);
+      if (!ref) continue;
+      process.stdout.write(`[sync github] ${ref.owner}/${ref.repo} ... `);
+      let metadata = null;
+      try {
+        metadata = await fetchGithubMetadata(ref);
+      } catch {
+        try {
+          const enriched = await enrichFromGithubHtml(links.github);
+          if (enriched.fields) {
+            process.stdout.write("html-fallback\n");
+          }
+        } catch {
+          process.stdout.write("skipped (api error)\n");
+          failed++;
+          continue;
+        }
+      }
+      const gh = (raw.github as Record<string, unknown> | undefined) ?? {};
+      const next = {
+        ...raw,
+        github: { ...gh, repository: metadata },
+      };
+      await writeFile(path, stringifyRecordYaml(next), "utf8");
+      process.stdout.write("updated\n");
+      updated++;
+    }
+    console.log(`\n[sync github] ${updated} updated, ${failed} failed`);
+  });
+
+// ──────────────────────────────────────────────────────────────────────
+// grove cleanup stale
+// ──────────────────────────────────────────────────────────────────────
+program
+  .command("cleanup")
+  .argument("<target>", "stale")
+  .description("List records that need human curation.")
+  .action(async (target: string) => {
+    if (target !== "stale") {
+      console.error(`Unknown cleanup target: ${target}. Use "stale".`);
+      process.exit(1);
+    }
+    const { report, path } = await cleanupStale();
+    console.log(`[cleanup stale] ${report.totalCandidates} candidate(s) → ${path}`);
+    for (const c of report.candidates.slice(0, 10)) {
+      console.log(`  - ${c.slug} (${c.status}, ${c.stars}★)`);
+    }
+  });
+
+// ──────────────────────────────────────────────────────────────────────
+// grove build / grove dev
+// ──────────────────────────────────────────────────────────────────────
+program
+  .command("build")
+  .description("Build the static site in the current project repo.")
+  .action(async () => {
+    const framework = await detectFramework();
+    const cmd = frameworkBuildCommand(framework);
+    await runExternal(cmd[0], cmd[1], { stdio: "inherit" });
+  });
+
+program
+  .command("dev")
+  .description("Start the framework dev server in the current project repo.")
+  .action(async () => {
+    const framework = await detectFramework();
+    const cmd = frameworkDevCommand(framework);
+    await runExternal(cmd[0], cmd[1], { stdio: "inherit" });
+  });
+
+// ──────────────────────────────────────────────────────────────────────
+// Framework discovery
 // ──────────────────────────────────────────────────────────────────────
 
 async function detectFramework(): Promise<Framework> {
@@ -579,7 +611,7 @@ async function detectFramework(): Promise<Framework> {
     /* ignore */
   }
   console.error("Could not detect a Grove framework in the current project.");
-  console.error("Install @grove-dev/astro, @grove-dev/nextjs, or @grove-dev/svelte first.");
+  console.error("Install @grove-dev/astro first. (Next.js and SvelteKit are roadmap-only in V1.)");
   process.exit(1);
 }
 
@@ -624,8 +656,7 @@ function runExternal(
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Templated project files (these stay in the CLI; they're emitted
-// per-project and have nothing to do with the framework adapter).
+// Helper: project file templates
 // ──────────────────────────────────────────────────────────────────────
 
 async function resolveText(
@@ -657,54 +688,72 @@ async function writeIfMissing(path: string, content: string): Promise<void> {
   }
 }
 
-function projectConfig(projectName: string): string {
+function projectConfig(
+  projectName: string,
+  blueprint: Blueprint,
+  githubMode: "none" | "public",
+): string {
+  const githubIntegrations =
+    githubMode === "public"
+      ? `integrations: { github: { metadata: true, health: true } },`
+      : `integrations: { github: false },`;
   return `import { defineConfig } from "@grove-dev/core";
 
 export default defineConfig({
-  name: "${projectName}",
-  tagline: "A living, health-aware developer directory.",
-  itemLabel: "project",
+  blueprint: "${blueprint}",
+
+  site: {
+    name: "${projectName}",
+    tagline: "A growing community knowledge site.",
+  },
+
+  ${githubIntegrations}
+
+  facets: ["category", "tags"],
 });
 `;
 }
 
-function projectReadme(projectName: string, framework: Framework): string {
+function projectReadme(
+  projectName: string,
+  blueprint: Blueprint,
+  framework: Framework,
+): string {
   return `# ${projectName}
 
-A living, health-aware developer directory built with [Grove](https://github.com/tortuvshin/grove).
+A growing community knowledge site built with [Grove](https://github.com/tortuvshin/grove).
 
-Framework: **${framework}**
+Blueprint: **${blueprint}** · Framework: **${framework}**
 
 ## What this is
 
 This repository is **data + branding + decisions**, not the framework.
-The CLI and static framework live in the separate \`grove\` repo.
+The CLI and the renderer live in the \`grove\` repo; you consume them as
+\`@grove-dev/core\`, \`@grove-dev/cli\`, and \`@grove-dev/${framework}\`.
 
 ## Workflow
 
 \`\`\`bash
-grove import <source>
-grove analyze
-grove review
-grove validate
-grove build-data
-grove build-llms-full
-grove sitemap
-grove build
+grove import <awesome-list-url>     # write data/records/*.yml
+grove sync github                   # optional: enrich with GitHub metadata
+grove cleanup stale                 # flag records that need human review
+grove validate                      # check schemas, slugs, taxonomy
+grove generate                      # build data/generated/records.{full,index}.json
+grove sitemap                       # write public/sitemap.xml
+grove llms                          # write public/llms.txt + llms-full.txt
+grove build                         # run the framework's build command
 \`\`\`
 
 ## Files
 
-- \`curated.config.ts\` — site name, tagline, and data paths.
-- \`sources/\` — original Markdown lists that feed the directory.
-- \`data/items.yml\` — parsed project list (commit this).
-- \`data/apps/\` — per-app YAML records (commit this).
-- \`data/health.yml\` — generated GitHub health metadata (regenerate on demand).
-- \`data/overrides.yml\` — manual corrections to items.
+- \`grove.config.ts\` — site name, blueprint, integrations, theme, paths.
+- \`data/records/\` — per-record YAML (commit this).
 - \`data/decisions.yml\` — human curation decisions.
-- \`data/taxonomy/\` — registry of stacks, platforms, categories, distribution channels.
-- \`content/methodology.md\` — the public methodology page.
+- \`data/generated/\` — auto-generated JSON; do not commit.
+- \`content/pages/\` — Markdown pages (\`about.md\`, \`methodology.md\`, ...).
+- \`content/records/\` — optional Markdown body per record.
 - \`public/\` — logo, OG image, and other static assets.
+- \`.github/workflows/\` — validate + build + (optional) sync workflows.
 `;
 }
 
@@ -718,7 +767,6 @@ dist/
 .env
 .env.*
 !.env.example
-data/.cache/
 data/generated/
 coverage/
 .tmp-test/
@@ -729,113 +777,6 @@ coverage/
 `;
 }
 
-function taxonomyStacks(): string {
-  return `- id: typescript
-  name: TypeScript
-  family: language
-  languages: [typescript, javascript]
-- id: javascript
-  name: JavaScript
-  family: language
-  languages: [javascript]
-- id: rust
-  name: Rust
-  family: language
-  languages: [rust]
-- id: go
-  name: Go
-  family: language
-  languages: [go]
-- id: python
-  name: Python
-  family: language
-  languages: [python]
-- id: flutter
-  name: Flutter
-  family: cross-platform
-  languages: [dart]
-  platforms: [ios, android, web, macos, windows, linux]
-- id: react-native
-  name: React Native
-  family: cross-platform
-  languages: [typescript, javascript]
-  platforms: [ios, android]
-`;
-}
-
-function taxonomyPlatforms(): string {
-  return `- id: web
-  name: Web
-- id: ios
-  name: iOS
-- id: android
-  name: Android
-- id: macos
-  name: macOS
-- id: windows
-  name: Windows
-- id: linux
-  name: Linux
-- id: desktop
-  name: Desktop
-- id: embedded
-  name: Embedded
-`;
-}
-
-function taxonomyCategories(): string {
-  return `- id: tools
-  name: Tools
-- id: libraries
-  name: Libraries
-- id: frameworks
-  name: Frameworks
-- id: applications
-  name: Applications
-- id: ai
-  name: AI / ML
-- id: devtools
-  name: Developer Tools
-- id: web
-  name: Web
-- id: mobile
-  name: Mobile
-- id: backend
-  name: Backend
-- id: infrastructure
-  name: Infrastructure
-`;
-}
-
-function taxonomyDistribution(): string {
-  return `- id: app-store
-  name: App Store
-  platforms: [ios, macos]
-- id: play-store
-  name: Play Store
-  platforms: [android]
-- id: fdroid
-  name: F-Droid
-  platforms: [android]
-- id: github-releases
-  name: GitHub Releases
-  platforms: [ios, android, macos, windows, linux]
-- id: website
-  name: Website
-  platforms: [web, ios, android, macos, windows, linux]
-- id: package-registry
-  name: Package Registry
-- id: npm
-  name: npm
-- id: crates-io
-  name: crates.io
-- id: pypi
-  name: PyPI
-- id: other
-  name: Other
-`;
-}
-
 function workflowValidate(): string {
   return `name: Validate data
 
@@ -843,7 +784,8 @@ on:
   pull_request:
     paths:
       - "data/**"
-      - "curated.config.ts"
+      - "content/**"
+      - "grove.config.ts"
       - "package.json"
   workflow_dispatch:
 
@@ -858,24 +800,23 @@ jobs:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run validate:data
+      - run: pnpm exec grove validate
 `;
 }
 
-function workflowImport(): string {
-  return `name: Refresh data
+function workflowBuild(framework: Framework): string {
+  const cmd = frameworkBuildCommand(framework);
+  return `name: Build
 
 on:
-  schedule:
-    - cron: "0 6 * * *"
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  refresh:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -884,163 +825,45 @@ jobs:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Refresh items
-        run: |
-          grove import "$AWESOME_SOURCE"
-          grove analyze
-          grove review
-          grove build-data
-          grove build-llms-full
-          grove sitemap
-        env:
-          AWESOME_SOURCE: \${{ vars.AWESOME_SOURCE }}
-          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-      - name: Open PR
-        uses: peter-evans/create-pull-request@v6
+      - run: pnpm exec grove generate
+      - run: pnpm exec grove sitemap
+      - run: pnpm exec grove llms
+      - run: pnpm exec grove build
+      - uses: actions/upload-artifact@v4
         with:
-          title: "chore(data): refresh from upstream"
-          commit-message: "chore(data): refresh from upstream"
-          branch: chore/data-refresh
-`;
-}
-
-function workflowDeploy(provider: DeployProvider, framework: Framework): string {
-  switch (provider) {
-    case "vercel":
-      return `name: Deploy to Vercel
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20", cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: \${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: \${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: \${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./
-`;
-    case "netlify":
-      return `name: Deploy to Netlify
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20", cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - uses: nwtgck/actions-netlify@v3.0
-        with:
-          publish-dir: ./dist
-          production-deploy: true
-          deploy-message: "Deploy from GitHub Actions"
-        env:
-          NETLIFY_AUTH_TOKEN: \${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: \${{ secrets.NETLIFY_SITE_ID }}
-`;
-    case "cloudflare":
-      return `name: Deploy to Cloudflare Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20", cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - uses: cloudflare/pages-action@v1
-        with:
-          apiToken: \${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${framework}-site
-          directory: dist
-`;
-    case "github-pages":
-      return `name: Build & deploy to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20", cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build
-      - uses: actions/upload-pages-artifact@v3
-        with:
+          name: dist
           path: dist
-  deploy:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
 `;
-    case "none":
-      return `# No deploy workflow generated. Add your own when ready.`;
-  }
 }
 
-function issueTemplateSubmission(): string {
+function issueTemplateSubmission(blueprint: Blueprint): string {
+  const labelHint =
+    blueprint === "project-directory"
+      ? `- **Repository URL** (required):
+- **Name**:
+- **One-line description** (≤ 120 chars):
+- **Category** (e.g. tools, libraries, frameworks):`
+      : blueprint === "resource-hub"
+        ? `- **Resource URL** (required):
+- **Title**:
+- **Type** (guide | comparison | link | explainer | other):
+- **Topic**:`
+        : `- **Name**:
+- **Type** (company | organization | community | school | ...):
+- **Category**:
+- **Website URL**:`;
   return `---
-name: Submit a project
-about: Suggest an open-source project to add to this directory
+name: Submit a record
+about: Suggest a new record to add to this Grove site
 title: "[Submit] "
 labels: submission
 ---
 
-## Project
-
-- **Repository URL** (required):
-- **Name**:
-- **One-line description** (≤ 120 chars):
-- **Category** (e.g. tools, libraries, frameworks):
-- **Stack / language** (e.g. typescript, rust):
-- **Platforms** (e.g. web, ios, android):
+${labelHint}
 
 ## Why include it?
 
-A few sentences on what makes this project worth listing — maturity,
-adoption, learning value, or unique qualities.
-
-## Source
-
-Where did you find it? (Awesome list, blog post, etc.)
+A few sentences on what makes this record worth listing.
 `;
 }
 
@@ -1069,7 +892,7 @@ What you expected to happen.
 function issueTemplateFeature(): string {
   return `---
 name: Feature request
-about: Suggest a new feature for this directory
+about: Suggest a new feature
 title: "[Feature] "
 labels: enhancement
 ---

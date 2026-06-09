@@ -43,8 +43,7 @@ export interface RecordsIndexPayload {
  *  - data/generated/records.index.json  (slim, visible-only)
  *  - data/generated/records.json        (alias of records.full.json)
  *
- * Replaces the V0 `buildData` function. Returns file paths and
- * counters; throws on schema errors.
+ * Returns file paths and counters; throws on schema errors.
  */
 export interface GenerateResult {
   totalRecords: number;
