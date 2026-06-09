@@ -10,7 +10,12 @@ pnpm add @grove-dev/svelte
 
 ## Status
 
-This package is a **skeleton** at the moment. It ships:
+**Roadmap only — not in V1.** Grove V1 ships the Astro renderer only.
+The SvelteKit adapter is reserved for a future wave once `@grove-dev/core`
+and `@grove-dev/ui` are rebuilt on the V1 `Resource` discriminated
+union. See [`docs/roadmap.md`](../docs/roadmap.md) for the schedule.
+
+This package currently ships a skeleton only:
 
 - `src/index.ts` — re-exports `@grove-dev/ui`
 - `src/styles.css` — placeholder design tokens
