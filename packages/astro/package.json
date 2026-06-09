@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/astro",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "description": "Astro framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",
@@ -38,9 +38,7 @@
     },
     "./styles.css": "./src/styles.css",
     "./components/*": "./src/components/*.astro",
-    "./layouts/*": "./src/layouts/*.astro",
-    "./package.json": "./package.json",
-    "./templates/*": "./templates/*"
+    "./layouts/*": "./src/layouts/*.astro"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -48,8 +46,8 @@
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "0.1.1",
-    "@grove-dev/ui": "0.1.1",
+    "@grove-dev/core": "workspace:*",
+    "@grove-dev/ui": "workspace:*",
     "astro": "^6.4.4"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/nextjs",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "description": "Next.js framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",
@@ -37,10 +37,7 @@
       "import": "./dist/index.js"
     },
     "./styles.css": "./src/styles.css",
-    "./components/*": "./src/components/*.tsx",
-    "./layouts/*": "./src/layouts/*.tsx",
-    "./package.json": "./package.json",
-    "./templates/*": "./templates/*"
+    "./components/*": "./src/components/*.tsx"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -48,8 +45,8 @@
     "test": "echo \"No nextjs package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "0.1.1",
-    "@grove-dev/ui": "0.1.1"
+    "@grove-dev/core": "workspace:*",
+    "@grove-dev/ui": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14.0.0",
