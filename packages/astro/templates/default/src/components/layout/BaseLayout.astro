@@ -1,32 +1,16 @@
 ---
-// SPDX-License-Identifier: MIT
-
-/**
- * BaseLayout — wraps every page. Owns the theme-detection inline script
- * and the global shell (Header, Footer). Per-page SEO (title, description,
- * OG, JSON-LD) is delegated to <Seo /> so each page can declare what it
- * needs without polluting the layout file.
- */
 import "../../styles/global.css";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
-import Seo from "./Seo.astro";
 
 interface Props {
   title: string;
   description: string;
-  type?: "website" | "article" | "profile";
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const {
-  title,
-  description,
-  type,
-  noindex,
-  jsonLd,
-} = Astro.props;
+const { title, description, noindex, jsonLd } = Astro.props;
 
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
@@ -38,57 +22,26 @@ const favicon =
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={favicon} />
     <link rel="sitemap" href="/sitemap.xml" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM usage guidance" />
-
-    <Seo
-      title={title}
-      description={description}
-      type={type}
-      noindex={noindex}
-      jsonLd={jsonLd}
-    />
-
-    <slot name="head" />
-    <script is:inline>
-      (function () {
-        var STORAGE_KEY = "open-apps-theme";
-        function getMode() {
-          var stored = localStorage.getItem(STORAGE_KEY);
-          if (stored === "light" || stored === "dark" || stored === "system") return stored;
-          return "system";
-        }
-        function apply(mode) {
-          var resolved =
-            mode === "system"
-              ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-              : mode;
-          var root = document.documentElement;
-          if (resolved === "dark") root.classList.add("dark");
-          else root.classList.remove("dark");
-          root.dataset.theme = mode;
-          root.dataset.resolvedTheme = resolved;
-        }
-        apply(getMode());
-        window.addEventListener("theme:set", function (e) { apply(e.detail); });
-        var mq = window.matchMedia("(prefers-color-scheme: dark)");
-        mq.addEventListener("change", function () {
-          if (getMode() === "system") apply("system");
-        });
-      })();
-    </script>
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <title>{title}</title>
+    {jsonLd && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(jsonLd)}
+      />
+    )}
   </head>
   <body class="min-h-screen bg-white text-ink-900 dark:bg-ink-950 dark:text-ink-100">
     <Header />
-
     <main>
       <slot />
     </main>
-
     <Footer />
-    <slot name="body-end" />
   </body>
 </html>
