@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/svelte",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "type": "module",
   "description": "SvelteKit framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",

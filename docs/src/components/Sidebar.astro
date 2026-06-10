@@ -1,0 +1,317 @@
+---
+/**
+ * Sidebar for the custom Astro pages.
+ *
+ * Mirrors Starlight's <Sidebar> markup 1:1 — same <details>, same
+ * <summary>, same <ul>/<li>/<a> nesting. The data is sourced from the
+ * same `sidebar` array defined in `astro.config.mjs` so the custom
+ * pages and the Starlight docs share an identical navigation.
+ */
+import logoLight from '../assets/logo-light.svg';
+import logoDark from '../assets/logo-dark.svg';
+
+interface SidebarLinkItem {
+    label: string;
+    href?: string;
+}
+interface SidebarGroup {
+    label: string;
+    items: SidebarLinkItem[];
+}
+
+// Mirror of astro.config.mjs → starlight({ sidebar: [...] })
+const groups: SidebarGroup[] = [
+    {
+        label: 'Start here',
+        items: [{ label: 'What is Grove?', href: '/start-here/what-is-grove/' }],
+    },
+    {
+        label: 'Tutorials',
+        items: [
+            { label: '1. Bootstrap a space', href: '/tutorials/01-bootstrap/' },
+            { label: '2. Author records', href: '/tutorials/02-author-records/' },
+            { label: '3. Customize the look', href: '/tutorials/03-customize/' },
+            { label: '4. Maintain the space', href: '/tutorials/04-maintain/' },
+            { label: '5. Deploy', href: '/tutorials/05-deploy/' },
+        ],
+    },
+    {
+        label: 'Guides',
+        items: [
+            { label: 'Spaces & blueprints', href: '/guides/spaces/' },
+            { label: 'The data model', href: '/guides/data-model/' },
+        ],
+    },
+    {
+        label: 'Reference',
+        items: [
+            { label: 'CLI', href: '/reference/cli/' },
+            { label: 'grove.config.ts', href: '/reference/config/' },
+            { label: 'Resource schema', href: '/reference/schema/' },
+            { label: 'Plugin API', href: '/reference/plugin-api/' },
+            { label: 'Theme Components', href: '/reference/components/' },
+        ],
+    },
+];
+
+interface Props {
+    currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+const isActive = (href?: string) => !!href && currentPath === href;
+---
+
+<starlight-menu-button class="print:hidden">
+    <button
+        type="button"
+        class="sidebar-toggle"
+        aria-label="Toggle Menu"
+        aria-expanded="false"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+        >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"></path>
+        </svg>
+        <span class="sr-only">Toggle Menu</span>
+    </button>
+</starlight-menu-button>
+
+<nav class="sidebar-nav print:hidden" aria-label="Primary">
+    <starlight-sidebar>
+        <div class="sidebar-pane">
+            <div class="sidebar-top">
+                <a href="/" class="sidebar-logo sl-flex" aria-label="Grove home">
+                    <img
+                        class="light:sl-hidden logo"
+                        alt="Grove"
+                        src={logoDark.src}
+                        width="32"
+                        height="32"
+                    />
+                    <img
+                        class="dark:sl-hidden logo"
+                        alt="Grove"
+                        src={logoLight.src}
+                        width="32"
+                        height="32"
+                    />
+                    <span class="title-text">Grove</span>
+                </a>
+            </div>
+
+            <div class="sidebar-content">
+                <ul role="tree" class="top-level">
+                    {
+                        groups.map((group) => (
+                            <li>
+                                <details open>
+                                    <summary>
+                                        <span class="group-label">
+                                            <span>{group.label}</span>
+                                        </span>
+                                    </summary>
+                                    <ul role="group">
+                                        {group.items.map((item) => (
+                                            <li>
+                                                <a
+                                                    href={item.href}
+                                                    aria-current={isActive(item.href) ? 'page' : undefined}
+                                                    class:list={[isActive(item.href) && 'is-active']}
+                                                >
+                                                    <span>{item.label}</span>
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </details>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
+        </div>
+    </starlight-sidebar>
+</nav>
+
+<style>
+    .sidebar-toggle {
+        position: fixed;
+        inset-inline-start: 0;
+        top: 0.5rem;
+        z-index: 20;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        background: var(--sl-color-bg-nav);
+        color: var(--sl-color-gray-2);
+        border: 1px solid var(--sl-color-hairline-light);
+        border-inline-start: none;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: var(--sl-border-radius);
+        border-bottom-right-radius: var(--sl-border-radius);
+        cursor: pointer;
+    }
+
+    .sidebar-toggle:hover {
+        color: var(--sl-color-white);
+    }
+
+    .sidebar-nav {
+        display: none;
+    }
+
+    @media (min-width: 50rem) {
+        .sidebar-nav {
+            display: block;
+            width: var(--sl-sidebar-width);
+            flex-shrink: 0;
+        }
+    }
+
+    .sidebar-pane {
+        position: fixed;
+        inset-inline-start: 0;
+        top: var(--sl-nav-height);
+        z-index: 10;
+        width: 100%;
+        height: calc(100vh - var(--sl-nav-height));
+        background: var(--sl-color-bg);
+        overflow-y: auto;
+        padding-block: 1rem 2rem;
+        border-inline-end: 1px solid var(--sl-color-hairline-light);
+    }
+
+    @media (min-width: 50rem) {
+        .sidebar-pane {
+            width: var(--sl-sidebar-width);
+            height: calc(100vh - var(--sl-nav-height));
+        }
+    }
+
+    .sidebar-top {
+        padding: 0 var(--sl-sidebar-pad-x);
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-logo {
+        align-items: center;
+        gap: var(--sl-nav-gap);
+        color: var(--sl-color-text-accent);
+        text-decoration: none;
+        font-size: var(--sl-text-h4);
+        font-weight: 600;
+    }
+
+    .sidebar-logo .logo {
+        height: 1.5rem;
+        width: auto;
+    }
+
+    .sidebar-content {
+        padding: 0 var(--sl-sidebar-pad-x);
+    }
+
+    .top-level {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .top-level > li {
+        margin-bottom: 1.25rem;
+    }
+
+    .top-level details summary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0 0.5rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    .top-level details summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .top-level details summary::marker {
+        content: '';
+    }
+
+    .top-level details summary::before {
+        content: '';
+        width: 0.5rem;
+        height: 0.5rem;
+        border-inline-start: 1px solid var(--sl-color-gray-3);
+        border-bottom: 1px solid var(--sl-color-gray-3);
+        transform: rotate(-45deg) translateY(0) translateX(0.1rem);
+        transform-origin: center;
+        flex-shrink: 0;
+        transition: transform 0.15s ease;
+    }
+
+    .top-level details[open] summary::before {
+        transform: rotate(-45deg) translateY(0) translateX(0.1rem) scaleY(-1);
+    }
+
+    .group-label {
+        font-size: var(--sl-text-sm);
+        font-weight: 600;
+        color: var(--sl-color-white);
+    }
+
+    .top-level ul[role='group'] {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .top-level ul[role='group'] li {
+        margin: 0;
+    }
+
+    .top-level ul[role='group'] a {
+        display: block;
+        padding: 0.4rem 0.75rem;
+        border-inline-start: 1px solid transparent;
+        color: var(--sl-color-gray-2);
+        text-decoration: none;
+        font-size: var(--sl-text-sm);
+        line-height: 1.4;
+    }
+
+    .top-level ul[role='group'] a:hover {
+        color: var(--sl-color-white);
+    }
+
+    .top-level ul[role='group'] a.is-active,
+    .top-level ul[role='group'] a[aria-current='page'] {
+        color: var(--sl-color-text-accent);
+        border-inline-start-color: var(--sl-color-accent);
+        background: var(--sl-color-accent-low);
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+</style>

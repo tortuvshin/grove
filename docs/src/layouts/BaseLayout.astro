@@ -1,14 +1,20 @@
 ---
 /**
  * Base layout for the custom Astro pages (landing + showcase hub).
- * Lives outside the Starlight system — we own every byte of chrome here.
  *
- * global.css carries the full Starlight token set (mirrored from
- * @astrojs/starlight/style/props.css) so every --sl-* variable used below
- * resolves to the exact same value the Starlight docs render with.
+ * Mirrors Starlight's <Page> + <PageFrame> layout: sticky header at the
+ * top, fixed-position sidebar on the left (≥50rem), main content column
+ * in the center, optional table-of-contents rail on the right, and a
+ * sticky footer at the bottom. This is the same chrome the docs site
+ * renders, just driven by our custom slot content.
+ *
+ * All colors / fonts / spacing come from Starlight's --sl-* tokens
+ * (mirrored in global.css) so the layout is visually identical to the
+ * /tutorials/*, /guides/*, and /reference/* pages.
  */
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/Footer.astro';
 
 interface Props {
@@ -16,6 +22,12 @@ interface Props {
     description?: string;
     ogImage?: string;
     activeNav?: 'home' | 'showcase' | 'docs' | 'github';
+    /** Optional table of contents items. Omit / pass `[]` to hide the rail. */
+    toc?: { depth: number; slug: string; text: string }[];
+    /** Current pathname, used to mark the active sidebar item. */
+    currentPath?: string;
+    /** Optional breadcrumbs rendered above the page title. */
+    breadcrumbs?: { label: string; href?: string }[];
 }
 
 const {
@@ -23,6 +35,9 @@ const {
     description = 'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
     ogImage,
     activeNav = 'home',
+    toc = [],
+    currentPath = '/',
+    breadcrumbs = [],
 } = Astro.props;
 
 const siteUrl = Astro.site?.toString() ?? 'https://grove.dev';
@@ -81,21 +96,62 @@ const canonical = new URL(Astro.url.pathname, siteUrl).toString();
     </head>
     <body>
         <Header activeNav={activeNav} />
-        <main id="main">
-            <slot />
-        </main>
-        <Footer />
+
+        <div class="page-frame">
+            <Sidebar currentPath={currentPath} />
+
+            <main id="main" class="main-pane">
+                {
+                    breadcrumbs.length > 0 && (
+                        <nav class="breadcrumbs" aria-label="Breadcrumb">
+                            <ol>
+                                {breadcrumbs.map((b, i) => (
+                                    <li>
+                                        {b.href ? <a href={b.href}>{b.label}</a> : <span>{b.label}</span>}
+                                        {i < breadcrumbs.length - 1 && (
+                                            <span class="sep" aria-hidden="true">
+                                                /
+                                            </span>
+                                        )}
+                                    </li>
+                                ))}
+                            </ol>
+                        </nav>
+                    )
+                }
+
+                <article class="content">
+                    <slot />
+                </article>
+
+                <Footer />
+            </main>
+
+            {
+                toc.length > 0 && (
+                    <aside class="toc-pane" aria-label="Table of contents">
+                        <nav>
+                            <h2 id="starlight__on-this-page">On this page</h2>
+                            <ul>
+                                {toc.map((entry) => (
+                                    <li class={`depth-${entry.depth}`}>
+                                        <a href={`#${entry.slug}`}>{entry.text}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+                    </aside>
+                )
+            }
+        </div>
     </body>
 </html>
 
 <style is:global>
-    /* Layout-level tokens that are *not* in Starlight: container widths and
-     * a single gutter. Every color, font, and border-radius is sourced from
-     * Starlight's --sl-* tokens so the page renders identically to the docs.
-     */
     :root {
-        --g-container: 72rem;
-        --g-container-narrow: 55rem;
+        --g-container: var(--sl-content-width);
+        --g-container-wide: 72rem;
+        --g-container-narrow: 35rem;
     }
 
     *,
@@ -156,13 +212,123 @@ const canonical = new URL(Astro.url.pathname, siteUrl).toString();
         padding-inline: 1.5rem;
     }
 
+    .g-container-wide {
+        max-width: var(--g-container-wide);
+    }
+
     .g-container-narrow {
         max-width: var(--g-container-narrow);
         margin-inline: auto;
         padding-inline: 1.5rem;
     }
+</style>
 
-    main {
-        min-height: 60vh;
+<style>
+    .page-frame {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+        max-width: var(--g-container-wide);
+        margin-inline: auto;
+        padding-block: 1.5rem;
+    }
+
+    @media (min-width: 50rem) {
+        .page-frame {
+            grid-template-columns: var(--sl-sidebar-width) minmax(0, 1fr) var(--sl-sidebar-width);
+        }
+    }
+
+    .main-pane {
+        min-width: 0;
+        padding: 1.5rem 1.5rem 3rem;
+    }
+
+    @media (min-width: 50rem) {
+        .main-pane {
+            padding: 1.5rem 2rem 3rem;
+        }
+    }
+
+    .content {
+        max-width: var(--sl-content-width);
+    }
+
+    .breadcrumbs {
+        margin-bottom: 1.5rem;
+        color: var(--sl-color-gray-3);
+        font-size: var(--sl-text-sm);
+    }
+
+    .breadcrumbs ol {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .breadcrumbs li {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .breadcrumbs a {
+        color: var(--sl-color-gray-2);
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--sl-color-text-accent);
+    }
+
+    .breadcrumbs .sep {
+        color: var(--sl-color-gray-4);
+    }
+
+    .toc-pane {
+        display: none;
+    }
+
+    @media (min-width: 72rem) {
+        .toc-pane {
+            display: block;
+            padding: 1.5rem 1.5rem 3rem 0;
+        }
+    }
+
+    .toc-pane h2 {
+        font-size: var(--sl-text-sm);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--sl-color-gray-3);
+        margin-bottom: 0.75rem;
+    }
+
+    .toc-pane ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .toc-pane li.depth-3 {
+        padding-inline-start: 1rem;
+    }
+
+    .toc-pane li.depth-4 {
+        padding-inline-start: 2rem;
+    }
+
+    .toc-pane a {
+        display: block;
+        padding: 0.25rem 0;
+        color: var(--sl-color-gray-3);
+        font-size: var(--sl-text-sm);
+        line-height: 1.4;
+    }
+
+    .toc-pane a:hover {
+        color: var(--sl-color-text-accent);
     }
 </style>
