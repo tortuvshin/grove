@@ -150,14 +150,8 @@ the discriminated `Resource` union:
 1. **Open Apps** — `project-directory` blueprint. Already has
    data, already has community signal, already validates the
    file-based model. **Likely reference space.**
-2. **oss.dev.mn** — `ecosystem-map` blueprint. Local
-   open-source ecosystem; tightest expression of "growing
-   community knowledge"; the strongest narrative. The
-   `entity` kind carries the most schema (founded / location
-   / members / parent), so a real ecosystem map exercises the
-   union more than a project directory.
-3. A new space — riskier, but if neither Open Apps nor
-   oss.dev.mn has a champion, build a small one first.
+2. A new space — riskier, but if Open Apps has no champion,
+   build a small one first.
 
 The choice is a community decision, not an architecture
 decision. Whatever space ships first becomes the **reference
@@ -168,7 +162,7 @@ nail down first.
 
 - Pick the space, name the gardener, open the repo.
 - Pick the matching blueprint (`project-directory` for Open
-  Apps, `ecosystem-map` for oss.dev.mn).
+  Apps, `ecosystem-map` for an entity-style space).
 - Migrate from the old `apps.yml` / `items.yml` model to
   `data/records/<slug>.yml` with the blueprint's `kind` on
   every record.

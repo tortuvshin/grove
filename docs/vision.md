@@ -8,11 +8,11 @@ Grove is an open-source framework for **growing useful community knowledge**. It
 
 The "knowledge" can be anything a community cares about:
 
-- An open-source ecosystem (`oss.dev.mn`)
-- A set of production-ready apps (`Open Apps`)
-- A directory of developer tools, SDKs, integrations (`tools.dev.mn`)
-- A library of practical AI resources (`ai.dev.mn`)
-- A local tech / startup ecosystem map (`startups.dev.mn`)
+- A set of production-ready apps ([`Open Apps`](https://github.com/tortuvshin/open-apps))
+- An open-source ecosystem
+- A directory of developer tools, SDKs, integrations
+- A library of practical AI resources
+- A local tech / startup ecosystem map
 - Learning resources, public datasets, research collections, community guides
 
 Every one of those is a **Grove space** — a static, file-backed, contributor-friendly site that runs the same engine and changes only its data, branding, and community rules.
@@ -138,19 +138,15 @@ These are real, useful features — and they should be roadmap items, not promis
 
 ## The reference spaces
 
-The first spaces we ship prove the framework works:
+The first space we ship proves the framework works:
 
 ```txt
-oss.dev.mn       →  Mongolian open-source ecosystem
-Open Apps        →  production-ready OSS applications
-tools.dev.mn     →  developer tools, SDKs, integrations
-ai.dev.mn        →  practical AI resources
-startups.dev.mn  →  Mongolian tech ecosystem map
+Open Apps  →  production-ready OSS applications
 ```
 
-They are not "example projects". They are **real spaces powered by Grove** — the reference implementations that show the framework is more than an abstract idea. `oss.dev.mn` is the most strategically important: it is the strongest expression of "growing useful community knowledge" and it ties Grove to a concrete community, not just an open-source aesthetic.
+It is not an "example project". It is a **real space powered by Grove** — the reference implementation that shows the framework is more than an abstract idea. The strongest expression of "growing useful community knowledge" is a real community running on Grove, not just an open-source aesthetic.
 
-The first version of Grove ships when **one of these spaces is live**. The rest follow.
+The first version of Grove ships when **this space is live**. The rest follow.
 
 ## What success looks like
 
