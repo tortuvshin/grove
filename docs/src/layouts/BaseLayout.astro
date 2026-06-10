@@ -3,13 +3,11 @@
  * Base layout for the custom Astro pages (landing + showcase hub).
  * Lives outside the Starlight system — we own every byte of chrome here.
  *
- * To make these pages feel exactly like the Starlight docs (same colors,
- * same fonts, same spacing), we import Starlight's own props.css and use
- * its --sl-* tokens everywhere. Any tweak in Starlight's theme is picked
- * up here automatically.
+ * global.css carries the full Starlight token set (mirrored from
+ * @astrojs/starlight/style/props.css) so every --sl-* variable used below
+ * resolves to the exact same value the Starlight docs render with.
  */
 import '../styles/global.css';
-import '@astrojs/starlight/style/props.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 

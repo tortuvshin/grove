@@ -7,7 +7,7 @@
  * Starlight content tree. This page is the marketing-style landing for the
  * entire showcase surface.
  */
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 
 type ShowcaseItem = {
     title: string;
@@ -182,88 +182,95 @@ const groups: { heading: string; lead: string; items: ShowcaseItem[] }[] = [
 </BaseLayout>
 
 <style>
+    /* All colors / fonts / radii come from Starlight's --sl-* tokens. */
+
     .show-hero {
-        padding-block: 80px 40px;
-        border-bottom: 1px solid var(--g-color-border);
-        background: radial-gradient(ellipse at top, var(--g-color-accent-soft), transparent 60%);
+        padding-block: 5rem 2.5rem;
+        border-bottom: 1px solid var(--sl-color-hairline);
+        background: radial-gradient(ellipse at top, var(--sl-color-accent-low), transparent 60%);
     }
 
     .eyebrow {
         text-transform: uppercase;
         letter-spacing: 0.18em;
-        font-size: 0.75rem;
-        color: var(--g-color-accent);
+        font-size: var(--sl-text-xs);
+        color: var(--sl-color-accent-high);
         font-weight: 600;
     }
 
     .show-hero h1 {
-        margin-top: 14px;
+        margin-top: 0.9rem;
         font-size: clamp(2rem, 4.5vw, 3.2rem);
         letter-spacing: -0.025em;
+        color: var(--sl-color-white);
     }
 
     .show-lead {
-        margin-top: 16px;
+        margin-top: 1rem;
         max-width: 64ch;
-        color: var(--g-color-text-muted);
-        font-size: 1.08rem;
-        line-height: 1.65;
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-lg);
+        line-height: var(--sl-line-height);
     }
 
     .show-section {
-        padding-block: 64px;
+        padding-block: 4rem;
     }
 
     .show-section + .show-section {
-        border-top: 1px solid var(--g-color-border);
+        border-top: 1px solid var(--sl-color-hairline);
     }
 
     .show-section-head {
-        margin-bottom: 32px;
+        margin-bottom: 2rem;
     }
 
     .show-section-head h2 {
         font-size: 1.6rem;
         letter-spacing: -0.02em;
+        color: var(--sl-color-white);
     }
 
     .show-section-head p {
-        margin-top: 8px;
-        color: var(--g-color-text-muted);
+        margin-top: 0.5rem;
+        color: var(--sl-color-gray-2);
         max-width: 64ch;
+        line-height: var(--sl-line-height);
     }
 
     .show-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr));
+        gap: 1.25rem;
     }
 
     .show-card {
         display: flex;
         flex-direction: column;
-        background: var(--g-color-bg-card);
-        border: 1px solid var(--g-color-border);
-        border-radius: var(--g-radius);
+        background: var(--sl-color-bg-nav);
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: var(--sl-border-radius);
         overflow: hidden;
-        color: var(--g-color-text);
+        color: var(--sl-color-white);
         transition: border-color 0.15s ease, transform 0.15s ease;
     }
 
     .show-card:hover {
-        border-color: var(--g-color-accent);
+        border-color: var(--sl-color-accent);
         transform: translateY(-3px);
     }
 
     .show-card-thumb {
         aspect-ratio: 16 / 10;
-        background: linear-gradient(135deg, var(--g-color-accent-soft), transparent 70%), var(--g-color-bg-elev);
-        color: var(--g-color-text-muted);
+        background:
+            linear-gradient(135deg, var(--sl-color-accent-low), transparent 70%),
+            var(--sl-color-gray-6);
+        color: var(--sl-color-gray-2);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 18px;
-        border-bottom: 1px solid var(--g-color-border);
+        padding: 1.1rem;
+        border-bottom: 1px solid var(--sl-color-hairline);
     }
 
     .show-card-thumb svg {
@@ -271,45 +278,45 @@ const groups: { heading: string; lead: string; items: ShowcaseItem[] }[] = [
     }
 
     .show-card-body {
-        padding: 20px 22px 22px;
+        padding: 1.25rem 1.4rem 1.4rem;
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 0.4rem;
         flex: 1;
     }
 
     .show-card-tag {
         display: inline-block;
         align-self: flex-start;
-        font-size: 0.7rem;
+        font-size: var(--sl-text-xs);
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        padding: 3px 8px;
+        padding: 0.2rem 0.55rem;
         border-radius: 999px;
-        background: var(--g-color-accent-soft);
-        color: var(--g-color-accent);
+        background: var(--sl-color-accent-low);
+        color: var(--sl-color-accent-high);
         font-weight: 600;
     }
 
     .show-card-body h3 {
-        font-size: 1.08rem;
-        margin-top: 4px;
+        font-size: var(--sl-text-lg);
+        margin-top: 0.25rem;
     }
 
     .show-card-body p {
-        color: var(--g-color-text-muted);
-        font-size: 0.92rem;
-        line-height: 1.55;
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        line-height: var(--sl-line-height);
         flex: 1;
     }
 
     .show-card-cta {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        color: var(--g-color-accent);
+        gap: 0.4rem;
+        color: var(--sl-color-accent-high);
         font-weight: 600;
-        font-size: 0.88rem;
-        margin-top: 8px;
+        font-size: var(--sl-text-sm);
+        margin-top: 0.5rem;
     }
 </style>
