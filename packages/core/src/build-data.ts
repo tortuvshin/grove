@@ -63,6 +63,28 @@ export async function generate(
   const outDir = resolve(cwd, cfg.paths.generatedDir);
   await mkdir(outDir, { recursive: true });
 
+  // Re-emit the site config as JSON alongside the records so the
+  // Astro (or any framework) template can pick up the user's
+  // branding, theme, and nav without parsing `grove.config.ts`
+  // at render time. The CLI runs `generate` ahead of `build`,
+  // so this stays in sync with the consumer's config edits.
+  const siteConfigPayload = {
+    blueprint: cfg.blueprint,
+    name: cfg.site.name,
+    tagline: cfg.site.tagline,
+    description: cfg.site.description ?? cfg.site.tagline,
+    siteUrl: cfg.site.url ?? "https://example.com",
+    repoUrl: cfg.site.repoUrl ?? "",
+    nav: cfg.nav,
+    theme: cfg.theme,
+    integrations: cfg.integrations,
+  };
+  await writeFile(
+    join(outDir, "site-config.json"),
+    JSON.stringify(siteConfigPayload, null, 2),
+    "utf8",
+  );
+
   const expectedKind = blueprintKind[cfg.blueprint];
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();

@@ -77,8 +77,28 @@ export async function validateProject(config: GroveConfig): Promise<ValidationRe
       });
     }
     const links = (obj.links as Record<string, unknown> | undefined) ?? {};
-    if (!links.github && !links.website) {
-      issues.push({ code: "missing_link", message: `${fileSlug} has neither github nor website link` });
+    // Blueprint-aware link check: each blueprint has a different
+    // canonical "where does this record live" answer.
+    //   project-directory → github OR website
+    //   resource-hub      → source OR github OR website
+    //   ecosystem-map     → website
+    const linkOk =
+      config.blueprint === "project-directory"
+        ? Boolean(links.github || links.website)
+        : config.blueprint === "resource-hub"
+          ? Boolean(links.source || links.github || links.website)
+          : Boolean(links.website);
+    if (!linkOk) {
+      const required =
+        config.blueprint === "project-directory"
+          ? "github or website"
+          : config.blueprint === "resource-hub"
+            ? "source, github, or website"
+            : "website";
+      issues.push({
+        code: "missing_link",
+        message: `${fileSlug} has no ${required} link`,
+      });
     }
     records.push(obj as unknown as Resource);
   }
