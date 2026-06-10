@@ -1,40 +1,83 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Grove
+description: A documentation framework for Astro Starlight — grow, maintain, and ship polished product docs without rebuilding the same scaffolding.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
-  image:
-    file: ../../assets/houston.webp
-  actions:
-    - text: Example Guide
-      link: /guides/example/
-      icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
+    layout: centered
+    tagline: >
+        Grove is a documentation framework for Astro Starlight. Garden your
+        content, grow alongside new frameworks, and maintain a single source
+        of truth across every adapter.
+    actions:
+        - text: Get started
+          link: /guides/example/
+          icon: right-arrow
+          variant: primary
+        - text: View on GitHub
+          link: https://github.com/grove-dev/grove
+          icon: external
+          variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## What is Grove?
+
+Grove packages a coherent, opinionated set of building blocks for product
+documentation sites built on [Astro Starlight](https://starlight.astro.build).
+Stop rewriting the same sidebar, theme, and content scaffolding for every
+project — plant a Grove instead.
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="Garden" icon="seti:notebook">
+		Plant a content collection once and reuse it across every framework
+		adapter. Sidebar, page title, search, and hero layout are already wired
+		up — focus on the words, not the chrome.
 	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
+	<Card title="Grow" icon="rocket">
+		Drop a new framework adapter into the workspace and Grove picks it up.
+		Next.js, Svelte, Astro, and Starlight all share the same content tree
+		and the same look.
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Maintain" icon="setting">
+		Tokens, type-safety, and versioning are first-class. Bump a content
+		schema, theme token, or component once — every consumer site updates on
+		the next install.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
+	<Card title="Splash pages" icon="open-book">
+		Hero layouts, card grids, link cards, and badge variants are tuned for
+		landing pages, changelogs, and reference indexes. Just author the
+		content.
 	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+</CardGrid>
+
+## The Grove workflow
+
+<CardGrid>
+	<Card title="1. Plant" icon="pencil">
+		Author your content in MDX under a single content collection. Frontmatter
+		extends the Starlight schema with announcement, hero layout, and link
+		attributes.
+	</Card>
+	<Card title="2. Pick a frame" icon="list-format">
+		Choose a framework adapter — Astro, Next.js, Svelte, or Starlight — and
+		Grove keeps the sidebar, hero, and theme in sync across all of them.
+	</Card>
+	<Card title="3. Ship" icon="rocket">
+		Run `grove build` and publish. The output is a normal Starlight site, so
+		hosting on Vercel, Netlify, Cloudflare, or GitHub Pages just works.
+	</Card>
+</CardGrid>
+
+## Where to next?
+
+<CardGrid>
+	<Card title="Read the guide" icon="open-book">
+		Walk through installation, content schema, and the recommended
+		Starlight config in [Getting Started](/guides/example/).
+	</Card>
+	<Card title="Browse the reference" icon="document">
+		See every Starlight component — cards, asides, tabs, badges, code
+		blocks, file trees, and buttons — rendered with the Grove theme.
 	</Card>
 </CardGrid>
