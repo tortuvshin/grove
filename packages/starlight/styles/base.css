@@ -1,0 +1,4 @@
+/* All base, theme and component styles live in `./theme.css` so Tailwind v4
+ * can pick them up via a single `@import "tailwindcss"`. This file remains
+ * as a re-export for backwards compatibility with the package's
+ * `./styles/base` entry — it is intentionally empty. */

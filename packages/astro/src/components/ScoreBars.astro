@@ -1,0 +1,102 @@
+---
+/**
+ * ScoreBars — 4-bar score visualization.
+ *
+ * Renders a horizontal 4-cell bar per score dimension. Each cell
+ * fills based on the score tier (0..4) computed from a 0-100 value.
+ * The 5 dimensions are: activity, maturity, learning, contribution,
+ * docs. The "overall" bar is optional and rendered last as a
+ * composite when `showOverall` is true.
+ *
+ * Renders nothing when the record has no score block.
+ */
+
+import type { Score } from "@grove-dev/core";
+import { scoreTier, scoreTierLabel, SCORE_LABELS } from "../lib/scores";
+
+interface Props {
+  scores: Score | undefined | null;
+  /** Show the "overall" composite bar. Default true. */
+  showOverall?: boolean;
+  /** Compact mode — no labels next to the bars. */
+  compact?: boolean;
+  class?: string;
+}
+
+const {
+  scores,
+  showOverall = true,
+  compact = false,
+  class: className = "",
+} = Astro.props;
+
+const dimensions: (keyof Score)[] = showOverall
+  ? ["activity", "maturity", "learning", "contribution", "docs", "overall"]
+  : ["activity", "maturity", "learning", "contribution", "docs"];
+
+function dim(n: number | undefined): number {
+  if (typeof n !== "number") return 0;
+  return scoreTier(n);
+}
+
+function label(n: number | undefined): string {
+  if (typeof n !== "number") return "—";
+  return Math.round(n).toString();
+}
+---
+
+{scores && (
+  <div
+    class:list={["grove-score-bars flex flex-col gap-2", className]}
+    aria-label="Project scores"
+  >
+    {dimensions.map((d) => {
+      const n = scores[d];
+      const tier = dim(n);
+      return (
+        <div
+          class:list={[
+            "grove-score-row flex items-center gap-2",
+            compact ? "text-2xs" : "text-2xs",
+          ]}
+          title={`${SCORE_LABELS[d]}: ${label(n)} (${scoreTierLabel(typeof n === "number" ? n : 0)})`}
+        >
+          {!compact && (
+            <span class="w-20 flex-shrink-0 font-medium text-ink-700 dark:text-ink-300">
+              {SCORE_LABELS[d]}
+            </span>
+          )}
+          <span
+            class:list={[
+              "grove-score-cells flex gap-0.5",
+              compact ? "w-20" : "w-24",
+            ]}
+            role="img"
+            aria-label={`${SCORE_LABELS[d]}: ${label(n)}`}
+          >
+            {[0, 1, 2, 3, 4].map((i) => (
+              <span
+                class:list={[
+                  "grove-score-cell h-1.5 flex-1 rounded-sm",
+                  i < tier
+                    ? d === "overall"
+                      ? "bg-ink-900 dark:bg-ink-100"
+                      : "bg-ink-700 dark:bg-ink-300"
+                    : "bg-ink-100 dark:bg-ink-900",
+                ]}
+              ></span>
+            ))}
+          </span>
+          <span
+            class:list={[
+              "font-mono text-ink-500 dark:text-ink-400",
+              compact ? "ml-1" : "ml-2 w-7 text-right",
+            ]}
+          >
+            {label(n)}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+)}

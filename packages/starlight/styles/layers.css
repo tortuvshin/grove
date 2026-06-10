@@ -1,0 +1,5 @@
+/* Tailwind v4 picks up these layer ordering declarations from the import of
+ * `./theme.css` (see plugin.ts), so this file is intentionally minimal.
+ * It exists so the package's `./styles/layers` export keeps the same
+ * surface as the upstream `lucode-starlight` package. */
+@layer starlight, grove;
