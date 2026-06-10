@@ -1,67 +1,263 @@
 ---
+/**
+ * Home page — the showcase's front door.
+ *
+ * Sections (in order):
+ *   1. Hero                       — brand + search + stats row
+ *   2. WhyThisExists              — 3 short value-prop points
+ *   3. AppSection "Trending"      — hot lens (stars >= 1000 OR pushed <= 30d)
+ *   4. AppSection "Recently added"— new lens (pushed <= 7d OR curated "new")
+ *   5. AppSection "Established"   — mature lens (tier=curated, pushed > 365d)
+ *   6. StackGrid                  — browse by stack
+ *   7. CategoryGrid               — browse by category
+ *   8. ContributorsGrid           — top contributors (when available)
+ *   9. OriginalCollection         — origin-card link to the source repo
+ *
+ * Every section is defensive: with 0 records (fresh scaffold) it
+ * renders a graceful empty state instead of throwing.
+ */
 import { siteConfig, indexSlug, itemLabel } from "../data/site-config";
-import { records } from "../data/records";
-import BaseLayout from "../components/layout/BaseLayout.astro";
-import Container from "../components/layout/Container.astro";
-import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
+import { records, fullRecords, projects } from "../data/records";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import Hero from "@grove-dev/astro/components/Hero.astro";
+import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
+import AppSection from "@grove-dev/astro/components/AppSection.astro";
+import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
+import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
+import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
+import OriginalCollection from "@grove-dev/astro/components/OriginalCollection.astro";
+import { countByCategory, countByStack } from "@grove-dev/astro";
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+import type { ProjectRecord } from "@grove-dev/core";
 
 const slug = indexSlug();
-const featured = records
-  .filter((r) => r.curation?.labels?.includes("featured"))
+const projectKind = projects;
+
+// ── Hero stats ──────────────────────────────────────────────────
+const totalApps = fullRecords.filter((r) => r.kind === "project").length;
+const totalCategories = new Set(projectKind.map((r) => r.category).filter(Boolean))
+  .size;
+const totalStacks = new Set(
+  projectKind.flatMap((r) => [r.stack, ...(r.stacks ?? [])]).filter(Boolean),
+).size;
+const totalContributors = new Set(
+  projectKind
+    .map((r) => {
+      const url = r.repoUrl ?? (r.links as { github?: string } | undefined)?.github ?? "";
+      const m = /github\.com\/([^/]+)\//.exec(url);
+      return m?.[1];
+    })
+    .filter(Boolean),
+).size;
+const totalStars = projectKind.reduce(
+  (acc, r) => acc + ((r as ProjectRecord).github?.stars ?? 0),
+  0,
+);
+
+// ── Lens sectioning (Hot / New / Mature) ────────────────────────
+const DAY_MS = 86_400_000;
+function daysSince(iso: string | null | undefined): number {
+  if (!iso) return Infinity;
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return Infinity;
+  return (Date.now() - d.valueOf()) / DAY_MS;
+}
+
+const hot = projectKind
+  .filter((r) => {
+    const stars = (r as ProjectRecord).github?.stars ?? 0;
+    const pushedAt = (r as ProjectRecord).github?.pushedAt ?? null;
+    const pushed = daysSince(pushedAt);
+    const labelledHot = r.curation?.labels?.includes("hot") ?? false;
+    return labelledHot || stars >= 1000 || pushed <= 30;
+  })
   .slice(0, 6);
-const recent = records.slice(0, 6);
-const list = featured.length > 0 ? featured : recent;
+
+const newItems = projectKind
+  .filter((r) => {
+    const pushedAt = (r as ProjectRecord).github?.pushedAt ?? null;
+    const pushed = daysSince(pushedAt);
+    const labelledNew = r.curation?.labels?.includes("new") ?? false;
+    return pushed <= 7 || labelledNew;
+  })
+  .slice(0, 6);
+
+const mature = projectKind
+  .filter((r) => {
+    const tier = r.health?.tier;
+    const pushedAt = (r as ProjectRecord).github?.pushedAt ?? null;
+    const pushed = daysSince(pushedAt);
+    return tier === "curated" && pushed > 365;
+  })
+  .slice(0, 6);
+
+// ── Stack / category aggregates ─────────────────────────────────
+const stackCounts = countByStack(projectKind);
+const stacks = [...stackCounts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, 12)
+  .map(([name, count]) => ({ name, slug: name, count }));
+
+const categoryCounts = countByCategory(projectKind);
+const categories = [...categoryCounts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([name, count]) => ({ name, slug: name, count }));
+
+// ── Contributors (best-effort, from records) ────────────────────
+const here = dirname(fileURLToPath(import.meta.url));
+const contributorsPath = [
+  resolve(here, "..", "..", "data", "generated", "contributors.json"),
+  resolve(process.cwd(), "data", "generated", "contributors.json"),
+].find((p) => existsSync(p));
+
+interface ContributorsFile {
+  contributors?: Array<{
+    username: string;
+    name?: string;
+    avatarUrl?: string;
+    profileUrl?: string;
+    contributions?: number;
+  }>;
+}
+
+let contributors: ContributorsFile["contributors"] = [];
+if (contributorsPath) {
+  try {
+    const parsed = JSON.parse(readFileSync(contributorsPath, "utf8")) as ContributorsFile;
+    contributors = parsed.contributors ?? [];
+  } catch {
+    contributors = [];
+  }
+}
+const hasContributors = contributors && contributors.length > 0;
+
+// ── OriginalCollection (repo-stats.json if present) ─────────────
+interface RepoStats {
+  originalRepo?: string;
+  stars?: number;
+  forks?: number;
+  contributors?: number;
+  description?: string;
+}
+let repoStats: RepoStats = {};
+const repoStatsPath = [
+  resolve(here, "..", "..", "data", "generated", "repo-stats.json"),
+  resolve(process.cwd(), "data", "generated", "repo-stats.json"),
+].find((p) => existsSync(p));
+if (repoStatsPath) {
+  try {
+    repoStats = JSON.parse(readFileSync(repoStatsPath, "utf8")) as RepoStats;
+  } catch {
+    repoStats = {};
+  }
+}
 
 const title = `${siteConfig.name} — ${siteConfig.tagline}`;
 const description =
   siteConfig.description ?? `A growing community knowledge site powered by Grove.`;
+
+// ── Render-time helpers ─────────────────────────────────────────
+function detailHrefFor(r: (typeof records)[number]): string {
+  return `/${slug}/${r.slug}`;
+}
 ---
 
-<BaseLayout title={title} description={description}>
-  <section class="border-b border-ink-200 dark:border-ink-800">
-    <Container>
-      <div class="py-12 sm:py-16">
-        <h1 class="m-0 text-[2rem] sm:text-[2.5rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          {siteConfig.name}
-        </h1>
-        <p class="mt-3 max-w-[60ch] text-lg text-ink-700 dark:text-ink-200 m-0">
-          {siteConfig.tagline}
-        </p>
-        <p class="mt-3 max-w-[60ch] text-sm text-ink-500 dark:text-ink-400 m-0">
-          {description}
-        </p>
-        <div class="mt-6 flex flex-wrap items-center gap-2">
-          <a
-            href={`/${slug}`}
-            class="rounded-md bg-ink-900 px-4 py-2 text-sm font-medium text-white hover:bg-ink-700 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white"
-          >
-            Browse {slug}
-          </a>
-          <a
-            href="/about"
-            class="rounded-md border border-ink-200 px-4 py-2 text-sm font-medium text-ink-700 hover:border-ink-300 dark:border-ink-800 dark:text-ink-300"
-          >
-            About
-          </a>
-        </div>
-      </div>
-    </Container>
-  </section>
+<BaseLayout
+  title={title}
+  description={description}
+  site={siteConfig}
+  submitHref="/submit"
+  submitLabel={`Submit ${itemLabel()}`}
+>
+  <Hero
+    name={siteConfig.name}
+    tagline={siteConfig.tagline}
+    description={description}
+    eyebrow="Curated directory"
+    searchPlaceholder={`Search ${slug}...`}
+    searchHref={`/${slug}`}
+    stats={{
+      apps: totalApps,
+      categories: totalCategories,
+      stacks: totalStacks,
+      contributors: totalContributors || undefined,
+      stars: totalStars || undefined,
+    }}
+    ctas={[
+      { label: `Browse ${slug}`, href: `/${slug}`, variant: "primary" },
+      { label: "About", href: "/about", variant: "outline" },
+    ]}
+  />
 
-  {list.length > 0 && (
-    <section>
-      <Container>
-        <div class="py-8 sm:py-10">
-          <h2 class="m-0 text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-            Featured {itemLabel()}s
-          </h2>
-          <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map((record) => (
-              <ItemCard record={record} href={`/${slug}/${record.slug}`} />
-            ))}
-          </div>
-        </div>
-      </Container>
-    </section>
+  <WhyThisExists />
+
+  <AppSection
+    id="hot"
+    title="Trending"
+    description="The projects getting attention right now — high-star repos and recently active codebases."
+    items={hot}
+    hrefFor={detailHrefFor}
+    viewAllHref={`/${slug}?lens=hot`}
+    eyebrow="Hot"
+    emptyLabel="No trending projects yet."
+  />
+
+  <AppSection
+    id="new"
+    title="Recently added"
+    description="Fresh entries — pushed within the last week or carrying the curated 'new' label."
+    items={newItems}
+    hrefFor={detailHrefFor}
+    viewAllHref={`/${slug}?lens=new`}
+    eyebrow="New"
+    emptyLabel="No new projects yet."
+  />
+
+  <AppSection
+    id="mature"
+    title="Established"
+    description="Long-running curated projects with deep history and stable architecture."
+    items={mature}
+    hrefFor={detailHrefFor}
+    viewAllHref={`/${slug}?lens=mature`}
+    eyebrow="Mature"
+    emptyLabel="No established projects yet."
+  />
+
+  {stacks.length > 0 && (
+    <StackGrid
+      stacks={stacks}
+      pathPrefix={`/${slug}`}
+    />
+  )}
+
+  {categories.length > 0 && (
+    <CategoryGrid
+      categories={categories}
+      pathPrefix={`/${slug}`}
+    />
+  )}
+
+  {hasContributors && (
+    <ContributorsGrid
+      contributors={contributors!}
+      total={contributors!.length}
+      viewAllHref={siteConfig.repoUrl || undefined}
+      viewAllLabel="View on GitHub"
+    />
+  )}
+
+  {repoStats.originalRepo && (
+    <OriginalCollection
+      repoUrl={repoStats.originalRepo}
+      stats={{
+        stars: repoStats.stars,
+        forks: repoStats.forks,
+        contributors: repoStats.contributors,
+        description: repoStats.description,
+      }}
+    />
   )}
 </BaseLayout>
