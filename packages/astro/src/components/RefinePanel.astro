@@ -1,0 +1,197 @@
+---
+/**
+ * RefinePanel — multi-select facet dropdowns.
+ *
+ * Renders a row of facet dropdowns (Stack, Platform, Category,
+ * License) plus a Sort dropdown, all using native <select> for
+ * server-render-only behavior. Selection auto-submits the form
+ * to the same list page with the chosen values merged into the URL.
+ *
+ * The form is a GET to the list page base, with each facet as a
+ * repeated key. Empty values are dropped, so the URL stays clean.
+ *
+ * Generic: takes a `facets` map of `{ value, label, count }[]` per
+ * dimension and an `initial` `AppsFilters` for preselecting the
+ * current URL state.
+ */
+
+import type { AppsFilters } from "../lib/search";
+import { SORT_OPTIONS } from "../lib/search";
+
+interface FacetValue {
+  value: string;
+  label?: string;
+  count?: number;
+}
+
+interface Facets {
+  stacks?: FacetValue[];
+  platforms?: FacetValue[];
+  categories?: FacetValue[];
+  labels?: FacetValue[];
+  licenses?: FacetValue[];
+}
+
+interface Props {
+  facets: Facets;
+  initial: AppsFilters;
+  pathPrefix?: string;
+  class?: string;
+  /** Hide specific facets. Default: all shown. */
+  hide?: Array<"stack" | "platform" | "category" | "license" | "sort">;
+}
+
+const {
+  facets,
+  initial,
+  pathPrefix = "/",
+  class: className = "",
+  hide = [],
+} = Astro.props;
+
+const baseAction = pathPrefix.replace(/\/$/, "") || "/";
+
+const initialStacks = new Set(initial.stacks ?? []);
+const initialPlatforms = new Set(initial.platforms ?? []);
+const initialCategories = new Set(initial.categories ?? []);
+const initialLicenses = new Set(initial.licenses ?? []);
+const initialSort = initial.sort ?? "";
+---
+
+<form
+  method="get"
+  action={baseAction}
+  class:list={[
+    "grove-refine-panel flex flex-wrap items-end gap-3",
+    className,
+  ]}
+  data-grove-refine-panel
+>
+  {initial.q && <input type="hidden" name="q" value={initial.q} />}
+  {initial.lens && <input type="hidden" name="lens" value={initial.lens} />}
+
+  {!hide.includes("stack") && (facets.stacks?.length ?? 0) > 0 && (
+    <label class="flex flex-col gap-1">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Stack
+      </span>
+      <select
+        name="stack"
+        multiple
+        size="1"
+        onchange="this.form?.requestSubmit()"
+        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+      >
+        {facets.stacks!.map((f) => (
+          <option
+            value={f.value}
+            selected={initialStacks.has(f.value)}
+          >
+            {f.label ?? f.value}
+            {typeof f.count === "number" ? ` (${f.count})` : ""}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
+
+  {!hide.includes("platform") && (facets.platforms?.length ?? 0) > 0 && (
+    <label class="flex flex-col gap-1">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Platform
+      </span>
+      <select
+        name="platform"
+        multiple
+        size="1"
+        onchange="this.form?.requestSubmit()"
+        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+      >
+        {facets.platforms!.map((f) => (
+          <option
+            value={f.value}
+            selected={initialPlatforms.has(f.value)}
+          >
+            {f.label ?? f.value}
+            {typeof f.count === "number" ? ` (${f.count})` : ""}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
+
+  {!hide.includes("category") && (facets.categories?.length ?? 0) > 0 && (
+    <label class="flex flex-col gap-1">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Category
+      </span>
+      <select
+        name="category"
+        multiple
+        size="1"
+        onchange="this.form?.requestSubmit()"
+        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+      >
+        {facets.categories!.map((f) => (
+          <option
+            value={f.value}
+            selected={initialCategories.has(f.value)}
+          >
+            {f.label ?? f.value}
+            {typeof f.count === "number" ? ` (${f.count})` : ""}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
+
+  {!hide.includes("license") && (facets.licenses?.length ?? 0) > 0 && (
+    <label class="flex flex-col gap-1">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        License
+      </span>
+      <select
+        name="license"
+        multiple
+        size="1"
+        onchange="this.form?.requestSubmit()"
+        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+      >
+        {facets.licenses!.map((f) => (
+          <option
+            value={f.value}
+            selected={initialLicenses.has(f.value)}
+          >
+            {f.label ?? f.value}
+            {typeof f.count === "number" ? ` (${f.count})` : ""}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
+
+  {!hide.includes("sort") && (
+    <label class="flex flex-col gap-1">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Sort
+      </span>
+      <select
+        name="sort"
+        onchange="this.form?.requestSubmit()"
+        class="grove-select min-w-[12rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+      >
+        {SORT_OPTIONS.map((o) => (
+          <option value={o.value} selected={initialSort === o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )}
+
+  <noscript>
+    <button type="submit" class="grove-btn grove-btn-outline">
+      Apply
+    </button>
+  </noscript>
+</form>

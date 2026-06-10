@@ -1,0 +1,204 @@
+---
+/**
+ * AppsIndexRow — compact table row for the list page.
+ *
+ * Renders: avatar + name + description + 3 metadata tiles
+ * (license, stars, updated) + chip row (stack/platform) + two
+ * CTAs (Details, GitHub). Designed for a dense table that the
+ * client-side filter script (and screen readers) can scan.
+ *
+ * `data-*` attributes are emitted so the consumer's filter script
+ * can read them and toggle visibility without re-rendering.
+ *
+ * Generic: takes a `Resource`. For non-project kinds the project
+ * fields are simply absent and the row degrades to a minimal
+ * name + description layout.
+ */
+
+import type { Resource, ProjectRecord } from "@grove-dev/core";
+import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "../lib/repo";
+import { formatRelative, formatStars } from "../lib/format";
+import { statusDisplay, prettySlug } from "../lib/display";
+
+interface Props {
+  record: Resource;
+  detailHref: string;
+  /** Whether to show stack/platform chips. Default true. */
+  showChips?: boolean;
+  class?: string;
+}
+
+const {
+  record,
+  detailHref,
+  showChips = true,
+  class: className = "",
+} = Astro.props;
+
+const isProject = record.kind === "project";
+const project = isProject ? (record as ProjectRecord) : null;
+
+const name =
+  record.kind === "resource"
+    ? (record as { title: string }).title
+    : (record as { name: string }).name;
+const description = record.description ?? "";
+const repoUrl = project?.repoUrl;
+const logoUrl = project?.logoUrl;
+const stacks = project?.stacks ?? (project?.stack ? [project.stack] : []);
+const platforms = project?.platforms ?? [];
+const github = project?.github?.repository;
+const stars = github?.stargazers_count;
+const licenseSpdx = github?.license?.spdx_id;
+const pushedAt = github?.pushed_at;
+const healthStatus = project?.health?.status;
+const githubUrl =
+  repoUrl ?? (record.links as { github?: string } | undefined)?.github;
+
+const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
+const avatarSrc =
+  logoUrl ?? (ownerRepo ? getOwnerAvatarUrl(ownerRepo.owner, 80) : null);
+const initials = (name || "")
+  .replace(/[^a-z0-9]/gi, "")
+  .slice(0, 2)
+  .toUpperCase();
+
+const allTags = [
+  ...stacks.slice(0, 2).map((s) => `Stack: ${s}`),
+  ...platforms.slice(0, 1).map((p) => `Platform: ${p}`),
+];
+const starsLabel = formatStars(stars);
+const updatedLabel = formatRelative(pushedAt);
+const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+
+const tags = record.tags ?? [];
+const labels = record.curation?.labels ?? [];
+---
+
+<article
+  class:list={[
+    "grove-row grove-card grid grid-cols-1 gap-3 p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center",
+    className,
+  ]}
+  data-record-slug={record.slug}
+  data-record-name={name}
+  data-record-kind={record.kind}
+  data-record-category={record.category}
+  data-record-stacks={stacks.join(",")}
+  data-record-platforms={platforms.join(",")}
+  data-record-tags={tags.join(",")}
+  data-record-labels={labels.join(",")}
+  data-record-search={[name, description, ownerRepo?.owner ?? "", ...stacks, ...platforms, ...tags, licenseSpdx ?? ""].join(" ").toLowerCase()}
+>
+  <div class="flex items-center gap-3">
+    <div class="flex-shrink-0">
+      {avatarSrc ? (
+        <img
+          src={avatarSrc}
+          alt=""
+          width="32"
+          height="32"
+          loading="lazy"
+          decoding="async"
+          class="h-8 w-8 rounded-md border border-ink-200 object-contain bg-white dark:border-ink-800 dark:bg-ink-950"
+        />
+      ) : (
+        <span
+          aria-hidden="true"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-xs font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200"
+        >
+          {initials || "·"}
+        </span>
+      )}
+    </div>
+    <div class="min-w-0">
+      <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+        <a href={detailHref} class="text-inherit no-underline hover:underline">
+          {name}
+        </a>
+      </h3>
+      {ownerRepo && (
+        <p class="m-0 mt-0.5 text-2xs text-ink-500 dark:text-ink-400">
+          @{ownerRepo.owner}/{ownerRepo.repo}
+        </p>
+      )}
+    </div>
+  </div>
+
+  <div class="min-w-0">
+    {description && (
+      <p class="m-0 line-clamp-2 text-[0.8125rem] leading-snug text-ink-500 dark:text-ink-400">
+        {description}
+      </p>
+    )}
+    {showChips && allTags.length > 0 && (
+      <ul class="mt-1.5 flex list-none flex-wrap gap-1.5 p-0">
+        {allTags.map((t) => <li class="grove-badge">{t}</li>)}
+      </ul>
+    )}
+  </div>
+
+  <dl
+    class="grid grid-cols-3 gap-x-4 gap-y-1 text-2xs text-ink-500 dark:text-ink-400 sm:flex sm:flex-col sm:items-end sm:gap-y-0.5"
+    aria-label="Project signals"
+  >
+    {starsLabel && (
+      <div class="flex items-center gap-1">
+        <dt class="sr-only">Stars</dt>
+        <dd class="m-0 font-mono text-ink-700 dark:text-ink-200">{starsLabel} ★</dd>
+      </div>
+    )}
+    {licenseSpdx && (
+      <div class="flex items-center gap-1">
+        <dt class="sr-only">License</dt>
+        <dd class="m-0">{licenseSpdx}</dd>
+      </div>
+    )}
+    {updatedLabel && updatedLabel !== "—" && (
+      <div class="flex items-center gap-1">
+        <dt class="sr-only">Last updated</dt>
+        <dd class="m-0">Updated {updatedLabel}</dd>
+      </div>
+    )}
+    {healthLabel && (
+      <div class="flex items-center gap-1">
+        <dt class="sr-only">Health</dt>
+        <dd class="m-0">{healthLabel}</dd>
+      </div>
+    )}
+  </dl>
+
+  <div class="col-span-full flex flex-wrap items-center gap-2 sm:col-span-1 sm:justify-end">
+    <a
+      href={detailHref}
+      class="grove-btn grove-btn-outline"
+      data-event="row_details_click"
+      data-event-source="apps_index_row"
+      data-event-app={record.slug}
+    >
+      View details
+    </a>
+    {githubUrl && (
+      <a
+        href={githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="grove-btn grove-btn-ghost"
+        data-event="row_repo_click"
+        data-event-source="apps_index_row"
+        data-event-app={record.slug}
+      >
+        GitHub
+      </a>
+    )}
+  </div>
+</article>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
