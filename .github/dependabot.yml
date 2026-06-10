@@ -1,0 +1,29 @@
+# Dependabot configuration for the Grove monorepo.
+#
+# We track pnpm workspaces. The release script rewrites `workspace:*` at
+# publish time, so the version range for `@grove-dev/*` deps in adapter
+# `package.json` is intentionally `workspace:*` — DO NOT let dependabot
+# rewrite it. See `CONTRIBUTING.md` and `docs/RELEASING.md` for context.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      grove-internal:
+        patterns:
+          - "@grove-dev/*"
+    ignore:
+      # Dependabot cannot safely update workspace protocol entries; the
+      # release script owns those rewrites.
+      - dependency-name: "@grove-dev/*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3

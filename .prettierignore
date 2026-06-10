@@ -1,0 +1,27 @@
+# Build output — never format generated JS.
+**/dist/
+**/.astro/
+**/.svelte-kit/
+**/.next/
+**/.nuxt/
+**/build/
+**/out/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Lockfiles — never auto-rewrite.
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Generated types
+*.d.ts.map
+
+# Test / scratch outputs
+.tmp-test/
+coverage/
+
+# Vendored / third-party
+docs/public/

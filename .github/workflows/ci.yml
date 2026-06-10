@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Use Corepack to pin pnpm to the version declared in package.json.
+  COREPACK_ENABLE_STRICT: 0
+
+jobs:
+  build:
+    name: Build & type-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@10.12.1 --activate
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Type-check
+        run: pnpm -r check
+
+  test:
+    name: Scaffold smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@10.12.1 --activate
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (needed for the CLI to run from dist)
+        run: pnpm -r build
+
+      - name: Run scaffold test
+        run: pnpm test:scaffold
+
+  lint:
+    name: Repo hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for stray .DS_Store
+        run: |
+          if find . -name '.DS_Store' -not -path './node_modules/*' -not -path './*/node_modules/*' -print -quit | grep -q .; then
+            echo "::error::Found .DS_Store files committed to the repo. Please delete them."
+            find . -name '.DS_Store' -not -path './node_modules/*' -not -path './*/node_modules/*' -print
+            exit 1
+          fi
+
+      - name: Check for workspace:* in published packages
+        # The release script rewrites these, but a stray one in a published
+        # `files` glob would still leak. Sanity check.
+        run: |
+          ! grep -rEn '"workspace:\*"' packages/*/package.json package.json \
+            | grep -v 'peerDependencies\|peerDependenciesMeta\|workspace:'

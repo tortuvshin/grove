@@ -1,0 +1,46 @@
+name: Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "packages/**/package.json"
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "packages/**/package.json"
+  schedule:
+    # Weekly full audit, Mondays at 06:00 UTC.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: pnpm audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        run: corepack enable && corepack prepare pnpm@10.12.1 --activate
+
+      - name: Install (no postinstall scripts by default; safer for CI)
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Audit production deps
+        # `pnpm audit --prod --audit-level=high` fails the job on high/critical.
+        run: pnpm audit --prod --audit-level=high
+
+      - name: Audit dev deps
+        continue-on-error: true
+        run: pnpm audit --audit-level=high
