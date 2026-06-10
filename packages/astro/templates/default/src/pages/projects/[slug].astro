@@ -1,51 +1,149 @@
 ---
+/**
+ * Detail page — one record at a time.
+ *
+ * Layout (top to bottom):
+ *   1. Breadcrumb                    — back to /projects (or blueprint slug)
+ *   2. AppCard-style header          — logo + name + owner + description + CTAs
+ *   3. ScoreBars                     — 5-dimension + overall score block
+ *   4. BestFor / WhyListed / Caveats — 3-column curation grid
+ *   5. GitHub signals dl             — stars, forks, pushed, license, language
+ *   6. Stack + Platform chips        — Icon (with fallback to text)
+ *   7. Distribution channels         — npm/crates/docker/etc. (when present)
+ *   8. Content markdown              — `record.content` (rendered as raw HTML
+ *                                      body) when present
+ *   9. JSON-LD SoftwareSourceCode    — for SEO + AI crawlers
+ *
+ * The page is generic across the 3 record kinds (project / resource
+ * / entity) — non-project fields simply render nothing.
+ */
 import { siteConfig, indexSlug } from "../../data/site-config";
-import { recordBySlug, records } from "../../data/records";
-import BaseLayout from "../../components/layout/BaseLayout.astro";
-import Container from "../../components/layout/Container.astro";
-import type { ProjectRecord, ResourceRecord, EntityRecord } from "@grove-dev/core";
+import { fullRecords, projectBySlug, resourceBySlug, entityBySlug } from "../../data/records";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import Icon from "@grove-dev/astro/components/Icon.astro";
+import ScoreBars from "@grove-dev/astro/components/ScoreBars.astro";
+import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro";
+import { formatRelative, formatStars } from "@grove-dev/astro";
+import { statusDisplay, prettySlug, labelDisplay } from "@grove-dev/astro";
+import { readFileSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+import type { ProjectRecord } from "@grove-dev/core";
 
 export function getStaticPaths() {
-  return records.map((record) => ({
+  return fullRecords.map((record) => ({
     params: { slug: record.slug },
   }));
 }
 
-interface Props {
-  slug: string;
-}
-
 const slug = indexSlug();
 const recordSlug = Astro.params.slug ?? "";
-const record = recordBySlug(recordSlug);
+const project = projectBySlug(recordSlug);
+const resource = resourceBySlug(recordSlug);
+const entity = entityBySlug(recordSlug);
+const record = project ?? resource ?? entity;
 
 if (!record) {
   return Astro.redirect(`/${slug}`);
 }
 
 const isProject = record.kind === "project";
-const isResource = record.kind === "resource";
-const isEntity = record.kind === "entity";
+const proj: ProjectRecord | null = project;
 
-const project = isProject ? (record as ProjectRecord) : null;
-const resource = isResource ? (record as ResourceRecord) : null;
-const entity = isEntity ? (record as EntityRecord) : null;
+const name =
+  record.kind === "resource" ? (record as { title: string }).title : (record as { name: string }).name;
 
-const name = resource ? resource.title : record.kind === "entity" ? entity!.name : project!.name;
 const title = `${name} — ${siteConfig.name}`;
 const description = record.description ?? `${name} on ${siteConfig.name}`;
 
-const gh = (record as { github?: { repository?: { html_url?: string; stargazers_count?: number; pushed_at?: string | null; description?: string | null } } }).github?.repository;
-const repoUrl = record.links?.github ?? gh?.html_url ?? "";
+const repoUrl = proj?.repoUrl ?? (record.links as { github?: string } | undefined)?.github ?? "";
 const homepageUrl = record.links?.website ?? "";
-const stars = gh?.stargazers_count ?? 0;
-const lastCommit = gh?.pushed_at ?? null;
+const logoUrl = proj?.logoUrl;
+const stacks = proj?.stacks ?? (proj?.stack ? [proj.stack] : []);
+const platforms = proj?.platforms ?? [];
+const github = proj?.github?.repository;
+const stars = github?.stargazers_count ?? 0;
+const forks = github?.forks_count ?? 0;
+const language = github?.language ?? null;
+const licenseSpdx = github?.license?.spdx_id ?? null;
+const pushedAt = github?.pushed_at ?? null;
+const starsLabel = formatStars(stars);
+const pushedLabel = formatRelative(pushedAt);
+
+const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
+const avatarSrc = logoUrl ?? (ownerRepo ? getOwnerAvatarUrl(ownerRepo.owner, 80) : null);
+const initials = (name || "").replace(/[^a-z0-9]/gi, "").slice(0, 2).toUpperCase();
+
+const bestFor = proj?.bestFor ?? [];
+const whyListed = proj?.whyListed ?? [];
+const caveats = proj?.caveats ?? [];
+const distribution = proj?.distribution?.channels ?? [];
+const scores = proj?.scores ?? null;
+const curationLabels = record.curation?.labels ?? [];
+const tags = record.tags ?? [];
+const healthStatus = proj?.health?.status;
+const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+
+// ── Optional content markdown (record.content is a path under
+// content/records/<slug>.md) ────────────────────────────────────
+let contentHtml: string | null = null;
+if (isProject && proj?.content) {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    resolve(here, "..", "..", "..", proj.content),
+    resolve(process.cwd(), proj.content),
+  ];
+  const contentPath = candidates.find((p) => existsSync(p));
+  if (contentPath) {
+    try {
+      // Cheap markdown → HTML using a minimal renderer would be
+      // nice, but we don't want to pull another dep into the
+      // template. Render the file as a <pre> for now so the body
+      // still surfaces on the page. Consumers can replace this
+      // with a real markdown pipeline (`marked`, `remark`, ...)
+      // by overriding the `[slug].astro` page.
+      const text = readFileSync(contentPath, "utf8");
+      contentHtml = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    } catch {
+      contentHtml = null;
+    }
+  }
+}
+
+// ── JSON-LD (SoftwareSourceCode) for project-kind records ──────
+let jsonLd: Record<string, unknown> | null = null;
+if (isProject && proj) {
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name,
+    description: record.description ?? undefined,
+    url: repoUrl || homepageUrl || undefined,
+    codeRepository: repoUrl || undefined,
+    programmingLanguage: language ?? undefined,
+    license: licenseSpdx ?? undefined,
+    author: ownerRepo
+      ? { "@type": "Organization", name: ownerRepo.owner, url: `https://github.com/${ownerRepo.owner}` }
+      : undefined,
+  };
+}
 ---
 
-<BaseLayout title={title} description={description}>
-  <Container>
-    <article class="py-10 sm:py-14">
-      <nav class="text-2xs text-ink-500 dark:text-ink-400" aria-label="Breadcrumb">
+<BaseLayout
+  title={title}
+  description={description}
+  site={siteConfig}
+  type="article"
+  jsonLd={jsonLd ?? undefined}
+  submitHref="/submit"
+  submitLabel={`Submit ${name}`}
+>
+  <article class="grove-section">
+    <div class="grove-container-wide mx-auto px-5 sm:px-7">
+      <nav class="mb-6 text-2xs text-ink-500 dark:text-ink-400" aria-label="Breadcrumb">
         <a href={`/${slug}`} class="hover:text-ink-900 dark:hover:text-ink-100 capitalize">
           {slug}
         </a>
@@ -53,131 +151,330 @@ const lastCommit = gh?.pushed_at ?? null;
         <span class="text-ink-700 dark:text-ink-300">{name}</span>
       </nav>
 
-      <header class="mt-5 flex flex-col gap-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-ink-700 dark:border-ink-800 dark:text-ink-300">
-            {record.kind}
-          </span>
-          <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
-            {record.category}
-          </span>
+      {/* ── AppCard-style header ──────────────────────────────── */}
+      <header class="grove-card flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
+        <div class="flex-shrink-0">
+          {avatarSrc ? (
+            <img
+              src={avatarSrc}
+              alt=""
+              width="64"
+              height="64"
+              loading="lazy"
+              decoding="async"
+              class="h-16 w-16 rounded-lg border border-ink-200 object-contain bg-white p-1 dark:border-ink-800 dark:bg-ink-950"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              class="inline-flex h-16 w-16 items-center justify-center rounded-lg border border-ink-200 bg-ink-50 text-2xl font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200"
+            >
+              {initials || "·"}
+            </span>
+          )}
         </div>
-        <h1 class="m-0 text-[1.75rem] sm:text-[2rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          {name}
-        </h1>
-        <p class="m-0 max-w-[68ch] text-base text-ink-700 dark:text-ink-200">
-          {record.description}
-        </p>
-        <div class="flex flex-wrap gap-2">
-          {repoUrl && (
-            <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="rounded-md bg-ink-900 px-4 py-2 text-sm font-medium text-white hover:bg-ink-700 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white">
-              View on GitHub
-            </a>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium uppercase tracking-wider text-ink-700 dark:border-ink-800 dark:text-ink-300">
+              {record.kind}
+            </span>
+            {record.category && (
+              <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
+                {record.category}
+              </span>
+            )}
+            {curationLabels.map((l) => (
+              <span class="grove-badge grove-badge-{l}" title={`Curated: ${labelDisplay(l) ?? l}`}>
+                {labelDisplay(l) ?? prettySlug(l)}
+              </span>
+            ))}
+            {healthLabel && (
+              <span class="grove-badge grove-badge-stale">{healthLabel}</span>
+            )}
+          </div>
+
+          <h1 class="m-0 mt-2 text-[1.75rem] sm:text-[2rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            {name}
+          </h1>
+
+          {ownerRepo && (
+            <p class="m-0 mt-1 text-sm text-ink-500 dark:text-ink-400">
+              <a
+                href={`https://github.com/${ownerRepo.owner}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
+              >
+                @{ownerRepo.owner}
+              </a>
+              <span class="mx-1 text-ink-300 dark:text-ink-700">/</span>
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
+              >
+                {ownerRepo.repo}
+              </a>
+            </p>
           )}
-          {homepageUrl && (
-            <a href={homepageUrl} target="_blank" rel="noopener noreferrer" class="rounded-md border border-ink-200 px-4 py-2 text-sm font-medium text-ink-700 hover:border-ink-300 dark:border-ink-800 dark:text-ink-300">
-              Homepage
-            </a>
+
+          {record.description && (
+            <p class="m-0 mt-3 max-w-[68ch] text-base leading-relaxed text-ink-700 dark:text-ink-200">
+              {record.description}
+            </p>
           )}
+
+          <div class="mt-5 flex flex-wrap gap-2">
+            {repoUrl && (
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="grove-btn grove-btn-primary"
+              >
+                View on GitHub →
+              </a>
+            )}
+            {homepageUrl && (
+              <a
+                href={homepageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="grove-btn grove-btn-outline"
+              >
+                Homepage
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
-      {record.tags && record.tags.length > 0 && (
-        <div class="mt-6 flex flex-wrap items-center gap-1.5">
-          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+      {/* ── Score bars ───────────────────────────────────────── */}
+      {proj && (
+        <section class="mt-8 grove-card p-6" aria-labelledby="scores-heading">
+          <h2 id="scores-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            Scores
+          </h2>
+          <p class="m-0 mt-1 text-sm text-ink-500 dark:text-ink-400">
+            A five-dimension read of how likely this project is to satisfy a curious developer.
+          </p>
+          <div class="mt-4">
+            <ScoreBars scores={scores} />
+          </div>
+        </section>
+      )}
+
+      {/* ── BestFor / WhyListed / Caveats grid ──────────────── */}
+      {isProject && (bestFor.length > 0 || whyListed.length > 0 || caveats.length > 0) && (
+        <section class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3" aria-label="Curation notes">
+          {bestFor.length > 0 && (
+            <div class="grove-card p-5">
+              <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Best for
+              </h3>
+              <ul class="mt-3 m-0 flex list-none flex-col gap-1.5 p-0">
+                {bestFor.map((b) => (
+                  <li class="text-sm text-ink-700 dark:text-ink-200">— {b}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {whyListed.length > 0 && (
+            <div class="grove-card p-5">
+              <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Why listed
+              </h3>
+              <ul class="mt-3 m-0 flex list-none flex-col gap-1.5 p-0">
+                {whyListed.map((w) => (
+                  <li class="text-sm text-ink-700 dark:text-ink-200">— {w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {caveats.length > 0 && (
+            <div class="grove-card p-5">
+              <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Caveats
+              </h3>
+              <ul class="mt-3 m-0 flex list-none flex-col gap-1.5 p-0">
+                {caveats.map((c) => (
+                  <li class="text-sm text-ink-700 dark:text-ink-200">— {c}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ── GitHub signals dl ────────────────────────────────── */}
+      {isProject && github && (
+        <section class="mt-8 grove-card p-6" aria-labelledby="signals-heading">
+          <h2 id="signals-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            GitHub signals
+          </h2>
+          <dl
+            class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3"
+            aria-label="Repository signals"
+          >
+            <div>
+              <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Stars
+              </dt>
+              <dd class="m-0 mt-0.5 font-mono text-ink-900 dark:text-ink-100">
+                {starsLabel ?? "—"}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Forks
+              </dt>
+              <dd class="m-0 mt-0.5 font-mono text-ink-900 dark:text-ink-100">
+                {forks}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                Last push
+              </dt>
+              <dd class="m-0 mt-0.5 font-mono text-ink-900 dark:text-ink-100">
+                {pushedLabel}
+              </dd>
+            </div>
+            {language && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                  Language
+                </dt>
+                <dd class="m-0 mt-0.5 text-ink-900 dark:text-ink-100">{language}</dd>
+              </div>
+            )}
+            {licenseSpdx && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                  License
+                </dt>
+                <dd class="m-0 mt-0.5 text-ink-900 dark:text-ink-100">{licenseSpdx}</dd>
+              </div>
+            )}
+            {pushedAt && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                  Updated
+                </dt>
+                <dd class="m-0 mt-0.5 font-mono text-ink-900 dark:text-ink-100">
+                  {pushedAt.slice(0, 10)}
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
+      )}
+
+      {/* ── Stack + Platform chips ───────────────────────────── */}
+      {isProject && (stacks.length > 0 || platforms.length > 0) && (
+        <section class="mt-8" aria-labelledby="stacks-heading">
+          <h2 id="stacks-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            Stack & platforms
+          </h2>
+          <div class="mt-4 flex flex-col gap-3">
+            {stacks.length > 0 && (
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                  Stack
+                </span>
+                {stacks.map((s) => (
+                  <span class="grove-badge inline-flex items-center gap-1.5">
+                    <Icon name={s} category="stack" size={14} />
+                    {s}
+                  </span>
+                ))}
+              </div>
+            )}
+            {platforms.length > 0 && (
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+                  Platform
+                </span>
+                {platforms.map((p) => (
+                  <span class="grove-badge inline-flex items-center gap-1.5">
+                    <Icon name={p} category="platform" size={14} />
+                    {p}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Tags ─────────────────────────────────────────────── */}
+      {tags.length > 0 && (
+        <section class="mt-8" aria-labelledby="tags-heading">
+          <h2 id="tags-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Tags
-          </span>
-          {record.tags.map((t) => (
-            <a
-              href={`/${slug}?tag=${encodeURIComponent(t)}`}
-              class="rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors hover:border-ink-300 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300"
-            >
-              {t}
-            </a>
-          ))}
-        </div>
+          </h2>
+          <ul class="mt-4 m-0 flex list-none flex-wrap gap-1.5 p-0">
+            {tags.map((t) => (
+              <li>
+                <a
+                  href={`/${slug}?q=${encodeURIComponent(t)}`}
+                  class="grove-badge inline-flex items-center gap-1.5"
+                >
+                  {t}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
-      {isProject && project && (
-        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-ink-200 bg-ink-200 text-2xs sm:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
-          {project.stack && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stack</dt>
-              <dd class="text-ink-900 dark:text-ink-100 font-mono">{project.stack}</dd>
-            </div>
-          )}
-          {project.platforms && project.platforms.length > 0 && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Platforms</dt>
-              <dd class="text-ink-900 dark:text-ink-100">{project.platforms.join(", ")}</dd>
-            </div>
-          )}
-          {stars > 0 && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stars</dt>
-              <dd class="text-ink-900 dark:text-ink-100 font-mono">{stars}</dd>
-            </div>
-          )}
-          {lastCommit && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Last commit</dt>
-              <dd class="text-ink-900 dark:text-ink-100 font-mono">{lastCommit.slice(0, 10)}</dd>
-            </div>
-          )}
-        </dl>
+      {/* ── Distribution channels ────────────────────────────── */}
+      {distribution.length > 0 && (
+        <section class="mt-8" aria-labelledby="dist-heading">
+          <h2 id="dist-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            Distribution channels
+          </h2>
+          <ul class="mt-4 m-0 flex list-none flex-col gap-2 p-0">
+            {distribution.map((c) => (
+              <li class="grove-card flex flex-wrap items-baseline justify-between gap-2 p-3">
+                <div class="flex flex-col">
+                  <span class="text-sm font-semibold text-ink-900 dark:text-ink-100">
+                    {c.label ?? c.type}
+                    {c.verified && (
+                      <span class="ml-2 grove-badge grove-badge-new">Verified</span>
+                    )}
+                  </span>
+                  {c.notes && (
+                    <span class="text-xs text-ink-500 dark:text-ink-400">{c.notes}</span>
+                  )}
+                </div>
+                <a
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="grove-btn grove-btn-outline"
+                >
+                  {c.platform ?? c.type} →
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
-      {isResource && resource && (
-        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-ink-200 bg-ink-200 text-2xs sm:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
-          <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-            <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Type</dt>
-            <dd class="text-ink-900 dark:text-ink-100 capitalize">{resource.type}</dd>
-          </div>
-          <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-            <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Topic</dt>
-            <dd class="text-ink-900 dark:text-ink-100">{resource.topic}</dd>
-          </div>
-          {resource.author && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Author</dt>
-              <dd class="text-ink-900 dark:text-ink-100">{resource.author}</dd>
-            </div>
-          )}
-          {resource.publishedAt && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Published</dt>
-              <dd class="text-ink-900 dark:text-ink-100 font-mono">{resource.publishedAt.slice(0, 10)}</dd>
-            </div>
-          )}
-        </dl>
+      {/* ── Content markdown (record.content → <pre> for now) ── */}
+      {contentHtml && (
+        <section class="mt-8" aria-labelledby="content-heading">
+          <h2 id="content-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            Notes
+          </h2>
+          <pre
+            class="mt-4 overflow-x-auto rounded-md border border-ink-200 bg-ink-50 p-4 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"
+          ><code>{contentHtml}</code></pre>
+        </section>
       )}
-
-      {isEntity && entity && (
-        <dl class="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-ink-200 bg-ink-200 text-2xs sm:grid-cols-4 dark:border-ink-800 dark:bg-ink-800">
-          <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-            <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Type</dt>
-            <dd class="text-ink-900 dark:text-ink-100 capitalize">{entity.type}</dd>
-          </div>
-          {entity.founded && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Founded</dt>
-              <dd class="text-ink-900 dark:text-ink-100 font-mono">{entity.founded}</dd>
-            </div>
-          )}
-          {entity.location && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Location</dt>
-              <dd class="text-ink-900 dark:text-ink-100">{entity.location}</dd>
-            </div>
-          )}
-          {entity.members && (
-            <div class="flex flex-col gap-1 bg-white p-4 dark:bg-ink-950">
-              <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Members</dt>
-              <dd class="text-ink-900 dark:text-ink-100 font-mono">{entity.members}</dd>
-            </div>
-          )}
-        </dl>
-      )}
-    </article>
-  </Container>
+    </div>
+  </article>
 </BaseLayout>
