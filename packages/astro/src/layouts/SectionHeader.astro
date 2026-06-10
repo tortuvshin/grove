@@ -39,9 +39,12 @@ const Heading = `h${level}` as "h2" | "h3";
       {eyebrow}
     </span>
   )}
-  <Heading class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-    {title}
-  </Heading>
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <Heading class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+      {title}
+    </Heading>
+    <slot name="actions" />
+  </div>
   {description && (
     <p
       class:list={[

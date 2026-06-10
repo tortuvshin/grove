@@ -1,0 +1,83 @@
+---
+/**
+ * AppSection — a titled "lens" of records on the home page.
+ *
+ * Renders a SectionHeader + a 3-column grid of `ItemCard`s, with an
+ * optional "View all" link in the header. Generic: passes the
+ * record list + per-record href through to `ItemCard`.
+ *
+ * The component is the workhorse of the home page — featured, hot,
+ * new, mature, "by category", "by stack" — all of them are just an
+ * `AppSection` with a different `id` + `title` + sliced list.
+ */
+
+import type { Resource } from "@grove-dev/core";
+import ItemCard from "./ItemCard.astro";
+import SectionHeader from "../layouts/SectionHeader.astro";
+
+interface Props {
+  /** Used as the section id (so deep links work) and a stable key. */
+  id: string;
+  title: string;
+  description?: string;
+  items: Resource[];
+  /** Detail page href builder. */
+  hrefFor: (record: Resource) => string;
+  /** Optional "View all" link rendered in the header. */
+  viewAllHref?: string;
+  viewAllLabel?: string;
+  /** Optional eyebrow. */
+  eyebrow?: string;
+  /** Empty-state copy. */
+  emptyLabel?: string;
+  /** Extra class on the outer <section>. */
+  class?: string;
+}
+
+const {
+  id,
+  title,
+  description,
+  items,
+  hrefFor,
+  viewAllHref,
+  viewAllLabel = "View all",
+  eyebrow,
+  emptyLabel = "No records yet.",
+  class: className = "",
+} = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={["grove-section", className]}
+  aria-labelledby={`${id}-heading`}
+>
+  <div class="grove-container-wide mx-auto px-5 sm:px-7">
+    <SectionHeader
+      eyebrow={eyebrow}
+      title={title}
+      description={description}
+    >
+      {viewAllHref && (
+        <a
+          slot="actions"
+          href={viewAllHref}
+          class="text-sm font-medium text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+        >
+          {viewAllLabel} →
+        </a>
+      )}
+    </SectionHeader>
+
+    {items.length === 0 ? (
+      <p class="m-0 text-sm text-ink-500 dark:text-ink-400">{emptyLabel}</p>
+    ) : (
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((record) => (
+          <ItemCard record={record} href={hrefFor(record)} />
+        ))}
+      </div>
+    )}
+  </div>
+</section>

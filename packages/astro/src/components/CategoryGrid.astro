@@ -1,0 +1,96 @@
+---
+/**
+ * CategoryGrid — browse-by-category grid for the home page.
+ *
+ * The lighter sibling of StackGrid. Renders a card per category with
+ * name, blurb, and count. Generic: takes a list of plain
+ * `{ name, slug, blurb, count }` entries.
+ */
+
+interface CategoryEntry {
+  name: string;
+  slug: string;
+  blurb?: string;
+  count?: number;
+}
+
+interface Props {
+  categories: CategoryEntry[];
+  /** List page base. */
+  pathPrefix?: string;
+  /** Extra class. */
+  class?: string;
+  /** Hide the section header. */
+  bare?: boolean;
+}
+
+const {
+  categories,
+  pathPrefix = "/",
+  class: className = "",
+  bare = false,
+} = Astro.props;
+
+function buildHref(slug: string): string {
+  const base = pathPrefix.replace(/\/$/, "");
+  return `${base}?category=${encodeURIComponent(slug)}`;
+}
+---
+
+<section
+  class:list={["grove-section", className]}
+  aria-labelledby={bare ? undefined : "grove-categorygrid-heading"}
+>
+  <div class="grove-container-wide mx-auto px-5 sm:px-7">
+    {!bare && (
+      <header class="mb-6 flex flex-col gap-2">
+        <h2
+          id="grove-categorygrid-heading"
+          class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+        >
+          Browse by category
+        </h2>
+        <p class="m-0 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
+          What kind of project are you looking for? Browse by category to find
+          reference apps, libraries, demos, and more.
+        </p>
+      </header>
+    )}
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {categories.map((c) => (
+        <a
+          href={buildHref(c.slug)}
+          class="grove-card grove-card-hover group flex flex-col gap-1.5 p-4 no-underline"
+          data-event="category_grid_click"
+          data-event-source="category_grid"
+        >
+          <div class="flex items-baseline justify-between gap-2">
+            <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+              {c.name}
+            </h3>
+            {typeof c.count === "number" && (
+              <span class="font-mono text-2xs text-ink-500 dark:text-ink-400">
+                {c.count}
+              </span>
+            )}
+          </div>
+          {c.blurb && (
+            <p class="m-0 line-clamp-2 text-[0.8125rem] leading-snug text-ink-500 dark:text-ink-400">
+              {c.blurb}
+            </p>
+          )}
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

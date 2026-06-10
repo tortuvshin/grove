@@ -1,0 +1,67 @@
+---
+/**
+ * ExploreByCategory — compact, count-only browse-by-category row.
+ *
+ * Light sibling of CategoryGrid. Pill-style links with a count.
+ * Generic: takes `{ name, slug, count }` entries.
+ */
+
+interface CategoryEntry {
+  name: string;
+  slug: string;
+  count?: number;
+}
+
+interface Props {
+  categories: CategoryEntry[];
+  pathPrefix?: string;
+  title?: string;
+  description?: string;
+  class?: string;
+}
+
+const {
+  categories,
+  pathPrefix = "/",
+  title = "Explore by category",
+  description,
+  class: className = "",
+} = Astro.props;
+
+function buildHref(slug: string): string {
+  const base = pathPrefix.replace(/\/$/, "");
+  return `${base}?category=${encodeURIComponent(slug)}`;
+}
+---
+
+<section class:list={["grove-section-tight", className]}>
+  <div class="grove-container-wide mx-auto px-5 sm:px-7">
+    <header class="mb-3 flex flex-col gap-1">
+      <h2 class="m-0 text-[1.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+        {title}
+      </h2>
+      {description && (
+        <p class="m-0 text-[0.8125rem] text-ink-500 dark:text-ink-400">
+          {description}
+        </p>
+      )}
+    </header>
+    <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
+      {categories.map((c) => (
+        <li>
+          <a
+            href={buildHref(c.slug)}
+            class="grove-badge inline-flex items-center gap-1.5 transition-colors hover:border-ink-400 dark:hover:border-ink-600"
+            data-event="explore_category_click"
+            data-event-source="explore_category"
+          >
+            <span>{c.name}</span>
+            {typeof c.count === "number" && (
+              <span class="font-mono text-ink-400">{c.count}</span>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
