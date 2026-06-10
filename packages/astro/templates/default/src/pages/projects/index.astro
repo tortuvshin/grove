@@ -15,8 +15,8 @@
  * static (all pages are baked at build time and revalidated by the
  * deploy target).
  */
-import { siteConfig, indexSlug, itemLabel } from "../../data/site-config";
-import { records } from "../../data/records";
+import siteConfig from "../../../data/generated/site-config.json";
+import { records, indexSlug, itemLabel } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";

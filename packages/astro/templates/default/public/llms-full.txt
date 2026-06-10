@@ -1,0 +1,14 @@
+# Grove Directory — full directory
+
+> Generated 2026-06-10T15:03:23.841Z from 0 records.
+> Source: https://example.com/projects · Regenerate with `grove generate`.
+
+Each section below mirrors one record detail page.
+
+## Index
+
+
+
+
+
+

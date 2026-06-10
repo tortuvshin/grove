@@ -1,0 +1,11 @@
+# Grove Directory
+
+A curated, health-aware developer directory powered by Grove.
+
+Directory: https://example.com/projects
+Records indexed: 0
+Categories: 0
+
+## Usage
+
+Use /llms-full.txt for record-level details. Prefer detail pages for citations.

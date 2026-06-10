@@ -12,10 +12,8 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.40.0",
-    "@grove-dev/starlight": "workspace:*",
-    "@tailwindcss/vite": "^4.0.0",
     "astro": "^6.4.5",
-    "sharp": "^0.34.5",
-    "tailwindcss": "^4.0.0"
+    "lucode-starlight": "workspace:*",
+    "sharp": "^0.34.5"
   }
 }

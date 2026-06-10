@@ -1,13 +1,45 @@
 ---
-import { siteConfig } from "../data/site-config";
-import BaseLayout from "../components/layout/BaseLayout.astro";
-import Container from "../components/layout/Container.astro";
+/**
+ * About page — three value props (MinimalAbout) + a long-form
+ * methodology section rendered from `content/pages/methodology.md`.
+ *
+ * The markdown body is read at build time and rendered as a single
+ * <pre> block (we keep the template dep-free; consumers can swap in
+ * a real markdown pipeline by overriding the page). The intent is
+ * that the methodology is *visible on the page* even if the prose
+ * isn't styled — the structured content stays discoverable.
+ */
+import { readFileSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+import siteConfig from "../../data/generated/site-config.json";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import Container from "@grove-dev/astro/layouts/Container.astro";
+import MinimalAbout from "@grove-dev/astro/components/MinimalAbout.astro";
 
 const title = `About — ${siteConfig.name}`;
 const description = `About ${siteConfig.name} — ${siteConfig.tagline}`;
+
+// ── Load methodology.md from content/pages/ (build time) ──────
+const here = dirname(fileURLToPath(import.meta.url));
+const methodologyPath = [
+  resolve(here, "..", "..", "..", "content", "pages", "methodology.md"),
+  resolve(here, "..", "..", "..", "..", "content", "pages", "methodology.md"),
+  resolve(process.cwd(), "content", "pages", "methodology.md"),
+].find((p) => existsSync(p));
+
+let methodologyText: string | null = null;
+if (methodologyPath) {
+  try {
+    methodologyText = readFileSync(methodologyPath, "utf8");
+  } catch {
+    methodologyText = null;
+  }
+}
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} site={siteConfig}>
   <Container>
     <article class="py-12 sm:py-16">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
@@ -28,51 +60,40 @@ const description = `About ${siteConfig.name} — ${siteConfig.tagline}`;
         </a>{" "}
         — an open-source framework for growing useful structured knowledge.
       </p>
-
-      <section class="mt-8">
-        <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          How it works
-        </h2>
-        <p class="mt-2 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
-          Records live in <code class="font-mono text-ink-900 dark:text-ink-100">data/records/</code> as
-          YAML files. Each record is one entry — a project, a resource, or an entity,
-          depending on the blueprint configured in <code class="font-mono">grove.config.ts</code>.
-        </p>
-        <p class="mt-2 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
-          Run <code class="font-mono">grove validate</code> to check the schema,{" "}
-          <code class="font-mono">grove generate</code> to build the index,
-          and <code class="font-mono">grove build</code> to produce the static site.
-        </p>
-      </section>
-
-      <section class="mt-8">
-        <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          Contributing
-        </h2>
-        <p class="mt-2 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
-          Open a pull request with a new YAML file under{" "}
-          <code class="font-mono">data/records/</code>. The schema is validated
-          automatically on every PR. A maintainer will review and merge.
-        </p>
-      </section>
-
-      <section class="mt-8">
-        <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          Blueprint
-        </h2>
-        <p class="mt-2 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
-          This site runs the <code class="font-mono">{siteConfig.blueprint}</code> blueprint.
-          {siteConfig.blueprint === "project-directory" && (
-            <> Records are <code class="font-mono">kind: project</code>.</>
-          )}
-          {siteConfig.blueprint === "resource-hub" && (
-            <> Records are <code class="font-mono">kind: resource</code>.</>
-          )}
-          {siteConfig.blueprint === "ecosystem-map" && (
-            <> Records are <code class="font-mono">kind: entity</code>.</>
-          )}
-        </p>
-      </section>
     </article>
+  </Container>
+
+  <MinimalAbout
+    title="Why this exists"
+    description="Three principles guide what gets listed and how it's surfaced."
+  />
+
+  <Container>
+    <section class="py-12 sm:py-16" aria-labelledby="methodology-heading">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Methodology
+      </span>
+      <h2
+        id="methodology-heading"
+        class="mt-1 text-[1.5rem] sm:text-[1.75rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0"
+      >
+        How records are picked, scored, and surfaced
+      </h2>
+      <p class="mt-3 max-w-[62ch] text-sm text-ink-500 dark:text-ink-400 m-0">
+        The full editorial + scoring methodology lives in
+        <code class="font-mono text-ink-900 dark:text-ink-100">content/pages/methodology.md</code>.
+        Below is the rendered source so reviewers can audit the criteria.
+      </p>
+      {methodologyText ? (
+        <pre
+          class="mt-6 overflow-x-auto rounded-md border border-ink-200 bg-ink-50 p-4 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"
+        ><code>{methodologyText}</code></pre>
+      ) : (
+        <p class="mt-6 max-w-[62ch] text-sm text-ink-500 dark:text-ink-400 m-0">
+          The methodology file is not yet present in this scaffold.
+          See <code class="font-mono">content/pages/methodology.md</code>.
+        </p>
+      )}
+    </section>
   </Container>
 </BaseLayout>

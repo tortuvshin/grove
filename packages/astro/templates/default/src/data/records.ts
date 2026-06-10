@@ -103,6 +103,18 @@ export function recordBySlug(slug: string): Resource | undefined {
   return bySlug.get(slug);
 }
 
+/**
+ * Generic slug lookup. The spec name is `findRecord`; this is an
+ * alias of `recordBySlug` so consumers can use either spelling.
+ * The two-name pattern matches the rest of the module (we keep
+ * `recordBySlug` for the typed `projectBySlug`/`resourceBySlug`/
+ * `entityBySlug` family, and `findRecord` as the unified entry
+ * point).
+ */
+export function findRecord(slug: string): Resource | undefined {
+  return bySlug.get(slug);
+}
+
 export function projectBySlug(slug: string): ProjectRecord | undefined {
   const r = bySlug.get(slug);
   return r && r.kind === "project" ? r : undefined;

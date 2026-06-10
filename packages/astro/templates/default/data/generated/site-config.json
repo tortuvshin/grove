@@ -1,0 +1,31 @@
+{
+  "blueprint": "project-directory",
+  "name": "Grove Directory",
+  "tagline": "A curated, health-aware developer directory.",
+  "description": "A curated, health-aware developer directory powered by Grove.",
+  "siteUrl": "https://example.com",
+  "repoUrl": "https://github.com/tortuvshin/grove",
+  "nav": [
+    {
+      "label": "Home",
+      "href": "/"
+    },
+    {
+      "label": "Browse",
+      "href": "/projects"
+    },
+    {
+      "label": "About",
+      "href": "/about"
+    }
+  ],
+  "theme": {
+    "primaryColor": "#16a34a",
+    "radius": "soft",
+    "density": "comfortable",
+    "containerWidth": "72rem"
+  },
+  "integrations": {
+    "github": false
+  }
+}

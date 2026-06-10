@@ -1,15 +1,32 @@
 ---
-import { siteConfig, indexSlug, itemLabel } from "../data/site-config";
-import BaseLayout from "../components/layout/BaseLayout.astro";
-import Container from "../components/layout/Container.astro";
+/**
+ * Submit page — text-based instructions for contributing a new
+ * record. No form: the openapps 19K form preview is overkill for
+ * the default template, and a static "open a PR / open an issue"
+ * workflow matches how the showcase actually accepts submissions.
+ */
+import siteConfig from "../../data/generated/site-config.json";
+import { indexSlug, itemLabel } from "../data/records";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import Container from "@grove-dev/astro/layouts/Container.astro";
 
 const title = `Submit a ${itemLabel()} — ${siteConfig.name}`;
 const description = `Submit a new ${itemLabel()} to ${siteConfig.name}.`;
 const noindex = true;
 const slug = indexSlug();
+
+const repoPath = (siteConfig.repoUrl ?? "").replace(/^https?:\/\/github\.com\//, "");
+const issueUrl = repoPath
+  ? `https://github.com/${repoPath}/issues/new?template=record_submission.md`
+  : "https://github.com/tortuvshin/grove/issues/new";
 ---
 
-<BaseLayout title={title} description={description} noindex={noindex}>
+<BaseLayout
+  title={title}
+  description={description}
+  site={siteConfig}
+  noindex={noindex}
+>
   <Container>
     <article class="py-12 sm:py-16">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
@@ -19,28 +36,41 @@ const slug = indexSlug();
         Submit a {itemLabel()}
       </h1>
       <p class="mt-4 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
-        Submissions happen through GitHub Issues. The maintainer will review
-        and merge accepted submissions as a new YAML file under{" "}
-        <code class="font-mono">data/records/</code>.
+        {siteConfig.name} is a community knowledge site. Adding a new{" "}
+        {itemLabel()} is a two-step process — open a submission issue,
+        then open a pull request that adds a new YAML file under{" "}
+        <code class="font-mono text-ink-900 dark:text-ink-100">data/records/</code>.
       </p>
 
-      <a
-        href={`https://github.com/${siteConfig.repoUrl.replace("https://github.com/", "")}/issues/new?template=record_submission.md`}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="mt-6 inline-flex items-center gap-2 rounded-md bg-ink-900 px-4 py-2 text-sm font-medium text-white hover:bg-ink-700 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white"
-      >
-        Open a submission issue
-        <span aria-hidden="true">↗</span>
-      </a>
+      <div class="mt-6 flex flex-wrap gap-2">
+        <a
+          href={issueUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="grove-btn grove-btn-primary"
+        >
+          Open a submission issue ↗
+        </a>
+        {repoPath && (
+          <a
+            href={`https://github.com/${repoPath}/blob/main/.github/ISSUE_TEMPLATE/record_submission.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="grove-btn grove-btn-outline"
+          >
+            See the issue template
+          </a>
+        )}
+      </div>
 
-      <section class="mt-12 max-w-[62ch]">
+      <section class="mt-12 max-w-[68ch">
         <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          Manual record
+          Manual record (alternative to the issue form)
         </h2>
         <p class="mt-2 text-sm text-ink-700 dark:text-ink-200 m-0">
           Prefer to write a record by hand? Here's the minimum shape for a{" "}
-          <code class="font-mono">{siteConfig.blueprint}</code> record:
+          <code class="font-mono">{siteConfig.blueprint}</code> record.
+          The schema is validated automatically on every PR.
         </p>
         {siteConfig.blueprint === "project-directory" && (
           <pre class="mt-4 overflow-x-auto rounded-md border border-ink-200 bg-ink-50 p-4 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"><code>{`kind: project
@@ -79,6 +109,18 @@ tags:
 links:
   website: https://example.com`}</code></pre>
         )}
+      </section>
+
+      <section class="mt-12 max-w-[68ch">
+        <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          What happens after you submit
+        </h2>
+        <ol class="mt-3 m-0 flex list-decimal flex-col gap-2 pl-5 text-sm text-ink-700 dark:text-ink-200">
+          <li>A maintainer reviews the issue and tags it as <code class="font-mono">accepted</code> or <code class="font-mono">needs-info</code>.</li>
+          <li>You open a PR with the new <code class="font-mono">data/records/&lt;slug&gt;.yml</code> file.</li>
+          <li>CI runs <code class="font-mono">grove validate</code> and previews the site with your record.</li>
+          <li>A maintainer merges. The next <code class="font-mono">grove build</code> deploys it.</li>
+        </ol>
       </section>
     </article>
   </Container>

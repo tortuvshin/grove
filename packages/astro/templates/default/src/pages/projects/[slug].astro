@@ -17,8 +17,8 @@
  * The page is generic across the 3 record kinds (project / resource
  * / entity) — non-project fields simply render nothing.
  */
-import { siteConfig, indexSlug } from "../../data/site-config";
-import { fullRecords, projectBySlug, resourceBySlug, entityBySlug } from "../../data/records";
+import siteConfig from "../../../data/generated/site-config.json";
+import { fullRecords, projectBySlug, resourceBySlug, entityBySlug, indexSlug } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Icon from "@grove-dev/astro/components/Icon.astro";
 import ScoreBars from "@grove-dev/astro/components/ScoreBars.astro";

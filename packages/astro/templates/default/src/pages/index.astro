@@ -16,8 +16,8 @@
  * Every section is defensive: with 0 records (fresh scaffold) it
  * renders a graceful empty state instead of throwing.
  */
-import { siteConfig, indexSlug, itemLabel } from "../data/site-config";
-import { records, fullRecords, projects } from "../data/records";
+import siteConfig from "../../data/generated/site-config.json";
+import { records, fullRecords, projects, indexSlug, itemLabel } from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Hero from "@grove-dev/astro/components/Hero.astro";
 import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
