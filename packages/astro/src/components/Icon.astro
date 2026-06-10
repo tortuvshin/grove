@@ -1,0 +1,223 @@
+---
+/**
+ * Icon — brand icon registry.
+ *
+ * Renders an `<img src="/icons/{stacks|platforms|brands}/{name}.svg" />`
+ * for a given registry name. The Astro integration ships the default
+ * `public/icons/{stacks,platforms}/` assets inside the `default`
+ * template's `public/` directory; consumers can ship their own SVGs
+ * under the same path (or override the `base` prop) without forking
+ * this component.
+ *
+ * The component is **generic** — it does not import any consumer-side
+ * `siteConfig`, `app`, or blueprint-specific module. Every consumer
+ * supplies its own icon list (and optionally an `aliases` map for
+ * friendly ids) via props, and any `name` not in the registry
+ * falls back to the initials placeholder.
+ *
+ * `category` selects the subfolder:
+ *
+ *   - "stack"     → `/icons/stacks/{name}.svg`
+ *   - "platform"  → `/icons/platforms/{name}.svg`
+ *   - "brand"     → `/icons/brands/{name}.svg`   (consumer-supplied)
+ *
+ * Theme-aware: when the consumer sets `mode: "auto"` the component
+ * looks for `{name}-light.svg` and `{name}-dark.svg` siblings in
+ * addition to the default `{name}.svg` and switches the `src` based
+ * on the resolved theme via the inline `data-grove-icon` script.
+ * For static (non-themed) icons this is a no-op — set `mode: "static"`
+ * (the default) to keep the markup simple and avoid hydration cost.
+ *
+ * Aliases: a tiny `aliases` map (e.g. `rn → react-native`) lets the
+ * registry accept multiple ids for the same asset without a renames
+ * pass. The lookup falls through the aliases map before failing over
+ * to the initials placeholder.
+ */
+import { getOwnerAndRepoFromRepoUrl } from "../lib/repo";
+
+export type IconCategory = "stack" | "platform" | "brand";
+export type IconMode = "static" | "auto";
+
+interface Props {
+  /**
+   * Registry id. Resolved through `aliases` first, then matched
+   * against the SVG file name (case-insensitive, slug-normalized).
+   */
+  name: string;
+  /** Subfolder under `/icons/`. */
+  category: IconCategory;
+  /** Pixel size (square). Defaults to 16. */
+  size?: number;
+  /** Extra class for the outer wrapper. */
+  class?: string;
+  /** Tooltip / aria-label. */
+  title?: string;
+  /**
+   * Static (single SVG) or auto (light/dark variants via inline
+   * script). Default "static".
+   */
+  mode?: IconMode;
+  /**
+   * Optional id → id remap. Lookup goes `name → aliases[name] →
+   * {name}.svg` (case-insensitive).
+   */
+  aliases?: Record<string, string>;
+  /**
+   * Initials to render when the icon file is missing. Defaults to
+   * the first 1–2 characters of `name`.
+   */
+  fallbackInitials?: string;
+  /**
+   * Base path for icon files. Defaults to `/icons` (matches the
+   * default template's `public/icons/`).
+   */
+  base?: string;
+}
+
+const {
+  name,
+  category,
+  size = 16,
+  class: className = "",
+  title,
+  mode = "static",
+  aliases,
+  fallbackInitials,
+  base = "/icons",
+} = Astro.props;
+
+// Normalize: lowercase + replace spaces/underscores with dashes.
+function slugify(s: string): string {
+  return s.toLowerCase().trim().replace(/[\s_]+/g, "-");
+}
+
+// Resolve `name` through the aliases map.
+function resolveName(raw: string): string {
+  if (!raw) return "";
+  if (aliases) {
+    const lower = raw.toLowerCase();
+    for (const [k, v] of Object.entries(aliases)) {
+      if (k.toLowerCase() === lower) return slugify(v);
+    }
+  }
+  return slugify(raw);
+}
+
+const resolved = resolveName(name);
+const folder =
+  category === "stack" ? "stacks" : category === "platform" ? "platforms" : "brands";
+const baseUrl = `${base.replace(/\/$/, "")}/${folder}/${resolved}`;
+
+// Static: just point at the canonical svg.
+const staticSrc = `${baseUrl}.svg`;
+
+// Initials fallback: first 1–2 alphanumerics, uppercased.
+const init = (fallbackInitials ?? name ?? "")
+  .replace(/[^a-z0-9]/gi, "")
+  .slice(0, 2)
+  .toUpperCase();
+const showFallback = !resolved;
+
+// Build aria-label.
+const ariaLabel = title ?? name;
+const a11y: Record<string, string> = title
+  ? { "aria-label": ariaLabel, role: "img" }
+  : { "aria-hidden": "true", "focusable": "false" };
+---
+
+{
+  showFallback ? (
+    <span
+      class:list={["grove-icon grove-icon-fallback", className]}
+      style={`width:${size}px;height:${size}px;font-size:${Math.max(10, size - 6)}px;`}
+      {...a11y}
+    >
+      {init || "·"}
+    </span>
+  ) : mode === "auto" ? (
+    <img
+      src={staticSrc}
+      data-grove-icon
+      data-grove-icon-light={`${baseUrl}-light.svg`}
+      data-grove-icon-dark={`${baseUrl}-dark.svg`}
+      data-grove-icon-fallback={staticSrc}
+      width={size}
+      height={size}
+      alt=""
+      class:list={["grove-icon grove-icon-themed", className]}
+      {...a11y}
+    />
+  ) : (
+    <img
+      src={staticSrc}
+      width={size}
+      height={size}
+      alt=""
+      class:list={["grove-icon", className]}
+      loading="lazy"
+      decoding="async"
+      {...a11y}
+    />
+  )
+}
+
+<style>
+  .grove-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .grove-icon-themed {
+    /* Theme-aware: dark/light variants selected by the inline script
+       below based on `data-resolved-theme` set by BaseLayout's
+       THEME_INIT. Default to the light variant so the markup looks
+       correct even before the script runs. */
+  }
+  .grove-icon-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    background: var(--color-ink-100, #f4f4f5);
+    color: var(--color-ink-700, #3f3f46);
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    user-select: none;
+  }
+  :global(.dark) .grove-icon-fallback {
+    background: var(--color-ink-800, #27272a);
+    color: var(--color-ink-200, #e4e4e7);
+  }
+</style>
+
+{mode === "auto" && (
+  <script is:inline>
+    // Theme-aware icon swap. Runs after THEME_INIT (BaseLayout) so
+    // `data-resolved-theme` is already populated. Idempotent — the
+    // MutationObserver picks up theme changes from ThemeToggle.
+    (function () {
+      function swap() {
+        var theme =
+          document.documentElement.dataset.resolvedTheme || "light";
+        var nodes = document.querySelectorAll(
+          "img[data-grove-icon]:not([data-grove-icon-bound])",
+        );
+        for (var i = 0; i < nodes.length; i++) {
+          var img = nodes[i];
+          img.setAttribute("data-grove-icon-bound", "1");
+          var next =
+            theme === "dark"
+              ? img.getAttribute("data-grove-icon-dark")
+              : img.getAttribute("data-grove-icon-light");
+          if (next) img.src = next;
+        }
+      }
+      swap();
+      new MutationObserver(swap).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-resolved-theme"],
+      });
+    })();
+  </script>
+)}
