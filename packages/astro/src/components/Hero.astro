@@ -1,0 +1,246 @@
+---
+/**
+ * Hero — the home page banner.
+ *
+ * Renders: trust stats (apps, categories, stacks, contributors, stars),
+ * a search form, an animated gradient backdrop, and up to 2 CTAs.
+ *
+ * The search form is a static GET form pointing at `searchHref` (the
+ * list page) with a `q` query param. JS enhancement is a consumer
+ * concern (e.g. the showcase wires the home hero's input into the
+ * list page filter via a custom event).
+ *
+ * Generic: every value comes through props — site name, tagline,
+ * stats, search target. No siteConfig import.
+ */
+
+interface CTA {
+  label: string;
+  href: string;
+  variant?: "primary" | "outline" | "ghost";
+  external?: boolean;
+}
+
+interface HeroStats {
+  apps?: number;
+  categories?: number;
+  stacks?: number;
+  contributors?: number;
+  stars?: number;
+}
+
+interface Props {
+  /** Site/brand name — rendered as the heading. */
+  name: string;
+  /** Short tagline displayed under the heading. */
+  tagline: string;
+  /** Longer description, rendered below the tagline. */
+  description?: string;
+  /** Trust stats row. */
+  stats?: HeroStats;
+  /** Placeholder for the search input. */
+  searchPlaceholder?: string;
+  /** Form action — the list page URL (e.g. "/projects"). */
+  searchHref?: string;
+  /** Optional CTAs rendered next to the search form. */
+  ctas?: CTA[];
+  /** Extra class for the outer <section>. */
+  class?: string;
+  /** Eyebrow text rendered above the title. */
+  eyebrow?: string;
+}
+
+const {
+  name,
+  tagline,
+  description,
+  stats = {},
+  searchPlaceholder = "Search the directory...",
+  searchHref = "/",
+  ctas = [],
+  class: className = "",
+  eyebrow,
+} = Astro.props;
+
+function fmt(n: number | undefined): string {
+  if (typeof n !== "number" || !Number.isFinite(n)) return "—";
+  if (n >= 1000) {
+    const k = n / 1000;
+    return (k >= 10 ? Math.round(k).toString() : k.toFixed(1)) + "k";
+  }
+  return n.toString();
+}
+
+const hasStats =
+  stats.apps !== undefined ||
+  stats.categories !== undefined ||
+  stats.stacks !== undefined ||
+  stats.contributors !== undefined ||
+  stats.stars !== undefined;
+---
+
+<section
+  class:list={[
+    "grove-hero relative overflow-hidden border-b border-ink-200 dark:border-ink-800",
+    className,
+  ]}
+  aria-labelledby="grove-hero-heading"
+>
+  <div
+    aria-hidden="true"
+    class="grove-hero__gradient pointer-events-none absolute inset-0 -z-10"
+  ></div>
+
+  <div class="grove-container-wide mx-auto px-5 py-16 sm:px-7 sm:py-20">
+    <div class="max-w-3xl">
+      {eyebrow && (
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          {eyebrow}
+        </span>
+      )}
+      <h1
+        id="grove-hero-heading"
+        class="m-0 mt-2 text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-ink-900 sm:text-[3rem] dark:text-ink-100"
+      >
+        {name}
+      </h1>
+      <p class="m-0 mt-4 max-w-2xl text-lg leading-relaxed text-ink-700 dark:text-ink-200">
+        {tagline}
+      </p>
+      {description && (
+        <p class="m-0 mt-2 max-w-2xl text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400">
+          {description}
+        </p>
+      )}
+
+      <form
+        class="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center"
+        role="search"
+        action={searchHref}
+        method="get"
+        data-grove-hero-search
+      >
+        <label class="relative flex-1">
+          <span class="sr-only">Search</span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
+            fill="currentColor"
+          >
+            <path d="M10.68 11.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z"></path>
+          </svg>
+          <input
+            type="search"
+            name="q"
+            placeholder={searchPlaceholder}
+            autocomplete="off"
+            class="w-full rounded-md border border-ink-200 bg-white py-2.5 pl-9 pr-3 text-sm placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          />
+        </label>
+        <button type="submit" class="grove-btn grove-btn-primary">
+          Search
+        </button>
+      </form>
+
+      {ctas.length > 0 && (
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          {ctas.map((cta) => (
+            <a
+              href={cta.href}
+              class:list={[
+                "grove-btn",
+                cta.variant === "primary"
+                  ? "grove-btn-primary"
+                  : cta.variant === "ghost"
+                    ? "grove-btn-ghost"
+                    : "grove-btn-outline",
+              ]}
+              {...(cta.external
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+              data-event="hero_cta_click"
+              data-event-source="hero"
+            >
+              {cta.label}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {hasStats && (
+        <dl
+          class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-2xs text-ink-500 dark:text-ink-400"
+          aria-label="Directory statistics"
+        >
+          {stats.apps !== undefined && (
+            <div class="flex items-baseline gap-1.5">
+              <dd class="m-0 font-mono text-base font-semibold text-ink-900 dark:text-ink-100">
+                {fmt(stats.apps)}
+              </dd>
+              <dt>apps</dt>
+            </div>
+          )}
+          {stats.categories !== undefined && (
+            <div class="flex items-baseline gap-1.5">
+              <dd class="m-0 font-mono text-base font-semibold text-ink-900 dark:text-ink-100">
+                {fmt(stats.categories)}
+              </dd>
+              <dt>categories</dt>
+            </div>
+          )}
+          {stats.stacks !== undefined && (
+            <div class="flex items-baseline gap-1.5">
+              <dd class="m-0 font-mono text-base font-semibold text-ink-900 dark:text-ink-100">
+                {fmt(stats.stacks)}
+              </dd>
+              <dt>stacks</dt>
+            </div>
+          )}
+          {stats.contributors !== undefined && (
+            <div class="flex items-baseline gap-1.5">
+              <dd class="m-0 font-mono text-base font-semibold text-ink-900 dark:text-ink-100">
+                {fmt(stats.contributors)}
+              </dd>
+              <dt>contributors</dt>
+            </div>
+          )}
+          {stats.stars !== undefined && (
+            <div class="flex items-baseline gap-1.5">
+              <dd class="m-0 font-mono text-base font-semibold text-ink-900 dark:text-ink-100">
+                {fmt(stats.stars)}
+              </dd>
+              <dt>total stars</dt>
+            </div>
+          )}
+        </dl>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .grove-hero__gradient {
+    background: linear-gradient(
+      120deg,
+      rgba(31, 111, 235, 0.08) 0%,
+      rgba(110, 231, 183, 0.06) 35%,
+      rgba(253, 186, 116, 0.06) 65%,
+      rgba(147, 197, 253, 0.08) 100%
+    );
+    background-size: 200% 200%;
+    animation: var(--animate-gradient-shift, gradient-shift 8s ease-in-out infinite);
+  }
+  :global(.dark) .grove-hero__gradient {
+    background: linear-gradient(
+      120deg,
+      rgba(31, 111, 235, 0.18) 0%,
+      rgba(6, 95, 70, 0.12) 35%,
+      rgba(67, 20, 7, 0.12) 65%,
+      rgba(30, 64, 175, 0.18) 100%
+    );
+    background-size: 200% 200%;
+  }
+</style>
