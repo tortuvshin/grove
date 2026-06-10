@@ -250,6 +250,10 @@ svg {
 	padding-inline: 1.5rem;
 }
 
+.g-container-wide {
+	max-width: var(--g-container-wide);
+}
+
 .g-container-narrow {
 	max-width: var(--g-container-narrow);
 	margin-inline: auto;
