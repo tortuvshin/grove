@@ -1,0 +1,71 @@
+---
+/**
+ * SmartLensTabs — curated single-select lens tabs.
+ *
+ * Renders the primary lenses (All / Trending / Recently added /
+ * Established / Featured / Needs review) as a horizontal tab bar.
+ * Clicking a tab navigates to the same list page with the `lens=`
+ * query param updated. Other filter params (q, stack, platform,
+ * category, sort) are preserved.
+ *
+ * The current selection is computed from `currentParams`, so the
+ * component is server-render-only — no client JS required.
+ *
+ * Generic: uses the `LENSES` registry from `lib/lenses.ts` and
+ * takes the list-page base via `pathPrefix`.
+ */
+
+import { LENSES, hrefForLens, isLensActive } from "../lib/lenses";
+import { lensDisplay } from "../lib/display";
+
+interface Props {
+  currentParams: URLSearchParams;
+  pathPrefix?: string;
+  class?: string;
+  /** Override the visible lens list (defaults to LENSES). */
+  lensIds?: string[];
+}
+
+const {
+  currentParams,
+  pathPrefix = "/",
+  class: className = "",
+  lensIds,
+} = Astro.props;
+
+// If `lensIds` is provided, filter LENSES to those ids in that order.
+const lenses =
+  lensIds && lensIds.length > 0
+    ? lensIds
+        .map((id) => LENSES.find((l) => l.id === id))
+        .filter((l): l is NonNullable<typeof l> => Boolean(l))
+    : LENSES;
+---
+
+<nav
+  class:list={[
+    "grove-lens-tabs flex flex-wrap items-center gap-1.5",
+    className,
+  ]}
+  aria-label="Curated views"
+>
+  {lenses.map((lens) => {
+    const active = isLensActive(lens.id, currentParams);
+    return (
+      <a
+        href={hrefForLens(lens.id, currentParams, pathPrefix)}
+        class:list={[
+          "grove-btn rounded-md px-3 py-1.5 text-2xs font-medium transition-colors",
+          active
+            ? "grove-btn-primary"
+            : "grove-btn-ghost border border-ink-200 dark:border-ink-800",
+        ]}
+        aria-current={active ? "page" : undefined}
+        data-event="lens_tab_click"
+        data-event-source="smart_lens_tabs"
+      >
+        {lensDisplay(lens.id)}
+      </a>
+    );
+  })}
+</nav>
