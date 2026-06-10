@@ -1,0 +1,126 @@
+---
+/**
+ * AppsPagination — windowed page list.
+ *
+ * Renders a row of page links with first / prev / numeric / next /
+ * last. The numeric window is a 5-page sliding window centered on
+ * the current page (clamped at the ends). Pages with no links
+ * (gaps) are rendered as "…" to preserve visual rhythm.
+ *
+ * Generic: takes a `current` and `total` page count and an
+ * `hrefFor` builder. The href builder is the only consumer-side
+ * knowledge; no siteConfig import.
+ */
+
+interface Props {
+  current: number;
+  total: number;
+  hrefFor: (page: number) => string;
+  class?: string;
+  /** Window size for the numeric page list. Default 5. */
+  windowSize?: number;
+}
+
+const {
+  current,
+  total,
+  hrefFor,
+  class: className = "",
+  windowSize = 5,
+} = Astro.props;
+
+// Clamp current into [1, total].
+const safeCurrent = Math.max(1, Math.min(total, current));
+const half = Math.floor(windowSize / 2);
+
+// Compute the numeric window. Clamp so it never extends past 1 or
+// total, and never narrower than `windowSize` unless total is
+// smaller.
+function buildWindow(): (number | "…")[] {
+  if (total <= windowSize + 2) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  let start = Math.max(2, safeCurrent - half);
+  let end = Math.min(total - 1, safeCurrent + half);
+  // Expand the window toward the nearest edge if it shrinks.
+  if (end - start + 1 < windowSize) {
+    if (safeCurrent <= half + 1) {
+      end = Math.min(total - 1, end + (windowSize - (end - start + 1)));
+    } else {
+      start = Math.max(2, start - (windowSize - (end - start + 1)));
+    }
+  }
+  const items: (number | "…")[] = [1];
+  if (start > 2) items.push("…");
+  for (let i = start; i <= end; i++) items.push(i);
+  if (end < total - 1) items.push("…");
+  items.push(total);
+  return items;
+}
+
+const pages = buildWindow();
+const hasPrev = safeCurrent > 1;
+const hasNext = safeCurrent < total;
+---
+
+<nav
+  class:list={[
+    "grove-pagination flex flex-wrap items-center gap-1",
+    className,
+  ]}
+  aria-label="Pagination"
+>
+  {hasPrev && (
+    <a
+      href={hrefFor(safeCurrent - 1)}
+      rel="prev"
+      class="grove-btn grove-btn-ghost"
+      data-event="pagination_click"
+      data-event-source="apps_pagination"
+    >
+      ← Prev
+    </a>
+  )}
+
+  <ol class="m-0 flex list-none items-center gap-1 p-0">
+    {pages.map((p) =>
+      p === "…" ? (
+        <li aria-hidden="true" class="px-2 text-2xs text-ink-400">
+          …
+        </li>
+      ) : (
+        <li>
+          {p === safeCurrent ? (
+            <span
+              aria-current="page"
+              class="grove-btn grove-btn-primary pointer-events-none"
+            >
+              {p}
+            </span>
+          ) : (
+            <a
+              href={hrefFor(p)}
+              class="grove-btn grove-btn-ghost"
+              data-event="pagination_click"
+              data-event-source="apps_pagination"
+            >
+              {p}
+            </a>
+          )}
+        </li>
+      ),
+    )}
+  </ol>
+
+  {hasNext && (
+    <a
+      href={hrefFor(safeCurrent + 1)}
+      rel="next"
+      class="grove-btn grove-btn-ghost"
+      data-event="pagination_click"
+      data-event-source="apps_pagination"
+    >
+      Next →
+    </a>
+  )}
+</nav>
