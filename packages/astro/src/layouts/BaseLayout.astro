@@ -1,32 +1,244 @@
 ---
+/**
+ * BaseLayout — wraps every page. Owns the theme-detection inline
+ * script and the global shell (Header, Footer). Per-page SEO
+ * (title, description, OG, JSON-LD) is delegated to <Seo /> so each
+ * page can declare what it needs without polluting the layout.
+ *
+ * Generic: takes a `site` prop with brand + nav, no siteConfig import.
+ * The header / footer / SEO components are imported from sibling
+ * files; consumers can override the Header/Footer via Astro's slot
+ * mechanism (`<Header slot="header" />`) if they need custom branding.
+ *
+ * The THEME_INIT inline script persists user preference in
+ * `localStorage` under the key "grove-theme" — matching the key
+ * `ThemeToggle.astro` uses.
+ */
+
 import "../styles.css";
+import Header from "./Header.astro";
+import Footer from "./Footer.astro";
+import Seo from "./Seo.astro";
+
+interface NavItem {
+  label: string;
+  href: string;
+}
+
+interface Site {
+  name: string;
+  tagline?: string;
+  description?: string;
+  nav: NavItem[];
+  repoUrl?: string;
+  url?: string;
+}
 
 interface Props {
   title: string;
-  description?: string;
+  description: string;
+  site: Site;
+  type?: "website" | "article" | "profile";
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Optional Google Analytics 4 Measurement ID (e.g. "G-XXXXXX"). */
+  gaId?: string;
+  /** Path used for JSON-LD `SearchAction` target. Defaults to "/projects". */
+  searchPath?: string;
+  /** Submit button label rendered in the header. Omit to hide. */
+  submitLabel?: string;
+  /** Submit button href rendered in the header. */
+  submitHref?: string;
 }
 
-const { title, description = "A living, health-aware developer directory." } = Astro.props;
+const {
+  title,
+  description,
+  site,
+  type,
+  noindex,
+  jsonLd,
+  gaId,
+  searchPath,
+  submitLabel,
+  submitHref,
+} = Astro.props;
+
+const favicon =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <title>{title}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href={favicon} />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms.txt"
+      title="LLM usage guidance"
+    />
+
+    {gaId && (
+      <>
+        {/* GA4 — gtag.js loader. We send the initial page_view with
+            the current path + query string so the dashboard
+            distinguishes /projects?stack=flutter from
+            /projects?stack=react (otherwise they'd all collapse to
+            /projects). */}
+        <script
+          is:inline
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+        />
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag("js", new Date());
+          gtag("config", gaId, {
+            page_path: window.location.pathname + window.location.search,
+            page_title: document.title,
+          });
+        </script>
+      </>
+    )}
+
+    <Seo
+      title={title}
+      description={description}
+      type={type}
+      noindex={noindex}
+      jsonLd={jsonLd}
+      site={site}
+      searchPath={searchPath}
+    />
+
+    <slot name="head" />
+
+    <script is:inline>
+      // THEME_INIT — runs before paint so the user never sees a
+      // flash of the wrong theme. State is persisted in localStorage
+      // under the key "grove-theme" (matching ThemeToggle.astro).
+      (function () {
+        var STORAGE_KEY = "grove-theme";
+        function getMode() {
+          try {
+            var stored = localStorage.getItem(STORAGE_KEY);
+            if (stored === "light" || stored === "dark" || stored === "system")
+              return stored;
+          } catch (e) {
+            // localStorage may be blocked (private mode, etc.) —
+            // fall through to the system default.
+          }
+          return "system";
+        }
+        function apply(mode) {
+          var resolved =
+            mode === "system"
+              ? (window.matchMedia("(prefers-color-scheme: dark)").matches
+                  ? "dark"
+                  : "light")
+              : mode;
+          var root = document.documentElement;
+          if (resolved === "dark") root.classList.add("dark");
+          else root.classList.remove("dark");
+          root.dataset.theme = mode;
+          root.dataset.resolvedTheme = resolved;
+        }
+        apply(getMode());
+        window.addEventListener("theme:set", function (e) {
+          apply(e.detail);
+        });
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        mq.addEventListener("change", function () {
+          if (getMode() === "system") apply("system");
+        });
+      })();
+    </script>
   </head>
-  <body>
-    <header class="oc-topbar">
-      <a href="/" class="oc-brand">Grove</a>
-      <nav aria-label="Primary">
-        <a href="/projects">Directory</a>
-        <a href="/methodology">Methodology</a>
-      </nav>
-    </header>
-    <main class="oc-shell">
+  <body class="min-h-screen bg-white text-ink-900 dark:bg-ink-950 dark:text-ink-100">
+    <slot name="header">
+      <Header
+        site={site}
+        submitLabel={submitLabel}
+        submitHref={submitHref}
+      />
+    </slot>
+
+    <main>
       <slot />
     </main>
+
+    <slot name="footer">
+      <Footer site={site} />
+    </slot>
+
+    <slot name="body-end" />
+
+    {gaId && (
+      <script is:inline define:vars={{ gaId }}>
+        // Mirror in-page SPA navigation (history.pushState /
+        // replaceState) into GA4 page_view events so filter changes
+        // on /projects show up as separate page views in the
+        // dashboard instead of one inflated session.
+        (function () {
+          var last = location.pathname + location.search;
+          function report() {
+            var next = location.pathname + location.search;
+            if (next === last) return;
+            last = next;
+            window.gtag("event", "page_view", {
+              page_path: next,
+              page_title: document.title,
+              page_location: location.href,
+            });
+          }
+          window.addEventListener("popstate", report);
+          var origPush = history.pushState;
+          var origReplace = history.replaceState;
+          history.pushState = function () {
+            origPush.apply(this, arguments);
+            report();
+          };
+          history.replaceState = function () {
+            origReplace.apply(this, arguments);
+            report();
+          };
+        })();
+      </script>
+    )}
+
+    {gaId && (
+      <script is:inline>
+        // Delegated click handler for `data-event` elements. We do
+        // this in one place so individual components just emit data
+        // attributes and stay declarative.
+        (function () {
+          document.addEventListener("click", function (e) {
+            var el = e.target instanceof Element
+              ? e.target.closest("[data-event]")
+              : null;
+            if (!el) return;
+            var name = el.getAttribute("data-event");
+            if (!name) return;
+            var params = {
+              source: el.getAttribute("data-event-source") || undefined,
+              app_slug: el.getAttribute("data-event-app") || undefined,
+              channel: el.getAttribute("data-event-channel") || undefined,
+              link_url: el.getAttribute("href") || undefined,
+            };
+            window.gtag("event", name, params);
+          });
+        })();
+      </script>
+    )}
   </body>
 </html>

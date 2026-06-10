@@ -1,0 +1,55 @@
+---
+/**
+ * SectionHeader — eyebrow + title + description, used to title
+ * every section on the home page. Optionally centered (good for
+ * "Why this exists" and friends).
+ */
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  align?: "left" | "center";
+  /** 2 (default) for top-level sections, 3 for nested ones. */
+  level?: 2 | 3;
+  /** Extra class for the outer header element. */
+  class?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  description,
+  align = "left",
+  level = 2,
+  class: className = "",
+} = Astro.props;
+const Heading = `h${level}` as "h2" | "h3";
+---
+
+<header
+  class:list={[
+    "mb-6 flex flex-col gap-2",
+    align === "center" ? "items-center text-center" : "",
+    className,
+  ]}
+>
+  {eyebrow && (
+    <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+      {eyebrow}
+    </span>
+  )}
+  <Heading class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+    {title}
+  </Heading>
+  {description && (
+    <p
+      class:list={[
+        "m-0 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400",
+        align === "center" ? "max-w-2xl" : "max-w-[56ch]",
+      ]}
+    >
+      {description}
+    </p>
+  )}
+</header>

@@ -1,0 +1,110 @@
+---
+/**
+ * ThemeToggle — a three-position theme switcher (light / dark / system).
+ *
+ * State is persisted in `localStorage` under the key "grove-theme"
+ * (matching `STORAGE_KEY` in `BaseLayout.astro`'s THEME_INIT script).
+ *
+ * The actual `<html class="dark">` toggle happens in the inline
+ * THEME_INIT script in BaseLayout — that script runs before paint
+ * so the user never sees a flash of the wrong theme.
+ *
+ * This button just rotates the stored mode and dispatches a
+ * `theme:set` event that the THEME_INIT listener picks up.
+ */
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  aria-label="Toggle theme"
+  title="Toggle theme"
+  class:list={[
+    "relative inline-flex h-8 w-8 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-700 transition-colors hover:border-ink-300 hover:bg-ink-50 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-200 dark:hover:border-ink-700 dark:hover:bg-ink-900/40",
+    className,
+  ]}
+>
+  {/* Sun — shown in dark mode (click to go light) */}
+  <svg
+    class="hidden h-4 w-4 dark:block"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+  </svg>
+  {/* Moon — shown in light mode (click to go dark) */}
+  <svg
+    class="block h-4 w-4 dark:hidden"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+  </svg>
+</button>
+
+<script>
+  // The toggle button simply rotates between the three modes on
+  // click. The actual class application lives in the page-level
+  // THEME_INIT script so behaviour stays consistent.
+  const STORAGE_KEY = "grove-theme";
+  type Mode = "light" | "dark" | "system";
+
+  function currentMode(): Mode {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored === "light" || stored === "dark" || stored === "system"
+        ? stored
+        : "system";
+    } catch {
+      return "system";
+    }
+  }
+
+  function rotate(): Mode {
+    const order: Mode[] = ["light", "dark", "system"];
+    const cur = currentMode();
+    const next = order[(order.indexOf(cur) + 1) % order.length];
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // localStorage may be blocked (private mode, etc.) — we still
+      // dispatch the event so the UI updates for the current page.
+    }
+    // Notify the page-level listener (THEME_INIT).
+    window.dispatchEvent(new CustomEvent("theme:set", { detail: next }));
+    return next;
+  }
+
+  function updateLabel(btn: HTMLButtonElement) {
+    btn.title = `Theme: ${currentMode()} (click to switch)`;
+  }
+
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-theme-toggle]")
+    .forEach((btn) => {
+      updateLabel(btn);
+      btn.addEventListener("click", () => {
+        rotate();
+        updateLabel(btn);
+      });
+      btn.addEventListener("mouseenter", () => updateLabel(btn));
+      btn.addEventListener("focus", () => updateLabel(btn));
+    });
+</script>
