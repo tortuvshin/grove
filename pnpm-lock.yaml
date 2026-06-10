@@ -18,7 +18,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  examples/my-grove-site:
+  examples/grove-demo:
     dependencies:
       '@astrojs/check':
         specifier: ^0.9.9

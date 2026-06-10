@@ -1,15 +1,16 @@
 /**
  * Site config exposed to Astro pages.
  *
- * This file is the typed view of `grove.config.ts`. The CLI builds it
- * from the project-root config at `grove generate` time. Astro pages
- * and components import it directly for branding strings, blueprint
- * routing, and theme tokens.
+ * This file is a typed re-export of `data/generated/site-config.json`,
+ * which the CLI builds from the project-root `grove.config.ts` at
+ * `grove generate` time. Astro pages and components import this
+ * module for branding strings, blueprint routing, and theme tokens.
  *
  * Do not edit by hand. Re-run `grove generate` after changing
  * `grove.config.ts`.
  */
 import type { GroveConfig } from "@grove-dev/core";
+import generated from "../../data/generated/site-config.json";
 
 export type SiteConfig = {
   blueprint: GroveConfig["blueprint"];
@@ -23,22 +24,7 @@ export type SiteConfig = {
   integrations: GroveConfig["integrations"];
 };
 
-export const siteConfig: SiteConfig = {
-  blueprint: "project-directory",
-  name: "Grove",
-  tagline: "A growing community knowledge site.",
-  description: "A curated, searchable directory of community knowledge — projects, resources, and ecosystem actors in one place.",
-  siteUrl: "https://example.com",
-  repoUrl: "",
-  nav: [],
-  theme: {
-    primaryColor: "#16a34a",
-    radius: "soft",
-    density: "comfortable",
-    containerWidth: "72rem",
-  },
-  integrations: { github: false },
-};
+export const siteConfig: SiteConfig = generated as SiteConfig;
 
 /** Convenience: slug for the directory index page based on blueprint. */
 export function indexSlug(): string {
