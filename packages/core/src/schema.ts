@@ -327,6 +327,14 @@ export const projectRecordSchema = resourceBaseSchema.extend({
   platforms: z.array(z.string()).default([]),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   codebaseSize: z.enum(["small", "medium", "large", "huge"]).optional(),
+  // Canonical repo URL. Distinct from `links.github`, which is the
+  // human-facing link on the page; `repoUrl` is the single source
+  // for owner/repo extraction, avatar fallback, and "view repo" CTAs.
+  repoUrl: z.string().url().optional(),
+  // Optional project logo/avatar URL. Falls back to the GitHub
+  // owner avatar (when `repoUrl` is a github.com URL) or to the
+  // first-2-letters initials placeholder.
+  logoUrl: z.string().url().optional(),
   bestFor: z.array(z.string()).default([]),
   whyListed: z.array(z.string()).default([]),
   caveats: z.array(z.string()).default([]),
@@ -650,9 +658,21 @@ export function toIndexRecord(record: Resource): Record<string, unknown> {
       stacks: record.stacks ?? [],
       platforms: record.platforms ?? [],
       projectType: record.projectType,
+      repoUrl: record.repoUrl,
+      logoUrl: record.logoUrl,
+      difficulty: record.difficulty,
+      codebaseSize: record.codebaseSize,
       bestFor: record.bestFor,
       whyListed: record.whyListed,
       caveats: record.caveats,
+      // Health surfaced alongside the record so list/detail UIs can
+      // show staleness/curation tier without a second lookup.
+      health: record.health,
+      // Visibility comes from either the health block (auto-derived
+      // from signals) or the curation override (`decisions.yml`).
+      // The generate step folds the latter in before serialising,
+      // so this is a best-effort projection of the current state.
+      visibility: record.health?.visibility ?? "keep",
       github: record.github?.repository
         ? {
             fullName: record.github.repository.full_name,
@@ -662,6 +682,8 @@ export function toIndexRecord(record: Resource): Record<string, unknown> {
             language: record.github.repository.language ?? null,
             pushedAt: record.github.repository.pushed_at ?? null,
             archived: Boolean(record.github.repository.archived),
+            license: record.github.repository.license?.spdx_id ?? null,
+            topics: record.github.repository.topics ?? [],
           }
         : undefined,
     };
