@@ -1,0 +1,14 @@
+docs/blueprint-gap-analysis.md
+  h_62cffde5d182b0 1-250
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bbb859c32bd4c44e709599699045cab29bef12e6",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
