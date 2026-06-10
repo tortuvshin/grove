@@ -1,0 +1,12 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "818dec3b64c599e5a794c8506f7086d67efcd86c",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
