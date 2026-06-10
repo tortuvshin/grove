@@ -1,130 +1,300 @@
 ---
-import type { Resource } from "@grove-dev/core";
+/**
+ * ItemCard — generic project/resource/entity card.
+ *
+ * The most-decorated card in the showcase. Used on home (curated
+ * sections), the list page (cards-only views), and the search
+ * results. Renders:
+ *
+ *   - Logo/avatar with initials fallback (logoUrl -> GitHub owner
+ *     avatar -> 2-letter initials).
+ *   - Owner / repo link (when `repoUrl` is github.com).
+ *   - Stack + platform chips (first 3, then "+N" overflow).
+ *   - Optional curated mark (label badge) — e.g. "Featured", "New".
+ *   - Health badge (Active / Mature / Stale / Archived / ...).
+ *   - License + star count + last-updated date.
+ *   - Two CTAs: "View repo" (links.github if present, else repoUrl)
+ *     and "Details" (the page link).
+ *
+ * Generic: takes any `Resource` (`kind: "project" | "resource" |
+ * "entity"`). For "project" we read the project-style fields
+ * (`repoUrl`, `logoUrl`, `stacks`, `platforms`, `github`,
+ * `curation`, `health`); for other kinds we degrade gracefully to
+ * the minimal view.
+ *
+ * The component is index-payload-friendly: every field it reads is
+ * present in the `toIndexRecord` projection (see
+ * `@grove-dev/core/schema.ts`).
+ */
+import type { Resource, ProjectRecord, HealthStatus } from "@grove-dev/core";
+import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "../lib/repo";
+import { formatRelative, formatStars } from "../lib/format";
+import { statusDisplay, prettySlug, labelDisplay } from "../lib/display";
 
 interface Props {
   record: Resource;
+  /** Detail page href. */
   href: string;
+  /** When true, show owner/repo below the title. Default true. */
+  showOwner?: boolean;
+  /** When true, render the stack/platform chip row. Default true. */
+  showChips?: boolean;
+  /** When true, render the curated label badge row. Default true. */
+  showLabel?: boolean;
+  /** When true, render the metadata strip (license/stars/updated). */
+  showMeta?: boolean;
+  /** Extra class on the outer <article>. */
+  class?: string;
 }
 
-const { record, href } = Astro.props;
+const {
+  record,
+  href,
+  showOwner = true,
+  showChips = true,
+  showLabel = true,
+  showMeta = true,
+  class: className = "",
+} = Astro.props;
+
+// Project-specific extraction
+const isProject = record.kind === "project";
+const project = isProject ? (record as ProjectRecord) : null;
 
 const name =
   record.kind === "resource"
-    ? record.title
-    : record.name;
+    ? (record as { title: string }).title
+    : (record as { name: string }).name;
+const description = record.description ?? "";
 const tags = (record.tags ?? []).slice(0, 4);
+const repoUrl = project?.repoUrl;
+const logoUrl = project?.logoUrl;
+const stacks = project?.stacks ?? (project?.stack ? [project.stack] : []);
+const platforms = project?.platforms ?? [];
+const healthStatus: HealthStatus | undefined = project?.health?.status;
+const labels = record.curation?.labels ?? [];
+const github = project?.github?.repository;
+const stars = github?.stargazers_count;
+const licenseSpdx = github?.license?.spdx_id;
+const pushedAt = github?.pushed_at;
+const githubUrl = repoUrl ?? (record.links as { github?: string } | undefined)?.github;
+
+// Logo fallback chain
+const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
+const avatarSrc =
+  logoUrl ?? (ownerRepo ? getOwnerAvatarUrl(ownerRepo.owner, 80) : null);
+const initials = (name || "")
+  .replace(/[^a-z0-9]/gi, "")
+  .slice(0, 2)
+  .toUpperCase();
+
+// Chips: 3 stacks/platforms, then overflow count
+function withOverflow(
+  items: string[],
+): { shown: string[]; overflow: number } {
+  const shown = items.filter(Boolean).slice(0, 3);
+  const overflow = Math.max(0, items.filter(Boolean).length - shown.length);
+  return { shown, overflow };
+}
+const stackChips = withOverflow(stacks);
+const platformChips = withOverflow(platforms);
+
+// Curated mark
+const curatedLabel = labels[0] ?? null;
+
+// Health class hook (for badge variant)
+function healthBadgeClass(s: HealthStatus | undefined): string {
+  switch (s) {
+    case "mature":
+    case "active":
+      return "grove-badge-new";
+    case "stale":
+    case "inactive":
+      return "grove-badge-stale";
+    case "archived":
+    case "unavailable":
+      return "grove-badge-hot";
+    default:
+      return "";
+  }
+}
+const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+
+const starsLabel = formatStars(stars);
+const updatedLabel = formatRelative(pushedAt);
 ---
 
-<article class="grove-card">
-  <div class="grove-card-header">
-    <div>
-      <h2 class="grove-card-title">
-        <a href={href}>{name}</a>
-      </h2>
-      <p class="grove-card-meta">
-        <span class="grove-badge">{record.kind}</span>
-        <span class="grove-card-category">{record.category}</span>
-      </p>
+<article
+  class:list={["grove-card grove-card-hover grove-item-card p-4", className]}
+  data-record-slug={record.slug}
+  data-record-kind={record.kind}
+  data-record-category={record.category}
+  data-record-stacks={stacks.join(",")}
+  data-record-platforms={platforms.join(",")}
+>
+  <div class="flex items-start gap-3">
+    <div class="grove-item-card__logo flex-shrink-0">
+      {avatarSrc ? (
+        <img
+          src={avatarSrc}
+          alt=""
+          width="40"
+          height="40"
+          loading="lazy"
+          decoding="async"
+          class="h-10 w-10 rounded-md border border-ink-200 object-contain bg-white dark:border-ink-800 dark:bg-ink-950"
+        />
+      ) : (
+        <span
+          class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-sm font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200"
+          aria-hidden="true"
+        >
+          {initials || "·"}
+        </span>
+      )}
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-baseline gap-2">
+        <h2 class="m-0 text-[1rem] font-semibold leading-tight tracking-tight text-ink-900 dark:text-ink-100">
+          <a href={href} class="text-inherit no-underline hover:underline">
+            {name}
+          </a>
+        </h2>
+        {showLabel && curatedLabel && (
+          <span
+            class:list={["grove-badge", `grove-badge-${curatedLabel}`]}
+            title={`Curated: ${labelDisplay(curatedLabel) ?? curatedLabel}`}
+          >
+            {labelDisplay(curatedLabel) ?? prettySlug(curatedLabel)}
+          </span>
+        )}
+        {healthLabel && (
+          <span class:list={["grove-badge", healthBadgeClass(healthStatus)]}>
+            {healthLabel}
+          </span>
+        )}
+      </div>
+
+      {showOwner && ownerRepo && (
+        <p class="m-0 mt-0.5 text-2xs text-ink-500 dark:text-ink-400">
+          <a
+            href={`https://github.com/${ownerRepo.owner}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
+          >
+            @{ownerRepo.owner}
+          </a>
+          <span class="mx-1 text-ink-300 dark:text-ink-700">/</span>
+          <a
+            href={repoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
+          >
+            {ownerRepo.repo}
+          </a>
+        </p>
+      )}
+
+      {description && (
+        <p class="m-0 mt-1.5 line-clamp-2 text-[0.8125rem] leading-snug text-ink-500 dark:text-ink-400">
+          {description}
+        </p>
+      )}
     </div>
   </div>
-  <p class="grove-card-description">{record.description}</p>
-  {tags.length > 0 && (
-    <ul class="grove-tags" aria-label="Tags">
-      {tags.map((tag) => <li class="grove-tag">{tag}</li>)}
-    </ul>
+
+  {showChips && (stackChips.shown.length > 0 || platformChips.shown.length > 0) && (
+    <div class="mt-3 flex flex-wrap items-center gap-1.5">
+      {stackChips.shown.map((s) => (
+        <span class="grove-badge" title={`Stack: ${s}`}>{s}</span>
+      ))}
+      {stackChips.overflow > 0 && (
+        <span class="grove-badge" title={`${stackChips.overflow} more stacks`}>
+          +{stackChips.overflow}
+        </span>
+      )}
+      {platformChips.shown.map((p) => (
+        <span class="grove-badge" title={`Platform: ${p}`}>{p}</span>
+      ))}
+      {platformChips.overflow > 0 && (
+        <span
+          class="grove-badge"
+          title={`${platformChips.overflow} more platforms`}
+        >
+          +{platformChips.overflow}
+        </span>
+      )}
+      {tags.length > 0 && tags.map((t) => <span class="grove-badge">{t}</span>)}
+    </div>
   )}
-  <div class="grove-card-actions">
-    <a href={href}>Details</a>
-    {record.links?.github && <a href={record.links.github}>GitHub</a>}
-    {record.links?.website && <a href={record.links.website}>Website</a>}
+
+  {showMeta && (starsLabel || licenseSpdx || updatedLabel !== "—") && (
+    <dl
+      class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400"
+      aria-label="Project signals"
+    >
+      {starsLabel && (
+        <div class="flex items-center gap-1">
+          <dt class="sr-only">Stars</dt>
+          <dd class="m-0 font-mono">{starsLabel}</dd>
+          <span aria-hidden="true">★</span>
+        </div>
+      )}
+      {licenseSpdx && (
+        <div class="flex items-center gap-1">
+          <dt class="sr-only">License</dt>
+          <dd class="m-0">{licenseSpdx}</dd>
+        </div>
+      )}
+      {updatedLabel && updatedLabel !== "—" && (
+        <div class="flex items-center gap-1">
+          <dt class="sr-only">Last updated</dt>
+          <dd class="m-0">Updated {updatedLabel}</dd>
+        </div>
+      )}
+    </dl>
+  )}
+
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <a
+      href={href}
+      class="grove-btn grove-btn-outline"
+      data-event="card_details_click"
+      data-event-source="item_card"
+      data-event-app={record.slug}
+    >
+      Details
+    </a>
+    {githubUrl && (
+      <a
+        href={githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="grove-btn grove-btn-ghost"
+        data-event="card_repo_click"
+        data-event-source="item_card"
+        data-event-app={record.slug}
+      >
+        View repo
+      </a>
+    )}
   </div>
 </article>
 
 <style>
-  .grove-card {
+  .grove-item-card {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
-    border: 1px solid var(--grove-border, #e5e7eb);
-    border-radius: var(--grove-radius, 0.5rem);
-    background: var(--grove-surface, #fff);
-    color: var(--grove-text, #111827);
-  }
-  .grove-card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-  .grove-card-title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-  .grove-card-title a {
-    color: inherit;
-    text-decoration: none;
-  }
-  .grove-card-title a:hover {
-    text-decoration: underline;
-  }
-  .grove-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-    margin: 0.25rem 0 0 0;
-    font-size: 0.75rem;
-    color: var(--grove-text-muted, #6b7280);
-  }
-  .grove-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.125rem 0.5rem;
-    border-radius: 999px;
-    border: 1px solid var(--grove-border, #e5e7eb);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .grove-card-description {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--grove-text-muted, #4b5563);
-  }
-  .grove-tags {
-    display: flex;
-    flex-wrap: wrap;
     gap: 0.25rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    height: 100%;
   }
-  .grove-tag {
-    display: inline-flex;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
-    background: var(--grove-surface-muted, #f3f4f6);
-    font-size: 0.6875rem;
-    color: var(--grove-text-muted, #4b5563);
-  }
-  .grove-card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: auto;
-  }
-  .grove-card-actions a {
-    font-size: 0.8125rem;
-    color: var(--grove-text, #111827);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-  }
-  .grove-card-actions a:hover {
-    border-bottom-color: currentColor;
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>
