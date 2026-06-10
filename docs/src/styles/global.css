@@ -5,11 +5,12 @@
  * hub) resolves to the exact value the Starlight docs render with. If the
  * Starlight theme is updated, copy the new props.css over the block below.
  *
- * We also import Starlight's reset.css and util.css so the page chrome
- * (header, buttons, search trigger) renders pixel-identical to the docs.
+ * We also import Starlight's reset.css and util.css via the package's
+ * installed path (the @astrojs/starlight package.json does not export
+ * these directly, so we point at the resolved file inside node_modules).
  */
-@import '@astrojs/starlight/style/reset.css';
-@import '@astrojs/starlight/style/util.css';
+@import '../../node_modules/@astrojs/starlight/style/reset.css';
+@import '../../node_modules/@astrojs/starlight/style/util.css';
 
 @layer starlight.base {
 	:root,
