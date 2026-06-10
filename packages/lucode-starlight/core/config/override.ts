@@ -1,6 +1,5 @@
 import type { HookParameters } from '@astrojs/starlight/types';
 import type { AstroIntegrationLogger } from 'astro';
-import type { LucodeStarlightUserConfig } from './schemas';
 
 type StarlightUserConfig = HookParameters<'config:setup'>['config'];
 type ComponentOverride = keyof NonNullable<StarlightUserConfig['components']>;
@@ -26,7 +25,6 @@ export const COMPONENT_OVERRIDES: ComponentOverride[] = [
 
 export function override(
     starlightConfig: StarlightUserConfig,
-    pluginConfig: LucodeStarlightUserConfig,
     overrides: ComponentOverride[],
     logger: AstroIntegrationLogger
 ): StarlightUserConfig['components'] {
@@ -35,14 +33,12 @@ export function override(
         if (starlightConfig.components?.[override] != null) {
             const fallback = `lucode-starlight/components/overrides/${override}.astro`;
 
-            if (pluginConfig.warnOverrides === undefined || Boolean(pluginConfig.warnOverrides)) {
-                logger.warn(
-                    `A \`<${override}>\` component override is already defined in your Starlight configuration.`
-                );
-                logger.warn(
-                    `To use \`lucode-starlight/components\`, either remove this override or manually render the content from \`${fallback}\`.`
-                );
-            }
+            logger.warn(
+                `A \`<${override}>\` component override is already defined in your Starlight configuration.`
+            );
+            logger.warn(
+                `To use \`lucode-starlight/components\`, either remove this override or manually render the content from \`${fallback}\`.`
+            );
             continue;
         }
         components[override] = `lucode-starlight/components/overrides/${override}.astro`;

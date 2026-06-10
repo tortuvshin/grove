@@ -2,20 +2,18 @@
 import { Icon } from '@astrojs/starlight/components';
 import { Image } from 'astro:assets';
 import { PAGE_TITLE_ID } from '../../core/config/constants';
+import type { HeroLayout } from '../../schema';
 import ContainerSection from '../custom/ContainerSection.astro';
 import LinkButton from '../custom/LinkButton.astro';
 
 const { data } = Astro.locals.starlightRoute.entry;
-const {
-    title = data.title,
-    tagline = data.description,
-    image,
-    announcement,
-    actions,
-    shadcn,
-} = data.hero || {};
-
+const { title = data.title, tagline: heroTagline, image, actions = [] } = data.hero || {};
+const heroLayout = ((data.hero as any)?.layout as HeroLayout) ?? 'centered';
+const announcement =
+    ((data.hero as any)?.announcement as { text: string; link: string }) ?? undefined;
 const hasImage = !!image;
+const tagline = heroTagline || data.description;
+
 const imageAttrs = {
     loading: 'eager' as const,
     decoding: 'async' as const,
@@ -39,7 +37,7 @@ if (image) {
 ---
 
 <ContainerSection>
-    <div class="hero" data-layout={data.hero?.layout} data-has-image={hasImage ? '' : undefined}>
+    <div class="hero" data-layout={heroLayout} data-has-image={hasImage ? '' : undefined}>
         {
             hasImage && (
                 <div class="hero-image">
@@ -74,10 +72,11 @@ if (image) {
 
             <div class="hero-content-container">
                 {tagline && <div class="tagline" set:html={tagline} />}
+
                 {
-                    actions?.length! > 0 && (
+                    actions.length > 0 && (
                         <div class="actions">
-                            {actions?.map(
+                            {actions.map(
                                 ({
                                     attrs: { class: className, ...attrs } = {},
                                     icon,
@@ -92,33 +91,7 @@ if (image) {
                                         {...attrs}
                                     >
                                         {text}
-                                        {icon?.name && <Icon name={icon?.name} size="16px" />}
                                         {icon?.html && <Fragment set:html={icon.html} />}
-                                    </LinkButton>
-                                )
-                            )}
-                        </div>
-                    )
-                }
-                {
-                    shadcn?.actions.length! > 0 && (
-                        <div class="actions">
-                            {shadcn?.actions.map(
-                                ({
-                                    attrs: { class: className, ...attrs } = {},
-                                    icon,
-                                    link: href,
-                                    text,
-                                    variant,
-                                }) => (
-                                    <LinkButton
-                                        {href}
-                                        {variant}
-                                        class:list={[className]}
-                                        {...attrs}
-                                    >
-                                        {text}
-                                        {icon && <i class={icon} />}
                                     </LinkButton>
                                 )
                             )}
