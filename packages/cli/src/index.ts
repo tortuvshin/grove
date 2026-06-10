@@ -83,6 +83,7 @@ program
   .option("-f, --framework <name>", "framework: astro | nextjs | svelte (V1: astro)")
   .option("-t, --template <name>", "template name", "default")
   .option("-d, --deploy <provider>", `deploy provider: ${DEPLOY_PROVIDERS.join(" | ")}`)
+  .option("-g, --github <mode>", "GitHub workflow mode: none | public (V1: none=private, public=community)")
   .option("--no-git", "skip `git init` after scaffolding")
   .option("--no-install", "skip `pnpm install` after scaffolding")
   .option("-y, --yes", "accept defaults for every prompt (CI / scripted use)")
@@ -94,6 +95,7 @@ program
         framework?: string;
         template: string;
         deploy?: string;
+        github?: string;
         git?: boolean;
         install?: boolean;
         yes?: boolean;
@@ -137,20 +139,39 @@ program
       }
 
       // GitHub integration
-      const githubMode: "none" | "public" =
-        opts.yes
-          ? "none"
-          : (await p.select({
-              message: "GitHub integration?",
-              options: [
-                { value: "none", label: "None / private site", hint: "No GitHub token, no API calls" },
-                { value: "public", label: "Public GitHub metadata", hint: "Optional, gated by token" },
-              ],
-              initialValue: "none",
-            })) as "none" | "public";
-      if (p.isCancel(githubMode)) {
-        p.cancel("Aborted.");
-        process.exit(0);
+      // "none"     — private/local mode: only validate-data.yml + build.yml
+      // "public"   — public GitHub mode: + sync + cleanup + update + issue/PR templates
+      let githubMode: "none" | "public";
+      if (opts.github && (opts.github === "none" || opts.github === "public")) {
+        githubMode = opts.github;
+      } else if (opts.github) {
+        p.log.error(`Unknown GitHub mode: ${opts.github}.`);
+        p.log.info(`Try one of: none | public`);
+        process.exit(1);
+      } else if (opts.yes) {
+        githubMode = "none";
+      } else {
+        const g = (await p.select({
+          message: "GitHub automation mode?",
+          options: [
+            {
+              value: "none",
+              label: "none / private",
+              hint: "Private or local — no GitHub token, only validate + build",
+            },
+            {
+              value: "public",
+              label: "public GitHub metadata",
+              hint: "Community sites — syncs stars, contributors, stale records (token-gated)",
+            },
+          ],
+          initialValue: "none",
+        })) as "none" | "public";
+        if (p.isCancel(g)) {
+          p.cancel("Aborted.");
+          process.exit(0);
+        }
+        githubMode = g;
       }
 
       // Framework
@@ -273,11 +294,22 @@ program
       await writeIfMissing(join(root, ".gitignore"), gitignoreTemplate());
       await writeIfMissing(join(root, "data", "decisions.yml"), "decisions: []\n");
       await writeIfMissing(join(root, "content", "methodology.md"), "# Methodology\n\nGrove uses repository metadata as a signal. Human curation decisions control final visibility.\n");
+      // Always-on workflows (safe for both private and public projects)
       await writeIfMissing(join(root, ".github", "workflows", "validate-data.yml"), workflowValidate());
       await writeIfMissing(join(root, ".github", "workflows", "build.yml"), workflowBuild(framework));
+      // Issue templates — both modes support a basic set
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "record_submission.md"), issueTemplateSubmission(blueprint));
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "bug_report.md"), issueTemplateBug());
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "feature_request.md"), issueTemplateFeature());
+      // Public-GitHub-only workflows and templates
+      if (githubMode === "public") {
+        await writeIfMissing(join(root, ".github", "workflows", "sync-github-metadata.yml"), workflowSyncGithubMetadata());
+        await writeIfMissing(join(root, ".github", "workflows", "sync-contributors.yml"), workflowSyncContributors());
+        await writeIfMissing(join(root, ".github", "workflows", "cleanup-stale-records.yml"), workflowCleanupStaleRecords());
+        await writeIfMissing(join(root, ".github", "workflows", "update-records.yml"), workflowUpdateRecords());
+        await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "report-broken-record.md"), issueTemplateBrokenRecord());
+        await writeIfMissing(join(root, ".github", "pull_request_template.md"), pullRequestTemplate());
+      }
       await writeIfMissing(join(root, "LICENSE"), licenseMIT(projectName));
 
       s.stop("Scaffolded");
@@ -303,10 +335,14 @@ program
         }
       }
 
+      const ghLabel =
+        githubMode === "public"
+          ? "public GitHub metadata (sync + cleanup + update workflows)"
+          : "none / private (only validate + build workflows)";
       p.outro(
         `🌳 ${projectName} is ready at ${root}\n\n` +
           `Blueprint: ${blueprint}\n` +
-          `GitHub integration: ${githubMode}\n\n` +
+          `GitHub mode: ${ghLabel}\n\n` +
           `Next steps:\n` +
           `  cd ${projectDir}\n` +
           `  grove validate\n` +
@@ -842,15 +878,8 @@ jobs:
 
 function workflowBuild(framework: Framework): string {
   // The project's "build" script in package.json already chains
-  #   grove generate && grove sitemap && grove llms && <framework> build
+  //   grove generate && grove sitemap && grove llms && <framework> build
   // via the `grove` package's own build orchestration. Keep the workflow thin.
-  const isWindows = false; // GitHub-hosted runners are linux
-  const setupNode = `- name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: pnpm
-          cache-dependency-path: "**/pnpm-lock.yaml"`;
   return `name: Build site
 
 # Runs on every PR, every push to main, and on manual dispatch.
@@ -876,7 +905,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
-${setupNode}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -921,6 +955,319 @@ ${labelHint}
 ## Why include it?
 
 A few sentences on what makes this record worth listing.
+`;
+}
+
+function workflowSyncGithubMetadata(): string {
+  return `name: Sync GitHub metadata
+
+# Refreshes GitHub repository metadata (stars, forks, last commit, license, …)
+# for records that link to public GitHub repos. Runs nightly and on demand.
+# Uses GROVE_GITHUB_TOKEN if set, else falls back to GITHUB_TOKEN.
+# Does NOT mutate human-owned data/records/*.yml files — it writes
+# .grove/generated/github-metadata.json and data/records metadata only.
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync GitHub metadata
+        run: pnpm exec grove sync github
+        env:
+          GITHUB_TOKEN: \${{ secrets.GROVE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Regenerate Grove data
+        run: pnpm exec grove generate
+
+      - name: Open PR with metadata refresh
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/grove-sync-github-metadata
+          title: "chore: sync GitHub metadata"
+          commit-message: "chore: sync GitHub metadata"
+          body: |
+            Automated metadata refresh by Grove.
+
+            - Updated GitHub stars, forks, last commit, license, etc.
+            - Triggered by: \${{ github.event_name }}
+          add-paths: |
+            data/records/*.yml
+            data/generated/*.json
+`;
+}
+
+function workflowSyncContributors(): string {
+  return `name: Sync contributors
+
+# Refreshes contributor data (avatars, recent activity, top contributors)
+# for records that have a public GitHub repository. Runs weekly and on demand.
+# Uses GROVE_GITHUB_TOKEN if set, else falls back to GITHUB_TOKEN.
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync contributors
+        run: pnpm exec grove sync contributors
+        env:
+          GITHUB_TOKEN: \${{ secrets.GROVE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Open PR with contributor refresh
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/grove-sync-contributors
+          title: "chore: sync contributors"
+          commit-message: "chore: sync contributors"
+          body: |
+            Automated contributor refresh by Grove.
+
+            - Updated contributor lists, avatars, and recent activity.
+            - Triggered by: \${{ github.event_name }}
+          add-paths: |
+            data/generated/contributors.json
+            .grove/cache/contributors.json
+`;
+}
+
+function workflowCleanupStaleRecords(): string {
+  return `name: Cleanup stale records
+
+# Reports records that may be outdated, archived, or no longer useful.
+# V1 behaviour is REPORT-ONLY — does not delete records. Use --strict in
+# the CLI to fail the run if any candidates are flagged.
+on:
+  schedule:
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate stale-record report
+        run: pnpm exec grove cleanup stale
+        env:
+          GITHUB_TOKEN: \${{ secrets.GROVE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Open PR with stale-record report
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/grove-stale-record-report
+          title: "chore: update stale record report"
+          commit-message: "chore: update stale record report"
+          body: |
+            Automated stale record report by Grove.
+
+            - Records flagged for human review (archived, inactive, broken links, …).
+            - Triggered by: \${{ github.event_name }}
+          add-paths: |
+            data/generated/stale-records.json
+            docs/generated/stale-records.md
+`;
+}
+
+function workflowUpdateRecords(): string {
+  return `name: Update Grove records
+
+# Full maintenance cycle: validate + sync GitHub metadata + sync contributors
+# + cleanup stale records + regenerate. Run on demand, or weekly if your
+# project needs hands-off maintenance.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate records
+        run: pnpm exec grove validate
+
+      - name: Sync GitHub metadata
+        run: pnpm exec grove sync github
+        env:
+          GITHUB_TOKEN: \${{ secrets.GROVE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Sync contributors
+        run: pnpm exec grove sync contributors
+        env:
+          GITHUB_TOKEN: \${{ secrets.GROVE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup stale records
+        run: pnpm exec grove cleanup stale
+        env:
+          GITHUB_TOKEN: \${{ secrets.GROVE_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Regenerate
+        run: pnpm exec grove generate
+
+      - name: Open PR with maintenance update
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/grove-update-records
+          title: "chore: update Grove records"
+          commit-message: "chore: update Grove records"
+          body: |
+            Automated Grove maintenance update.
+
+            - Validated records
+            - Synced GitHub metadata
+            - Synced contributors
+            - Flagged stale records (report only)
+            - Regenerated indexes
+
+            Triggered by: \${{ github.event_name }}
+`;
+}
+
+function issueTemplateBrokenRecord(): string {
+  return `---
+name: Report broken record
+about: Report a broken link, dead project, wrong category, or duplicate record
+title: "[Broken] "
+labels: broken-record
+---
+
+## Which record is broken?
+
+Record slug (e.g. \`zod\`) or full URL of the record page:
+
+## What is wrong?
+
+- [ ] Broken link (404, dead site, repo not found)
+- [ ] Dead / abandoned / archived project
+- [ ] Wrong category or tags
+- [ ] Duplicate of an existing record
+- [ ] Security concern
+- [ ] Outdated metadata (stars, last commit, etc.)
+- [ ] Incorrect description
+- [ ] Other (describe below)
+
+## Details
+
+A short description of the issue, with evidence if possible (link to a working
+alternative, archive.org snapshot, or commit history).
+
+## Suggested fix (optional)
+
+If you know what should change, describe it here.
+`;
+}
+
+function pullRequestTemplate(): string {
+  return `## What did you add or change?
+
+<!-- A short summary of your change. -->
+
+## Is this a new record?
+
+- [ ] Yes — adds a new record under \`data/records/\`
+- [ ] No — updates an existing record, fixes a bug, or changes infrastructure
+
+## Checklist
+
+- [ ] I added or updated records under \`data/records/\`
+- [ ] The record has a clear, accurate description
+- [ ] The category and tags are appropriate
+- [ ] I ran \`pnpm exec grove validate\` and it passed
+- [ ] I did not add generated files manually unless required
+- [ ] I included the official / source link where available
+- [ ] This PR is safe to publish (no private or sensitive data)
 `;
 }
 
