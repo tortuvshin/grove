@@ -50,7 +50,7 @@
   "dependencies": {
     "@grove-dev/core": "workspace:*",
     "@grove-dev/ui": "workspace:*",
-    "astro": "^6.4.4"
+    "astro": "^6.4.6"
   },
   "peerDependencies": {
     "astro": "^6.0.0"
