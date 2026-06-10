@@ -17,10 +17,10 @@
  * payload and the `Score` / `HealthStatus` unions).
  */
 
-export * from "./repo";
-export * from "./format";
-export * from "./lenses";
-export * from "./search";
-export * from "./scores";
-export * from "./taxonomy-counts";
-export * from "./display";
+export * from "./repo.js";
+export * from "./format.js";
+export * from "./lenses.js";
+export * from "./search.js";
+export * from "./scores.js";
+export * from "./taxonomy-counts.js";
+export * from "./display.js";

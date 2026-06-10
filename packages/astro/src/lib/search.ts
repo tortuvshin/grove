@@ -17,8 +17,8 @@ import type {
   HealthStatus,
   ProjectRecord,
 } from "@grove-dev/core";
-import { labelDisplay, statusDisplay } from "./display";
-import { applyLens, lensFromSearchParams, type LensId } from "./lenses";
+import { labelDisplay, statusDisplay } from "./display.js";
+import { applyLens, lensFromSearchParams, type LensId } from "./lenses.js";
 
 // ── Types ─────────────────────────────────────────────────────────
 

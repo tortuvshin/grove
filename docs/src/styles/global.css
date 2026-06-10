@@ -1,0 +1,7 @@
+/* Grove overrides for the Lucode Starlight theme.
+ *
+ * Lucode appends its own CSS after this file, so anything you put here can
+ * override Lucode tokens, but Lucode component styles win when specificity
+ * is equal. Wrap your changes in @layer lucode when you want to override
+ * the theme tokens explicitly.
+ */

@@ -37,7 +37,9 @@
       "import": "./dist/index.js"
     },
     "./styles.css": "./src/styles.css",
+    "./components/*.astro": "./src/components/*.astro",
     "./components/*": "./src/components/*.astro",
+    "./layouts/*.astro": "./src/layouts/*.astro",
     "./layouts/*": "./src/layouts/*.astro"
   },
   "scripts": {
