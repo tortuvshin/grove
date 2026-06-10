@@ -15,6 +15,7 @@
     "test": "pnpm -r test",
     "test:scaffold": "node scripts/test-scaffold.mjs",
     "dev": "pnpm --filter @grove-dev/cli dev",
+    "dev:docs": "pnpm --filter @grove-dev/docs dev",
     "release": "node scripts/release.mjs",
     "release:dry": "node scripts/release.mjs --dry-run"
   },
