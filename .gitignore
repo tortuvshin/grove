@@ -10,6 +10,8 @@ coverage/
 .mavis
 .claude/settings.local.json
 .tmp-test/
+.codex/
+.opencode/
 .idea/
 .vscode/
 *.log
