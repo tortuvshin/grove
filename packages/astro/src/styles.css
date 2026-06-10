@@ -12,8 +12,8 @@
  * properties and Tailwind utility names — components can use either
  * bare `grove-*` classes or Tailwind utilities like `text-ink-900`.
  *
- * Namespace history: earlier V0 drafts used `oc-*`. Those have been
- * fully removed; only `grove-*` remains.
+ * Namespace history: earlier V0 drafts used a different (now
+ * removed) prefix. Only `grove-*` remains.
  */
 
 @theme {
