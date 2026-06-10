@@ -1,0 +1,18 @@
+package.json
+  h_62cffde5d182b0 18
+docs/package.json
+  h_62cffde5d182b0 2
+packages/starlight/components/overrides/parts/Drawer.astro
+  h_62cffde5d182b0 2-4,23,25-26,28-44,46,48-72,74-77,79-211,230,232,234-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "354931b2672665bcd79b15e6da4ced4060c7c662",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
