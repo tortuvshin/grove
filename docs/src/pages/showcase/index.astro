@@ -243,7 +243,7 @@ const groups: { heading: string; lead: string; items: ShowcaseItem[] }[] = [
         display: flex;
         flex-direction: column;
         background: var(--sl-color-bg-nav);
-        border: 1px solid var(--sl-color-hairline);
+        border: 1px solid var(--sl-color-hairline-light);
         border-radius: var(--sl-border-radius);
         overflow: hidden;
         color: var(--sl-color-white);
@@ -262,8 +262,8 @@ const groups: { heading: string; lead: string; items: ShowcaseItem[] }[] = [
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0.875rem;
-        border-bottom: 1px solid var(--sl-color-hairline);
+        padding: 1rem;
+        border-bottom: 1px solid var(--sl-color-hairline-light);
     }
 
     .show-card-thumb svg {
@@ -271,7 +271,7 @@ const groups: { heading: string; lead: string; items: ShowcaseItem[] }[] = [
     }
 
     .show-card-body {
-        padding: 0.875rem 1rem 1rem;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
         gap: 0.3rem;

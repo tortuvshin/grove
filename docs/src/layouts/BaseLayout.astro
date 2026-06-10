@@ -30,7 +30,7 @@ const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 ---
 
 <!doctype html>
-<html lang="en" dir="ltr" data-theme="dark">
+<html lang="en" dir="ltr">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -58,16 +58,24 @@ const canonical = new URL(Astro.url.pathname, siteUrl).toString();
         />
 
         <script is:inline>
-            (() => {
-                try {
-                    const stored = localStorage.getItem('grove-theme');
-                    const theme =
-                        stored ||
-                        (window.matchMedia('(prefers-color-scheme: light)').matches
-                            ? 'light'
-                            : 'dark');
-                    document.documentElement.dataset.theme = theme;
-                } catch {}
+            // Identical to Starlight's ThemeProvider.astro so the custom
+            // pages share the same theme key (`starlight-theme`) and pick
+            // up the system / user preference on first paint.
+            window.StarlightThemeProvider = (() => {
+                const storedTheme =
+                    typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+                const theme =
+                    storedTheme ||
+                    (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+                return {
+                    updatePickers(theme = storedTheme || 'auto') {
+                        document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+                            const select = picker.querySelector('select');
+                            if (select) select.value = theme;
+                        });
+                    },
+                };
             })();
         </script>
     </head>

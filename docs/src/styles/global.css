@@ -11,6 +11,7 @@
  */
 @import '../../node_modules/@astrojs/starlight/style/reset.css';
 @import '../../node_modules/@astrojs/starlight/style/util.css';
+@import '../../node_modules/@astrojs/starlight/style/markdown.css';
 
 @layer starlight.base {
 	:root,
