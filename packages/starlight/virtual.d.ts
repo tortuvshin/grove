@@ -1,6 +1,6 @@
-declare module 'virtual:lucode-starlight-config' {
-    const LucodeStarlightConfig: import('./core/config/schemas').LucodeStarlightConfig;
-    export default LucodeStarlightConfig;
+declare module 'virtual:@grove-dev/starlight-config' {
+    const GroveStarlightConfig: import('./core/config/schemas').GroveStarlightConfig;
+    export default GroveStarlightConfig;
 }
 
 declare module 'virtual:starlight/user-config' {
