@@ -19,7 +19,6 @@
  */
 
 import type {
-  HealthBlock,
   HealthStatus,
   ProjectRecord,
 } from "@grove-dev/core";
@@ -55,7 +54,11 @@ const DAY_MS = 86_400_000;
  */
 export interface AppLike {
   curation?: { labels?: string[] };
-  health?: Pick<HealthBlock, "status" | "tier" | "cleanupCandidate">;
+  health?: {
+    status?: HealthStatus;
+    tier?: "curated" | "listed" | "experimental" | "hidden";
+    cleanupCandidate?: boolean;
+  };
   github?: {
     stars?: number;
     pushedAt?: string | null;

@@ -27,6 +27,11 @@ import { applyLens, lensFromSearchParams, type LensId } from "./lenses";
  * inline so the lib works on both full records and the lighter
  * index payload. Use `ProjectRecord` from core when you have it;
  * pass any object that satisfies `Searchable` otherwise.
+ *
+ * `Searchable` is a superset of `AppLike` (the lens-matching shape
+ * in `lib/lenses.ts`) — both interfaces share the same optional
+ * field shape, so `Searchable` records can be passed to
+ * `applyLens()` and `filterApps()` interchangeably.
  */
 export interface Searchable {
   slug?: string;

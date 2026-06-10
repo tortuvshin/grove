@@ -1,0 +1,26 @@
+/**
+ * @grove-dev/astro — framework-agnostic lib helpers.
+ *
+ * Re-exports every helper that the showcase component library
+ * (and any future consumer) can use to:
+ *
+ *   - parse GitHub repo URLs (`lib/repo`)
+ *   - format counts, dates, stars (`lib/format`)
+ *   - apply curated lenses / facets / search filters (`lib/lenses`,
+ *     `lib/search`)
+ *   - render score bars (`lib/scores`)
+ *   - compute taxonomy counts at build time (`lib/taxonomy-counts`)
+ *   - pretty-print slugs and label/lens/sort/status ids (`lib/display`)
+ *
+ * All helpers are pure, dependency-free, and typed against
+ * `@grove-dev/core` (specifically `ProjectRecord` for the index
+ * payload and the `Score` / `HealthStatus` unions).
+ */
+
+export * from "./repo";
+export * from "./format";
+export * from "./lenses";
+export * from "./search";
+export * from "./scores";
+export * from "./taxonomy-counts";
+export * from "./display";
