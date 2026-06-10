@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import lucode from 'lucode-starlight';
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +17,23 @@ export default defineConfig({
                 dark: './src/assets/logo-dark.svg',
                 light: './src/assets/logo-light.svg',
             },
+            customCss: ['./src/styles/global.css'],
+            editLink: {
+                baseUrl: 'https://github.com/grove-dev/grove/edit/main/docs',
+            },
+            lastUpdated: true,
+            plugins: [
+                lucode({
+                    docs: {
+                        includeAiUtilities: true,
+                    },
+                    navLinks: [
+                        { label: 'Docs', link: '/tutorials/01-bootstrap/' },
+                        { label: 'Showcase', link: '/showcase/starlight-components/' },
+                        { label: 'API', link: '/reference/plugin-api/' },
+                    ],
+                }),
+            ],
             social: [
                 { icon: 'github', label: 'GitHub', href: 'https://github.com/grove-dev/grove' },
             ],
@@ -44,11 +62,31 @@ export default defineConfig({
                     ],
                 },
                 {
+                    label: 'Showcase',
+                    items: [
+                        { label: 'Starlight Components', slug: 'showcase/starlight-components' },
+                        { label: 'Splash Pages', slug: 'showcase/splash-pages' },
+                        { label: 'Typography', slug: 'showcase/typography' },
+                    ],
+                },
+                {
+                    label: 'Splash Examples',
+                    items: [
+                        { label: 'Centered', slug: 'showcase/splash/centered' },
+                        { label: 'Centered Top', slug: 'showcase/splash/centered-top' },
+                        { label: 'Split Left', slug: 'showcase/splash/split-left' },
+                        { label: 'Split Right', slug: 'showcase/splash/split-right' },
+                        { label: 'Banner', slug: 'showcase/splash/banner' },
+                    ],
+                },
+                {
                     label: 'Reference',
                     items: [
                         { label: 'CLI', slug: 'reference/cli' },
                         { label: 'grove.config.ts', slug: 'reference/config' },
                         { label: 'Resource schema', slug: 'reference/schema' },
+                        { label: 'Plugin API', slug: 'reference/plugin-api' },
+                        { label: 'Theme Components', slug: 'reference/components' },
                     ],
                 },
             ],
