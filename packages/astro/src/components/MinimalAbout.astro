@@ -1,0 +1,82 @@
+---
+/**
+ * MinimalAbout — 3 short points + title, used on the about page.
+ *
+ * A trimmed-down sibling of `WhyThisExists` with a different layout
+ * (no icons, no "0X" counter, vertical list) for text-heavy pages.
+ *
+ * Generic: every point comes through props.
+ */
+
+interface AboutPoint {
+  title: string;
+  body: string;
+}
+
+interface Props {
+  points?: AboutPoint[];
+  title?: string;
+  description?: string;
+  class?: string;
+}
+
+const {
+  points,
+  title = "About this directory",
+  description,
+  class: className = "",
+} = Astro.props;
+
+const defaultPoints: AboutPoint[] = [
+  {
+    title: "Curated, not scraped",
+    body: "Every entry is hand-checked. If something here, it's because someone looked at the source, ran the build, and decided it was worth your time.",
+  },
+  {
+    title: "Plain text all the way down",
+    body: "Records live in plain YAML, content in plain Markdown, and the static output in plain HTML. No database, no JavaScript framework, no CDN with sticky sessions.",
+  },
+  {
+    title: "Free to fork, free to extend",
+    body: "This whole site is one repo. If you want your own copy, fork it. If you want to add a record, open a PR. The directory is the community.",
+  },
+];
+
+const items = points && points.length > 0 ? points : defaultPoints;
+---
+
+<section class:list={["grove-section", className]}>
+  <div class="grove-container-narrow mx-auto px-5 sm:px-7">
+    <header class="mb-6 flex flex-col gap-2">
+      <h2 class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+        {title}
+      </h2>
+      {description && (
+        <p class="m-0 text-[0.9375rem] text-ink-500 dark:text-ink-400">
+          {description}
+        </p>
+      )}
+    </header>
+
+    <ol class="m-0 flex list-none flex-col gap-5 p-0">
+      {items.map((p, i) => (
+        <li class="flex gap-4">
+          <span
+            aria-hidden="true"
+            class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-ink-200 bg-ink-50 font-mono text-2xs text-ink-500 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-400"
+          >
+            0{i + 1}
+          </span>
+          <div>
+            <h3 class="m-0 text-[1rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              {p.title}
+            </h3>
+            <p class="m-0 mt-1 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400">
+              {p.body}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
