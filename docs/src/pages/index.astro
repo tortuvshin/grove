@@ -1,0 +1,828 @@
+---
+/**
+ * Grove marketing landing page.
+ *
+ * This page is intentionally outside the Starlight system — every byte of
+ * chrome (header, nav, footer, layout) is owned by us. The Starlight site
+ * still serves /tutorials, /guides, /reference, /start-here, /showcase/* from
+ * the docs content tree.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import logoLight from '../assets/logo-light.svg';
+import logoDark from '../assets/logo-dark.svg';
+
+const features = [
+    {
+        title: 'Spaces',
+        icon: 'spaces',
+        body: 'Structured containers for the projects, tools, resources, and knowledge a community curates. Versioned, forkable, easy to maintain.',
+    },
+    {
+        title: 'Blueprints',
+        icon: 'blueprints',
+        body: 'Schemas that define a Space. They make contributions reviewable, keep quality consistent, and let contributors submit PRs with confidence.',
+    },
+    {
+        title: 'Open Source First',
+        icon: 'open',
+        body: 'MIT-licensed, framework-agnostic. Adapters for Astro, Next.js, and SvelteKit. Data lives in your repo, tooling fits your existing CI.',
+    },
+    {
+        title: 'Grow Over Time',
+        icon: 'grow',
+        body: 'Knowledge is a long-lived artifact. Updates, refactors, archival, and health checks are first-class operations, not afterthoughts.',
+    },
+    {
+        title: 'Versioned Records',
+        icon: 'version',
+        body: 'Every record has a changelog. Refactors become atomic PRs. Forks inherit schema history, not just the current state.',
+    },
+    {
+        title: 'Health & Decisions',
+        icon: 'health',
+        body: 'CI surfaces stale links, missing fields, and abandoned records. Decision logs keep "why" alongside "what."',
+    },
+];
+
+const adapters = [
+    {
+        name: 'Astro',
+        desc: 'Recommended. Fully static, deploy anywhere. Starlight-compatible themes available out of the box.',
+        cta: 'Astro adapter docs',
+        href: '/start-here/what-is-grove/',
+    },
+    {
+        name: 'Next.js',
+        desc: 'For teams that need server components, edge runtime, or React. Grove plugs in as a content source.',
+        cta: 'Next.js adapter docs',
+        href: '/start-here/what-is-grove/',
+    },
+    {
+        name: 'SvelteKit',
+        desc: 'For Svelte-native teams. Same CLI, same data model, Svelte components for the rendered views.',
+        cta: 'SvelteKit adapter docs',
+        href: '/start-here/what-is-grove/',
+    },
+    {
+        name: 'Bring your own',
+        desc: 'Grove is framework-agnostic. The CLI emits JSON; you render it however you want.',
+        cta: 'Read the data model',
+        href: '/guides/data-model/',
+    },
+];
+
+const steps = [
+    { n: '01', title: 'Bootstrap', body: 'Scaffold a Space with `pnpm create grove`, pick an adapter, connect your CI.' },
+    { n: '02', title: 'Author', body: 'Add records as Markdown files. Blueprints enforce fields, link types, and tags.' },
+    { n: '03', title: 'Maintain', body: '`grove check` on every PR surfaces staleness, broken links, and schema drift.' },
+    { n: '04', title: 'Deploy', body: 'Ship a static site, Next.js app, or SvelteKit portal. Grove fits your stack — never replaces it.' },
+];
+---
+
+<BaseLayout
+    title="Grove — Grow useful community knowledge"
+    description="An open-source framework for collecting, structuring, and maintaining the projects, tools, resources, and knowledge a community relies on."
+    activeNav="home"
+>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+        <div class="g-container hero-inner">
+            <div class="hero-copy">
+                <a class="hero-pill" href="/start-here/what-is-grove/">
+                    <span class="dot"></span>
+                    Grove is in active development
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                        <path d="m9 6 6 6-6 6"></path>
+                    </svg>
+                </a>
+                <h1 class="hero-title">
+                    Grow the knowledge your<br />
+                    community <span class="grad">actually relies on</span>.
+                </h1>
+                <p class="hero-lead">
+                    Grove helps open-source communities collect, structure, maintain, and improve the
+                    projects, tools, resources, and decisions they share — over <strong>years, not weeks</strong>.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="/start-here/what-is-grove/">
+                        Get started
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <path d="M5 12h14m-6-6 6 6-6 6"></path>
+                        </svg>
+                    </a>
+                    <a class="btn btn-ghost" href="https://github.com/grove-dev/grove" target="_blank" rel="noreferrer noopener">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                            <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.02c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.45.11-3.02 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39s1.97.13 2.89.39c2.21-1.49 3.18-1.18 3.18-1.18.62 1.57.23 2.73.11 3.02.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.26 5.69.41.36.78 1.05.78 2.12v3.14c0 .31.21.67.8.55C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5Z"></path>
+                        </svg>
+                        Star on GitHub
+                    </a>
+                </div>
+                <div class="hero-meta">
+                    <span>MIT licensed</span>
+                    <span class="sep">·</span>
+                    <span>Framework-agnostic</span>
+                    <span class="sep">·</span>
+                    <span>Data in your repo</span>
+                </div>
+            </div>
+
+            <div class="hero-visual" aria-hidden="true">
+                <div class="visual-card">
+                    <div class="visual-glow"></div>
+                    <div class="visual-frame">
+                        <div class="visual-row visual-header">
+                            <div class="visual-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <code>space.yml</code>
+                        </div>
+                        <pre class="visual-code"><code><span class="tk-c"># Grove Space</span>
+<span class="tk-k">name</span>: <span class="tk-s">"awesome-tools"</span>
+<span class="tk-k">blueprint</span>: <span class="tk-s">tool</span>
+<span class="tk-k">taxonomy</span>:
+  - <span class="tk-s">language:rust</span>
+  - <span class="tk-s">category:cli</span>
+  - <span class="tk-s">maturity:stable</span>
+
+<span class="tk-c"># A record is just a Markdown file</span>
+<span class="tk-k">records</span>:
+  - <span class="tk-s">records/ripgrep.md</span>     <span class="tk-c">✓ healthy</span>
+  - <span class="tk-s">records/fd.md</span>         <span class="tk-c">✓ healthy</span>
+  - <span class="tk-s">records/bat.md</span>        <span class="tk-c">! stale</span>
+  - <span class="tk-s">records/zoxide.md</span>     <span class="tk-c">✓ healthy</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="logo-bg">
+                    <img class="logo logo-light" src={logoLight.src} alt="" />
+                    <img class="logo logo-dark" src={logoDark.src} alt="" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== LOGOS / TRUST ===================== -->
+    <section class="trust">
+        <div class="g-container">
+            <p class="trust-label">Built for the long run</p>
+            <div class="trust-grid">
+                <span>Versioned records</span>
+                <span>Decision logs</span>
+                <span>Health checks in CI</span>
+                <span>Schema-validated contributions</span>
+                <span>Forkable Spaces</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== FEATURES ===================== -->
+    <section class="section">
+        <div class="g-container">
+            <div class="section-head">
+                <p class="eyebrow">What Grove Does</p>
+                <h2>A home for the knowledge your community keeps re-finding.</h2>
+                <p class="section-lead">
+                    Most community knowledge lives in chat, Notion pages, and the heads of a few
+                    long-time contributors. Grove gives it a structured, reviewable, durable home —
+                    right in your repo.
+                </p>
+            </div>
+
+            <div class="feature-grid">
+                {
+                    features.map((f) => (
+                        <article class="feature-card">
+                            <div class={`feature-icon icon-${f.icon}`} aria-hidden="true">
+                                {f.icon === 'spaces' && (
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"></path>
+                                    </svg>
+                                )}
+                                {f.icon === 'blueprints' && (
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M4 4h12l4 4v12H4z"></path>
+                                        <path d="M16 4v4h4M8 12h8M8 16h6"></path>
+                                    </svg>
+                                )}
+                                {f.icon === 'open' && (
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M12 3 4 8v8l8 5 8-5V8z"></path>
+                                        <path d="m4 8 8 5 8-5M12 13v8"></path>
+                                    </svg>
+                                )}
+                                {f.icon === 'grow' && (
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M12 20V8M12 8c0-3 2-5 5-5 0 3-2 5-5 5ZM12 12c0-2-1-4-4-4 0 2 1 4 4 4Z"></path>
+                                    </svg>
+                                )}
+                                {f.icon === 'version' && (
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <circle cx="7" cy="7" r="3"></circle>
+                                        <circle cx="7" cy="17" r="3"></circle>
+                                        <path d="M10 7h7a3 3 0 0 1 0 6h-4M10 17h7"></path>
+                                    </svg>
+                                )}
+                                {f.icon === 'health' && (
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M3 12h4l2-6 4 12 2-6h6"></path>
+                                    </svg>
+                                )}
+                            </div>
+                            <h3>{f.title}</h3>
+                            <p>{f.body}</p>
+                        </article>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== HOW IT WORKS ===================== -->
+    <section class="section section-alt">
+        <div class="g-container">
+            <div class="section-head">
+                <p class="eyebrow">How It Works</p>
+                <h2>From `pnpm create grove` to a maintained Space, in an afternoon.</h2>
+            </div>
+
+            <div class="steps">
+                {
+                    steps.map((s, i) => (
+                        <article class="step">
+                            <div class="step-num">{s.n}</div>
+                            <h3>{s.title}</h3>
+                            <p>{s.body}</p>
+                            {i < steps.length - 1 && <div class="step-connector" aria-hidden="true"></div>}
+                        </article>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== ADAPTERS ===================== -->
+    <section class="section">
+        <div class="g-container">
+            <div class="section-head">
+                <p class="eyebrow">Pick Your Adapter</p>
+                <h2>Grove is framework-agnostic. Pick the renderer you already love.</h2>
+                <p class="section-lead">
+                    The CLI emits the same JSON to every adapter. The data lives in your repo, the
+                    renderer is your choice — and it's reversible later.
+                </p>
+            </div>
+
+            <div class="adapter-grid">
+                {
+                    adapters.map((a) => (
+                        <a class="adapter-card" href={a.href}>
+                            <h3>{a.name}</h3>
+                            <p>{a.desc}</p>
+                            <span class="adapter-cta">
+                                {a.cta}
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                                    <path d="M5 12h14m-6-6 6 6-6 6"></path>
+                                </svg>
+                            </span>
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== CTA ===================== -->
+    <section class="cta">
+        <div class="g-container">
+            <div class="cta-card">
+                <h2>Ready to grow something useful?</h2>
+                <p>
+                    Bootstrap a Grove Space in your community repo, walk through the tutorial, and
+                    ship a maintained knowledge site this week.
+                </p>
+                <div class="cta-actions">
+                    <a class="btn btn-primary" href="/start-here/what-is-grove/">
+                        Read the getting started guide
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <path d="M5 12h14m-6-6 6 6-6 6"></path>
+                        </svg>
+                    </a>
+                    <a class="btn btn-ghost" href="/showcase/">
+                        Browse the showcase
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    /* Every color, font, and radius here is sourced from Starlight's
+     * own --sl-* tokens. The result renders identically to the docs site. */
+
+    /* ===================== HERO ===================== */
+    .hero {
+        padding-block: 4.5rem 3.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: -12rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 75rem;
+        height: 38rem;
+        background: radial-gradient(ellipse at center, var(--sl-color-accent-low), transparent 60%);
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .hero-inner {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3.5rem;
+        align-items: center;
+        position: relative;
+    }
+
+    @media (min-width: 960px) {
+        .hero-inner {
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 3rem;
+        }
+    }
+
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.4rem 0.85rem 0.4rem 0.65rem;
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: 999px;
+        background: var(--sl-color-bg-nav);
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        font-weight: 500;
+        transition: border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .hero-pill:hover {
+        border-color: var(--sl-color-accent);
+        color: var(--sl-color-white);
+    }
+
+    .hero-pill .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--sl-color-accent);
+        box-shadow: 0 0 0 4px var(--sl-color-accent-low);
+    }
+
+    .hero-title {
+        margin-top: 1.4rem;
+        font-size: clamp(2.2rem, 5vw, 3.6rem);
+        line-height: 1.05;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: var(--sl-color-white);
+    }
+
+    .grad {
+        background: linear-gradient(120deg, var(--sl-color-accent), var(--sl-color-accent-high) 60%, var(--sl-color-blue-high));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .hero-lead {
+        margin-top: 1.25rem;
+        font-size: var(--sl-text-lg);
+        color: var(--sl-color-gray-2);
+        max-width: 56ch;
+        line-height: var(--sl-line-height);
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.9rem;
+    }
+
+    .hero-meta {
+        margin-top: 1.4rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        color: var(--sl-color-gray-3);
+        font-size: var(--sl-text-sm);
+    }
+
+    .hero-meta .sep {
+        opacity: 0.5;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.15rem;
+        border-radius: var(--sl-border-radius);
+        font-weight: 600;
+        font-size: var(--sl-text-sm);
+        border: 1px solid transparent;
+        transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-primary {
+        background: var(--sl-color-accent);
+        color: var(--sl-color-text-invert);
+    }
+
+    .btn-primary:hover {
+        background: var(--sl-color-accent-high);
+        transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+        background: var(--sl-color-bg-nav);
+        color: var(--sl-color-white);
+        border-color: var(--sl-color-hairline);
+    }
+
+    .btn-ghost:hover {
+        border-color: var(--sl-color-gray-4);
+        background: var(--sl-color-gray-6);
+    }
+
+    /* ===================== HERO VISUAL ===================== */
+    .hero-visual {
+        position: relative;
+        min-height: 22.5rem;
+    }
+
+    .visual-card {
+        position: relative;
+        z-index: 1;
+    }
+
+    .visual-glow {
+        position: absolute;
+        inset: -2.5rem;
+        background: radial-gradient(circle at 30% 30%, var(--sl-color-accent-low), transparent 60%);
+        z-index: 0;
+    }
+
+    .visual-frame {
+        position: relative;
+        z-index: 1;
+        background: var(--sl-color-bg-nav);
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: var(--sl-border-radius-lg);
+        box-shadow: var(--sl-shadow-md);
+        overflow: hidden;
+        transform: perspective(1400px) rotateY(-6deg) rotateX(2deg);
+    }
+
+    .visual-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--sl-color-hairline);
+        background: var(--sl-color-gray-6);
+    }
+
+    .visual-dots {
+        display: flex;
+        gap: 6px;
+    }
+
+    .visual-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--sl-color-gray-4);
+    }
+
+    .visual-dots span:nth-child(1) {
+        background: #ff5f57;
+    }
+
+    .visual-dots span:nth-child(2) {
+        background: #ffbd2e;
+    }
+
+    .visual-dots span:nth-child(3) {
+        background: #28ca42;
+    }
+
+    .visual-header code {
+        font-size: var(--sl-text-xs);
+        color: var(--sl-color-gray-2);
+    }
+
+    .visual-code {
+        margin: 0;
+        padding: 1.25rem 1.4rem;
+        font-size: var(--sl-text-xs);
+        line-height: 1.7;
+        color: var(--sl-color-white);
+        white-space: pre;
+        overflow-x: auto;
+    }
+
+    .tk-c {
+        color: var(--sl-color-gray-3);
+        font-style: italic;
+    }
+
+    .tk-k {
+        color: var(--sl-color-accent-high);
+    }
+
+    .tk-s {
+        color: var(--sl-color-orange-high);
+    }
+
+    .logo-bg {
+        position: absolute;
+        top: 50%;
+        right: -2.5rem;
+        transform: translateY(-50%);
+        z-index: 0;
+        opacity: 0.12;
+        width: 17.5rem;
+        pointer-events: none;
+    }
+
+    .logo-bg .logo {
+        width: 100%;
+        height: auto;
+    }
+
+    :root[data-theme='dark'] .logo-bg .logo-light {
+        display: block;
+    }
+    :root[data-theme='dark'] .logo-bg .logo-dark {
+        display: none;
+    }
+    :root[data-theme='light'] .logo-bg .logo-light {
+        display: none;
+    }
+    :root[data-theme='light'] .logo-bg .logo-dark {
+        display: block;
+    }
+
+    /* ===================== TRUST ===================== */
+    .trust {
+        padding-block: 2rem 3rem;
+        border-top: 1px solid var(--sl-color-hairline);
+        border-bottom: 1px solid var(--sl-color-hairline);
+    }
+
+    .trust-label {
+        text-align: center;
+        color: var(--sl-color-gray-3);
+        font-size: var(--sl-text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-bottom: 1.1rem;
+    }
+
+    .trust-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.1rem 2rem;
+        justify-content: center;
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+    }
+
+    .trust-grid span {
+        position: relative;
+        padding-inline-start: 1.1rem;
+    }
+
+    .trust-grid span::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--sl-color-accent);
+    }
+
+    /* ===================== SECTIONS ===================== */
+    .section {
+        padding-block: 6rem;
+    }
+
+    .section-alt {
+        background: var(--sl-color-bg-nav);
+        border-block: 1px solid var(--sl-color-hairline);
+    }
+
+    .section-head {
+        max-width: 45rem;
+        margin-bottom: 3rem;
+    }
+
+    .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: var(--sl-text-xs);
+        color: var(--sl-color-accent-high);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .section-head h2 {
+        font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+        letter-spacing: -0.02em;
+        color: var(--sl-color-white);
+    }
+
+    .section-lead {
+        margin-top: 0.9rem;
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-lg);
+        line-height: var(--sl-line-height);
+    }
+
+    /* ===================== FEATURES ===================== */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+        gap: 1.25rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+        background: var(--sl-color-bg-nav);
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: var(--sl-border-radius);
+        transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .feature-card:hover {
+        border-color: var(--sl-color-accent);
+        transform: translateY(-2px);
+    }
+
+    .feature-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--sl-border-radius);
+        background: var(--sl-color-accent-low);
+        color: var(--sl-color-accent-high);
+        margin-bottom: 0.9rem;
+    }
+
+    .feature-card h3 {
+        font-size: var(--sl-text-base);
+        margin-bottom: 0.4rem;
+        color: var(--sl-color-white);
+    }
+
+    .feature-card p {
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        line-height: var(--sl-line-height);
+    }
+
+    /* ===================== STEPS ===================== */
+    .steps {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    @media (min-width: 720px) {
+        .steps {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    .step {
+        position: relative;
+        padding: 1.5rem;
+        background: var(--sl-color-bg-nav);
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: var(--sl-border-radius);
+    }
+
+    .step-num {
+        display: inline-block;
+        font-family: var(--sl-font-system-mono);
+        font-size: var(--sl-text-xs);
+        color: var(--sl-color-accent-high);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .step h3 {
+        font-size: var(--sl-text-base);
+        margin-bottom: 0.4rem;
+        color: var(--sl-color-white);
+    }
+
+    .step p {
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        line-height: var(--sl-line-height);
+    }
+
+    /* ===================== ADAPTERS ===================== */
+    .adapter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(13.75rem, 1fr));
+        gap: 1rem;
+    }
+
+    .adapter-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        padding: 1.5rem;
+        background: var(--sl-color-bg-nav);
+        border: 1px solid var(--sl-color-hairline);
+        border-radius: var(--sl-border-radius);
+        color: var(--sl-color-white);
+        transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    }
+
+    .adapter-card:hover {
+        border-color: var(--sl-color-accent);
+        background: var(--sl-color-gray-6);
+        transform: translateY(-2px);
+    }
+
+    .adapter-card h3 {
+        font-size: var(--sl-text-lg);
+    }
+
+    .adapter-card p {
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        line-height: var(--sl-line-height);
+        flex: 1;
+    }
+
+    .adapter-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--sl-color-accent-high);
+        font-weight: 600;
+        font-size: var(--sl-text-sm);
+        margin-top: 0.4rem;
+    }
+
+    /* ===================== CTA ===================== */
+    .cta {
+        padding-block: 2rem 6rem;
+    }
+
+    .cta-card {
+        position: relative;
+        padding: 3.5rem 3rem;
+        text-align: center;
+        background:
+            linear-gradient(135deg, var(--sl-color-accent-low), transparent 60%),
+            var(--sl-color-bg-nav);
+        border: 1px solid var(--sl-color-accent);
+        border-radius: var(--sl-border-radius-lg);
+        overflow: hidden;
+    }
+
+    .cta-card h2 {
+        font-size: clamp(1.5rem, 3vw, 2.1rem);
+        color: var(--sl-color-white);
+    }
+
+    .cta-card p {
+        margin-top: 0.75rem;
+        color: var(--sl-color-gray-2);
+        max-width: 56ch;
+        margin-inline: auto;
+    }
+
+    .cta-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-top: 1.75rem;
+    }
+</style>

@@ -1,0 +1,195 @@
+---
+/**
+ * Top navigation for the custom Astro pages. Mirrors the brand across the
+ * landing page and showcase hub, with a docs link that hops back into the
+ * Starlight subtree.
+ */
+import logoLight from '../assets/logo-light.svg';
+import logoDark from '../assets/logo-dark.svg';
+
+interface Props {
+    activeNav?: 'home' | 'showcase' | 'docs' | 'github';
+}
+
+const { activeNav = 'home' } = Astro.props;
+
+const links = [
+    { id: 'home', label: 'Home', href: '/' },
+    { id: 'showcase', label: 'Showcase', href: '/showcase/' },
+    { id: 'docs', label: 'Docs', href: '/start-here/what-is-grove/' },
+] as const;
+---
+
+<header class="g-header">
+    <div class="g-container g-header-inner">
+        <a class="g-brand" href="/" aria-label="Grove home">
+            <img class="logo logo-light" src={logoLight.src} alt="Grove" width="28" height="28" />
+            <img class="logo logo-dark" src={logoDark.src} alt="Grove" width="28" height="28" />
+            <span class="g-brand-name">Grove</span>
+            <span class="g-brand-tag">beta</span>
+        </a>
+
+        <nav class="g-nav" aria-label="Primary">
+            {
+                links.map((link) => (
+                    <a
+                        href={link.href}
+                        class:list={['g-nav-link', { active: activeNav === link.id }]}
+                        aria-current={activeNav === link.id ? 'page' : undefined}
+                    >
+                        {link.label}
+                    </a>
+                ))
+            }
+        </nav>
+
+        <div class="g-header-actions">
+            <a
+                class="g-icon-btn"
+                href="https://github.com/grove-dev/grove"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label="Grove on GitHub"
+            >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+                    <path
+                        d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.02c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.45.11-3.02 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.89-.39s1.97.13 2.89.39c2.21-1.49 3.18-1.18 3.18-1.18.62 1.57.23 2.73.11 3.02.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.26 5.69.41.36.78 1.05.78 2.12v3.14c0 .31.21.67.8.55C20.21 21.38 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5Z"
+                    ></path>
+                </svg>
+            </a>
+            <a class="g-cta-sm" href="/start-here/what-is-grove/">Get started</a>
+        </div>
+    </div>
+</header>
+
+<style>
+    .g-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: saturate(180%) blur(14px);
+        -webkit-backdrop-filter: saturate(180%) blur(14px);
+        background: color-mix(in oklab, var(--sl-color-bg) 75%, transparent);
+        border-bottom: 1px solid var(--sl-color-hairline);
+    }
+
+    .g-header-inner {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        height: var(--sl-nav-height);
+    }
+
+    .g-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: var(--sl-color-white);
+        font-family: var(--sl-font-system);
+    }
+
+    .g-brand-name {
+        font-size: var(--sl-text-base);
+        letter-spacing: -0.01em;
+    }
+
+    .g-brand-tag {
+        font-size: var(--sl-text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: var(--sl-color-accent-low);
+        color: var(--sl-color-accent-high);
+        font-weight: 600;
+    }
+
+    .logo {
+        width: 28px;
+        height: 28px;
+    }
+
+    :root[data-theme='dark'] .logo-light {
+        display: none;
+    }
+    :root[data-theme='light'] .logo-dark {
+        display: none;
+    }
+
+    .g-nav {
+        display: none;
+        gap: 4px;
+        margin-inline-start: 8px;
+    }
+
+    @media (min-width: 720px) {
+        .g-nav {
+            display: inline-flex;
+        }
+    }
+
+    .g-nav-link {
+        padding: 8px 12px;
+        font-size: var(--sl-text-sm);
+        font-weight: 500;
+        color: var(--sl-color-gray-2);
+        border-radius: var(--sl-border-radius);
+        transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .g-nav-link:hover {
+        color: var(--sl-color-white);
+        background: var(--sl-color-gray-6);
+    }
+
+    .g-nav-link.active {
+        color: var(--sl-color-text-accent);
+        background: var(--sl-color-accent-low);
+    }
+
+    .g-header-actions {
+        margin-inline-start: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .g-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--sl-border-radius);
+        color: var(--sl-color-gray-2);
+        transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .g-icon-btn:hover {
+        color: var(--sl-color-white);
+        background: var(--sl-color-gray-6);
+    }
+
+    .g-cta-sm {
+        display: none;
+        padding: 8px 14px;
+        background: var(--sl-color-accent);
+        color: var(--sl-color-text-invert);
+        font-weight: 600;
+        font-size: var(--sl-text-sm);
+        border-radius: var(--sl-border-radius);
+        transition: background 0.15s ease, transform 0.15s ease;
+    }
+
+    .g-cta-sm:hover {
+        background: var(--sl-color-accent-high);
+        transform: translateY(-1px);
+    }
+
+    @media (min-width: 540px) {
+        .g-cta-sm {
+            display: inline-flex;
+        }
+    }
+</style>

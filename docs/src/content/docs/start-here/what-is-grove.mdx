@@ -1,0 +1,168 @@
+---
+title: Grove
+description:
+    An open-source framework for growing useful community knowledge — collect, structure,
+    maintain, and improve the projects, tools, resources, and knowledge a community relies on.
+template: splash
+hero:
+    layout: split-left
+    tagline:
+        Grove helps communities collect, structure, maintain, and improve the projects, tools,
+        resources, and knowledge they rely on — **over years, not weeks**.
+    announcement:
+        text: Grove is in active development
+        link: /tutorials/01-bootstrap/
+    image:
+        file: ../../../assets/logo-light.svg
+        alt: Grove logo
+    actions:
+        - text: Get started
+          link: /tutorials/01-bootstrap/
+          icon: right-arrow
+        - text: View on GitHub
+          link: https://github.com/grove-dev/grove
+          icon: external
+          variant: minimal
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+import { ContainerSection } from 'lucode-starlight/components';
+
+<ContainerSection>
+
+## What Grove Does
+
+<CardGrid>
+    <Card title="Spaces" icon="open-book">
+        Grove Spaces are structured containers that hold the projects, tools, resources, and
+        knowledge a community curates. Spaces are versioned, forkable, and easy to maintain.
+    </Card>
+    <Card title="Blueprints" icon="setting">
+        Blueprints define the schema of a Space. They make contributions reviewable, keep quality
+        consistent, and let contributors submit pull requests with confidence.
+    </Card>
+    <Card title="Open Source First" icon="rocket">
+        Grove is MIT-licensed, framework-agnostic, and ships adapters for Astro, Next.js, and
+        SvelteKit. The data lives in your repo, the tooling fits your existing CI.
+    </Card>
+    <Card title="Grow Over Time" icon="starlight">
+        Grove treats knowledge like a long-lived artifact. Updates, refactors, and archival are
+        first-class operations, not afterthoughts.
+    </Card>
+</CardGrid>
+
+</ContainerSection>
+
+<ContainerSection>
+
+## How It Works
+
+A Grove **Space** is a folder in your repo with structured records. Each record has a Blueprint
+schema — the same way a database table has columns — and a Markdown file with prose, examples, and
+links. Grove's CLI checks, formats, and upgrades records on every commit, so contributions stay
+reviewable, consistent, and current.
+
+<CardGrid>
+    <Card title="1. Bootstrap" icon="rocket">
+        Run `pnpm create grove` to scaffold a Space, pick an adapter (Astro, Next.js, SvelteKit),
+        and connect it to your existing CI.
+    </Card>
+    <Card title="2. Author" icon="pencil">
+        Add records as Markdown files. Blueprints enforce fields, link types, taxonomy, and
+        required tags — so contributors cannot drift.
+    </Card>
+    <Card title="3. Maintain" icon="setting">
+        Run `grove check` on every PR. Health scores, broken links, and stale records surface
+        automatically. Refactors are first-class operations.
+    </Card>
+    <Card title="4. Deploy" icon="starlight">
+        Ship a static site, a Next.js app, or a SvelteKit portal. Grove fits your existing stack —
+        it never replaces it.
+    </Card>
+</CardGrid>
+
+</ContainerSection>
+
+<ContainerSection>
+
+## Built for the Long Run
+
+<CardGrid>
+    <Card title="Versioned records" icon="rocket">
+        Every record has a `since` field and a changelog. Refactors are atomic PRs. Forks inherit
+        schema history, not just the current state.
+    </Card>
+    <Card title="Decision logs" icon="open-book">
+        Keep "why we use X" alongside "what we use." Decisions become searchable, reviewable, and
+        referenceable from individual records.
+    </Card>
+    <Card title="Health checks" icon="heart">
+        Stale links, missing fields, and abandoned records are surfaced automatically. CI fails
+        before the problem reaches a reader.
+    </Card>
+    <Card title="Taxonomy" icon="puzzle">
+        Tag records with curated labels, not free-form text. Categories stay small, useful, and
+        consistent across years of contributions.
+    </Card>
+</CardGrid>
+
+</ContainerSection>
+
+<ContainerSection>
+
+## Pick Your Adapter
+
+<CardGrid>
+    <Card title="Astro" icon="starlight">
+        The recommended adapter. Ship a fully static site with `astro build` and deploy it to any
+        CDN. Starlight-compatible themes available out of the box.
+    </Card>
+    <Card title="Next.js" icon="right-arrow">
+        For teams that need server components, edge runtime, or React. Grove integrates as a
+        content source for your existing Next.js app.
+    </Card>
+    <Card title="SvelteKit" icon="puzzle">
+        For Svelte-native teams. Same CLI, same data model, Svelte's component model for the
+        rendered views.
+    </Card>
+    <Card title="Bring your own" icon="setting">
+        Grove's data layer is framework-agnostic. The CLI emits JSON; you render it however you
+        want.
+    </Card>
+</CardGrid>
+
+</ContainerSection>
+
+<ContainerSection>
+
+## Where to Start
+
+<CardGrid>
+    <Card title="Bootstrap a space" icon="rocket">
+        Walk through the [five-step tutorial series](/tutorials/01-bootstrap/) — from `pnpm create
+        grove` to a deployed site with cron-driven maintenance. About an hour, end-to-end.
+    </Card>
+    <Card title="Learn the model" icon="setting">
+        Read [Spaces & Blueprints](/guides/spaces/) and [The data model](/guides/data-model/) to
+        understand how records, taxonomy, health, and decisions fit together.
+    </Card>
+    <Card title="Inspect the UI" icon="magnifier">
+        Compare every state in the [Starlight Components](/showcase/starlight-components/) page —
+        cards, asides, tabs, badges, code blocks, and the splash gallery.
+    </Card>
+    <Card title="Reference" icon="open-book">
+        Need a specific command or config field? Jump to the [CLI reference](/reference/cli/),
+        [grove.config.ts reference](/reference/config/), or [Resource schema reference](/reference/schema/).
+    </Card>
+</CardGrid>
+
+<div class="cta-row">
+    <LinkButton href="/tutorials/01-bootstrap/" variant="primary" icon="right-arrow">
+        Get started
+    </LinkButton>
+    <LinkButton href="https://github.com/grove-dev/grove" variant="minimal" icon="external">
+        Star on GitHub
+    </LinkButton>
+</div>
+
+</ContainerSection>

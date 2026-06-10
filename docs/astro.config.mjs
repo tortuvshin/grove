@@ -8,6 +8,10 @@ export default defineConfig({
     site: 'https://grove.dev',
     integrations: [
         starlight({
+            // The custom landing page at "/" and showcase hub at "/showcase"
+            // are plain Astro routes in src/pages/. The Starlight site keeps
+            // the root and exposes its content at /start-here, /tutorials,
+            // /guides, /reference, /showcase/* (deep gallery).
             title: 'Grove',
             description:
                 'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
@@ -41,7 +45,7 @@ export default defineConfig({
                 {
                     label: 'Start here',
                     items: [
-                        { label: 'What is Grove?', slug: 'index' },
+                        { label: 'What is Grove?', slug: 'start-here/what-is-grove' },
                     ],
                 },
                 {
@@ -59,24 +63,6 @@ export default defineConfig({
                     items: [
                         { label: 'Spaces & blueprints', slug: 'guides/spaces' },
                         { label: 'The data model', slug: 'guides/data-model' },
-                    ],
-                },
-                {
-                    label: 'Showcase',
-                    items: [
-                        { label: 'Starlight Components', slug: 'showcase/starlight-components' },
-                        { label: 'Splash Pages', slug: 'showcase/splash-pages' },
-                        { label: 'Typography', slug: 'showcase/typography' },
-                    ],
-                },
-                {
-                    label: 'Splash Examples',
-                    items: [
-                        { label: 'Centered', slug: 'showcase/splash/centered' },
-                        { label: 'Centered Top', slug: 'showcase/splash/centered-top' },
-                        { label: 'Split Left', slug: 'showcase/splash/split-left' },
-                        { label: 'Split Right', slug: 'showcase/splash/split-right' },
-                        { label: 'Banner', slug: 'showcase/splash/banner' },
                     ],
                 },
                 {

@@ -5,3 +5,18 @@
  * is equal. Wrap your changes in @layer lucode when you want to override
  * the theme tokens explicitly.
  */
+
+/* Landing page CTA row — used on the home page. */
+.cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing);
+    justify-content: center;
+    padding-top: calc(var(--spacing) * 6);
+    margin-top: calc(var(--spacing) * 4);
+    border-top: 1px solid var(--sl-color-gray-5);
+}
+
+.cta-row a {
+    font-weight: 600;
+}

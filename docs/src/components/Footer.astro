@@ -1,0 +1,129 @@
+---
+/**
+ * Footer for the custom Astro pages.
+ */
+const year = new Date().getFullYear();
+---
+
+<footer class="g-footer">
+    <div class="g-container g-footer-inner">
+        <div class="g-footer-brand">
+            <strong>Grove</strong>
+            <p>
+                An open-source framework for growing useful community knowledge.
+                MIT licensed. Built in public.
+            </p>
+        </div>
+
+        <div class="g-footer-cols">
+            <div>
+                <h4>Project</h4>
+                <a href="/">Home</a>
+                <a href="/showcase/">Showcase</a>
+                <a href="/start-here/what-is-grove/">Documentation</a>
+                <a href="https://github.com/grove-dev/grove" target="_blank" rel="noreferrer noopener">
+                    GitHub
+                </a>
+            </div>
+
+            <div>
+                <h4>Learn</h4>
+                <a href="/tutorials/01-bootstrap/">Bootstrap tutorial</a>
+                <a href="/guides/spaces/">Spaces &amp; blueprints</a>
+                <a href="/guides/data-model/">Data model</a>
+                <a href="/reference/cli/">CLI reference</a>
+            </div>
+
+            <div>
+                <h4>Community</h4>
+                <a href="https://github.com/grove-dev/grove/discussions" target="_blank" rel="noreferrer noopener">
+                    Discussions
+                </a>
+                <a href="https://github.com/grove-dev/grove/issues" target="_blank" rel="noreferrer noopener">
+                    Issues
+                </a>
+                <a href="https://github.com/grove-dev/grove/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noreferrer noopener">
+                    Code of conduct
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="g-container g-footer-bottom">
+        <span>© {year} Grove. Released under the MIT License.</span>
+        <span class="g-footer-meta">Spectral theme · Astro + Starlight · Built with care.</span>
+    </div>
+</footer>
+
+<style>
+    .g-footer {
+        margin-top: 96px;
+        border-top: 1px solid var(--sl-color-hairline);
+        background: var(--sl-color-bg-nav);
+    }
+
+    .g-footer-inner {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding-block: 56px 32px;
+    }
+
+    @media (min-width: 720px) {
+        .g-footer-inner {
+            grid-template-columns: 1.4fr 2fr;
+        }
+    }
+
+    .g-footer-brand strong {
+        font-size: var(--sl-text-lg);
+        letter-spacing: -0.01em;
+        color: var(--sl-color-white);
+    }
+
+    .g-footer-brand p {
+        margin-top: 8px;
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        max-width: 36ch;
+        line-height: var(--sl-line-height);
+    }
+
+    .g-footer-cols {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .g-footer-cols h4 {
+        font-size: var(--sl-text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--sl-color-gray-3);
+        margin-bottom: 14px;
+        font-weight: 600;
+    }
+
+    .g-footer-cols a {
+        display: block;
+        padding: 4px 0;
+        color: var(--sl-color-gray-2);
+        font-size: var(--sl-text-sm);
+        transition: color 0.15s ease;
+    }
+
+    .g-footer-cols a:hover {
+        color: var(--sl-color-text-accent);
+    }
+
+    .g-footer-bottom {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
+        padding-block: 18px 32px;
+        border-top: 1px solid var(--sl-color-hairline);
+        color: var(--sl-color-gray-3);
+        font-size: var(--sl-text-xs);
+    }
+</style>

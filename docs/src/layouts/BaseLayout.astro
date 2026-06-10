@@ -1,0 +1,162 @@
+---
+/**
+ * Base layout for the custom Astro pages (landing + showcase hub).
+ * Lives outside the Starlight system — we own every byte of chrome here.
+ *
+ * To make these pages feel exactly like the Starlight docs (same colors,
+ * same fonts, same spacing), we import Starlight's own props.css and use
+ * its --sl-* tokens everywhere. Any tweak in Starlight's theme is picked
+ * up here automatically.
+ */
+import '../styles/global.css';
+import '@astrojs/starlight/style/props.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+    title: string;
+    description?: string;
+    ogImage?: string;
+    activeNav?: 'home' | 'showcase' | 'docs' | 'github';
+}
+
+const {
+    title,
+    description = 'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
+    ogImage,
+    activeNav = 'home',
+} = Astro.props;
+
+const siteUrl = Astro.site?.toString() ?? 'https://grove.dev';
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+---
+
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonical} />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:site_name" content="Grove" />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        />
+
+        <script is:inline>
+            (() => {
+                try {
+                    const stored = localStorage.getItem('grove-theme');
+                    const theme =
+                        stored ||
+                        (window.matchMedia('(prefers-color-scheme: light)').matches
+                            ? 'light'
+                            : 'dark');
+                    document.documentElement.dataset.theme = theme;
+                } catch {}
+            })();
+        </script>
+    </head>
+    <body>
+        <Header activeNav={activeNav} />
+        <main id="main">
+            <slot />
+        </main>
+        <Footer />
+    </body>
+</html>
+
+<style is:global>
+    /* Layout-level tokens that are *not* in Starlight: container widths and
+     * a single gutter. Every color, font, and border-radius is sourced from
+     * Starlight's --sl-* tokens so the page renders identically to the docs.
+     */
+    :root {
+        --g-container: 72rem;
+        --g-container-narrow: 55rem;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: var(--sl-font-system);
+        background: var(--sl-color-bg);
+        color: var(--sl-color-text);
+        line-height: var(--sl-line-height);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        line-height: var(--sl-line-height-headings);
+    }
+
+    p {
+        margin: 0;
+    }
+
+    code,
+    pre {
+        font-family: var(--sl-font-system-mono);
+    }
+
+    img,
+    svg {
+        max-width: 100%;
+        display: block;
+    }
+
+    .g-container {
+        max-width: var(--g-container);
+        margin-inline: auto;
+        padding-inline: 1.5rem;
+    }
+
+    .g-container-narrow {
+        max-width: var(--g-container-narrow);
+        margin-inline: auto;
+        padding-inline: 1.5rem;
+    }
+
+    main {
+        min-height: 60vh;
+    }
+</style>
