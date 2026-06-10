@@ -1,0 +1,116 @@
+---
+/**
+ * WhyThisExists — the "what is this site for?" section.
+ *
+ * Renders 3 short, opinionated points (icon + title + body). The
+ * icon set is small and generic: "app" (window/grid glyph),
+ * "code" (angle brackets), "search" (magnifier). Defaults to
+ * the canonical "directory, source, search" trio.
+ *
+ * Generic: every point comes through props. No blueprint-specific
+ * copy. Consumers can pass `points` to swap the order or copy.
+ */
+
+interface WhyPoint {
+  title: string;
+  body: string;
+  icon: "app" | "code" | "search";
+}
+
+interface Props {
+  points?: WhyPoint[];
+  title?: string;
+  description?: string;
+  class?: string;
+}
+
+const {
+  points,
+  title = "Why this directory exists",
+  description = "A short note on the point of all this.",
+  class: className = "",
+} = Astro.props;
+
+const defaultPoints: WhyPoint[] = [
+  {
+    icon: "app",
+    title: "A curated starting point",
+    body: "Skip the rabbit holes. Every entry here is something a real developer reached for, vetted for quality and longevity.",
+  },
+  {
+    icon: "code",
+    title: "Real, runnable source",
+    body: "Every project links back to its source. Skim, fork, learn — no paywalls, no broken download links.",
+  },
+  {
+    icon: "search",
+    title: "Search that respects you",
+    body: "Filter by stack, platform, license, or status. No SEO spam, no affiliate farms. The directory is the product.",
+  },
+];
+
+const items = points && points.length > 0 ? points : defaultPoints;
+---
+
+<section
+  class:list={["grove-section", className]}
+  aria-labelledby="grove-why-heading"
+>
+  <div class="grove-container mx-auto px-5 sm:px-7">
+    <header class="mb-8 flex flex-col items-center gap-2 text-center">
+      <h2
+        id="grove-why-heading"
+        class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+      >
+        {title}
+      </h2>
+      {description && (
+        <p class="m-0 max-w-2xl text-[0.9375rem] text-ink-500 dark:text-ink-400">
+          {description}
+        </p>
+      )}
+    </header>
+
+    <ol
+      class="m-0 grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-3"
+      aria-label="Why this directory"
+    >
+      {items.map((p, i) => (
+        <li class="flex flex-col items-center gap-2 text-center">
+          <span
+            aria-hidden="true"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-200"
+          >
+            {p.icon === "app" && (
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                <path d="M1.75 3.5a.25.25 0 0 1 .25-.25h12a.25.25 0 0 1 .25.25v8a.25.25 0 0 1-.25.25h-12a.25.25 0 0 1-.25-.25v-8ZM2 4.75v6h12v-6H2ZM2.5 6.5h4v2.5h-4V6.5Z"></path>
+              </svg>
+            )}
+            {p.icon === "code" && (
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                <path d="M4.72 3.22a.75.75 0 0 1 1.06 1.06L2.06 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25Zm6.56 0a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L13.94 8l-3.72-3.72a.75.75 0 0 1 0-1.06Z"></path>
+              </svg>
+            )}
+            {p.icon === "search" && (
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                <path d="M10.68 11.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z"></path>
+              </svg>
+            )}
+          </span>
+          <span
+            aria-hidden="true"
+            class="font-mono text-2xs text-ink-400 dark:text-ink-500"
+          >
+            0{i + 1}
+          </span>
+          <h3 class="m-0 text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            {p.title}
+          </h3>
+          <p class="m-0 max-w-xs text-[0.875rem] leading-relaxed text-ink-500 dark:text-ink-400">
+            {p.body}
+          </p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
