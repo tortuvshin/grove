@@ -1,83 +1,74 @@
 ---
 title: Grove
-description: A documentation framework for Astro Starlight — grow, maintain, and ship polished product docs without rebuilding the same scaffolding.
+description:
+    An open-source framework for growing useful community knowledge — collect, structure,
+    maintain, and improve the projects, tools, resources, and knowledge a community relies on.
 template: splash
 hero:
-    layout: centered
-    tagline: >
-        Grove is a documentation framework for Astro Starlight. Garden your
-        content, grow alongside new frameworks, and maintain a single source
-        of truth across every adapter.
+    tagline:
+        Grove helps communities collect, structure, maintain, and improve the projects, tools,
+        resources, and knowledge they rely on — over years, not weeks.
+    announcement:
+        text: Grove is in active development
+        link: /guides/getting-started/
     actions:
         - text: Get started
-          link: /guides/example/
+          link: /guides/getting-started/
           icon: right-arrow
-          variant: primary
-        - text: View on GitHub
-          link: https://github.com/grove-dev/grove
-          icon: external
+        - text: See the showcase
+          link: /showcase/starlight-components/
           variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import { ContainerSection } from 'lucode-starlight/components';
 
-## What is Grove?
+<ContainerSection>
 
-Grove packages a coherent, opinionated set of building blocks for product
-documentation sites built on [Astro Starlight](https://starlight.astro.build).
-Stop rewriting the same sidebar, theme, and content scaffolding for every
-project — plant a Grove instead.
-
-<CardGrid stagger>
-	<Card title="Garden" icon="seti:notebook">
-		Plant a content collection once and reuse it across every framework
-		adapter. Sidebar, page title, search, and hero layout are already wired
-		up — focus on the words, not the chrome.
-	</Card>
-	<Card title="Grow" icon="rocket">
-		Drop a new framework adapter into the workspace and Grove picks it up.
-		Next.js, Svelte, Astro, and Starlight all share the same content tree
-		and the same look.
-	</Card>
-	<Card title="Maintain" icon="setting">
-		Tokens, type-safety, and versioning are first-class. Bump a content
-		schema, theme token, or component once — every consumer site updates on
-		the next install.
-	</Card>
-	<Card title="Splash pages" icon="open-book">
-		Hero layouts, card grids, link cards, and badge variants are tuned for
-		landing pages, changelogs, and reference indexes. Just author the
-		content.
-	</Card>
-</CardGrid>
-
-## The Grove workflow
+## What Grove Does
 
 <CardGrid>
-	<Card title="1. Plant" icon="pencil">
-		Author your content in MDX under a single content collection. Frontmatter
-		extends the Starlight schema with announcement, hero layout, and link
-		attributes.
-	</Card>
-	<Card title="2. Pick a frame" icon="list-format">
-		Choose a framework adapter — Astro, Next.js, Svelte, or Starlight — and
-		Grove keeps the sidebar, hero, and theme in sync across all of them.
-	</Card>
-	<Card title="3. Ship" icon="rocket">
-		Run `grove build` and publish. The output is a normal Starlight site, so
-		hosting on Vercel, Netlify, Cloudflare, or GitHub Pages just works.
-	</Card>
+    <Card title="Spaces" icon="open-book">
+        Grove Spaces are structured containers that hold the projects, tools, resources, and
+        knowledge a community curates. Spaces are versioned, forkable, and easy to maintain.
+    </Card>
+    <Card title="Blueprints" icon="setting">
+        Blueprints define the schema of a Space. They make contributions reviewable, keep quality
+        consistent, and let contributors submit pull requests with confidence.
+    </Card>
+    <Card title="Open Source First" icon="rocket">
+        Grove is MIT-licensed, framework-agnostic, and ships adapters for Astro, Next.js, and
+        SvelteKit. The data lives in your repo, the tooling fits your existing CI.
+    </Card>
+    <Card title="Grow Over Time" icon="starlight">
+        Grove treats knowledge like a long-lived artifact. Updates, refactors, and archival are
+        first-class operations, not afterthoughts.
+    </Card>
 </CardGrid>
 
-## Where to next?
+</ContainerSection>
+
+<ContainerSection>
+
+## Where to Start
 
 <CardGrid>
-	<Card title="Read the guide" icon="open-book">
-		Walk through installation, content schema, and the recommended
-		Starlight config in [Getting Started](/guides/example/).
-	</Card>
-	<Card title="Browse the reference" icon="document">
-		See every Starlight component — cards, asides, tabs, badges, code
-		blocks, file trees, and buttons — rendered with the Grove theme.
-	</Card>
+    <Card title="Install Grove" icon="rocket">
+        Follow the setup guide in
+        [Getting Started](/guides/getting-started/) to scaffold a new project with the Grove CLI.
+    </Card>
+    <Card title="Model a Space" icon="setting">
+        Read [Spaces & Blueprints](/guides/spaces/) to understand how Spaces and Blueprints fit
+        together in a real community knowledge base.
+    </Card>
+    <Card title="Inspect the UI" icon="magnifier">
+        Compare every state in the [Starlight Components](/showcase/starlight-components/) page —
+        cards, asides, tabs, badges, code blocks, and the splash gallery.
+    </Card>
+    <Card title="Pick a Landing Layout" icon="open-book">
+        Browse the live hero layouts in [Splash Pages](/showcase/splash-pages/) before
+        customizing your own docs entry point.
+    </Card>
 </CardGrid>
+
+</ContainerSection>
