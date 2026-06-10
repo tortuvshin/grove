@@ -363,18 +363,33 @@ program
 program
   .command("validate")
   .description("Validate project data files against the configured blueprint.")
-  .action(async () => {
+  .option("--strict", "fail on warnings as well as errors")
+  .action(async (opts: { strict?: boolean }) => {
     const config: GroveConfig = await loadConfig();
-    const result = await validateProject(config);
-    for (const issue of result.issues) {
-      console.log(`${issue.code}: ${issue.message}`);
+    const result = await validateProject(config, { strict: opts.strict });
+    for (const issue of result.errors) {
+      console.log(`✖ ${issue.code}: ${issue.message}`);
+    }
+    for (const issue of result.warnings) {
+      console.log(`⚠ ${issue.code}: ${issue.message}`);
     }
     if (!result.ok) {
       process.exitCode = 1;
-      console.log(`Validation failed with ${result.issues.length} issue(s).`);
+      const total = result.issues.length;
+      const errorCount = result.errors.length;
+      const warnCount = result.warnings.length;
+      console.log(
+        `Validation failed with ${errorCount} error(s) and ${warnCount} warning(s) (${total} total).`,
+      );
       return;
     }
-    console.log("Validation passed.");
+    if (result.warnings.length > 0) {
+      console.log(
+        `Validation passed with ${result.warnings.length} warning(s).`,
+      );
+    } else {
+      console.log("Validation passed.");
+    }
   });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -485,7 +500,8 @@ program
   .argument("<target>", "github | contributors")
   .description("Optional GitHub integration: enrich records with GitHub metadata.")
   .option("--limit <n>", "limit records to sync (rate-limit guard)", (value) => Number(value))
-  .action(async (target: string, options: { limit?: number }) => {
+  .option("--strict", "fail on unavailable GitHub metadata")
+  .action(async (target: string, options: { limit?: number; strict?: boolean }) => {
     const config = await loadConfig();
     if (target !== "github" && target !== "contributors") {
       console.error(`Unknown sync target: ${target}. Use "github" or "contributors".`);
@@ -519,6 +535,7 @@ program
       if (!ref) continue;
       process.stdout.write(`[sync github] ${ref.owner}/${ref.repo} ... `);
       let metadata = null;
+      let didEnrich = false;
       try {
         metadata = await fetchGithubMetadata(ref);
       } catch {
@@ -526,6 +543,7 @@ program
           const enriched = await enrichFromGithubHtml(links.github);
           if (enriched.fields) {
             process.stdout.write("html-fallback\n");
+            didEnrich = true;
           }
         } catch {
           process.stdout.write("skipped (api error)\n");
@@ -539,10 +557,15 @@ program
         github: { ...gh, repository: metadata },
       };
       await writeFile(path, stringifyRecordYaml(next), "utf8");
-      process.stdout.write("updated\n");
+      if (!didEnrich) process.stdout.write("updated\n");
       updated++;
     }
     console.log(`\n[sync github] ${updated} updated, ${failed} failed`);
+    // In strict mode, fail the build if any record could not be synced.
+    if (options.strict && failed > 0) {
+      process.exitCode = 1;
+      console.error(`[sync github] --strict: ${failed} record(s) could not be synced.`);
+    }
   });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -552,7 +575,9 @@ program
   .command("cleanup")
   .argument("<target>", "stale")
   .description("List records that need human curation.")
-  .action(async (target: string) => {
+  .option("--report", "produce a report (default behaviour in V1)")
+  .option("--strict", "fail the run if any candidates need curation")
+  .action(async (target: string, opts: { report?: boolean; strict?: boolean }) => {
     if (target !== "stale") {
       console.error(`Unknown cleanup target: ${target}. Use "stale".`);
       process.exit(1);
@@ -561,6 +586,12 @@ program
     console.log(`[cleanup stale] ${report.totalCandidates} candidate(s) → ${path}`);
     for (const c of report.candidates.slice(0, 10)) {
       console.log(`  - ${c.slug} (${c.status}, ${c.stars}★)`);
+    }
+    if (opts.strict && report.totalCandidates > 0) {
+      process.exitCode = 1;
+      console.error(
+        `[cleanup stale] --strict: ${report.totalCandidates} record(s) need human review.`,
+      );
     }
   });
 
@@ -772,59 +803,93 @@ coverage/
 function workflowValidate(): string {
   return `name: Validate data
 
+# Runs on every PR, every push to main, and on manual dispatch.
+# No secrets required — safe for fork PRs.
 on:
   pull_request:
-    paths:
-      - "data/**"
-      - "content/**"
-      - "grove.config.ts"
-      - "package.json"
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec grove validate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Grove data
+        run: pnpm exec grove validate
 `;
 }
 
 function workflowBuild(framework: Framework): string {
-  const cmd = frameworkBuildCommand(framework);
-  return `name: Build
+  // The project's "build" script in package.json already chains
+  #   grove generate && grove sitemap && grove llms && <framework> build
+  // via the `grove` package's own build orchestration. Keep the workflow thin.
+  const isWindows = false; // GitHub-hosted runners are linux
+  const setupNode = `- name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"`;
+  return `name: Build site
 
+# Runs on every PR, every push to main, and on manual dispatch.
+# No secrets required — safe for fork PRs.
 on:
-  push:
-    branches: [main]
   pull_request:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec grove generate
-      - run: pnpm exec grove sitemap
-      - run: pnpm exec grove llms
-      - run: pnpm exec grove build
-      - uses: actions/upload-artifact@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+${setupNode}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the site
+        run: pnpm build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
+          retention-days: 7
 `;
 }
 

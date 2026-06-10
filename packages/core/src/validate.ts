@@ -14,13 +14,19 @@ import {
 } from "./schema.js";
 import { readYamlFile } from "./io.js";
 
+export type ValidationSeverity = "error" | "warning";
+
 export interface ValidationIssue {
   code: string;
   message: string;
+  severity: ValidationSeverity;
 }
 
 export interface ValidationResult {
   ok: boolean;
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
+  /** Flattened list of all issues (errors first, then warnings). */
   issues: ValidationIssue[];
 }
 
@@ -39,16 +45,21 @@ async function exists(path: string): Promise<boolean> {
  * required fields, taxonomy reference problems, and dangling health
  * or decision references.
  */
-export async function validateProject(config: GroveConfig): Promise<ValidationResult> {
-  const issues: ValidationIssue[] = [];
+export async function validateProject(
+  config: GroveConfig,
+  opts: { strict?: boolean } = {},
+): Promise<ValidationResult> {
+  const errors: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
   const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
 
   if (!(await exists(recordsDir))) {
-    issues.push({
+    errors.push({
       code: "missing_records_dir",
       message: `${config.paths.recordsDir} does not exist`,
+      severity: "error",
     });
-    return { ok: false, issues };
+    return finalize(errors, warnings);
   }
 
   const expectedKind = blueprintKind[config.blueprint];
@@ -63,17 +74,26 @@ export async function validateProject(config: GroveConfig): Promise<ValidationRe
     const raw = parseYaml(text) as Record<string, unknown> | null;
     const obj = (raw ?? {}) as Record<string, unknown>;
     if (slugs.has(fileSlug)) {
-      issues.push({ code: "duplicate_slug", message: `Duplicate record slug: ${fileSlug}` });
+      errors.push({
+        code: "duplicate_slug",
+        message: `Duplicate record slug: ${fileSlug}`,
+        severity: "error",
+      });
     }
     slugs.add(fileSlug);
     if (!obj.description || !(obj.description as string).trim()) {
-      issues.push({ code: "missing_description", message: `${fileSlug} is missing a description` });
+      errors.push({
+        code: "missing_description",
+        message: `${fileSlug} is missing a description`,
+        severity: "error",
+      });
     }
     const kind = (obj.kind as string | undefined) ?? expectedKind;
     if (kind !== expectedKind) {
-      issues.push({
+      errors.push({
         code: "kind_blueprint_mismatch",
         message: `${fileSlug}: kind "${kind}" does not match blueprint "${config.blueprint}" (expected "${expectedKind}")`,
+        severity: "error",
       });
     }
     const links = (obj.links as Record<string, unknown> | undefined) ?? {};
@@ -95,9 +115,10 @@ export async function validateProject(config: GroveConfig): Promise<ValidationRe
           : config.blueprint === "resource-hub"
             ? "source, github, or website"
             : "website";
-      issues.push({
+      errors.push({
         code: "missing_link",
         message: `${fileSlug} has no ${required} link`,
+        severity: "error",
       });
     }
     records.push(obj as unknown as Resource);
@@ -111,9 +132,10 @@ export async function validateProject(config: GroveConfig): Promise<ValidationRe
     for (const record of records) {
       const links = (record as { links?: { github?: string } }).links;
       if (links?.github && !healthIds.has(record.slug)) {
-        issues.push({
+        errors.push({
           code: "missing_health",
           message: `${record.slug} has a GitHub link but no health entry`,
+          severity: "error",
         });
       }
     }
@@ -125,15 +147,31 @@ export async function validateProject(config: GroveConfig): Promise<ValidationRe
     );
     for (const decision of decisions) {
       if (!slugs.has(decision.id)) {
-        issues.push({
+        errors.push({
           code: "unknown_decision_record",
           message: `Decision references unknown record: ${decision.id}`,
+          severity: "error",
         });
       }
     }
   }
 
-  return { ok: issues.length === 0, issues };
+  return finalize(errors, warnings, opts.strict);
+}
+
+function finalize(
+  errors: ValidationIssue[],
+  warnings: ValidationIssue[],
+  strict = false,
+): ValidationResult {
+  // In strict mode, warnings also fail validation.
+  const ok = errors.length === 0 && (!strict || warnings.length === 0);
+  return {
+    ok,
+    errors,
+    warnings,
+    issues: [...errors, ...warnings],
+  };
 }
 
 /**
