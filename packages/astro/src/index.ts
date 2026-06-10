@@ -13,12 +13,21 @@
  *    `@grove-dev/core` so the component prop signatures stay
  *    type-safe without forcing a dependency on the core package
  *    in every consumer file.
+ *  - Re-exports the generic `lib/` helpers (search, lenses, scores,
+ *    repo, format, display, taxonomy-counts) under a single import
+ *    path so consumers can `import { ... } from "@grove-dev/astro"`.
  */
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { AstroIntegration } from "astro";
 
 export * from "@grove-dev/core";
+
+// Generic lib helpers — repo URL parsing, formatting, search /
+// facet / sort / paginate, lens application, score tiers, taxonomy
+// counts, and pretty-print display maps. All dependency-free and
+// typed against `@grove-dev/core`.
+export * from "./lib/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 // `here` is the compiled `dist/` directory. The components and
