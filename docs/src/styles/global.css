@@ -183,10 +183,13 @@
 	}
 }
 
-/* Layout-level tokens that are *not* in Starlight: container widths. */
+/* Layout-level tokens that are *not* in Starlight: container widths.
+ * The custom pages keep Starlight's `--sl-content-width` (45rem) for the
+ * readable column and use a wider value only for the hero. */
 :root {
-	--g-container: 72rem;
-	--g-container-narrow: 55rem;
+	--g-container: var(--sl-content-width);
+	--g-container-wide: 72rem;
+	--g-container-narrow: 35rem;
 }
 
 *,
