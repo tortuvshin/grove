@@ -55,7 +55,7 @@ Records carry: `title`, `description`, `type` (guide, comparison, link,
 explainer, tool, video, article, course, book, podcast, other), `topic`,
 `related[]` (slugs of other resources), `publishedAt`, `author`, `links`.
 
-**Example spaces:** ai.dev.mn (practical AI resources for builders), a
+**Example spaces:** [Open Apps](https://github.com/tortuvshin/open-apps) (production-ready OSS applications), a
 company-internal learning hub, a public reading list.
 
 ### `ecosystem-map` — kind: `entity`
@@ -72,8 +72,8 @@ community, school, university, research-lab, agency, service, product,
 person, other), `founded`, `location`, `members`, `parent` (slug of a
 parent entity for hierarchies), `links`.
 
-**Example spaces:** oss.dev.mn (Mongolian open-source ecosystem),
-startups.dev.mn (Mongolian tech ecosystem map), any "local ecosystem" map.
+**Example spaces:** an open-source ecosystem, a local tech / startup
+ecosystem map, any "local ecosystem" map.
 
 ## How a blueprint is set
 
@@ -112,8 +112,8 @@ entity` at validation time. The schema, the importer, and the GitHub
    framework-shaped work, not space-shaped work.
 2. **The data model is the identity.** If we let every site invent its
    own kind, the framework stops being a framework and becomes a template
-   generator. We want the records in `oss.dev.mn`, `ai.dev.mn`, and
-   `startups.dev.mn` to be shaped the same way so contributors and tooling
+   generator. We want the records in every space to be shaped the same way
+   so contributors and tooling
    can move between spaces without learning a new shape.
 3. **Wave 2 extends the union, not the API.** When the first real space
    needs fields the V1 schemas do not carry, we add them to one of the
