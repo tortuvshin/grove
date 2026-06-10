@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@plugin "@tailwindcss/typography";
-
 /* ------------------------------------------------------------------ */
 /* Grove theme tokens — keep these in sync with packages/ui if needed  */
 /* ------------------------------------------------------------------ */

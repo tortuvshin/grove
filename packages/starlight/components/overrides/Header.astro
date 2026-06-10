@@ -16,71 +16,35 @@ const shouldRenderSearch =
 
 <MobileMenuToggle />
 
-<div class="site-title-wrapper">
+<div class="site-title-wrapper hidden mr-4 md:flex">
     <SiteTitle />
     <NavBar />
 </div>
 
-<div class="header-right">
+<div class="header-right flex flex-1 items-center gap-2 justify-between md:justify-end">
     {shouldRenderSearch && <Search />}
 
-    <nav class="header-nav">
-        <div>
+    <nav class="header-nav flex items-center gap-0.5">
+        <div class="flex items-center">
             <SocialIcons />
         </div>
-        <div>
+        <div class="header-nav-divider flex items-center">
             <ThemeSelect />
         </div>
-        <div>
+        <div class="header-nav-divider flex items-center">
             <LanguageSelect />
         </div>
     </nav>
 </div>
 
 <style>
-    .site-title-wrapper {
-        display: none;
-        margin-right: calc(var(--spacing) * 4);
-    }
-
-    @media (min-width: 768px) {
-        .site-title-wrapper {
-            display: flex;
-        }
-    }
-
-    .header-right {
-        gap: 0.5rem;
-        justify-content: space-between;
-        align-items: center;
-        flex: 1 1 0%;
-        display: flex;
-    }
-
-    @media (min-width: 768px) {
-        .header-right {
-            justify-content: flex-end;
-        }
-    }
-
-    .header-nav {
-        gap: 0.125rem;
-        align-items: center;
-        display: flex;
-    }
-
-    .header-nav > div:has(> :not(script)) {
-        display: flex;
-        align-items: center;
-    }
-
-    .header-nav > div:has(> :not(script)) + div:has(> :not(script)) {
+    .header-nav-divider {
         position: relative;
-        margin-left: calc(var(--spacing) * 1);
-        padding-left: calc(var(--spacing) * 3);
+        margin-left: 0.25rem;
+        padding-left: 0.75rem;
     }
 
-    .header-nav > div:has(> :not(script)) + div:has(> :not(script))::before {
+    .header-nav-divider::before {
         content: '';
         position: absolute;
         top: 50%;
