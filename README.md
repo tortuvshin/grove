@@ -30,15 +30,11 @@ Every artifact is a file. No database. No CMS. No admin dashboard. The whole spa
 
 ## Spaces built with Grove
 
-A few example spaces that show what Grove can do:
+A real-world space that runs on Grove:
 
-- **Open Apps** — production-ready open-source applications.
-- **oss.dev.mn** — the Mongolian open-source ecosystem.
-- **tools.dev.mn** — developer tools, SDKs, and integrations.
-- **ai.dev.mn** — practical AI resources for builders.
-- **startups.dev.mn** — a map of the Mongolian tech ecosystem.
+- **[Open Apps](https://github.com/tortuvshin/open-apps)** — production-ready open-source applications.
 
-Each space is its own repository, with its own data, branding, and community rules. Grove is the shared engine underneath.
+Each space is its own repository, with its own data, branding, and community rules. Grove is the shared engine underneath. If you fork Grove to launch a new space, send a PR to add it to this list.
 
 ---
 
