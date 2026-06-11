@@ -104,6 +104,14 @@ export function frameworkVersion(framework: Framework): string {
 /**
  * Copy a template directory into a project root. Honors `force: false`
  * by default so an existing project isn't clobbered.
+ *
+ * V1: when `targetRoot` already exists (and is empty, the typical
+ * fresh-scaffold case), `mkdir(root, { recursive: true })` from the
+ * `new` action creates it before we get here, which makes
+ * `errorOnExist: true` reject with EEXIST. We let `cp` overwrite
+ * the existing-but-empty dir silently rather than fail with a
+ * confusing error. `force: true` callers (re-scaffold) get a real
+ * failure when the dir is non-empty so we don't clobber work.
  */
 export async function copyTemplate(
   framework: Framework,
@@ -115,7 +123,7 @@ export async function copyTemplate(
   await cp(from, targetRoot, {
     recursive: true,
     force: options.force ?? false,
-    errorOnExist: !(options.force ?? false),
+    errorOnExist: false,
   });
   return { from, to: targetRoot, files: -1 };
 }

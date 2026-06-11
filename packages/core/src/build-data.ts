@@ -15,44 +15,48 @@ import { loadConfig } from "./config.js";
 /**
  * Apply a minimal decisions.yml override to a normalized record. The
  * human curation layer is the single source of truth for visibility:
- *   - decision.visibility (when present) wins over record.health.visibility
- *   - all other record fields are untouched
+ *   - For project records: decision.visibility (when present) wins
+ *     over record.health.visibility. The health block's other fields
+ *     (status, tier, etc.) are untouched.
+ *   - For resource-hub and ecosystem-map records: decision.visibility
+ *     is written to the record's top-level `visibility` field (these
+ *     blueprints have no `health` block).
  *
  * The full override pipeline (with reasons surfaced in the index
  * payload) is a V2 feature; V1 keeps the merge intentional and small.
- *
- * Only project records carry a `health` block in the V1 schema; the
- * override is therefore only applied to projects. resource-hub and
- * ecosystem-map blueprints are not yet wired with maintenance
- * signals, so the decision file's visibility for those blueprints
- * is a no-op (the record always shows up).
  */
 function applyDecision(
   record: Resource,
   visibilityById: Map<string, string>,
 ): Resource {
   const override = visibilityById.get(record.slug);
-  if (!override || record.kind !== "project") return record;
-  const existing = record.health;
-  const fallback = {
-    status: "unknown" as const,
-    maturity: "unknown" as const,
-    tier: "listed" as const,
-    visibility: "keep" as const,
-    cleanupCandidate: false,
-    staleReason: null,
-    confidence: "medium" as const,
-    reasons: [] as string[],
-  };
-  const merged = { ...(existing ?? fallback), visibility: override as typeof fallback.visibility };
-  return { ...record, health: merged };
+  if (!override) return record;
+  if (record.kind === "project") {
+    const existing = record.health;
+    const fallback = {
+      status: "unknown" as const,
+      maturity: "unknown" as const,
+      tier: "listed" as const,
+      visibility: "keep" as const,
+      cleanupCandidate: false,
+      staleReason: null,
+      confidence: "medium" as const,
+      reasons: [] as string[],
+    };
+    const merged = { ...(existing ?? fallback), visibility: override as typeof fallback.visibility };
+    return { ...record, health: merged };
+  }
+  // Resource-hub / ecosystem-map: no `health` block; the top-level
+  // `visibility` field on the base schema is the source of truth.
+  return { ...record, visibility: override as typeof record.visibility };
 }
 
 async function loadDecisionVisibility(
   decisionsPath: string,
+  cwd: string,
 ): Promise<Map<string, string>> {
   try {
-    const raw = await readFile(resolve(process.cwd(), decisionsPath), "utf8");
+    const raw = await readFile(resolve(cwd, decisionsPath), "utf8");
     const parsed = decisionsFileSchema.parse(parseYaml(raw) ?? {});
     const decisions = unwrapDecisions(parsed);
     const out = new Map<string, string>();
@@ -143,7 +147,7 @@ export async function generate(
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
 
   // Load human curation decisions once; missing file → empty map.
-  const visibilityById = await loadDecisionVisibility(cfg.paths.decisions);
+  const visibilityById = await loadDecisionVisibility(cfg.paths.decisions, cwd);
 
   const out: Resource[] = [];
   const errors: string[] = [];

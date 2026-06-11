@@ -70,6 +70,8 @@ export async function validateProject(
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
   const slugs = new Set<string>();
+  /** Slugs that have a github link and therefore need a health entry. */
+  const slugsNeedingHealth = new Set<string>();
 
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
@@ -135,6 +137,14 @@ export async function validateProject(
         severity: "warning",
       });
     }
+    // Records that link to a GitHub repo need a matching health entry
+    // so list/detail UIs can render staleness signals. Track here and
+    // cross-check against health.yml below.
+    const repoUrl = (parsed as { repoUrl?: string }).repoUrl;
+    const linksGithub = (parsed.links as { github?: string } | undefined)?.github;
+    if (repoUrl || linksGithub) {
+      slugsNeedingHealth.add(fileSlug);
+    }
   }
 
   if (await exists(resolve(process.cwd(), config.paths.health))) {
@@ -151,13 +161,23 @@ export async function validateProject(
       });
     }
     const healthIds = new Set(health.map((entry) => entry.id));
-    for (const slug of slugs) {
-      // We don't have parsed records here when Zod failed; the
-      // slug set is the best proxy for "this record exists".
-      // The "missing_health" check is now advisory: only flag when
-      // a decision.yml also points to a slug, which is rare.
+    for (const slug of slugsNeedingHealth) {
       if (healthIds.has(slug)) continue;
+      errors.push({
+        code: "missing_health",
+        message: `${slug} has a GitHub link but no health entry`,
+        severity: "error",
+      });
     }
+  } else if (slugsNeedingHealth.size > 0) {
+    // Health file is optional, but if any record points at a GitHub
+    // repo we expect a health file to exist (or `sync github` to
+    // produce one). Flag it as a warning so the operator knows.
+    warnings.push({
+      code: "missing_health_file",
+      message: `${config.paths.health} is missing but ${slugsNeedingHealth.size} record(s) link to GitHub repos`,
+      severity: "warning",
+    });
   }
 
   if (await exists(resolve(process.cwd(), config.paths.decisions))) {
@@ -204,12 +224,25 @@ function finalize(
 
 /**
  * Load and normalize every record YAML under `config.paths.recordsDir`.
- * Records that fail validation are skipped silently — use
- * `validateProject` to surface the failures. For callers that want
- * the strict-by-default behaviour, see `loadRecordsOrThrow`.
+ *
+ * @param config Grove config (provides `paths.recordsDir` and `blueprint`)
+ * @param opts.onError 'skip' (default) silently drops schema failures;
+ *   'throw' raises on the first failure with the file slug and the
+ *   Zod issue path in the error message.
+ * @param opts.cwd Working directory to resolve `paths.recordsDir`
+ *   against. Defaults to `process.cwd()`.
+ *
+ * For callers that want the strict-by-default behaviour, see
+ * `loadRecordsOrThrow`. `validateProject` is the recommended
+ * surface for surfacing failures with full error reporting.
  */
-export async function loadRecords(config: GroveConfig): Promise<Resource[]> {
-  const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
+export async function loadRecords(
+  config: GroveConfig,
+  opts: { onError?: "skip" | "throw"; cwd?: string } = {},
+): Promise<Resource[]> {
+  const onError = opts.onError ?? "skip";
+  const cwd = opts.cwd ?? process.cwd();
+  const recordsDir = resolve(cwd, config.paths.recordsDir);
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
   const expectedKind = blueprintKind[config.blueprint];
@@ -218,13 +251,19 @@ export async function loadRecords(config: GroveConfig): Promise<Resource[]> {
     const fileSlug = basename(file, ".yml");
     const text = await readFile(join(recordsDir, file), "utf8");
     const raw = parseYaml(text) as Record<string, unknown> | null;
-    if (!raw || typeof raw !== "object") continue;
+    if (!raw || typeof raw !== "object") {
+      if (onError === "throw") {
+        throw new Error(`${fileSlug}: record file is empty or not a YAML mapping`);
+      }
+      continue;
+    }
     if (!raw.kind) raw.kind = expectedKind;
     try {
       const parsed = recordsFileSchema.parse(raw);
       parsed.slug = fileSlug;
       out.push(parsed);
-    } catch {
+    } catch (err) {
+      if (onError === "throw") throw err;
       // skip — validation should have caught this
     }
   }
@@ -237,25 +276,9 @@ export async function loadRecords(config: GroveConfig): Promise<Resource[]> {
  * Recommended for build pipelines; `loadRecords` is the lenient
  * helper for previews and dev-time inspection.
  */
-export async function loadRecordsOrThrow(
+export function loadRecordsOrThrow(
   config: GroveConfig,
+  opts: { cwd?: string } = {},
 ): Promise<Resource[]> {
-  const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
-  const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith(".yml")).sort();
-  const expectedKind = blueprintKind[config.blueprint];
-  const out: Resource[] = [];
-  for (const file of files) {
-    const fileSlug = basename(file, ".yml");
-    const text = await readFile(join(recordsDir, file), "utf8");
-    const raw = parseYaml(text) as Record<string, unknown> | null;
-    if (!raw || typeof raw !== "object") {
-      throw new Error(`${fileSlug}: record file is empty or not a YAML mapping`);
-    }
-    if (!raw.kind) raw.kind = expectedKind;
-    const parsed = recordsFileSchema.parse(raw);
-    parsed.slug = fileSlug;
-    out.push(parsed);
-  }
-  return out;
+  return loadRecords(config, { ...opts, onError: "throw" });
 }
