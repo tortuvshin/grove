@@ -20,7 +20,6 @@ import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import {
@@ -55,10 +54,8 @@ import {
  * it via `import.meta.url`. In dev (`tsx src/index.ts`) we fall back
  * to a `require` of the source `package.json`.
  */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 function readOwnVersion(): string {
-  // 1) Production: dist/index.js → ../package.json (alongside the built file).
+  // 1) Production: dist/index.js → ./package.json (alongside the built file).
   try {
     const distPkg = createRequire(import.meta.url)("./package.json");
     if (distPkg?.version) return String(distPkg.version);

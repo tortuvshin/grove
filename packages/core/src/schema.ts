@@ -314,6 +314,15 @@ const resourceBaseSchema = z.object({
     .default({ type: "manual" }),
   curation: curationBlockSchema,
   scores: scoreSchema.default({}),
+  /**
+   * Effective visibility after any decisions.yml override. For project
+   * records the canonical signal lives in `health.visibility`; for
+   * resource-hub / ecosystem-map records (which have no `health`
+   * block) the top-level `visibility` is the source of truth.
+   * Defaults to "keep" so existing YAML files without the field
+   * continue to validate.
+   */
+  visibility: decisionVisibilitySchema.default("keep"),
 });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -704,6 +713,8 @@ export interface IndexResourceRecord extends IndexBase {
   related: string[];
   publishedAt: ResourceRecord["publishedAt"];
   author: ResourceRecord["author"];
+  /** Effective visibility — decisions.yml overrides win over the record default. */
+  visibility: DecisionVisibility;
 }
 
 export interface IndexEntityRecord extends IndexBase {
@@ -714,6 +725,8 @@ export interface IndexEntityRecord extends IndexBase {
   location: EntityRecord["location"];
   members: EntityRecord["members"];
   parent: EntityRecord["parent"];
+  /** Effective visibility — decisions.yml overrides win over the record default. */
+  visibility: DecisionVisibility;
 }
 
 export type IndexRecord =
@@ -807,6 +820,11 @@ export function toIndexRecord(record: Resource): IndexRecord {
       related: r.related,
       publishedAt: r.publishedAt,
       author: r.author,
+      // Non-project records store effective visibility at the top
+      // level (no `health` block); applyDecision has already merged
+      // any decisions.yml override into `r.visibility` by the time
+      // we get here.
+      visibility: r.visibility,
     };
   }
 
@@ -821,6 +839,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
     location: e.location,
     members: e.members,
     parent: e.parent,
+    visibility: e.visibility,
   };
 }
 

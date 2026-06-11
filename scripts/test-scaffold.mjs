@@ -134,13 +134,35 @@ function checkProject(project, framework) {
 }
 
 function main() {
-  console.log("[test:scaffold] building workspace packages…");
-  run("pnpm", ["-r", "build"], { stdio: "inherit" });
+  console.log("[test:scaffold] building @grove-dev/* packages…");
+  // Build only the framework packages. The `docs` workspace has its
+  // own pre-existing content-collection sidebar bug ("start-here/what-
+  // is-grove" slug missing) that is unrelated to the scaffold smoke
+  // test; the docs build must be fixed separately in docs/AREA.
+  run(
+    "pnpm",
+    [
+      "--filter",
+      "@grove-dev/core",
+      "--filter",
+      "@grove-dev/ui",
+      "--filter",
+      "@grove-dev/astro",
+      "--filter",
+      "@grove-dev/nextjs",
+      "--filter",
+      "@grove-dev/svelte",
+      "--filter",
+      "@grove-dev/cli",
+      "build",
+    ],
+    { stdio: "inherit" },
+  );
 
   const cliDist = join(REPO_ROOT, "packages/cli/dist/index.js");
   expect(
     existsSync(cliDist),
-    `CLI not built — ${cliDist} missing. Did pnpm -r build run?`,
+    `CLI not built — ${cliDist} missing. Did the @grove-dev/* build run?`,
   );
 
   let failed = 0;
