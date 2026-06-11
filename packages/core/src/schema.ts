@@ -609,45 +609,6 @@ export function getOwnerRepoFromUrl(
   return { owner: m[1], repo: m[2].replace(/\.git$/, "") };
 }
 
-/**
- * Normalize a raw record mapping into a typed Resource. The `kind`
- * field must match the blueprint of the site that owns the record;
- * mismatch produces a clear ZodError.
- */
-export function normalizeRecord(
-  raw: Record<string, unknown>,
-  fileSlug: string,
-  blueprint: Blueprint = "project-directory",
-): Resource {
-  const expectedKind = blueprintKind[blueprint];
-  if (!raw.kind) {
-    raw = { ...raw, kind: expectedKind };
-  } else if (raw.kind !== expectedKind) {
-    throw new Error(
-      `${fileSlug}: kind "${raw.kind}" does not match blueprint "${blueprint}" (expected "${expectedKind}")`,
-    );
-  }
-  return resourceSchema.parse(raw) as Resource;
-}
-
-export function validateRecord(
-  raw: Record<string, unknown>,
-  fileSlug: string,
-  blueprint?: Blueprint,
-): string[] {
-  try {
-    normalizeRecord(raw, fileSlug, blueprint);
-    return [];
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      return err.issues.map(
-        (issue) => `${fileSlug}: ${issue.path.join(".") || "(root)"} ${issue.message}`,
-      );
-    }
-    return [`${fileSlug}: ${(err as Error).message}`];
-  }
-}
-
 // ──────────────────────────────────────────────────────────────────────
 // Index payload types (records.index.json / records.full.json)
 // ──────────────────────────────────────────────────────────────────────

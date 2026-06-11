@@ -135,25 +135,20 @@ function checkProject(project, framework) {
 
 function main() {
   console.log("[test:scaffold] building @grove-dev/* packages…");
-  // Build only the framework packages. The `docs` workspace has its
-  // own pre-existing content-collection sidebar bug ("start-here/what-
-  // is-grove" slug missing) that is unrelated to the scaffold smoke
-  // test; the docs build must be fixed separately in docs/AREA.
+  // Build only the framework + engine packages. The `docs` workspace
+  // has its own pre-existing content-collection sidebar bug
+  // ("start-here/what-is-grove" slug missing) that is unrelated to
+  // the scaffold smoke test; the docs build must be fixed separately
+  // in docs/AREA. The double-filter is self-maintaining: any new
+  // @grove-dev/* package added under packages/ is picked up
+  // automatically, and only `docs` is excluded by name.
   run(
     "pnpm",
     [
       "--filter",
-      "@grove-dev/core",
+      "@grove-dev/*",
       "--filter",
-      "@grove-dev/ui",
-      "--filter",
-      "@grove-dev/astro",
-      "--filter",
-      "@grove-dev/nextjs",
-      "--filter",
-      "@grove-dev/svelte",
-      "--filter",
-      "@grove-dev/cli",
+      "!@grove-dev/docs",
       "build",
     ],
     { stdio: "inherit" },

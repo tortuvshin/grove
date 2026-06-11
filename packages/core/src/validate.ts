@@ -45,9 +45,9 @@ async function exists(path: string): Promise<boolean> {
  * schema, slug, link, health, or decision reference issues.
  *
  * Each record is run through the same Zod schema the build pipeline
- * uses (see `normalizeRecord` / `recordsFileSchema`). Validation
- * catches both schema problems (missing fields, wrong types) and
- * reference problems (duplicate slugs, dangling health/decision ids).
+ * uses (see `recordsFileSchema`). Validation catches both schema
+ * problems (missing fields, wrong types) and reference problems
+ * (duplicate slugs, missing health entries, dangling decision ids).
  */
 export async function validateProject(
   config: GroveConfig,
