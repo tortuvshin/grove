@@ -82,7 +82,7 @@ const repoUrl = (project as ProjectRecord | IndexProjectRecord | null)?.repoUrl;
 const logoUrl = (project as ProjectRecord | IndexProjectRecord | null)?.logoUrl;
 const stacks = (project?.stacks ?? (project?.stack ? [project.stack] : [])) as string[];
 const platforms = (project?.platforms ?? []) as string[];
-const healthStatus: HealthStatus | undefined = (project as ProjectRecord | null)?.health?.status;
+const healthStatus: HealthStatus | undefined = project?.health?.status;
 const labels = record.curation?.labels ?? [];
 // Slim (IndexProjectRecord.github) → full (ProjectRecord.github.repository).
 const indexGh = isIndex ? (project as IndexProjectRecord).github : null;
@@ -116,14 +116,10 @@ const platformChips = withOverflow(platforms);
 // Curated mark
 const curatedLabel = labels[0] ?? null;
 
-// Health class hook (for badge variant). Index payload does not
-// always carry the health block (the slim projection may strip it
-// if a record has no `health` field), so the index branch reads it
-// from a separate place.
-const indexHealthStatus =
-  isIndex ? (project as IndexProjectRecord).health?.status : undefined;
-const healthStatusOrIndex =
-  healthStatus ?? (indexHealthStatus as HealthStatus | undefined);
+// Health class hook (for badge variant). `project` is the union of
+// ProjectRecord | IndexProjectRecord, and both share a `health` field
+// with the same shape, so a single optional-chain read covers both
+// shapes — no isIndex branch is needed for the status itself.
 function healthBadgeClass(s: HealthStatus | undefined): string {
   switch (s) {
     case "mature":
@@ -139,7 +135,7 @@ function healthBadgeClass(s: HealthStatus | undefined): string {
       return "";
   }
 }
-const healthLabel = healthStatusOrIndex ? statusDisplay(healthStatusOrIndex) : null;
+const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
 
 const starsLabel = formatStars(stars);
 const updatedLabel = formatRelative(pushedAt);
@@ -191,7 +187,7 @@ const updatedLabel = formatRelative(pushedAt);
           </span>
         )}
         {healthLabel && (
-          <span class:list={["grove-badge", healthBadgeClass(healthStatusOrIndex)]}>
+          <span class:list={["grove-badge", healthBadgeClass(healthStatus)]}>
             {healthLabel}
           </span>
         )}

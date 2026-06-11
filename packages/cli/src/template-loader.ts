@@ -7,7 +7,7 @@
  * just works after `pnpm add @grove-dev/<framework>`.
  */
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -105,13 +105,15 @@ export function frameworkVersion(framework: Framework): string {
  * Copy a template directory into a project root. Honors `force: false`
  * by default so an existing project isn't clobbered.
  *
- * V1: when `targetRoot` already exists (and is empty, the typical
- * fresh-scaffold case), `mkdir(root, { recursive: true })` from the
- * `new` action creates it before we get here, which makes
- * `errorOnExist: true` reject with EEXIST. We let `cp` overwrite
- * the existing-but-empty dir silently rather than fail with a
- * confusing error. `force: true` callers (re-scaffold) get a real
- * failure when the dir is non-empty so we don't clobber work.
+ * V1: the `new` action runs `mkdir(root, { recursive: true })` before
+ * we get here, which means `targetRoot` already exists (and is empty)
+ * for a fresh scaffold. `cp` with `errorOnExist: true` would reject
+ * that empty dir with EEXIST, so we let `cp` overwrite it silently.
+ *
+ * The non-empty case is handled before the copy: a non-empty
+ * `targetRoot` with `force: false` raises up front (partial
+ * scaffolds are worse than a hard fail), and `force: true` proceeds
+ * and overwrites per `cp`'s `force: true` semantics.
  */
 export async function copyTemplate(
   framework: Framework,
@@ -120,6 +122,19 @@ export async function copyTemplate(
   options: { force?: boolean } = {},
 ): Promise<{ from: string; to: string; files: number }> {
   const from = templatePath(framework, name);
+  // Guard: refuse to silently produce a partial scaffold. Node's
+  // `cp` with `force: false` will skip existing files without
+  // raising — which is the worst possible outcome for a scaffolder
+  // (the user gets a half-populated project and no error).
+  if (existsSync(targetRoot)) {
+    const entries = readdirSync(targetRoot);
+    if (entries.length > 0 && !options.force) {
+      throw new Error(
+        `Target directory ${targetRoot} is not empty. ` +
+          `Re-run with force: true to overwrite, or pick a different target.`,
+      );
+    }
+  }
   await cp(from, targetRoot, {
     recursive: true,
     force: options.force ?? false,

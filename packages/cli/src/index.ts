@@ -596,9 +596,22 @@ program
       // Canonical repo URL: `repoUrl` first (the project-directory
       // canonical field per the schema), then fall back to
       // `links.github` for sites that only use the human-facing link.
+      // When both are present and disagree, warn loudly — a curator
+      // who updated only `links.github` and forgot `repoUrl` would
+      // otherwise see stale metadata with no explanation.
       const links = (raw.links as Record<string, string> | undefined) ?? {};
-      const repoUrl =
-        (raw.repoUrl as string | undefined) ?? links.github ?? null;
+      const rawRepoUrl = raw.repoUrl as string | undefined;
+      const linksGithub = links.github;
+      if (
+        rawRepoUrl &&
+        linksGithub &&
+        rawRepoUrl.trim() !== linksGithub.trim()
+      ) {
+        process.stderr.write(
+          `[sync github] ${file}: repoUrl "${rawRepoUrl}" and links.github "${linksGithub}" disagree — using repoUrl. Update repoUrl (or remove it) to silence this.\n`,
+        );
+      }
+      const repoUrl = rawRepoUrl ?? linksGithub ?? null;
       if (!repoUrl) {
         process.stdout.write(`[sync github] ${file}: no repoUrl or links.github, skipping\n`);
         continue;
