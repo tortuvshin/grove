@@ -54,6 +54,7 @@ export default defineConfig({
                     label: 'Concepts',
                     items: [
                         { label: 'Blueprints', slug: 'concepts/blueprints' },
+                        { label: 'Philosophy', slug: 'concepts/philosophy' },
                     ],
                 },
                 {
@@ -97,6 +98,15 @@ export default defineConfig({
                     label: 'Project',
                     items: [
                         { label: 'Roadmap', slug: 'roadmap' },
+                    ],
+                },
+                {
+                    label: 'Maintainers',
+                    items: [
+                        { label: 'Governance', slug: 'maintainers/governance' },
+                        { label: 'Release process', slug: 'maintainers/release-process' },
+                        { label: 'Contributing', slug: 'maintainers/contributing' },
+                        { label: 'Security', slug: 'maintainers/security' },
                     ],
                 },
             ],

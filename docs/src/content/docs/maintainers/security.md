@@ -1,0 +1,108 @@
+---
+title: Security
+description: The security policy for Grove — supported versions, how to report a vulnerability, what data is and is not collected.
+---
+
+This page documents the security posture of the Grove framework and the `@grove-dev/*` packages. If you maintain a *Grove-powered directory*, the same policy applies to your directory, with the maintainer team as the contact point. The complete policy lives in [`SECURITY.md`](https://github.com/grove-dev/grove/blob/main/SECURITY.md) at the repo root; this page is the summary.
+
+## Supported versions
+
+The six published packages (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`, `@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`) follow a single support window:
+
+| Version | Supported |
+|---|---|
+| `latest` | Active fixes + backports |
+| Previous minor | Critical fixes only, for 30 days after a new minor release |
+| Older | No fixes — please upgrade |
+
+In practice this means: if you're on `0.2.3` and `0.2.4` ships, you have 30 days of critical-only support on `0.2.3` before you should upgrade. After 30 days, you're on your own.
+
+To check which version your space is on:
+
+```bash
+pnpm ls -r --depth=-1 | grep "@grove-dev"
+```
+
+The output lists the installed version of every `@grove-dev/*` package in your workspace.
+
+## What counts as a vulnerability
+
+Three categories, in decreasing order of severity:
+
+1. **Code execution from data.** A malicious YAML record, a malicious markdown body, or a malicious URL in a record field that escapes the sandbox of a Grove space. This is the highest-priority class — a directory that displays untrusted records must not be able to execute the attacker's payload.
+2. **Build-time compromise.** A vulnerability in the CLI or a build step that allows a malicious record to compromise the developer machine or the CI runner.
+3. **Information disclosure.** A vulnerability that leaks data the user did not intend to expose — e.g., a record's content rendered on a page it shouldn't be on, a private config exposed via the build output.
+
+The framework is designed so that category 1 is hard. Records are parsed via Zod, not `eval`; URLs are passed through to the framework's link renderer, not directly to the browser; markdown bodies are rendered by a hardened pipeline. If you find a way around any of these, that's a category-1 report.
+
+## Reporting a vulnerability
+
+**Do not file a public issue.** Public disclosure before a fix is ready makes every Grove-powered space on the internet a target.
+
+Report privately by email to:
+
+> **toroo.byamba@gmail.com**
+
+Include, where possible:
+
+1. The affected package and version (e.g., `@grove-dev/cli@0.2.2`).
+2. A minimal reproduction — the smallest `grove.config.ts` + data + command that triggers the issue. A failing test case is even better.
+3. The expected behaviour and the actual behaviour.
+4. Whether the issue is exploitable from untrusted input (a forked data file, a third-party resource record, a user-submitted PR).
+5. Your contact info for follow-up questions. If you'd like to be credited in the release notes, say so.
+
+PGP-encrypted reports are not currently supported. The email is monitored by a maintainer; an out-of-band response (e.g., "we got your report") is sent within 72 hours.
+
+## What to expect after a report
+
+- **Acknowledgement** within **72 hours** of the report.
+- **Triage** within **7 days**: confirm, scope, decide on a fix plan.
+- **Fix** for critical issues as fast as we can responsibly ship — typically days, occasionally a week or two if the fix has migration implications.
+- **Coordinated disclosure** — the maintainer team agrees on a disclosure date with you so you can publish your own write-up at the same time.
+- **Credit** in the release notes (`CHANGELOG.md`) and the GitHub Security Advisory, unless you'd rather stay anonymous.
+
+For a category-1 report, the fix is usually shipped within 1-2 weeks. For category-2 and -3, the timeline is closer to a regular release.
+
+## What is in scope
+
+- **Any vulnerability in an `@grove-dev/*` package** that can be triggered by data in `data/`, a CLI command, a build step, or a runtime adapter.
+- **Issues that allow a malicious data record to escape the sandbox** of a Grove space (e.g., a YAML deserialization flaw in `@grove-dev/core`).
+- **Supply-chain issues** in the published packages' dependency tree.
+
+## What is out of scope
+
+- **Documentation typos and broken links.** Open a regular issue.
+- **Performance improvements** that don't have a security angle. Open a regular issue.
+- **The example directories under `examples/`.** Those are illustrative and not covered by the security policy; report bugs as regular issues.
+- **Vulnerabilities in third-party templates** (a downstream user's custom Astro template, for example). Those are the downstream maintainer's responsibility, not the framework's.
+
+## What data Grove does (and does not) collect
+
+Grove is a build-time tool. It does not phone home, log analytics, or collect telemetry. The only network calls the CLI makes are:
+
+1. **To the GitHub API** (`api.github.com`) — during `grove sync github`. The call uses the token resolved from `GITHUB_TOKEN` or `gh auth token`. No request goes anywhere else.
+2. **To `registry.npmjs.org`** — when you run `pnpm publish` (via the release script). The framework itself does not initiate this call.
+3. **To the host of any URL in a record's `links`** — when the rendered page is loaded in a browser. This is the user's browser, not the framework.
+
+A built site has no JavaScript that phones home unless the user adds it. The Astro template's `BaseLayout.astro` ships with no third-party scripts by default; any analytics integration is the user's choice.
+
+## Safe-harbour
+
+The maintainer team will not pursue legal action against security researchers who, in good faith, follow this policy: make a reasonable effort to avoid privacy violations, destruction of data, and interruption of services, and stop testing immediately if they confirm a vulnerability.
+
+The legal niceties aside, the practical posture is: we want the report, we want to fix it, and we want you to be comfortable sending it.
+
+## Past advisories
+
+Public security advisories are listed at [GitHub Security Advisories for this repo](https://github.com/grove-dev/grove/security/advisories). The list is empty in V1; it is the right place to look if you want to confirm a CVE.
+
+## For directory maintainers
+
+If you maintain a Grove-powered directory and want to mirror this policy:
+
+1. **Set up a private contact channel.** The framework uses email; a directory can use email, a security@ mailbox, or a GitHub Security Advisory. The point is *private* and *monitored*.
+2. **Define a support window.** The 30-day critical-fix window above is a reasonable default. Some directories extend it to 90 days; some narrow it to 14. Pick one and document it.
+3. **Tell your contributors.** Link the policy from your `README` and your `submit.astro` page. The easier it is to find, the more likely a researcher is to use it.
+4. **Have a back-up maintainer.** If the security contact is one person, an outage on their end is a vulnerability report with no acknowledgement. The framework's policy is owned by a maintainer team, not an individual.
+
+For a directory that processes untrusted record submissions (a "submit a record" form), the threat model is broader than the framework's. The framework protects you from a malicious record *rendering* badly; it does not protect you from a malicious record *being submitted* in the first place. Use GitHub's PR-based submission flow — the platform handles the abuse cases (rate limits, captchas, account age) for you.
