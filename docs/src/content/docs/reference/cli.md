@@ -1,472 +1,401 @@
 ---
-title: CLI reference
-description: Every Grove CLI command, every flag, every useful example.
+title: CLI
+description: Every grove command, every option, every output file. The V1 command surface.
 ---
 
-The Grove CLI is the operational entry point for a space. It scaffolds
-projects, imports records, validates the schema, runs the data pipeline,
-and orchestrates the framework's build and dev commands. This page
-documents every command in the V1 surface.
-
-The CLI is shipped as `@grove-dev/cli`. The fastest way to run it is
-`pnpm create grove` (which calls `grove new` under the hood), or you
-can install it as a dev dependency in any space:
+The Grove CLI is the `@grove-dev/cli` package. You can run it with
+`pnpm dlx` (no install required) or install it as a project
+dependency.
 
 ```bash
-pnpm add -D @grove-dev/cli
+pnpm dlx @grove-dev/cli@latest <command> [options]
 ```
 
-When installed in a space, run commands from the project root:
-
-```bash
-grove --help
-grove validate
-grove build
-```
-
-:::note[Command surface]
-The V1 command surface is small and stable:
-
-```txt
-grove new <name>      scaffold a new project (asks blueprint + framework)
-grove import <src>    turn an awesome list into records/*.yml
-grove validate        check records, taxonomy, health, decisions
-grove generate        build data/generated/records.{full,index}.json
-grove sitemap         write public/sitemap.xml
-grove llms            write public/llms.txt and llms-full.txt
-grove sync github     optional: enrich records with GitHub metadata
-grove cleanup stale   flag records that need human review
-grove workflows sync  sync Grove workflow templates into the project
-grove build           run the framework's build command
-grove dev             run the framework's dev server
-```
-:::
+This page documents every command, every option, and the files each
+command reads and writes. Commands are organized by lifecycle: set
+up a space, work with records, ship the site.
 
 ## `grove new`
 
-Scaffold a new Grove project from a framework template.
+Scaffold a new Grove space from a framework template.
 
-```bash
-grove new [name] [options]
-```
+**Syntax:** `grove new [<name>] [options]`
 
 **Arguments:**
 
-- `[name]` — project directory name. If omitted and `--yes` is not set, the
-  CLI prompts for a path. Pass `.` to scaffold into the current directory.
+| Argument | Description | Default |
+|---|---|---|
+| `<name>` | Project directory name. Omit to scaffold in the current directory. | `.` |
 
 **Options:**
 
-- `-b, --blueprint <name>` — one of `project-directory`, `resource-hub`,
-  `ecosystem-map`. The CLI rejects unknown values.
-- `-f, --framework <name>` — one of `astro`, `nextjs`, `svelte`. V1
-  supports `astro`; the other two are roadmap-only.
-- `-t, --template <name>` — template name. Defaults to `default`.
-- `-d, --deploy <provider>` — one of `vercel`, `netlify`, `cloudflare`,
-  `github-pages`, `none`. Determines which deploy workflow the scaffold
-  writes.
-- `-g, --github <mode>` — GitHub workflow mode: `none` (private, no
-  token) or `public` (community, token-gated sync). Defaults to `none`.
-- `--no-git` — skip `git init` after scaffolding.
-- `--no-install` — skip `pnpm install` after scaffolding.
-- `-y, --yes` — accept defaults for every prompt. Use in CI.
+| Option | Description | Default |
+|---|---|---|
+| `-b, --blueprint <name>` | `project-directory` \| `resource-hub` \| `ecosystem-map` | prompts |
+| `-f, --framework <name>` | `astro` \| `nextjs` \| `svelte` (V1 supports `astro` only) | prompts |
+| `-t, --template <name>` | Template name within the framework | `default` |
+| `-d, --deploy <provider>` | `vercel` \| `netlify` \| `cloudflare` \| `github-pages` \| `none` | prompts |
+| `-g, --github <mode>` | `none` (private/local) \| `public` (community site with sync workflows) | prompts |
+| `--no-git` | Skip `git init` after scaffolding | git init runs |
+| `--no-install` | Skip `pnpm install` after scaffolding | install runs |
+| `-y, --yes` | Accept defaults for every prompt (CI / scripted use) | prompts |
 
-**Examples:**
+**Reads:** nothing (creates a new directory).
+
+**Writes:**
+
+- `<name>/grove.config.ts`
+- `<name>/README.md`
+- `<name>/.gitignore`
+- `<name>/LICENSE`
+- `<name>/data/decisions.yml` (empty `decisions: []`)
+- `<name>/content/methodology.md`
+- `<name>/.github/workflows/validate-data.yml`
+- `<name>/.github/workflows/build.yml`
+- `<name>/.github/ISSUE_TEMPLATE/{record_submission,bug_report,feature_request}.md`
+- In `--github public` mode, additionally:
+  `<name>/.github/workflows/{sync-github-metadata,sync-contributors,cleanup-stale-records,update-records}.yml`,
+  `<name>/.github/ISSUE_TEMPLATE/report-broken-record.md`,
+  `<name>/.github/pull_request_template.md`
+
+**Example:**
 
 ```bash
-# Interactive scaffold
-grove new my-space
-
-# Non-interactive, the typical "I just want a working site" flow
-grove new my-space \
+pnpm dlx @grove-dev/cli@latest new my-space \
   --blueprint project-directory \
   --framework astro \
+  --github public \
   --deploy github-pages \
   --yes
-
-# Scaffold into the current directory
-grove new . --yes
-
-# Roadmap-only framework, no install
-grove new svelte-space --framework svelte --no-install
 ```
 
-After scaffolding, the CLI:
+**Common errors:**
 
-1. Copies the matching framework template into the target directory.
-2. Rewrites `workspace:*` dependencies to the published version (only
-   relevant inside the framework monorepo; external spaces pin to the
-   published version on `pnpm install`).
-3. Optionally runs `git init` and `pnpm install`.
+- `Unknown blueprint: <x>` — must be one of the three V1 blueprints.
+- `Unknown framework: <x>` — V1 supports `astro` only; `nextjs` and
+  `svelte` are accepted by the flag but their templates are bare
+  `package.json` and `grove build` will refuse to run them.
+- `Install failed` — the scaffold itself completed; run `pnpm install`
+  inside `<name>/` to retry.
 
 ## `grove import`
 
-Import Markdown links into `data/records/*.yml` for the current
-blueprint.
+Turn an awesome-list README (or any Markdown file full of links)
+into `data/records/*.yml`.
 
-```bash
-grove import <source>
-```
+**Syntax:** `grove import <source>`
 
 **Arguments:**
 
-- `<source>` — a GitHub awesome-list URL (`https://github.com/.../awesome-x`),
-  a raw README URL (`https://raw.githubusercontent.com/.../README.md`),
-  or a local `README.md` path.
+| Argument | Description |
+|---|---|
+| `<source>` | GitHub awesome-list URL (e.g. `https://github.com/avelino/awesome-go`), raw README URL, or path to a local `README.md` |
+
+**Options:** none.
+
+**Reads:**
+
+- `<source>` (URL or file)
+- `grove.config.ts` (for the configured blueprint and paths)
+
+**Writes:**
+
+- One `<slug>.yml` per detected record in `data/records/` (or
+  whatever `paths.recordsDir` is set to).
+- Records are written with `source: { type: "import" }` so you can
+  filter imported vs. hand-authored records later.
+
+**Example:**
+
+```bash
+grove import https://github.com/avelino/awesome-go
+grove import ./inbox/README.md
+```
 
 **Behavior:**
 
-The CLI parses the Markdown, extracts `name` and `url` pairs from
-list items, slugifies the names, and writes one YAML record per link
-into `data/records/`. The record's `kind` is set to match the space's
-blueprint, and the `source` block is set to `{ type: 'import' }`.
+- For `project-directory` spaces, each record gets `name`,
+  `description`, `category`, `tags`, and `links` from the
+  source. `stack`, `stacks`, `platforms`, `projectType` are left
+  empty for curators to fill in.
+- For `resource-hub` spaces, each record gets `title`, `type:
+  "link"`, `topic` (set from the category), and `links`.
+- For `ecosystem-map` spaces, each record gets `name`, `type:
+  "other"`, and `links`.
 
-**What it does not do:**
+**Common errors:**
 
-- It does not deduplicate against existing records. Run `grove validate`
-  afterwards to find collisions.
-- It does not enrich with GitHub metadata. Run `grove sync github` for
-  that.
-- It does not preserve descriptions that span multiple lines or that
-  are formatted in non-standard ways. Curators refine the imported
-  records after import.
-
-**Examples:**
-
-```bash
-# Import from a public awesome list
-grove import https://github.com/avelino/awesome-go
-
-# Import from a raw README URL
-grove import https://raw.githubusercontent.com/some-user/some-list/main/README.md
-
-# Import from a local file
-grove import ./awesome-list.md
-```
+- `Could not load config` — run from a directory with a
+  `grove.config.ts`.
+- Network errors fetching the URL — `import` does not retry; re-run
+  once the network is up.
 
 ## `grove validate`
 
-Validate project data files against the configured blueprint.
+Check records, taxonomy, health, and decisions against the
+configured blueprint's schema.
 
-```bash
-grove validate [--strict]
-```
+**Syntax:** `grove validate [--strict]`
 
 **Options:**
 
-- `--strict` — fail on warnings as well as errors. Without `--strict`,
-  warnings are reported but the command exits 0.
+| Option | Description |
+|---|---|
+| `--strict` | Fail the run (exit 1) on warnings as well as errors |
 
-**Behavior:**
+**Reads:**
 
-The CLI loads `grove.config.ts`, then walks:
+- `grove.config.ts`
+- `data/records/*.yml` (every record file)
+- `data/decisions.yml`
+- `data/health.yml` (legacy compatibility shape)
+- `data/overrides.yml`
 
-- Every YAML file under `data/records/`
-- The taxonomy files under `data/taxonomy/`
-- `data/health.yml`, `data/decisions.yml`, `data/overrides.yml`
+**Writes:** nothing. Exits 0 on success, 1 on errors.
 
-It checks:
+**Output:**
 
-- Schema validity against the discriminated `Resource` union.
-- `kind` matches the space's blueprint.
-- `category` is in `taxonomy/categories.yml`.
-- `topic` (on `resource` records) is in `taxonomy/topics.yml`.
-- Decision `id`s reference real record slugs.
-- Override `id`s reference real record slugs.
+```
+✖ <code>: <file>: <message>
+⚠ <code>: <file>: <message>
+Validation passed.
+Validation passed with N warning(s).
+Validation failed with N error(s) and M warning(s).
+```
 
-The command prints errors with `✖` and warnings with `⚠`, and exits
-non-zero if any errors are present (or, with `--strict`, if any
-warnings are present).
-
-**Examples:**
+**Example:**
 
 ```bash
-# Standard validation
 grove validate
-
-# Treat warnings as errors
 grove validate --strict
 ```
 
+**Use this in CI.** The `validate-data.yml` workflow the CLI
+generates runs `grove validate` on every PR.
+
 ## `grove generate`
 
-Build the data files the framework template consumes.
+Build the data files the renderer reads.
 
-```bash
-grove generate
+**Syntax:** `grove generate`
+
+**Reads:**
+
+- `grove.config.ts`
+- `data/records/*.yml`
+- `data/decisions.yml`
+- `data/health.yml` (legacy)
+
+**Writes:**
+
+- `data/generated/records.full.json` — every record, every field.
+- `data/generated/records.index.json` — slim projection with only
+  the fields the list/detail pages need.
+- `data/generated/records.json` — alias for `records.full.json`,
+  for tools that expect a stable filename.
+- `data/generated/site-config.json` — site name, tagline, nav, theme.
+
+**Output:**
+
+```
+[generate] 42 total, 38 visible
+  full:  data/generated/records.full.json
+  index: data/generated/records.index.json
+  alias: data/generated/records.json
 ```
 
-**Behavior:**
-
-Reads every record, applies `decisions.yml` and `overrides.yml`,
-projects each record through `toIndexRecord()`, and writes:
-
-- `data/generated/records.full.json` — every record, with the full
-  shape (including the GitHub enrichment block, distribution channels,
-  curation notes). Used by detail pages.
-- `data/generated/records.index.json` — a slimmer projection. Used by
-  list, search, and filter pages.
-- `data/generated/alias.json` — a slug → record map for cross-references.
-
-The command reports total vs. visible counts (a record with
-`visibility: hide` or `remove` is in the full file but not the index
-file).
-
-**Examples:**
-
-```bash
-# Generate
-grove generate
-
-# Typical iteration loop
-grove validate && grove generate
-```
+`visible` is the count of records whose effective visibility is
+`keep` or `highlight` after `decisions.yml` overrides are applied.
 
 ## `grove sitemap`
 
-Generate `public/sitemap.xml` from the index file.
+Write `public/sitemap.xml` from the generated records.
 
-```bash
-grove sitemap
-```
+**Syntax:** `grove sitemap`
 
-**Behavior:**
+**Reads:**
 
-Reads `data/generated/records.full.json`, filters by visibility
-(defaults to `keep` and `highlight`), and writes a sitemap to
-`public/sitemap.xml`. The sitemap includes the site root, the index
-pages (one per category, topic, or tag), and a `<url>` entry for every
-visible record.
+- `grove.config.ts`
+- `data/generated/records.full.json`
 
-The generated `lastmod` is the most recent of the record's `lastCommitAt`
-(from GitHub metadata), `addedAt` (set when the record was first
-imported), and the build's `generatedAt`.
+**Writes:**
 
-**Examples:**
+- `public/sitemap.xml`
 
-```bash
-# Generate the sitemap
-grove sitemap
-```
+**Output:** `[sitemap] wrote 38 URLs → public/sitemap.xml`
 
 ## `grove llms`
 
-Generate `public/llms.txt` and `public/llms-full.txt`.
+Write the LLM-friendly index files (`llms.txt` and
+`llms-full.txt`).
 
-```bash
-grove llms
-```
+**Syntax:** `grove llms`
 
-**Behavior:**
+**Reads:**
 
-LLM-friendly indexes of the space:
+- `grove.config.ts`
+- `data/generated/records.full.json`
 
-- `llms.txt` — a compact, human-readable summary: site name, tagline,
-  blueprint, count of visible records, and a one-line per record.
-- `llms-full.txt` — the full record set, with description, category,
-  tags, links, and GitHub stats. Useful for AI assistants that need
-  structured context.
+**Writes:**
 
-Both files are generated from the index projection — visibility
-`hide` and `remove` are excluded.
+- `public/llms.txt` — one-line-per-record index, suitable for
+  LLM ingestion.
+- `public/llms-full.txt` — full record bodies concatenated.
 
-**Examples:**
+**Output:** `[llms] 38 indexed → public/llms.txt + public/llms-full.txt`
 
-```bash
-# Generate llms.txt
-grove llms
-```
+## `grove sync github`
 
-## `grove sync`
+Enrich records with live GitHub metadata (stars, forks, last
+commit, license, language, topics).
 
-Optional GitHub integration: enrich records with GitHub metadata.
-
-```bash
-grove sync <target> [--limit <n>] [--strict]
-```
-
-**Arguments:**
-
-- `<target>` — one of `github` or `contributors`. V1 implements
-  `github`; `contributors` is a placeholder that prints a "not yet
-  implemented" message and exits 0.
+**Syntax:** `grove sync github [--limit <n>] [--strict]`
 
 **Options:**
 
-- `--limit <n>` — limit the number of records to sync. Useful as a
-  rate-limit guard. Without `--limit`, the CLI syncs every record.
-- `--strict` — fail the run if any record could not be synced.
+| Option | Description |
+|---|---|
+| `--limit <n>` | Sync only the first `n` records (alphabetical by filename). Useful as a rate-limit guard. |
+| `--strict` | Fail the run (exit 1) if any record could not be synced (API + HTML fallback both failed) |
+
+**Reads:**
+
+- `data/records/*.yml` (one at a time)
+
+**Writes:**
+
+- Each successfully synced record is rewritten with a
+  `github.repository` block (API success) or a partial
+  `github.html` block (HTML fallback), plus a `github.sync` block
+  with `syncedAt` and `source: "api" | "html"`.
+- Records with no `repoUrl` or unparseable URLs are skipped
+  (printed to stdout).
+
+**Output:**
+
+```
+[sync github] owner/repo ... updated
+[sync github] owner/repo ... html-fallback
+[sync github] owner/repo ... skipped (api+html error)
+[sync github] 35 updated (5 html-only), 2 failed
+```
 
 **Behavior:**
 
-For every record with a `links.github` URL, the CLI fetches the
-GitHub API metadata (stars, forks, language, license, latest release,
-monthly commits) and writes the result into the record's `github:`
-block. On API failure, the CLI falls back to an HTML scrape. On
-both failures, the record is skipped (or, with `--strict`, the run
-fails).
+- `repoUrl` is the canonical field. If `repoUrl` and `links.github`
+  disagree, `repoUrl` wins and a warning is printed.
+- API hits `https://api.github.com/repos/<owner>/<repo>`. On rate
+  limit or transient failure, falls back to scraping the repo page
+  HTML for license, language, topics, and homepage.
+- Records with `repoUrl` pointing at a non-GitHub host are
+  unparseable and skipped.
 
-`grove sync github` does not touch `data/health.yml` directly. The
-health derivation is run as part of `grove generate`, which reads the
-just-updated `github:` blocks and writes `data/health.yml` as a
-build artifact.
+## `grove sync contributors`
 
-**Examples:**
+**Status: stub in V1.**
 
-```bash
-# Sync every record
-grove sync github
+**Syntax:** `grove sync contributors`
 
-# Sync a small batch (rate-limit guard)
-grove sync github --limit 25
+**Behavior:** prints `[sync contributors] contributor sync is not yet
+implemented in V1.` and exits 0. The full contributor-sync
+workflow is generated by `grove new --github public` but the
+implementation is a V1.1 feature.
 
-# Fail the run on any sync failure
-grove sync github --strict
-```
-
-## `grove cleanup`
+## `grove cleanup stale`
 
 List records that need human curation.
 
-```bash
-grove cleanup <target> [--report] [--strict]
-```
-
-**Arguments:**
-
-- `<target>` — only `stale` is supported in V1. Unknown values produce
-  an error.
+**Syntax:** `grove cleanup stale [--report] [--strict]`
 
 **Options:**
 
-- `--report` — produce a report (default behavior in V1, kept for
-  forward compatibility).
-- `--strict` — fail the run if any candidates need curation. Useful in
-  CI: a PR that introduces a stale record breaks the build until a
-  curator reviews it.
+| Option | Description |
+|---|---|
+| `--report` | Produce a report (default behavior in V1) |
+| `--strict` | Fail the run (exit 1) if any candidates need curation |
 
-**Behavior:**
+**Reads:**
 
-Reads `data/health.yml` and the in-memory record set, then lists every
-record where `cleanupCandidate: true` — that is, every record with
-`status: stale`, `archived`, `inactive`, or `unavailable`. The output
-is a per-record line with slug, status, and (if available) star count.
+- `data/records/*.yml`
+- `data/generated/records.full.json` (if present)
 
-The command writes a JSON report alongside the console output. The
-report's path is printed; it is gitignored by default.
+**Writes:**
 
-**Examples:**
+- `data/generated/cleanup-report.json` — machine-readable list of
+  candidates.
 
-```bash
-# List cleanup candidates
-grove cleanup stale
+**Output:**
 
-# Fail in CI if anything needs review
-grove cleanup stale --strict
+```
+[cleanup stale] 5 candidate(s) → data/generated/cleanup-report.json
+  - old-tool (inactive, 12★)
+  - abandoned-app (archived, 304★)
+  - ...
 ```
 
-## `grove workflows`
+**Behavior:** `cleanup-stale-records.yml` workflow runs this on a
+weekly cron and opens a PR with the report. The CLI does not
+delete or hide records — that is a curator's call, made via
+`decisions.yml`.
 
-Sync Grove workflow templates into the current project.
+## `grove workflows sync`
 
-```bash
-grove workflows sync [--force]
-```
+Re-emit the GitHub workflow files. Useful when you upgrade the CLI
+and want the new workflow files, or when you change
+`integrations.github` mode.
 
-**Arguments:**
-
-- `<action>` — only `sync` is supported in V1. Unknown actions
-  produce an error.
+**Syntax:** `grove workflows sync [--force]`
 
 **Options:**
 
-- `--force` — overwrite existing workflow files. Without `--force`,
-  the command skips files that already exist.
+| Option | Description |
+|---|---|
+| `--force` | Overwrite existing workflow files |
 
-**Behavior:**
+**Reads:**
 
-Reads the `integrations.github` field from `grove.config.ts` to decide
-which workflows to write. The `none` mode writes a minimal set
-(`validate-data.yml`, `build.yml`); the `public` mode adds
-`sync-github-metadata.yml`, `sync-contributors.yml`,
-`cleanup-stale-records.yml`, `update-records.yml`, and the issue / PR
-templates.
+- `grove.config.ts` (for the GitHub integration mode)
 
-Use this command after upgrading the CLI to pick up new workflow
-templates. The command is idempotent — re-running it does not
-overwrite your customizations, unless `--force` is passed.
+**Writes:**
 
-**Examples:**
+- `.github/workflows/validate-data.yml`
+- `.github/workflows/build.yml`
+- In `public` mode, also:
+  `.github/workflows/{sync-github-metadata,sync-contributors,cleanup-stale-records,update-records}.yml`,
+  `.github/ISSUE_TEMPLATE/report-broken-record.md`,
+  `.github/pull_request_template.md`.
 
-```bash
-# Sync the latest workflow templates
-grove workflows sync
-
-# Force-overwrite (use after a CLI upgrade)
-grove workflows sync --force
-```
+By default, existing files are **not** overwritten. Use `--force`
+to replace them with the current templates.
 
 ## `grove build`
 
-Build the static site in the current project repo.
+Build the static site. Detects the framework from `package.json`
+and delegates to the framework's own build command.
 
-```bash
-grove build
-```
+**Syntax:** `grove build`
 
 **Behavior:**
 
-Detects the framework from `package.json` (currently `astro`,
-`nextjs`, or `svelte`) and runs the framework's build command. The
-V1 default is `astro build`. The CLI does not run the data pipeline
-itself — call `grove validate` and `grove generate` first, or wrap
-the full pipeline in your CI workflow.
-
-**Examples:**
-
-```bash
-# Standard build
-grove build
-```
+- Reads `<root>/package.json` to detect `@grove-dev/astro`,
+  `@grove-dev/nextjs`, or `@grove-dev/svelte`.
+- Runs `astro build`, `next build`, or `vite build` accordingly.
+- **V1 only Astro is fully supported.** Next.js and SvelteKit
+  scaffolds will pass `grove new` but `grove build` will exit 1
+  with "Next.js and SvelteKit are roadmap-only in V1."
 
 ## `grove dev`
 
-Start the framework dev server in the current project repo.
+Start the framework dev server.
 
-```bash
-grove dev
-```
+**Syntax:** `grove dev`
 
-**Behavior:**
+Same framework detection as `grove build`. V1 only Astro is
+supported.
 
-Detects the framework and runs the dev server (`astro dev`, `next dev`,
-`vite dev`, ...). The dev server picks up changes to record YAMLs on
-reload, so the iteration loop is `edit record → save → reload tab`.
+## Related docs
 
-**Examples:**
-
-```bash
-# Start the dev server
-grove dev
-```
-
-## Global options
-
-- `-V, --version` — print the CLI version.
-- `-h, --help` — print the command-specific help.
-
-## Exit codes
-
-- `0` — success (or warnings, unless `--strict` was passed).
-- `1` — validation, sync, or cleanup failure.
-- Non-zero on `grove new` if the scaffold target is not writable, or
-  the blueprint / framework / deploy choice is unknown.
-
-## Environment variables
-
-- `GITHUB_TOKEN` — used by `grove sync github` for authenticated
-  requests. Without it, the CLI falls back to anonymous requests
-  (60.5 req/hr) and an HTML scrape on rate-limit. Set this in CI
-  for a 5000 req/hr budget.
-- `GROVE_NO_COLOR` — disable colored output. The CLI also respects
-  `NO_COLOR` and non-TTY stdout.
+- **[grove.config.ts reference](/reference/config/)** — every
+  config field, every default.
+- **[Record schema](/reference/record-schema/)** — the schema
+  `grove validate` and `grove generate` work against.
