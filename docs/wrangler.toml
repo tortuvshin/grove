@@ -1,0 +1,21 @@
+# Cloudflare Pages configuration for the Grove documentation site.
+#
+# The docs is a static Astro site that builds to ./dist. Cloudflare Pages
+# serves the static output directly — no @astrojs/cloudflare adapter and
+# no Pages Functions are needed.
+#
+# This file exists to:
+#   1. Tell Cloudflare Pages where the built site lives
+#      (pages_build_output_dir).
+#   2. Disable wrangler's automatic Astro detection. Without this file,
+#      wrangler injects @astrojs/cloudflare into astro.config.mjs, and
+#      that adapter's vite plugin transitively requires `prismjs` (a
+#      devDependency of @astrojs/cloudflare, not bundled with it),
+#      producing: "Cannot find package 'prismjs' imported from
+#      .../@astrojs/cloudflare/dist/vite-plugin-prism.js".
+
+name = "grove-docs"
+pages_build_output_dir = "./dist"
+
+[build]
+command = "npm run build"
