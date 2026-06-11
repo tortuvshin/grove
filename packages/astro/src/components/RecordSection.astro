@@ -1,17 +1,22 @@
 ---
 /**
- * AppSection — a titled "lens" of records on the home page.
+ * RecordSection — a titled "lens" of records on the home page.
  *
  * Renders a SectionHeader + a 3-column grid of `ItemCard`s, with an
  * optional "View all" link in the header. Generic: passes the
  * record list + per-record href through to `ItemCard`.
  *
  * The component is the workhorse of the home page — featured, hot,
- * new, mature, "by category", "by stack" — all of them are just an
- * `AppSection` with a different `id` + `title` + sliced list.
+ * new, mature, "by category", "by stack" — all of them are just a
+ * `RecordSection` with a different `id` + `title` + sliced list.
+ *
+ * V1: items are `IndexProjectRecord`s (the slim list-page shape).
+ * Other blueprints (`resource-hub`, `ecosystem-map`) can pass their
+ * own `IndexResourceRecord` / `IndexEntityRecord` arrays; the
+ * component does not branch on the kind.
  */
 
-import type { Resource } from "@grove-dev/core";
+import type { IndexProjectRecord } from "@grove-dev/core";
 import ItemCard from "./ItemCard.astro";
 import SectionHeader from "../layouts/SectionHeader.astro";
 
@@ -20,9 +25,9 @@ interface Props {
   id: string;
   title: string;
   description?: string;
-  items: Resource[];
+  items: IndexProjectRecord[];
   /** Detail page href builder. */
-  hrefFor: (record: Resource) => string;
+  hrefFor: (record: IndexProjectRecord) => string;
   /** Optional "View all" link rendered in the header. */
   viewAllHref?: string;
   viewAllLabel?: string;

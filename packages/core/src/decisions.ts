@@ -4,7 +4,6 @@ import { parse as parseYaml } from "yaml";
 import {
   blueprintKind,
   recordsFileSchema,
-  unwrapRecords,
   type GroveConfig,
   type Resource,
 } from "./schema.js";
@@ -85,7 +84,7 @@ export async function cleanupStale(
     const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
     if (!raw.kind) raw.kind = expectedKind;
     try {
-      const normalized = unwrapRecords(recordsFileSchema.parse([raw]))[0];
+      const normalized = recordsFileSchema.parse(raw);
       normalized.slug = fileSlug;
       records.push(normalized);
     } catch {
