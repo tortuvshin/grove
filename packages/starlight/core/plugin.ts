@@ -13,7 +13,7 @@ const parseConfig = (userConfig?: LucodeStarlightUserConfig): LucodeStarlightCon
 
     if (!parsedConfig.success) {
         throw new Error(
-            `The provided plugin configuration for lucode-starlight is invalid.\n${parsedConfig.error.issues.map((issue) => issue.message).join('\n')}`
+            `The provided plugin configuration for @grove-dev/starlight is invalid.\n${parsedConfig.error.issues.map((issue) => issue.message).join('\n')}`
         );
     }
 
@@ -29,9 +29,9 @@ const plugin = (userConfig?: LucodeStarlightUserConfig): StarlightPlugin =>
                     components: override(config, COMPONENT_OVERRIDES, logger),
                     customCss: [
                         ...(config.customCss ?? []),
-                        'lucode-starlight/styles/layers',
-                        'lucode-starlight/styles/theme',
-                        'lucode-starlight/styles/base',
+                        '@grove-dev/starlight/styles/layers',
+                        '@grove-dev/starlight/styles/theme',
+                        '@grove-dev/starlight/styles/base',
                     ],
                     expressiveCode: expressiveCode(config),
                 });
