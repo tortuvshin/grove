@@ -31,17 +31,17 @@ export function override(
     const components = { ...starlightConfig.components };
     for (const override of overrides) {
         if (starlightConfig.components?.[override] != null) {
-            const fallback = `lucode-starlight/components/overrides/${override}.astro`;
+            const fallback = `@grove-dev/starlight/components/overrides/${override}.astro`;
 
             logger.warn(
                 `A \`<${override}>\` component override is already defined in your Starlight configuration.`
             );
             logger.warn(
-                `To use \`lucode-starlight/components\`, either remove this override or manually render the content from \`${fallback}\`.`
+                `To use \`@grove-dev/starlight/components\`, either remove this override or manually render the content from \`${fallback}\`.`
             );
             continue;
         }
-        components[override] = `lucode-starlight/components/overrides/${override}.astro`;
+        components[override] = `@grove-dev/starlight/components/overrides/${override}.astro`;
     }
 
     return components;
