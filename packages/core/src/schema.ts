@@ -60,6 +60,8 @@ export const decisionVisibilitySchema = z.enum([
   "historical",
 ]);
 
+export type DecisionVisibility = z.infer<typeof decisionVisibilitySchema>;
+
 export const healthTierSchema = z.enum([
   "curated",
   "listed",
@@ -418,13 +420,21 @@ export const resourceSchema = z.discriminatedUnion("kind", [
 export type Resource = z.infer<typeof resourceSchema>;
 
 // ──────────────────────────────────────────────────────────────────────
-// Records file (one or many resources per file is also supported)
+// Records file (V1: one resource per file)
 // ──────────────────────────────────────────────────────────────────────
+//
+// V1 is intentionally narrow: one YAML file = one resource. The
+// filename (minus `.yml`) is the canonical slug. This keeps PR
+// review clean, removes an entire class of "which slug wins" bugs,
+// and matches what every contributor actually wants to read.
+//
+// The previous "array or { records: [...] }" shape leaked into the
+// parser and forced every consumer to call `unwrapRecords`. The
+// `resourceSchema.parse(raw)` call below is now a direct mapping
+// parse; multi-record files are a V2 feature and will live behind
+// a separate `recordsBundleSchema`.
 
-export const recordsFileSchema = z.union([
-  z.array(resourceSchema),
-  z.object({ records: z.array(resourceSchema) }),
-]);
+export const recordsFileSchema = resourceSchema;
 
 export type RecordsFile = z.infer<typeof recordsFileSchema>;
 
@@ -546,10 +556,6 @@ export type Links = z.infer<typeof linksSchema>;
 // Helpers
 // ──────────────────────────────────────────────────────────────────────
 
-export function unwrapRecords(value: RecordsFile): Resource[] {
-  return Array.isArray(value) ? value : value.records;
-}
-
 export function unwrapHealth(value: HealthFile): HealthEntry[] {
   return Array.isArray(value) ? value : value.health;
 }
@@ -633,12 +639,111 @@ export function validateRecord(
   }
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Index payload types (records.index.json / records.full.json)
+// ──────────────────────────────────────────────────────────────────────
+//
+// The slim projection `toIndexRecord` is the single source of truth
+// for what ends up in `data/generated/records.index.json`. Adapters
+// consume it as a discriminated union keyed by `kind`, so the type
+// helpers below let a page write
+//
+//   if (r.kind === "project") { r.github.stars }
+//
+// without a `as ProjectRecord` cast. Projections are deliberately
+// readonly; pages must not mutate the index payload.
+
+export interface IndexBase {
+  slug: string;
+  kind: ResourceKind;
+  category: string;
+  tags: string[];
+  links: Links;
+  description: string;
+  content?: string;
+  curation: ProjectRecord["curation"];
+}
+
+export interface IndexGithubSummary {
+  fullName: string | undefined;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  language: string | null;
+  pushedAt: string | null;
+  archived: boolean;
+  license: string | null;
+  topics: string[];
+}
+
+export interface IndexProjectRecord extends IndexBase {
+  kind: "project";
+  name: string;
+  stack: ProjectRecord["stack"];
+  stacks: string[];
+  platforms: string[];
+  projectType: ProjectRecord["projectType"];
+  repoUrl: ProjectRecord["repoUrl"];
+  logoUrl: ProjectRecord["logoUrl"];
+  difficulty: ProjectRecord["difficulty"];
+  codebaseSize: ProjectRecord["codebaseSize"];
+  bestFor: string[];
+  whyListed: string[];
+  caveats: string[];
+  health: ProjectRecord["health"];
+  /** Effective visibility — decisions.yml overrides win over health. */
+  visibility: DecisionVisibility;
+  github: IndexGithubSummary | undefined;
+}
+
+export interface IndexResourceRecord extends IndexBase {
+  kind: "resource";
+  title: string;
+  type: ResourceRecord["type"];
+  topic: string;
+  related: string[];
+  publishedAt: ResourceRecord["publishedAt"];
+  author: ResourceRecord["author"];
+}
+
+export interface IndexEntityRecord extends IndexBase {
+  kind: "entity";
+  name: string;
+  type: EntityRecord["type"];
+  founded: EntityRecord["founded"];
+  location: EntityRecord["location"];
+  members: EntityRecord["members"];
+  parent: EntityRecord["parent"];
+}
+
+export type IndexRecord =
+  | IndexProjectRecord
+  | IndexResourceRecord
+  | IndexEntityRecord;
+
+export function isIndexProject(r: IndexRecord): r is IndexProjectRecord {
+  return r.kind === "project";
+}
+export function isIndexResource(r: IndexRecord): r is IndexResourceRecord {
+  return r.kind === "resource";
+}
+export function isIndexEntity(r: IndexRecord): r is IndexEntityRecord {
+  return r.kind === "entity";
+}
+
 /**
  * Project a Resource to a stable, search-index-friendly summary
  * object. Strips out blueprint-specific heavy fields and leaves
  * only what the public list/detail UIs need.
+ *
+ * The return type is the discriminated `IndexRecord` union. The
+ * function body uses a single `kind` literal cast per branch
+ * because the `record.kind` is a `ResourceKind` (the union of
+ * all three) and TypeScript cannot narrow the literal from a
+ * runtime check alone. The casts are safe because each branch
+ * is gated on the literal string compare.
  */
-export function toIndexRecord(record: Resource): Record<string, unknown> {
+export function toIndexRecord(record: Resource): IndexRecord {
   const base = {
     slug: record.slug,
     kind: record.kind,
@@ -651,65 +756,71 @@ export function toIndexRecord(record: Resource): Record<string, unknown> {
   };
 
   if (record.kind === "project") {
+    const r = record;
     return {
       ...base,
-      name: record.name,
-      stack: record.stack,
-      stacks: record.stacks ?? [],
-      platforms: record.platforms ?? [],
-      projectType: record.projectType,
-      repoUrl: record.repoUrl,
-      logoUrl: record.logoUrl,
-      difficulty: record.difficulty,
-      codebaseSize: record.codebaseSize,
-      bestFor: record.bestFor,
-      whyListed: record.whyListed,
-      caveats: record.caveats,
+      kind: "project" as const,
+      name: r.name,
+      stack: r.stack,
+      stacks: r.stacks ?? [],
+      platforms: r.platforms ?? [],
+      projectType: r.projectType,
+      repoUrl: r.repoUrl,
+      logoUrl: r.logoUrl,
+      difficulty: r.difficulty,
+      codebaseSize: r.codebaseSize,
+      bestFor: r.bestFor,
+      whyListed: r.whyListed,
+      caveats: r.caveats,
       // Health surfaced alongside the record so list/detail UIs can
       // show staleness/curation tier without a second lookup.
-      health: record.health,
+      health: r.health,
       // Visibility comes from either the health block (auto-derived
       // from signals) or the curation override (`decisions.yml`).
       // The generate step folds the latter in before serialising,
       // so this is a best-effort projection of the current state.
-      visibility: record.health?.visibility ?? "keep",
-      github: record.github?.repository
+      visibility: r.health?.visibility ?? "keep",
+      github: r.github?.repository
         ? {
-            fullName: record.github.repository.full_name,
-            stars: record.github.repository.stargazers_count ?? 0,
-            forks: record.github.repository.forks_count ?? 0,
-            openIssues: record.github.repository.open_issues_count ?? 0,
-            language: record.github.repository.language ?? null,
-            pushedAt: record.github.repository.pushed_at ?? null,
-            archived: Boolean(record.github.repository.archived),
-            license: record.github.repository.license?.spdx_id ?? null,
-            topics: record.github.repository.topics ?? [],
+            fullName: r.github.repository.full_name,
+            stars: r.github.repository.stargazers_count ?? 0,
+            forks: r.github.repository.forks_count ?? 0,
+            openIssues: r.github.repository.open_issues_count ?? 0,
+            language: r.github.repository.language ?? null,
+            pushedAt: r.github.repository.pushed_at ?? null,
+            archived: Boolean(r.github.repository.archived),
+            license: r.github.repository.license?.spdx_id ?? null,
+            topics: r.github.repository.topics ?? [],
           }
         : undefined,
     };
   }
 
   if (record.kind === "resource") {
+    const r = record;
     return {
       ...base,
-      title: record.title,
-      type: record.type,
-      topic: record.topic,
-      related: record.related,
-      publishedAt: record.publishedAt,
-      author: record.author,
+      kind: "resource" as const,
+      title: r.title,
+      type: r.type,
+      topic: r.topic,
+      related: r.related,
+      publishedAt: r.publishedAt,
+      author: r.author,
     };
   }
 
   // entity
+  const e = record;
   return {
     ...base,
-    name: record.name,
-    type: record.type,
-    founded: record.founded,
-    location: record.location,
-    members: record.members,
-    parent: record.parent,
+    kind: "entity" as const,
+    name: e.name,
+    type: e.type,
+    founded: e.founded,
+    location: e.location,
+    members: e.members,
+    parent: e.parent,
   };
 }
 

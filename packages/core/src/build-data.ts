@@ -5,11 +5,64 @@ import {
   blueprintKind,
   recordsFileSchema,
   toIndexRecord,
-  unwrapRecords,
+  unwrapDecisions,
+  decisionsFileSchema,
   type GroveConfig,
   type Resource,
 } from "./schema.js";
 import { loadConfig } from "./config.js";
+
+/**
+ * Apply a minimal decisions.yml override to a normalized record. The
+ * human curation layer is the single source of truth for visibility:
+ *   - decision.visibility (when present) wins over record.health.visibility
+ *   - all other record fields are untouched
+ *
+ * The full override pipeline (with reasons surfaced in the index
+ * payload) is a V2 feature; V1 keeps the merge intentional and small.
+ *
+ * Only project records carry a `health` block in the V1 schema; the
+ * override is therefore only applied to projects. resource-hub and
+ * ecosystem-map blueprints are not yet wired with maintenance
+ * signals, so the decision file's visibility for those blueprints
+ * is a no-op (the record always shows up).
+ */
+function applyDecision(
+  record: Resource,
+  visibilityById: Map<string, string>,
+): Resource {
+  const override = visibilityById.get(record.slug);
+  if (!override || record.kind !== "project") return record;
+  const existing = record.health;
+  const fallback = {
+    status: "unknown" as const,
+    maturity: "unknown" as const,
+    tier: "listed" as const,
+    visibility: "keep" as const,
+    cleanupCandidate: false,
+    staleReason: null,
+    confidence: "medium" as const,
+    reasons: [] as string[],
+  };
+  const merged = { ...(existing ?? fallback), visibility: override as typeof fallback.visibility };
+  return { ...record, health: merged };
+}
+
+async function loadDecisionVisibility(
+  decisionsPath: string,
+): Promise<Map<string, string>> {
+  try {
+    const raw = await readFile(resolve(process.cwd(), decisionsPath), "utf8");
+    const parsed = decisionsFileSchema.parse(parseYaml(raw) ?? {});
+    const decisions = unwrapDecisions(parsed);
+    const out = new Map<string, string>();
+    for (const d of decisions) out.set(d.id, d.decision.visibility);
+    return out;
+  } catch {
+    // missing or invalid decisions.yml → no overrides
+    return new Map();
+  }
+}
 
 /**
  * The full payload written to data/generated/records.full.json.
@@ -89,6 +142,9 @@ export async function generate(
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
 
+  // Load human curation decisions once; missing file → empty map.
+  const visibilityById = await loadDecisionVisibility(cfg.paths.decisions);
+
   const out: Resource[] = [];
   const errors: string[] = [];
   for (const file of files) {
@@ -97,9 +153,12 @@ export async function generate(
       const text = await readFile(join(recordsDir, file), "utf8");
       const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
       if (!raw.kind) raw.kind = expectedKind;
-      const normalized = unwrapRecords(recordsFileSchema.parse([raw]))[0];
+      const normalized = recordsFileSchema.parse(raw);
       normalized.slug = fileSlug;
-      out.push(normalized);
+      // Apply decisions.yml visibility override on top of the record.
+      // The index payload then derives visibility from record.health,
+      // which is now the merged result.
+      out.push(applyDecision(normalized, visibilityById));
     } catch (err) {
       errors.push(`${file}: ${(err as Error).message}`);
     }

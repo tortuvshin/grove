@@ -39,7 +39,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\"",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"No cli package tests yet\"",
     "dev": "tsx src/index.ts --help"

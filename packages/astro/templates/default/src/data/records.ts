@@ -10,16 +10,14 @@
  *     `whyListed`, `caveats`, full `github.repository`, ...).
  *     Use this for the detail page.
  *   - `records.index.json`  — slim projection, visible-only. Use
- *     this for the list page and any home-page sectioning.
+ *     this for the list page and any home-page sectioning. Shape
+ *     is the `IndexRecord` discriminated union from `@grove-dev/core`.
  *   - `records.json`        — alias of `records.full.json`.
  *
  * The YML files are the human-edited source; this module is a
  * typed re-export so pages can import the records without parsing
- * JSON inline. The shape is the V1 discriminated union from
- * `@grove-dev/core` — records have a `kind` field that selects
- * `ProjectRecord`, `ResourceRecord`, or `EntityRecord`. Pages cast
- * to the kind they expect based on the blueprint in
- * `grove.config.ts`.
+ * JSON inline. Pages cast to the kind they expect based on the
+ * blueprint in `grove.config.ts`.
  *
  * When the JSON files are missing (e.g. before `grove generate`
  * runs, or in a fresh scaffold with no records) this module falls
@@ -29,9 +27,18 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import type { ProjectRecord, ResourceRecord, EntityRecord, Resource } from "@grove-dev/core";
+import type {
+  ProjectRecord,
+  ResourceRecord,
+  EntityRecord,
+  Resource,
+  IndexRecord,
+  IndexProjectRecord,
+  IndexResourceRecord,
+  IndexEntityRecord,
+} from "@grove-dev/core";
 
-interface RecordsPayload {
+interface FullPayload {
   schemaVersion?: number;
   blueprint?: string;
   generatedAt?: string;
@@ -40,7 +47,15 @@ interface RecordsPayload {
   records?: Resource[];
 }
 
-function loadGenerated(filename: string): Resource[] {
+interface IndexPayload {
+  schemaVersion?: number;
+  blueprint?: string;
+  generatedAt?: string;
+  totalRecords?: number;
+  records?: IndexRecord[];
+}
+
+function loadGenerated<T>(filename: string, parser: (raw: string) => T): T {
   // The Astro build resolves JSON imports from `src/data/*.ts`, but
   // we want to be defensive about the order of operations: a fresh
   // scaffold runs `astro build` without first running
@@ -55,17 +70,38 @@ function loadGenerated(filename: string): Resource[] {
       resolve(process.cwd(), "data", "generated", filename),
     ];
     const path = candidates.find((p) => existsSync(p));
-    if (!path) return [];
-    const raw = readFileSync(path, "utf8");
-    const parsed = JSON.parse(raw) as RecordsPayload;
-    return (parsed.records ?? []) as Resource[];
+    if (!path) return parser("");
+    return parser(readFileSync(path, "utf8"));
   } catch {
-    return [];
+    return parser("");
   }
 }
 
-const fullRecordsRaw = loadGenerated("records.full.json");
-const indexRecordsRaw = loadGenerated("records.index.json");
+const fullRecordsRaw: Resource[] = loadGenerated(
+  "records.full.json",
+  (raw) => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw) as FullPayload;
+      return (parsed.records ?? []) as Resource[];
+    } catch {
+      return [];
+    }
+  },
+);
+
+const indexRecordsRaw: IndexRecord[] = loadGenerated(
+  "records.index.json",
+  (raw) => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw) as IndexPayload;
+      return (parsed.records ?? []) as IndexRecord[];
+    } catch {
+      return [];
+    }
+  },
+);
 
 /**
  * Full records (all visibility). Use this for the detail page,
@@ -79,22 +115,22 @@ export const fullRecords: Resource[] = fullRecordsRaw;
  * page and any home-page sectioning, where you only need the
  * slim search-index fields.
  */
-export const records: Resource[] =
-  indexRecordsRaw.length > 0 ? indexRecordsRaw : fullRecordsRaw;
+export const records: IndexRecord[] =
+  indexRecordsRaw.length > 0 ? indexRecordsRaw : [];
 
-/** Project-kind records only. */
+/** Project-kind records only — slim shape, ready for list pages. */
 export const projects = records.filter(
-  (r): r is ProjectRecord => r.kind === "project",
+  (r): r is IndexProjectRecord => r.kind === "project",
 );
 
-/** Resource-kind records. */
+/** Resource-kind records — slim shape. */
 export const resources = records.filter(
-  (r): r is ResourceRecord => r.kind === "resource",
+  (r): r is IndexResourceRecord => r.kind === "resource",
 );
 
-/** Entity-kind records. */
+/** Entity-kind records — slim shape. */
 export const entities = records.filter(
-  (r): r is EntityRecord => r.kind === "entity",
+  (r): r is IndexEntityRecord => r.kind === "entity",
 );
 
 const bySlug = new Map(fullRecords.map((r) => [r.slug, r]));
@@ -106,10 +142,6 @@ export function recordBySlug(slug: string): Resource | undefined {
 /**
  * Generic slug lookup. The spec name is `findRecord`; this is an
  * alias of `recordBySlug` so consumers can use either spelling.
- * The two-name pattern matches the rest of the module (we keep
- * `recordBySlug` for the typed `projectBySlug`/`resourceBySlug`/
- * `entityBySlug` family, and `findRecord` as the unified entry
- * point).
  */
 export function findRecord(slug: string): Resource | undefined {
   return bySlug.get(slug);

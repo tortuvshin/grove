@@ -12,12 +12,15 @@
  *   grove llms            write public/llms.txt and llms-full.txt
  *   grove sync github     optional: enrich records with GitHub metadata
  *   grove cleanup stale   flag records that need human review
+ *   grove workflows sync  re-emit GitHub workflow files
  *   grove build           run the framework's build command
  *   grove dev             run the framework's dev server
  */
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import {
@@ -46,6 +49,33 @@ import {
   type Framework,
 } from "./template-loader.js";
 
+/**
+ * Resolve the CLI's own version. After `tsc` builds, the build script
+ * copies `package.json` next to `index.js` so production usage can read
+ * it via `import.meta.url`. In dev (`tsx src/index.ts`) we fall back
+ * to a `require` of the source `package.json`.
+ */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+function readOwnVersion(): string {
+  // 1) Production: dist/index.js → ../package.json (alongside the built file).
+  try {
+    const distPkg = createRequire(import.meta.url)("./package.json");
+    if (distPkg?.version) return String(distPkg.version);
+  } catch {
+    /* not built yet — fall through */
+  }
+  // 2) Dev: src/index.ts → ../../package.json.
+  try {
+    const srcPkg = createRequire(import.meta.url)("../../package.json");
+    if (srcPkg?.version) return String(srcPkg.version);
+  } catch {
+    /* missing — fall through */
+  }
+  return "0.0.0-dev";
+}
+
+const CLI_VERSION = readOwnVersion();
 const program = new Command();
 
 const DEPLOY_PROVIDERS = ["vercel", "netlify", "cloudflare", "github-pages", "none"] as const;
@@ -70,7 +100,7 @@ const BLUEPRINT_LABELS: Record<Blueprint, { label: string; hint: string }> = {
 program
   .name("grove")
   .description("Grove — grow a community knowledge site.")
-  .version("0.1.5");
+  .version(CLI_VERSION);
 
 // ──────────────────────────────────────────────────────────────────────
 // grove new
@@ -560,43 +590,95 @@ program
     const selected =
       typeof options.limit === "number" ? files.slice(0, options.limit) : files;
     let updated = 0;
+    let htmlOnly = 0;
     let failed = 0;
     for (const file of selected) {
       const path = join(recordsDir, file);
       const text = await readFile(path, "utf8");
       const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
+      // Canonical repo URL: `repoUrl` first (the project-directory
+      // canonical field per the schema), then fall back to
+      // `links.github` for sites that only use the human-facing link.
       const links = (raw.links as Record<string, string> | undefined) ?? {};
-      if (!links.github) continue;
-      const ref = parseGithubRepoUrl(links.github);
-      if (!ref) continue;
+      const repoUrl =
+        (raw.repoUrl as string | undefined) ?? links.github ?? null;
+      if (!repoUrl) {
+        process.stdout.write(`[sync github] ${file}: no repoUrl or links.github, skipping\n`);
+        continue;
+      }
+      const ref = parseGithubRepoUrl(repoUrl);
+      if (!ref) {
+        process.stdout.write(`[sync github] ${file}: unparseable repoUrl, skipping\n`);
+        continue;
+      }
       process.stdout.write(`[sync github] ${ref.owner}/${ref.repo} ... `);
-      let metadata = null;
-      let didEnrich = false;
+
+      // Build a github patch. We always either write a real `repository`
+      // block (API success), a partial block from HTML (fallback), or
+      // skip the file (both fail). The `sync` block records which
+      // path the data came from so downstream consumers can tell
+      // full metadata from partial.
+      const gh = (raw.github as Record<string, unknown> | undefined) ?? {};
+      const githubPatch: Record<string, unknown> = {};
+      let syncSource: "api" | "html" | null = null;
       try {
-        metadata = await fetchGithubMetadata(ref);
+        const metadata = await fetchGithubMetadata(ref);
+        if (metadata) {
+          githubPatch.repository = {
+            full_name: metadata.fullName,
+            stargazers_count: metadata.stars,
+            forks_count: metadata.forks,
+            open_issues_count: metadata.openIssues,
+            language: metadata.language,
+            pushed_at: metadata.pushedAt,
+            archived: metadata.archived,
+            license: metadata.license
+              ? { spdx_id: metadata.license, name: metadata.license }
+              : null,
+            topics: metadata.topics,
+          };
+          syncSource = "api";
+        }
       } catch {
+        // API failed — try HTML fallback below.
+      }
+      if (syncSource === null) {
         try {
-          const enriched = await enrichFromGithubHtml(links.github);
-          if (enriched.fields) {
-            process.stdout.write("html-fallback\n");
-            didEnrich = true;
+          const enriched = await enrichFromGithubHtml(repoUrl);
+          if (!enriched.notFound && !enriched.rateLimited && !enriched.error) {
+            githubPatch.html = {
+              license: enriched.fields.license,
+              language: enriched.fields.language,
+              topics: enriched.fields.topics,
+              homepage: enriched.fields.homepage,
+            };
+            syncSource = "html";
+            htmlOnly++;
           }
         } catch {
-          process.stdout.write("skipped (api error)\n");
-          failed++;
-          continue;
+          // both API and HTML failed
         }
       }
-      const gh = (raw.github as Record<string, unknown> | undefined) ?? {};
+      if (syncSource === null) {
+        process.stdout.write("skipped (api+html error)\n");
+        failed++;
+        continue;
+      }
+      githubPatch.sync = {
+        syncedAt: new Date().toISOString(),
+        source: syncSource,
+      };
       const next = {
         ...raw,
-        github: { ...gh, repository: metadata },
+        github: { ...gh, ...githubPatch },
       };
       await writeFile(path, stringifyRecordYaml(next), "utf8");
-      if (!didEnrich) process.stdout.write("updated\n");
+      process.stdout.write(syncSource === "api" ? "updated\n" : "html-fallback\n");
       updated++;
     }
-    console.log(`\n[sync github] ${updated} updated, ${failed} failed`);
+    console.log(
+      `\n[sync github] ${updated} updated (${htmlOnly} html-only), ${failed} failed`,
+    );
     // In strict mode, fail the build if any record could not be synced.
     if (options.strict && failed > 0) {
       process.exitCode = 1;
@@ -653,9 +735,11 @@ program
         : "public";
     const root = process.cwd();
 
-    // Make sure the directories exist.
-    ensureDir(join(root, ".github", "workflows"));
-    ensureDir(join(root, ".github", "ISSUE_TEMPLATE"));
+    // Make sure the directories exist. `ensureDir` returns a
+    // promise; without `await`, the subsequent `writeFile` can race
+    // the directory creation on cold start.
+    await ensureDir(join(root, ".github", "workflows"));
+    await ensureDir(join(root, ".github", "ISSUE_TEMPLATE"));
 
     const files: Array<{ path: string; content: string }> = [
       { path: join(root, ".github", "workflows", "validate-data.yml"), content: workflowValidate() },
@@ -1030,8 +1114,10 @@ function workflowSyncGithubMetadata(): string {
 # Refreshes GitHub repository metadata (stars, forks, last commit, license, …)
 # for records that link to public GitHub repos. Runs nightly and on demand.
 # Uses GROVE_GITHUB_TOKEN if set, else falls back to GITHUB_TOKEN.
-# Does NOT mutate human-owned data/records/*.yml files — it writes
-# .grove/generated/github-metadata.json and data/records metadata only.
+#
+# This workflow DOES mutate data/records/*.yml: 'grove sync github' writes
+# a 'github.repository' block back into the owning record file. The PR
+# below is the human review point for that diff.
 on:
   schedule:
     - cron: "0 2 * * *"
@@ -1080,6 +1166,9 @@ jobs:
             Automated metadata refresh by Grove.
 
             - Updated GitHub stars, forks, last commit, license, etc.
+            - Each touched record YAML now carries a \`github.sync\` block
+              with the \`syncedAt\` timestamp and the \`source\` ("api" or
+              "html" fallback).
             - Triggered by: \${{ github.event_name }}
           add-paths: |
             data/records/*.yml

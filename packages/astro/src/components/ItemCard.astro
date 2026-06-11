@@ -22,17 +22,24 @@
  * `curation`, `health`); for other kinds we degrade gracefully to
  * the minimal view.
  *
- * The component is index-payload-friendly: every field it reads is
- * present in the `toIndexRecord` projection (see
- * `@grove-dev/core/schema.ts`).
+ * Index-payload-friendly: when the consumer passes an
+ * `IndexProjectRecord` (the slim list-page shape), the component
+ * reads the projected fields directly — `github.stars` /
+ * `github.pushedAt` / `github.license` — rather than the raw
+ * `github.repository` block.
  */
-import type { Resource, ProjectRecord, HealthStatus } from "@grove-dev/core";
+import type {
+  Resource,
+  ProjectRecord,
+  HealthStatus,
+  IndexProjectRecord,
+} from "@grove-dev/core";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "../lib/repo";
 import { formatRelative, formatStars } from "../lib/format";
 import { statusDisplay, prettySlug, labelDisplay } from "../lib/display";
 
 interface Props {
-  record: Resource;
+  record: Resource | IndexProjectRecord;
   /** Detail page href. */
   href: string;
   /** When true, show owner/repo below the title. Default true. */
@@ -57,9 +64,13 @@ const {
   class: className = "",
 } = Astro.props;
 
-// Project-specific extraction
-const isProject = record.kind === "project";
-const project = isProject ? (record as ProjectRecord) : null;
+// Project-specific extraction. The `isIndex` branch reads the slim
+// fields from `toIndexRecord`; the full branch reads the raw
+// `github.repository` block for sites that want max fidelity.
+const isIndex = "github" in record && record.github !== undefined
+  && (record as IndexProjectRecord).github !== undefined
+  && (record.github as { fullName?: string })?.fullName !== undefined;
+const project = record.kind === "project" ? (record as ProjectRecord | IndexProjectRecord) : null;
 
 const name =
   record.kind === "resource"
@@ -67,17 +78,20 @@ const name =
     : (record as { name: string }).name;
 const description = record.description ?? "";
 const tags = (record.tags ?? []).slice(0, 4);
-const repoUrl = project?.repoUrl;
-const logoUrl = project?.logoUrl;
-const stacks = project?.stacks ?? (project?.stack ? [project.stack] : []);
-const platforms = project?.platforms ?? [];
-const healthStatus: HealthStatus | undefined = project?.health?.status;
+const repoUrl = (project as ProjectRecord | IndexProjectRecord | null)?.repoUrl;
+const logoUrl = (project as ProjectRecord | IndexProjectRecord | null)?.logoUrl;
+const stacks = (project?.stacks ?? (project?.stack ? [project.stack] : [])) as string[];
+const platforms = (project?.platforms ?? []) as string[];
+const healthStatus: HealthStatus | undefined = (project as ProjectRecord | null)?.health?.status;
 const labels = record.curation?.labels ?? [];
-const github = project?.github?.repository;
-const stars = github?.stargazers_count;
-const licenseSpdx = github?.license?.spdx_id;
-const pushedAt = github?.pushed_at;
-const githubUrl = repoUrl ?? (record.links as { github?: string } | undefined)?.github;
+// Slim (IndexProjectRecord.github) → full (ProjectRecord.github.repository).
+const indexGh = isIndex ? (project as IndexProjectRecord).github : null;
+const fullGh = !isIndex ? (project as ProjectRecord | null)?.github?.repository : null;
+const stars = indexGh?.stars ?? fullGh?.stargazers_count;
+const licenseSpdx = indexGh?.license ?? fullGh?.license?.spdx_id ?? null;
+const pushedAt = indexGh?.pushedAt ?? fullGh?.pushed_at;
+const githubUrl =
+  repoUrl ?? (record.links as { github?: string } | undefined)?.github;
 
 // Logo fallback chain
 const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
@@ -102,7 +116,14 @@ const platformChips = withOverflow(platforms);
 // Curated mark
 const curatedLabel = labels[0] ?? null;
 
-// Health class hook (for badge variant)
+// Health class hook (for badge variant). Index payload does not
+// always carry the health block (the slim projection may strip it
+// if a record has no `health` field), so the index branch reads it
+// from a separate place.
+const indexHealthStatus =
+  isIndex ? (project as IndexProjectRecord).health?.status : undefined;
+const healthStatusOrIndex =
+  healthStatus ?? (indexHealthStatus as HealthStatus | undefined);
 function healthBadgeClass(s: HealthStatus | undefined): string {
   switch (s) {
     case "mature":
@@ -118,7 +139,7 @@ function healthBadgeClass(s: HealthStatus | undefined): string {
       return "";
   }
 }
-const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+const healthLabel = healthStatusOrIndex ? statusDisplay(healthStatusOrIndex) : null;
 
 const starsLabel = formatStars(stars);
 const updatedLabel = formatRelative(pushedAt);
@@ -170,7 +191,7 @@ const updatedLabel = formatRelative(pushedAt);
           </span>
         )}
         {healthLabel && (
-          <span class:list={["grove-badge", healthBadgeClass(healthStatus)]}>
+          <span class:list={["grove-badge", healthBadgeClass(healthStatusOrIndex)]}>
             {healthLabel}
           </span>
         )}

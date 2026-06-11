@@ -5,9 +5,9 @@
  * Sections (in order):
  *   1. Hero                       — brand + search + stats row
  *   2. WhyThisExists              — 3 short value-prop points
- *   3. AppSection "Trending"      — hot lens (stars >= 1000 OR pushed <= 30d)
- *   4. AppSection "Recently added"— new lens (pushed <= 7d OR curated "new")
- *   5. AppSection "Established"   — mature lens (tier=curated, pushed > 365d)
+ *   3. RecordSection "Trending"   — hot lens (stars >= 1000 OR pushed <= 30d)
+ *   4. RecordSection "Recently added" — new lens (pushed <= 7d OR curated "new")
+ *   5. RecordSection "Established" — mature lens (tier=curated, pushed > 365d)
  *   6. StackGrid                  — browse by stack
  *   7. CategoryGrid               — browse by category
  *   8. ContributorsGrid           — top contributors (when available)
@@ -15,13 +15,18 @@
  *
  * Every section is defensive: with 0 records (fresh scaffold) it
  * renders a graceful empty state instead of throwing.
+ *
+ * V1 source-of-truth types are from `@grove-dev/core`. The slim
+ * `IndexProjectRecord` shape is what the home page consumes (no
+ * `as ProjectRecord` casts); the full `Resource` only flows into
+ * the detail page.
  */
 import siteConfig from "../../data/generated/site-config.json";
 import { records, fullRecords, projects, indexSlug, itemLabel } from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Hero from "@grove-dev/astro/components/Hero.astro";
 import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
-import AppSection from "@grove-dev/astro/components/AppSection.astro";
+import RecordSection from "@grove-dev/astro/components/RecordSection.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
 import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
@@ -30,7 +35,7 @@ import { countByCategory, countByStack } from "@grove-dev/astro";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import type { ProjectRecord } from "@grove-dev/core";
+import type { IndexProjectRecord } from "@grove-dev/core";
 
 const slug = indexSlug();
 const projectKind = projects;
@@ -45,14 +50,14 @@ const totalStacks = new Set(
 const totalContributors = new Set(
   projectKind
     .map((r) => {
-      const url = r.repoUrl ?? (r.links as { github?: string } | undefined)?.github ?? "";
+      const url = r.repoUrl ?? r.links?.github ?? "";
       const m = /github\.com\/([^/]+)\//.exec(url);
       return m?.[1];
     })
     .filter(Boolean),
 ).size;
 const totalStars = projectKind.reduce(
-  (acc, r) => acc + ((r as ProjectRecord).github?.stars ?? 0),
+  (acc, r) => acc + (r.github?.stars ?? 0),
   0,
 );
 
@@ -66,9 +71,9 @@ function daysSince(iso: string | null | undefined): number {
 }
 
 const hot = projectKind
-  .filter((r) => {
-    const stars = (r as ProjectRecord).github?.stars ?? 0;
-    const pushedAt = (r as ProjectRecord).github?.pushedAt ?? null;
+  .filter((r: IndexProjectRecord) => {
+    const stars = r.github?.stars ?? 0;
+    const pushedAt = r.github?.pushedAt ?? null;
     const pushed = daysSince(pushedAt);
     const labelledHot = r.curation?.labels?.includes("hot") ?? false;
     return labelledHot || stars >= 1000 || pushed <= 30;
@@ -76,8 +81,8 @@ const hot = projectKind
   .slice(0, 6);
 
 const newItems = projectKind
-  .filter((r) => {
-    const pushedAt = (r as ProjectRecord).github?.pushedAt ?? null;
+  .filter((r: IndexProjectRecord) => {
+    const pushedAt = r.github?.pushedAt ?? null;
     const pushed = daysSince(pushedAt);
     const labelledNew = r.curation?.labels?.includes("new") ?? false;
     return pushed <= 7 || labelledNew;
@@ -85,9 +90,9 @@ const newItems = projectKind
   .slice(0, 6);
 
 const mature = projectKind
-  .filter((r) => {
+  .filter((r: IndexProjectRecord) => {
     const tier = r.health?.tier;
-    const pushedAt = (r as ProjectRecord).github?.pushedAt ?? null;
+    const pushedAt = r.github?.pushedAt ?? null;
     const pushed = daysSince(pushedAt);
     return tier === "curated" && pushed > 365;
   })
@@ -159,7 +164,7 @@ const description =
   siteConfig.description ?? `A growing community knowledge site powered by Grove.`;
 
 // ── Render-time helpers ─────────────────────────────────────────
-function detailHrefFor(r: (typeof records)[number]): string {
+function detailHrefFor(r: IndexProjectRecord): string {
   return `/${slug}/${r.slug}`;
 }
 ---
@@ -193,7 +198,7 @@ function detailHrefFor(r: (typeof records)[number]): string {
 
   <WhyThisExists />
 
-  <AppSection
+  <RecordSection
     id="hot"
     title="Trending"
     description="The projects getting attention right now — high-star repos and recently active codebases."
@@ -204,7 +209,7 @@ function detailHrefFor(r: (typeof records)[number]): string {
     emptyLabel="No trending projects yet."
   />
 
-  <AppSection
+  <RecordSection
     id="new"
     title="Recently added"
     description="Fresh entries — pushed within the last week or carrying the curated 'new' label."
@@ -215,7 +220,7 @@ function detailHrefFor(r: (typeof records)[number]): string {
     emptyLabel="No new projects yet."
   />
 
-  <AppSection
+  <RecordSection
     id="mature"
     title="Established"
     description="Long-running curated projects with deep history and stable architecture."
