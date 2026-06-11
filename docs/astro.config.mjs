@@ -75,6 +75,17 @@ export default defineConfig({
                     ],
                 },
                 {
+                    label: 'Guides',
+                    items: [
+                        { label: 'Author a record', slug: 'guides/author-a-record' },
+                        { label: 'Maintain health signals', slug: 'guides/maintain-health-signals' },
+                        { label: 'Manage decisions', slug: 'guides/manage-decisions' },
+                        { label: 'Sync GitHub metadata', slug: 'guides/sync-github-metadata' },
+                        { label: 'Customize the Astro template', slug: 'guides/customize-astro-template' },
+                        { label: 'Deploy', slug: 'guides/deploy' },
+                    ],
+                },
+                {
                     label: 'Showcase',
                     items: [
                         { label: 'Splash pages', slug: 'showcase/splash-pages' },
