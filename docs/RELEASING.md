@@ -21,7 +21,7 @@ The release script lives at `scripts/release.mjs`. It does the following in orde
 
 1. Reads the current version of `@grove-dev/core` (the root of the dep graph).
 2. Computes the new version using the bump flag (`patch` by default; honors `--bump=X.Y.Z`).
-3. Writes the new `version` field into **every** `packages/*/package.json` (and `lucode-starlight` if it ships in lockstep with us).
+3. Writes the new `version` field into **every** `packages/*/package.json` (and `@grove-dev/starlight` if it ships in lockstep with us).
 4. **Skips** rewriting `workspace:*` deps — `pnpm publish` does that for us in the tarball. (See "Why we don't rewrite `workspace:*` manually" below.)
 5. Runs `pnpm install` to refresh `pnpm-lock.yaml` and the symlinks under `node_modules/`.
 6. Runs `pnpm -r build` so the `dist/` for every package matches the new version.
@@ -47,7 +47,7 @@ Grove follows **semver**:
 - Changing the default scaffold output in a way that breaks an existing space.
 - Dropping support for a Node.js, pnpm, or framework version we previously listed as supported in `engines` / `peerDependencies`.
 
-### What's *not* a breaking change?
+### What's _not_ a breaking change?
 
 - Adding a new optional field to the resource schema.
 - Adding a new CLI subcommand or flag.
@@ -124,7 +124,7 @@ After tagging, open a GitHub release from the tag. The release body should be a 
 
 ## Why we don't rewrite `workspace:*` manually
 
-Older versions of `scripts/release.mjs` rewrote every `workspace:*` dep to a real version range *before* `pnpm install`. This was a footgun: pnpm tried to resolve the new range against the npm registry, found a 404 (the version doesn't exist yet — we hadn't published!), and the install failed.
+Older versions of `scripts/release.mjs` rewrote every `workspace:*` dep to a real version range _before_ `pnpm install`. This was a footgun: pnpm tried to resolve the new range against the npm registry, found a 404 (the version doesn't exist yet — we hadn't published!), and the install failed.
 
 The fix: `pnpm publish` already rewrites `workspace:*` to the real version when it builds the publishable tarball. Verified by inspecting `grove-dev-cli-0.1.0.tgz` — the dep appeared as the right version in the tarball's `package/package.json` even though the source still had `workspace:*`.
 

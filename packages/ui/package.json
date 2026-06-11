@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/ui",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "type": "module",
   "description": "Framework-agnostic UI primitives for Grove: filters, sort, pagination, scoring, stats, slug helpers. **Roadmap only — not in V1.**",
   "license": "MIT",
