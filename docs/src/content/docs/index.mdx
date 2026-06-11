@@ -1,0 +1,94 @@
+---
+title: Grove
+description: Build living, file-based community knowledge spaces. Open-source framework for curating open-source apps, AI tools, ecosystem maps, and internal knowledge hubs.
+template: splash
+hero:
+  layout: split-left
+  tagline: |
+    Grove is an open-source framework for building living community
+    knowledge spaces. Files are the source of truth, every change
+    is reviewable, and every space is static, forkable, and
+    contributor-friendly.
+  actions:
+    - text: Get started
+      link: /getting-started/create-a-space/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/grove-dev/grove
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## What you can build
+
+<CardGrid>
+  <Card title="Open-source app directories" icon="open-book">
+    Curate production-ready OSS apps with health, taxonomy, and a contributor workflow.
+  </Card>
+  <Card title="AI tools directories" icon="starlight">
+    Track tools, models, and resources with structured records and built-in `llms.txt` output.
+  </Card>
+  <Card title="Local ecosystem maps" icon="setting">
+    Map your city, industry, or community with structured profiles and decision logs.
+  </Card>
+  <Card title="Internal knowledge hubs" icon="puzzle">
+    Replace ad-hoc spreadsheets with versioned, reviewable, contributor-friendly data.
+  </Card>
+</CardGrid>
+
+## Start here
+
+<CardGrid>
+  <Card title="What is Grove?" href="/getting-started/what-is-grove/">
+    60-second pitch and the "why not just an awesome list?" answer.
+  </Card>
+  <Card title="Create a space" href="/getting-started/create-a-space/">
+    Scaffold your first Grove space with the CLI in under 10 minutes.
+  </Card>
+  <Card title="Add your first record" href="/getting-started/add-your-first-record/">
+    Write a YAML record, validate it, and see it render in your site.
+  </Card>
+  <Card title="Browse the CLI reference" href="/reference/cli/">
+    Every command, every option, every output file.
+  </Card>
+</CardGrid>
+
+## Current status
+
+Grove is in **active development** (current release: **v0.2.x**).
+
+**End-to-end supported in V1:**
+
+- The `project-directory` blueprint, the `project` record kind, and the Astro adapter (the default template ships a working directory site out of the box)
+- File-based YAML records under `data/records/`
+- The full CLI: `new`, `import`, `validate`, `generate`, `sitemap`, `llms`, `sync github`, `cleanup stale`, `workflows sync`, `build`, `dev`
+- `llms.txt` and `sitemap.xml` output, wired into the Astro build pipeline
+- GitHub workflows for CI validation, scheduled metadata sync, and stale-record reports
+
+**Schema-ready, no template yet:**
+
+- The `resource-hub` blueprint and the `resource` record kind
+- The `ecosystem-map` blueprint and the `entity` record kind
+
+The Zod schemas and CLI support exist for both, but the Astro template does not yet ship polished default pages for these kinds.
+
+**Roadmap (not in V1):**
+
+- The **Next.js** adapter — the package is reserved, but the default template is `package.json` only, and `grove build` refuses to run it.
+- The **SvelteKit** adapter — same status as Next.js.
+- The `@grove-dev/ui` framework-agnostic primitives — package reserved, no implementations.
+
+## A note on honesty
+
+Grove V1 supports the Astro adapter and the `project-directory` blueprint.
+The Next.js and SvelteKit adapter packages exist to reserve the package
+boundary, but they are not recommended for production use yet. The
+`resource-hub` and `ecosystem-map` blueprints describe the schema
+direction, but their default templates and polished workflows are still
+experimental.
+
+If you find a doc that says "supported" but the code says otherwise, that's
+a bug — please [open an issue](https://github.com/grove-dev/grove/issues).

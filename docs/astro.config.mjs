@@ -8,13 +8,13 @@ export default defineConfig({
     site: 'https://grove.dev',
     integrations: [
         starlight({
-            // The custom landing page at "/" and showcase hub at "/showcase"
-            // are plain Astro routes in src/pages/. The Starlight site keeps
-            // the root and exposes its content at /start-here, /tutorials,
-            // /guides, /reference, /showcase/* (deep gallery).
+            // The custom landing page at "/" is a Starlight splash
+            // content entry (src/content/docs/index.mdx). The deep
+            // showcase gallery lives at /showcase/* (also from
+            // src/content/docs/showcase/).
             title: 'Grove',
             description:
-                'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
+                'Grove is an open-source framework for building living, file-based community knowledge spaces.',
             logo: {
                 replacesTitle: false,
                 alt: 'Grove',
@@ -32,9 +32,9 @@ export default defineConfig({
                         includeAiUtilities: true,
                     },
                     navLinks: [
-                        { label: 'Docs', link: '/tutorials/01-bootstrap/' },
+                        { label: 'Docs', link: '/getting-started/create-a-space/' },
                         { label: 'Showcase', link: '/showcase/starlight-components/' },
-                        { label: 'API', link: '/reference/plugin-api/' },
+                        { label: 'API', link: '/reference/cli/' },
                     ],
                 }),
             ],
@@ -45,24 +45,15 @@ export default defineConfig({
                 {
                     label: 'Start here',
                     items: [
-                        { label: 'What is Grove?', slug: 'start-here/what-is-grove' },
+                        { label: 'What is Grove?', slug: 'getting-started/what-is-grove' },
+                        { label: 'Create a space', slug: 'getting-started/create-a-space' },
+                        { label: 'Add your first record', slug: 'getting-started/add-your-first-record' },
                     ],
                 },
                 {
-                    label: 'Tutorials',
+                    label: 'Concepts',
                     items: [
-                        { label: '1. Bootstrap a space', slug: 'tutorials/01-bootstrap' },
-                        { label: '2. Author records', slug: 'tutorials/02-author-records' },
-                        { label: '3. Customize the look', slug: 'tutorials/03-customize' },
-                        { label: '4. Maintain the space', slug: 'tutorials/04-maintain' },
-                        { label: '5. Deploy', slug: 'tutorials/05-deploy' },
-                    ],
-                },
-                {
-                    label: 'Guides',
-                    items: [
-                        { label: 'Spaces & blueprints', slug: 'guides/spaces' },
-                        { label: 'The data model', slug: 'guides/data-model' },
+                        { label: 'Blueprints', slug: 'concepts/blueprints' },
                     ],
                 },
                 {
@@ -70,9 +61,31 @@ export default defineConfig({
                     items: [
                         { label: 'CLI', slug: 'reference/cli' },
                         { label: 'grove.config.ts', slug: 'reference/config' },
-                        { label: 'Resource schema', slug: 'reference/schema' },
+                        { label: 'Record schema', slug: 'reference/record-schema' },
                         { label: 'Plugin API', slug: 'reference/plugin-api' },
                         { label: 'Theme Components', slug: 'reference/components' },
+                    ],
+                },
+                {
+                    label: 'Adapters',
+                    items: [
+                        { label: 'Astro', slug: 'adapters/astro' },
+                        { label: 'Next.js', slug: 'adapters/nextjs' },
+                        { label: 'SvelteKit', slug: 'adapters/svelte' },
+                    ],
+                },
+                {
+                    label: 'Showcase',
+                    items: [
+                        { label: 'Splash pages', slug: 'showcase/splash-pages' },
+                        { label: 'Starlight components', slug: 'showcase/starlight-components' },
+                        { label: 'Typography', slug: 'showcase/typography' },
+                    ],
+                },
+                {
+                    label: 'Project',
+                    items: [
+                        { label: 'Roadmap', slug: 'roadmap' },
                     ],
                 },
             ],

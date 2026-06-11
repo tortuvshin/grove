@@ -134,21 +134,22 @@ function checkProject(project, framework) {
 }
 
 function main() {
+  console.log("[test:scaffold] checking Starlight sidebar slugs…");
+  // Fast smoke test: every `slug:` in docs/astro.config.mjs must
+  // resolve to an existing file. Runs in milliseconds and lists
+  // every missing slug at once, before a full docs build.
+  run("node", [join(REPO_ROOT, "scripts/check-starlight-sidebar.mjs")], {
+    stdio: "inherit",
+  });
   console.log("[test:scaffold] building @grove-dev/* packages…");
-  // Build only the framework + engine packages. The `docs` workspace
-  // has its own pre-existing content-collection sidebar bug
-  // ("start-here/what-is-grove" slug missing) that is unrelated to
-  // the scaffold smoke test; the docs build must be fixed separately
-  // in docs/AREA. The double-filter is self-maintaining: any new
-  // @grove-dev/* package added under packages/ is picked up
-  // automatically, and only `docs` is excluded by name.
+  // Build every @grove-dev/* workspace, including `docs`. The filter
+  // is self-maintaining: any new @grove-dev/* package added under
+  // packages/ is picked up automatically.
   run(
     "pnpm",
     [
       "--filter",
       "@grove-dev/*",
-      "--filter",
-      "!@grove-dev/docs",
       "build",
     ],
     { stdio: "inherit" },
