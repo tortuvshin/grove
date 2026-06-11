@@ -1,19 +1,6 @@
-<p align="center">
-    <br />
-    <img src="https://raw.githubusercontent.com/lucas-labs/lucode-starlight-theme/refs/heads/master/docs/src/assets/logo.svg" alt="Lucode Starlight Theme" width="64" />
-    <br />
-    <strong>Lucode Starlight Theme</strong>
-    <br />
-    An Astro Starlight theme inspired by <code>shadcn/ui</code>.
-    <br />
-    <a href="https://lucas-labs.github.io/lucode-starlight-theme">Preview/docs</a> · <a href="https://www.npmjs.com/package/lucode-starlight">Npm</a>
-</p>
+# @grove-dev/starlight
 
-<br />
-
-# lucode-starlight
-
-Lucode Starlight is a theme plugin for Astro Starlight inspired by [shadcn/ui](https://ui.shadcn.com/).
+Grove Starlight is a theme plugin for Astro Starlight
 
 ## Features
 
@@ -25,13 +12,13 @@ Lucode Starlight is a theme plugin for Astro Starlight inspired by [shadcn/ui](h
 ## Installation
 
 ```bash
-npm install lucode-starlight
+npm install @grove-dev/starlight
 ```
 
 With Bun:
 
 ```bash
-bun add lucode-starlight
+bun add @grove-dev/starlight
 ```
 
 ## Usage
@@ -42,7 +29,7 @@ Add the plugin inside the Starlight integration:
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from 'lucode-starlight';
+import lucode from '@grove-dev/starlight';
 
 export default defineConfig({
   integrations: [
@@ -71,7 +58,7 @@ To use Lucode's splash-page frontmatter fields with type checking, extend the St
 import { defineCollection } from 'astro:content';
 import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
-import { ExtendDocsSchema } from 'lucode-starlight/schema';
+import { ExtendDocsSchema } from '@grove-dev/starlight/schema';
 
 export const collections = {
   docs: defineCollection({
@@ -103,10 +90,10 @@ Example:
 lucode({
   navLinks: [
     { label: 'Docs', link: '/guides/getting-started/' },
-    { label: 'GitHub', link: 'https://github.com/lucas-labs/lucode-starlight-theme' },
+    { label: 'GitHub', link: 'https://github.com/lucas-labs/@grove-dev/starlight-theme' },
   ],
   footerText:
-    'Built with [Lucode Starlight](https://github.com/lucas-labs/lucode-starlight-theme).',
+    'Built with [Lucode Starlight](https://github.com/lucas-labs/@grove-dev/starlight-theme).',
 });
 ```
 
@@ -141,17 +128,17 @@ Available layouts:
 
 ## Components
 
-Import user-facing components from `lucode-starlight/components`:
+Import user-facing components from `@grove-dev/starlight/components`:
 
 ```astro
 ---
-import { ContainerSection, Dropdown, LinkButton } from 'lucode-starlight/components';
+import { ContainerSection, Dropdown, LinkButton } from '@grove-dev/starlight/components';
 ---
 
 <ContainerSection width="lg">
   <h2>Build better docs</h2>
   <p>Use Lucode sections on splash pages and custom MDX content.</p>
-  <LinkButton href="/lucode-starlight-theme/guides/getting-started/">Get started</LinkButton>
+  <LinkButton href="/@grove-dev/starlight-theme/guides/getting-started/">Get started</LinkButton>
 </ContainerSection>
 
 <Dropdown.Root>
