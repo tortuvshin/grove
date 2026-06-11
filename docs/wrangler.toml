@@ -1,21 +1,26 @@
-# Cloudflare Pages configuration for the Grove documentation site.
+# Cloudflare Workers static-assets configuration for the Grove docs site.
 #
-# The docs is a static Astro site that builds to ./dist. Cloudflare Pages
-# serves the static output directly — no @astrojs/cloudflare adapter and
-# no Pages Functions are needed.
+# The docs is a static Astro site that builds to ./dist. The build pipeline
+# runs `npm run build` (from the Cloudflare dashboard), then invokes
+# `wrangler deploy` to upload the result. This file configures that deploy
+# step in the Workers-with-Assets schema.
 #
-# This file exists to:
-#   1. Tell Cloudflare Pages where the built site lives
-#      (pages_build_output_dir).
-#   2. Disable wrangler's automatic Astro detection. Without this file,
-#      wrangler injects @astrojs/cloudflare into astro.config.mjs, and
-#      that adapter's vite plugin transitively requires `prismjs` (a
-#      devDependency of @astrojs/cloudflare, not bundled with it),
-#      producing: "Cannot find package 'prismjs' imported from
-#      .../@astrojs/cloudflare/dist/vite-plugin-prism.js".
+# This file also (and more importantly) prevents wrangler's automatic Astro
+# detection. Without it, `runAutoConfig` downloads @astrojs/cloudflare and
+# injects it into astro.config.mjs; the adapter's vite plugin transitively
+# requires `prismjs` (a devDependency of @astrojs/cloudflare, not bundled
+# with it), producing:
+#
+#   Cannot find package 'prismjs' imported from
+#   .../@astrojs/cloudflare/dist/vite-plugin-prism.js
+#
+# The `pages_build_output_dir` field was tried first, but the build env
+# runs `wrangler deploy` (Workers CLI), not `wrangler pages deploy` (Pages
+# CLI), so wrangler rejects the Pages schema. The [assets] block below is
+# the Workers-with-Assets equivalent for deploying a static directory.
 
 name = "grove-docs"
-pages_build_output_dir = "./dist"
+compatibility_date = "2026-06-11"
 
-[build]
-command = "npm run build"
+[assets]
+directory = "./dist"
