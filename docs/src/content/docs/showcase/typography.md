@@ -1,7 +1,6 @@
 ---
 title: Typography
-description:
-    A sample documentation page that shows how Markdown content renders with Lucode Starlight.
+description: A sample documentation page that shows how Markdown content renders with Lucode Starlight.
 ---
 
 This page is intentionally content-heavy. Use it to inspect the reading experience after changing
@@ -42,7 +41,7 @@ This paragraph includes **bold text**, _italic text_, `inline code`, and a
 [link to the theme configuration guide](guides/configuration/). It also
 includes a keyboard hint: press <kbd>Ctrl</kbd> + <kbd>K</kbd> to open search.
 
-Use inline code for file names like `astro.config.mjs`, package names like `lucode-starlight`, and
+Use inline code for file names like `astro.config.mjs`, package names like `@grove-dev/starlight`, and
 token names like `--code-background`.
 
 ## Blockquotes
@@ -59,24 +58,24 @@ Longer quotes should still feel aligned with the surrounding prose:
 ```ts
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from 'lucode-starlight';
+import lucode from '@grove-dev/starlight';
 
 export default defineConfig({
-    integrations: [
-        starlight({
-            title: 'Acme Docs',
-            plugins: [lucode()],
-        }),
-    ],
+  integrations: [
+    starlight({
+      title: 'Acme Docs',
+      plugins: [lucode()],
+    }),
+  ],
 });
 ```
 
 ```css
 @layer lucode {
-    :root {
-        --radius: 0.5rem;
-        --container-max-width: 1440px;
-    }
+  :root {
+    --radius: 0.5rem;
+    --container-max-width: 1440px;
+  }
 }
 ```
 

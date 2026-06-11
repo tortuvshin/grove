@@ -1,6 +1,6 @@
 # Grove docs site
 
-The documentation site for [Grove](https://github.com/tortuvshin/grove), built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and themed with [`lucode-starlight`](https://lucas-labs.github.io/lucode-starlight-theme/).
+The documentation site for [Grove](https://github.com/tortuvshin/grove), built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and themed with [`@grove-dev/starlight`](https://lucas-labs.github.io/@grove-dev/starlight-theme/).
 
 This site is **not** a published npm package — it's the source for <https://grove.tortuvshin.dev> (or wherever the project points it next). It lives in the workspace so that doc changes ship in the same PR as the code they describe.
 
@@ -66,7 +66,7 @@ import Content from '../../../../MY-NEW-DOC.md';
 <Content />
 ```
 
-This way the doc shows up on the site *and* on GitHub.
+This way the doc shows up on the site _and_ on GitHub.
 
 ## Deploying
 
@@ -77,7 +77,7 @@ We don't have a single canonical deploy pipeline yet — see [`../roadmap.md`](.
 
 ## Conventions
 
-- MDX is fine; you can import components from `lucode-starlight` and `@grove-dev/astro`.
+- MDX is fine; you can import components from `@grove-dev/starlight` and `@grove-dev/astro`.
 - Code fences should declare a language. Use `bash` for shell, `ts` for TypeScript, `astro` for Astro component snippets.
 - Internal links use **relative paths** (`./architecture.md`), not absolute GitHub URLs. Starlight rewrites them correctly at build time.
 - Keep page titles short and noun-phrase-y — they show up in the sidebar and the page `<title>`.

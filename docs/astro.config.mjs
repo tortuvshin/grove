@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from 'lucode-starlight';
+import lucode from '@grove-dev/starlight';
 
 // https://astro.build/config
 export default defineConfig({

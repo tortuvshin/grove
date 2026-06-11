@@ -13,7 +13,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.40.0",
     "astro": "^6.4.6",
-    "lucode-starlight": "workspace:*",
+    "@grove-dev/starlight": "0.1.9",
     "sharp": "^0.34.5"
   }
 }

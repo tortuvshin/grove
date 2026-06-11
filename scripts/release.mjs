@@ -38,6 +38,7 @@ const PACKAGES = [
   { name: "@grove-dev/nextjs", dir: "packages/nextjs" },
   { name: "@grove-dev/svelte", dir: "packages/svelte" },
   { name: "@grove-dev/cli", dir: "packages/cli" },
+  { name: "@grove-dev/starlight", dir: "packages/starlight" },
 ];
 
 function parseArgs(argv) {
