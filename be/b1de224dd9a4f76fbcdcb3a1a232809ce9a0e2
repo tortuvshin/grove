@@ -1,0 +1,19 @@
+packages/astro/templates/default/src/pages/submit.astro
+  s_79084ccde86752::t_1399ae37a91ad6 3,7-10,12-38,41,43-55,57-71,73-83,85-119,121-156,158-288
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "beb1de224dd9a4f76fbcdcb3a1a232809ce9a0e2",
+  "prompts": {},
+  "sessions": {
+    "s_79084ccde86752": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd1b-fcb4-7803-8900-38588b51da5e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
