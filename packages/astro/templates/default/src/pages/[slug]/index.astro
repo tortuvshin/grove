@@ -29,13 +29,12 @@ import {
   countByStack,
   effectivePage,
   effectiveSort,
-  filterItems,
+  filterApps,
   filtersFromSearchParams,
   paginate,
   searchParamsFromFilters,
   sortDisplay,
   totalPages,
-  type ItemsFilters,
 } from "@grove-dev/astro";
 
 export async function getStaticPaths() {
@@ -57,7 +56,7 @@ const filters = filtersFromSearchParams(Astro.url.searchParams);
 const facets = buildFacets(items);
 const sort = effectiveSort(filters);
 const requestedPage = effectivePage(filters);
-const filtered = filterItems(items, filters);
+const filtered = filterApps(items, filters);
 const sorted = applySort(filtered, sort);
 const pages = totalPages(sorted.length);
 const page = Math.min(requestedPage, pages);
@@ -106,15 +105,15 @@ const stackEntries = [...countByStack(items as Parameters<typeof countByStack>[0
   .map(([name, count]) => ({ name, slug: name, count }));
 
 function hrefForPage(target: number): string {
-  const next: ItemsFilters = { ...filters, page: target };
+  const next: AppsFilters = { ...filters, page: target };
   const query = searchParamsFromFilters(next).toString();
   return query ? `/${slug}?${query}` : `/${slug}`;
 }
 
-function hrefForRemove(key: keyof ItemsFilters, value: string): string {
+function hrefForRemove(key: keyof AppsFilters, value: string): string {
   const params = new URLSearchParams(Astro.url.searchParams);
   params.delete("page");
-  const urlKey: Partial<Record<keyof ItemsFilters, string>> = {
+  const urlKey: Partial<Record<keyof AppsFilters, string>> = {
     stacks: "stack",
     platforms: "platform",
     categories: "category",
