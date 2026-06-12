@@ -22,6 +22,7 @@ interface Props {
   class?: string;
   /** Hide the section header. */
   bare?: boolean;
+  itemLabelPlural?: string;
 }
 
 const {
@@ -29,6 +30,7 @@ const {
   pathPrefix = "/",
   class: className = "",
   bare = false,
+  itemLabelPlural = "items",
 } = Astro.props;
 
 function buildHref(slug: string): string {
@@ -38,50 +40,60 @@ function buildHref(slug: string): string {
 ---
 
 <section
-  class:list={["grove-section", className]}
+  id="categories"
+  class:list={["grove-section scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
   aria-labelledby={bare ? undefined : "grove-categorygrid-heading"}
 >
   <div class="grove-container-wide mx-auto px-5 sm:px-7">
     {!bare && (
-      <header class="mb-6 flex flex-col gap-2">
+      <header class="mb-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Categories
+        </span>
         <h2
           id="grove-categorygrid-heading"
-          class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+          class="m-0 mt-1 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
         >
           Browse by category
         </h2>
         <p class="m-0 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
-          What kind of project are you looking for? Browse by category to find
-          reference items, libraries, demos, and more.
+          Find {itemLabelPlural} by what they do, not by which stack they use.
         </p>
       </header>
     )}
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {categories.map((c) => (
-        <a
-          href={buildHref(c.slug)}
-          class="grove-card grove-card-hover group flex flex-col gap-1.5 p-4 no-underline"
-          data-event="category_grid_click"
-          data-event-source="category_grid"
-        >
-          <div class="flex items-baseline justify-between gap-2">
-            <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
-              {c.name}
-            </h3>
-            {typeof c.count === "number" && (
-              <span class="font-mono text-2xs text-ink-500 dark:text-ink-400">
-                {c.count}
-              </span>
-            )}
-          </div>
-          {c.blurb && (
-            <p class="m-0 line-clamp-2 text-[0.8125rem] leading-snug text-ink-500 dark:text-ink-400">
-              {c.blurb}
-            </p>
-          )}
-        </a>
-      ))}
+    <div class="overflow-hidden rounded-lg border border-ink-200 dark:border-ink-800">
+      <ul class="m-0 grid list-none grid-cols-1 divide-y divide-ink-200 p-0 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3 dark:divide-ink-800">
+        {categories.map((c) => (
+          <li class="divide-x divide-ink-200 dark:divide-ink-800">
+            <a
+              href={buildHref(c.slug)}
+              class="group flex h-full items-start gap-3 p-4 no-underline transition-colors hover:bg-ink-50/60 dark:hover:bg-ink-900/40"
+            >
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                  <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+                    {c.name}
+                  </h3>
+                  {typeof c.count === "number" && (
+                    <span class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400">
+                      {c.count} {itemLabelPlural}
+                    </span>
+                  )}
+                </div>
+                {c.blurb && (
+                  <p class="m-0 text-2xs leading-relaxed text-ink-500 dark:text-ink-400">
+                    {c.blurb}
+                  </p>
+                )}
+              </div>
+              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" class="mt-1 shrink-0 text-ink-300 transition-colors group-hover:text-ink-500 dark:text-ink-700 dark:group-hover:text-ink-400" fill="currentColor">
+                <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
+              </svg>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
 </section>

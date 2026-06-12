@@ -130,10 +130,10 @@ const description =
 
 <BaseLayout title={title} description={description} site={siteConfig}>
   <Hero
-    name={siteConfig.name}
-    tagline={siteConfig.tagline}
+    name={`Find ${itemPlural} you can actually`}
+    tagline="run, study, and contribute to."
     description={description}
-    eyebrow="A directory of curated knowledge"
+    eyebrow={`A directory of real curated ${itemPlural}`}
     eyebrowBadge="Beta"
     stats={{
       totalApps: stats.apps,
@@ -154,7 +154,10 @@ const description =
     ]}
     ctas={[
       { label: `Browse ${itemPlural}`, href: `/${slug}`, variant: "primary" },
-      { label: "About", href: "/about", variant: "outline" },
+      { label: `Submit ${itemSingular} via GitHub`, href: "/submit", variant: "outline" },
+      ...(siteConfig.repoUrl
+        ? [{ label: "View source", href: siteConfig.repoUrl, variant: "outline" as const }]
+        : []),
     ]}
   />
 
@@ -280,8 +283,8 @@ const description =
     </div>
   </section>
 
-  <StackGrid stacks={stacks} pathPrefix={`/${slug}`} />
-  <CategoryGrid categories={categories} pathPrefix={`/${slug}`} />
+  <StackGrid stacks={stacks} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
+  <CategoryGrid categories={categories} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
 
   {contributors.length > 0 && (
     <ContributorsGrid
