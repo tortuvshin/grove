@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: grove build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # `build` chains build:data + build:sitemap + build:llms + astro build.
+      # Site URL is overridden so sitemap/OG/canonical links resolve to
+      # the deployed URL rather than the placeholder in grove.config.ts.
+      - name: Build site
+        env:
+          SITE_URL: ${{ vars.SITE_URL || github.pages.custom_domain || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+        run: pnpm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Deployed to ${{ steps.deployment.outputs.page_url }}"

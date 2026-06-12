@@ -1,0 +1,53 @@
+name: Sync contributors
+
+on:
+  schedule:
+    # Weekly — Sunday 04:00 UTC (after the metadata sync).
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: sync contributors
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Walk the records' repoUrl fields, fetch each repo's
+      # /contributors endpoint, and write a single
+      # `data/generated/contributors.json` (consumed by the home
+      # page and /contributors page). The script lives at the root
+      # of the project — it's not a CLI command because contributor
+      # fan-in is tightly coupled to this directory's git history
+      # and doesn't generalise across forks.
+      - name: Sync contributors from GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/sync-contributors.mjs
+
+      - name: Commit contributors.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet data/generated/contributors.json; then
+            echo "No changes to contributors.json"
+          else
+            git add data/generated/contributors.json
+            git commit -m "chore(data): refresh contributors"
+            git push
+          fi
