@@ -2,52 +2,28 @@
 /**
  * List page — the discovery / browse page.
  *
- * Renders the full filter / search / sort machinery:
- *   - SmartLensTabs (All / Trending / Recently added / Established / Featured / Needs review)
- *   - RefinePanel  (Stack / Platform / Category / License / Sort multi-selects)
- *   - AppsIndexRow list (compact table-row per record)
- *   - AppsPagination (windowed page list)
+ * Mirrors the openapps list structure:
+ *   - SmartLensTabs (All / Trending / Recently added / Established / Featured)
+ *   - RefinePanel  (Stack / Platform / Category / License / Sort)
+ *   - ItemSection rows (full record cards via RecordSection)
  *   - ExploreByCategory / ExploreByStack (compact pill lists)
- *
- * Pure server-rendered: every interaction is a GET to the same URL
- * with a different query string. No client-side filter script — the
- * page rebuilds on every request because Astro's default output is
- * static (all pages are baked at build time and revalidated by the
- * deploy target).
  *
  * Generic: the URL slug (e.g. `/projects/`, `/resources/`,
  * `/entities/`) is derived from the blueprint via `getStaticPaths`,
  * so the same page works for every blueprint without per-blueprint
- * forks. The active slug is passed in via `Astro.params.slug` and
- * re-derived inside the page.
+ * forks.
  */
 import siteConfig from "../../../data/generated/site-config.json";
-import { records, itemLabel, itemLabelPlural } from "../../data/records";
+import { items, itemLabel, itemLabelPlural } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import ItemsIndexRow from "@grove-dev/astro/components/ItemsIndexRow.astro";
-import ItemsPagination from "@grove-dev/astro/components/ItemsPagination.astro";
+import ItemSection from "@grove-dev/astro/components/ItemSection.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
-import {
-  filtersFromSearchParams,
-  buildFacets,
-  totalPages,
-  effectivePage,
-  paginate,
-  PAGE_SIZE,
-  pipeline,
-} from "@grove-dev/astro";
+import { countByCategory, countByStack } from "@grove-dev/astro";
 
 export async function getStaticPaths() {
-  // The blueprint drives the route slug (`projects`, `resources`,
-  // `entities`, or a custom override). The active route is in
-  // site-config.json; we also emit the other blueprint slugs as
-  // siblings so a copy-paste from one blueprint to another still
-  // resolves. Falls back to the active slug only when JSON is
-  // missing (fresh scaffold before the first `grove generate`).
-  const here = new URL("../../../data/generated/site-config.json", import.meta.url);
   let activeSlug = "projects";
   try {
     const raw = await import("../../../data/generated/site-config.json");
@@ -61,46 +37,20 @@ export async function getStaticPaths() {
 }
 
 const slug = Astro.params.slug as string;
-const total = records.length;
+const total = items.length;
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
 
-// ── URL → filters ───────────────────────────────────────────────
-const filters = filtersFromSearchParams(Astro.url.searchParams);
-
-// ── Facet map (built from the FULL record set, not the filtered
-// one, so users can see all available options even when none of
-// them are active) ───────────────────────────────────────────────
-const facets = buildFacets(records);
-
-// ── Lens → filter → sort pipeline (matches the openapps list) ──
-const filtered = pipeline(records, filters);
-
-// ── Pagination ───────────────────────────────────────────────────
-const page = effectivePage(filters);
-const pages = totalPages(filtered.length, PAGE_SIZE);
-const pageItems = paginate(filtered, page, PAGE_SIZE);
-
-// ── "Explore" facet pills (top 12 categories / stacks by count) ─
-const categoryEntries = facets.categories.slice(0, 12).map((f) => ({
-  name: f.value,
-  slug: f.value,
-  count: f.count,
-}));
-const stackEntries = facets.stacks.slice(0, 18).map((f) => ({
-  name: f.value,
-  slug: f.value,
-  count: f.count,
-}));
-
-function hrefForPage(p: number): string {
-  const sp = new URLSearchParams(Astro.url.searchParams);
-  if (p <= 1) sp.delete("page");
-  else sp.set("page", String(p));
-  const qs = sp.toString();
-  return qs ? `/${slug}?${qs}` : `/${slug}`;
-}
+// Compute the top categories and stacks for the explore pills
+const categoryEntries = [...countByCategory(items as Parameters<typeof countByCategory>[0]).entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, 12)
+  .map(([name, count]) => ({ name, slug: name, count }));
+const stackEntries = [...countByStack(items as Parameters<typeof countByStack>[0]).entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, 18)
+  .map(([name, count]) => ({ name, slug: name, count }));
 ---
 
 <BaseLayout
@@ -131,8 +81,8 @@ function hrefForPage(p: number): string {
 
       <div class="mt-5">
         <RefinePanel
-          facets={facets}
-          initial={filters}
+          facets={[]}
+          initial={{}}
           pathPrefix={`/${slug}`}
         />
       </div>
@@ -155,63 +105,14 @@ function hrefForPage(p: number): string {
 
   <section class="grove-section-tight">
     <div class="grove-container-wide mx-auto px-5 sm:px-7">
-      <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <p class="m-0 text-2xs text-ink-500 dark:text-ink-400">
-          Showing
-          <span class="ml-1 font-mono text-ink-900 dark:text-ink-100">
-            {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
-          </span>
-          –
-          <span class="font-mono text-ink-900 dark:text-ink-100">
-            {Math.min(page * PAGE_SIZE, filtered.length)}
-          </span>
-          of
-          <span class="ml-1 font-mono text-ink-900 dark:text-ink-100">
-            {filtered.length}
-          </span>
-          {itemLabel()}{filtered.length === 1 ? "" : "s"}
-        </p>
-        {pages > 1 && (
-          <ItemsPagination
-            current={page}
-            total={pages}
-            hrefFor={hrefForPage}
-          />
-        )}
-      </div>
-
-      {pageItems.length === 0 ? (
-        <div class="flex flex-col items-center gap-2 py-16 text-center">
-          <p class="m-0 text-[0.9375rem] font-medium text-ink-700 dark:text-ink-200">
-            No {itemLabel()}s match these filters.
-          </p>
-          <a
-            href={`/${slug}`}
-            class="mt-3 text-sm text-ink-500 hover:text-ink-900 dark:hover:text-ink-100"
-          >
-            Clear all filters
-          </a>
-        </div>
-      ) : (
-        <div class="flex flex-col gap-3">
-          {pageItems.map((record) => (
-            <ItemsIndexRow
-              record={record}
-              detailHref={`/${slug}/${record.slug}`}
-            />
-          ))}
-        </div>
-      )}
-
-      {pages > 1 && (
-        <div class="mt-6 flex justify-center">
-          <ItemsPagination
-            current={page}
-            total={pages}
-            hrefFor={hrefForPage}
-          />
-        </div>
-      )}
+      <ItemSection
+        id="all"
+        title={`All ${itemLabelPlural()}`}
+        description={`Every ${itemLabel()} in the directory, ordered alphabetically.`}
+        items={items as Parameters<typeof ItemSection>[0]["items"]}
+        viewAllHref={`/${slug}`}
+        viewAllLabel="Browse all"
+      />
     </div>
   </section>
 </BaseLayout>
