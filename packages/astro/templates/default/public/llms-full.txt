@@ -1,15 +1,13 @@
 # Grove Directory — full directory
 
-> Generated 2026-06-12T17:15:04.846Z from 10 records.
-> Source: https://example.com/entities · Regenerate with `grove generate`.
+> Generated 2026-06-12T17:21:04.008Z from 8 records.
+> Source: https://example.com/projects · Regenerate with `grove generate`.
 
 Each section below mirrors one record detail page.
 
 ## Index
 
-- [Anthropic](#anthropic) — research-lab · — · 0★ — AI safety company building reliable, interpretable AI systems.
 - [Coolify](#coolify) — DevOps · SvelteKit · 0★ — Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps and databases from a single dashboard.
-- [Flutter Handbook](#flutter-handbook) — guides · — · 0★ — A community-maintained handbook for Flutter — patterns, recipes, and best practices.
 - [Gitea](#gitea) — DevOps · Go · 0★ — Lightweight, self-hosted Git service — painless, single-binary, low-resource alternative to GitHub.
 - [Hoppscotch](#hoppscotch) — Web · Vue · 0★ — Open-source API development ecosystem — design, test, and debug APIs faster from a single interface.
 - [InvenTree](#inventree) — Mobile · Flutter · 0★ — Open-source inventory management system with parts, stock, and purchase orders.
@@ -18,15 +16,7 @@ Each section below mirrors one record detail page.
 - [PrivateGPT](#private-gpt) — AI/ML · Python · 0★ — Interact privately with your documents using LLMs — 100% private, no data leaves your execution environment.
 - [Wakapi](#wakapi) — Mobile · Kotlin · 0★ — Open-source time tracker for developers — coding stats, language breakdowns, and project-level metrics.
 
-## Entities
-
-### Anthropic
-AI safety company building reliable, interpretable AI systems.
-- slug: anthropic
-- category: research-lab
-- stack: —
-- stars: 0
-- url: https://example.com/entities/anthropic
+## Projects
 
 ### Coolify
 Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps and databases from a single dashboard.
@@ -34,15 +24,7 @@ Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps
 - category: DevOps
 - stack: SvelteKit
 - stars: 0
-- url: https://example.com/entities/coolify
-
-### Flutter Handbook
-A community-maintained handbook for Flutter — patterns, recipes, and best practices.
-- slug: flutter-handbook
-- category: guides
-- stack: —
-- stars: 0
-- url: https://example.com/entities/flutter-handbook
+- url: https://example.com/projects/coolify
 
 ### Gitea
 Lightweight, self-hosted Git service — painless, single-binary, low-resource alternative to GitHub.
@@ -50,7 +32,7 @@ Lightweight, self-hosted Git service — painless, single-binary, low-resource a
 - category: DevOps
 - stack: Go
 - stars: 0
-- url: https://example.com/entities/gitea
+- url: https://example.com/projects/gitea
 
 ### Hoppscotch
 Open-source API development ecosystem — design, test, and debug APIs faster from a single interface.
@@ -58,7 +40,7 @@ Open-source API development ecosystem — design, test, and debug APIs faster fr
 - category: Web
 - stack: Vue
 - stars: 0
-- url: https://example.com/entities/hoppscotch
+- url: https://example.com/projects/hoppscotch
 
 ### InvenTree
 Open-source inventory management system with parts, stock, and purchase orders.
@@ -66,7 +48,7 @@ Open-source inventory management system with parts, stock, and purchase orders.
 - category: Mobile
 - stack: Flutter
 - stars: 0
-- url: https://example.com/entities/inventree
+- url: https://example.com/projects/inventree
 
 ### Label Studio
 Open-source data labeling platform — annotate images, text, audio, video, and time series for ML training.
@@ -74,7 +56,7 @@ Open-source data labeling platform — annotate images, text, audio, video, and 
 - category: AI/ML
 - stack: Python
 - stars: 0
-- url: https://example.com/entities/label-studio
+- url: https://example.com/projects/label-studio
 
 ### Logseq
 Privacy-first, open-source knowledge base that works on top of plain text Markdown and Org-mode files.
@@ -82,7 +64,7 @@ Privacy-first, open-source knowledge base that works on top of plain text Markdo
 - category: Web
 - stack: ClojureScript
 - stars: 0
-- url: https://example.com/entities/logseq
+- url: https://example.com/projects/logseq
 
 ### PrivateGPT
 Interact privately with your documents using LLMs — 100% private, no data leaves your execution environment.
@@ -90,7 +72,7 @@ Interact privately with your documents using LLMs — 100% private, no data leav
 - category: AI/ML
 - stack: Python
 - stars: 0
-- url: https://example.com/entities/private-gpt
+- url: https://example.com/projects/private-gpt
 
 ### Wakapi
 Open-source time tracker for developers — coding stats, language breakdowns, and project-level metrics.
@@ -98,4 +80,4 @@ Open-source time tracker for developers — coding stats, language breakdowns, a
 - category: Mobile
 - stack: Kotlin
 - stars: 0
-- url: https://example.com/entities/wakapi
+- url: https://example.com/projects/wakapi

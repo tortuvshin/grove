@@ -1,44 +1,10 @@
 {
   "schemaVersion": 1,
-  "blueprint": "ecosystem-map",
-  "generatedAt": "2026-06-12T17:15:04.846Z",
-  "totalRecords": 10,
-  "visibleRecords": 10,
+  "blueprint": "project-directory",
+  "generatedAt": "2026-06-12T17:21:04.008Z",
+  "totalRecords": 8,
+  "visibleRecords": 8,
   "records": [
-    {
-      "slug": "anthropic",
-      "description": "AI safety company building reliable, interpretable AI systems.",
-      "category": "research-lab",
-      "tags": [
-        "ai-safety",
-        "research",
-        "claude"
-      ],
-      "links": {
-        "website": "https://www.anthropic.com",
-        "source": "https://github.com/anthropics"
-      },
-      "source": {
-        "type": "manual"
-      },
-      "curation": {
-        "reviewed": true,
-        "reviewedBy": "grove-bot",
-        "reviewedAt": "2026-06-13",
-        "labels": [
-          "featured"
-        ],
-        "lenses": []
-      },
-      "scores": {},
-      "visibility": "keep",
-      "kind": "entity",
-      "name": "Anthropic",
-      "type": "research-lab",
-      "founded": "2021",
-      "location": "San Francisco",
-      "members": 350
-    },
     {
       "slug": "coolify",
       "description": "Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps and databases from a single dashboard.",
@@ -97,38 +63,6 @@
       "distribution": {
         "channels": []
       }
-    },
-    {
-      "slug": "flutter-handbook",
-      "description": "A community-maintained handbook for Flutter — patterns, recipes, and best practices.",
-      "category": "guides",
-      "tags": [
-        "flutter",
-        "dart",
-        "mobile"
-      ],
-      "links": {
-        "source": "https://flutter.dev"
-      },
-      "source": {
-        "type": "manual"
-      },
-      "curation": {
-        "reviewed": true,
-        "reviewedBy": "grove-bot",
-        "reviewedAt": "2026-06-13",
-        "labels": [
-          "featured"
-        ],
-        "lenses": []
-      },
-      "scores": {},
-      "visibility": "keep",
-      "kind": "resource",
-      "title": "Flutter Handbook",
-      "type": "guide",
-      "topic": "mobile-frameworks",
-      "related": []
     },
     {
       "slug": "gitea",
