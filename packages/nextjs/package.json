@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/nextjs",
-  "version": "0.2.6",
+  "version": "0.2.10",
   "type": "module",
   "description": "Next.js framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",

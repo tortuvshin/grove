@@ -5,6 +5,8 @@
  *
  * V1 command surface:
  *   grove new <name>      scaffold a new project (asks blueprint + framework)
+ *   grove run [action]    dev-internal: scaffold from LOCAL template and run it
+ *                         (dev | build | init). Preserves workspace:* deps.
  *   grove import <src>    turn an awesome list into records/*.yml
  *   grove validate        check records, taxonomy, health, decisions
  *   grove generate        build data/generated/records.{full,index}.json
@@ -20,6 +22,7 @@ import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import * as p from "@clack/prompts";
 import {
@@ -40,9 +43,12 @@ import { parse as parseYaml } from "yaml";
 import {
   copyTemplate,
   ensureDir,
+  findMonorepoRoot,
   isFramework,
   listTemplates,
+  packageNameFromProjectName,
   renameProjectInTemplate,
+  renameProjectInTemplatePreserveDeps,
   SUPPORTED_FRAMEWORKS,
   type DeployProvider,
   type Framework,
@@ -375,6 +381,274 @@ program
           `  grove validate\n` +
           `  grove generate\n` +
           `  grove build\n`,
+      );
+    },
+  );
+
+// ──────────────────────────────────────────────────────────────────────
+// grove run — dev-only "pretend user" smoke test
+// ──────────────────────────────────────────────────────────────────────
+//
+// `grove new` is the production path: it copies the framework template
+// into a fresh dir, rewrites `workspace:*` deps to the published
+// version, and (optionally) installs + inits git. That's exactly what
+// we want for an end user.
+//
+// `grove run` is the dev / CI-internal path. It does almost the same
+// scaffolding, but with two differences that make it useful when
+// iterating on the monorepo:
+//
+//   1. `workspace:*` deps in the scaffolded `package.json` are LEFT
+//      ALONE. pnpm resolves those to the local `packages/*` siblings
+//      inside the monorepo, so a template change in
+//      `packages/astro/templates/default/` is picked up by the next
+//      `grove run` without a publish step.
+//
+//   2. The scaffold lives INSIDE the monorepo, under
+//      `<monorepo-root>/.grove/run/<timestamp>/`. `.grove/*` is
+//      registered in `pnpm-workspace.yaml`, so `pnpm install --filter`
+//      from the monorepo root can resolve `workspace:*` deps against
+//      the local `packages/*` siblings.
+//
+// After scaffolding and (optionally) installing, `grove run` can launch
+// the framework dev server in-process. That makes end-to-end smoke
+// tests a one-liner:
+//
+//          grove run dev                # scaffold → install → astro dev
+//          grove run build              # scaffold → install → astro build
+//          grove run init --no-install  # just scaffold, fix deps manually
+//
+// V1 only supports `astro` because that's the only framework with a
+// real template + peer wiring. `nextjs` and `svelte` are roadmap.
+program
+  .command("run")
+  .argument(
+    "[action]",
+    "run action: dev (default) | build | init",
+    "dev",
+  )
+  .argument("[name]", "project directory name (default: grove-run-<timestamp>)")
+  .description("Scaffold a Grove project from the LOCAL workspace template and run it.")
+  .option("-f, --framework <name>", "framework: astro | nextjs | svelte (V1: astro)", "astro")
+  .option("-t, --template <name>", "template name", "default")
+  .option("-d, --dir <name>", "project directory name (overrides positional name; relative to monorepo root)")
+  .option("--no-install", "skip `pnpm install` after scaffolding")
+  .option("--no-git", "skip `git init` after scaffolding")
+  .option(
+    "--port <port>",
+    "dev server port (only used by `dev` action; passed to astro dev)",
+    (value) => Number(value),
+  )
+  .action(
+    async (
+      action: string,
+      name: string | undefined,
+      opts: {
+        framework: string;
+        template: string;
+        dir?: string;
+        install?: boolean;
+        git?: boolean;
+        port?: number;
+      },
+    ) => {
+      // ── Validate action ────────────────────────────────────────────
+      const validActions = ["dev", "build", "init"] as const;
+      type RunAction = (typeof validActions)[number];
+      if (!(validActions as readonly string[]).includes(action)) {
+        p.log.error(`Unknown run action: ${action}.`);
+        p.log.info(`Try one of: ${validActions.join(", ")}`);
+        process.exit(1);
+      }
+      const runAction = action as RunAction;
+
+      // ── Validate framework ─────────────────────────────────────────
+      if (!isFramework(opts.framework)) {
+        p.log.error(`Unknown framework: ${opts.framework}.`);
+        p.log.info(`Try one of: ${SUPPORTED_FRAMEWORKS.join(", ")}`);
+        process.exit(1);
+      }
+      const framework = opts.framework;
+      if (framework !== "astro") {
+        p.log.warn(
+          `Framework "${framework}" is roadmap-only in V1. Only astro has a real template — proceeding anyway and hoping for the best.`,
+        );
+      }
+
+      p.intro(`🧪 Grove run — ${runAction}`);
+
+      // ── Locate the monorepo root ───────────────────────────────────
+      // We need the monorepo root so we can:
+      //   (a) decide where to put the scaffolded project (always
+      //       inside the monorepo, under `.grove/run/<stamp>/`)
+      //   (b) run `pnpm install --filter` from there, so the
+      //       workspace protocol resolves `packages/*` siblings.
+      const cliLocation = dirname(fileURLToPath(import.meta.url));
+      let monorepoRoot: string;
+      try {
+        monorepoRoot = findMonorepoRoot(cliLocation);
+      } catch (err) {
+        p.log.error((err as Error).message);
+        process.exit(1);
+      }
+      p.log.info(`Monorepo root: ${monorepoRoot}`);
+
+      // ── Resolve target directory ───────────────────────────────────
+      const stamp = new Date()
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\..+$/, "")
+        .replace("T", "-");
+      const dirRel = opts.dir ?? name ?? `grove-run-${stamp}`;
+      // Always live under <monorepo-root>/.grove/run/<name>/ so the
+      // workspace picks it up via the `.grove/*` glob in
+      // `pnpm-workspace.yaml`.
+      const root = resolve(monorepoRoot, ".grove", "run", dirRel);
+      // The dir name and the package.json `name` are not the same —
+      // `renameProjectInTemplatePreserveDeps` slugifies the dir name
+      // and appends `-<framework>-<template>`. We need the package
+      // name to drive `pnpm --filter`, so compute it once and reuse.
+      const projectName = root.split("/").filter(Boolean).pop() ?? dirRel;
+
+      // ── Look up the LOCAL template via @grove-dev/<framework>'s
+      //    `templates/<name>` directory. Inside this monorepo, that
+      //    is a symlink straight to packages/astro/templates/default/,
+      //    so a template change in the source tree flows through to
+      //    the scaffolded project with no publish step. ─────────────
+      const templates = await listTemplates(framework);
+      const tpl = templates.find((t) => t.template === opts.template) ?? templates[0];
+      if (!tpl) {
+        p.log.error(`No templates found for ${framework}.`);
+        process.exit(1);
+      }
+      p.log.info(`Template: ${tpl.path}`);
+
+      const packageName = packageNameFromProjectName(projectName, framework, tpl.template);
+      p.log.info(`Project: ${projectName} (package: ${packageName}) → ${root}`);
+
+      // ── Scaffold (or reuse an existing scaffold) ──────────────────
+      // If the target dir already contains a package.json whose
+      // name matches what we would have written, treat it as a
+      // re-run of `grove run dev` against an already-initialised
+      // project and skip the copy. That makes iterative development
+      // a one-line affair: edit template, run `grove run dev` again.
+      const sentinel = join(root, "package.json");
+      let alreadyScaffolded = false;
+      try {
+        const existing = JSON.parse(await readFile(sentinel, "utf8")) as { name?: string };
+        const expectedName = packageNameFromProjectName(projectName, framework, tpl.template);
+        alreadyScaffolded = existing.name === expectedName;
+      } catch {
+        alreadyScaffolded = false;
+      }
+      const s = p.spinner();
+      if (alreadyScaffolded) {
+        s.start("Reusing existing scaffold");
+        s.stop("Reusing existing scaffold");
+      } else {
+        s.start("Scaffolding");
+        await mkdir(root, { recursive: true });
+        await copyTemplate(framework, root, tpl.template);
+        // `renameProjectInTemplatePreserveDeps` only updates the
+        // package.json `name` field — it does NOT touch `workspace:*`
+        // Grove deps. The monorepo-root `pnpm install --filter` below
+        // then resolves those against the local `packages/*` siblings.
+        await renameProjectInTemplatePreserveDeps(framework, root, projectName, tpl.template);
+        s.stop("Scaffolded (workspace:* deps preserved)");
+      }
+
+      // ── git init ───────────────────────────────────────────────────
+      if (opts.git !== false) {
+        try {
+          await runExternal("git", ["init", "-b", "main"], { stdio: "ignore", cwd: root });
+          p.log.step("Initialized git repo on `main`");
+        } catch {
+          p.log.warn("git not found — skipping git init");
+        }
+      }
+
+      // ── pnpm install (from monorepo root, scoped to this project) ──
+      if (opts.install !== false) {
+        const installSpinner = p.spinner();
+        installSpinner.start(
+          `Installing dependencies (monorepo filter on '${packageName}')`,
+        );
+        try {
+          await runExternal("pnpm", ["install", "--filter", packageName], {
+            stdio: "ignore",
+            cwd: monorepoRoot,
+          });
+          installSpinner.stop("Installed dependencies");
+        } catch {
+          installSpinner.stop("Install failed");
+          p.log.warn(
+            `Run \`pnpm install --filter ${packageName}\` from ${monorepoRoot} to retry.`,
+          );
+          if (runAction !== "init") {
+            p.log.error("Cannot continue without a working install.");
+            process.exit(1);
+          }
+        }
+      }
+
+      // ── Run the requested action ───────────────────────────────────
+      if (runAction === "init") {
+        p.outro(
+          `🌳 Scaffolded at ${root}\n\n` +
+            `Next steps:\n` +
+            `  cd ${root}\n` +
+            `  pnpm dev\n`,
+        );
+        return;
+      }
+
+      if (runAction === "build") {
+        // Run the template's `build` script, not `astro build` directly.
+        // The script chains `build:data` + `build:sitemap` + `build:llms`
+        // + `astro build` so the data is generated first. Skipping that
+        // chain gives you a half-built site with no records.
+        p.log.step(`Building ${packageName} via 'pnpm run build' (this can take a while)…`);
+        await runExternal("pnpm", ["--filter", packageName, "run", "build"], {
+          stdio: "inherit",
+          cwd: monorepoRoot,
+        });
+        p.outro(`🌳 Build done at ${root}`);
+        return;
+      }
+
+      // runAction === "dev" — start the dev server in-process.
+      //
+      // The template's `dev` script chains `build:data && astro dev`,
+      // which is what we want for a production user. But for a dev
+      // smoke test, the script's `&&` makes pnpm's `--` forwarding
+      // land in a tricky place: `pnpm run dev -- --port 4327` becomes
+      // `astro dev -- --port 4327`, where Astro treats `--port 4327`
+      // as positional args (port flag ignored).
+      //
+      // Cleanest workaround: run `build:data` separately (the only
+      // pre-step `dev` does), then `pnpm exec astro dev` directly with
+      // the port flag in the right place. Two `runExternal` calls is
+      // fine — they're both fast (`build:data` is a quick
+      // `grove generate`, and `astro dev` is what the user actually
+      // wants to see).
+      const port = typeof opts.port === "number" ? opts.port : 4321;
+      p.log.step(`Generating data via 'pnpm run build:data'…`);
+      try {
+        await runExternal(
+          "pnpm",
+          ["--filter", packageName, "run", "build:data"],
+          { stdio: "inherit", cwd: monorepoRoot },
+        );
+      } catch {
+        p.log.warn(
+          `build:data failed — starting astro dev anyway, site will be empty.`,
+        );
+      }
+      p.log.step(`Starting astro dev on port ${port} (Ctrl-C to stop)…`);
+      await runExternal(
+        "pnpm",
+        ["--filter", packageName, "exec", "astro", "dev", "--port", String(port)],
+        { stdio: "inherit", cwd: monorepoRoot },
       );
     },
   );
