@@ -1,0 +1,29 @@
+packages/astro/templates/default/data/generated/records.index.json
+  s_79084ccde86752::t_0a20a32e00e942 4
+packages/astro/templates/default/public/llms-full.txt
+  s_79084ccde86752::t_0a20a32e00e942 3
+packages/astro/templates/default/public/sitemap.xml
+  s_79084ccde86752::t_0a20a32e00e942 5,11,17,23,29,35,41,47,53,59
+packages/astro/src/components/RefinePanel.astro
+  s_79084ccde86752::t_3f28331b5cb91b 110-127
+packages/astro/templates/default/data/generated/records.full.json
+  s_79084ccde86752::t_0a20a32e00e942 4
+packages/astro/templates/default/data/generated/records.json
+  s_79084ccde86752::t_0a20a32e00e942 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "0c2b86a6f68b79000b7089442c435181bd3b6de5",
+  "prompts": {},
+  "sessions": {
+    "s_79084ccde86752": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd1b-fcb4-7803-8900-38588b51da5e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
