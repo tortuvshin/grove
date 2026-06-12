@@ -47,6 +47,10 @@ interface Site {
    * at generate time. Components use it to render hero counts,
    * origin card stats, and footer summary lines. */
   stats?: SiteStats;
+  blueprintConfig?: {
+    routeSlug?: string;
+    labelPlural?: string;
+  };
 }
 
 interface Props {
@@ -74,10 +78,12 @@ const {
   noindex,
   jsonLd,
   gaId,
-  searchPath = "/items",
+  searchPath,
   submitLabel,
   submitHref,
 } = Astro.props;
+const directoryPath =
+  searchPath ?? `/${site.blueprintConfig?.routeSlug ?? "items"}`;
 
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
@@ -128,7 +134,7 @@ const favicon =
       noindex={noindex}
       jsonLd={jsonLd}
       site={site}
-      searchPath={searchPath}
+      searchPath={directoryPath}
     />
 
     <slot name="head" />
@@ -196,15 +202,12 @@ const favicon =
           totalStacks: site.stats?.totalStacks,
           totalOwners: site.stats?.totalOwners,
         }}
-        itemsLabel={
-          (site as { blueprintConfig?: { labelPlural?: string } })
-            .blueprintConfig?.labelPlural ?? "items"
-        }
+        itemsLabel={site.blueprintConfig?.labelPlural ?? "items"}
         discover={{
           heading: "Discover",
           items: [
             ...(site.stats?.totalApps
-              ? [{ label: "Browse all", href: "/items" }]
+              ? [{ label: "Browse all", href: directoryPath }]
               : []),
             { label: "Contributors", href: "/contributors" },
             ...(site.stats?.originalRepo
