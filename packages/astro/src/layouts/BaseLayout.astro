@@ -201,6 +201,10 @@ const favicon =
           categories: site.stats?.totalCategories,
           contributors: site.stats?.totalOwners,
         }}
+        appsLabel={
+          (site as { blueprintConfig?: { labelPlural?: string } })
+            .blueprintConfig?.labelPlural ?? "apps"
+        }
         discover={{
           heading: "Discover",
           items: [

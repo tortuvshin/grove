@@ -36,6 +36,12 @@ interface Props {
   tagline: string;
   /** Longer description, rendered below the tagline. */
   description?: string;
+  /**
+   * Plural label for the primary count stat (e.g. "apps",
+   * "resources", "entities"). Defaults to "apps" so existing
+   * call-sites that don't pass it still render the same.
+   */
+  itemsLabel?: string;
   /** Trust stats row. */
   stats?: HeroStats;
   /** Placeholder for the search input. */
@@ -60,6 +66,7 @@ const {
   ctas = [],
   class: className = "",
   eyebrow,
+  itemsLabel = "apps",
 } = Astro.props;
 
 function fmt(n: number | undefined): string {
@@ -180,7 +187,7 @@ const hasStats =
               <dd class="m-0 font-mono text-base font-semibold text-ink-900 dark:text-ink-100">
                 {fmt(stats.apps)}
               </dd>
-              <dt>apps</dt>
+              <dt>{itemsLabel}</dt>
             </div>
           )}
           {stats.categories !== undefined && (
