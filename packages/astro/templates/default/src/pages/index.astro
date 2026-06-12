@@ -188,7 +188,7 @@ const description =
         <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {hotList.map((item) => (
             <li class="m-0 p-0">
-              <ItemCard item={item} />
+              <ItemCard item={item} pathPrefix={`/${slug}`} />
             </li>
           ))}
         </ul>
@@ -228,7 +228,7 @@ const description =
         <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {newList.map((item) => (
             <li class="m-0 p-0">
-              <ItemCard item={item} />
+              <ItemCard item={item} pathPrefix={`/${slug}`} />
             </li>
           ))}
         </ul>
@@ -268,7 +268,7 @@ const description =
         <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {matureList.map((item) => (
             <li class="m-0 p-0">
-              <ItemCard item={item} />
+              <ItemCard item={item} pathPrefix={`/${slug}`} />
             </li>
           ))}
         </ul>
