@@ -390,10 +390,15 @@ program
         githubMode === "public"
           ? "public GitHub metadata (sync + cleanup + update workflows)"
           : "none / private (only validate + build workflows)";
+      const deployLabel =
+        deploy === "none"
+          ? "none (no deploy workflow written)"
+          : `${deploy} workflow + config written`;
       p.outro(
         `🌳 ${projectName} is ready at ${root}\n\n` +
           `Blueprint: ${blueprint}\n` +
-          `GitHub mode: ${ghLabel}\n\n` +
+          `GitHub mode: ${ghLabel}\n` +
+          `Deploy: ${deployLabel}\n\n` +
           `Next steps:\n` +
           `  cd ${projectDir}\n` +
           `  grove validate\n` +
