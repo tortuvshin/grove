@@ -1,0 +1,469 @@
+/*
+ * @grove-dev/ui — shared design tokens and utility classes (V1).
+ *
+ * This file is the framework-agnostic base stylesheet shipped
+ * with the `@grove-dev/ui` package. It exposes the same color,
+ * typography, radius, and shadow tokens that the showcase
+ * (`@grove-dev/astro`) uses, but without a Tailwind dependency —
+ * consumers can layer Tailwind on top via `@import "tailwindcss"`,
+ * or consume the tokens as plain CSS custom properties.
+ *
+ * Usage (plain HTML / any framework):
+ *
+ *   import "@grove-dev/ui/styles.css";   // ESM
+ *   @import "@grove-dev/ui/styles.css";  // CSS @import
+ *   require("@grove-dev/ui/styles.css"); // CJS
+ *
+ * The CSS custom properties are the stable contract. The bare
+ * utility classes below (`grove-card`, `grove-section`, `grove-btn-*`,
+ * `grove-badge-*`) mirror the showcase component classes and stay
+ * consistent with the openapps/astro styles. Framework adapters
+ * (Astro, Svelte, Next.js) can re-export this file or compose it
+ * with their own Tailwind layers.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ── Neutral ink scale ───────────────────────────────────────── */
+  --grove-color-ink-50: #fafafa;
+  --grove-color-ink-100: #f4f4f5;
+  --grove-color-ink-200: #e4e4e7;
+  --grove-color-ink-300: #d4d4d8;
+  --grove-color-ink-400: #a1a1aa;
+  --grove-color-ink-500: #71717a;
+  --grove-color-ink-600: #52525b;
+  --grove-color-ink-700: #3f3f46;
+  --grove-color-ink-800: #27272a;
+  --grove-color-ink-900: #18181b;
+  --grove-color-ink-950: #09090b;
+
+  /* ── Accent (interactive states) ─────────────────────────────── */
+  --grove-color-accent: #1f6feb;
+  --grove-color-accent-muted: #388bfd1a;
+
+  /* ── Status palettes (badges only) ───────────────────────────── */
+  --grove-color-emerald-50: #ecfdf5;
+  --grove-color-emerald-300: #6ee7b7;
+  --grove-color-emerald-400: #34d399;
+  --grove-color-emerald-700: #047857;
+  --grove-color-emerald-800: #065f46;
+  --grove-color-emerald-950: #022c22;
+
+  --grove-color-orange-50: #fff7ed;
+  --grove-color-orange-300: #fdba74;
+  --grove-color-orange-400: #fb923c;
+  --grove-color-orange-700: #c2410c;
+  --grove-color-orange-800: #9a3412;
+  --grove-color-orange-950: #431407;
+
+  --grove-color-blue-50: #eff6ff;
+  --grove-color-blue-300: #93c5fd;
+  --grove-color-blue-400: #60a5fa;
+  --grove-color-blue-700: #1d4ed8;
+  --grove-color-blue-800: #1e40af;
+  --grove-color-blue-950: #172554;
+
+  --grove-color-amber-50: #fffbeb;
+  --grove-color-amber-300: #fcd34d;
+  --grove-color-amber-400: #fbbf24;
+  --grove-color-amber-700: #b45309;
+  --grove-color-amber-800: #92400e;
+  --grove-color-amber-950: #451a03;
+
+  /* ── Font stacks ─────────────────────────────────────────────── */
+  --grove-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --grove-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  /* ── Font size extensions (2xs) ──────────────────────────────── */
+  --grove-text-2xs: 0.6875rem;
+  --grove-text-2xs--line-height: 1rem;
+
+  /* ── Border radius scale ─────────────────────────────────────── */
+  --grove-radius: 0.375rem;
+  --grove-radius-lg: 0.5rem;
+  --grove-radius-xl: 0.75rem;
+
+  /* ── Shadow scale (subtle) ───────────────────────────────────── */
+  --grove-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --grove-shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+  --grove-shadow-lg: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  --grove-shadow-sm-dark: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --grove-shadow-md-dark: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  --grove-shadow-lg-dark: 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+
+  /* ── Container widths (showcase rhythm) ──────────────────────── */
+  --grove-container: 1140px;
+  --grove-container-wide: 1400px;
+  --grove-container-narrow: 720px;
+
+  /* ── Animation ───────────────────────────────────────────────── */
+  --grove-animate-fade-in-up: grove-fade-in-up 0.6s ease-out both;
+  --grove-animate-fade-in: grove-fade-in 0.8s ease-out both;
+}
+
+@keyframes grove-fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grove-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Base — sensible defaults for any consumer page.
+ * ────────────────────────────────────────────────────────────────── */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--grove-color-ink-900);
+  font-family: var(--grove-font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.dark body {
+  background: var(--grove-color-ink-950);
+  color: var(--grove-color-ink-100);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Subtle selection */
+::selection {
+  background: var(--grove-color-ink-200);
+  color: var(--grove-color-ink-900);
+}
+.dark ::selection {
+  background: var(--grove-color-ink-800);
+  color: var(--grove-color-ink-100);
+}
+
+/* Slim, neutral scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--grove-color-ink-300) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--grove-color-ink-200);
+  border-radius: 4px;
+}
+.dark *::-webkit-scrollbar-thumb {
+  background: var(--grove-color-ink-800);
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Component classes — shared by the showcase component library
+ * (and any consumer that imports this stylesheet).
+ * ────────────────────────────────────────────────────────────────── */
+
+/* Section spacing — consistent vertical rhythm */
+.grove-section {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+@media (min-width: 640px) {
+  .grove-section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.grove-section-tight {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+@media (min-width: 640px) {
+  .grove-section-tight {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* Subtle card border + hover lift */
+.grove-card {
+  border: 1px solid var(--grove-color-ink-200);
+  background: #ffffff;
+  border-radius: var(--grove-radius-lg);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+.dark .grove-card {
+  border-color: var(--grove-color-ink-800);
+  background: var(--grove-color-ink-950);
+}
+
+.grove-card-hover:hover {
+  border-color: var(--grove-color-ink-300);
+  background: rgba(244, 244, 245, 0.6);
+  box-shadow:
+    var(--grove-shadow-sm),
+    var(--grove-shadow-md);
+}
+.dark .grove-card-hover:hover {
+  border-color: var(--grove-color-ink-700);
+  background: rgba(24, 24, 27, 0.4);
+  box-shadow:
+    var(--grove-shadow-sm-dark),
+    var(--grove-shadow-md-dark);
+}
+
+/* Pill badge — small, neutral */
+.grove-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--grove-color-ink-200);
+  background: var(--grove-color-ink-50);
+  padding: 0.125rem 0.375rem;
+  font-size: var(--grove-text-2xs);
+  line-height: var(--grove-text-2xs--line-height);
+  font-weight: 500;
+  color: var(--grove-color-ink-700);
+}
+.dark .grove-badge {
+  border-color: var(--grove-color-ink-800);
+  background: rgba(24, 24, 27, 0.6);
+  color: var(--grove-color-ink-300);
+}
+
+.grove-badge-accent {
+  border-color: var(--grove-color-ink-900);
+  background: var(--grove-color-ink-900);
+  color: #ffffff;
+}
+.dark .grove-badge-accent {
+  border-color: var(--grove-color-ink-100);
+  background: var(--grove-color-ink-100);
+  color: var(--grove-color-ink-900);
+}
+
+.grove-badge-new {
+  border-color: rgba(110, 231, 183, 0.6);
+  background: var(--grove-color-emerald-50);
+  color: var(--grove-color-emerald-800);
+}
+.dark .grove-badge-new {
+  border-color: rgba(6, 95, 70, 0.6);
+  background: rgba(2, 44, 34, 0.4);
+  color: var(--grove-color-emerald-300);
+}
+
+.grove-badge-hot {
+  border-color: rgba(253, 186, 116, 0.6);
+  background: var(--grove-color-orange-50);
+  color: var(--grove-color-orange-800);
+}
+.dark .grove-badge-hot {
+  border-color: rgba(154, 52, 18, 0.6);
+  background: rgba(67, 20, 7, 0.4);
+  color: var(--grove-color-orange-300);
+}
+
+.grove-badge-mature {
+  border-color: rgba(147, 197, 253, 0.6);
+  background: var(--grove-color-blue-50);
+  color: var(--grove-color-blue-800);
+}
+.dark .grove-badge-mature {
+  border-color: rgba(30, 64, 175, 0.6);
+  background: rgba(23, 37, 84, 0.4);
+  color: var(--grove-color-blue-300);
+}
+
+.grove-badge-stale {
+  border-color: rgba(252, 211, 77, 0.6);
+  background: var(--grove-color-amber-50);
+  color: var(--grove-color-amber-800);
+}
+.dark .grove-badge-stale {
+  border-color: rgba(146, 64, 14, 0.6);
+  background: rgba(69, 26, 3, 0.4);
+  color: var(--grove-color-amber-300);
+}
+
+/* Buttons — outline / ghost / primary */
+.grove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: var(--grove-radius);
+  border: 1px solid transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.grove-btn-ghost {
+  color: var(--grove-color-ink-700);
+}
+.grove-btn-ghost:hover {
+  background: var(--grove-color-ink-100);
+}
+.dark .grove-btn-ghost {
+  color: var(--grove-color-ink-300);
+}
+.dark .grove-btn-ghost:hover {
+  background: var(--grove-color-ink-900);
+}
+
+.grove-btn-outline {
+  border-color: var(--grove-color-ink-200);
+  background: #ffffff;
+  color: var(--grove-color-ink-900);
+}
+.grove-btn-outline:hover {
+  border-color: var(--grove-color-ink-300);
+  background: var(--grove-color-ink-50);
+}
+.dark .grove-btn-outline {
+  border-color: var(--grove-color-ink-800);
+  background: var(--grove-color-ink-950);
+  color: var(--grove-color-ink-100);
+}
+.dark .grove-btn-outline:hover {
+  border-color: var(--grove-color-ink-700);
+  background: rgba(24, 24, 27, 0.4);
+}
+
+.grove-btn-primary {
+  border-color: var(--grove-color-ink-900);
+  background: var(--grove-color-ink-900);
+  color: #ffffff;
+}
+.grove-btn-primary:hover {
+  background: var(--grove-color-ink-800);
+}
+.dark .grove-btn-primary {
+  border-color: var(--grove-color-ink-100);
+  background: var(--grove-color-ink-100);
+  color: var(--grove-color-ink-900);
+}
+.dark .grove-btn-primary:hover {
+  background: #ffffff;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Backwards-compat aliases — openapps used unprefixed utility names
+ * (`card`, `btn-primary`, `btn-outline`, `btn-ghost`). New code
+ * should use the `grove-` prefix. These rules mirror the
+ * `grove-*` definitions above so the openapps-derived components
+ * work without per-component edits.
+ * ────────────────────────────────────────────────────────────────── */
+
+.card {
+  border: 1px solid var(--grove-color-ink-200);
+  background: #ffffff;
+  border-radius: 0.5rem;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.dark .card {
+  border-color: var(--grove-color-ink-800);
+  background: var(--grove-color-ink-950);
+}
+.card-hover:hover {
+  border-color: var(--grove-color-ink-300);
+  background: rgba(244, 244, 245, 0.6);
+  box-shadow: var(--grove-shadow-sm), var(--grove-shadow-md);
+}
+.dark .card-hover:hover {
+  border-color: var(--grove-color-ink-700);
+  background: rgba(24, 24, 27, 0.4);
+  box-shadow: var(--grove-shadow-sm-dark), var(--grove-shadow-md-dark);
+}
+
+.btn-primary,
+.btn-outline,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    color 0.15s,
+    background-color 0.15s,
+    border-color 0.15s;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.btn-primary {
+  border-color: var(--grove-color-ink-900);
+  background: var(--grove-color-ink-900);
+  color: var(--grove-color-ink-50);
+}
+.btn-primary:hover {
+  background: var(--grove-color-ink-700);
+  border-color: var(--grove-color-ink-700);
+}
+.btn-outline {
+  border-color: var(--grove-color-ink-200);
+  background: var(--grove-color-ink-50);
+  color: var(--grove-color-ink-700);
+}
+.btn-outline:hover {
+  border-color: var(--grove-color-ink-300);
+  background: var(--grove-color-ink-100);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--grove-color-ink-500);
+}
+.btn-ghost:hover {
+  color: var(--grove-color-ink-900);
+  background: var(--grove-color-ink-100);
+}
