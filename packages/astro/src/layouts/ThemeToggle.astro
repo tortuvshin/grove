@@ -1,7 +1,7 @@
 ---
 // A three-position theme switcher: light / dark / system.
 //
-// State is persisted in `localStorage` under the key "open-items-theme".
+// State is persisted in `localStorage` under the key "grove-theme".
 // On mount it reads the stored value (or "system" if none), applies
 // the corresponding class to <html>, and re-syncs when the OS
 // preference changes (only meaningful when mode is "system").
@@ -59,7 +59,7 @@ const { class: className = "" } = Astro.props;
   // The toggle button simply rotates between the three modes on
   // click. The actual class application lives in the page-level
   // THEME_INIT script so behaviour stays consistent.
-  const STORAGE_KEY = "open-items-theme";
+  const STORAGE_KEY = "grove-theme";
   type Mode = "light" | "dark" | "system";
 
   function currentMode(): Mode {
