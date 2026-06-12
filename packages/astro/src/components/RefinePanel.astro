@@ -113,7 +113,11 @@ function triggerLabel(group: FilterGroup): string {
                   <li>
                     <label class="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 text-[0.8125rem] text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-900/60">
                       <span class="flex min-w-0 items-center gap-2">
-                        <input type={group.single ? "radio" : "checkbox"} class="grove-filter-input h-3.5 w-3.5 shrink-0 cursor-pointer accent-ink-900 dark:accent-ink-100" data-filter-key={group.filterKey} data-filter-value={option.value} checked={checked} />
+                        {group.single ? (
+                          <input type="radio" name={group.filterKey} class="grove-filter-input h-3.5 w-3.5 shrink-0 cursor-pointer accent-ink-900 dark:accent-ink-100" data-filter-key={group.filterKey} data-filter-value={option.value} checked={checked} />
+                        ) : (
+                          <input type="checkbox" class="grove-filter-input h-3.5 w-3.5 shrink-0 cursor-pointer accent-ink-900 dark:accent-ink-100" data-filter-key={group.filterKey} data-filter-value={option.value} checked={checked} />
+                        )}
                         <span class="truncate">{option.label ?? pretty(option.value)}</span>
                       </span>
                       <span class="font-mono text-2xs tabular-nums text-ink-500 dark:text-ink-400">{option.count ?? 0}</span>
