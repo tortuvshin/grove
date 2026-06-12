@@ -1,9 +1,9 @@
 ---
-import type { Resource } from "../../data/types";
+import type { Resource } from "@grove-dev/core";
 import Icon from "./Icon.astro";
-import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "../../lib/repo";
-import { formatStars, formatRelative } from "../../lib/format";
-import { statusDisplay } from "../../lib/display";
+import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro";
+import { formatStars, formatRelative } from "@grove-dev/astro";
+import { statusDisplay } from "@grove-dev/astro";
 
 interface Props {
   item: Resource;

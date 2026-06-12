@@ -1,42 +1,86 @@
 ---
-// SPDX-License-Identifier: MIT
-
 /**
- * BaseLayout — wraps every page. Owns the theme-detection inline script
- * and the global shell (Header, Footer). Per-page SEO (title, description,
- * OG, JSON-LD) is delegated to <Seo /> so each page can declare what it
- * needs without polluting the layout file.
+ * BaseLayout — wraps every page. Owns the theme-detection inline
+ * script and the global shell (Header, Footer). Per-page SEO
+ * (title, description, OG, JSON-LD) is delegated to `<Seo />` so
+ * each page can declare what it needs without polluting the layout
+ * file.
+ *
+ * Generic: takes a `site` prop with brand + nav + stats. No
+ * `siteConfig` import — consumers compose the props from their
+ * own config (typically `data/generated/site-config.json` for the
+ * showcase).
+ *
+ * Optional `gaId` adds a GA4 measurement snippet. Omit for
+ * privacy-first deployments.
  */
 import "../styles.css";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
 import Seo from "./Seo.astro";
 
+interface NavItem {
+  label: string;
+  href: string;
+}
+
+interface SiteStats {
+  totalApps?: number;
+  totalCategories?: number;
+  totalStacks?: number;
+  totalOwners?: number;
+  totalStars?: number;
+  originalRepo?: string;
+  originalStars?: number;
+  originalForks?: number;
+  originalContributors?: number;
+}
+
+interface Site {
+  name: string;
+  tagline?: string;
+  description?: string;
+  nav: NavItem[];
+  repoUrl?: string;
+  url?: string;
+  /** Optional directory-level stats — populated from site-config.json
+   * at generate time. Components use it to render hero counts,
+   * origin card stats, and footer summary lines. */
+  stats?: SiteStats;
+}
+
 interface Props {
   title: string;
   description: string;
+  site: Site;
   type?: "website" | "article" | "profile";
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Optional Google Analytics 4 Measurement ID (e.g. "G-XXXXXX"). */
+  gaId?: string;
+  /** Path used for JSON-LD `SearchAction` target. Defaults to "/items". */
+  searchPath?: string;
+  /** Submit button label rendered in the header. Omit to hide. */
+  submitLabel?: string;
+  /** Submit button href rendered in the header. */
+  submitHref?: string;
 }
 
 const {
   title,
   description,
+  site,
   type,
   noindex,
   jsonLd,
+  gaId,
+  searchPath = "/items",
+  submitLabel,
+  submitHref,
 } = Astro.props;
 
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
-
-// Google Analytics 4 — hard-coded Measurement ID for the
-// open-items.dev.mn property. The gtag snippet is injected on every
-// page; if you need to silence it for a local preview, comment the
-// gtag <script> block below out.
-const GA_ID = "G-MB9GWW1LVX";
-const gaEnabled = true;
 ---
 
 <!doctype html>
@@ -49,24 +93,27 @@ const gaEnabled = true;
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={favicon} />
     <link rel="sitemap" href="/sitemap.xml" />
-    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM usage guidance" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms.txt"
+      title="LLM usage guidance"
+    />
 
-    {gaEnabled && (
+    {gaId && (
       <>
-        {/* GA4 — gtag.js loader. We send the initial page_view with
-            the current path + query string so the dashboard
-            distinguishes /items?stack=flutter from /items?stack=react
-            (otherwise they'd all collapse to /items). */}
         <script
           is:inline
           async
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
         />
-        <script is:inline define:vars={{ GA_ID }}>
+        <script is:inline define:vars={{ gaId }}>
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
+          function gtag() {
+            dataLayer.push(arguments);
+          }
           gtag("js", new Date());
-          gtag("config", GA_ID, {
+          gtag("config", gaId, {
             page_path: window.location.pathname + window.location.search,
             page_title: document.title,
           });
@@ -80,21 +127,35 @@ const gaEnabled = true;
       type={type}
       noindex={noindex}
       jsonLd={jsonLd}
+      site={site}
+      searchPath={searchPath}
     />
 
     <slot name="head" />
+
     <script is:inline>
+      // THEME_INIT — runs before paint so the user never sees a
+      // flash of the wrong theme. State is persisted in localStorage
+      // under the key "grove-theme" (matching ThemeToggle.astro).
       (function () {
-        var STORAGE_KEY = "open-items-theme";
+        var STORAGE_KEY = "grove-theme";
         function getMode() {
-          var stored = localStorage.getItem(STORAGE_KEY);
-          if (stored === "light" || stored === "dark" || stored === "system") return stored;
+          try {
+            var stored = localStorage.getItem(STORAGE_KEY);
+            if (stored === "light" || stored === "dark" || stored === "system")
+              return stored;
+          } catch (e) {
+            // localStorage may be blocked (private mode, etc.) —
+            // fall through to the system default.
+          }
           return "system";
         }
         function apply(mode) {
           var resolved =
             mode === "system"
-              ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+              ? (window.matchMedia("(prefers-color-scheme: dark)").matches
+                  ? "dark"
+                  : "light")
               : mode;
           var root = document.documentElement;
           if (resolved === "dark") root.classList.add("dark");
@@ -103,7 +164,9 @@ const gaEnabled = true;
           root.dataset.resolvedTheme = resolved;
         }
         apply(getMode());
-        window.addEventListener("theme:set", function (e) { apply(e.detail); });
+        window.addEventListener("theme:set", function (e) {
+          apply(e.detail);
+        });
         var mq = window.matchMedia("(prefers-color-scheme: dark)");
         mq.addEventListener("change", function () {
           if (getMode() === "system") apply("system");
@@ -112,21 +175,96 @@ const gaEnabled = true;
     </script>
   </head>
   <body class="min-h-screen bg-white text-ink-900 dark:bg-ink-950 dark:text-ink-100">
-    <Header />
+    <slot name="header">
+      <Header
+        site={site}
+        submitLabel={submitLabel}
+        submitHref={submitHref}
+      />
+    </slot>
 
     <main>
       <slot />
     </main>
 
-    <Footer />
+    <slot name="footer">
+      <Footer
+        site={site}
+        stats={{
+          totalApps: site.stats?.totalApps,
+          totalCategories: site.stats?.totalCategories,
+          totalStacks: site.stats?.totalStacks,
+          totalOwners: site.stats?.totalOwners,
+        }}
+        itemsLabel={
+          (site as { blueprintConfig?: { labelPlural?: string } })
+            .blueprintConfig?.labelPlural ?? "items"
+        }
+        discover={{
+          heading: "Discover",
+          items: [
+            ...(site.stats?.totalApps
+              ? [{ label: "Browse all", href: "/items" }]
+              : []),
+            { label: "Contributors", href: "/contributors" },
+            ...(site.stats?.originalRepo
+              ? [{ label: "View on GitHub", href: site.stats.originalRepo, external: true }]
+              : []),
+          ],
+        }}
+        contribute={{
+          heading: "Contribute",
+          items: [
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Submit via GitHub",
+                    href: `${site.repoUrl}/blob/main/CONTRIBUTING.md`,
+                    external: true,
+                  },
+                ]
+              : []),
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Report an issue",
+                    href: `${site.repoUrl}/issues`,
+                    external: true,
+                  },
+                ]
+              : []),
+          ],
+        }}
+        project={{
+          heading: "Project",
+          items: [
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Source on GitHub",
+                    href: site.repoUrl,
+                    external: true,
+                  },
+                ]
+              : []),
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Changelog",
+                    href: `${site.repoUrl}/blob/main/CHANGELOG.md`,
+                    external: true,
+                  },
+                ]
+              : []),
+          ],
+        }}
+      />
+    </slot>
+
     <slot name="body-end" />
 
-    {gaEnabled && (
-      <script is:inline define:vars={{ GA_ID }}>
-        // Mirror in-page SPA navigation (history.pushState /
-        // replaceState) into GA4 page_view events so filter
-        // changes on /items show up as separate page views in
-        // the dashboard instead of one inflated session.
+    {gaId && (
+      <script is:inline define:vars={{ gaId }}>
         (function () {
           var last = location.pathname + location.search;
           function report() {
@@ -150,31 +288,6 @@ const gaEnabled = true;
             origReplace.apply(this, arguments);
             report();
           };
-        })();
-      </script>
-    )}
-
-    {gaEnabled && (
-      <script is:inline>
-        // Delegated click handler for `data-event` elements. We do
-        // this in one place so individual components just emit
-        // data attributes and stay declarative.
-        (function () {
-          document.addEventListener("click", function (e) {
-            var el = e.target instanceof Element
-              ? e.target.closest("[data-event]")
-              : null;
-            if (!el) return;
-            var name = el.getAttribute("data-event");
-            if (!name) return;
-            var params = {
-              source: el.getAttribute("data-event-source") || undefined,
-              app_slug: el.getAttribute("data-event-item") || undefined,
-              channel: el.getAttribute("data-event-channel") || undefined,
-              link_url: el.getAttribute("href") || undefined,
-            };
-            window.gtag("event", name, params);
-          });
         })();
       </script>
     )}
