@@ -14,7 +14,7 @@ import { indexSlug, itemLabelPlural, items } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import ItemIndexRow from "@grove-dev/astro/components/ItemIndexRow.astro";
+import AppsIndexRow from "@grove-dev/astro/components/AppsIndexRow.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import siteConfig from "../../../data/generated/site-config.json";
@@ -113,7 +113,7 @@ const description = `Browse every curated ${itemPlural.replace(/s$/, "")} in the
         <ul class="m-0 grid list-none grid-cols-1 gap-3 p-0">
           {visibleItems.map((item) => (
             <li class="m-0 p-0">
-              <ItemIndexRow item={item} pathPrefix="/apps" />
+              <AppsIndexRow record={item as Parameters<typeof AppsIndexRow>[0]["record"]} detailHref={`/apps/${item.slug}`} />
             </li>
           ))}
         </ul>
