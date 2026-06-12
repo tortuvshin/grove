@@ -1,111 +1,18 @@
 ---
-/**
- * Footer — 4-column grid (brand + Discover + Contribute + Project) plus
- * a thin bar at the bottom with copyright + repo link.
- *
- * Generic: takes a `site` prop with brand + repoUrl. No siteConfig
- * import — consumers compose props from their own config.
- *
- * Each column's links are passed in as a `{ heading, items[] }` shape
- * so consumers can customize the order and copy. Defaults are provided
- * for the brand and bar so the footer still renders if no extra
- * link data is supplied.
- */
+import { stats } from "../../data/stats";
 
-interface NavItem {
-  label: string;
-  href: string;
-  /** When true, opens in a new tab (external). */
-  external?: boolean;
-}
-
-interface FooterColumn {
-  heading: string;
-  items: NavItem[];
-}
-
-interface Site {
-  name: string;
-  tagline?: string;
-  description?: string;
-  repoUrl?: string;
-}
-
-interface Props {
-  site: Site;
-  /** Discover links — first content column. */
-  discover?: FooterColumn;
-  /** Contribute links — second content column. */
-  contribute?: FooterColumn;
-  /** Project links — third content column. */
-  project?: FooterColumn;
-  /** Stats line under brand blurb (e.g. "79 apps · 12 categories"). */
-  stats?: { apps?: number; categories?: number; contributors?: number };
-  /**
-   * Plural label for the primary count stat. Generic blueprint
-   * awareness: "apps" for project-directory, "resources" for
-   * resource-hub, "entities" for ecosystem-map. Defaults to
-   * "apps" so existing call-sites are unaffected.
-   */
-  appsLabel?: string;
-  /** Copyright suffix. Defaults to site.name. */
-  copyrightHolder?: string;
-  /** License line under the bar (e.g. "Content under CC BY-SA 4.0."). */
-  licenseLine?: string;
-  /** Extra class for the outer footer element. */
-  class?: string;
-}
-
-const {
-  site,
-  discover = { heading: "Discover", items: [] },
-  contribute = { heading: "Contribute", items: [] },
-  project = { heading: "Project", items: [] },
-  stats,
-  appsLabel = "apps",
-  copyrightHolder,
-  licenseLine,
-  class: className = "",
-} = Astro.props;
-
+const githubUrl = stats.originalRepo;
 const year = new Date().getFullYear();
-const holder = copyrightHolder ?? site.name;
-const gh = site.repoUrl;
 
-const defaultDiscover: NavItem[] = gh
-  ? [
-      { label: "Source on GitHub", href: gh, external: true },
-      { label: "Latest release", href: `${gh}/releases`, external: true },
-    ]
-  : [];
-const defaultContribute: NavItem[] = gh
-  ? [
-      { label: "Submit via GitHub", href: `${gh}/blob/main/CONTRIBUTING.md`, external: true },
-      { label: "Report an issue", href: `${gh}/issues`, external: true },
-      { label: "Contributing guide", href: `${gh}/blob/main/CONTRIBUTING.md`, external: true },
-    ]
-  : [];
-const defaultProject: NavItem[] = gh
-  ? [
-      { label: "README", href: `${gh}/blob/main/README.md`, external: true },
-      { label: "Changelog", href: `${gh}/blob/main/CHANGELOG.md`, external: true },
-    ]
-  : [];
-
-const discoverItems = discover.items.length ? discover.items : defaultDiscover;
-const contributeItems = contribute.items.length ? contribute.items : defaultContribute;
-const projectItems = project.items.length ? project.items : defaultProject;
+// One-line positioning. Should be the same on every page so the
+// project's identity is consistent.
+const positioning =
+  "A searchable directory of real open-source applications — organized by stack, category, platform, license, activity, and maturity.";
 ---
 
-<footer
-  class:list={[
-    "mt-16 border-t border-ink-200 bg-white text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400",
-    className,
-  ]}
->
+<footer class="mt-16 border-t border-ink-200 bg-white text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
   <div
     class="mx-auto grid max-w-wide grid-cols-2 gap-8 px-5 py-12 md:grid-cols-4 sm:px-7"
-    style="max-width: var(--container-wide, 1400px);"
   >
     <div class="col-span-2 md:col-span-1">
       <div
@@ -115,129 +22,123 @@ const projectItems = project.items.length ? project.items : defaultProject;
           aria-hidden="true"
           class="inline-block h-3.5 w-3.5 rounded bg-ink-900 dark:bg-ink-100"
         ></span>
-        <span>{site.name}</span>
+        <span>Open Source Apps</span>
       </div>
-      {site.tagline && (
-        <p class="m-0 max-w-[36ch] text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
-          {site.tagline}
-        </p>
-      )}
-      {stats && (
-        <p class="mt-3 m-0 text-2xs text-ink-500 dark:text-ink-400">
-          {stats.apps !== undefined && (
-            <>
-              <span class="font-mono">{stats.apps}</span> {appsLabel}
-            </>
-          )}
-          {stats.apps !== undefined && (stats.categories !== undefined || stats.contributors !== undefined) && (
-            <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-          )}
-          {stats.categories !== undefined && (
-            <>
-              <span class="font-mono">{stats.categories}</span> categories
-            </>
-          )}
-          {stats.categories !== undefined && stats.contributors !== undefined && (
-            <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-          )}
-          {stats.contributors !== undefined && (
-            <>
-              <span class="font-mono">{stats.contributors}</span> contributors
-            </>
-          )}
-        </p>
-      )}
+      <p class="m-0 max-w-[36ch] text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
+        {positioning}
+      </p>
+      <p class="mt-3 m-0 text-2xs text-ink-500 dark:text-ink-400">
+        <span class="font-mono">{stats.apps}</span> apps
+        <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+        <span class="font-mono">{stats.categories}</span> categories
+        <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+        <span class="font-mono">{stats.contributors}</span> contributors
+      </p>
     </div>
 
-    {discoverItems.length > 0 && (
-      <div>
-        <h4 class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100">
-          {discover.heading}
-        </h4>
-        <ul class="m-0 flex list-none flex-col gap-2 p-0">
-          {discoverItems.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
-                {...(item.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
+    <div>
+      <h4
+        class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100"
+      >
+        Discover
+      </h4>
+      <ul class="m-0 flex list-none flex-col gap-2 p-0">
+        <li><a href="#hot" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Hot apps</a></li>
+        <li><a href="#new" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">New apps</a></li>
+        <li><a href="#mature" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Mature apps</a></li>
+        <li><a href="#stacks" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">By stack</a></li>
+        <li><a href="#categories" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">By category</a></li>
+      </ul>
+    </div>
 
-    {contributeItems.length > 0 && (
-      <div>
-        <h4 class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100">
-          {contribute.heading}
-        </h4>
-        <ul class="m-0 flex list-none flex-col gap-2 p-0">
-          {contributeItems.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
-                {...(item.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
+    <div>
+      <h4
+        class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100"
+      >
+        Contribute
+      </h4>
+      <ul class="m-0 flex list-none flex-col gap-2 p-0">
+        <li>
+          <a
+            href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Submit via GitHub</a
+          >
+        </li>
+        <li><a href="#contributors" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Contributors</a></li>
+        <li>
+          <a
+            href={`${githubUrl}/issues`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Report an issue</a
+          >
+        </li>
+        <li>
+          <a
+            href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Contributing guide</a
+          >
+        </li>
+      </ul>
+    </div>
 
-    {projectItems.length > 0 && (
-      <div>
-        <h4 class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100">
-          {project.heading}
-        </h4>
-        <ul class="m-0 flex list-none flex-col gap-2 p-0">
-          {projectItems.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
-                {...(item.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
+    <div>
+      <h4
+        class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100"
+      >
+        Project
+      </h4>
+      <ul class="m-0 flex list-none flex-col gap-2 p-0">
+        <li>
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >Source on GitHub</a
+          >
+        </li>
+        <li><a href="#about" class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100">Why this exists</a></li>
+        <li>
+          <a
+            href={`${githubUrl}/blob/main/README.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >README</a
+          >
+        </li>
+        <li>
+          <a
+            href="/about"
+            class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+            >About</a
+          >
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div class="border-t border-ink-200 dark:border-ink-800">
     <div
       class="mx-auto flex max-w-wide flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
-      style="max-width: var(--container-wide, 1400px);"
     >
-      <span>© {year} {holder}.{licenseLine ? ` ${licenseLine}` : ""}</span>
-      {gh && (
-        <>
-          <span class="text-ink-300 dark:text-ink-700">·</span>
-          <a
-            href={gh}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="transition-colors hover:text-ink-900 dark:hover:text-ink-100"
-          >
-            View source on GitHub
-          </a>
-        </>
-      )}
+      <span>© {year} Open Source Apps. Content under CC BY-SA 4.0.</span>
+      <span class="text-ink-300 dark:text-ink-700">·</span>
+      <a
+        href={githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="transition-colors hover:text-ink-900 dark:hover:text-ink-100"
+        >View source on GitHub</a
+      >
     </div>
   </div>
 </footer>

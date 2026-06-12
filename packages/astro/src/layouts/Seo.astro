@@ -1,44 +1,35 @@
 ---
+// SPDX-License-Identifier: MIT
+
 /**
- * Seo — per-page <head> content: title, description, canonical,
- * Open Graph, Twitter Card, and JSON-LD structured data. Designed
- * to be used inside the <head> slot of BaseLayout. Pages pass the
- * rich props they care about; everything else has a sensible default
- * derived from `site` and the Astro URL.
+ * Per-page SEO: <title>, description, canonical, Open Graph, Twitter Card,
+ * and JSON-LD structured data. Designed to be used inside <head> by the
+ * BaseLayout. Pages pass the rich props they care about; everything else
+ * has a sensible default derived from the site config and the Astro URL.
  *
  * Renders:
  *   - <title>, meta description, canonical link
  *   - Open Graph (og:*) for Facebook, LinkedIn, Discord, Slack, etc.
  *   - Twitter Card (twitter:*) for X / Twitter
  *   - JSON-LD WebSite + Organization on every page
- *   - JSON-LD custom payload (e.g. SoftwareSourceCode) when `jsonLd`
- *     is provided.
+ *   - JSON-LD SoftwareSourceCode (or custom) when `jsonLd` is provided
+ *     (e.g. on /apps/[slug] for the per-app structured data)
  *
- * Noindex is opt-in via the `noindex` prop. By default everything
- * is indexable.
+ * Noindex is opt-in via the `noindex` prop. By default everything is
+ * indexable; the only noindex target today is the thin /submit wrapper.
  */
-
-interface SiteRef {
-  name: string;
-  description?: string;
-  url?: string;
-  repoUrl?: string;
-  searchPath?: string;
-}
 
 interface Props {
   title: string;
   description: string;
-  /** Open Graph / Twitter image. Default: /og-image.svg. */
+  /** Open Graph / Twitter image. Default: /og-image.svg. Should be absolute or root-relative. */
   image?: string;
-  /** og:type. Default: "website". */
+  /** og:type. Default: "website". Use "article" for blog posts / changelog. */
   type?: "website" | "article" | "profile";
   /** Set true to add noindex,nofollow. */
   noindex?: boolean;
-  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode. */
+  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on app pages. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
-  /** Site identity (name, description, url, repoUrl). Required. */
-  site: SiteRef;
 }
 
 const {
@@ -48,53 +39,45 @@ const {
   type = "website",
   noindex = false,
   jsonLd,
-  site,
 } = Astro.props;
 
-const siteUrl = site.url
-  ? new URL(site.url)
-  : (Astro.site ?? new URL("https://grove.dev"));
-const canonical = new URL(Astro.url.pathname, siteUrl).toString();
-const ogImage = new URL(image, siteUrl).toString();
+const site = Astro.site ?? new URL("https://open-apps.dev");
+const canonical = new URL(Astro.url.pathname, site).toString();
+const ogImage = new URL(image, site).toString();
 
-// Truncate description for OG/Twitter where longer is worse (160-200 chars).
+// Truncate description for OG/Twitter where longer is worse (160–200 chars).
 function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
   return s.slice(0, max - 1).trimEnd() + "\u2026";
 }
 const shortDescription = truncate(description, 200);
-const siteDescription =
-  site.description ??
-  "A growing community knowledge site powered by Grove.";
 
-// JSON-LD: site-wide identity. Google uses these for site links
-// and the knowledge panel.
-const searchPath = site.searchPath ?? "/projects";
-const websiteLd: Record<string, unknown> = {
+// WebSite + Organization JSON-LD. These are site-wide identity signals
+// that should appear on every page (Google uses them for site links
+// and the knowledge panel).
+const websiteLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: site.name,
-  description: siteDescription,
-  url: siteUrl.toString().replace(/\/$/, ""),
+  name: "Open Source Apps",
+  description:
+    "A curated, self-refreshing directory of real open-source application codebases.",
+  url: site.toString().replace(/\/$/, ""),
   inLanguage: "en",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${siteUrl.toString().replace(/\/$/, "")}${searchPath}?q={search_term_string}`,
+    target: `${site.toString().replace(/\/$/, "")}/apps?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };
 
-const organizationLd: Record<string, unknown> = {
+const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: site.name,
-  url: siteUrl.toString().replace(/\/$/, ""),
-  logo: new URL("/og-image.svg", siteUrl).toString(),
+  name: "Open Source Apps",
+  url: site.toString().replace(/\/$/, ""),
+  logo: new URL("/og-image.svg", site).toString(),
+  sameAs: ["https://github.com/tortuvshin/open-apps"],
 };
-
-if (site.repoUrl) {
-  organizationLd.sameAs = [site.repoUrl];
-}
 ---
 
 <!-- Primary meta -->
@@ -111,8 +94,8 @@ if (site.repoUrl) {
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content={`${site.name} — ${siteDescription}`} />
-<meta property="og:site_name" content={site.name} />
+<meta property="og:image:alt" content="Open Source Apps — a directory of real open-source apps" />
+<meta property="og:site_name" content="Open Source Apps" />
 <meta property="og:locale" content="en" />
 
 <!-- Twitter Card -->
@@ -120,21 +103,13 @@ if (site.repoUrl) {
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={shortDescription} />
 <meta name="twitter:image" content={ogImage} />
-<meta name="twitter:image:alt" content={`${site.name} — ${siteDescription}`} />
+<meta name="twitter:image:alt" content="Open Source Apps — a directory of real open-source apps" />
 
 <!-- JSON-LD: site-wide identity -->
-<script
-  is:inline
-  type="application/ld+json"
-  set:html={JSON.stringify(websiteLd)}
-></script>
-<script
-  is:inline
-  type="application/ld+json"
-  set:html={JSON.stringify(organizationLd)}
-></script>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(organizationLd)} />
 
-<!-- JSON-LD: per-page (SoftwareSourceCode for [slug], etc.) -->
+<!-- JSON-LD: per-page (SoftwareSourceCode for /apps/[slug], etc.) -->
 {jsonLd && (
   <script
     is:inline
