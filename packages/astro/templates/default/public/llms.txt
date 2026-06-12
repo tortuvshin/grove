@@ -1,11 +1,46 @@
 # Grove Directory
 
-A curated, health-aware developer directory powered by Grove.
+Grove Directory is a curated, health-aware developer directory powered by
+the Grove framework. The directory is a structured, blueprint-aware
+mirror of every record in the showcase — every entry carries the
+metadata a developer needs to decide whether to open the source.
 
-Directory: https://example.com/projects
-Records indexed: 8
-Categories: 4
+## Important pages
 
-## Usage
+- Home: https://example.com/
+- Browse: https://example.com/projects
+- About: https://example.com/about
+- Contributors: https://example.com/contributors
+- Submit a record: https://example.com/submit
+- Trending: https://example.com/projects?label=hot
+- Recently added: https://example.com/projects?label=new
+- Established: https://example.com/projects?label=mature
+- Browse by stack: https://example.com/projects
+- Browse by category: https://example.com/projects
 
-Use /llms-full.txt for record-level details. Prefer detail pages for citations.
+## What the directory contains
+
+- Real, runnable open-source records (projects, resources, entities)
+- Stack, language, and architecture at a glance
+- Activity, health signals, and maturity tiers
+- License, stars, and contribution readiness
+- Curated notes: best for, why listed, caveats
+- Filters by stack, platform, license, and status
+
+## Data layout
+
+- `data/records/*.yml` — human-edited source of truth
+- `data/taxonomy/*.yml` — categories, stacks, platforms, channels
+- `data/generated/records.*.json` — build-time projection
+- `data/generated/site-config.json` — blueprint + site metadata
+
+## How it's built
+
+The static site is rendered by Astro, fed by JSON projections
+produced by `@grove-dev/cli generate` from the YAML records. The
+build chains:
+
+1. `pnpm run build:data` — yml → JSON
+2. `pnpm run build:sitemap` — emit public/sitemap.xml
+3. `pnpm run build:llms` — emit public/llms.txt + llms-full.txt
+4. `astro build` — render the static site
