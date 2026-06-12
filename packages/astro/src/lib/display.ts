@@ -78,6 +78,15 @@ export function sortDisplay(id: string | null | undefined): string {
   return SORT_DISPLAY[id] ?? id;
 }
 
+export function prettySlug(value: string | null | undefined): string {
+  if (!value) return "";
+  return value
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 // ── Status option list (used by filter dropdowns) ───────────────────
 // "needs-maintainer" is included even though it's a derived/composite
 // status — filter dropdowns and chip rendering need to offer it
