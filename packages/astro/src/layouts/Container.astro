@@ -1,57 +1,18 @@
 ---
-/**
- * Container — page-width wrapper.
- *
- * Centralizes the three layout widths the showcase uses:
- *
- *   - "default" → 1140px (the standard reading width)
- *   - "wide"    → 1400px (home, full-bleed grid sections)
- *   - "narrow"  → 720px  (about, methodology, content-heavy pages)
- *
- * Pure layout, no styling dependencies beyond Tailwind's `max-w-*`
- * tokens defined in `@grove-dev/astro/styles.css`.
- */
-
 interface Props {
   size?: "default" | "wide" | "narrow";
   class?: string;
-  /** Padding preset. Defaults to a comfortable 1.25rem / 1.75rem. */
-  padding?: "default" | "none" | "tight";
 }
 
-const {
-  size = "default",
-  class: className = "",
-  padding = "default",
-} = Astro.props;
-
+const { size = "default", class: className = "" } = Astro.props;
 const sizeClass =
   size === "wide"
-    ? "grove-container-wide"
+    ? "max-w-wide"
     : size === "narrow"
-      ? "grove-container-narrow"
-      : "grove-container";
-
-const paddingClass =
-  padding === "none"
-    ? ""
-    : padding === "tight"
-      ? "px-4 sm:px-5"
-      : "px-5 sm:px-7";
+      ? "max-w-narrow"
+      : "max-w-container";
 ---
 
-<div class:list={["mx-auto", sizeClass, paddingClass, className]}>
+<div class={`${sizeClass} mx-auto px-5 sm:px-7 ${className}`}>
   <slot />
 </div>
-
-<style>
-  .grove-container {
-    max-width: var(--container-container, 1140px);
-  }
-  .grove-container-wide {
-    max-width: var(--container-wide, 1400px);
-  }
-  .grove-container-narrow {
-    max-width: var(--container-narrow, 720px);
-  }
-</style>
