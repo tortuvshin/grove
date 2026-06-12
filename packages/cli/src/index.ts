@@ -1031,56 +1031,84 @@ program
   .argument("<action>", "sync")
   .description("Sync Grove workflow templates into the current project.")
   .option("--force", "overwrite existing workflow files")
-  .action(async (action: string, opts: { force?: boolean }) => {
-    if (action !== "sync") {
-      console.error(`Unknown workflows action: ${action}. Use "sync".`);
-      process.exit(1);
-    }
-    const config = await loadConfig();
-    // config.integrations.github is the configured GitHub integration mode.
-    // `false` → "none" (private); anything else → "public".
-    const githubMode: "none" | "public" =
-      config.integrations?.github === false || config.integrations?.github === undefined
-        ? "none"
-        : "public";
-    const root = process.cwd();
-
-    // Make sure the directories exist. `ensureDir` returns a
-    // promise; without `await`, the subsequent `writeFile` can race
-    // the directory creation on cold start.
-    await ensureDir(join(root, ".github", "workflows"));
-    await ensureDir(join(root, ".github", "ISSUE_TEMPLATE"));
-
-    const files: Array<{ path: string; content: string }> = [
-      { path: join(root, ".github", "workflows", "validate-data.yml"), content: workflowValidate() },
-      { path: join(root, ".github", "workflows", "build.yml"), content: workflowBuild("astro") },
-    ];
-    if (githubMode === "public") {
-      files.push(
-        { path: join(root, ".github", "workflows", "sync-github-metadata.yml"), content: workflowSyncGithubMetadata() },
-        { path: join(root, ".github", "workflows", "sync-contributors.yml"), content: workflowSyncContributors() },
-        { path: join(root, ".github", "workflows", "cleanup-stale-records.yml"), content: workflowCleanupStaleRecords() },
-        { path: join(root, ".github", "workflows", "update-records.yml"), content: workflowUpdateRecords() },
-        { path: join(root, ".github", "ISSUE_TEMPLATE", "report-broken-record.md"), content: issueTemplateBrokenRecord() },
-        { path: join(root, ".github", "pull_request_template.md"), content: pullRequestTemplate() },
-      );
-    }
-
-    let written = 0;
-    let skipped = 0;
-    for (const f of files) {
-      if (!opts.force && (await existsLocal(f.path))) {
-        skipped++;
-        continue;
+  .option(
+    "-d, --deploy <provider>",
+    `deploy provider for the build workflow + config files: ${DEPLOY_PROVIDERS.join(" | ")}`,
+    "github-pages",
+  )
+  .action(
+    async (
+      action: string,
+      opts: { force?: boolean; deploy?: string },
+    ) => {
+      if (action !== "sync") {
+        console.error(`Unknown workflows action: ${action}. Use "sync".`);
+        process.exit(1);
       }
-      await writeFile(f.path, f.content, "utf8");
-      written++;
-    }
-    console.log(
-      `[workflows sync] ${githubMode} mode: ${written} written, ${skipped} skipped` +
-        (opts.force ? " (--force)" : ""),
-    );
-  });
+      const config = await loadConfig();
+      // config.integrations.github is the configured GitHub integration mode.
+      // `false` → "none" (private); anything else → "public".
+      const githubMode: "none" | "public" =
+        config.integrations?.github === false || config.integrations?.github === undefined
+          ? "none"
+          : "public";
+      // Validate the deploy option; default to github-pages for back-compat.
+      const deploy: DeployProvider =
+        opts.deploy && (DEPLOY_PROVIDERS as readonly string[]).includes(opts.deploy)
+          ? (opts.deploy as DeployProvider)
+          : "github-pages";
+      const root = process.cwd();
+
+      // Make sure the directories exist. `ensureDir` returns a
+      // promise; without `await`, the subsequent `writeFile` can race
+      // the directory creation on cold start.
+      await ensureDir(join(root, ".github", "workflows"));
+      await ensureDir(join(root, ".github", "ISSUE_TEMPLATE"));
+
+      const files: Array<{ path: string; content: string }> = [
+        { path: join(root, ".github", "workflows", "validate-data.yml"), content: workflowValidate() },
+        { path: join(root, ".github", "workflows", "build.yml"), content: workflowBuild("astro", deploy) },
+      ];
+      // Provider-specific deploy workflow (vercel / netlify / cloudflare).
+      // GitHub Pages deploys inline in build.yml; `none` writes nothing.
+      if (deploy === "vercel" || deploy === "netlify" || deploy === "cloudflare") {
+        files.push({
+          path: join(root, ".github", "workflows", `deploy-${deploy}.yml`),
+          content: workflowDeploy(deploy),
+        });
+      }
+      // Provider-specific config files at the project root.
+      const projectName = (config.site?.name as string | undefined) ?? "Grove Directory";
+      for (const file of deployConfigFiles(deploy, projectName)) {
+        files.push({ path: join(root, file.path), content: file.content });
+      }
+      if (githubMode === "public") {
+        files.push(
+          { path: join(root, ".github", "workflows", "sync-github-metadata.yml"), content: workflowSyncGithubMetadata() },
+          { path: join(root, ".github", "workflows", "sync-contributors.yml"), content: workflowSyncContributors() },
+          { path: join(root, ".github", "workflows", "cleanup-stale-records.yml"), content: workflowCleanupStaleRecords() },
+          { path: join(root, ".github", "workflows", "update-records.yml"), content: workflowUpdateRecords() },
+          { path: join(root, ".github", "ISSUE_TEMPLATE", "report-broken-record.md"), content: issueTemplateBrokenRecord() },
+          { path: join(root, ".github", "pull_request_template.md"), content: pullRequestTemplate() },
+        );
+      }
+
+      let written = 0;
+      let skipped = 0;
+      for (const f of files) {
+        if (!opts.force && (await existsLocal(f.path))) {
+          skipped++;
+          continue;
+        }
+        await writeFile(f.path, f.content, "utf8");
+        written++;
+      }
+      console.log(
+        `[workflows sync] ${githubMode} mode, deploy=${deploy}: ${written} written, ${skipped} skipped` +
+          (opts.force ? " (--force)" : ""),
+      );
+    },
+  );
 
 // ──────────────────────────────────────────────────────────────────────
 // grove build / grove dev
