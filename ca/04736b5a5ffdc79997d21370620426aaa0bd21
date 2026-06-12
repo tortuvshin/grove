@@ -1,0 +1,42 @@
+packages/astro/templates/default/grove.config.ts
+  s_79084ccde86752::t_91625c481f0786 31
+packages/astro/templates/default/public/llms-full.txt
+  s_79084ccde86752::t_f51e71492968fc 3
+packages/astro/templates/default/data/generated/records.full.json
+  s_79084ccde86752::t_f51e71492968fc 4
+packages/astro/templates/default/data/generated/records.json
+  s_79084ccde86752::t_f51e71492968fc 4
+packages/astro/templates/default/data/generated/site-config.json
+  s_79084ccde86752::t_f51e71492968fc 31
+packages/astro/src/lib/search.ts
+  s_79084ccde86752::t_1fa2aced13eb7d 217-218,236,259-261,380-382
+  s_79084ccde86752::t_8929311ed8081a 1-2,124-142,147,150,153,156-157,159-163,168,202,216,219-235,237-241,243,247-250,258,266,275,279-281,285-287,291,370,379,383-387,389
+packages/astro/src/lib/taxonomy-counts.ts
+  s_79084ccde86752::t_8929311ed8081a 1,4,8,18,21-23
+packages/astro/src/lib/lenses.ts
+  s_79084ccde86752::t_8929311ed8081a 194-198,218-219
+packages/astro/templates/default/data/generated/records.index.json
+  s_79084ccde86752::t_f51e71492968fc 4
+packages/astro/templates/default/public/sitemap.xml
+  s_79084ccde86752::t_f51e71492968fc 5,11,17,23,29,35,41,47,53,59
+packages/astro/src/lib/scores.ts
+  s_79084ccde86752::t_8929311ed8081a 1-8
+packages/astro/src/lib/display.ts
+  s_79084ccde86752::t_8929311ed8081a 42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ca04736b5a5ffdc79997d21370620426aaa0bd21",
+  "prompts": {},
+  "sessions": {
+    "s_79084ccde86752": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd1b-fcb4-7803-8900-38588b51da5e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
