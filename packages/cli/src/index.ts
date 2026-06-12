@@ -1326,10 +1326,48 @@ jobs:
 `;
 }
 
-function workflowBuild(framework: Framework): string {
+function workflowBuild(framework: Framework, deploy: DeployProvider): string {
   // The project's "build" script in package.json already chains
   //   grove generate && grove sitemap && grove llms && <framework> build
   // via the `grove` package's own build orchestration. Keep the workflow thin.
+  //
+  // For `github-pages` we add a deploy-pages step at the end so the
+  // build workflow is self-contained (the `pages: write` permission
+  // and the `actions/configure-pages` + `actions/deploy-pages` steps
+  // are the canonical Pages deploy path).
+  //
+  // For `vercel` / `netlify` / `cloudflare` we keep build.yml as a
+  // pure build + artifact upload; the provider-specific deploy lives
+  // in a separate `.github/workflows/deploy-<provider>.yml` workflow.
+  // For `none` we still upload the artifact so a user can manually
+  // download it, but skip the deploy step.
+  const isPages = deploy === "github-pages";
+  const pagesSteps = isPages
+    ? `      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ Deployed to \${{ steps.deployment.outputs.page_url }}"
+`
+    : "";
+  const pagesPermissions = isPages
+    ? `  contents: read
+  pages: write
+  id-token: write
+`
+    : `  contents: read
+`;
   return `name: Build site
 
 # Runs on every PR, every push to main, and on manual dispatch.
@@ -1342,8 +1380,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-
+${pagesPermissions}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -1365,16 +1402,258 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # \`build\` chains build:data + build:sitemap + build:llms + <framework> build.
+      # Site URL is overridden so sitemap/OG/canonical links resolve to
+      # the deployed URL rather than the placeholder in grove.config.ts.
       - name: Build the site
-        run: pnpm build
+        env:
+          SITE_URL: \${{ vars.SITE_URL || github.pages.custom_domain || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+        run: pnpm run build
+${pagesSteps}`;
+}
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+/**
+ * Provider-specific deploy workflow. Triggered after a successful build
+ * to deploy the static site to the chosen provider via its CLI / API.
+ * Used for vercel / netlify / cloudflare (GitHub Pages deploys inline
+ * in build.yml, and `none` writes no deploy workflow at all).
+ */
+function workflowDeploy(deploy: DeployProvider): string {
+  switch (deploy) {
+    case "vercel":
+      return `name: Deploy to Vercel
+
+# Runs after a successful build on main. Uses the Vercel CLI to deploy
+# the built \`dist/\` directory. Requires a VERCEL_TOKEN secret (and
+# optionally VERCEL_ORG_ID / VERCEL_PROJECT_ID for project linking).
+on:
+  workflow_run:
+    workflows: ["Build site"]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: \${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          name: dist
-          path: dist
-          retention-days: 7
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel project info
+        id: vercel
+        run: |
+          echo "PROJECT_ID=\${VERCEL_PROJECT_ID}" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_TOKEN: \${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: \${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: \${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel (production)
+        run: vercel deploy --prod --yes --token \$VERCEL_TOKEN
+        env:
+          VERCEL_TOKEN: \${{ secrets.VERCEL_TOKEN }}
 `;
+    case "netlify":
+      return `name: Deploy to Netlify
+
+# Runs after a successful build on main. Uses the Netlify CLI to deploy
+# the built \`dist/\` directory. Requires NETLIFY_AUTH_TOKEN and
+# NETLIFY_SITE_ID secrets.
+on:
+  workflow_run:
+    workflows: ["Build site"]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: \${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install Netlify CLI
+        run: pnpm add -g netlify-cli@latest
+
+      - name: Deploy to Netlify (production)
+        run: netlify deploy --prod --dir=dist --message "Deploy from GitHub Actions"
+        env:
+          NETLIFY_AUTH_TOKEN: \${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: \${{ secrets.NETLIFY_SITE_ID }}
+`;
+    case "cloudflare":
+      return `name: Deploy to Cloudflare Pages
+
+# Runs after a successful build on main. Uses wrangler to deploy the
+# built \`dist/\` directory to Cloudflare Pages. Requires
+# CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID secrets.
+on:
+  workflow_run:
+    workflows: ["Build site"]
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: \${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+
+      - name: Install wrangler
+        run: pnpm add -g wrangler@latest
+
+      - name: Deploy to Cloudflare Pages
+        run: wrangler pages deploy dist --project-name ${"${{ github.event.repository.name }}"} --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+`;
+    default:
+      // github-pages and none never reach this path; build.yml handles
+      // github-pages, and `none` writes no deploy workflow.
+      throw new Error(`workflowDeploy: unsupported deploy provider ${deploy}`);
+  }
+}
+
+/**
+ * Provider-specific config files written at the project root so the
+ * provider's CLI / build hook picks them up automatically. V1 only
+ * emits configs for vercel / netlify / cloudflare / github-pages.
+ * `none` emits nothing.
+ */
+function deployConfigFiles(
+  deploy: DeployProvider,
+  projectName: string,
+): Array<{ path: string; content: string }> {
+  switch (deploy) {
+    case "vercel":
+      return [
+        {
+          path: "vercel.json",
+          content: `{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false
+}
+`,
+        },
+      ];
+    case "netlify":
+      return [
+        {
+          path: "netlify.toml",
+          content: `# Netlify configuration for ${projectName}.
+# Generated by \`grove new --deploy netlify\`. See https://docs.netlify.com/configure-netlify/file-based-configuration/
+
+[build]
+  command = "pnpm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PNPM_VERSION = "10"
+
+# Astro renders clean URLs out of the box; keep static asset caching
+# aggressive but always revalidate HTML so a fresh deploy shows up.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+`,
+        },
+      ];
+    case "cloudflare":
+      return [
+        {
+          path: "wrangler.jsonc",
+          content: `// Cloudflare Pages configuration for ${projectName}.
+// Generated by \`grove new --deploy cloudflare\`. See https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+{
+  "name": "${slugifyProjectName(projectName)}",
+  "compatibility_date": "${new Date().toISOString().slice(0, 10)}",
+  "pages_build_output_dir": "./dist",
+  "observability": {
+    "enabled": true
+  }
+}
+`,
+        },
+      ];
+    case "github-pages":
+      // GitHub Pages uses repo-level Pages settings; no config file.
+      return [];
+    case "none":
+      return [];
+  }
+}
+
+function slugifyProjectName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "grove-site";
 }
 
 function issueTemplateSubmission(blueprint: Blueprint): string {
