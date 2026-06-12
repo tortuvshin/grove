@@ -120,28 +120,6 @@ export async function generate(
   const outDir = resolve(cwd, cfg.paths.generatedDir);
   await mkdir(outDir, { recursive: true });
 
-  // Re-emit the site config as JSON alongside the records so the
-  // Astro (or any framework) template can pick up the user's
-  // branding, theme, and nav without parsing `grove.config.ts`
-  // at render time. The CLI runs `generate` ahead of `build`,
-  // so this stays in sync with the consumer's config edits.
-  const siteConfigPayload = {
-    blueprint: cfg.blueprint,
-    name: cfg.site.name,
-    tagline: cfg.site.tagline,
-    description: cfg.site.description ?? cfg.site.tagline,
-    siteUrl: cfg.site.url ?? "https://example.com",
-    repoUrl: cfg.site.repoUrl ?? "",
-    nav: cfg.nav,
-    theme: cfg.theme,
-    integrations: cfg.integrations,
-  };
-  await writeFile(
-    join(outDir, "site-config.json"),
-    JSON.stringify(siteConfigPayload, null, 2),
-    "utf8",
-  );
-
   const expectedKind = blueprintKind[cfg.blueprint];
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
@@ -181,6 +159,138 @@ export async function generate(
       const vis = (r as { visibility?: string }).visibility;
       return vis !== "hide" && vis !== "remove";
     });
+
+  // ── Derive directory stats from the records themselves ──────────
+  // Single source of truth for the hero/origin/contributors counts.
+  // Pages and components read this from site-config.json so the
+  // numbers are guaranteed to match what's actually rendered.
+  const projects = indexRecords.filter((r) => r.kind === "project");
+  const resources = indexRecords.filter((r) => r.kind === "resource");
+  const entities = indexRecords.filter((r) => r.kind === "entity");
+
+  const categories = new Set<string>();
+  const stacks = new Set<string>();
+  const platforms = new Set<string>();
+  const owners = new Set<string>();
+  let totalStars = 0;
+  for (const r of indexRecords) {
+    const cat = (r as { category?: string }).category;
+    if (cat) categories.add(cat);
+    const s1 = (r as { stack?: string }).stack;
+    if (s1) stacks.add(s1);
+    const s2 = (r as { stacks?: string[] }).stacks ?? [];
+    for (const s of s2) stacks.add(s);
+    const ps = (r as { platforms?: string[] }).platforms ?? [];
+    for (const p of ps) platforms.add(p);
+    const gh = (r as { github?: { fullName?: string; stars?: number } }).github;
+    if (gh?.fullName && gh.fullName.includes("/")) {
+      owners.add(gh.fullName.split("/")[0]);
+    }
+    if (typeof gh?.stars === "number") totalStars += gh.stars;
+  }
+
+  // Try to merge in the optional repo-stats.json (origin / source repo).
+  // This file is produced by the `sync:repo-stats` workflow, but the
+  // generate step must not require it — fallback to a sane empty shape.
+  const repoStatsPath = join(outDir, "repo-stats.json");
+  let repoStats: {
+    originalRepo?: string;
+    stars?: number;
+    forks?: number;
+    contributors?: number;
+    description?: string;
+  } = {};
+  try {
+    repoStats = JSON.parse(await readFile(repoStatsPath, "utf8"));
+  } catch {
+    /* not present — pages render gracefully */
+  }
+
+  // Re-emit the site config as JSON alongside the records so the
+  // Astro (or any framework) template can pick up the user's
+  // branding, theme, and nav without parsing `grove.config.ts`
+  // at render time. The CLI runs `generate` ahead of `build`,
+  // so this stays in sync with the consumer's config edits.
+  //
+  // `stats` carries directory-level aggregates so the hero,
+  // origin card, and contributors page all read the same numbers
+  // without re-deriving them.
+  //
+  // `blueprintConfig` is the generic-naming layer: every name
+  // (route slug, kind, singular/plural labels) is derived from the
+  // blueprint so the same template works for project directories,
+  // resource hubs, and ecosystem maps without per-blueprint forks.
+  const kind = expectedKind;
+  const blueprintConfig = {
+    id: cfg.blueprint,
+    kind,
+    // Slug used in URLs (e.g. /projects/, /resources/, /entities/).
+    // Override in `grove.config.ts` via `routes.directory` if you
+    // want a custom path that doesn't match the blueprint id.
+    routeSlug:
+      (cfg as { routes?: { directory?: string } }).routes?.directory ??
+      ({
+        project: "projects",
+        resource: "resources",
+        entity: "entities",
+      }[kind] ?? "items"),
+    itemSlug:
+      (cfg as { routes?: { item?: string } }).routes?.item ??
+      ({
+        project: "project",
+        resource: "resource",
+        entity: "entity",
+      }[kind] ?? "item"),
+    // Human-facing labels (e.g. "Browse projects", "Submit a project").
+    labelSingular:
+      (cfg as { labels?: { singular?: string } }).labels?.singular ??
+      ({
+        project: "project",
+        resource: "resource",
+        entity: "entity",
+      }[kind] ?? "item"),
+    labelPlural:
+      (cfg as { labels?: { plural?: string } }).labels?.plural ??
+      ({
+        project: "projects",
+        resource: "resources",
+        entity: "entities",
+      }[kind] ?? "items"),
+  };
+
+  const siteConfigPayload = {
+    blueprint: cfg.blueprint,
+    blueprintConfig,
+    name: cfg.site.name,
+    tagline: cfg.site.tagline,
+    description: cfg.site.description ?? cfg.site.tagline,
+    siteUrl: cfg.site.url ?? "https://example.com",
+    repoUrl: cfg.site.repoUrl ?? "",
+    nav: cfg.nav,
+    theme: cfg.theme,
+    integrations: cfg.integrations,
+    stats: {
+      totalRecords: indexRecords.length,
+      totalApps: projects.length,
+      totalResources: resources.length,
+      totalEntities: entities.length,
+      totalCategories: categories.size,
+      totalStacks: stacks.size,
+      totalPlatforms: platforms.size,
+      totalOwners: owners.size,
+      totalStars,
+      // origin / source repo — only present when sync:repo-stats has run
+      originalRepo: repoStats.originalRepo ?? cfg.site.repoUrl ?? "",
+      originalStars: repoStats.stars ?? 0,
+      originalForks: repoStats.forks ?? 0,
+      originalContributors: repoStats.contributors ?? 0,
+    },
+  };
+  await writeFile(
+    join(outDir, "site-config.json"),
+    JSON.stringify(siteConfigPayload, null, 2),
+    "utf8",
+  );
 
   const generatedAt = new Date().toISOString();
   const fullPayload: RecordsFullPayload = {

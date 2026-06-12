@@ -493,6 +493,35 @@ export const groveConfigSchema = z.object({
 
   nav: z.array(navItemSchema).default([]),
 
+  /**
+   * Optional URL slug overrides. By default the blueprint id maps
+   * to a route — `project-directory` → `/projects/`,
+   * `resource-hub` → `/resources/`, `ecosystem-map` → `/entities/`.
+   * Override either field if you want a different path or singular
+   * noun without forking the template (e.g. set `directory: "books"`
+   * for a custom project-directory that presents as a book list).
+   */
+  routes: z
+    .object({
+      directory: z.string().optional(),
+      item: z.string().optional(),
+    })
+    .default({}),
+
+  /**
+   * Optional display-name overrides. Default labels are derived
+   * from the blueprint id (e.g. "project" / "projects" for
+   * `project-directory`). Override either field for a friendlier
+   * default — useful when the project is using a different noun
+   * (e.g. set `singular: "guide"` to render "Submit a guide").
+   */
+  labels: z
+    .object({
+      singular: z.string().optional(),
+      plural: z.string().optional(),
+    })
+    .default({}),
+
   facets: z.array(z.string()).default(["category", "tags"]),
 
   integrations: z
