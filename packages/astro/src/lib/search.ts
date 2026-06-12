@@ -1,93 +1,22 @@
-/**
- * URL-driven search/filter/sort state for the directory list page.
- *
- * Multi-value fields use repeated keys: `?stack=Flutter&stack=RN`.
- * Single-value fields (q, sort, page, lens) are scalar. Empty
- * / undefined fields mean "no filter on this dimension".
- *
- * The functions here are generic over a record-like shape that
- * carries the index payload (see `toIndexRecord` in
- * `@grove-dev/core`). The list page only needs `name`, `slug`,
- * `description`, `category`, `tags`, `stack`, `stacks`, `platforms`,
- * `repoUrl`, `logoUrl`, `health`, `curation`, and `github.{stars,
- * pushedAt}` — all of which are present in the index projection.
- */
-
-import type {
-  HealthStatus,
-  ProjectRecord,
-} from "@grove-dev/core";
-import { labelDisplay, statusDisplay } from "./display.js";
-import { applyLens, lensFromSearchParams, type LensId } from "./lenses.js";
-
-// ── Types ─────────────────────────────────────────────────────────
+import type { OpenSourceApp } from "../data/types";
+import { labelDisplay, lensDisplay, statusDisplay } from "./display";
 
 /**
- * Subset of `ProjectRecord` the search lib actually reads. Defined
- * inline so the lib works on both full records and the lighter
- * index payload. Use `ProjectRecord` from core when you have it;
- * pass any object that satisfies `Searchable` otherwise.
+ * URL-driven filter state for the /apps discovery page.
  *
- * `Searchable` is a superset of `AppLike` (the lens-matching shape
- * in `lib/lenses.ts`) — both interfaces share the same optional
- * field shape, so `Searchable` records can be passed to
- * `applyLens()` and `filterApps()` interchangeably.
+ * Multi-value fields use repeated keys in the URL: `?stack=Flutter&stack=React+Native`.
+ * Empty / undefined fields mean "no filter on this dimension".
  */
-export interface Searchable {
-  slug?: string;
-  name: string;
-  description?: string;
-  category?: string;
-  tags?: string[];
-  stack?: string;
-  stacks?: string[];
-  platforms?: string[];
-  /** Canonical repo URL — used for owner extraction in text search. */
-  repoUrl?: string;
-  logoUrl?: string;
-  /** Curated labels (new, hot, mature, featured). */
-  curation?: { labels?: string[] };
-  /** Health block — drives status filter + tier fallback. */
-  health?: {
-    status?: HealthStatus;
-    tier?: "curated" | "listed" | "experimental" | "hidden";
-    visibility?: "highlight" | "keep" | "needs_review" | "hide" | "remove" | "historical";
-    cleanupCandidate?: boolean;
-  };
-  /** GitHub metadata used for sort + text search. */
-  github?: {
-    stars?: number;
-    forks?: number;
-    pushedAt?: string | null;
-    license?: string | null;
-  };
-  /** Score block — used for "best-overall" sort. */
-  scores?: {
-    activity?: number;
-    maturity?: number;
-    learning?: number;
-    contribution?: number;
-    docs?: number;
-    overall?: number;
-  };
-}
-
 export type AppsFilters = {
   q?: string;
-  /** Stack slugs, repeated URL key `stack=`. Matches against `stack` AND `stacks[]`. */
   stacks?: string[];
-  /** Platform slugs, repeated URL key `platform=`. Matches `platforms[]`. */
   platforms?: string[];
-  /** Category names, repeated URL key `category=`. */
   categories?: string[];
-  /** Curated label ids (new/hot/mature/featured), repeated URL key `label=`. */
   labels?: string[];
-  /** SPDX license ids, repeated URL key `license=`. */
   licenses?: string[];
-  /** Health status values, comma-separated repeated URL key `status=`. */
   statuses?: string[];
-  /** A curated lens (single-select view). */
-  lens?: LensId;
+  /** A curated lens (e.g. "good-to-learn", "production-like"). Single value. */
+  lens?: string;
   /** Sort order. Single value, defaults to "recently-updated". */
   sort?: AppsSort;
   /** 1-based page number. */
@@ -107,12 +36,7 @@ export type AppsSort = (typeof SORT_OPTIONS)[number]["value"];
 
 const DEFAULT_SORT: AppsSort = "recently-updated";
 const DEFAULT_PAGE = 1;
-
-/**
- * How many records per page. Constant for now; future versions may
- * vary per blueprint.
- */
-export const PAGE_SIZE = 24;
+const DEFAULT_PAGE_SIZE = 20;
 
 const KEYS = {
   q: "q",
@@ -127,15 +51,11 @@ const KEYS = {
   page: "page",
 } as const;
 
-// ── Search param round-tripping ──────────────────────────────────
-
 /**
- * Read filters from a URLSearchParams (or anything URLSearchParams-
- * shaped, e.g. the result of `new URL(req.url).searchParams`).
+ * Read filters from a URLSearchParams (or anything URLSearchParams-shaped,
+ * e.g. the result of `new URL(req.url).searchParams`).
  */
-export function filtersFromSearchParams(
-  sp: URLSearchParams,
-): AppsFilters {
+export function filtersFromSearchParams(sp: URLSearchParams): AppsFilters {
   const rawSort = sp.get(KEYS.sort);
   // Backwards-compat: old "most-mature" sort now maps to "best-overall".
   const normalizedSort = rawSort === "most-mature" ? "best-overall" : rawSort;
@@ -144,8 +64,7 @@ export function filtersFromSearchParams(
       ? (normalizedSort as AppsSort)
       : undefined;
   const rawPage = Number(sp.get(KEYS.page));
-  const page =
-    Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : undefined;
+  const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : undefined;
   return {
     q: sp.get(KEYS.q) ?? undefined,
     stacks: sp.getAll(KEYS.stacks).filter(Boolean),
@@ -153,20 +72,17 @@ export function filtersFromSearchParams(
     categories: sp.getAll(KEYS.categories).filter(Boolean),
     labels: sp.getAll(KEYS.labels).filter(Boolean),
     licenses: sp.getAll(KEYS.licenses).filter(Boolean),
-    statuses: sp
-      .getAll(KEYS.statuses)
-      .flatMap((s) => s.split(","))
-      .filter(Boolean),
-    lens: lensFromSearchParams(sp) || undefined,
+    statuses: sp.getAll(KEYS.statuses).flatMap((s) => s.split(",")).filter(Boolean),
+    lens: sp.get(KEYS.lens) ?? undefined,
     sort,
     page,
   };
 }
 
 /**
- * Serialize a filters object back to URLSearchParams. Undefined /
- * empty values are dropped. Defaults (sort, page 1) are also dropped
- * to keep URLs short and canonical.
+ * Serialize a filters object back to URLSearchParams.
+ * Undefined / empty values are dropped. Defaults (sort, page 1, comfortable
+ * density) are also dropped to keep URLs short and canonical.
  */
 export function searchParamsFromFilters(f: AppsFilters): URLSearchParams {
   const sp = new URLSearchParams();
@@ -183,12 +99,7 @@ export function searchParamsFromFilters(f: AppsFilters): URLSearchParams {
   return sp;
 }
 
-// ── Filter application ───────────────────────────────────────────
-
-/**
- * True if any filter is active (i.e. the result list isn't "all
- * records, default sort").
- */
+/** True if any filter is active (i.e. the result list isn't "all apps"). */
 export function hasAnyFilter(f: AppsFilters): boolean {
   if (f.q && f.q.trim()) return true;
   if (f.lens) return true;
@@ -202,131 +113,35 @@ export function hasAnyFilter(f: AppsFilters): boolean {
   );
 }
 
-/**
- * Return the subset of records that match all active filters (AND
- * across dimensions, OR within a dimension).
- *
- * `q` is a case-insensitive substring search across name, owner,
- * description, category, stack/stacks/platforms, tags, and license.
- * Other dimensions are exact match.
- */
-export function filterApps<T extends Searchable>(
-  records: T[],
-  f: AppsFilters,
-): T[] {
-  const q = f.q?.trim().toLowerCase();
-  const stacks = f.stacks?.length ? new Set(f.stacks) : null;
-  const platforms = f.platforms?.length ? new Set(f.platforms) : null;
-  const categories = f.categories?.length ? new Set(f.categories) : null;
-  const labels = f.labels?.length ? new Set(f.labels) : null;
-  const licenses = f.licenses?.length ? new Set(f.licenses) : null;
-  const statuses = f.statuses?.length ? new Set(f.statuses) : null;
-
-  return records.filter((r) => {
-    if (q) {
-      const ownerMatch =
-        /github\.com\/([^/]+)\//.exec(r.repoUrl ?? "")?.[1]?.toLowerCase() ??
-        "";
-      const haystack = [
-        r.name,
-        ownerMatch,
-        r.description ?? "",
-        r.category ?? "",
-        r.stack ?? "",
-        ...(r.stacks ?? []),
-        ...(r.platforms ?? []),
-        ...(r.tags ?? []),
-        r.github?.license ?? "",
-        r.health?.status ? statusDisplay(r.health.status) : "",
-      ]
-        .join(" ")
-        .toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-
-    if (stacks) {
-      const allStacks = [r.stack, ...(r.stacks ?? [])].filter(
-        (s): s is string => Boolean(s),
-      );
-      if (!allStacks.some((s) => stacks.has(s))) return false;
-    }
-
-    if (platforms) {
-      if (!r.platforms?.some((p) => platforms.has(p))) return false;
-    }
-
-    if (categories) {
-      if (!r.category || !categories.has(r.category)) return false;
-    }
-
-    if (labels) {
-      if (!r.curation?.labels?.some((l) => labels.has(l))) return false;
-    }
-
-    if (licenses) {
-      const license = r.github?.license;
-      if (!license || !licenses.has(license)) return false;
-    }
-
-    if (statuses) {
-      const status = r.health?.status;
-      if (!status || !statuses.has(status)) return false;
-    }
-
-    return true;
-  });
-}
-
-// ── Lenses, sort, pagination ─────────────────────────────────────
+/** How many apps per page. Constant for now; future versions may vary. */
+export const PAGE_SIZE = DEFAULT_PAGE_SIZE;
 
 /**
- * Apply lens → filter → sort pipeline. Lens is applied first because
- * it's a single-select "view" that may be broader or narrower than
- * the regular filter dimensions.
+ * Sort apps in-place-free: returns a new array. Stable for ties.
+ * Apps missing the sort key (e.g. no stars) sink to the bottom rather
+ * than vanishing.
  */
-export function pipeline<T extends Searchable>(
-  records: T[],
-  filters: AppsFilters,
-): T[] {
-  const afterLens = applyLens(records, filters.lens ?? "");
-  const afterFilter = filterApps(afterLens, filters);
-  return applySort(afterFilter, effectiveSort(filters));
-}
-
-/**
- * Sort records in-place-free: returns a new array. Stable for ties.
- * Records missing the sort key (e.g. no stars) sink to the bottom
- * rather than vanishing.
- */
-export function applySort<T extends Searchable>(
-  records: T[],
-  sort: AppsSort,
-): T[] {
-  const arr = records.slice();
+export function applySort(apps: OpenSourceApp[], sort: AppsSort): OpenSourceApp[] {
+  const arr = apps.slice();
   const ts = (s?: string | null): number => (s ? new Date(s).valueOf() : 0);
   switch (sort) {
     case "most-starred":
-      arr.sort((a, b) => (b.github?.stars ?? 0) - (a.github?.stars ?? 0));
+      arr.sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0));
       break;
     case "recently-updated":
-      arr.sort((a, b) => ts(b.github?.pushedAt) - ts(a.github?.pushedAt));
+      arr.sort((a, b) => ts(b.lastCommitAt) - ts(a.lastCommitAt));
       break;
     case "recently-added":
-      // Index payload doesn't have a dedicated "addedAt" yet — fall
-      // back to `pushedAt` so the sort still works. Once we add an
-      // explicit addedAt field, swap the key here.
-      arr.sort((a, b) => ts(b.github?.pushedAt) - ts(a.github?.pushedAt));
+      arr.sort((a, b) => ts(b.addedAt) - ts(a.addedAt));
       break;
     case "best-overall": {
       // Composite: scores.overall → scores.maturity → scores.activity →
       // active status → license present → stars. Avoids ranking by
       // stars alone.
-      const score = (
-        x: T,
-        k: "overall" | "maturity" | "activity",
-      ): number => (typeof x.scores?.[k] === "number" ? x.scores![k]! : 0);
-      const active = (x: T): number => (x.health?.status === "active" ? 1 : 0);
-      const licensed = (x: T): number => (x.github?.license ? 1 : 0);
+      const score = (a: OpenSourceApp, k: "overall" | "maturity" | "activity") =>
+        typeof a.scores?.[k] === "number" ? (a.scores![k] as number) : 0;
+      const active = (a: OpenSourceApp) => (a.status === "active" ? 1 : 0);
+      const licensed = (a: OpenSourceApp) => (a.license ? 1 : 0);
       arr.sort((a, b) => {
         const sOverall = score(b, "overall") - score(a, "overall");
         if (sOverall !== 0) return sOverall;
@@ -338,7 +153,7 @@ export function applySort<T extends Searchable>(
         if (sActive !== 0) return sActive;
         const sLicensed = licensed(b) - licensed(a);
         if (sLicensed !== 0) return sLicensed;
-        return (b.github?.stars ?? 0) - (a.github?.stars ?? 0);
+        return (b.stars ?? 0) - (a.stars ?? 0);
       });
       break;
     }
@@ -370,12 +185,84 @@ export function effectivePage(f: AppsFilters): number {
   return f.page ?? DEFAULT_PAGE;
 }
 
-// ── Facets ───────────────────────────────────────────────────────
-
 /**
- * Return a flat list of active-filter chips for display + removal.
- * Used by the "x" button on each chip in the UI.
+ * Return the subset of apps that match all active filters (AND across
+ * dimensions, OR within a dimension).
+ *
+ * `q` is a case-insensitive substring search across name, owner,
+ * description, and category. Other dimensions are exact match.
  */
+export function filterApps(apps: OpenSourceApp[], f: AppsFilters): OpenSourceApp[] {
+  const q = f.q?.trim().toLowerCase();
+  const stacks = f.stacks?.length ? new Set(f.stacks) : null;
+  const platforms = f.platforms?.length ? new Set(f.platforms) : null;
+  const categories = f.categories?.length ? new Set(f.categories) : null;
+  const labels = f.labels?.length ? new Set(f.labels) : null;
+  const licenses = f.licenses?.length ? new Set(f.licenses) : null;
+  const statuses = f.statuses?.length ? new Set(f.statuses) : null;
+
+  return apps.filter((a) => {
+    // Text search — match name, owner, description, category, stack,
+    // stacks, platforms, tags, backend, architecture, stateManagement,
+    // bestFor, whyListed, license, status.
+    if (q) {
+      const ownerMatch = /github\.com\/([^/]+)\//.exec(a.repoUrl)?.[1]?.toLowerCase() ?? "";
+      const haystack = [
+        a.name,
+        ownerMatch,
+        a.description,
+        a.category,
+        a.stack,
+        ...(a.stacks ?? []),
+        ...(a.platforms ?? []),
+        ...(a.tags ?? []),
+        a.backend ?? "",
+        a.architecture ?? "",
+        a.stateManagement ?? "",
+        ...(a.bestFor ?? []),
+        ...(a.whyListed ?? []),
+        a.license ?? "",
+        statusDisplay(a.status),
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+
+    if (stacks) {
+      const allStacks = [a.stack, ...(a.stacks ?? [])];
+      if (!allStacks.some((s) => stacks.has(s))) return false;
+    }
+
+    if (platforms) {
+      if (!a.platforms.some((p) => platforms.has(p))) return false;
+    }
+
+    if (categories) {
+      if (!categories.has(a.category)) return false;
+    }
+
+    if (labels) {
+      if (!a.labels?.some((l) => labels.has(l))) return false;
+    }
+
+    if (licenses) {
+      if (!a.license || !licenses.has(a.license)) return false;
+    }
+
+    if (statuses) {
+      if (!a.status || !statuses.has(a.status)) return false;
+    }
+
+    if (f.lens) {
+      if (!a.lenses?.includes(f.lens)) return false;
+    }
+
+    return true;
+  });
+}
+
+/** Build a flat list of "active filter" chips for display + removal. */
 export function activeFilterChips(
   f: AppsFilters,
 ): { key: keyof AppsFilters; value: string; label: string }[] {
@@ -400,21 +287,17 @@ export function activeFilterChips(
     out.push({ key: "licenses", value: v, label: `License: ${v}` });
   }
   if (f.lens) {
-    // Inline map keeps this function dependency-free for unit tests
-    // (no need to import from `lenses.ts` to render a chip label).
-    const LENS_CHIP_LABELS: Record<LensId, string> = {
-      all: "All",
-      hot: "Trending",
-      new: "Recently added",
-      mature: "Established",
-      featured: "Featured",
-      "needs-review": "Needs review",
-    };
-    out.push({ key: "lens", value: f.lens, label: LENS_CHIP_LABELS[f.lens] ?? f.lens });
+    out.push({ key: "lens", value: f.lens, label: lensDisplay(f.lens) });
   }
+  // Status: collapse the "stale,quiet" composite into a single chip.
   if (f.statuses && f.statuses.length) {
-    for (const v of f.statuses) {
-      out.push({ key: "statuses", value: v, label: statusDisplay(v) });
+    const joined = f.statuses.join(",");
+    if (joined === "stale,quiet") {
+      out.push({ key: "statuses", value: "stale,quiet", label: statusDisplay("needs-maintainer") });
+    } else {
+      for (const v of f.statuses) {
+        out.push({ key: "statuses", value: v, label: statusDisplay(v) });
+      }
     }
   }
 
@@ -422,11 +305,36 @@ export function activeFilterChips(
 }
 
 /**
- * Build the full list of facet values from the record array,
- * preserving a sensible order (frequency desc, then alphabetical
- * for ties).
+ * Return a new filters object with one (key, value) removed.
+ * - key="q" → clears the search string
+ * - multi-value keys → removes the single matching value
+ * Used by the "x" button on each active filter chip.
+ * Also resets page to 1 so the user doesn't get stranded on a high page
+ * that no longer has results.
  */
-export function buildFacets<T extends Searchable>(records: T[]) {
+export function removeFilter(
+  f: AppsFilters,
+  key: keyof AppsFilters,
+  value: string,
+): AppsFilters {
+  let next: AppsFilters;
+  if (key === "q") {
+    next = { ...f, q: undefined };
+  } else {
+    const current = f[key] as string[] | undefined;
+    if (!current) return f;
+    const filtered = current.filter((v) => v !== value);
+    next = { ...f, [key]: filtered.length ? filtered : undefined };
+  }
+  next.page = 1;
+  return next;
+}
+
+/**
+ * Build the full list of facet values from the apps array, preserving
+ * a sensible order (frequency desc, then alphabetical for ties).
+ */
+export function buildFacets(apps: OpenSourceApp[]) {
   const counts = {
     stack: new Map<string, number>(),
     platform: new Map<string, number>(),
@@ -434,31 +342,13 @@ export function buildFacets<T extends Searchable>(records: T[]) {
     label: new Map<string, number>(),
     license: new Map<string, number>(),
   };
-  for (const r of records) {
-    const allStacks = new Set(
-      [r.stack, ...(r.stacks ?? [])].filter(
-        (s): s is string => Boolean(s),
-      ),
-    );
-    for (const s of allStacks) {
-      counts.stack.set(s, (counts.stack.get(s) ?? 0) + 1);
-    }
-    for (const p of r.platforms ?? []) {
-      counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);
-    }
-    if (r.category) {
-      counts.category.set(
-        r.category,
-        (counts.category.get(r.category) ?? 0) + 1,
-      );
-    }
-    for (const l of r.curation?.labels ?? []) {
-      counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
-    }
-    const license = r.github?.license;
-    if (license) {
-      counts.license.set(license, (counts.license.get(license) ?? 0) + 1);
-    }
+  for (const a of apps) {
+    const allStacks = new Set([a.stack, ...(a.stacks ?? [])]);
+    for (const s of allStacks) counts.stack.set(s, (counts.stack.get(s) ?? 0) + 1);
+    for (const p of a.platforms) counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);
+    counts.category.set(a.category, (counts.category.get(a.category) ?? 0) + 1);
+    for (const l of a.labels ?? []) counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
+    if (a.license) counts.license.set(a.license, (counts.license.get(a.license) ?? 0) + 1);
   }
   const sortByCountThenName = (m: Map<string, number>) =>
     [...m.entries()]
@@ -472,10 +362,3 @@ export function buildFacets<T extends Searchable>(records: T[]) {
     licenses: sortByCountThenName(counts.license),
   };
 }
-
-/**
- * Re-export the `ProjectRecord` type so consumers of the search lib
- * can write `import type { ProjectRecord } from "@grove-dev/astro/lib"`
- * without a second import.
- */
-export type { ProjectRecord };

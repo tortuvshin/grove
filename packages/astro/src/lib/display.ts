@@ -1,24 +1,17 @@
 /**
- * Display-name helpers for curation labels, statuses, lenses, and
- * sort options. Internal ids (e.g. "hot", "stale", "production-like")
- * stay stable for URL state and data files; this module owns the
- * mapping from id → user-facing string.
+ * Display-name helpers for curation labels, statuses, lenses, and sort
+ * options. Internal ids (e.g. "hot", "stale", "production-like") stay
+ * stable for URL state and data files; this module owns the mapping
+ * from id → user-facing string.
  *
- * Every export is dependency-free so it can be imported by both
+ * Every export here is dependency-free so it can be imported by both
  * server-rendered Astro components and any client-side script.
- *
- * Status ids accept the `HealthStatus` union from `@grove-dev/core`
- * plus a couple of curated composites (e.g. "needs-maintainer")
- * that appear in URL state.
  */
 
-import type {
-  AppLabel,
-  HealthStatus,
-} from "@grove-dev/core";
+import type { AppStatus } from "../data/types";
 
-// ── Label ids (the `curation.labels` array on a record) ──────────
-export type LabelId = AppLabel;
+// ── Label ids (the `labels` array on an app) ────────────────────────
+export type LabelId = "new" | "hot" | "mature" | "featured";
 
 export const LABEL_DISPLAY: Record<LabelId, string> = {
   new: "Recently added",
@@ -27,70 +20,53 @@ export const LABEL_DISPLAY: Record<LabelId, string> = {
   featured: "Featured",
 };
 
-/** Pretty-print a slug to Title Case. Used for arbitrary slugs. */
-export function prettySlug(slug: string | null | undefined): string {
-  if (!slug) return "";
-  return slug
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .map((w) => (w ? w[0]!.toUpperCase() + w.slice(1) : ""))
-    .join(" ");
-}
-
 /** Returns a human-readable name for a label id, or null if unknown. */
 export function labelDisplay(id: string | null | undefined): string | null {
   if (!id) return null;
-  if (id in LABEL_DISPLAY) {
-    return LABEL_DISPLAY[id as LabelId];
-  }
-  return prettySlug(id);
+  return LABEL_DISPLAY[id as LabelId] ?? null;
 }
 
-// ── Status ids (the `health.status` field on a record) ───────────
+// ── Status ids (the `status` field on an app) ───────────────────────
 /**
- * Canonical status display map. Includes the curated
- * "needs-maintainer" composite that's emitted by the
- * `needs-maintainer` lens.
+ * Canonical status ids, including the curated "needs-maintainer"
+ * composite that's emitted by the `needs-maintainer` lens (it expands
+ * to "stale,quiet" in URL state but presents as one chip).
  */
 export const STATUS_DISPLAY: Record<string, string> = {
   active: "Active",
-  mature: "Mature",
+  quiet: "Quiet",
   stale: "Not recently active",
-  inactive: "Inactive",
+  "needs-maintainer": "Needs maintainer",
   archived: "Archived",
   unknown: "Unknown",
-  historical: "Historical",
-  needs_review: "Needs review",
-  quiet: "Quiet",
-  unavailable: "Unavailable",
-  "needs-maintainer": "Needs maintainer",
 };
 
-export function statusDisplay(
-  s: HealthStatus | string | null | undefined,
-): string {
+export function statusDisplay(s: AppStatus | string | null | undefined): string {
   if (!s) return STATUS_DISPLAY.unknown;
-  return STATUS_DISPLAY[s] ?? prettySlug(s);
+  return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown;
 }
 
-// ── Lens ids (the curated tabs on /projects) ─────────────────────
+// ── Lens ids (the curated tabs on /apps) ────────────────────────────
 export const LENS_DISPLAY: Record<string, string> = {
-  all: "All",
-  hot: "Trending",
+  all: "All apps",
   new: "Recently added",
+  hot: "Trending",
   mature: "Established",
-  featured: "Featured",
-  "needs-review": "Needs review",
+  "good-to-learn": "Good to learn",
+  "production-like": "Production-like",
+  "beginner-friendly": "Beginner friendly",
+  "contribution-ready": "Contribution ready",
+  launches: "Launches",
+  "actively-developed": "Active",
+  "needs-maintainer": "Needs maintainer",
 };
 
 export function lensDisplay(id: string | null | undefined): string {
   if (!id) return LENS_DISPLAY.all;
-  return LENS_DISPLAY[id] ?? prettySlug(id);
+  return LENS_DISPLAY[id] ?? id;
 }
 
-// ── Sort ids (the /projects sort dropdown) ───────────────────────
+// ── Sort ids (the /apps sort dropdown) ──────────────────────────────
 export const SORT_DISPLAY: Record<string, string> = {
   "recently-updated": "Recently updated",
   "most-starred": "Most starred",
@@ -101,13 +77,13 @@ export const SORT_DISPLAY: Record<string, string> = {
 
 export function sortDisplay(id: string | null | undefined): string {
   if (!id) return SORT_DISPLAY["recently-updated"];
-  return SORT_DISPLAY[id] ?? prettySlug(id);
+  return SORT_DISPLAY[id] ?? id;
 }
 
-// ── Status option list (used by filter dropdowns) ───────────────
+// ── Status option list (used by filter dropdowns) ───────────────────
 // "needs-maintainer" is included even though it's a derived/composite
 // status — filter dropdowns and chip rendering need to offer it
-// alongside the raw HealthStatus values.
+// alongside the raw AppStatus values.
 export const STATUS_OPTIONS: string[] = [
   "active",
   "quiet",

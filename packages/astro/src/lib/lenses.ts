@@ -1,162 +1,123 @@
 /**
- * Curated lenses for the list / discovery page.
+ * Curated lenses for the list page.
  *
- * A lens is a single-select view that translates into a (possibly
- * empty) URL search-param filter. The 6 lenses below cover the
- * "what should I look at next?" mental shortcut:
+ * Two flavors:
+ * - "label-based": maps to a single `labels` value (e.g. new / hot / mature).
+ *   No extra curation needed — every app already has a label.
+ * - "curator-assigned": maps to a `lenses` value on the app. The 5 anchor
+ *   apps get these populated. Other apps will simply not match.
  *
- *   - "all"          — no filter
- *   - "hot"          — recent attention: stars ≥ 1000 OR pushed within 30d
- *   - "new"          — fresh entries: pushed within 7d OR curated "new" label
- *   - "mature"       — long-running projects: curated tier AND pushed > 365d ago
- *   - "featured"     — curated "featured" label
- *   - "needs-review" — cleanup candidate (stale / archived / etc.)
+ * The lens id is what shows up in the URL as `?lens=...`. For
+ * label-based lenses, the lens id is the same as the label.
  *
- * The lens id is what shows up in the URL as `?lens=...`. Filter
- * resolution happens in `lib/search.ts` (`filterApps`).
- *
- * Keep this list in sync with `lib/search.ts` and any UI tabs.
+ * The 6 lenses in `PRIMARY_LENSES` are rendered as top-row tabs. The rest
+ * remain in the union type for URL deep-linking and future use, but are
+ * not shown in the UI by default.
  */
 
-import type {
-  HealthStatus,
-  ProjectRecord,
-} from "@grove-dev/core";
-
 export type LensId =
+  // Label-based (tabbed)
   | "all"
-  | "hot"
   | "new"
+  | "hot"
   | "mature"
-  | "featured"
-  | "needs-review";
+  // Curator-assigned (tabbed)
+  | "good-to-learn"
+  | "production-like"
+  // Available in URL state, but not tabbed
+  | "beginner-friendly"
+  | "contribution-ready"
+  | "launches"
+  // Status-based (available in URL state, not tabbed)
+  | "actively-developed"
+  | "needs-maintainer";
 
 export interface LensDef {
   id: LensId;
   label: string;
-  description: string;
-  /**
-   * Returns true when the record matches this lens. Designed to
-   * operate on the index payload (`toIndexRecord`) shape — the
-   * same record the list page already holds — so consumers don't
-   * need to do a second fetch.
-   */
-  match: (record: AppLike) => boolean;
-}
-
-const DAY_MS = 86_400_000;
-
-/**
- * The shape that lens matching actually reads. Decoupled from
- * `ProjectRecord` so the search lib can also pass the index payload
- * (which omits a few heavy fields) and tests can pass minimal
- * fixtures.
- */
-export interface AppLike {
-  curation?: { labels?: string[] };
-  health?: {
-    status?: HealthStatus;
-    tier?: "curated" | "listed" | "experimental" | "hidden";
-    cleanupCandidate?: boolean;
-  };
-  github?: {
-    stars?: number;
-    pushedAt?: string | null;
-  };
-}
-
-function daysSince(iso: string | null | undefined): number {
-  if (!iso) return Infinity;
-  const d = new Date(iso);
-  if (Number.isNaN(d.valueOf())) return Infinity;
-  return (Date.now() - d.valueOf()) / DAY_MS;
-}
-
-function hasLabel(record: AppLike, label: string): boolean {
-  return record.curation?.labels?.includes(label) ?? false;
-}
-
-const CLEANUP_STATUSES: HealthStatus[] = [
-  "stale",
-  "inactive",
-  "archived",
-  "unavailable",
-  "needs_review",
-];
-
-function isCleanupCandidate(record: AppLike): boolean {
-  if (record.health?.cleanupCandidate) return true;
-  const status = record.health?.status;
-  if (!status) return false;
-  return CLEANUP_STATUSES.includes(status);
+  /** Short blurb shown when the lens is active. */
+  description?: string;
+  /** What URL state this lens implies. Empty means no filter. */
+  toParams: () => Record<string, string | string[]>;
 }
 
 export const LENSES: LensDef[] = [
+  { id: "all", label: "All apps", description: "Every app in the directory", toParams: () => ({}) },
   {
-    id: "all",
-    label: "All",
-    description: "Every record in the directory.",
-    match: () => true,
+    id: "new",
+    label: "Recently added",
+    description: "Apps recently added to the directory",
+    toParams: () => ({ label: "new" }),
   },
   {
     id: "hot",
     label: "Trending",
-    description:
-      "Records with recent attention — stars ≥ 1000 or pushed within 30 days.",
-    match: (r) => {
-      const stars = r.github?.stars ?? 0;
-      const pushed = daysSince(r.github?.pushedAt);
-      return stars >= 1000 || pushed <= 30;
-    },
-  },
-  {
-    id: "new",
-    label: "Recently added",
-    description:
-      "Fresh entries — pushed within 7 days or curated with the “new” label.",
-    match: (r) => {
-      const pushed = daysSince(r.github?.pushedAt);
-      return pushed <= 7 || hasLabel(r, "new");
-    },
+    description: "Apps with recent activity and attention",
+    toParams: () => ({ label: "hot" }),
   },
   {
     id: "mature",
     label: "Established",
-    description:
-      "Long-running projects — curated tier and last push > 365 days ago.",
-    match: (r) => {
-      const tier = r.health?.tier;
-      const pushed = daysSince(r.github?.pushedAt);
-      return tier === "curated" && pushed > 365;
-    },
+    description: "Long-running projects with stable history",
+    toParams: () => ({ label: "mature" }),
   },
   {
-    id: "featured",
-    label: "Featured",
-    description: "Records curated with the “featured” label.",
-    match: (r) => hasLabel(r, "featured"),
+    id: "production-like",
+    label: "Production-like",
+    description: "Real apps, not toy projects",
+    toParams: () => ({ lens: "production-like" }),
   },
   {
-    id: "needs-review",
-    label: "Needs review",
-    description: "Cleanup candidates — stale, archived, or unmaintained.",
-    match: (r) => isCleanupCandidate(r),
+    id: "good-to-learn",
+    label: "Good to learn",
+    description: "Readable codebases with useful patterns",
+    toParams: () => ({ lens: "good-to-learn" }),
+  },
+  // Secondary (URL-only, not rendered as tabs)
+  {
+    id: "beginner-friendly",
+    label: "Beginner friendly",
+    description: "Smaller, readable, easier to understand",
+    toParams: () => ({ lens: "beginner-friendly" }),
+  },
+  {
+    id: "contribution-ready",
+    label: "Contribution ready",
+    description: "Clear issues, active maintainers, license, contribution docs",
+    toParams: () => ({ lens: "contribution-ready" }),
+  },
+  {
+    id: "launches",
+    label: "Launches",
+    description: "Recently launched OSS apps seeking feedback",
+    toParams: () => ({ lens: "launches" }),
+  },
+  {
+    id: "actively-developed",
+    label: "Active",
+    description: "Apps with recent commits, releases, and issue activity",
+    toParams: () => ({ status: "active" }),
+  },
+  {
+    id: "needs-maintainer",
+    label: "Needs maintainer",
+    description: "Useful apps that need help",
+    toParams: () => ({ status: "stale,quiet" }),
   },
 ];
 
 /**
- * The lenses rendered as top-row tabs on the list page. Order
- * matters — left to right. Keep this in sync with what the design
- * calls for; URL deep-linking accepts any `LensId` even if it's not
- * in the primary row.
+ * The 6 lenses shown as top-row tabs on /apps. Order matters — left to right.
+ * Keep this list aligned with what the design calls for: All, signal lenses,
+ * and the two curator-assigned lenses that have any matches.
  */
 export const PRIMARY_LENSES: LensId[] = [
   "all",
-  "hot",
   "new",
+  "hot",
   "mature",
-  "featured",
-  "needs-review",
+  "production-like",
+  "good-to-learn",
 ];
 
 export function lensById(id: string | null | undefined): LensDef | undefined {
@@ -164,78 +125,91 @@ export function lensById(id: string | null | undefined): LensDef | undefined {
   return LENSES.find((l) => l.id === id);
 }
 
-export function isPrimaryLens(id: string | null | undefined): id is LensId {
+/**
+ * Check whether the current URL search params match a given lens's
+ * implied filter state. Used to highlight the active tab when a
+ * deep-link uses the underlying filter key (e.g. ?label=hot) rather
+ * than the abstract lens id (?lens=hot).
+ */
+export function isLensActive(lensId: LensId, sp: URLSearchParams): boolean {
+  if (lensId === "all") {
+    // "All" is active when no lens-shaped filter is present.
+    return !lensFromSearchParams(sp) && !sp.get("label") && !sp.get("status");
+  }
+  const def = lensById(lensId);
+  if (!def) return false;
+  const target = def.toParams();
+  for (const [k, v] of Object.entries(target)) {
+    if (Array.isArray(v)) {
+      if (sp.getAll(k).length !== v.length) return false;
+      for (const item of v) if (!sp.getAll(k).includes(item)) return false;
+    } else {
+      if (sp.get(k) !== v) return false;
+    }
+  }
+  return true;
+}
+
+export function isPrimaryLens(id: string | null | undefined): boolean {
   if (!id) return false;
   return PRIMARY_LENSES.includes(id as LensId);
 }
 
 /**
- * Resolve the active lens from URL search params. Returns the empty
- * string when no `lens=...` is set, so callers can treat both
- * "absent" and "unknown" identically.
+ * Turn a lens's `toParams()` output into a URLSearchParams string
+ * (with the existing query preserved, then lens params merged on top).
  */
-export function lensFromSearchParams(
-  params: URLSearchParams,
-): LensId | "" {
-  const v = params.get("lens");
-  if (!v) return "";
-  if (LENSES.some((l) => l.id === v)) return v as LensId;
-  return "";
-}
-
-/**
- * `true` when the URL search params currently reflect this lens's
- * filter shape. The "all" lens is the implicit "no filter" state —
- * it's active only when no other lens-shaped params are present.
- */
-export function isLensActive(lensId: LensId, params: URLSearchParams): boolean {
-  if (lensId === "all") {
-    return lensFromSearchParams(params) === "" && !params.get("label");
+export function lensToQuery(id: LensId | null | undefined, current: URLSearchParams): string {
+  if (!id || id === "all") return "";
+  const def = lensById(id);
+  if (!def) return "";
+  const next = new URLSearchParams(current);
+  for (const [k, v] of Object.entries(def.toParams())) {
+    if (Array.isArray(v)) {
+      next.delete(k);
+      for (const item of v) next.append(k, item);
+    } else {
+      next.set(k, v);
+    }
   }
-  return lensFromSearchParams(params) === lensId;
+  return next.toString();
 }
 
 /**
- * Build a `href` for a lens tab. Selecting a lens resets the other
- * "view" params (label, page) and applies only the chosen lens's
- * filter. Other filters (q, stack, platform, category, sort) are
- * preserved.
- *
- * `pathPrefix` is the URL root for the list page — typically
- * `/projects` for the project-directory blueprint, `/resources` for
- * resource-hub, `/entities` for ecosystem-map. Defaults to `/`.
+ * Read a `?lens=...` value from URL search params.
  */
-export function hrefForLens(
-  lensId: LensId,
-  params: URLSearchParams,
-  pathPrefix: string = "/",
-): string {
-  const sp = new URLSearchParams(params);
+export function lensFromSearchParams(sp: URLSearchParams): LensId | null {
+  const v = sp.get("lens");
+  if (!v) return null;
+  if (LENSES.some((l) => l.id === v)) return v as LensId;
+  return null;
+}
+
+/**
+ * Build a `href` for a lens tab. Per the single-select-view rule,
+ * clicking a lens resets the "view" params (lens, label, status, page)
+ * and applies only the chosen lens's params. Stack/Platform/Category/
+ * License/q/sort/density filters are preserved.
+ */
+export function hrefForLens(lensId: LensId | null | undefined, current: URLSearchParams): string {
+  const sp = new URLSearchParams(current);
   sp.delete("lens");
   sp.delete("label");
+  sp.delete("status");
   sp.delete("page");
   if (lensId && lensId !== "all") {
-    sp.set("lens", lensId);
+    const def = lensById(lensId);
+    if (def) {
+      for (const [k, v] of Object.entries(def.toParams())) {
+        if (Array.isArray(v)) {
+          sp.delete(k);
+          for (const item of v) sp.append(k, item);
+        } else {
+          sp.set(k, v);
+        }
+      }
+    }
   }
   const qs = sp.toString();
-  const base = pathPrefix.replace(/\/$/, "");
-  return qs ? `${base}?${qs}` : base || "/";
+  return qs ? `/apps?${qs}` : "/apps";
 }
-
-/**
- * Apply the lens filter to a record array. When `lensId` is
- * `""` (no lens) or `"all"`, returns the input unchanged.
- *
- * Type-parameterized so the same helper works on `ProjectRecord[]`
- * and on the lighter index payload that list pages ship.
- */
-export function applyLens<T extends AppLike>(records: T[], lensId: LensId | ""): T[] {
-  if (!lensId || lensId === "all") return records;
-  const def = lensById(lensId);
-  if (!def) return records;
-  return records.filter((r) => def.match(r));
-}
-
-// Re-export the type so consumers can write `import type { AppLike }`
-// without depending on `@grove-dev/core` directly.
-export type { ProjectRecord };
