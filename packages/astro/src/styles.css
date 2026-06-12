@@ -16,6 +16,8 @@
  * removed) prefix. Only `grove-*` remains.
  */
 
+@import "tailwindcss";
+
 @theme {
   /* ── Neutral ink scale (V1 default) ───────────────────────────── */
   --color-ink-50: #fafafa;

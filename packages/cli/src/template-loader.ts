@@ -71,6 +71,51 @@ function resolvePackageRoot(pkg: string, from: string): string {
   throw new Error(`Could not find ${pkg} from ${from}`);
 }
 
+/**
+ * Walk up from a starting directory looking for `pnpm-workspace.yaml`.
+ * That file marks the monorepo root — pnpm convention. We need it for
+ * the special case where the package we want to resolve IS the CLI
+ * itself (`@grove-dev/cli`): the CLI's `node_modules/@grove-dev/cli`
+ * doesn't exist because the CLI is a root package, not a dep of
+ * itself. From the monorepo root, `packages/cli` is always canonical.
+ *
+ * Throws if we never find a `pnpm-workspace.yaml` (we are not inside
+ * a monorepo, so `grove run` is the wrong tool anyway).
+ */
+function findMonorepoRoot(from: string): string {
+  let cursor = from;
+  for (let i = 0; i < 8; i++) {
+    if (existsSync(join(cursor, "pnpm-workspace.yaml"))) return cursor;
+    const parent = resolve(cursor, "..");
+    if (parent === cursor) break; // filesystem root
+    cursor = parent;
+  }
+  throw new Error(
+    `Could not find monorepo root (pnpm-workspace.yaml) starting from ${from}. ` +
+      `grove run must be executed from inside the grove monorepo.`,
+  );
+}
+
+/**
+ * Resolve a `@grove-dev/*` package's on-disk path. Two strategies:
+ *
+ *  1. Standard: walk up from `from` looking for `node_modules/<pkg>`.
+ *     Works for any package the CLI has as a dep (e.g. `@grove-dev/astro`).
+ *  2. Self: if `pkg` is the CLI's own name, look for `packages/<short>`
+ *     inside the monorepo root. Necessary because the CLI is a root
+ *     package and is not symlinked under its own `node_modules`.
+ */
+function resolveGrovePackage(pkg: string, from: string): string {
+  if (pkg === "@grove-dev/cli") {
+    const monorepoRoot = findMonorepoRoot(from);
+    const cliPath = join(monorepoRoot, "packages", "cli");
+    if (existsSync(cliPath)) return cliPath;
+    // Fall through to the standard strategy below; the package might
+    // still be findable via a globally installed `grove` layout.
+  }
+  return resolvePackageRoot(pkg, from);
+}
+
 /** List every available template for a framework. */
 export async function listTemplates(framework: Framework): Promise<TemplateSummary[]> {
   const root = templatesRoot(framework);
@@ -146,16 +191,31 @@ export async function copyTemplate(
 /**
  * Read the framework's `package.json` from the template and rewrite
  * the `name` to a project-friendly slug, then rewrite any
- * `workspace:*` Grove dependencies into the published version of
- * the framework adapter so the new project installs from npm
- * instead of trying to resolve local monorepo paths.
+ * `workspace:*` Grove dependencies so the new project can install.
+ *
+ * Two rewrite modes are supported:
+ *
+ *   - `published` (default for `grove new`): pin `@grove-dev/*`
+ *     dependencies to the published version of the framework adapter
+ *     so a real end user installs from the npm registry.
+ *
+ *   - `file` (used by `grove run`): rewrite `@grove-dev/*`
+ *     dependencies to absolute `file:` paths pointing back at the
+ *     monorepo's local `packages/*` siblings. This lets a developer
+ *     (or a CI job) scaffold a project from the LOCAL template and
+ *     `pnpm install` it without publishing — handy for smoke tests
+ *     and template iteration.
  */
+export type DepRewriteMode = "published" | "file";
+
 export async function renameProjectInTemplate(
   framework: Framework,
   targetRoot: string,
   projectName: string,
   templateName = "default",
+  options: { mode?: DepRewriteMode } = {},
 ): Promise<{ packageJsonPath: string; finalName: string; rewrittenDeps: string[] }> {
+  const mode: DepRewriteMode = options.mode ?? "published";
   const packageJsonPath = join(targetRoot, "package.json");
   const raw = await readFile(packageJsonPath, "utf8");
   const pkg = JSON.parse(raw) as {
@@ -166,7 +226,10 @@ export async function renameProjectInTemplate(
     [k: string]: unknown;
   };
   pkg.name = packageNameFromProjectName(projectName, framework, templateName);
-  const rewrittenDeps = rewriteWorkspaceDeps(pkg, frameworkVersion(framework));
+  const rewrittenDeps =
+    mode === "published"
+      ? rewriteWorkspaceDepsToVersion(pkg, frameworkVersion(framework))
+      : rewriteWorkspaceDepsToFile(pkg);
   await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
   return { packageJsonPath, finalName: pkg.name, rewrittenDeps };
 }
@@ -183,7 +246,7 @@ export async function renameProjectInTemplate(
  *
  * Non-Grove deps are left untouched.
  */
-function rewriteWorkspaceDeps(
+function rewriteWorkspaceDepsToVersion(
   pkg: {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
@@ -211,7 +274,81 @@ function rewriteWorkspaceDeps(
   return rewritten;
 }
 
-function packageNameFromProjectName(name: string, framework: Framework, templateName: string): string {
+/**
+ * In-place: rewrite every `@grove-dev/*` dependency in the template's
+ * `package.json` to a `file:` URL pointing at the matching package
+ * inside the local monorepo. Used by `grove run` to make a freshly
+ * scaffolded project installable from this workspace without going
+ * through the npm registry or `pnpm-workspace.yaml` membership.
+ *
+ * We resolve each package by walking the `@grove-dev/cli`'s
+ * `node_modules` ancestry, exactly the way `templatesRoot` does —
+ * the CLI's own dep tree already mirrors the local monorepo because
+ * pnpm creates a symlink at `node_modules/@grove-dev/<pkg>` → real
+ * path, so a single `resolvePackageRoot(name, cliLocation)` returns
+ * the on-disk path. From there we compute a relative `file:` URL
+ * anchored at the scaffolded project's root.
+ */
+function rewriteWorkspaceDepsToFile(pkg: {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+}): string[] {
+  const rewritten: string[] = [];
+  // The CLI's own dist/ directory is the only stable reference point
+  // we have. From there we walk up to find each `@grove-dev/*` package.
+  const cliLocation = dirname(fileURLToPath(import.meta.url));
+  for (const section of ["dependencies", "devDependencies", "peerDependencies"] as const) {
+    const map = pkg[section];
+    if (!map) continue;
+    for (const name of Object.keys(map)) {
+      if (!name.startsWith("@grove-dev/")) continue;
+      let pkgPath: string;
+      try {
+        pkgPath = resolveGrovePackage(name, cliLocation);
+      } catch {
+        // Not installed locally (e.g. a future framework like
+        // `@grove-dev/svelte` that has no real template in V1). Skip
+        // rather than crashing — the user will see a normal pnpm
+        // install error and can fix it.
+        continue;
+      }
+      rewritten.push(`${name}: -> file:${pkgPath}`);
+      map[name] = `file:${pkgPath}`;
+    }
+  }
+  return rewritten;
+}
+
+/**
+ * Like `renameProjectInTemplate` but only renames the project — it
+ * does NOT rewrite any `@grove-dev/*` dependencies. The template's
+ * `workspace:*` placeholders are preserved as-is, so a downstream
+ * `pnpm install` from inside the monorepo (or a `pnpm install
+ * --filter` from the monorepo root) can resolve them against the
+ * local `packages/*` siblings.
+ *
+ * Used by `grove run` for the dev-internal "pretend user" flow where
+ * the scaffolded project lives inside the monorepo.
+ */
+export async function renameProjectInTemplatePreserveDeps(
+  framework: Framework,
+  targetRoot: string,
+  projectName: string,
+  templateName = "default",
+): Promise<{ packageJsonPath: string; finalName: string }> {
+  const packageJsonPath = join(targetRoot, "package.json");
+  const raw = await readFile(packageJsonPath, "utf8");
+  const pkg = JSON.parse(raw) as {
+    name?: string;
+    [k: string]: unknown;
+  };
+  pkg.name = packageNameFromProjectName(projectName, framework, templateName);
+  await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
+  return { packageJsonPath, finalName: pkg.name };
+}
+
+export function packageNameFromProjectName(name: string, framework: Framework, templateName: string): string {
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -235,3 +372,11 @@ export function here(...parts: string[]): string {
   const url = new URL(import.meta.url);
   return resolve(fileURLToPath(url), "..", ...parts);
 }
+
+/**
+ * Public re-export: `grove run` needs to find the monorepo root to
+ * place its scratch project under `<root>/.grove/run/...` and to run
+ * `pnpm install --filter` from there. The implementation lives above
+ * so this stays a thin alias.
+ */
+export { findMonorepoRoot };
