@@ -11,14 +11,18 @@
  *
  * What it does:
  *   1. Builds all workspace packages.
- *   2. For each framework (astro, nextjs, svelte):
- *      a. Runs `node packages/cli/dist/index.js new <name> --framework <f> --yes`
+ *   2. For the Astro framework:
+ *      a. Runs `node packages/cli/dist/index.js new <name> --framework astro --yes`
  *         from a scratch dir.
  *      b. Asserts the scaffolded package.json has no `workspace:*` deps.
  *      c. Asserts the scaffolded package.json pins a real version for
- *         @grove-dev/<framework> / @grove-dev/cli / @grove-dev/core.
+ *         @grove-dev/astro / @grove-dev/cli / @grove-dev/core.
  *      d. Asserts pnpm install completes without 404s.
  *   3. Reports pass/fail and exits non-zero on any failure.
+ *
+ * V1 scope: Astro only. The Next.js and SvelteKit adapters are skeleton
+ * packages in V1 — they will be added back to this smoke test when
+ * their templates ship real pages, components, and layouts in v0.3.0.
  *
  * Usage: pnpm test:scaffold
  */
@@ -28,7 +32,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const REPO_ROOT = resolve(new URL("..", import.meta.url).pathname);
-const FRAMEWORKS = ["astro", "nextjs", "svelte"];
+const FRAMEWORKS = ["astro"];
 
 function run(bin, args, opts = {}) {
   const res = spawnSync(bin, args, {
@@ -184,7 +188,7 @@ function main() {
     console.error(`\n[test:scaffold] ${failed} framework(s) failed`);
     process.exit(1);
   }
-  console.log("\n[test:scaffold] all frameworks pass");
+  console.log("\n[test:scaffold] all frameworks pass (V1: astro only — nextjs/svelte land in v0.3.0)");
 }
 
 main();
