@@ -1,6 +1,6 @@
 # Grove Directory — full directory
 
-> Generated 2026-06-12T17:55:55.383Z from 8 records.
+> Generated 2026-06-12T17:56:31.268Z from 8 records.
 > Source: https://example.com/projects · Regenerate with `grove generate`.
 
 Each section below mirrors one record detail page.
