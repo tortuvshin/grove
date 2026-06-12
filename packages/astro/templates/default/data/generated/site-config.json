@@ -1,12 +1,12 @@
 {
-  "blueprint": "ecosystem-map",
+  "blueprint": "project-directory",
   "blueprintConfig": {
-    "id": "ecosystem-map",
-    "kind": "entity",
-    "routeSlug": "entities",
-    "itemSlug": "entity",
-    "labelSingular": "entity",
-    "labelPlural": "entities"
+    "id": "project-directory",
+    "kind": "project",
+    "routeSlug": "projects",
+    "itemSlug": "project",
+    "labelSingular": "project",
+    "labelPlural": "projects"
   },
   "name": "Grove Directory",
   "tagline": "A curated, health-aware developer directory.",
@@ -37,11 +37,11 @@
     "github": false
   },
   "stats": {
-    "totalRecords": 10,
+    "totalRecords": 8,
     "totalApps": 8,
-    "totalResources": 1,
-    "totalEntities": 1,
-    "totalCategories": 6,
+    "totalResources": 0,
+    "totalEntities": 0,
+    "totalCategories": 4,
     "totalStacks": 19,
     "totalPlatforms": 8,
     "totalOwners": 0,

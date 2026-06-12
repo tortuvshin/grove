@@ -6,7 +6,7 @@ import { defineConfig } from "@grove-dev/core";
  * with their own branding, taxonomy, and integrations.
  */
 export default defineConfig({
-  blueprint: "ecosystem-map",
+  blueprint: "project-directory",
 
   site: {
     name: "Grove Directory",

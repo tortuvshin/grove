@@ -1,39 +1,9 @@
 {
   "schemaVersion": 1,
-  "blueprint": "ecosystem-map",
-  "generatedAt": "2026-06-12T17:15:04.846Z",
-  "totalRecords": 10,
+  "blueprint": "project-directory",
+  "generatedAt": "2026-06-12T17:21:04.008Z",
+  "totalRecords": 8,
   "records": [
-    {
-      "slug": "anthropic",
-      "kind": "entity",
-      "category": "research-lab",
-      "tags": [
-        "ai-safety",
-        "research",
-        "claude"
-      ],
-      "links": {
-        "website": "https://www.anthropic.com",
-        "source": "https://github.com/anthropics"
-      },
-      "description": "AI safety company building reliable, interpretable AI systems.",
-      "curation": {
-        "reviewed": true,
-        "reviewedBy": "grove-bot",
-        "reviewedAt": "2026-06-13",
-        "labels": [
-          "featured"
-        ],
-        "lenses": []
-      },
-      "name": "Anthropic",
-      "type": "research-lab",
-      "founded": "2021",
-      "location": "San Francisco",
-      "members": 350,
-      "visibility": "keep"
-    },
     {
       "slug": "coolify",
       "kind": "project",
@@ -84,34 +54,6 @@
         "Clear upgrade path from manual Docker"
       ],
       "caveats": [],
-      "visibility": "keep"
-    },
-    {
-      "slug": "flutter-handbook",
-      "kind": "resource",
-      "category": "guides",
-      "tags": [
-        "flutter",
-        "dart",
-        "mobile"
-      ],
-      "links": {
-        "source": "https://flutter.dev"
-      },
-      "description": "A community-maintained handbook for Flutter — patterns, recipes, and best practices.",
-      "curation": {
-        "reviewed": true,
-        "reviewedBy": "grove-bot",
-        "reviewedAt": "2026-06-13",
-        "labels": [
-          "featured"
-        ],
-        "lenses": []
-      },
-      "title": "Flutter Handbook",
-      "type": "guide",
-      "topic": "mobile-frameworks",
-      "related": [],
       "visibility": "keep"
     },
     {
