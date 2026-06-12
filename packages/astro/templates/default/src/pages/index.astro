@@ -52,18 +52,21 @@ function tierOf(r: typeof items[number]): string | undefined {
 }
 
 const hotList = items
+  .filter((r) => r.kind === "project")
   .filter((r) => {
     const labelledHot = labelsOf(r).includes("hot");
     return labelledHot || starsOf(r) >= 1000 || daysSince(pushedAtOf(r)) <= 30;
   })
   .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
 const newList = items
+  .filter((r) => r.kind === "project")
   .filter((r) => {
     const labelledNew = labelsOf(r).includes("new");
     return daysSince(pushedAtOf(r)) <= 7 || labelledNew;
   })
   .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
 const matureList = items
+  .filter((r) => r.kind === "project")
   .filter((r) => {
     return tierOf(r) === "curated" && daysSince(pushedAtOf(r)) > 365;
   })
