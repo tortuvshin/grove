@@ -2,9 +2,9 @@
 
 A curated, health-aware developer directory powered by Grove.
 
-Directory: https://example.com/projects
-Records indexed: 0
-Categories: 0
+Directory: https://example.com/entities
+Records indexed: 10
+Categories: 6
 
 ## Usage
 
