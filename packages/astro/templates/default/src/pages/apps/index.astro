@@ -24,7 +24,7 @@ import {
   buildFacets,
   effectivePage,
   effectiveSort,
-  filterItems,
+  filterApps,
   filtersFromSearchParams,
   paginate,
   totalPages,
@@ -44,7 +44,7 @@ const filters = filtersFromSearchParams(Astro.url.searchParams);
 const facets = buildFacets(items);
 const sort = effectiveSort(filters);
 const requestedPage = effectivePage(filters);
-const filtered = filterItems(items, filters);
+const filtered = filterApps(items, filters);
 const sorted = applySort(filtered, sort);
 const pages = totalPages(sorted.length);
 const page = Math.min(requestedPage, pages);
