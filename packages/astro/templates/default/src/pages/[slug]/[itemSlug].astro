@@ -392,6 +392,154 @@ if (isProject && proj) {
         </section>
       )}
 
+      {/* ── Decision signals (3-col) ──────────────────────────── */}
+      {isProject && github && (
+        <section class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3" aria-label="Decision signals">
+          {/* Repository health 3-col card */}
+          <div class="grove-card p-5">
+            <h3 class="m-0 text-[1rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Repository health
+            </h3>
+            <dl class="mt-4 grid gap-3 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-ink-500 dark:text-ink-400">Status</dt>
+                <dd class="font-medium text-ink-900 dark:text-ink-100">
+                  {healthLabel ?? "—"}
+                </dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-ink-500 dark:text-ink-400">Stars</dt>
+                <dd class="font-mono text-ink-900 dark:text-ink-100">
+                  {starsLabel ?? "—"}
+                </dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-ink-500 dark:text-ink-400">Forks</dt>
+                <dd class="font-mono text-ink-900 dark:text-ink-100">
+                  {forks}
+                </dd>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <dt class="text-ink-500 dark:text-ink-400">Open issues</dt>
+                <dd class="font-mono text-ink-900 dark:text-ink-100">
+                  {github?.open_issues_count ?? "—"}
+                </dd>
+              </div>
+              {licenseSpdx && (
+                <div class="flex items-center justify-between gap-3">
+                  <dt class="text-ink-500 dark:text-ink-400">License</dt>
+                  <dd class="font-mono text-ink-900 dark:text-ink-100">{licenseSpdx}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+
+          {/* Activity bar chart */}
+          <div class="grove-card p-5">
+            <h3 class="m-0 text-[1rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Activity
+            </h3>
+            {(record as { github?: { activity?: { monthlyCommits?: Array<number | { month: string; commits: number }> } } }).github?.activity?.monthlyCommits?.length ? (
+              <figure class="mt-4 m-0">
+                <div
+                  class="flex h-28 items-end gap-1.5"
+                  role="img"
+                  aria-label="Monthly commits over the last 12 months"
+                >
+                  {(() => {
+                    const raw = (record as { github?: { activity?: { monthlyCommits?: Array<number | { month: string; commits: number }> } } }).github?.activity?.monthlyCommits ?? [];
+                    const items = raw.map((it) => typeof it === "number" ? { month: "", commits: it } : it);
+                    const max = Math.max(1, ...items.map((i) => i.commits ?? 0));
+                    return items.map((item) => (
+                      <div class="flex min-w-0 flex-1 flex-col items-center gap-1">
+                        <div
+                          class="w-full rounded-sm bg-ink-700 dark:bg-ink-200"
+                          style={`height: ${Math.max(8, Math.round(((item.commits ?? 0) / max) * 96))}px`}
+                          title={`${item.month || "month"}: ${item.commits ?? 0} commits`}
+                        />
+                        <span class="max-w-full truncate text-[10px] text-ink-500 dark:text-ink-400">
+                          {item.month ? item.month.slice(5) : item.commits}
+                        </span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+                <figcaption class="sr-only">
+                  Monthly commit count over the last 12 months
+                </figcaption>
+              </figure>
+            ) : (
+              <p class="mt-4 m-0 text-sm text-ink-500 dark:text-ink-400">
+                Monthly commit history is not yet populated for this {`${itemSingular}`}.
+              </p>
+            )}
+          </div>
+
+          {/* Contribution readiness chips */}
+          <div class="grove-card p-5">
+            <h3 class="m-0 text-[1rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Contribution readiness
+            </h3>
+            <ul class="mt-4 m-0 grid list-none gap-2 p-0 text-sm">
+              {(["readme", "contributing", "security", "issueTemplates", "pullRequestTemplate"] as const).map((key) => {
+                const files = (record as { github?: { files?: Record<string, boolean> } }).github?.files ?? {};
+                const ok = files[key];
+                if (ok === undefined) return null;
+                return (
+                  <li class="flex items-center justify-between gap-3">
+                    <span class="text-ink-700 dark:text-ink-200">
+                      {key === "readme" ? "README" :
+                       key === "contributing" ? "Contributing" :
+                       key === "security" ? "Security" :
+                       key === "issueTemplates" ? "Issue templates" :
+                       "PR template"}
+                    </span>
+                    <span class={ok ? "text-emerald-700 dark:text-emerald-400" : "text-ink-400 dark:text-ink-600"}>
+                      {ok ? "Found" : "Missing"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            {!["readme", "contributing", "security", "issueTemplates", "pullRequestTemplate"].some((k) => (record as { github?: { files?: Record<string, boolean> } }).github?.files?.[k as keyof Record<string, boolean>] !== undefined) && (
+              <p class="mt-4 m-0 text-sm text-ink-500 dark:text-ink-400">
+                Contribution files have not been synced yet.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Language mix ─────────────────────────────────────── */}
+      {isProject && (() => {
+        const langs = (record as { github?: { languages?: Record<string, number> } }).github?.languages;
+        if (!langs) return null;
+        const entries = Object.entries(langs).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (entries.length === 0) return null;
+        const total = Math.max(1, entries.reduce((sum, [, b]) => sum + b, 0));
+        return (
+          <section class="mt-4 grove-card p-5">
+            <h3 class="m-0 text-[1rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+              Language mix
+            </h3>
+            <dl class="mt-4 grid gap-2 text-sm">
+              {entries.map(([language, bytes]) => {
+                const pct = Math.round((bytes / total) * 100);
+                return (
+                  <div class="grid grid-cols-[8rem_minmax(0,1fr)_3rem] items-center gap-3">
+                    <dt class="truncate text-ink-700 dark:text-ink-200">{language}</dt>
+                    <dd class="h-2 overflow-hidden rounded-sm bg-ink-200 dark:bg-ink-800">
+                      <div class="h-full bg-ink-700 dark:bg-ink-200" style={`width: ${pct}%`} />
+                    </dd>
+                    <dd class="text-right font-mono text-2xs text-ink-500 dark:text-ink-400">{pct}%</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </section>
+        );
+      })()}
+
       {/* ── Stack + Platform chips ───────────────────────────── */}
       {isProject && (stacks.length > 0 || platforms.length > 0) && (
         <section class="mt-8" aria-labelledby="stacks-heading">
