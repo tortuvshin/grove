@@ -14,9 +14,15 @@
  * page rebuilds on every request because Astro's default output is
  * static (all pages are baked at build time and revalidated by the
  * deploy target).
+ *
+ * Generic: the URL slug (e.g. `/projects/`, `/resources/`,
+ * `/entities/`) is derived from the blueprint via `getStaticPaths`,
+ * so the same page works for every blueprint without per-blueprint
+ * forks. The active slug is passed in via `Astro.params.slug` and
+ * re-derived inside the page.
  */
 import siteConfig from "../../../data/generated/site-config.json";
-import { records, indexSlug, itemLabel } from "../../data/records";
+import { records, itemLabel, itemLabelPlural } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
@@ -26,21 +32,39 @@ import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.ast
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
   filtersFromSearchParams,
-  filterApps,
-  applySort,
-  paginate,
+  buildFacets,
   totalPages,
   effectivePage,
-  buildFacets,
+  paginate,
   PAGE_SIZE,
   pipeline,
 } from "@grove-dev/astro";
 
-const slug = indexSlug();
+export async function getStaticPaths() {
+  // The blueprint drives the route slug (`projects`, `resources`,
+  // `entities`, or a custom override). The active route is in
+  // site-config.json; we also emit the other blueprint slugs as
+  // siblings so a copy-paste from one blueprint to another still
+  // resolves. Falls back to the active slug only when JSON is
+  // missing (fresh scaffold before the first `grove generate`).
+  const here = new URL("../../../data/generated/site-config.json", import.meta.url);
+  let activeSlug = "projects";
+  try {
+    const raw = await import("../../../data/generated/site-config.json");
+    activeSlug = raw.default?.blueprintConfig?.routeSlug ?? "projects";
+  } catch {
+    /* not present */
+  }
+  const all = ["projects", "resources", "entities"];
+  if (!all.includes(activeSlug)) all.push(activeSlug);
+  return all.map((slug) => ({ params: { slug } }));
+}
+
+const slug = Astro.params.slug as string;
 const total = records.length;
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
-const description = `A searchable directory of ${slug} for ${siteConfig.name}.`;
+const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
 
 // ── URL → filters ───────────────────────────────────────────────
 const filters = filtersFromSearchParams(Astro.url.searchParams);

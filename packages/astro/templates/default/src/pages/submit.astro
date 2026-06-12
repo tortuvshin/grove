@@ -1,19 +1,22 @@
 ---
 /**
  * Submit page — text-based instructions for contributing a new
- * record. No form: the openapps 19K form preview is overkill for
- * the default template, and a static "open a PR / open an issue"
- * workflow matches how the showcase actually accepts submissions.
+ * record, plus a small client-side form that pre-fills the
+ * record_submission GitHub issue with the user's input.
+ *
+ * The form does NOT submit data anywhere — it just constructs a
+ * GitHub issue URL with prefilled title/body and hands the user
+ * off to GitHub. That keeps the page static-hostable (no server
+ * runtime, no form spam) while still being a real form experience.
  */
 import siteConfig from "../../data/generated/site-config.json";
-import { indexSlug, itemLabel } from "../data/records";
+import { itemLabel } from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 
 const title = `Submit a ${itemLabel()} — ${siteConfig.name}`;
 const description = `Submit a new ${itemLabel()} to ${siteConfig.name}.`;
 const noindex = true;
-const slug = indexSlug();
 
 const repoPath = (siteConfig.repoUrl ?? "").replace(/^https?:\/\/github\.com\//, "");
 const issueUrl = repoPath
@@ -36,36 +39,162 @@ const issueUrl = repoPath
         Submit a {itemLabel()}
       </h1>
       <p class="mt-4 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
-        {siteConfig.name} is a community knowledge site. Adding a new{" "}
-        {itemLabel()} is a two-step process — open a submission issue,
-        then open a pull request that adds a new YAML file under{" "}
+        {siteConfig.name} is a community knowledge site. Fill in the
+        form below — it pre-fills the submission issue on GitHub with
+        your answers, where a maintainer will review and (if accepted)
+        convert it into a record under{" "}
         <code class="font-mono text-ink-900 dark:text-ink-100">data/records/</code>.
       </p>
 
-      <div class="mt-6 flex flex-wrap gap-2">
-        <a
-          href={issueUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="grove-btn grove-btn-primary"
-        >
-          Open a submission issue ↗
-        </a>
-        {repoPath && (
-          <a
-            href={`https://github.com/${repoPath}/blob/main/.github/ISSUE_TEMPLATE/record_submission.md`}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="grove-btn grove-btn-outline"
+      <form
+        id="grove-submit-form"
+        class="mt-8 grid max-w-2xl grid-cols-1 gap-4"
+        data-issue-base={issueUrl}
+      >
+        <label class="flex flex-col gap-1">
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            Name *
+          </span>
+          <input
+            name="name"
+            required
+            type="text"
+            placeholder="My Project"
+            class="rounded-md border border-ink-200 bg-white px-3 py-2 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            One-line description *
+          </span>
+          <input
+            name="description"
+            required
+            type="text"
+            placeholder="What does it do, in plain words?"
+            class="rounded-md border border-ink-200 bg-white px-3 py-2 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          />
+        </label>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <label class="flex flex-col gap-1">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              Category
+            </span>
+            <input
+              name="category"
+              type="text"
+              placeholder="e.g. tools, mobile, devops"
+              class="rounded-md border border-ink-200 bg-white px-3 py-2 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+            />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+              Primary stack
+            </span>
+            <input
+              name="stack"
+              type="text"
+              placeholder="e.g. Flutter, Vue, Go"
+              class="rounded-md border border-ink-200 bg-white px-3 py-2 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+            />
+          </label>
+        </div>
+        <label class="flex flex-col gap-1">
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            Repository URL *
+          </span>
+          <input
+            name="repoUrl"
+            required
+            type="url"
+            placeholder="https://github.com/owner/repo"
+            class="rounded-md border border-ink-200 bg-white px-3 py-2 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            Why it deserves a spot
+          </span>
+          <textarea
+            name="whyListed"
+            rows="4"
+            placeholder="A short paragraph — what makes it stand out?"
+            class="rounded-md border border-ink-200 bg-white px-3 py-2 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          ></textarea>
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="submit"
+            class="grove-btn grove-btn-primary"
+            data-event="submit_form_open_issue"
+            data-event-source="submit_page"
           >
-            See the issue template
-          </a>
-        )}
-      </div>
+            Open a submission issue ↗
+          </button>
+          {repoPath && (
+            <a
+              href={`https://github.com/${repoPath}/blob/main/.github/ISSUE_TEMPLATE/record_submission.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="grove-btn grove-btn-outline"
+            >
+              See the issue template
+            </a>
+          )}
+        </div>
+      </form>
 
-      <section class="mt-12 max-w-[68ch">
+      <script>
+        // Submit form: build a GitHub issue URL with the user's input
+        // prefilled, then redirect. No data leaves the browser until
+        // the user clicks "Submit" on GitHub's side. Keeps the page
+        // serverless and spam-resistant.
+        (() => {
+          const form = document.getElementById("grove-submit-form") as HTMLFormElement | null;
+          if (!form) return;
+          const base = form.dataset.issueBase;
+          if (!base) return;
+          form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const fd = new FormData(form);
+            const name = String(fd.get("name") ?? "").trim();
+            const description = String(fd.get("description") ?? "").trim();
+            const category = String(fd.get("category") ?? "").trim();
+            const stack = String(fd.get("stack") ?? "").trim();
+            const repoUrl = String(fd.get("repoUrl") ?? "").trim();
+            const whyListed = String(fd.get("whyListed") ?? "").trim();
+            if (!name || !description || !repoUrl) {
+              alert("Please fill in name, description, and repository URL.");
+              return;
+            }
+            const title = encodeURIComponent(`[submit] ${name}`);
+            const body = [
+              "## Basics",
+              `- **Name:** ${name}`,
+              `- **One-line description:** ${description}`,
+              category ? `- **Category:** ${category}` : "",
+              stack ? `- **Primary stack:** ${stack}` : "",
+              `- **Repository URL:** ${repoUrl}`,
+              "",
+              "## Why it deserves a spot",
+              whyListed || "_(fill in)_",
+              "",
+              "## Checkboxes",
+              "- [ ] The repo is **public** on GitHub / another public forge",
+              "- [ ] It's **open source** under an OSI-approved license",
+              "- [ ] It has been **maintained** in the last 12 months",
+            ]
+              .filter(Boolean)
+              .join("\n");
+            const url = `${base}&title=${title}&body=${encodeURIComponent(body)}`;
+            window.open(url, "_blank", "noopener,noreferrer");
+          });
+        })();
+      </script>
+
+      <section class="mt-12 max-w-[68ch]">
         <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          Manual record (alternative to the issue form)
+          Manual record (alternative to the form)
         </h2>
         <p class="mt-2 text-sm text-ink-700 dark:text-ink-200 m-0">
           Prefer to write a record by hand? Here's the minimum shape for a{" "}
@@ -111,7 +240,7 @@ links:
         )}
       </section>
 
-      <section class="mt-12 max-w-[68ch">
+      <section class="mt-12 max-w-[68ch]">
         <h2 class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           What happens after you submit
         </h2>

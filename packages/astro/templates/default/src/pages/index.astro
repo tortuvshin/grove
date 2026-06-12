@@ -1,28 +1,42 @@
 ---
 /**
- * Home page — the showcase's front door.
+ *  Home page — the showcase's front door.
  *
- * Sections (in order):
+ *  Sections (in order):
  *   1. Hero                       — brand + search + stats row
  *   2. WhyThisExists              — 3 short value-prop points
- *   3. RecordSection "Trending"   — hot lens (stars >= 1000 OR pushed <= 30d)
- *   4. RecordSection "Recently added" — new lens (pushed <= 7d OR curated "new")
+ *   3. RecordSection "Trending"   — hot lens (curation OR stars >= 1000 OR pushed <= 30d)
+ *   4. RecordSection "Recently added" — new lens (curation OR pushed <= 7d)
  *   5. RecordSection "Established" — mature lens (tier=curated, pushed > 365d)
  *   6. StackGrid                  — browse by stack
  *   7. CategoryGrid               — browse by category
- *   8. ContributorsGrid           — top contributors (when available)
+ *   8. ContributorsGrid           — top contributors (when contributors.json is present)
  *   9. OriginalCollection         — origin-card link to the source repo
  *
- * Every section is defensive: with 0 records (fresh scaffold) it
- * renders a graceful empty state instead of throwing.
+ *  Every section is defensive: with 0 records (fresh scaffold) it
+ *  renders a graceful empty state instead of throwing.
  *
- * V1 source-of-truth types are from `@grove-dev/core`. The slim
- * `IndexProjectRecord` shape is what the home page consumes (no
- * `as ProjectRecord` casts); the full `Resource` only flows into
- * the detail page.
+ *  Generic: the home page works for all 3 blueprints (project
+ *  directory, resource hub, ecosystem map). The active kind
+ *  comes from `siteConfig.blueprintConfig`, the URL slug from
+ *  `indexSlug()`, the human label from `itemLabel()`. Sections
+ *  that need project-only fields (stars, pushedAt) safely fall
+ *  back to "no match" when the active blueprint is `resource` or
+ *  `entity` — so resource hubs still render Hot/New/Mature but
+ *  with the empty state.
+ *
+ *  Stats come from `siteConfig.stats` (derived at generate time from
+ *  the records themselves). Pages never re-derive counts — that
+ *  guarantees the hero, origin card, and contributors page all show
+ *  the same numbers.
  */
 import siteConfig from "../../data/generated/site-config.json";
-import { records, fullRecords, projects, indexSlug, itemLabel } from "../data/records";
+import {
+  items,
+  indexSlug,
+  itemLabel,
+  itemLabelPlural,
+} from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Hero from "@grove-dev/astro/components/Hero.astro";
 import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
@@ -35,33 +49,15 @@ import { countByCategory, countByStack } from "@grove-dev/astro";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import type { IndexProjectRecord } from "@grove-dev/core";
+import type { IndexRecord } from "@grove-dev/core";
 
 const slug = indexSlug();
-const projectKind = projects;
-
-// ── Hero stats ──────────────────────────────────────────────────
-const totalApps = fullRecords.filter((r) => r.kind === "project").length;
-const totalCategories = new Set(projectKind.map((r) => r.category).filter(Boolean))
-  .size;
-const totalStacks = new Set(
-  projectKind.flatMap((r) => [r.stack, ...(r.stacks ?? [])]).filter(Boolean),
-).size;
-const totalContributors = new Set(
-  projectKind
-    .map((r) => {
-      const url = r.repoUrl ?? r.links?.github ?? "";
-      const m = /github\.com\/([^/]+)\//.exec(url);
-      return m?.[1];
-    })
-    .filter(Boolean),
-).size;
-const totalStars = projectKind.reduce(
-  (acc, r) => acc + (r.github?.stars ?? 0),
-  0,
-);
+const list = items; // generic — already filtered to the active kind
+const stats = siteConfig.stats;
 
 // ── Lens sectioning (Hot / New / Mature) ────────────────────────
+// Project-shaped helpers fall back gracefully when a record
+// doesn't carry stars/pushedAt (e.g. resource-hub records).
 const DAY_MS = 86_400_000;
 function daysSince(iso: string | null | undefined): number {
   if (!iso) return Infinity;
@@ -70,47 +66,57 @@ function daysSince(iso: string | null | undefined): number {
   return (Date.now() - d.valueOf()) / DAY_MS;
 }
 
-const hot = projectKind
-  .filter((r: IndexProjectRecord) => {
-    const stars = r.github?.stars ?? 0;
-    const pushedAt = r.github?.pushedAt ?? null;
-    const pushed = daysSince(pushedAt);
-    const labelledHot = r.curation?.labels?.includes("hot") ?? false;
+function starsOf(r: IndexRecord): number {
+  return (r as { github?: { stars?: number } }).github?.stars ?? 0;
+}
+function pushedAtOf(r: IndexRecord): string | null {
+  return (r as { github?: { pushedAt?: string | null } }).github?.pushedAt ?? null;
+}
+function labelsOf(r: IndexRecord): string[] {
+  return r.curation?.labels ?? [];
+}
+function tierOf(r: IndexRecord): string | undefined {
+  return (r as { health?: { tier?: string } }).health?.tier;
+}
+
+const hot = list
+  .filter((r) => {
+    const stars = starsOf(r);
+    const pushed = daysSince(pushedAtOf(r));
+    const labelledHot = labelsOf(r).includes("hot");
     return labelledHot || stars >= 1000 || pushed <= 30;
   })
   .slice(0, 6);
 
-const newItems = projectKind
-  .filter((r: IndexProjectRecord) => {
-    const pushedAt = r.github?.pushedAt ?? null;
-    const pushed = daysSince(pushedAt);
-    const labelledNew = r.curation?.labels?.includes("new") ?? false;
+const newItems = list
+  .filter((r) => {
+    const pushed = daysSince(pushedAtOf(r));
+    const labelledNew = labelsOf(r).includes("new");
     return pushed <= 7 || labelledNew;
   })
   .slice(0, 6);
 
-const mature = projectKind
-  .filter((r: IndexProjectRecord) => {
-    const tier = r.health?.tier;
-    const pushedAt = r.github?.pushedAt ?? null;
-    const pushed = daysSince(pushedAt);
+const mature = list
+  .filter((r) => {
+    const tier = tierOf(r);
+    const pushed = daysSince(pushedAtOf(r));
     return tier === "curated" && pushed > 365;
   })
   .slice(0, 6);
 
 // ── Stack / category aggregates ─────────────────────────────────
-const stackCounts = countByStack(projectKind);
+const stackCounts = countByStack(list as Parameters<typeof countByStack>[0]);
 const stacks = [...stackCounts.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .slice(0, 12)
   .map(([name, count]) => ({ name, slug: name, count }));
 
-const categoryCounts = countByCategory(projectKind);
+const categoryCounts = countByCategory(list as Parameters<typeof countByCategory>[0]);
 const categories = [...categoryCounts.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .map(([name, count]) => ({ name, slug: name, count }));
 
-// ── Contributors (best-effort, from records) ────────────────────
+// ── Contributors (best-effort, from data/generated/contributors.json) ──
 const here = dirname(fileURLToPath(import.meta.url));
 const contributorsPath = [
   resolve(here, "..", "..", "data", "generated", "contributors.json"),
@@ -138,35 +144,20 @@ if (contributorsPath) {
 }
 const hasContributors = contributors && contributors.length > 0;
 
-// ── OriginalCollection (repo-stats.json if present) ─────────────
-interface RepoStats {
-  originalRepo?: string;
-  stars?: number;
-  forks?: number;
-  contributors?: number;
-  description?: string;
-}
-let repoStats: RepoStats = {};
-const repoStatsPath = [
-  resolve(here, "..", "..", "data", "generated", "repo-stats.json"),
-  resolve(process.cwd(), "data", "generated", "repo-stats.json"),
-].find((p) => existsSync(p));
-if (repoStatsPath) {
-  try {
-    repoStats = JSON.parse(readFileSync(repoStatsPath, "utf8")) as RepoStats;
-  } catch {
-    repoStats = {};
-  }
-}
-
 const title = `${siteConfig.name} — ${siteConfig.tagline}`;
 const description =
   siteConfig.description ?? `A growing community knowledge site powered by Grove.`;
 
 // ── Render-time helpers ─────────────────────────────────────────
-function detailHrefFor(r: IndexProjectRecord): string {
+function detailHrefFor(r: IndexRecord): string {
   return `/${slug}/${r.slug}`;
 }
+
+const singular = itemLabel();
+const plural = itemLabelPlural();
+const emptyTrending = `No trending ${plural} yet.`;
+const emptyNew = `No new ${plural} yet.`;
+const emptyMature = `No established ${plural} yet.`;
 ---
 
 <BaseLayout
@@ -174,7 +165,7 @@ function detailHrefFor(r: IndexProjectRecord): string {
   description={description}
   site={siteConfig}
   submitHref="/submit"
-  submitLabel={`Submit ${itemLabel()}`}
+  submitLabel={`Submit ${singular}`}
 >
   <Hero
     name={siteConfig.name}
@@ -184,11 +175,11 @@ function detailHrefFor(r: IndexProjectRecord): string {
     searchPlaceholder={`Search ${slug}...`}
     searchHref={`/${slug}`}
     stats={{
-      apps: totalApps,
-      categories: totalCategories,
-      stacks: totalStacks,
-      contributors: totalContributors || undefined,
-      stars: totalStars || undefined,
+      apps: stats.totalApps,
+      categories: stats.totalCategories,
+      stacks: stats.totalStacks,
+      contributors: stats.totalOwners || undefined,
+      stars: stats.totalStars || undefined,
     }}
     ctas={[
       { label: `Browse ${slug}`, href: `/${slug}`, variant: "primary" },
@@ -201,12 +192,12 @@ function detailHrefFor(r: IndexProjectRecord): string {
   <RecordSection
     id="hot"
     title="Trending"
-    description="The projects getting attention right now — high-star repos and recently active codebases."
+    description="The items getting attention right now — high-star repos and recently active codebases."
     items={hot}
     hrefFor={detailHrefFor}
     viewAllHref={`/${slug}?lens=hot`}
     eyebrow="Hot"
-    emptyLabel="No trending projects yet."
+    emptyLabel={emptyTrending}
   />
 
   <RecordSection
@@ -217,18 +208,18 @@ function detailHrefFor(r: IndexProjectRecord): string {
     hrefFor={detailHrefFor}
     viewAllHref={`/${slug}?lens=new`}
     eyebrow="New"
-    emptyLabel="No new projects yet."
+    emptyLabel={emptyNew}
   />
 
   <RecordSection
     id="mature"
     title="Established"
-    description="Long-running curated projects with deep history and stable architecture."
+    description="Long-running curated items with deep history and stable architecture."
     items={mature}
     hrefFor={detailHrefFor}
     viewAllHref={`/${slug}?lens=mature`}
     eyebrow="Mature"
-    emptyLabel="No established projects yet."
+    emptyLabel={emptyMature}
   />
 
   {stacks.length > 0 && (
@@ -254,14 +245,13 @@ function detailHrefFor(r: IndexProjectRecord): string {
     />
   )}
 
-  {repoStats.originalRepo && (
+  {stats.originalRepo && stats.originalRepo !== siteConfig.repoUrl && (
     <OriginalCollection
-      repoUrl={repoStats.originalRepo}
+      repoUrl={stats.originalRepo}
       stats={{
-        stars: repoStats.stars,
-        forks: repoStats.forks,
-        contributors: repoStats.contributors,
-        description: repoStats.description,
+        stars: stats.originalStars,
+        forks: stats.originalForks,
+        contributors: stats.originalContributors,
       }}
     />
   )}
