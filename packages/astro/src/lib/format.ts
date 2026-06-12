@@ -1,9 +1,8 @@
 /**
- * Shared formatting helpers.
+ * Shared formatting helpers used across components.
  *
- * Dependency-free — importable by both server-rendered Astro
- * components and any future client-side script. No `Intl`-heavy
- * calls that would explode the client bundle.
+ * Keep these dependency-free so they can be imported by both server-
+ * rendered Astro components and any future client-side scripts.
  */
 
 /**
@@ -19,7 +18,7 @@ export function compact(n: number): string {
 }
 
 /**
- * Format a star count compactly. Returns `null` when input is not a
+ * Format a star count compactly. Returns null when input is not a
  * finite number, so callers can render "—" without an extra guard.
  */
 export function formatStars(n: number | null | undefined): string | null {
@@ -32,9 +31,9 @@ export function formatStars(n: number | null | undefined): string | null {
  * Returns "—" for missing or invalid input, and "today" for future
  * dates (which can happen with bad upstream timestamps).
  */
-export function formatRelative(date: string | null | undefined): string {
-  if (!date) return "—";
-  const d = new Date(date);
+export function formatRelative(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return "—";
   const days = Math.floor((Date.now() - d.valueOf()) / (1000 * 60 * 60 * 24));
   if (days <= 0) return "today";
@@ -53,10 +52,10 @@ export function formatRelative(date: string | null | undefined): string {
  * Returns the original string for unparseable input, or "—" when
  * no value is provided.
  */
-export function formatDate(date: string | null | undefined): string {
-  if (!date) return "—";
-  const d = new Date(date);
-  if (Number.isNaN(d.valueOf())) return date;
+export function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return iso;
   return d.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
