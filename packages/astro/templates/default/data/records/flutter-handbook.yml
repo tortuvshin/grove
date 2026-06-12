@@ -1,0 +1,31 @@
+kind: resource
+slug: flutter-handbook
+title: Flutter Handbook
+description: A community-maintained handbook for Flutter — patterns, recipes, and best practices.
+category: guides
+type: guide
+topic: mobile-frameworks
+tags:
+  - flutter
+  - dart
+  - mobile
+links:
+  source: https://flutter.dev
+bestFor:
+  - Learning Flutter idioms
+  - Pattern reference
+  - Quick recipes
+whyListed:
+  - Curated by the Flutter team
+  - Searchable by topic
+caveats: []
+source:
+  type: manual
+curation:
+  reviewed: true
+  reviewedBy: grove-bot
+  reviewedAt: "2026-06-13"
+  labels:
+    - featured
+  lenses: []
+visibility: keep

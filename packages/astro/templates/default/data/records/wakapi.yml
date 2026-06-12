@@ -1,0 +1,44 @@
+kind: project
+name: Wakapi
+slug: wakapi
+description: Open-source time tracker for developers — coding stats, language breakdowns, and project-level metrics.
+category: Mobile
+tags:
+  - time-tracking
+  - analytics
+  - mobile
+  - kotlin
+stack: Kotlin
+stacks:
+  - Kotlin
+  - Android
+platforms:
+  - android
+projectType: real-app
+difficulty: beginner
+codebaseSize: medium
+repoUrl: https://github.com/muety/wakapi
+links:
+  github: https://github.com/muety/wakapi
+  website: https://wakapi.dev
+bestFor:
+  - Personal coding stats
+  - WakaTime alternative
+  - Privacy-first telemetry
+whyListed:
+  - Self-host friendly
+  - Companion mobile app
+  - Clean MVVM architecture
+caveats: []
+distribution:
+  channels: []
+source:
+  type: manual
+curation:
+  reviewed: true
+  reviewedBy: grove-bot
+  reviewedAt: "2026-06-13"
+  labels:
+    - new
+  lenses: []
+visibility: keep

@@ -1,0 +1,48 @@
+kind: project
+name: Logseq
+slug: logseq
+description: Privacy-first, open-source knowledge base that works on top of plain text Markdown and Org-mode files.
+category: Web
+tags:
+  - notes
+  - knowledge-base
+  - productivity
+  - clojure
+stack: ClojureScript
+stacks:
+  - ClojureScript
+  - Clojure
+  - JavaScript
+platforms:
+  - web
+  - desktop
+projectType: real-app
+difficulty: intermediate
+codebaseSize: huge
+repoUrl: https://github.com/logseq/logseq
+links:
+  github: https://github.com/logseq/logseq
+  website: https://logseq.com
+bestFor:
+  - PKM (personal knowledge management)
+  - Local-first note taking
+  - Graph-based outliner
+whyListed:
+  - Local-first with sync
+  - Active community
+  - Strong plugin ecosystem
+caveats:
+  - Mobile app still maturing
+distribution:
+  channels: []
+source:
+  type: manual
+curation:
+  reviewed: true
+  reviewedBy: grove-bot
+  reviewedAt: "2026-06-13"
+  labels:
+    - hot
+    - mature
+  lenses: []
+visibility: keep

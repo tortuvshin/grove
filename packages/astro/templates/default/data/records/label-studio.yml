@@ -1,0 +1,46 @@
+kind: project
+name: Label Studio
+slug: label-studio
+description: Open-source data labeling platform — annotate images, text, audio, video, and time series for ML training.
+category: AI/ML
+tags:
+  - labeling
+  - ml-ops
+  - annotation
+  - python
+stack: Python
+stacks:
+  - Python
+  - Django
+  - React
+platforms:
+  - web
+  - self-host
+projectType: real-app
+difficulty: intermediate
+codebaseSize: large
+repoUrl: https://github.com/HumanSignal/label-studio
+links:
+  github: https://github.com/HumanSignal/label-studio
+  website: https://labelstud.io
+bestFor:
+  - ML dataset labeling
+  - Multi-modal annotation
+  - Active learning pipelines
+whyListed:
+  - Mature, production-grade
+  - Strong ML backend
+  - Active commercial + community backing
+caveats: []
+distribution:
+  channels: []
+source:
+  type: manual
+curation:
+  reviewed: true
+  reviewedBy: grove-bot
+  reviewedAt: "2026-06-13"
+  labels:
+    - mature
+  lenses: []
+visibility: keep
