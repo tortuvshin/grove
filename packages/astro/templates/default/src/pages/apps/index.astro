@@ -1,0 +1,152 @@
+---
+/**
+ * /apps — alternate list URL.
+ *
+ * Mirrors `/[slug]/index.astro` (the blueprint-aware dynamic list
+ * page) at a static URL so the openapps-style `/apps` route works
+ * for project-directory blueprints without per-blueprint forks.
+ *
+ * For non-project blueprints (resource-hub → /resources,
+ * ecosystem-map → /entities), this page redirects to the matching
+ * dynamic route.
+ */
+import { indexSlug, itemLabelPlural, items } from "../data/records";
+import { redirect } from "astro:actions";
+import { getStaticPaths as _ignored } from "../data/records";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
+import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
+import ItemIndexRow from "@grove-dev/astro/components/ItemIndexRow.astro";
+import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
+import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
+import siteConfig from "../../data/generated/site-config.json";
+import {
+  activeFilterChips,
+  applySort,
+  buildFacets,
+  effectivePage,
+  effectiveSort,
+  filterItems,
+  filtersFromSearchParams,
+  paginate,
+  totalPages,
+} from "@grove-dev/astro";
+
+const slug = indexSlug();
+
+// Only render the static /apps route when the active blueprint is
+// project-directory (the openapps-style URL). For other blueprints,
+// redirect to the dynamic `/<slug>/` route.
+if (slug !== "projects") {
+  return Astro.redirect(`/${slug}${Astro.url.search}`);
+}
+
+const total = items.length;
+const filters = filtersFromSearchParams(Astro.url.searchParams);
+const facets = buildFacets(items);
+const sort = effectiveSort(filters);
+const requestedPage = effectivePage(filters);
+const filtered = filterItems(items, filters);
+const sorted = applySort(filtered, sort);
+const pages = totalPages(sorted.length);
+const page = Math.min(requestedPage, pages);
+const visibleItems = paginate(sorted, page);
+const chips = activeFilterChips(filters);
+const itemPlural = itemLabelPlural();
+
+const title = `${itemPlural.charAt(0).toUpperCase()}${itemPlural.slice(1)} — ${siteConfig.name}`;
+const description = `Browse every curated ${itemPlural.replace(/s$/, "")} in the ${siteConfig.name} directory.`;
+---
+
+<BaseLayout title={title} description={description} site={siteConfig}>
+  <section class="grove-section">
+    <div class="grove-container-wide mx-auto px-5 sm:px-7">
+      <header class="mb-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          {itemPlural}
+        </span>
+        <h1 class="m-0 mt-1 text-[1.75rem] sm:text-[2.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          Browse the directory
+        </h1>
+        <p class="m-0 mt-2 max-w-2xl text-base leading-relaxed text-ink-700 dark:text-ink-200">
+          Search and filter every curated {itemPlural.replace(/s$/, "")}. Use the
+          lens tabs to focus on a curated angle, or refine by stack,
+          platform, license, and status.
+        </p>
+      </header>
+
+      <div class="mb-6">
+        <SmartLensTabs
+          currentParams={Astro.url.searchParams}
+          lensIds={["all", "trending", "recently-added", "established", "featured"]}
+        />
+      </div>
+
+      <div class="mb-8">
+        <RefinePanel
+          facets={facets}
+          filters={filters}
+          searchHref="/apps"
+          totalCount={total}
+          filteredCount={filtered.length}
+        />
+      </div>
+
+      {chips.length > 0 && (
+        <ul class="mb-6 flex flex-wrap items-center gap-1.5" aria-label="Active filters">
+          {chips.map((chip) => (
+            <li>
+              <a
+                href={chip.removeHref}
+                class="grove-badge inline-flex items-center gap-1.5 hover:border-ink-300 dark:hover:border-ink-700"
+                title={`Remove filter: ${chip.label}`}
+              >
+                <span>{chip.label}</span>
+                <span aria-hidden="true">×</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {visibleItems.length === 0 ? (
+        <p class="grove-card p-8 text-center text-sm text-ink-500 dark:text-ink-400">
+          No {itemPlural} match these filters. Try clearing a filter or two.
+        </p>
+      ) : (
+        <ul class="m-0 grid list-none grid-cols-1 gap-3 p-0">
+          {visibleItems.map((item) => (
+            <li class="m-0 p-0">
+              <ItemIndexRow item={item} pathPrefix="/apps" />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <ExploreByCategory
+    categories={[
+      ...new Set(
+        items
+          .filter((i) => i.kind === "project")
+          .map((i) => (i as { category?: string }).category ?? "")
+          .filter(Boolean),
+      ),
+    ].map((c) => ({ id: c, name: c, blurb: "" }))}
+    pathPrefix="/apps"
+    itemLabelPlural={itemPlural}
+  />
+  <ExploreByStack
+    stacks={[
+      ...new Set(
+        items
+          .filter((i) => i.kind === "project")
+          .flatMap((i) => [(i as { stack?: string }).stack ?? "", ...(i as { stacks?: string[] }).stacks])
+          .filter(Boolean),
+      ),
+    ].map((s) => ({ id: s, name: s, status: "live" as const, blurb: "" }))}
+    pathPrefix="/apps"
+    itemLabelPlural={itemPlural}
+  />
+</BaseLayout>
