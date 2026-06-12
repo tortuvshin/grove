@@ -41,6 +41,13 @@ interface Props {
   project?: FooterColumn;
   /** Stats line under brand blurb (e.g. "79 apps · 12 categories"). */
   stats?: { apps?: number; categories?: number; contributors?: number };
+  /**
+   * Plural label for the primary count stat. Generic blueprint
+   * awareness: "apps" for project-directory, "resources" for
+   * resource-hub, "entities" for ecosystem-map. Defaults to
+   * "apps" so existing call-sites are unaffected.
+   */
+  appsLabel?: string;
   /** Copyright suffix. Defaults to site.name. */
   copyrightHolder?: string;
   /** License line under the bar (e.g. "Content under CC BY-SA 4.0."). */
@@ -55,6 +62,7 @@ const {
   contribute = { heading: "Contribute", items: [] },
   project = { heading: "Project", items: [] },
   stats,
+  appsLabel = "apps",
   copyrightHolder,
   licenseLine,
   class: className = "",
@@ -118,7 +126,7 @@ const projectItems = project.items.length ? project.items : defaultProject;
         <p class="mt-3 m-0 text-2xs text-ink-500 dark:text-ink-400">
           {stats.apps !== undefined && (
             <>
-              <span class="font-mono">{stats.apps}</span> apps
+              <span class="font-mono">{stats.apps}</span> {appsLabel}
             </>
           )}
           {stats.apps !== undefined && (stats.categories !== undefined || stats.contributors !== undefined) && (
