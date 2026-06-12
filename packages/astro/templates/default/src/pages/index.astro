@@ -1,128 +1,49 @@
 ---
 /**
- *  Home page — the showcase's front door.
+ * Home page — generic.
  *
- *  Sections (in order):
- *   1. Hero                       — brand + search + stats row
- *   2. WhyThisExists              — 3 short value-prop points
- *   3. RecordSection "Trending"   — hot lens (curation OR stars >= 1000 OR pushed <= 30d)
- *   4. RecordSection "Recently added" — new lens (curation OR pushed <= 7d)
- *   5. RecordSection "Established" — mature lens (tier=curated, pushed > 365d)
- *   6. StackGrid                  — browse by stack
- *   7. CategoryGrid               — browse by category
- *   8. ContributorsGrid           — top contributors (when contributors.json is present)
- *   9. OriginalCollection         — origin-card link to the source repo
+ * Mirrors the openapps structure: Hero → WhyThisExists → three
+ * lens sections (hot / new / mature) → StackGrid → CategoryGrid →
+ * ContributorsGrid → OriginalCollection.
  *
- *  Every section is defensive: with 0 records (fresh scaffold) it
- *  renders a graceful empty state instead of throwing.
- *
- *  Generic: the home page works for all 3 blueprints (project
- *  directory, resource hub, ecosystem map). The active kind
- *  comes from `siteConfig.blueprintConfig`, the URL slug from
- *  `indexSlug()`, the human label from `itemLabel()`. Sections
- *  that need project-only fields (stars, pushedAt) safely fall
- *  back to "no match" when the active blueprint is `resource` or
- *  `entity` — so resource hubs still render Hot/New/Mature but
- *  with the empty state.
- *
- *  Stats come from `siteConfig.stats` (derived at generate time from
- *  the records themselves). Pages never re-derive counts — that
- *  guarantees the hero, origin card, and contributors page all show
- *  the same numbers.
+ * All data derives from `data/generated/records.{index,full}.json`
+ * and `data/generated/site-config.json`. Nothing here is hardcoded
+ * to a specific blueprint — section copy uses singular/plural
+ * labels from `itemLabel()`/`itemLabelPlural()`.
  */
-import siteConfig from "../../data/generated/site-config.json";
-import {
-  items,
-  indexSlug,
-  itemLabel,
-  itemLabelPlural,
-} from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Hero from "@grove-dev/astro/components/Hero.astro";
 import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
-import RecordSection from "@grove-dev/astro/components/RecordSection.astro";
+import ItemSection from "@grove-dev/astro/components/ItemSection.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
 import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
 import OriginalCollection from "@grove-dev/astro/components/OriginalCollection.astro";
-import { countByCategory, countByStack } from "@grove-dev/astro";
+
+import { items, fullRecords, fullItems } from "../data/records";
+import { hotItems, newItems, matureItems, stacksFromItems, categoriesFromItems } from "@grove-dev/astro";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import type { IndexRecord } from "@grove-dev/core";
+import siteConfig from "../../data/generated/site-config.json";
 
-const slug = indexSlug();
-const list = items; // generic — already filtered to the active kind
-const stats = siteConfig.stats;
+const slug = (siteConfig.blueprintConfig?.routeSlug ?? "items") as string;
+const itemSingular = (siteConfig.blueprintConfig?.labelSingular ?? "item") as string;
+const itemPlural = (siteConfig.blueprintConfig?.labelPlural ?? "items") as string;
 
-// ── Lens sectioning (Hot / New / Mature) ────────────────────────
-// Project-shaped helpers fall back gracefully when a record
-// doesn't carry stars/pushedAt (e.g. resource-hub records).
-const DAY_MS = 86_400_000;
-function daysSince(iso: string | null | undefined): number {
-  if (!iso) return Infinity;
-  const d = new Date(iso);
-  if (Number.isNaN(d.valueOf())) return Infinity;
-  return (Date.now() - d.valueOf()) / DAY_MS;
-}
+const hotList = hotItems(items, fullRecords).slice(0, 6);
+const newList = newItems(items, fullRecords).slice(0, 6);
+const matureList = matureItems(items, fullRecords).slice(0, 6);
 
-function starsOf(r: IndexRecord): number {
-  return (r as { github?: { stars?: number } }).github?.stars ?? 0;
-}
-function pushedAtOf(r: IndexRecord): string | null {
-  return (r as { github?: { pushedAt?: string | null } }).github?.pushedAt ?? null;
-}
-function labelsOf(r: IndexRecord): string[] {
-  return r.curation?.labels ?? [];
-}
-function tierOf(r: IndexRecord): string | undefined {
-  return (r as { health?: { tier?: string } }).health?.tier;
-}
+const stacks = stacksFromItems(fullItems).slice(0, 12);
+const categories = categoriesFromItems(fullItems).slice(0, 12);
 
-const hot = list
-  .filter((r) => {
-    const stars = starsOf(r);
-    const pushed = daysSince(pushedAtOf(r));
-    const labelledHot = labelsOf(r).includes("hot");
-    return labelledHot || stars >= 1000 || pushed <= 30;
-  })
-  .slice(0, 6);
-
-const newItems = list
-  .filter((r) => {
-    const pushed = daysSince(pushedAtOf(r));
-    const labelledNew = labelsOf(r).includes("new");
-    return pushed <= 7 || labelledNew;
-  })
-  .slice(0, 6);
-
-const mature = list
-  .filter((r) => {
-    const tier = tierOf(r);
-    const pushed = daysSince(pushedAtOf(r));
-    return tier === "curated" && pushed > 365;
-  })
-  .slice(0, 6);
-
-// ── Stack / category aggregates ─────────────────────────────────
-const stackCounts = countByStack(list as Parameters<typeof countByStack>[0]);
-const stacks = [...stackCounts.entries()]
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  .slice(0, 12)
-  .map(([name, count]) => ({ name, slug: name, count }));
-
-const categoryCounts = countByCategory(list as Parameters<typeof countByCategory>[0]);
-const categories = [...categoryCounts.entries()]
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  .map(([name, count]) => ({ name, slug: name, count }));
-
-// ── Contributors (best-effort, from data/generated/contributors.json) ──
+// Contributors (best-effort from data/generated/contributors.json)
 const here = dirname(fileURLToPath(import.meta.url));
 const contributorsPath = [
   resolve(here, "..", "..", "data", "generated", "contributors.json"),
   resolve(process.cwd(), "data", "generated", "contributors.json"),
 ].find((p) => existsSync(p));
-
 interface ContributorsFile {
   contributors?: Array<{
     username: string;
@@ -132,7 +53,6 @@ interface ContributorsFile {
     contributions?: number;
   }>;
 }
-
 let contributors: ContributorsFile["contributors"] = [];
 if (contributorsPath) {
   try {
@@ -142,117 +62,100 @@ if (contributorsPath) {
     contributors = [];
   }
 }
-const hasContributors = contributors && contributors.length > 0;
+
+const stats = {
+  originalRepo: siteConfig.repoUrl ?? "",
+  apps: siteConfig.stats?.totalApps ?? 0,
+  categories: siteConfig.stats?.totalCategories ?? 0,
+  stacks: siteConfig.stats?.totalStacks ?? 0,
+  contributors: siteConfig.stats?.totalOwners ?? 0,
+  stars: siteConfig.stats?.totalStars ?? 0,
+};
 
 const title = `${siteConfig.name} — ${siteConfig.tagline}`;
 const description =
-  siteConfig.description ?? `A growing community knowledge site powered by Grove.`;
-
-// ── Render-time helpers ─────────────────────────────────────────
-function detailHrefFor(r: IndexRecord): string {
-  return `/${slug}/${r.slug}`;
-}
-
-const singular = itemLabel();
-const plural = itemLabelPlural();
-const emptyTrending = `No trending ${plural} yet.`;
-const emptyNew = `No new ${plural} yet.`;
-const emptyMature = `No established ${plural} yet.`;
+  siteConfig.description ??
+  `A searchable directory of real ${itemPlural} — organized by stack, category, platform, license, activity, and maturity.`;
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  site={siteConfig}
-  submitHref="/submit"
-  submitLabel={`Submit ${singular}`}
->
+<BaseLayout title={title} description={description} site={siteConfig}>
   <Hero
     name={siteConfig.name}
     tagline={siteConfig.tagline}
     description={description}
-    eyebrow="Curated directory"
-    searchPlaceholder={`Search ${slug}...`}
-    searchHref={`/${slug}`}
+    eyebrow="A directory of curated knowledge"
+    eyebrowBadge="Beta"
     stats={{
-      apps: stats.totalApps,
-      categories: stats.totalCategories,
-      stacks: stats.totalStacks,
-      contributors: stats.totalOwners || undefined,
-      stars: stats.totalStars || undefined,
+      totalApps: stats.apps,
+      totalCategories: stats.categories,
+      totalStacks: stats.stacks,
+      totalOwners: stats.contributors,
+      totalStars: stats.stars,
+      originalRepo: stats.originalRepo,
     }}
-    itemsLabel={plural}
+    itemsLabel={itemPlural}
+    itemLabel={itemSingular}
+    searchHref={`/${slug}`}
+    searchPlaceholder={`Search ${itemPlural}, stacks, categories, licenses, platforms...`}
+    quickFilters={[
+      { label: `Trending ${itemPlural}`, href: `/${slug}?label=hot` },
+      { label: "Recently added", href: `/${slug}?label=new` },
+      { label: "Established", href: `/${slug}?label=mature` },
+    ]}
     ctas={[
-      { label: `Browse ${slug}`, href: `/${slug}`, variant: "primary" },
+      { label: `Browse ${itemPlural}`, href: `/${slug}`, variant: "primary" },
       { label: "About", href: "/about", variant: "outline" },
     ]}
   />
 
   <WhyThisExists />
 
-  <RecordSection
+  <ItemSection
     id="hot"
-    title="Trending"
-    description="The items getting attention right now — high-star repos and recently active codebases."
-    items={hot}
-    hrefFor={detailHrefFor}
-    viewAllHref={`/${slug}?lens=hot`}
-    eyebrow="Hot"
-    emptyLabel={emptyTrending}
+    title="Trending now"
+    description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} gaining stars, activity, or attention recently.`}
+    items={hotList}
+    viewAllHref={`/${slug}?label=hot`}
+    viewAllLabel={`View all trending ${itemPlural}`}
   />
 
-  <RecordSection
+  <ItemSection
     id="new"
     title="Recently added"
-    description="Fresh entries — pushed within the last week or carrying the curated 'new' label."
-    items={newItems}
-    hrefFor={detailHrefFor}
-    viewAllHref={`/${slug}?lens=new`}
-    eyebrow="New"
-    emptyLabel={emptyNew}
+    description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} added to the directory in the last few weeks.`}
+    items={newList}
+    viewAllHref={`/${slug}?label=new`}
+    viewAllLabel={`View all recently added`}
   />
 
-  <RecordSection
+  <ItemSection
     id="mature"
     title="Established"
-    description="Long-running curated items with deep history and stable architecture."
-    items={mature}
-    hrefFor={detailHrefFor}
-    viewAllHref={`/${slug}?lens=mature`}
-    eyebrow="Mature"
-    emptyLabel={emptyMature}
+    description={`Long-running curated ${itemPlural} with strong history, active maintainers, and real-world usage.`}
+    items={matureList}
+    viewAllHref={`/${slug}?label=mature`}
+    viewAllLabel={`View all established`}
   />
 
-  {stacks.length > 0 && (
-    <StackGrid
-      stacks={stacks}
-      pathPrefix={`/${slug}`}
-    />
-  )}
+  <StackGrid stacks={stacks} pathPrefix={`/${slug}`} />
+  <CategoryGrid categories={categories} pathPrefix={`/${slug}`} />
 
-  {categories.length > 0 && (
-    <CategoryGrid
-      categories={categories}
-      pathPrefix={`/${slug}`}
-    />
-  )}
-
-  {hasContributors && (
+  {contributors.length > 0 && (
     <ContributorsGrid
-      contributors={contributors!}
-      total={contributors!.length}
-      viewAllHref={siteConfig.repoUrl || undefined}
-      viewAllLabel="View on GitHub"
+      contributors={contributors}
+      total={contributors.length}
+      viewAllHref={`/contributors`}
+      viewAllLabel="View all contributors"
     />
   )}
 
-  {stats.originalRepo && stats.originalRepo !== siteConfig.repoUrl && (
+  {siteConfig.stats?.originalRepo && (
     <OriginalCollection
-      repoUrl={stats.originalRepo}
+      repoUrl={siteConfig.stats.originalRepo}
       stats={{
-        stars: stats.originalStars,
-        forks: stats.originalForks,
-        contributors: stats.originalContributors,
+        stars: siteConfig.stats.originalStars,
+        forks: siteConfig.stats.originalForks,
+        contributors: siteConfig.stats.originalContributors,
       }}
     />
   )}

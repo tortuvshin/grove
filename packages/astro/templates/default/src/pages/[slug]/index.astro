@@ -26,8 +26,8 @@ import { records, itemLabel, itemLabelPlural } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import AppsIndexRow from "@grove-dev/astro/components/AppsIndexRow.astro";
-import AppsPagination from "@grove-dev/astro/components/AppsPagination.astro";
+import ItemsIndexRow from "@grove-dev/astro/components/ItemsIndexRow.astro";
+import ItemsPagination from "@grove-dev/astro/components/ItemsPagination.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
@@ -172,7 +172,7 @@ function hrefForPage(p: number): string {
           {itemLabel()}{filtered.length === 1 ? "" : "s"}
         </p>
         {pages > 1 && (
-          <AppsPagination
+          <ItemsPagination
             current={page}
             total={pages}
             hrefFor={hrefForPage}
@@ -195,7 +195,7 @@ function hrefForPage(p: number): string {
       ) : (
         <div class="flex flex-col gap-3">
           {pageItems.map((record) => (
-            <AppsIndexRow
+            <ItemsIndexRow
               record={record}
               detailHref={`/${slug}/${record.slug}`}
             />
@@ -205,7 +205,7 @@ function hrefForPage(p: number): string {
 
       {pages > 1 && (
         <div class="mt-6 flex justify-center">
-          <AppsPagination
+          <ItemsPagination
             current={page}
             total={pages}
             hrefFor={hrefForPage}
