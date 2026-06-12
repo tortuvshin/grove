@@ -417,7 +417,9 @@ program
 //          grove run init --no-install  # just scaffold, fix deps manually
 //
 // V1 only supports `astro` because that's the only framework with a
-// real template + peer wiring. `nextjs` and `svelte` are roadmap.
+// real template + peer wiring. `nextjs` and `svelte` are not exposed as
+// scaffold options in V1 — they exist as skeleton packages but their
+// templates have no real pages / components / layouts.
 program
   .command("run")
   .argument(
