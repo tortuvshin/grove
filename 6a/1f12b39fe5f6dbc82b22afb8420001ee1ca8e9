@@ -1,0 +1,21 @@
+packages/astro/src/lib/display.ts
+  s_79084ccde86752::t_dda1aaafce5af0 81-89
+packages/astro/src/layouts/BaseLayout.astro
+  s_79084ccde86752::t_dda1aaafce5af0 50-53,81,85-86,137,205,210
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "6a1f12b39fe5f6dbc82b22afb8420001ee1ca8e9",
+  "prompts": {},
+  "sessions": {
+    "s_79084ccde86752": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd1b-fcb4-7803-8900-38588b51da5e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
