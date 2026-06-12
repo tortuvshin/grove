@@ -9,16 +9,16 @@ const githubUrl = stats.originalRepo;
 // `Contributors` is intentionally not a top-level item — it lives lower
 // on the page. The watchlist was removed in v0.1 (see CHANGELOG).
 //
-// All links point to /apps with a filter rather than in-page anchors.
+// All links point to /items with a filter rather than in-page anchors.
 // This keeps the nav usable from any page (e.g. /about) — anchor links
-// would only work on the home page, leaving /apps and /about with dead
-// links. Category/Stack filters are exposed via the /apps refine panel
+// would only work on the home page, leaving /items and /about with dead
+// links. Category/Stack filters are exposed via the /items refine panel
 // and the home page's "Browse by stack"/"Browse by category" sections.
 const navItems = [
-  { label: "Recently added", href: "/apps?label=new" },
-  { label: "Trending", href: "/apps?label=hot" },
-  { label: "Categories", href: "/apps" },
-  { label: "Stacks", href: "/apps" },
+  { label: "Recently added", href: "/items?label=new" },
+  { label: "Trending", href: "/items?label=hot" },
+  { label: "Categories", href: "/items" },
+  { label: "Stacks", href: "/items" },
   { label: "About", href: "/about" },
 ];
 
@@ -39,7 +39,7 @@ const starsLabel = compact(stats.stars);
         aria-hidden="true"
         class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100"
       ></span>
-      <span>Open Source Apps</span>
+      <span>{site.name}</span>
     </a>
 
     <nav class="hidden flex-1 md:block" aria-label="Primary">
@@ -67,7 +67,7 @@ const starsLabel = compact(stats.stars);
         <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="currentColor">
           <path d="M7.75 2a.75.75 0 0 1 .75.75v3.5h3.5a.75.75 0 0 1 0 1.5h-3.5v3.5a.75.75 0 0 1-1.5 0v-3.5h-3.5a.75.75 0 0 1 0-1.5h3.5v-3.5A.75.75 0 0 1 7.75 2Z"/>
         </svg>
-        <span>Submit app</span>
+        <span>Submit item</span>
       </a>
 
       {/* GitHub button. The star count is rendered as text, not an
@@ -119,7 +119,7 @@ const starsLabel = compact(stats.stars);
 <script>
   // Smooth-scroll for in-page anchor links (Header nav + Hero CTA).
   // Works on any <a href="#…"> that points to an existing element on
-  // the current page. External links (e.g. /about, /apps?…) are skipped
+  // the current page. External links (e.g. /about, /items?…) are skipped
   // because they don't start with "#". Modifier-clicks (Cmd/Ctrl/Shift/
   // middle) let the browser handle the anchor normally so users can
   // open the same section in a new tab.

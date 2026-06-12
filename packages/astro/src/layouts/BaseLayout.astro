@@ -7,7 +7,7 @@
  * OG, JSON-LD) is delegated to <Seo /> so each page can declare what it
  * needs without polluting the layout file.
  */
-import "../../styles/global.css";
+import "../styles.css";
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
 import Seo from "./Seo.astro";
@@ -32,7 +32,7 @@ const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
 
 // Google Analytics 4 — hard-coded Measurement ID for the
-// open-apps.dev.mn property. The gtag snippet is injected on every
+// open-items.dev.mn property. The gtag snippet is injected on every
 // page; if you need to silence it for a local preview, comment the
 // gtag <script> block below out.
 const GA_ID = "G-MB9GWW1LVX";
@@ -55,8 +55,8 @@ const gaEnabled = true;
       <>
         {/* GA4 — gtag.js loader. We send the initial page_view with
             the current path + query string so the dashboard
-            distinguishes /apps?stack=flutter from /apps?stack=react
-            (otherwise they'd all collapse to /apps). */}
+            distinguishes /items?stack=flutter from /items?stack=react
+            (otherwise they'd all collapse to /items). */}
         <script
           is:inline
           async
@@ -85,7 +85,7 @@ const gaEnabled = true;
     <slot name="head" />
     <script is:inline>
       (function () {
-        var STORAGE_KEY = "open-apps-theme";
+        var STORAGE_KEY = "open-items-theme";
         function getMode() {
           var stored = localStorage.getItem(STORAGE_KEY);
           if (stored === "light" || stored === "dark" || stored === "system") return stored;
@@ -125,7 +125,7 @@ const gaEnabled = true;
       <script is:inline define:vars={{ GA_ID }}>
         // Mirror in-page SPA navigation (history.pushState /
         // replaceState) into GA4 page_view events so filter
-        // changes on /apps show up as separate page views in
+        // changes on /items show up as separate page views in
         // the dashboard instead of one inflated session.
         (function () {
           var last = location.pathname + location.search;
@@ -169,7 +169,7 @@ const gaEnabled = true;
             if (!name) return;
             var params = {
               source: el.getAttribute("data-event-source") || undefined,
-              app_slug: el.getAttribute("data-event-app") || undefined,
+              app_slug: el.getAttribute("data-event-item") || undefined,
               channel: el.getAttribute("data-event-channel") || undefined,
               link_url: el.getAttribute("href") || undefined,
             };

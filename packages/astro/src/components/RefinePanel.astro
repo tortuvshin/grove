@@ -11,11 +11,11 @@
  * repeated key. Empty values are dropped, so the URL stays clean.
  *
  * Generic: takes a `facets` map of `{ value, label, count }[]` per
- * dimension and an `initial` `AppsFilters` for preselecting the
+ * dimension and an `initial` `ItemsFilters` for preselecting the
  * current URL state.
  */
 
-import type { AppsFilters } from "../lib/search";
+import type { ItemsFilters } from "../lib/search";
 import { SORT_OPTIONS } from "../lib/search";
 
 interface FacetValue {
@@ -34,7 +34,7 @@ interface Facets {
 
 interface Props {
   facets: Facets;
-  initial: AppsFilters;
+  initial: ItemsFilters;
   pathPrefix?: string;
   class?: string;
   /** Hide specific facets. Default: all shown. */

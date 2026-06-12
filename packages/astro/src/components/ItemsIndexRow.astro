@@ -1,5 +1,5 @@
 ---
-import type { OpenSourceApp } from "../../data/types";
+import type { Resource } from "../../data/types";
 import Icon from "../icons/Icon.astro";
 import {
   getOwnerAndRepoFromRepoUrl,
@@ -9,20 +9,20 @@ import { formatStars, formatRelative } from "../../lib/format";
 import { statusDisplay } from "../../lib/display";
 
 interface Props {
-  app: OpenSourceApp;
+  item: Resource;
 }
 
-const { app } = Astro.props;
+const { item } = Astro.props;
 
-const { owner, repo } = getOwnerAndRepoFromRepoUrl(app.repoUrl);
-const avatar = app.logoUrl ?? getOwnerAvatarUrl(owner, 80);
+const { owner, repo } = getOwnerAndRepoFromRepoUrl(item.repoUrl);
+const avatar = item.logoUrl ?? getOwnerAvatarUrl(owner, 80);
 
 const isCurated = Boolean(
-  app.bestFor?.length || app.whyListed?.length || app.caveats?.length || app.scores,
+  item.bestFor?.length || item.whyListed?.length || item.caveats?.length || item.scores,
 );
 
 // Initials for placeholder logo.
-const initials = app.name
+const initials = item.name
   .split(/\s+/)
   .map((w) => w[0])
   .filter(Boolean)
@@ -30,57 +30,57 @@ const initials = app.name
   .join("")
   .toUpperCase();
 
-const allStacks = [app.stack, ...(app.stacks ?? [])].filter(Boolean);
+const allStacks = [item.stack, ...(item.stacks ?? [])].filter(Boolean);
 const visibleStacks = allStacks.slice(0, 4);
 const stackOverflow = allStacks.length - visibleStacks.length;
 
-const visiblePlatforms = app.platforms.slice(0, 4);
-const platformOverflow = app.platforms.length - visiblePlatforms.length;
+const visiblePlatforms = item.platforms.slice(0, 4);
+const platformOverflow = item.platforms.length - visiblePlatforms.length;
 
-const starsLabel = formatStars(app.stars);
-const updatedLabel = formatRelative(app.lastCommitAt);
+const starsLabel = formatStars(item.stars);
+const updatedLabel = formatRelative(item.lastCommitAt);
 
-const detailHref = `/apps/${app.slug}`;
-const repoHref = app.repoUrl;
-const statusText = statusDisplay(app.status);
+const detailHref = `/items/${item.slug}`;
+const repoHref = item.repoUrl;
+const statusText = statusDisplay(item.status);
 const statusAttr = statusText.toLowerCase();
 ---
 
 <article
-  class="apps-row group relative flex flex-col gap-3 rounded-lg border border-ink-200 bg-white p-4 transition-colors hover:border-ink-300 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_-2px_rgba(0,0,0,0.06)] dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-700 dark:hover:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_4px_12px_-2px_rgba(0,0,0,0.3)]"
-  data-slug={app.slug}
-  data-stack={app.stack}
+  class="items-row group relative flex flex-col gap-3 rounded-lg border border-ink-200 bg-white p-4 transition-colors hover:border-ink-300 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_-2px_rgba(0,0,0,0.06)] dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-700 dark:hover:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_4px_12px_-2px_rgba(0,0,0,0.3)]"
+  data-slug={item.slug}
+  data-stack={item.stack}
   data-stacks={allStacks.join("|")}
-  data-category={app.category ?? ""}
-  data-platforms={(app.platforms ?? []).join("|")}
-  data-labels={(app.labels ?? []).join("|")}
-  data-status={app.status ?? ""}
+  data-category={item.category ?? ""}
+  data-platforms={(item.platforms ?? []).join("|")}
+  data-labels={(item.labels ?? []).join("|")}
+  data-status={item.status ?? ""}
   data-status-display={statusAttr}
-  data-license={app.license ?? ""}
-  data-license-display={(app.license ?? "").toLowerCase()}
-  data-stars={app.stars ?? 0}
-  data-updated={app.lastCommitAt ?? ""}
-  data-name={app.name.toLowerCase()}
+  data-license={item.license ?? ""}
+  data-license-display={(item.license ?? "").toLowerCase()}
+  data-stars={item.stars ?? 0}
+  data-updated={item.lastCommitAt ?? ""}
+  data-name={item.name.toLowerCase()}
   data-owner={(owner ?? "").toLowerCase()}
-  data-q={(app.description ?? "").toLowerCase()}
-  data-tags={(app.tags ?? []).join("|").toLowerCase()}
-  data-backend={(app.backend ?? "").toLowerCase()}
-  data-architecture={(app.architecture ?? "").toLowerCase()}
-  data-state-mgmt={(app.stateManagement ?? "").toLowerCase()}
-  data-best-for={(app.bestFor ?? []).join("|").toLowerCase()}
-  data-why-listed={(app.whyListed ?? []).join("|").toLowerCase()}
+  data-q={(item.description ?? "").toLowerCase()}
+  data-tags={(item.tags ?? []).join("|").toLowerCase()}
+  data-backend={(item.backend ?? "").toLowerCase()}
+  data-architecture={(item.architecture ?? "").toLowerCase()}
+  data-state-mgmt={(item.stateManagement ?? "").toLowerCase()}
+  data-best-for={(item.bestFor ?? []).join("|").toLowerCase()}
+  data-why-listed={(item.whyListed ?? []).join("|").toLowerCase()}
 >
   {/* Header: avatar + name + curated mark */}
   <header class="flex items-start gap-3">
     <a
       href={detailHref}
       class="relative z-10 flex shrink-0"
-      aria-label={`Open ${app.name} details`}
+      aria-label={`Open ${item.name} details`}
     >
       {avatar ? (
         <img
           src={avatar}
-          alt={`${app.name} avatar`}
+          alt={`${item.name} avatar`}
           width="44"
           height="44"
           loading="lazy"
@@ -104,7 +104,7 @@ const statusAttr = statusText.toLowerCase();
             href={detailHref}
             class="relative z-10 text-inherit no-underline hover:underline"
           >
-            {app.name}
+            {item.name}
           </a>
         </h3>
         {isCurated && (
@@ -127,7 +127,7 @@ const statusAttr = statusText.toLowerCase();
             rel="noopener noreferrer"
             data-event="external_repo_click"
             data-event-source="row_owner"
-            data-event-app={app.slug}
+            data-event-item = {item.slug}
             class="relative z-10 font-mono hover:text-ink-900 dark:hover:text-ink-100"
           >
             <span class="text-ink-400 dark:text-ink-500">@</span>{owner}
@@ -135,8 +135,8 @@ const statusAttr = statusText.toLowerCase();
           </a>
         )}
         {owner && <span class="text-ink-300 dark:text-ink-700">·</span>}
-        <span>{app.category}</span>
-        {app.status && (
+        <span>{item.category}</span>
+        {item.status && (
           <>
             <span class="text-ink-300 dark:text-ink-700">·</span>
             <span>{statusText}</span>
@@ -147,13 +147,13 @@ const statusAttr = statusText.toLowerCase();
   </header>
 
   {/* Description */}
-  <p class="apps-row-desc m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-300">
-    {app.description}
+  <p class="items-row-desc m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-300">
+    {item.description}
   </p>
 
   {/* High-priority metadata row: stars · updated · license — the
       "is this alive and usable?" answers at a glance. */}
-  <dl class="apps-row-meta grid grid-cols-3 gap-x-3 text-2xs">
+  <dl class="items-row-meta grid grid-cols-3 gap-x-3 text-2xs">
     {starsLabel !== null && (
       <div class="flex items-baseline gap-1.5">
         <dt class="sr-only">Stars</dt>
@@ -167,36 +167,36 @@ const statusAttr = statusText.toLowerCase();
     )}
     <div class="flex items-baseline gap-1.5">
       <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Updated</dt>
-      <dd class="font-mono text-ink-700 dark:text-ink-300" title={app.lastCommitAt ?? ""}>{updatedLabel}</dd>
+      <dd class="font-mono text-ink-700 dark:text-ink-300" title={item.lastCommitAt ?? ""}>{updatedLabel}</dd>
     </div>
     <div class="flex items-baseline gap-1.5">
       <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">License</dt>
-      <dd class="font-mono text-ink-700 dark:text-ink-300">{app.license ?? "—"}</dd>
+      <dd class="font-mono text-ink-700 dark:text-ink-300">{item.license ?? "—"}</dd>
     </div>
   </dl>
 
   {/* Medium-priority metadata: platforms + stacks. */}
-  <div class="apps-row-chips flex flex-col gap-1.5">
+  <div class="items-row-chips flex flex-col gap-1.5">
     <div class="flex flex-wrap items-center gap-1.5">
       {visiblePlatforms.map((p) => (
-        <span class="apps-chip inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300">
+        <span class="items-chip inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300">
           <Icon name={p} category="platform" size={11} />
           <span>{p}</span>
         </span>
       ))}
       {platformOverflow > 0 && (
-        <span class="apps-chip text-2xs text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
+        <span class="items-chip text-2xs text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
       )}
     </div>
     <div class="flex flex-wrap items-center gap-1.5">
       {visibleStacks.map((s) => (
-        <span class="apps-chip inline-flex items-center gap-1 rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">
+        <span class="items-chip inline-flex items-center gap-1 rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">
           <Icon name={s} category="stack" size={11} />
           <span>{s}</span>
         </span>
       ))}
       {stackOverflow > 0 && (
-        <span class="apps-chip text-2xs text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
+        <span class="items-chip text-2xs text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
       )}
     </div>
   </div>
@@ -219,7 +219,7 @@ const statusAttr = statusText.toLowerCase();
       rel="noopener noreferrer"
       data-event="external_repo_click"
       data-event-source="row_github"
-      data-event-app={app.slug}
+      data-event-item = {item.slug}
       class="relative z-10 inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-2 py-1 font-medium text-ink-700 transition-colors hover:border-ink-300 hover:bg-ink-50 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:hover:bg-ink-900/60"
     >
       <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor">

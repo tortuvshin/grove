@@ -13,7 +13,7 @@
  *   - Twitter Card (twitter:*) for X / Twitter
  *   - JSON-LD WebSite + Organization on every page
  *   - JSON-LD SoftwareSourceCode (or custom) when `jsonLd` is provided
- *     (e.g. on /apps/[slug] for the per-app structured data)
+ *     (e.g. on /items/[slug] for the per-item structured data)
  *
  * Noindex is opt-in via the `noindex` prop. By default everything is
  * indexable; the only noindex target today is the thin /submit wrapper.
@@ -28,7 +28,7 @@ interface Props {
   type?: "website" | "article" | "profile";
   /** Set true to add noindex,nofollow. */
   noindex?: boolean;
-  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on app pages. */
+  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on item pages. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -41,7 +41,7 @@ const {
   jsonLd,
 } = Astro.props;
 
-const site = Astro.site ?? new URL("https://open-apps.dev");
+const site = Astro.site ?? new URL("https://open-items.dev");
 const canonical = new URL(Astro.url.pathname, site).toString();
 const ogImage = new URL(image, site).toString();
 
@@ -65,7 +65,7 @@ const websiteLd = {
   inLanguage: "en",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${site.toString().replace(/\/$/, "")}/apps?q={search_term_string}`,
+    target: `${site.toString().replace(/\/$/, "")}/items?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };
@@ -76,7 +76,7 @@ const organizationLd = {
   name: "Open Source Apps",
   url: site.toString().replace(/\/$/, ""),
   logo: new URL("/og-image.svg", site).toString(),
-  sameAs: ["https://github.com/tortuvshin/open-apps"],
+  sameAs: ["https://github.com/tortuvshin/open-items"],
 };
 ---
 
@@ -94,7 +94,7 @@ const organizationLd = {
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Open Source Apps — a directory of real open-source apps" />
+<meta property="og:image:alt" content="Open Source Apps — a directory of real open-source items" />
 <meta property="og:site_name" content="Open Source Apps" />
 <meta property="og:locale" content="en" />
 
@@ -103,13 +103,13 @@ const organizationLd = {
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={shortDescription} />
 <meta name="twitter:image" content={ogImage} />
-<meta name="twitter:image:alt" content="Open Source Apps — a directory of real open-source apps" />
+<meta name="twitter:image:alt" content="Open Source Apps — a directory of real open-source items" />
 
 <!-- JSON-LD: site-wide identity -->
 <script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
 <script is:inline type="application/ld+json" set:html={JSON.stringify(organizationLd)} />
 
-<!-- JSON-LD: per-page (SoftwareSourceCode for /apps/[slug], etc.) -->
+<!-- JSON-LD: per-page (SoftwareSourceCode for /items/[slug], etc.) -->
 {jsonLd && (
   <script
     is:inline
