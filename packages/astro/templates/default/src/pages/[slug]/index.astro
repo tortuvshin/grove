@@ -19,7 +19,6 @@ import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
 import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
-import Pagination from "@grove-dev/astro/components/Pagination.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
@@ -64,6 +63,34 @@ const pages = totalPages(sorted.length);
 const page = Math.min(requestedPage, pages);
 const visibleItems = paginate(sorted, page);
 const chips = activeFilterChips(filters);
+const clientItems = items.map((item) => ({
+  slug: item.slug,
+  name: item.kind === "resource" ? item.title : item.name,
+  description: item.description,
+  category: item.category,
+  tags: item.tags,
+  labels: item.curation?.labels ?? [],
+  lenses: item.curation?.lenses ?? [],
+  reviewed: Boolean(item.curation?.reviewed),
+  addedAt: item.curation?.reviewedAt ?? "",
+  stacks: item.kind === "project" ? [item.stack, ...item.stacks].filter(Boolean) : [],
+  platforms: item.kind === "project" ? item.platforms : [],
+  license: item.kind === "project" ? item.github?.license ?? "" : "",
+  status: item.kind === "project" ? item.health?.status ?? "" : "",
+  stars: item.kind === "project" ? item.github?.stars ?? 0 : 0,
+  updatedAt:
+    item.kind === "project"
+      ? item.github?.pushedAt ?? ""
+      : item.kind === "resource"
+        ? item.publishedAt ?? ""
+        : "",
+  extra:
+    item.kind === "project"
+      ? [item.repoUrl, item.projectType, item.difficulty, item.codebaseSize, ...item.bestFor, ...item.whyListed]
+      : item.kind === "resource"
+        ? [item.type, item.topic, item.author ?? ""]
+        : [item.type, item.location ?? "", item.parent ?? ""],
+}));
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
@@ -208,14 +235,19 @@ function hrefForRemove(key: keyof ItemsFilters, value: string): string {
       </header>
       <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p class="m-0 text-2xs text-ink-500 dark:text-ink-400">
-          <span class="font-mono text-ink-900 dark:text-ink-100">
+          <span id="results-count" class="font-mono text-ink-900 dark:text-ink-100">
             {sorted.length} {sorted.length === 1 ? itemLabel() : itemLabelPlural()}
           </span>
-          <span>{` · sorted by ${sortDisplay(sort)}`}</span>
-          {pages > 1 && <span>{` · page ${page} of ${pages}`}</span>}
+          <span id="results-sort">{` · sorted by ${sortDisplay(sort)}`}</span>
+          <span id="results-page">{pages > 1 ? ` · page ${page} of ${pages}` : ""}</span>
         </p>
-        {chips.length > 0 && (
-          <div class="flex flex-wrap items-center gap-1.5" aria-label="Active filters">
+        <div
+          id="active-filters"
+          class:list={["flex flex-wrap items-center gap-1.5", chips.length === 0 && "hidden"]}
+          aria-label="Active filters"
+        >
+          {chips.length > 0 && (
+            <>
             {chips.map((chip) => (
               <a
                 href={hrefForRemove(chip.key, chip.value)}
@@ -227,24 +259,218 @@ function hrefForRemove(key: keyof ItemsFilters, value: string): string {
             <a href={`/${slug}`} class="text-2xs font-medium text-ink-500 hover:text-ink-900">
               Clear all
             </a>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
-      {visibleItems.length > 0 ? (
-        <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleItems.map((item) => (
-            <li class="m-0 p-0">
+      <ul id="results-list" class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        {sorted.map((item) => (
+            <li class="m-0 p-0" data-item-slug={item.slug}>
               <ItemCard item={item} pathPrefix={`/${slug}`} />
             </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="m-0 text-sm text-ink-500 dark:text-ink-400">
+        ))}
+      </ul>
+      <div id="empty-state" class:list={["py-12 text-center", sorted.length > 0 && "hidden"]}>
+        <p class="m-0 text-sm font-medium text-ink-700 dark:text-ink-200">
           {`No ${itemLabel()}s match these filters.`}
         </p>
-      )}
-      <Pagination current={page} total={pages} hrefFor={hrefForPage} class="mt-8" />
+        <a href={`/${slug}`} class="grove-btn grove-btn-outline mt-4">Clear filters</a>
+      </div>
+      <nav id="client-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination"></nav>
     </div>
   </section>
+
+  <script is:inline define:vars={{ clientItems, slug, itemSingular: itemLabel(), itemPlural: itemLabelPlural() }}>
+    (function () {
+      var PAGE_SIZE = 20;
+      var list = document.getElementById("results-list");
+      if (!list) return;
+
+      function values(params, key) {
+        return params.getAll(key).filter(Boolean);
+      }
+
+      function display(value) {
+        return String(value || "")
+          .split(/[-_]+/)
+          .filter(Boolean)
+          .map(function (part) { return part.charAt(0).toUpperCase() + part.slice(1); })
+          .join(" ");
+      }
+
+      function sortLabel(value) {
+        return {
+          "recently-updated": "Recently updated",
+          "most-starred": "Most starred",
+          "recently-added": "Recently added",
+          "best-overall": "Best overall",
+          alphabetical: "Alphabetical",
+        }[value] || "Recently updated";
+      }
+
+      function pageHref(params, page) {
+        var next = new URLSearchParams(params);
+        if (page <= 1) next.delete("page");
+        else next.set("page", String(page));
+        var query = next.toString();
+        return query ? "/" + slug + "?" + query : "/" + slug;
+      }
+
+      function apply() {
+        var params = new URLSearchParams(location.search);
+        var query = (params.get("q") || "").trim().toLowerCase();
+        var stacks = values(params, "stack");
+        var platforms = values(params, "platform");
+        var categories = values(params, "category");
+        var labels = values(params, "label");
+        var licenses = values(params, "license");
+        var statuses = (params.get("status") || "").split(",").filter(Boolean);
+        var lens = params.get("lens") || "";
+        var sort = params.get("sort") || "recently-updated";
+        var page = Math.max(1, Number(params.get("page")) || 1);
+
+        var filtered = clientItems.filter(function (item) {
+          var haystack = [
+            item.name,
+            item.description,
+            item.category,
+            item.tags,
+            item.stacks,
+            item.platforms,
+            item.license,
+            item.status,
+            item.extra,
+          ].flat(3).join(" ").toLowerCase();
+          if (query && !haystack.includes(query)) return false;
+          if (stacks.length && !item.stacks.some(function (value) { return stacks.includes(value); })) return false;
+          if (platforms.length && !item.platforms.some(function (value) { return platforms.includes(value); })) return false;
+          if (categories.length && !categories.includes(item.category)) return false;
+          if (labels.length && !item.labels.some(function (value) { return labels.includes(value); })) return false;
+          if (licenses.length && !licenses.includes(item.license)) return false;
+          if (statuses.length && !statuses.includes(item.status)) return false;
+          if (lens && !item.lenses.includes(lens)) return false;
+          return true;
+        });
+
+        filtered.sort(function (a, b) {
+          if (sort === "most-starred") return b.stars - a.stars;
+          if (sort === "recently-added") return Date.parse(b.addedAt || 0) - Date.parse(a.addedAt || 0);
+          if (sort === "best-overall") return Number(b.reviewed) - Number(a.reviewed) || b.stars - a.stars;
+          if (sort === "alphabetical") return a.name.localeCompare(b.name);
+          return Date.parse(b.updatedAt || 0) - Date.parse(a.updatedAt || 0);
+        });
+
+        var totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        page = Math.min(page, totalPages);
+        var visible = new Set(
+          filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(function (item) { return item.slug; }),
+        );
+        var order = new Map(filtered.map(function (item, index) { return [item.slug, index]; }));
+        Array.from(list.children)
+          .sort(function (a, b) {
+            return (order.get(a.dataset.itemSlug) ?? Number.MAX_SAFE_INTEGER) -
+              (order.get(b.dataset.itemSlug) ?? Number.MAX_SAFE_INTEGER);
+          })
+          .forEach(function (node) {
+            node.hidden = !visible.has(node.dataset.itemSlug);
+            list.appendChild(node);
+          });
+
+        var count = document.getElementById("results-count");
+        if (count) count.textContent = filtered.length + " " + (filtered.length === 1 ? itemSingular : itemPlural);
+        var sortText = document.getElementById("results-sort");
+        if (sortText) sortText.textContent = " · sorted by " + sortLabel(sort);
+        var pageText = document.getElementById("results-page");
+        if (pageText) pageText.textContent = totalPages > 1 ? " · page " + page + " of " + totalPages : "";
+        document.getElementById("empty-state")?.classList.toggle("hidden", filtered.length > 0);
+
+        var search = document.querySelector('input[name="q"]');
+        if (search) search.value = params.get("q") || "";
+        document.querySelectorAll("select").forEach(function (select) {
+          var selected = values(params, select.name);
+          if (select.name === "sort") selected = [sort];
+          Array.from(select.options).forEach(function (option) {
+            option.selected = selected.includes(option.value);
+          });
+        });
+
+        var pager = document.getElementById("client-pagination");
+        if (pager) {
+          pager.innerHTML = "";
+          if (totalPages > 1) {
+            for (var number = 1; number <= totalPages; number += 1) {
+              var link = document.createElement("a");
+              link.href = pageHref(params, number);
+              link.textContent = String(number);
+              link.className = "grove-btn min-w-9 px-2 py-1.5 text-2xs " +
+                (number === page ? "grove-btn-primary" : "grove-btn-outline");
+              if (number === page) link.setAttribute("aria-current", "page");
+              pager.appendChild(link);
+            }
+          }
+        }
+
+        var chipHost = document.getElementById("active-filters");
+        if (chipHost) {
+          chipHost.innerHTML = "";
+          var specs = [
+            ["q", params.get("q") ? "“" + params.get("q") + "”" : ""],
+            ...stacks.map(function (v) { return ["stack", "Stack: " + v]; }),
+            ...platforms.map(function (v) { return ["platform", "Platform: " + v]; }),
+            ...categories.map(function (v) { return ["category", "Category: " + v]; }),
+            ...labels.map(function (v) { return ["label", display(v)]; }),
+            ...licenses.map(function (v) { return ["license", "License: " + v]; }),
+            ...(lens ? [["lens", display(lens)]] : []),
+            ...statuses.map(function (v) { return ["status", display(v)]; }),
+          ].filter(function (entry) { return entry[1]; });
+          specs.forEach(function (entry) {
+            var key = entry[0];
+            var chip = document.createElement("a");
+            var next = new URLSearchParams(params);
+            if (key === "status") {
+              var remaining = statuses.filter(function (value) { return display(value) !== entry[1]; });
+              next.delete("status");
+              if (remaining.length) next.set("status", remaining.join(","));
+            } else {
+              next.delete(key);
+            }
+            next.delete("page");
+            chip.href = next.toString() ? "/" + slug + "?" + next : "/" + slug;
+            chip.className = "grove-badge transition-colors hover:border-ink-400";
+            chip.textContent = entry[1] + " x";
+            chipHost.appendChild(chip);
+          });
+          if (specs.length) {
+            var clear = document.createElement("a");
+            clear.href = "/" + slug;
+            clear.className = "text-2xs font-medium text-ink-500 hover:text-ink-900";
+            clear.textContent = "Clear all";
+            chipHost.appendChild(clear);
+          }
+          chipHost.classList.toggle("hidden", specs.length === 0);
+        }
+      }
+
+      document.querySelectorAll("form").forEach(function (form) {
+        form.addEventListener("submit", function (event) {
+          if (!form.closest("main")) return;
+          event.preventDefault();
+          var params = new URLSearchParams(location.search);
+          form.querySelectorAll("input, select").forEach(function (field) {
+            if (!field.name) return;
+            params.delete(field.name);
+            if (field instanceof HTMLSelectElement && field.multiple) {
+              Array.from(field.selectedOptions).forEach(function (option) { params.append(field.name, option.value); });
+            } else if (field.value) {
+              params.set(field.name, field.value);
+            }
+          });
+          params.delete("page");
+          location.assign(params.toString() ? "?" + params : location.pathname);
+        });
+      });
+      apply();
+    })();
+  </script>
 </BaseLayout>
