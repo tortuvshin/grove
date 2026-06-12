@@ -1,9 +1,9 @@
 ---
 /**
- * Detail page — one record at a time.
+ *  Detail page — one record at a time.
  *
- * Layout (top to bottom):
- *   1. Breadcrumb                    — back to /projects (or blueprint slug)
+ *  Layout (top to bottom):
+ *   1. Breadcrumb                    — back to the directory index
  *   2. AppCard-style header          — logo + name + owner + description + CTAs
  *   3. ScoreBars                     — 5-dimension + overall score block
  *   4. BestFor / WhyListed / Caveats — 3-column curation grid
@@ -14,11 +14,20 @@
  *                                      body) when present
  *   9. JSON-LD SoftwareSourceCode    — for SEO + AI crawlers
  *
- * The page is generic across the 3 record kinds (project / resource
- * / entity) — non-project fields simply render nothing.
+ *  Generic across the 3 record kinds (project / resource / entity) —
+ *  non-project fields simply render nothing. The URL is dynamic on
+ *  both `[slug]` (blueprint route, e.g. `projects`/`resources`/
+ *  `entities`) and `[itemSlug]` (the record slug), so a single page
+ *  file serves every blueprint and every record.
  */
 import siteConfig from "../../../data/generated/site-config.json";
-import { fullRecords, projectBySlug, resourceBySlug, entityBySlug, indexSlug } from "../../data/records";
+import {
+  fullRecords,
+  projectBySlug,
+  resourceBySlug,
+  entityBySlug,
+  indexSlug,
+} from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Icon from "@grove-dev/astro/components/Icon.astro";
 import ScoreBars from "@grove-dev/astro/components/ScoreBars.astro";
@@ -30,14 +39,25 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { ProjectRecord } from "@grove-dev/core";
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
+  // Walk every record and emit a path for it. The directory slug
+  // (`projects` / `resources` / `entities`) is taken from the
+  // blueprint config so a `resource-hub` blueprint produces
+  // `/resources/<slug>` URLs without any per-blueprint fork.
+  let dirSlug = "projects";
+  try {
+    const raw = await import("../../../data/generated/site-config.json");
+    dirSlug = raw.default?.blueprintConfig?.routeSlug ?? "projects";
+  } catch {
+    /* not present */
+  }
   return fullRecords.map((record) => ({
-    params: { slug: record.slug },
+    params: { slug: dirSlug, itemSlug: record.slug },
   }));
 }
 
-const slug = indexSlug();
-const recordSlug = Astro.params.slug ?? "";
+const slug = Astro.params.slug ?? indexSlug();
+const recordSlug = Astro.params.itemSlug ?? "";
 const project = projectBySlug(recordSlug);
 const resource = resourceBySlug(recordSlug);
 const entity = entityBySlug(recordSlug);
