@@ -18,7 +18,7 @@ import { items, itemLabel, itemLabelPlural } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import ItemSection from "@grove-dev/astro/components/ItemSection.astro";
+import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import { countByCategory, countByStack } from "@grove-dev/astro";
@@ -105,14 +105,27 @@ const stackEntries = [...countByStack(items as Parameters<typeof countByStack>[0
 
   <section class="grove-section-tight">
     <div class="grove-container-wide mx-auto px-5 sm:px-7">
-      <ItemSection
-        id="all"
-        title={`All ${itemLabelPlural()}`}
-        description={`Every ${itemLabel()} in the directory, ordered alphabetically.`}
-        items={items as Parameters<typeof ItemSection>[0]["items"]}
-        viewAllHref={`/${slug}`}
-        viewAllLabel="Browse all"
-      />
+      <header class="mb-6">
+        <h2 class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {`All ${itemLabelPlural()}`}
+        </h2>
+        <p class="m-0 mt-1 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
+          {`Every ${itemLabel()} in the directory.`}
+        </p>
+      </header>
+      {items.length > 0 ? (
+        <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => (
+            <li class="m-0 p-0">
+              <ItemCard item={item as Parameters<typeof ItemCard>[0]["item"]} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="m-0 text-sm text-ink-500 dark:text-ink-400">
+          {`No ${itemLabel()}s match these filters.`}
+        </p>
+      )}
     </div>
   </section>
 </BaseLayout>
