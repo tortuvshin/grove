@@ -49,149 +49,153 @@ const {
   hide = [],
 } = Astro.props;
 
-const baseAction = pathPrefix.replace(/\/$/, "") || "/";
+interface FilterGroup {
+  label: string;
+  filterKey: "stacks" | "platforms" | "categories" | "licenses";
+  options: FacetValue[];
+  initial: string[];
+  single?: boolean;
+}
 
-const initialStacks = new Set(initial.stacks ?? []);
-const initialPlatforms = new Set(initial.platforms ?? []);
-const initialCategories = new Set(initial.categories ?? []);
-const initialLicenses = new Set(initial.licenses ?? []);
-const initialSort = initial.sort ?? "";
+const groups: FilterGroup[] = [
+  { label: "Stack", filterKey: "stacks", options: facets.stacks ?? [], initial: initial.stacks ?? [] },
+  { label: "Platform", filterKey: "platforms", options: facets.platforms ?? [], initial: initial.platforms ?? [] },
+  { label: "Category", filterKey: "categories", options: facets.categories ?? [], initial: initial.categories ?? [] },
+  { label: "License", filterKey: "licenses", options: facets.licenses ?? [], initial: initial.licenses ?? [], single: true },
+].filter((group) => {
+  const singular = group.filterKey.slice(0, -1) as "stack" | "platform" | "category" | "license";
+  return !hide.includes(singular) && group.options.length > 0;
+});
+
+function pretty(value: string): string {
+  return value
+    .split(/[-_]/)
+    .map((part) => part ? part[0].toUpperCase() + part.slice(1) : part)
+    .join(" ");
+}
+
+function triggerLabel(group: FilterGroup): string {
+  if (group.initial.length === 0) return `${group.label}: Any`;
+  if (group.initial.length === 1) return `${group.label}: ${pretty(group.initial[0])}`;
+  return `${group.label}: ${group.initial.length} selected`;
+}
 ---
 
-<form
-  method="get"
-  action={baseAction}
-  class:list={[
-    "grove-refine-panel flex flex-wrap items-end gap-3",
-    className,
-  ]}
-  data-grove-refine-panel
->
-  {initial.q && <input type="hidden" name="q" value={initial.q} />}
-  {initial.lens && <input type="hidden" name="lens" value={initial.lens} />}
-
-  {!hide.includes("stack") && (facets.stacks?.length ?? 0) > 0 && (
-    <label class="flex flex-col gap-1">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Stack
-      </span>
-      <select
-        name="stack"
-        multiple
-        size="1"
-        onchange="this.form?.requestSubmit()"
-        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
-      >
-        {facets.stacks!.map((f) => (
-          <option
-            value={f.value}
-            selected={initialStacks.has(f.value)}
+<section class={className}>
+  <div class="flex flex-wrap items-center gap-2" role="toolbar" aria-label="Filter items">
+    {groups.map((group) => {
+      const active = group.initial.length > 0;
+      const popoverId = `filter-popover-${group.filterKey}`;
+      return (
+        <div class="grove-filter relative" data-filter-group-key={group.filterKey} data-filter-single={group.single ? "true" : "false">
+          <button
+            type="button"
+            class:list={[
+              "grove-filter-trigger inline-flex h-9 items-center gap-1.5 rounded-md border px-3 text-[0.8125rem] font-medium transition-colors",
+              active
+                ? "border-ink-900 bg-ink-900 text-white dark:border-ink-100 dark:bg-ink-100 dark:text-ink-900"
+                : "border-ink-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-ink-50 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:hover:bg-ink-900/60",
+            ]}
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls={popoverId}
           >
-            {f.label ?? f.value}
-            {typeof f.count === "number" ? ` (${f.count})` : ""}
-          </option>
-        ))}
-      </select>
-    </label>
-  )}
+            <span>{triggerLabel(group)}</span>
+            <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="opacity-70">
+              <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"/>
+            </svg>
+          </button>
+          <div id={popoverId} class="grove-filter-popover absolute left-0 top-full z-40 mt-1 hidden w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-ink-200 bg-white p-1.5 shadow-lg dark:border-ink-800 dark:bg-ink-950" role="listbox" hidden>
+            <ul class="m-0 flex max-h-72 list-none flex-col gap-0.5 overflow-y-auto p-0">
+              {group.options.map((option) => {
+                const checked = group.initial.includes(option.value);
+                return (
+                  <li>
+                    <label class="flex cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-1.5 text-[0.8125rem] text-ink-700 transition-colors hover:bg-ink-50 dark:text-ink-300 dark:hover:bg-ink-900/60">
+                      <span class="flex min-w-0 items-center gap-2">
+                        <input type={group.single ? "radio" : "checkbox"} class="grove-filter-input h-3.5 w-3.5 shrink-0 cursor-pointer accent-ink-900 dark:accent-ink-100" data-filter-key={group.filterKey} data-filter-value={option.value} checked={checked} />
+                        <span class="truncate">{option.label ?? pretty(option.value)}</span>
+                      </span>
+                      <span class="font-mono text-2xs tabular-nums text-ink-500 dark:text-ink-400">{option.count ?? 0}</span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            <div class="mt-1 flex items-center justify-between border-t border-ink-100 px-2 pt-1.5 dark:border-ink-900">
+              <button type="button" class="grove-filter-clear text-2xs font-medium text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100" hidden={!active}>Clear {group.label.toLowerCase()}</button>
+              <button type="button" class="grove-filter-apply ml-auto rounded-md bg-ink-900 px-2.5 py-1 text-2xs font-medium text-white dark:bg-ink-100 dark:text-ink-900">Apply</button>
+            </div>
+          </div>
+        </div>
+      );
+    })}
 
-  {!hide.includes("platform") && (facets.platforms?.length ?? 0) > 0 && (
-    <label class="flex flex-col gap-1">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Platform
-      </span>
-      <select
-        name="platform"
-        multiple
-        size="1"
-        onchange="this.form?.requestSubmit()"
-        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
-      >
-        {facets.platforms!.map((f) => (
-          <option
-            value={f.value}
-            selected={initialPlatforms.has(f.value)}
-          >
-            {f.label ?? f.value}
-            {typeof f.count === "number" ? ` (${f.count})` : ""}
-          </option>
-        ))}
-      </select>
-    </label>
-  )}
+    {!hide.includes("sort") && (
+      <label class="relative">
+        <span class="sr-only">Sort items</span>
+        <select name="sort" class="h-9 cursor-pointer appearance-none rounded-md border border-ink-200 bg-white py-1.5 pl-3 pr-8 text-[0.8125rem] font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300">
+          {SORT_OPTIONS.map((option) => <option value={option.value} selected={(initial.sort ?? "recently-updated") === option.value}>{option.label}</option>)}
+        </select>
+        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400" fill="currentColor">
+          <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"/>
+        </svg>
+      </label>
+    )}
+  </div>
+</section>
 
-  {!hide.includes("category") && (facets.categories?.length ?? 0) > 0 && (
-    <label class="flex flex-col gap-1">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Category
-      </span>
-      <select
-        name="category"
-        multiple
-        size="1"
-        onchange="this.form?.requestSubmit()"
-        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
-      >
-        {facets.categories!.map((f) => (
-          <option
-            value={f.value}
-            selected={initialCategories.has(f.value)}
-          >
-            {f.label ?? f.value}
-            {typeof f.count === "number" ? ` (${f.count})` : ""}
-          </option>
-        ))}
-      </select>
-    </label>
-  )}
-
-  {!hide.includes("license") && (facets.licenses?.length ?? 0) > 0 && (
-    <label class="flex flex-col gap-1">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        License
-      </span>
-      <select
-        name="license"
-        multiple
-        size="1"
-        onchange="this.form?.requestSubmit()"
-        class="grove-select min-w-[10rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
-      >
-        {facets.licenses!.map((f) => (
-          <option
-            value={f.value}
-            selected={initialLicenses.has(f.value)}
-          >
-            {f.label ?? f.value}
-            {typeof f.count === "number" ? ` (${f.count})` : ""}
-          </option>
-        ))}
-      </select>
-    </label>
-  )}
-
-  {!hide.includes("sort") && (
-    <label class="flex flex-col gap-1">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Sort
-      </span>
-      <select
-        name="sort"
-        onchange="this.form?.requestSubmit()"
-        class="grove-select min-w-[12rem] rounded-md border border-ink-200 bg-white py-1.5 pl-2 pr-7 text-sm focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
-      >
-        {SORT_OPTIONS.map((o) => (
-          <option value={o.value} selected={initialSort === o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  )}
-
-  <noscript>
-    <button type="submit" class="grove-btn grove-btn-outline">
-      Apply
-    </button>
-  </noscript>
-</form>
+<script is:inline define:vars={{ pathPrefix }}>
+  (() => {
+    const groups = document.querySelectorAll(".grove-filter");
+    const keys = { stacks: "stack", platforms: "platform", categories: "category", licenses: "license" };
+    function closeAll(except) {
+      groups.forEach((group) => {
+        if (group === except) return;
+        const popover = group.querySelector(".grove-filter-popover");
+        const trigger = group.querySelector(".grove-filter-trigger");
+        if (popover && trigger) {
+          popover.hidden = true;
+          popover.classList.add("hidden");
+          trigger.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+    function navigate(group, values) {
+      const params = new URLSearchParams(location.search);
+      const key = keys[group.dataset.filterGroupKey];
+      params.delete(key);
+      params.delete("page");
+      values.forEach((value) => params.append(key, value));
+      location.assign(params.toString() ? `${pathPrefix}?${params}` : pathPrefix);
+    }
+    groups.forEach((group) => {
+      const trigger = group.querySelector(".grove-filter-trigger");
+      const popover = group.querySelector(".grove-filter-popover");
+      trigger?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const opening = trigger.getAttribute("aria-expanded") !== "true";
+        closeAll(opening ? group : undefined);
+        popover.hidden = !opening;
+        popover.classList.toggle("hidden", !opening);
+        trigger.setAttribute("aria-expanded", String(opening));
+      });
+      group.querySelector(".grove-filter-apply")?.addEventListener("click", () => {
+        navigate(group, [...group.querySelectorAll(".grove-filter-input:checked")].map((input) => input.dataset.filterValue));
+      });
+      group.querySelector(".grove-filter-clear")?.addEventListener("click", () => navigate(group, []));
+      if (group.dataset.filterSingle === "true") {
+        group.querySelectorAll(".grove-filter-input").forEach((input) => input.addEventListener("change", () => navigate(group, [input.dataset.filterValue])));
+      }
+      popover?.addEventListener("click", (event) => event.stopPropagation());
+    });
+    document.addEventListener("click", () => closeAll());
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeAll(); });
+    document.querySelector('select[name="sort"]')?.addEventListener("change", (event) => {
+      const params = new URLSearchParams(location.search);
+      params.set("sort", event.target.value);
+      params.delete("page");
+      location.assign(params.toString() ? `${pathPrefix}?${params}` : pathPrefix);
+    });
+  })();
+</script>

@@ -18,7 +18,7 @@ import { items, itemLabel, itemLabelPlural } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
+import ItemIndexRow from "@grove-dev/astro/components/ItemIndexRow.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
@@ -264,10 +264,10 @@ function hrefForRemove(key: keyof ItemsFilters, value: string): string {
         </div>
       </div>
 
-      <ul id="results-list" class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+      <ul id="results-list" class="m-0 flex list-none flex-col gap-3 p-0">
         {sorted.map((item) => (
             <li class="m-0 p-0" data-item-slug={item.slug}>
-              <ItemCard item={item} pathPrefix={`/${slug}`} />
+              <ItemIndexRow item={item} pathPrefix={`/${slug}`} />
             </li>
         ))}
       </ul>

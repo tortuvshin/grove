@@ -49,6 +49,7 @@ interface Site {
   stats?: SiteStats;
   blueprintConfig?: {
     routeSlug?: string;
+    labelSingular?: string;
     labelPlural?: string;
   };
 }
@@ -184,8 +185,8 @@ const favicon =
     <slot name="header">
       <Header
         site={site}
-        submitLabel={submitLabel}
-        submitHref={submitHref}
+        submitLabel={submitLabel ?? (site.blueprintConfig ? `Submit ${site.blueprintConfig.labelSingular ?? "item"}` : undefined)}
+        submitHref={submitHref ?? (site.blueprintConfig ? "/submit" : undefined)}
       />
     </slot>
 

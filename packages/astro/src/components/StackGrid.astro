@@ -1,4 +1,5 @@
 ---
+import Icon from "./Icon.astro";
 /**
  * StackGrid — browse-by-stack grid for the home page.
  *
@@ -30,6 +31,7 @@ interface Props {
   class?: string;
   /** Hide the section eyebrow / header entirely. */
   bare?: boolean;
+  itemLabelPlural?: string;
 }
 
 const {
@@ -38,6 +40,7 @@ const {
   iconAliases,
   class: className = "",
   bare = false,
+  itemLabelPlural = "items",
 } = Astro.props;
 
 function buildHref(slug: string): string {
@@ -48,7 +51,7 @@ function buildHref(slug: string): string {
 function statusLabel(s: StackEntry["status"]): string | null {
   switch (s) {
     case "live":
-      return "Live";
+      return "Available now";
     case "expanding":
       return "Expanding";
     case "planned":
@@ -60,52 +63,57 @@ function statusLabel(s: StackEntry["status"]): string | null {
 ---
 
 <section
-  class:list={["grove-section", className]}
+  id="stacks"
+  class:list={["grove-section scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
   aria-labelledby={bare ? undefined : "grove-stackgrid-heading"}
 >
   <div class="grove-container-wide mx-auto px-5 sm:px-7">
     {!bare && (
-      <header class="mb-6 flex flex-col gap-2">
+      <header class="mb-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Stacks
+        </span>
         <h2
           id="grove-stackgrid-heading"
-          class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+          class="m-0 mt-1 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
         >
           Browse by stack
         </h2>
         <p class="m-0 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
-          Every record is tagged with the technologies it depends on. Pick a
-          stack to see what's shipping in that world.
+          Pick a stack to see real {itemLabelPlural} built with it.
         </p>
       </header>
     )}
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
       {stacks.map((s) => (
         <a
           href={buildHref(s.slug)}
-          class="grove-card grove-card-hover group flex flex-col gap-1.5 p-4 no-underline"
+          class="card card-hover group flex h-full items-center gap-3 p-3.5 no-underline"
           data-event="stack_grid_click"
           data-event-source="stack_grid"
         >
-          <div class="flex items-baseline justify-between gap-2">
-            <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
-              {s.name}
-            </h3>
-            {typeof s.count === "number" && (
-              <span class="font-mono text-2xs text-ink-500 dark:text-ink-400">
-                {s.count}
-              </span>
-            )}
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-950" aria-hidden="true">
+            <Icon name={iconAliases?.[s.slug] ?? s.name} category="stack" size={18} />
           </div>
-          {s.blurb && (
-            <p class="m-0 line-clamp-2 text-[0.8125rem] leading-snug text-ink-500 dark:text-ink-400">
-              {s.blurb}
-            </p>
-          )}
+
+          <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <div class="flex items-center gap-2">
+              <h3 class="m-0 text-[0.875rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+                {s.name}
+              </h3>
+              {typeof s.count === "number" && (
+                <span class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400">
+                  {s.count} {itemLabelPlural}
+                </span>
+              )}
+            </div>
+            {s.blurb && <p class="m-0 truncate text-2xs text-ink-500 dark:text-ink-400">{s.blurb}</p>}
+          </div>
           {statusLabel(s.status) && (
             <span
               class:list={[
-                "grove-badge mt-1 self-start",
+                "shrink-0 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider",
                 s.status === "live"
                   ? "grove-badge-new"
                   : s.status === "expanding"
