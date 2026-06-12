@@ -28,7 +28,7 @@ export default defineConfig({
   integrations: {},
 
   theme: {
-    primaryColor: "#16a34a",
+    primaryColor: "#1f6feb",
     radius: "soft",
     density: "comfortable",
     containerWidth: "72rem",

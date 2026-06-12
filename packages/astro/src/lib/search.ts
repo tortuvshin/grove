@@ -1,5 +1,5 @@
-import type { Resource } from "../data/types";
-import { labelDisplay, lensDisplay, statusDisplay } from "./display";
+import type { IndexRecord } from "@grove-dev/core";
+import { labelDisplay, lensDisplay, statusDisplay } from "./display.js";
 
 /**
  * URL-driven filter state for the /items discovery page.
@@ -121,44 +121,51 @@ export const PAGE_SIZE = DEFAULT_PAGE_SIZE;
  * Apps missing the sort key (e.g. no stars) sink to the bottom rather
  * than vanishing.
  */
-export function applySort(items: Resource[], sort: ItemsSort): Resource[] {
+function recordName(record: IndexRecord): string {
+  return record.kind === "resource" ? record.title : record.name;
+}
+
+function projectStars(record: IndexRecord): number {
+  return record.kind === "project" ? record.github?.stars ?? 0 : 0;
+}
+
+function recordUpdatedAt(record: IndexRecord): string | null {
+  if (record.kind === "project") return record.github?.pushedAt ?? null;
+  if (record.kind === "resource") return record.publishedAt ?? null;
+  return null;
+}
+
+function recordAddedAt(record: IndexRecord): string | null {
+  return record.curation?.reviewedAt ?? null;
+}
+
+export function applySort(items: IndexRecord[], sort: ItemsSort): IndexRecord[] {
   const arr = items.slice();
   const ts = (s?: string | null): number => (s ? new Date(s).valueOf() : 0);
   switch (sort) {
     case "most-starred":
-      arr.sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0));
+      arr.sort((a, b) => projectStars(b) - projectStars(a));
       break;
     case "recently-updated":
-      arr.sort((a, b) => ts(b.lastCommitAt) - ts(a.lastCommitAt));
+      arr.sort((a, b) => ts(recordUpdatedAt(b)) - ts(recordUpdatedAt(a)));
       break;
     case "recently-added":
-      arr.sort((a, b) => ts(b.addedAt) - ts(a.addedAt));
+      arr.sort((a, b) => ts(recordAddedAt(b)) - ts(recordAddedAt(a)));
       break;
     case "best-overall": {
-      // Composite: scores.overall → scores.maturity → scores.activity →
-      // active status → license present → stars. Avoids ranking by
-      // stars alone.
-      const score = (a: Resource, k: "overall" | "maturity" | "activity") =>
-        typeof a.scores?.[k] === "number" ? (a.scores![k] as number) : 0;
-      const active = (a: Resource) => (a.status === "active" ? 1 : 0);
-      const licensed = (a: Resource) => (a.license ? 1 : 0);
+      const reviewed = (a: IndexRecord) => (a.curation?.reviewed ? 1 : 0);
+      const visible = (a: IndexRecord) => (a.visibility === "keep" ? 1 : 0);
       arr.sort((a, b) => {
-        const sOverall = score(b, "overall") - score(a, "overall");
-        if (sOverall !== 0) return sOverall;
-        const sMaturity = score(b, "maturity") - score(a, "maturity");
-        if (sMaturity !== 0) return sMaturity;
-        const sActivity = score(b, "activity") - score(a, "activity");
-        if (sActivity !== 0) return sActivity;
-        const sActive = active(b) - active(a);
-        if (sActive !== 0) return sActive;
-        const sLicensed = licensed(b) - licensed(a);
-        if (sLicensed !== 0) return sLicensed;
-        return (b.stars ?? 0) - (a.stars ?? 0);
+        const reviewedDelta = reviewed(b) - reviewed(a);
+        if (reviewedDelta !== 0) return reviewedDelta;
+        const visibleDelta = visible(b) - visible(a);
+        if (visibleDelta !== 0) return visibleDelta;
+        return projectStars(b) - projectStars(a);
       });
       break;
     }
     case "alphabetical":
-      arr.sort((a, b) => a.name.localeCompare(b.name));
+      arr.sort((a, b) => recordName(a).localeCompare(recordName(b)));
       break;
   }
   return arr;
@@ -192,7 +199,7 @@ export function effectivePage(f: ItemsFilters): number {
  * `q` is a case-insensitive substring search across name, owner,
  * description, and category. Other dimensions are exact match.
  */
-export function filterItems(items: Resource[], f: ItemsFilters): Resource[] {
+export function filterItems(items: IndexRecord[], f: ItemsFilters): IndexRecord[] {
   const q = f.q?.trim().toLowerCase();
   const stacks = f.stacks?.length ? new Set(f.stacks) : null;
   const platforms = f.platforms?.length ? new Set(f.platforms) : null;
@@ -206,23 +213,41 @@ export function filterItems(items: Resource[], f: ItemsFilters): Resource[] {
     // stacks, platforms, tags, backend, architecture, stateManagement,
     // bestFor, whyListed, license, status.
     if (q) {
-      const ownerMatch = /github\.com\/([^/]+)\//.exec(a.repoUrl)?.[1]?.toLowerCase() ?? "";
+      const repoUrl = a.kind === "project" ? a.repoUrl : a.links.github ?? "";
+      const ownerMatch =
+        /github\.com\/([^/]+)\//.exec(repoUrl ?? "")?.[1]?.toLowerCase() ?? "";
+      const projectFields =
+        a.kind === "project"
+          ? [
+              a.stack,
+              ...a.stacks,
+              ...a.platforms,
+              a.projectType,
+              a.difficulty ?? "",
+              a.codebaseSize ?? "",
+              ...a.bestFor,
+              ...a.whyListed,
+              a.github?.license ?? "",
+              a.health?.status ? statusDisplay(a.health.status) : "",
+            ]
+          : [];
+      const resourceFields =
+        a.kind === "resource"
+          ? [a.type, a.topic, a.author ?? ""]
+          : [];
+      const entityFields =
+        a.kind === "entity"
+          ? [a.type, a.location ?? "", a.parent ?? ""]
+          : [];
       const haystack = [
-        a.name,
+        recordName(a),
         ownerMatch,
         a.description,
         a.category,
-        a.stack,
-        ...(a.stacks ?? []),
-        ...(a.platforms ?? []),
-        ...(a.tags ?? []),
-        a.backend ?? "",
-        a.architecture ?? "",
-        a.stateManagement ?? "",
-        ...(a.bestFor ?? []),
-        ...(a.whyListed ?? []),
-        a.license ?? "",
-        statusDisplay(a.status),
+        ...a.tags,
+        ...projectFields,
+        ...resourceFields,
+        ...entityFields,
       ]
         .join(" ")
         .toLowerCase();
@@ -230,11 +255,15 @@ export function filterItems(items: Resource[], f: ItemsFilters): Resource[] {
     }
 
     if (stacks) {
-      const allStacks = [a.stack, ...(a.stacks ?? [])];
+      if (a.kind !== "project") return false;
+      const allStacks = [a.stack, ...a.stacks].filter(
+        (stack): stack is string => Boolean(stack),
+      );
       if (!allStacks.some((s) => stacks.has(s))) return false;
     }
 
     if (platforms) {
+      if (a.kind !== "project") return false;
       if (!a.platforms.some((p) => platforms.has(p))) return false;
     }
 
@@ -243,19 +272,23 @@ export function filterItems(items: Resource[], f: ItemsFilters): Resource[] {
     }
 
     if (labels) {
-      if (!a.labels?.some((l) => labels.has(l))) return false;
+      if (!a.curation?.labels?.some((l) => labels.has(l))) return false;
     }
 
     if (licenses) {
-      if (!a.license || !licenses.has(a.license)) return false;
+      if (a.kind !== "project") return false;
+      const license = a.github?.license;
+      if (!license || !licenses.has(license)) return false;
     }
 
     if (statuses) {
-      if (!a.status || !statuses.has(a.status)) return false;
+      if (a.kind !== "project") return false;
+      const status = a.health?.status;
+      if (!status || !statuses.has(status)) return false;
     }
 
     if (f.lens) {
-      if (!a.lenses?.includes(f.lens)) return false;
+      if (!a.curation?.lenses?.includes(f.lens)) return false;
     }
 
     return true;
@@ -334,7 +367,7 @@ export function removeFilter(
  * Build the full list of facet values from the items array, preserving
  * a sensible order (frequency desc, then alphabetical for ties).
  */
-export function buildFacets(items: Resource[]) {
+export function buildFacets(items: IndexRecord[]) {
   const counts = {
     stack: new Map<string, number>(),
     platform: new Map<string, number>(),
@@ -343,12 +376,17 @@ export function buildFacets(items: Resource[]) {
     license: new Map<string, number>(),
   };
   for (const a of items) {
-    const allStacks = new Set([a.stack, ...(a.stacks ?? [])]);
-    for (const s of allStacks) counts.stack.set(s, (counts.stack.get(s) ?? 0) + 1);
-    for (const p of a.platforms) counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);
+    if (a.kind === "project") {
+      const allStacks = new Set(
+        [a.stack, ...a.stacks].filter((stack): stack is string => Boolean(stack)),
+      );
+      for (const s of allStacks) counts.stack.set(s, (counts.stack.get(s) ?? 0) + 1);
+      for (const p of a.platforms) counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);
+      const license = a.github?.license;
+      if (license) counts.license.set(license, (counts.license.get(license) ?? 0) + 1);
+    }
     counts.category.set(a.category, (counts.category.get(a.category) ?? 0) + 1);
-    for (const l of a.labels ?? []) counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
-    if (a.license) counts.license.set(a.license, (counts.license.get(a.license) ?? 0) + 1);
+    for (const l of a.curation?.labels ?? []) counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
   }
   const sortByCountThenName = (m: Map<string, number>) =>
     [...m.entries()]

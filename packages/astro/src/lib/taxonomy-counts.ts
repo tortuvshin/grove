@@ -1,27 +1,11 @@
-// Build-time helpers that compute taxonomy counts from the generated
-// items.json. The static taxonomy files (categories.ts, stacks.ts) hold
-// the canonical list of names + blurbs; counts live here so we never
-// have to hand-update them.
-//
-// All functions are synchronous and cheap — they're called from Astro
-// page frontmatter at build time, never on the client.
-
-import generatedJson from "../../data/generated/items.json";
-
-type GeneratedApp = {
+type TaxonomyRecord = {
   category?: string;
   stack?: string;
+  stacks?: string[];
 };
 
-function loadApps(): GeneratedApp[] {
-  const raw = generatedJson as { items?: GeneratedApp[] };
-  return raw.items ?? [];
-}
-
-const items = loadApps();
-
 /** Number of items in the directory, per category name. */
-export function countByCategory(): Map<string, number> {
+export function countByCategory(items: TaxonomyRecord[] = []): Map<string, number> {
   const m = new Map<string, number>();
   for (const a of items) {
     const k = a.category || "Other";
@@ -31,11 +15,12 @@ export function countByCategory(): Map<string, number> {
 }
 
 /** Number of items in the directory, per primary stack. */
-export function countByStack(): Map<string, number> {
+export function countByStack(items: TaxonomyRecord[] = []): Map<string, number> {
   const m = new Map<string, number>();
   for (const a of items) {
-    const k = a.stack || "Other";
-    m.set(k, (m.get(k) ?? 0) + 1);
+    const stacks = new Set([a.stack, ...(a.stacks ?? [])].filter(Boolean) as string[]);
+    if (stacks.size === 0) stacks.add("Other");
+    for (const stack of stacks) m.set(stack, (m.get(stack) ?? 0) + 1);
   }
   return m;
 }

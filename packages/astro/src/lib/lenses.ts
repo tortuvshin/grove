@@ -191,7 +191,11 @@ export function lensFromSearchParams(sp: URLSearchParams): LensId | null {
  * and applies only the chosen lens's params. Stack/Platform/Category/
  * License/q/sort/density filters are preserved.
  */
-export function hrefForLens(lensId: LensId | null | undefined, current: URLSearchParams): string {
+export function hrefForLens(
+  lensId: LensId | null | undefined,
+  current: URLSearchParams,
+  pathPrefix = "/items",
+): string {
   const sp = new URLSearchParams(current);
   sp.delete("lens");
   sp.delete("label");
@@ -211,5 +215,6 @@ export function hrefForLens(lensId: LensId | null | undefined, current: URLSearc
     }
   }
   const qs = sp.toString();
-  return qs ? `/items?${qs}` : "/items";
+  const base = pathPrefix.replace(/\/$/, "") || "/";
+  return qs ? `${base}?${qs}` : base;
 }

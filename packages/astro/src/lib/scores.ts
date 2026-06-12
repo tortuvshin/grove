@@ -1,4 +1,11 @@
-import type { AppScores } from "../data/types";
+type AppScores = {
+  activity?: number;
+  maturity?: number;
+  learning?: number;
+  contribution?: number;
+  docs?: number;
+  overall?: number;
+};
 
 /**
  * Format a single score (0-100) into a 0-5 "tier" used by the UI:
