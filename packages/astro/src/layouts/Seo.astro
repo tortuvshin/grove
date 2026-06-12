@@ -22,6 +22,12 @@
 interface Props {
   title: string;
   description: string;
+  site: {
+    name: string;
+    description?: string;
+    repoUrl?: string;
+  };
+  searchPath?: string;
   /** Open Graph / Twitter image. Default: /og-image.svg. Should be absolute or root-relative. */
   image?: string;
   /** og:type. Default: "website". Use "article" for blog posts / changelog. */
@@ -35,15 +41,17 @@ interface Props {
 const {
   title,
   description,
+  site: siteConfig,
+  searchPath = "/items",
   image = "/og-image.svg",
   type = "website",
   noindex = false,
   jsonLd,
 } = Astro.props;
 
-const site = Astro.site ?? new URL("https://open-items.dev");
-const canonical = new URL(Astro.url.pathname, site).toString();
-const ogImage = new URL(image, site).toString();
+const siteUrl = Astro.site ?? new URL("https://example.com");
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImage = new URL(image, siteUrl).toString();
 
 // Truncate description for OG/Twitter where longer is worse (160–200 chars).
 function truncate(s: string, max: number): string {
@@ -58,14 +66,13 @@ const shortDescription = truncate(description, 200);
 const websiteLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Open Source Apps",
-  description:
-    "A curated, self-refreshing directory of real open-source application codebases.",
-  url: site.toString().replace(/\/$/, ""),
+  name: siteConfig.name,
+  description: siteConfig.description ?? description,
+  url: siteUrl.toString().replace(/\/$/, ""),
   inLanguage: "en",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${site.toString().replace(/\/$/, "")}/items?q={search_term_string}`,
+    target: `${siteUrl.toString().replace(/\/$/, "")}${searchPath}?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };
@@ -73,10 +80,10 @@ const websiteLd = {
 const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Open Source Apps",
-  url: site.toString().replace(/\/$/, ""),
-  logo: new URL("/og-image.svg", site).toString(),
-  sameAs: ["https://github.com/tortuvshin/open-items"],
+  name: siteConfig.name,
+  url: siteUrl.toString().replace(/\/$/, ""),
+  logo: new URL("/og-image.svg", siteUrl).toString(),
+  ...(siteConfig.repoUrl ? { sameAs: [siteConfig.repoUrl] } : {}),
 };
 ---
 
@@ -94,8 +101,8 @@ const organizationLd = {
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Open Source Apps — a directory of real open-source items" />
-<meta property="og:site_name" content="Open Source Apps" />
+<meta property="og:image:alt" content={`${siteConfig.name} social preview`} />
+<meta property="og:site_name" content={siteConfig.name} />
 <meta property="og:locale" content="en" />
 
 <!-- Twitter Card -->
@@ -103,7 +110,7 @@ const organizationLd = {
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={shortDescription} />
 <meta name="twitter:image" content={ogImage} />
-<meta name="twitter:image:alt" content="Open Source Apps — a directory of real open-source items" />
+<meta name="twitter:image:alt" content={`${siteConfig.name} social preview`} />
 
 <!-- JSON-LD: site-wide identity -->
 <script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
