@@ -11,14 +11,15 @@
   },
   "scripts": {
     "validate:data": "grove validate",
-    "build:data": "grove build-data",
-    "build:llms-full": "grove build-llms-full",
-    "build": "pnpm run build:data && pnpm run build:llms-full && vite build",
+    "build:data": "grove generate",
+    "build:sitemap": "grove sitemap",
+    "build:llms": "grove llms",
+    "build": "pnpm run build:data && pnpm run build:sitemap && pnpm run build:llms && vite build",
     "dev": "pnpm run build:data && vite dev",
     "preview": "vite preview",
     "svelte-kit": "svelte-kit",
-    "refresh:activity": "grove analyze",
-    "enrich:github": "grove enrich"
+    "sync:github": "grove sync github",
+    "cleanup": "grove cleanup stale"
   },
   "dependencies": {
     "@grove-dev/core": "*",
