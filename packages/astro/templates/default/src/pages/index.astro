@@ -181,6 +181,7 @@ const emptyMature = `No established ${plural} yet.`;
       contributors: stats.totalOwners || undefined,
       stars: stats.totalStars || undefined,
     }}
+    itemsLabel={plural}
     ctas={[
       { label: `Browse ${slug}`, href: `/${slug}`, variant: "primary" },
       { label: "About", href: "/about", variant: "outline" },
