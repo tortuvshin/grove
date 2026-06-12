@@ -25,6 +25,18 @@ interface NavItem {
   href: string;
 }
 
+interface SiteStats {
+  totalApps?: number;
+  totalCategories?: number;
+  totalStacks?: number;
+  totalOwners?: number;
+  totalStars?: number;
+  originalRepo?: string;
+  originalStars?: number;
+  originalForks?: number;
+  originalContributors?: number;
+}
+
 interface Site {
   name: string;
   tagline?: string;
@@ -32,6 +44,10 @@ interface Site {
   nav: NavItem[];
   repoUrl?: string;
   url?: string;
+  /** Optional directory-level stats — populated from site-config.json
+   * at generate time. Components use it to render hero counts,
+   * origin card stats, and footer summary lines. */
+  stats?: SiteStats;
 }
 
 interface Props {
@@ -178,7 +194,72 @@ const favicon =
     </main>
 
     <slot name="footer">
-      <Footer site={site} />
+      <Footer
+        site={site}
+        stats={{
+          apps: site.stats?.totalApps,
+          categories: site.stats?.totalCategories,
+          contributors: site.stats?.totalOwners,
+        }}
+        discover={{
+          heading: "Discover",
+          items: [
+            ...(site.stats?.totalApps
+              ? [{ label: "Browse all", href: "/projects" }]
+              : []),
+            { label: "Contributors", href: "/contributors" },
+            ...(site.stats?.originalRepo
+              ? [{ label: "View on GitHub", href: site.stats.originalRepo, external: true }]
+              : []),
+          ],
+        }}
+        contribute={{
+          heading: "Contribute",
+          items: [
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Submit via GitHub",
+                    href: `${site.repoUrl}/blob/main/CONTRIBUTING.md`,
+                    external: true,
+                  },
+                ]
+              : []),
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Report an issue",
+                    href: `${site.repoUrl}/issues`,
+                    external: true,
+                  },
+                ]
+              : []),
+          ],
+        }}
+        project={{
+          heading: "Project",
+          items: [
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Source on GitHub",
+                    href: site.repoUrl,
+                    external: true,
+                  },
+                ]
+              : []),
+            ...(site.repoUrl
+              ? [
+                  {
+                    label: "Changelog",
+                    href: `${site.repoUrl}/blob/main/CHANGELOG.md`,
+                    external: true,
+                  },
+                ]
+              : []),
+          ],
+        }}
+      />
     </slot>
 
     <slot name="body-end" />
