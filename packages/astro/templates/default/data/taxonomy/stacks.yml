@@ -1,0 +1,41 @@
+- id: flutter
+  name: Flutter
+  family: cross-platform
+  languages: [dart]
+  platforms: [ios, android, web, macos, windows, linux]
+  icon: flutter
+
+- id: react-native
+  name: React Native
+  family: cross-platform
+  languages: [typescript, javascript]
+  platforms: [ios, android]
+  icon: react-native
+
+- id: ios
+  name: Native iOS
+  family: native
+  languages: [swift, objective-c]
+  platforms: [ios]
+  icon: swift
+
+- id: android
+  name: Native Android
+  family: native
+  languages: [kotlin, java]
+  platforms: [android]
+  icon: android
+
+- id: capacitor
+  name: Capacitor
+  family: hybrid
+  languages: [typescript, javascript]
+  platforms: [ios, android, web]
+  icon: capacitor
+
+- id: kmp
+  name: Kotlin Multiplatform
+  family: cross-platform
+  languages: [kotlin]
+  platforms: [ios, android, desktop]
+  icon: kotlin

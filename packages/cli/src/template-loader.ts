@@ -11,7 +11,16 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export type Framework = "astro" | "nextjs" | "svelte";
+// V1 only ships the Astro adapter. The Next.js and SvelteKit adapters
+// still exist as skeleton packages (`packages/nextjs/`, `packages/svelte/`)
+// but their templates are not yet functional — `pnpm install` will succeed
+// but `pnpm run build` will fail with no pages / components / layouts.
+// The CLI therefore does NOT advertise them as scaffold options.
+//
+// When a real Next.js or Svelte template lands, add the framework back
+// to this union AND re-add a matching `FRAMEWORK_LABELS` entry in
+// `index.ts`. The `isFramework()` guard below already enforces the union.
+export type Framework = "astro";
 export type DeployProvider = "vercel" | "netlify" | "cloudflare" | "github-pages" | "none";
 
 export interface TemplateSummary {
@@ -22,7 +31,7 @@ export interface TemplateSummary {
 }
 
 /** Frameworks that ship templates inside the adapter package. */
-export const SUPPORTED_FRAMEWORKS: readonly Framework[] = ["astro", "nextjs", "svelte"] as const;
+export const SUPPORTED_FRAMEWORKS: readonly Framework[] = ["astro"] as const;
 
 export function isFramework(value: string): value is Framework {
   return (SUPPORTED_FRAMEWORKS as readonly string[]).includes(value);

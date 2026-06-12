@@ -1,0 +1,47 @@
+- id: productivity
+  name: Productivity
+
+- id: finance
+  name: Finance
+
+- id: education
+  name: Education
+
+- id: tools
+  name: Tools
+
+- id: communication
+  name: Communication
+
+- id: health-and-fitness
+  name: Health and Fitness
+
+- id: business
+  name: Business
+
+- id: games
+  name: Games
+
+- id: media
+  name: Media
+
+- id: entertainment
+  name: Entertainment
+
+- id: social-network
+  name: Social Network
+
+- id: shopping
+  name: Shopping
+
+- id: news
+  name: News and Magazine
+
+- id: travel
+  name: Travel
+
+- id: lifestyle
+  name: Lifestyle
+
+- id: personalization
+  name: Personalization
