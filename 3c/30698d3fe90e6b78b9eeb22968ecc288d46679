@@ -1,0 +1,37 @@
+packages/astro/src/layouts/Header.astro
+  s_79084ccde86752::t_8cd1d0eb818ddb 140
+  s_79084ccde86752::t_7a23692f884ce9 30-35,57-71,97,114,134-136,138-139,141-149
+packages/astro/src/components/RefinePanel.astro
+  s_79084ccde86752::t_0dfd8972545988 52-58,60-68,70-75,77-82,84-101,103-132,134-146,148-201
+packages/astro/src/components/StackGrid.astro
+  s_79084ccde86752::t_165d7dfd061058 2,34,43,54,66-67,72-75,78,83,88,92,96-111,116
+packages/astro/src/components/CategoryGrid.astro
+  s_79084ccde86752::t_165d7dfd061058 25,33,43-44,49-52,55,60,65-96
+packages/astro/src/components/ItemIndexRow.astro
+  s_79084ccde86752::t_f824da87672dab 1-72
+packages/astro/templates/default/src/pages/index.astro
+  s_79084ccde86752::t_7a23692f884ce9 133-134,136,157-160
+  s_79084ccde86752::t_165d7dfd061058 286-287
+packages/astro/templates/default/src/pages/[slug]/index.astro
+  s_79084ccde86752::t_f824da87672dab 21,267,270
+packages/astro/src/layouts/BaseLayout.astro
+  s_79084ccde86752::t_7a23692f884ce9 52,188-189
+packages/astro/src/styles.css
+  s_79084ccde86752::t_7a23692f884ce9 159,417,419,423,427-428,432-433
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3c30698d3fe90e6b78b9eeb22968ecc288d46679",
+  "prompts": {},
+  "sessions": {
+    "s_79084ccde86752": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd1b-fcb4-7803-8900-38588b51da5e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
