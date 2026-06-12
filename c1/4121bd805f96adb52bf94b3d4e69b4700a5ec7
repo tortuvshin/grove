@@ -1,0 +1,21 @@
+packages/astro/templates/default/src/pages/[slug]/index.astro
+  s_79084ccde86752::t_5cef9f13bdc1f9 22,25-40,57-66,80-115,125,137-167,171,175,177-178,209-234,236,238,247
+packages/astro/templates/default/src/pages/index.astro
+  s_79084ccde86752::t_a09af63a6a533c 191,231,271
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "c14121bd805f96adb52bf94b3d4e69b4700a5ec7",
+  "prompts": {},
+  "sessions": {
+    "s_79084ccde86752": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebd1b-fcb4-7803-8900-38588b51da5e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
