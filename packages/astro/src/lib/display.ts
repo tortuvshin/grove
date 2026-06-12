@@ -10,7 +10,7 @@
 
 import type { AppStatus } from "../data/types";
 
-// ── Label ids (the `labels` array on an app) ────────────────────────
+// ── Label ids (the `labels` array on an item) ────────────────────────
 export type LabelId = "new" | "hot" | "mature" | "featured";
 
 export const LABEL_DISPLAY: Record<LabelId, string> = {
@@ -26,7 +26,7 @@ export function labelDisplay(id: string | null | undefined): string | null {
   return LABEL_DISPLAY[id as LabelId] ?? null;
 }
 
-// ── Status ids (the `status` field on an app) ───────────────────────
+// ── Status ids (the `status` field on an item) ───────────────────────
 /**
  * Canonical status ids, including the curated "needs-maintainer"
  * composite that's emitted by the `needs-maintainer` lens (it expands
@@ -46,9 +46,9 @@ export function statusDisplay(s: AppStatus | string | null | undefined): string 
   return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown;
 }
 
-// ── Lens ids (the curated tabs on /apps) ────────────────────────────
+// ── Lens ids (the curated tabs on /items) ────────────────────────────
 export const LENS_DISPLAY: Record<string, string> = {
-  all: "All apps",
+  all: "All items",
   new: "Recently added",
   hot: "Trending",
   mature: "Established",
@@ -66,7 +66,7 @@ export function lensDisplay(id: string | null | undefined): string {
   return LENS_DISPLAY[id] ?? id;
 }
 
-// ── Sort ids (the /apps sort dropdown) ──────────────────────────────
+// ── Sort ids (the /items sort dropdown) ──────────────────────────────
 export const SORT_DISPLAY: Record<string, string> = {
   "recently-updated": "Recently updated",
   "most-starred": "Most starred",

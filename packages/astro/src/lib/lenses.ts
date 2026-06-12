@@ -3,9 +3,9 @@
  *
  * Two flavors:
  * - "label-based": maps to a single `labels` value (e.g. new / hot / mature).
- *   No extra curation needed — every app already has a label.
- * - "curator-assigned": maps to a `lenses` value on the app. The 5 anchor
- *   apps get these populated. Other apps will simply not match.
+ *   No extra curation needed — every item already has a label.
+ * - "curator-assigned": maps to a `lenses` value on the item. The 5 anchor
+ *   items get these populated. Other items will simply not match.
  *
  * The lens id is what shows up in the URL as `?lens=...`. For
  * label-based lenses, the lens id is the same as the label.
@@ -42,7 +42,7 @@ export interface LensDef {
 }
 
 export const LENSES: LensDef[] = [
-  { id: "all", label: "All apps", description: "Every app in the directory", toParams: () => ({}) },
+  { id: "all", label: "All items", description: "Every item in the directory", toParams: () => ({}) },
   {
     id: "new",
     label: "Recently added",
@@ -64,7 +64,7 @@ export const LENSES: LensDef[] = [
   {
     id: "production-like",
     label: "Production-like",
-    description: "Real apps, not toy projects",
+    description: "Real items, not toy projects",
     toParams: () => ({ lens: "production-like" }),
   },
   {
@@ -89,7 +89,7 @@ export const LENSES: LensDef[] = [
   {
     id: "launches",
     label: "Launches",
-    description: "Recently launched OSS apps seeking feedback",
+    description: "Recently launched OSS items seeking feedback",
     toParams: () => ({ lens: "launches" }),
   },
   {
@@ -101,13 +101,13 @@ export const LENSES: LensDef[] = [
   {
     id: "needs-maintainer",
     label: "Needs maintainer",
-    description: "Useful apps that need help",
+    description: "Useful items that need help",
     toParams: () => ({ status: "stale,quiet" }),
   },
 ];
 
 /**
- * The 6 lenses shown as top-row tabs on /apps. Order matters — left to right.
+ * The 6 lenses shown as top-row tabs on /items. Order matters — left to right.
  * Keep this list aligned with what the design calls for: All, signal lenses,
  * and the two curator-assigned lenses that have any matches.
  */
@@ -211,5 +211,5 @@ export function hrefForLens(lensId: LensId | null | undefined, current: URLSearc
     }
   }
   const qs = sp.toString();
-  return qs ? `/apps?${qs}` : "/apps";
+  return qs ? `/items?${qs}` : "/items";
 }

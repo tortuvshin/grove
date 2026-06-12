@@ -1,13 +1,13 @@
-import type { OpenSourceApp } from "../data/types";
+import type { Resource } from "../data/types";
 import { labelDisplay, lensDisplay, statusDisplay } from "./display";
 
 /**
- * URL-driven filter state for the /apps discovery page.
+ * URL-driven filter state for the /items discovery page.
  *
  * Multi-value fields use repeated keys in the URL: `?stack=Flutter&stack=React+Native`.
  * Empty / undefined fields mean "no filter on this dimension".
  */
-export type AppsFilters = {
+export type ItemsFilters = {
   q?: string;
   stacks?: string[];
   platforms?: string[];
@@ -18,7 +18,7 @@ export type AppsFilters = {
   /** A curated lens (e.g. "good-to-learn", "production-like"). Single value. */
   lens?: string;
   /** Sort order. Single value, defaults to "recently-updated". */
-  sort?: AppsSort;
+  sort?: ItemsSort;
   /** 1-based page number. */
   page?: number;
 };
@@ -32,9 +32,9 @@ export const SORT_OPTIONS = [
   { value: "alphabetical", label: "Alphabetical" },
 ] as const;
 
-export type AppsSort = (typeof SORT_OPTIONS)[number]["value"];
+export type ItemsSort = (typeof SORT_OPTIONS)[number]["value"];
 
-const DEFAULT_SORT: AppsSort = "recently-updated";
+const DEFAULT_SORT: ItemsSort = "recently-updated";
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -55,13 +55,13 @@ const KEYS = {
  * Read filters from a URLSearchParams (or anything URLSearchParams-shaped,
  * e.g. the result of `new URL(req.url).searchParams`).
  */
-export function filtersFromSearchParams(sp: URLSearchParams): AppsFilters {
+export function filtersFromSearchParams(sp: URLSearchParams): ItemsFilters {
   const rawSort = sp.get(KEYS.sort);
   // Backwards-compat: old "most-mature" sort now maps to "best-overall".
   const normalizedSort = rawSort === "most-mature" ? "best-overall" : rawSort;
-  const sort: AppsSort | undefined =
+  const sort: ItemsSort | undefined =
     normalizedSort && SORT_OPTIONS.some((o) => o.value === normalizedSort)
-      ? (normalizedSort as AppsSort)
+      ? (normalizedSort as ItemsSort)
       : undefined;
   const rawPage = Number(sp.get(KEYS.page));
   const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : undefined;
@@ -84,7 +84,7 @@ export function filtersFromSearchParams(sp: URLSearchParams): AppsFilters {
  * Undefined / empty values are dropped. Defaults (sort, page 1, comfortable
  * density) are also dropped to keep URLs short and canonical.
  */
-export function searchParamsFromFilters(f: AppsFilters): URLSearchParams {
+export function searchParamsFromFilters(f: ItemsFilters): URLSearchParams {
   const sp = new URLSearchParams();
   if (f.q) sp.set(KEYS.q, f.q);
   for (const v of f.stacks ?? []) sp.append(KEYS.stacks, v);
@@ -99,8 +99,8 @@ export function searchParamsFromFilters(f: AppsFilters): URLSearchParams {
   return sp;
 }
 
-/** True if any filter is active (i.e. the result list isn't "all apps"). */
-export function hasAnyFilter(f: AppsFilters): boolean {
+/** True if any filter is active (i.e. the result list isn't "all items"). */
+export function hasAnyFilter(f: ItemsFilters): boolean {
   if (f.q && f.q.trim()) return true;
   if (f.lens) return true;
   return Boolean(
@@ -113,16 +113,16 @@ export function hasAnyFilter(f: AppsFilters): boolean {
   );
 }
 
-/** How many apps per page. Constant for now; future versions may vary. */
+/** How many items per page. Constant for now; future versions may vary. */
 export const PAGE_SIZE = DEFAULT_PAGE_SIZE;
 
 /**
- * Sort apps in-place-free: returns a new array. Stable for ties.
+ * Sort items in-place-free: returns a new array. Stable for ties.
  * Apps missing the sort key (e.g. no stars) sink to the bottom rather
  * than vanishing.
  */
-export function applySort(apps: OpenSourceApp[], sort: AppsSort): OpenSourceApp[] {
-  const arr = apps.slice();
+export function applySort(items: Resource[], sort: ItemsSort): Resource[] {
+  const arr = items.slice();
   const ts = (s?: string | null): number => (s ? new Date(s).valueOf() : 0);
   switch (sort) {
     case "most-starred":
@@ -138,10 +138,10 @@ export function applySort(apps: OpenSourceApp[], sort: AppsSort): OpenSourceApp[
       // Composite: scores.overall → scores.maturity → scores.activity →
       // active status → license present → stars. Avoids ranking by
       // stars alone.
-      const score = (a: OpenSourceApp, k: "overall" | "maturity" | "activity") =>
+      const score = (a: Resource, k: "overall" | "maturity" | "activity") =>
         typeof a.scores?.[k] === "number" ? (a.scores![k] as number) : 0;
-      const active = (a: OpenSourceApp) => (a.status === "active" ? 1 : 0);
-      const licensed = (a: OpenSourceApp) => (a.license ? 1 : 0);
+      const active = (a: Resource) => (a.status === "active" ? 1 : 0);
+      const licensed = (a: Resource) => (a.license ? 1 : 0);
       arr.sort((a, b) => {
         const sOverall = score(b, "overall") - score(a, "overall");
         if (sOverall !== 0) return sOverall;
@@ -176,23 +176,23 @@ export function totalPages(itemCount: number, pageSize = PAGE_SIZE): number {
 }
 
 /** Resolve the effective sort from a filters object, applying default. */
-export function effectiveSort(f: AppsFilters): AppsSort {
+export function effectiveSort(f: ItemsFilters): ItemsSort {
   return f.sort ?? DEFAULT_SORT;
 }
 
 /** Resolve the effective page from a filters object, applying default. */
-export function effectivePage(f: AppsFilters): number {
+export function effectivePage(f: ItemsFilters): number {
   return f.page ?? DEFAULT_PAGE;
 }
 
 /**
- * Return the subset of apps that match all active filters (AND across
+ * Return the subset of items that match all active filters (AND across
  * dimensions, OR within a dimension).
  *
  * `q` is a case-insensitive substring search across name, owner,
  * description, and category. Other dimensions are exact match.
  */
-export function filterApps(apps: OpenSourceApp[], f: AppsFilters): OpenSourceApp[] {
+export function filterItems(items: Resource[], f: ItemsFilters): Resource[] {
   const q = f.q?.trim().toLowerCase();
   const stacks = f.stacks?.length ? new Set(f.stacks) : null;
   const platforms = f.platforms?.length ? new Set(f.platforms) : null;
@@ -201,7 +201,7 @@ export function filterApps(apps: OpenSourceApp[], f: AppsFilters): OpenSourceApp
   const licenses = f.licenses?.length ? new Set(f.licenses) : null;
   const statuses = f.statuses?.length ? new Set(f.statuses) : null;
 
-  return apps.filter((a) => {
+  return items.filter((a) => {
     // Text search — match name, owner, description, category, stack,
     // stacks, platforms, tags, backend, architecture, stateManagement,
     // bestFor, whyListed, license, status.
@@ -264,9 +264,9 @@ export function filterApps(apps: OpenSourceApp[], f: AppsFilters): OpenSourceApp
 
 /** Build a flat list of "active filter" chips for display + removal. */
 export function activeFilterChips(
-  f: AppsFilters,
-): { key: keyof AppsFilters; value: string; label: string }[] {
-  const out: { key: keyof AppsFilters; value: string; label: string }[] = [];
+  f: ItemsFilters,
+): { key: keyof ItemsFilters; value: string; label: string }[] {
+  const out: { key: keyof ItemsFilters; value: string; label: string }[] = [];
 
   if (f.q && f.q.trim()) {
     out.push({ key: "q", value: "", label: `“${f.q}”` });
@@ -313,11 +313,11 @@ export function activeFilterChips(
  * that no longer has results.
  */
 export function removeFilter(
-  f: AppsFilters,
-  key: keyof AppsFilters,
+  f: ItemsFilters,
+  key: keyof ItemsFilters,
   value: string,
-): AppsFilters {
-  let next: AppsFilters;
+): ItemsFilters {
+  let next: ItemsFilters;
   if (key === "q") {
     next = { ...f, q: undefined };
   } else {
@@ -331,10 +331,10 @@ export function removeFilter(
 }
 
 /**
- * Build the full list of facet values from the apps array, preserving
+ * Build the full list of facet values from the items array, preserving
  * a sensible order (frequency desc, then alphabetical for ties).
  */
-export function buildFacets(apps: OpenSourceApp[]) {
+export function buildFacets(items: Resource[]) {
   const counts = {
     stack: new Map<string, number>(),
     platform: new Map<string, number>(),
@@ -342,7 +342,7 @@ export function buildFacets(apps: OpenSourceApp[]) {
     label: new Map<string, number>(),
     license: new Map<string, number>(),
   };
-  for (const a of apps) {
+  for (const a of items) {
     const allStacks = new Set([a.stack, ...(a.stacks ?? [])]);
     for (const s of allStacks) counts.stack.set(s, (counts.stack.get(s) ?? 0) + 1);
     for (const p of a.platforms) counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);

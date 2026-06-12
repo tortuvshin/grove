@@ -3,7 +3,7 @@
  * Returns nulls if the URL doesn't match github.com/{owner}/{repo}.
  *
  * Used in:
- *   - AppCard avatar fallback (owner avatar via GitHub avatars API)
+ *   - ItemCard avatar fallback (owner avatar via GitHub avatars API)
  *   - App detail page (showing owner + repo name in breadcrumb / header)
  *   - Anywhere we need to display "@owner / repo" or link to the owner
  */

@@ -403,3 +403,72 @@
     background: #ffffff;
   }
 }
+
+/* ────────────────────────────────────────────────────────────────────
+ * Backwards-compat aliases — openapps used the unprefixed utility
+ * names (`card`, `btn-primary`, `btn-outline`, `btn-ghost`). New
+ * components should use the `grove-` prefix. These rules mirror
+ * the `grove-*` definitions above so the openapps-derived
+ * components (ItemCard, AppCard, etc.) work without per-component
+ * edits.
+ * ────────────────────────────────────────────────────────────────────*/
+.card {
+  border: 1px solid var(--color-ink-200);
+  background: var(--color-ink-50);
+  border-radius: 0.5rem;
+}
+.dark .card {
+  border-color: var(--color-ink-800);
+  background: var(--color-ink-900);
+}
+.card-hover:hover {
+  border-color: var(--color-ink-300);
+  background: var(--color-ink-100);
+}
+.dark .card-hover:hover {
+  border-color: var(--color-ink-700);
+  background: var(--color-ink-900);
+}
+.btn-primary,
+.btn-outline,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+.btn-primary {
+  border-color: var(--color-ink-900);
+  background: var(--color-ink-900);
+  color: var(--color-ink-50);
+}
+.btn-primary:hover {
+  background: var(--color-ink-700);
+  border-color: var(--color-ink-700);
+}
+.btn-outline {
+  border-color: var(--color-ink-200);
+  background: var(--color-ink-50);
+  color: var(--color-ink-700);
+}
+.btn-outline:hover {
+  border-color: var(--color-ink-300);
+  background: var(--color-ink-100);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink-500);
+}
+.btn-ghost:hover {
+  color: var(--color-ink-900);
+  background: var(--color-ink-100);
+}

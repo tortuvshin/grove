@@ -65,7 +65,7 @@ export const SCORE_LABELS: Record<keyof AppScores, string> = {
 /**
  * Reasoning copy per dimension, surfaced in the detail page so the
  * numbers don't feel magical. These are intentionally short — the
- * curation.notes on each app carries the longer story.
+ * curation.notes on each item carries the longer story.
  */
 export const SCORE_REASONING: Record<keyof AppScores, string> = {
   activity:
@@ -79,5 +79,5 @@ export const SCORE_REASONING: Record<keyof AppScores, string> = {
   docs:
     "README quality, architecture docs, contributing guide, examples, code comments.",
   overall:
-    "Composite judgment — how likely this app is to satisfy a curious developer.",
+    "Composite judgment — how likely this item is to satisfy a curious developer.",
 };
