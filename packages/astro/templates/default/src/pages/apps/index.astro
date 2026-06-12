@@ -10,16 +10,14 @@
  * ecosystem-map → /entities), this page redirects to the matching
  * dynamic route.
  */
-import { indexSlug, itemLabelPlural, items } from "../data/records";
-import { redirect } from "astro:actions";
-import { getStaticPaths as _ignored } from "../data/records";
+import { indexSlug, itemLabelPlural, items } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
 import ItemIndexRow from "@grove-dev/astro/components/ItemIndexRow.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
-import siteConfig from "../../data/generated/site-config.json";
+import siteConfig from "../../../data/generated/site-config.json";
 import {
   activeFilterChips,
   applySort,
@@ -78,17 +76,15 @@ const description = `Browse every curated ${itemPlural.replace(/s$/, "")} in the
       <div class="mb-6">
         <SmartLensTabs
           currentParams={Astro.url.searchParams}
-          lensIds={["all", "trending", "recently-added", "established", "featured"]}
+          pathPrefix="/apps"
         />
       </div>
 
       <div class="mb-8">
         <RefinePanel
           facets={facets}
-          filters={filters}
-          searchHref="/apps"
-          totalCount={total}
-          filteredCount={filtered.length}
+          initial={filters}
+          pathPrefix="/apps"
         />
       </div>
 
@@ -133,9 +129,8 @@ const description = `Browse every curated ${itemPlural.replace(/s$/, "")} in the
           .map((i) => (i as { category?: string }).category ?? "")
           .filter(Boolean),
       ),
-    ].map((c) => ({ id: c, name: c, blurb: "" }))}
+    ].map((name) => ({ name, slug: name }))}
     pathPrefix="/apps"
-    itemLabelPlural={itemPlural}
   />
   <ExploreByStack
     stacks={[
@@ -145,8 +140,7 @@ const description = `Browse every curated ${itemPlural.replace(/s$/, "")} in the
           .flatMap((i) => [(i as { stack?: string }).stack ?? "", ...(i as { stacks?: string[] }).stacks])
           .filter(Boolean),
       ),
-    ].map((s) => ({ id: s, name: s, status: "live" as const, blurb: "" }))}
+    ].map((name) => ({ name, slug: name }))}
     pathPrefix="/apps"
-    itemLabelPlural={itemPlural}
   />
 </BaseLayout>

@@ -14,7 +14,7 @@
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Hero from "@grove-dev/astro/components/Hero.astro";
 import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
-import ItemSection from "@grove-dev/astro/components/ItemSection.astro";
+import RecordSection from "@grove-dev/astro/components/RecordSection.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
 import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
@@ -56,18 +56,18 @@ const hotList = items
     const labelledHot = labelsOf(r).includes("hot");
     return labelledHot || starsOf(r) >= 1000 || daysSince(pushedAtOf(r)) <= 30;
   })
-  .slice(0, 6);
+  .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
 const newList = items
   .filter((r) => {
     const labelledNew = labelsOf(r).includes("new");
     return daysSince(pushedAtOf(r)) <= 7 || labelledNew;
   })
-  .slice(0, 6);
+  .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
 const matureList = items
   .filter((r) => {
     return tierOf(r) === "curated" && daysSince(pushedAtOf(r)) > 365;
   })
-  .slice(0, 6);
+  .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
 
 // Stacks and categories derived from items
 const stackMap = new Map<string, number>();
@@ -163,35 +163,35 @@ const description =
 
   <WhyThisExists />
 
-  <ItemSection
+  <RecordSection
     id="hot"
     title="Trending now"
     description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} gaining stars, activity, or attention recently.`}
     eyebrow="Hot"
     items={hotList}
-    pathPrefix={`/${slug}`}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
     viewAllHref={`/${slug}?label=hot`}
     viewAllLabel={`View all trending ${itemPlural}`}
   />
 
-  <ItemSection
+  <RecordSection
     id="new"
     title="Recently added"
     description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} added to the directory in the last few weeks.`}
     eyebrow="New"
     items={newList}
-    pathPrefix={`/${slug}`}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
     viewAllHref={`/${slug}?label=new`}
     viewAllLabel={`View all recently added`}
   />
 
-  <ItemSection
+  <RecordSection
     id="mature"
     title="Established"
     description={`Long-running curated ${itemPlural} with strong history, active maintainers, and real-world usage.`}
     eyebrow="Mature"
     items={matureList}
-    pathPrefix={`/${slug}`}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
     viewAllHref={`/${slug}?label=mature`}
     viewAllLabel={`View all established`}
   />
