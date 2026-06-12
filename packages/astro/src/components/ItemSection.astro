@@ -1,20 +1,20 @@
 ---
-import type { OpenSourceApp } from "../../data/types";
-import AppCard from "./AppCard.astro";
-import SectionHeader from "../layout/SectionHeader.astro";
-import Container from "../layout/Container.astro";
+import type { Resource } from "../../data/types";
+import ItemCard from "./ItemCard.astro";
+import SectionHeader from "../layouts/"SectionHeader.astro";
+import Container from "../layouts/"Container.astro";
 
 interface Props {
   id: string;
   title: string;
   /** Plain-language subtitle explaining the lens. */
   description: string;
-  apps: OpenSourceApp[];
-  /** Where the "View all" link points (typically the apps page with a
+  items: Resource[];
+  /** Where the "View all" link points (typically the items page with a
    *  filter applied). */
   viewAllHref?: string;
   /** Custom label for the "View all" link. Lets us say
-   *  "View all new" / "View hot apps" / "View mature apps"
+   *  "View all new" / "View hot items" / "View mature items"
    *  instead of the generic "View all". */
   viewAllLabel?: string;
 }
@@ -23,7 +23,7 @@ const {
   id,
   title,
   description,
-  apps,
+  items,
   viewAllHref = "#",
   viewAllLabel = "View all",
 } = Astro.props;
@@ -44,7 +44,7 @@ const {
     <div
       class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
     >
-      {apps.map((app) => <AppCard app={app} />)}
+      {items.map((item) => <ItemCard item = {item} />)}
     </div>
 
     <div class="mt-4 sm:hidden">

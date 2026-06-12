@@ -1,25 +1,25 @@
 ---
-import type { OpenSourceApp } from "../../data/types";
+import type { Resource } from "../../data/types";
 import Icon from "../icons/Icon.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "../../lib/repo";
 import { formatStars, formatRelative } from "../../lib/format";
 import { statusDisplay } from "../../lib/display";
 
 interface Props {
-  app: OpenSourceApp;
+  item: Resource;
 }
 
-const { app } = Astro.props;
+const { item } = Astro.props;
 
 // Curated = at least one of the hand-written fields is filled in.
 // Stays on the card because it's an objective fact about whether a
 // human reviewed the entry, not a subjective curation label.
 const isCurated = Boolean(
-  app.bestFor?.length || app.whyListed?.length || app.caveats?.length || app.scores,
+  item.bestFor?.length || item.whyListed?.length || item.caveats?.length || item.scores,
 );
 
 // Initials for placeholder logo (first 2 letters of any word in name).
-const initials = app.name
+const initials = item.name
   .split(/\s+/)
   .map((w) => w[0])
   .filter(Boolean)
@@ -27,28 +27,28 @@ const initials = app.name
   .join("")
   .toUpperCase();
 
-// Resolve a logo URL for this app:
-//   1. Explicit `logoUrl` on the app
+// Resolve a logo URL for this item:
+//   1. Explicit `logoUrl` on the item
 //   2. GitHub owner avatar (extracted from `repoUrl`)
 //   3. Initials placeholder.
-const { owner, repo } = getOwnerAndRepoFromRepoUrl(app.repoUrl);
-const logoUrl = app.logoUrl ?? getOwnerAvatarUrl(owner, 80);
+const { owner, repo } = getOwnerAndRepoFromRepoUrl(item.repoUrl);
+const logoUrl = item.logoUrl ?? getOwnerAvatarUrl(owner, 80);
 
 // Show up to 4 platforms; overflow as +N.
-const visiblePlatforms = app.platforms.slice(0, 4);
-const platformOverflow = app.platforms.length - visiblePlatforms.length;
+const visiblePlatforms = item.platforms.slice(0, 4);
+const platformOverflow = item.platforms.length - visiblePlatforms.length;
 
 // Show up to 3 stack chips (primary + first 2 secondary).
-const allStacks = [app.stack, ...(app.stacks ?? [])].filter(Boolean);
+const allStacks = [item.stack, ...(item.stacks ?? [])].filter(Boolean);
 const visibleStacks = allStacks.slice(0, 3);
 const stackOverflow = allStacks.length - visibleStacks.length;
 
-const starsLabel = formatStars(app.stars);
-const updatedLabel = formatRelative(app.lastCommitAt);
+const starsLabel = formatStars(item.stars);
+const updatedLabel = formatRelative(item.lastCommitAt);
 
-const detailHref = `/apps/${app.slug}`;
-const repoHref = app.repoUrl;
-const statusText = statusDisplay(app.status);
+const detailHref = `/items/${item.slug}`;
+const repoHref = item.repoUrl;
+const statusText = statusDisplay(item.status);
 ---
 
 <article
@@ -58,14 +58,14 @@ const statusText = statusDisplay(app.status);
   <header class="relative z-10 flex items-start gap-3">
     <a
       href={detailHref}
-      aria-label={`Open ${app.name} details`}
+      aria-label={`Open ${item.name} details`}
       class="absolute inset-0 z-0 rounded-lg"
     ></a>
 
     {logoUrl ? (
       <img
         src={logoUrl}
-        alt={`${app.name} avatar`}
+        alt={`${item.name} avatar`}
         width="40"
         height="40"
         loading="lazy"
@@ -91,7 +91,7 @@ const statusText = statusDisplay(app.status);
           href={detailHref}
           class="relative z-10 text-inherit no-underline"
         >
-          {app.name}
+          {item.name}
         </a>
       </h3>
       <span class="truncate text-2xs text-ink-500 dark:text-ink-400">
@@ -103,14 +103,14 @@ const statusText = statusDisplay(app.status);
               rel="noopener noreferrer"
               data-event="external_repo_click"
               data-event-source="card_owner"
-              data-event-app={app.slug}
+              data-event-item = {item.slug}
               class="relative z-10 font-mono text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
             >
               <span class="text-ink-400 dark:text-ink-500">@</span>{owner}{repo ? <span class="text-ink-400 dark:text-ink-500">/{repo}</span> : ""}
             </a>
             <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-            {app.category}
-            {app.status && (
+            {item.category}
+            {item.status && (
               <>
                 <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
                 <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
@@ -119,8 +119,8 @@ const statusText = statusDisplay(app.status);
           </>
         ) : (
           <>
-            {app.category}
-            {app.status && (
+            {item.category}
+            {item.status && (
               <>
                 <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
                 <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
@@ -148,31 +148,31 @@ const statusText = statusDisplay(app.status);
   <p
     class="relative z-10 m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400"
   >
-    {app.description}
+    {item.description}
   </p>
 
   {/* Metadata row: stars · updated · license — the three signals
       that answer "is this alive and usable?" at a glance. */}
   <div class="relative z-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400">
     {starsLabel !== null && (
-      <span class="inline-flex items-center gap-1" title={`${app.stars} stars on GitHub`}>
+      <span class="inline-flex items-center gap-1" title={`${item.stars} stars on GitHub`}>
         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
           <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
         </svg>
         <span class="font-mono">{starsLabel}</span>
       </span>
     )}
-    {app.lastCommitAt && (
-      <span class="inline-flex items-center gap-1" title={`Last commit ${app.lastCommitAt}`}>
+    {item.lastCommitAt && (
+      <span class="inline-flex items-center gap-1" title={`Last commit ${item.lastCommitAt}`}>
         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-ink-400">
           <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm-.5 1.5a.5.5 0 0 0-1 0v3.25c0 .15.07.29.18.39l1.95 1.65a.5.5 0 0 0 .66-.76L7.5 7.55V5Z"/>
         </svg>
         <span class="font-mono">Updated {updatedLabel}</span>
       </span>
     )}
-    {app.license && (
-      <span class="inline-flex items-center gap-1" title={`License: ${app.license}`}>
-        <span class="font-mono uppercase tracking-wide text-[10px]">{app.license}</span>
+    {item.license && (
+      <span class="inline-flex items-center gap-1" title={`License: ${item.license}`}>
+        <span class="font-mono uppercase tracking-wide text-[10px]">{item.license}</span>
       </span>
     )}
   </div>
@@ -212,7 +212,7 @@ const statusText = statusDisplay(app.status);
       rel="noopener noreferrer"
       data-event="external_repo_click"
       data-event-source="card_view_repo"
-      data-event-app={app.slug}
+      data-event-item = {item.slug}
       class="relative z-10 inline-flex items-center gap-1 font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
     >
       View repo

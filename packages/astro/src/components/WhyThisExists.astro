@@ -3,7 +3,7 @@
  * WhyThisExists — the "what is this site for?" section.
  *
  * Renders 3 short, opinionated points (icon + title + body). The
- * icon set is small and generic: "app" (window/grid glyph),
+ * icon set is small and generic: "item" (window/grid glyph),
  * "code" (angle brackets), "search" (magnifier). Defaults to
  * the canonical "directory, source, search" trio.
  *
@@ -14,7 +14,7 @@
 interface WhyPoint {
   title: string;
   body: string;
-  icon: "app" | "code" | "search";
+  icon: "item" | "code" | "search";
 }
 
 interface Props {
@@ -33,7 +33,7 @@ const {
 
 const defaultPoints: WhyPoint[] = [
   {
-    icon: "app",
+    icon: "item",
     title: "A curated starting point",
     body: "Skip the rabbit holes. Every entry here is something a real developer reached for, vetted for quality and longevity.",
   },
@@ -81,7 +81,7 @@ const items = points && points.length > 0 ? points : defaultPoints;
             aria-hidden="true"
             class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-200"
           >
-            {p.icon === "app" && (
+            {p.icon === "item" && (
               <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
                 <path d="M1.75 3.5a.25.25 0 0 1 .25-.25h12a.25.25 0 0 1 .25.25v8a.25.25 0 0 1-.25.25h-12a.25.25 0 0 1-.25-.25v-8ZM2 4.75v6h12v-6H2ZM2.5 6.5h4v2.5h-4V6.5Z"></path>
               </svg>
