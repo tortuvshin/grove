@@ -1,0 +1,47 @@
+kind: project
+name: PrivateGPT
+slug: private-gpt
+description: Interact privately with your documents using LLMs — 100% private, no data leaves your execution environment.
+category: AI/ML
+tags:
+  - llm
+  - rag
+  - privacy
+  - python
+stack: Python
+stacks:
+  - Python
+  - LLM
+  - RAG
+platforms:
+  - linux
+  - macos
+  - self-host
+projectType: real-app
+difficulty: intermediate
+codebaseSize: medium
+repoUrl: https://github.com/zylon-ai/private-gpt
+links:
+  github: https://github.com/zylon-ai/private-gpt
+bestFor:
+  - Private document Q&A
+  - Local LLM experimentation
+  - Enterprise privacy use cases
+whyListed:
+  - Strict no-network mode
+  - Pluggable LLM providers
+  - Clean ingestion pipeline
+caveats:
+  - GPU recommended for best results
+distribution:
+  channels: []
+source:
+  type: manual
+curation:
+  reviewed: true
+  reviewedBy: grove-bot
+  reviewedAt: "2026-06-13"
+  labels:
+    - hot
+  lenses: []
+visibility: keep
