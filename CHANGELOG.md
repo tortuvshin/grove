@@ -31,6 +31,53 @@ For the developer workflow that produces these entries, see
   contributor-facing documentation.
 - Dependabot configured to ignore `@grove-dev/*` workspace deps (the
   release script owns those rewrites).
+- `--deploy <provider>` now writes a deploy workflow + config file
+  for the chosen provider:
+  - `vercel` → `vercel.json` + `.github/workflows/deploy-vercel.yml`
+  - `netlify` → `netlify.toml` + `.github/workflows/deploy-netlify.yml`
+  - `cloudflare` → `wrangler.jsonc` + `.github/workflows/deploy-cloudflare.yml`
+  - `github-pages` → `.github/workflows/build.yml` (Pages deploy step)
+  - `none` → no deploy workflow
+  Previously the flag was cosmetic: any choice silently produced the
+  same GitHub Pages `build.yml`.
+
+### Changed
+- `@grove-dev/cli` V1 scaffolds **Astro** projects only.
+- `packages/nextjs/templates/default/package.json` and
+  `packages/svelte/templates/default/package.json` rewritten to use V1
+  CLI commands (`grove validate`, `grove generate`, `grove sitemap`,
+  `grove llms`, `grove sync github`) instead of the V0 leftovers
+  (`grove build-data`, `grove build-llms-full`, `grove analyze`,
+  `grove enrich`). These are the only V0→V1 entries that can be fixed
+  in V1; the templates are still skeleton-only (no pages / components
+  / layouts) and not exposed as scaffold options until v0.3.0.
+- `scripts/test-scaffold.mjs` now tests the Astro scaffold path only.
+
+### Removed
+- `--framework nextjs` and `--framework svelte` from `@grove-dev/cli`.
+  The `Framework` union in `packages/cli/src/template-loader.ts` is
+  now `"astro"` only; `isFramework()` rejects any other value with
+  `Unknown framework: <value>`. The Next.js and SvelteKit adapter
+  packages still exist (no source files changed) but their templates
+  are skeleton-only and do not scaffold a runnable project, so
+  advertising them as options was misleading. They return as
+  scaffold options in v0.3.0 when the templates ship real pages,
+  components, and layouts.
+- The `nextjs` and `svelte` branches in `FRAMEWORK_LABELS`
+  (`packages/cli/src/index.ts`), the framework select prompt, and the
+  help text for `grove new`/`grove run`. The `detectFramework()` /
+  `frameworkBuildCommand()` / `frameworkDevCommand()` helpers no
+  longer have a non-astro branch.
+
+### Fixed
+- `grove new --framework nextjs` no longer silently produces a
+  half-populated project whose `package.json` references V0 CLI
+  commands that do not exist. It now exits with
+  `Unknown framework: nextjs` and a hint to use `astro` (or wait
+  for v0.3.0).
+- `scripts/test-scaffold.mjs` no longer attempts to scaffold
+  `nextjs` / `svelte` projects (which would fail at the `pnpm run
+  build` step). It is now an Astro-only smoke test.
 
 ### Changed
 - None.
