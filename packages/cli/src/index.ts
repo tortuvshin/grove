@@ -91,8 +91,6 @@ const DEPLOY_LABELS: Record<DeployProvider, { label: string; hint: string }> = {
 };
 const FRAMEWORK_LABELS: Record<Framework, { label: string; hint: string }> = {
   astro: { label: "Astro", hint: "Static-first, great for content sites (V1 supported)" },
-  nextjs: { label: "Next.js", hint: "Roadmap only — not in V1" },
-  svelte: { label: "SvelteKit", hint: "Roadmap only — not in V1" },
 };
 const BLUEPRINT_LABELS: Record<Blueprint, { label: string; hint: string }> = {
   "project-directory": { label: "project-directory", hint: "Structured projects/tools/apps" },
@@ -113,7 +111,7 @@ program
   .argument("[name]", "project directory name (current dir if omitted)")
   .description("Scaffold a new Grove project from a framework template.")
   .option("-b, --blueprint <name>", "blueprint: project-directory | resource-hub | ecosystem-map")
-  .option("-f, --framework <name>", "framework: astro | nextjs | svelte (V1: astro)")
+  .option("-f, --framework <name>", "framework: astro (V1: astro only — nextjs/svelte roadmap)")
   .option("-t, --template <name>", "template name", "default")
   .option("-d, --deploy <provider>", `deploy provider: ${DEPLOY_PROVIDERS.join(" | ")}`)
   .option("-g, --github <mode>", "GitHub workflow mode: none | public (V1: none=private, public=community)")
@@ -219,7 +217,7 @@ program
         framework = "astro";
       } else {
         const f = await p.select({
-          message: "Pick a framework (V1 only supports astro)",
+          message: "Pick a framework (V1: astro only — nextjs/svelte land in v0.3.0)",
           options: SUPPORTED_FRAMEWORKS.map((f) => ({
             value: f,
             label: FRAMEWORK_LABELS[f].label,
@@ -429,7 +427,7 @@ program
   )
   .argument("[name]", "project directory name (default: grove-run-<timestamp>)")
   .description("Scaffold a Grove project from the LOCAL workspace template and run it.")
-  .option("-f, --framework <name>", "framework: astro | nextjs | svelte (V1: astro)", "astro")
+  .option("-f, --framework <name>", "framework: astro (V1: astro only — nextjs/svelte roadmap)", "astro")
   .option("-t, --template <name>", "template name", "default")
   .option("-d, --dir <name>", "project directory name (overrides positional name; relative to monorepo root)")
   .option("--no-install", "skip `pnpm install` after scaffolding")

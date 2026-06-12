@@ -1,0 +1,43 @@
+- id: app-store
+  name: App Store
+  platforms: [ios, macos]
+
+- id: play-store
+  name: Play Store
+  platforms: [android]
+
+- id: fdroid
+  name: F-Droid
+  platforms: [android]
+
+- id: github-releases
+  name: GitHub Releases
+  platforms: [android, ios, macos, windows, linux]
+
+- id: apk
+  name: APK download
+  platforms: [android]
+
+- id: testflight
+  name: TestFlight
+  platforms: [ios]
+
+- id: website
+  name: Website download
+  platforms: [web, ios, android, macos, windows, linux]
+
+- id: snapcraft
+  name: Snapcraft
+  platforms: [linux]
+
+- id: flathub
+  name: Flathub
+  platforms: [linux]
+
+- id: microsoft-store
+  name: Microsoft Store
+  platforms: [windows]
+
+- id: other
+  name: Other
+  platforms: []
