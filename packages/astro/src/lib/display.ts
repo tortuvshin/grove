@@ -8,8 +8,6 @@
  * server-rendered Astro components and any client-side script.
  */
 
-import type { AppStatus } from "../data/types";
-
 // ── Label ids (the `labels` array on an item) ────────────────────────
 export type LabelId = "new" | "hot" | "mature" | "featured";
 
@@ -41,7 +39,7 @@ export const STATUS_DISPLAY: Record<string, string> = {
   unknown: "Unknown",
 };
 
-export function statusDisplay(s: AppStatus | string | null | undefined): string {
+export function statusDisplay(s: string | null | undefined): string {
   if (!s) return STATUS_DISPLAY.unknown;
   return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown;
 }
