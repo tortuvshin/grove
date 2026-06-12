@@ -14,7 +14,14 @@ import { itemLabel } from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 
-const title = `Submit a ${itemLabel()} — ${siteConfig.name}`;
+// English a/an article: "a project" but "an entity" / "an app". Pick
+// automatically so the rendered headline reads naturally regardless
+// of the blueprint's singular label.
+function indefiniteArticle(word: string): string {
+  return /^[aeiou]/i.test(word) ? "an" : "a";
+}
+const article = indefiniteArticle(itemLabel());
+const title = `Submit ${article} ${itemLabel()} — ${siteConfig.name}`;
 const description = `Submit a new ${itemLabel()} to ${siteConfig.name}.`;
 const noindex = true;
 
@@ -36,7 +43,7 @@ const issueUrl = repoPath
         Submit
       </span>
       <h1 class="mt-1 text-[1.75rem] sm:text-[2rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0">
-        Submit a {itemLabel()}
+        Submit {article} {itemLabel()}
       </h1>
       <p class="mt-4 max-w-[62ch] text-sm text-ink-700 dark:text-ink-200 m-0">
         {siteConfig.name} is a community knowledge site. Fill in the

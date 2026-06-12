@@ -1,28 +1,33 @@
 /**
- * Source of truth: `data/generated/records.{full,index,json}`,
- * produced at build time by `grove generate` from
- * `data/records/*.yml`.
+ *  Source of truth: `data/generated/records.{full,index,json}` and
+ *  `data/generated/site-config.json`, produced at build time by
+ *  `grove generate` from `data/records/*.yml` and `grove.config.ts`.
  *
- * Three flavors are written by the generator:
+ *  Three flavors of records are written by the generator:
  *
- *   - `records.full.json`   — every record, all visibility. Carries
- *     every normalized field (including `content`, `bestFor`,
- *     `whyListed`, `caveats`, full `github.repository`, ...).
- *     Use this for the detail page.
- *   - `records.index.json`  — slim projection, visible-only. Use
- *     this for the list page and any home-page sectioning. Shape
- *     is the `IndexRecord` discriminated union from `@grove-dev/core`.
- *   - `records.json`        — alias of `records.full.json`.
+ *    - `records.full.json`   — every record, all visibility. Carries
+ *      every normalized field (including `content`, `bestFor`,
+ *      `whyListed`, `caveats`, full `github.repository`, ...).
+ *      Use this for the detail page.
+ *    - `records.index.json`  — slim projection, visible-only. Use
+ *      this for the list page and any home-page sectioning. Shape
+ *      is the `IndexRecord` discriminated union from `@grove-dev/core`.
+ *    - `records.json`        — alias of `records.full.json`.
  *
- * The YML files are the human-edited source; this module is a
- * typed re-export so pages can import the records without parsing
- * JSON inline. Pages cast to the kind they expect based on the
- * blueprint in `grove.config.ts`.
+ *  The YML files are the human-edited source; this module is a
+ *  typed re-export so pages can import the records without parsing
+ *  JSON inline.
  *
- * When the JSON files are missing (e.g. before `grove generate`
- * runs, or in a fresh scaffold with no records) this module falls
- * back to empty arrays so the Astro build still succeeds — every
- * page must render a graceful "no records yet" state.
+ *  Blueprint-aware helpers (`indexSlug`, `itemLabel`, `itemsByKind`,
+ *  `items` default export) read from `data/generated/site-config.json`'s
+ *  `blueprintConfig` block, so the same module works for all three
+ *  blueprints — `project-directory` (default), `resource-hub`, and
+ *  `ecosystem-map` — without per-blueprint forks.
+ *
+ *  When the JSON files are missing (e.g. before `grove generate`
+ *  runs, or in a fresh scaffold with no records) this module falls
+ *  back to empty arrays so the Astro build still succeeds — every
+ *  page must render a graceful "no records yet" state.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -53,6 +58,19 @@ interface IndexPayload {
   generatedAt?: string;
   totalRecords?: number;
   records?: IndexRecord[];
+}
+
+interface SiteConfigPayload {
+  blueprint?: string;
+  blueprintConfig?: {
+    id?: string;
+    kind?: "project" | "resource" | "entity";
+    routeSlug?: string;
+    itemSlug?: string;
+    labelSingular?: string;
+    labelPlural?: string;
+  };
+  name?: string;
 }
 
 function loadGenerated<T>(filename: string, parser: (raw: string) => T): T {
@@ -103,17 +121,29 @@ const indexRecordsRaw: IndexRecord[] = loadGenerated(
   },
 );
 
+const siteConfigRaw: SiteConfigPayload = loadGenerated(
+  "site-config.json",
+  (raw) => {
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw) as SiteConfigPayload;
+    } catch {
+      return {};
+    }
+  },
+);
+
 /**
- * Full records (all visibility). Use this for the detail page,
- * where you need `content`, `bestFor`, `whyListed`, `caveats`,
- * the full `github.repository` block, etc.
+ *  Full records (all visibility). Use this for the detail page,
+ *  where you need `content`, `bestFor`, `whyListed`, `caveats`,
+ *  the full `github.repository` block, etc.
  */
 export const fullRecords: Resource[] = fullRecordsRaw;
 
 /**
- * Index-payload records (visible only). Use this for the list
- * page and any home-page sectioning, where you only need the
- * slim search-index fields.
+ *  Index-payload records (visible only). Use this for the list
+ *  page and any home-page sectioning, where you only need the
+ *  slim search-index fields.
  */
 export const records: IndexRecord[] =
   indexRecordsRaw.length > 0 ? indexRecordsRaw : [];
@@ -140,8 +170,8 @@ export function recordBySlug(slug: string): Resource | undefined {
 }
 
 /**
- * Generic slug lookup. The spec name is `findRecord`; this is an
- * alias of `recordBySlug` so consumers can use either spelling.
+ *  Generic slug lookup. The spec name is `findRecord`; this is an
+ *  alias of `recordBySlug` so consumers can use either spelling.
  */
 export function findRecord(slug: string): Resource | undefined {
   return bySlug.get(slug);
@@ -162,32 +192,85 @@ export function entityBySlug(slug: string): EntityRecord | undefined {
   return r && r.kind === "entity" ? r : undefined;
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Blueprint-aware generic helpers
+// ──────────────────────────────────────────────────────────────────────
+//
+// Every page (home, list, detail, submit) needs to know the
+// route slug, the kind filter, and the human label. Rather than
+// hardcode "project" / "projects" / "kind: project" at every
+// call-site, we derive them once from `site-config.json`'s
+// `blueprintConfig` block (populated by `grove generate`).
+//
+// `indexSlug()` and `itemLabel()` retain their old signatures
+// (zero-arg) so existing pages keep working — they now read from
+// the JSON instead of a switch statement.
+
+const blueprintConfig = siteConfigRaw.blueprintConfig ?? {};
+const blueprintKind = (blueprintConfig.kind ?? "project") as
+  | "project"
+  | "resource"
+  | "entity";
+const blueprintId = (blueprintConfig.id ?? "project-directory") as
+  | "project-directory"
+  | "resource-hub"
+  | "ecosystem-map";
+
 /**
- * Page slug for the directory index page, derived from the
- * blueprint in `grove.config.ts` (mirrors the helper that used
- * to live in `data/site-config.ts`).
+ * URL slug for the directory index page (e.g. `/projects/`,
+ * `/resources/`, `/entities/`). Override in `grove.config.ts`
+ * via `routes.directory` — reflected through to here at generate
+ * time.
  */
-export function indexSlug(blueprint: string | undefined): string {
-  switch (blueprint) {
-    case "resource-hub":
-      return "resources";
-    case "ecosystem-map":
-      return "entities";
-    case "project-directory":
-    default:
-      return "projects";
-  }
+export function indexSlug(): string {
+  return blueprintConfig.routeSlug ?? "projects";
 }
 
-/** Human label for items in the UI. */
-export function itemLabel(blueprint: string | undefined): string {
-  switch (blueprint) {
-    case "resource-hub":
-      return "resource";
-    case "ecosystem-map":
-      return "entity";
-    case "project-directory":
-    default:
-      return "project";
-  }
+/** URL slug for a single item detail page (the dynamic
+ * `[itemSlug]` segment). */
+export function itemSlug(): string {
+  return blueprintConfig.itemSlug ?? "project";
 }
+
+/** Singular human label, e.g. "project", "resource", "entity". */
+export function itemLabel(): string {
+  return blueprintConfig.labelSingular ?? "project";
+}
+
+/** Plural human label, e.g. "projects", "resources", "entities". */
+export function itemLabelPlural(): string {
+  return blueprintConfig.labelPlural ?? "projects";
+}
+
+/** Active blueprint id. */
+export function blueprintIdFn(): string {
+  return blueprintId;
+}
+
+/** Active record kind discriminator. */
+export function activeKind(): "project" | "resource" | "entity" {
+  return blueprintKind;
+}
+
+/**
+ * Generic items alias. Defaults to the kind this blueprint
+ * produces (project/resource/entity). Use this for all
+ * "list"-flavoured pages so a single template works for every
+ * blueprint.
+ */
+export const items: IndexRecord[] = (() => {
+  switch (blueprintKind) {
+    case "resource":
+      return resources;
+    case "entity":
+      return entities;
+    case "project":
+    default:
+      return projects;
+  }
+})();
+
+/** Generic full-record alias. */
+export const fullItems: Resource[] = (() => {
+  return fullRecords.filter((r) => r.kind === blueprintKind);
+})();
