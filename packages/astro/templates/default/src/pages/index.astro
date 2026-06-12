@@ -21,7 +21,6 @@ import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro
 import OriginalCollection from "@grove-dev/astro/components/OriginalCollection.astro";
 
 import { items, fullRecords, fullItems } from "../data/records";
-import { hotItems, newItems, matureItems, stacksFromItems, categoriesFromItems } from "@grove-dev/astro";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -31,12 +30,63 @@ const slug = (siteConfig.blueprintConfig?.routeSlug ?? "items") as string;
 const itemSingular = (siteConfig.blueprintConfig?.labelSingular ?? "item") as string;
 const itemPlural = (siteConfig.blueprintConfig?.labelPlural ?? "items") as string;
 
-const hotList = hotItems(items, fullRecords).slice(0, 6);
-const newList = newItems(items, fullRecords).slice(0, 6);
-const matureList = matureItems(items, fullRecords).slice(0, 6);
+// ── Lens sectioning (Hot / New / Mature) ────────────────────────
+const DAY_MS = 86_400_000;
+function daysSince(iso: string | null | undefined): number {
+  if (!iso) return Infinity;
+  const d = new Date(iso);
+  if (Number.isNaN(d.valueOf())) return Infinity;
+  return (Date.now() - d.valueOf()) / DAY_MS;
+}
+function starsOf(r: typeof items[number]): number {
+  return (r as { github?: { stars?: number } }).github?.stars ?? 0;
+}
+function pushedAtOf(r: typeof items[number]): string | null {
+  return (r as { github?: { pushedAt?: string | null } }).github?.pushedAt ?? null;
+}
+function labelsOf(r: typeof items[number]): string[] {
+  return r.curation?.labels ?? [];
+}
+function tierOf(r: typeof items[number]): string | undefined {
+  return (r as { health?: { tier?: string } }).health?.tier;
+}
 
-const stacks = stacksFromItems(fullItems).slice(0, 12);
-const categories = categoriesFromItems(fullItems).slice(0, 12);
+const hotList = items
+  .filter((r) => {
+    const labelledHot = labelsOf(r).includes("hot");
+    return labelledHot || starsOf(r) >= 1000 || daysSince(pushedAtOf(r)) <= 30;
+  })
+  .slice(0, 6);
+const newList = items
+  .filter((r) => {
+    const labelledNew = labelsOf(r).includes("new");
+    return daysSince(pushedAtOf(r)) <= 7 || labelledNew;
+  })
+  .slice(0, 6);
+const matureList = items
+  .filter((r) => {
+    return tierOf(r) === "curated" && daysSince(pushedAtOf(r)) > 365;
+  })
+  .slice(0, 6);
+
+// Stacks and categories derived from items
+const stackMap = new Map<string, number>();
+const catMap = new Map<string, number>();
+for (const r of fullItems) {
+  const cat = (r as { category?: string }).category;
+  if (cat) catMap.set(cat, (catMap.get(cat) ?? 0) + 1);
+  const s1 = (r as { stack?: string }).stack;
+  if (s1) stackMap.set(s1, (stackMap.get(s1) ?? 0) + 1);
+  const s2 = (r as { stacks?: string[] }).stacks ?? [];
+  for (const s of s2) stackMap.set(s, (stackMap.get(s) ?? 0) + 1);
+}
+const stacks = [...stackMap.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, 12)
+  .map(([name, count]) => ({ name, slug: name, count }));
+const categories = [...catMap.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([name, count]) => ({ name, slug: name, count }));
 
 // Contributors (best-effort from data/generated/contributors.json)
 const here = dirname(fileURLToPath(import.meta.url));
