@@ -327,7 +327,27 @@ program
       await writeIfMissing(join(root, "content", "methodology.md"), "# Methodology\n\nGrove uses repository metadata as a signal. Human curation decisions control final visibility.\n");
       // Always-on workflows (safe for both private and public projects)
       await writeIfMissing(join(root, ".github", "workflows", "validate-data.yml"), workflowValidate());
-      await writeIfMissing(join(root, ".github", "workflows", "build.yml"), workflowBuild(framework));
+      // The build workflow's deploy step depends on the chosen provider.
+      // For `github-pages` we keep the Pages deploy inline (the original
+      // V1 behaviour). For `vercel` / `netlify` / `cloudflare` / `none`
+      // we write a thin build workflow + a separate deploy workflow (or
+      // skip the deploy workflow entirely for `none`).
+      await writeIfMissing(join(root, ".github", "workflows", "build.yml"), workflowBuild(framework, deploy));
+      // Provider-specific config files (vercel.json, netlify.toml, wrangler.jsonc).
+      // These live at the project root and are picked up automatically by
+      // the provider's CLI / build hook.
+      for (const file of deployConfigFiles(deploy, projectName)) {
+        await writeIfMissing(join(root, file.path), file.content);
+      }
+      // For vercel / netlify / cloudflare we also write a GitHub Actions
+      // workflow that triggers the provider's deploy on push to main.
+      // (`github-pages` deploys inline in build.yml; `none` skips this.)
+      if (deploy === "vercel" || deploy === "netlify" || deploy === "cloudflare") {
+        await writeIfMissing(
+          join(root, ".github", "workflows", `deploy-${deploy}.yml`),
+          workflowDeploy(deploy),
+        );
+      }
       // Issue templates — both modes support a basic set
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "record_submission.md"), issueTemplateSubmission(blueprint));
       await writeIfMissing(join(root, ".github", "ISSUE_TEMPLATE", "bug_report.md"), issueTemplateBug());
