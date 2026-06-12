@@ -470,8 +470,14 @@ program
       }
       const framework = opts.framework;
       if (framework !== "astro") {
+        // V1 only supports astro. The CLI rejects other frameworks at
+        // the `--framework` boundary in `grove new`; `grove run` keeps
+        // the same restriction by virtue of the `Framework` union
+        // (see template-loader.ts). This branch is therefore
+        // unreachable in V1; kept as a safety net for any future
+        // framework that slips past the type guard.
         p.log.warn(
-          `Framework "${framework}" is roadmap-only in V1. Only astro has a real template — proceeding anyway and hoping for the best.`,
+          `Framework "${framework}" is not supported in V1. Only astro is wired up — proceeding anyway and hoping for the best.`,
         );
       }
 
@@ -1089,13 +1095,11 @@ async function detectFramework(): Promise<Framework> {
     };
     const all = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
     if (all["@grove-dev/astro"]) return "astro";
-    if (all["@grove-dev/nextjs"]) return "nextjs";
-    if (all["@grove-dev/svelte"]) return "svelte";
   } catch {
     /* ignore */
   }
   console.error("Could not detect a Grove framework in the current project.");
-  console.error("Install @grove-dev/astro first. (Next.js and SvelteKit are roadmap-only in V1.)");
+  console.error("Install @grove-dev/astro first. (V1 supports Astro only.)");
   process.exit(1);
 }
 
@@ -1103,10 +1107,6 @@ function frameworkBuildCommand(fw: Framework): [string, string[]] {
   switch (fw) {
     case "astro":
       return ["pnpm", ["exec", "astro", "build"]];
-    case "nextjs":
-      return ["pnpm", ["exec", "next", "build"]];
-    case "svelte":
-      return ["pnpm", ["exec", "vite", "build"]];
   }
 }
 
@@ -1114,10 +1114,6 @@ function frameworkDevCommand(fw: Framework): [string, string[]] {
   switch (fw) {
     case "astro":
       return ["pnpm", ["exec", "astro", "dev"]];
-    case "nextjs":
-      return ["pnpm", ["exec", "next", "dev"]];
-    case "svelte":
-      return ["pnpm", ["exec", "vite", "dev"]];
   }
 }
 
