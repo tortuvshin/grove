@@ -1,99 +1,182 @@
 ---
 /**
- * About page — three value props (MinimalAbout) + a long-form
- * methodology section rendered from `content/pages/methodology.md`.
+ * About page — generic.
  *
- * The markdown body is read at build time and rendered as a single
- * <pre> block (we keep the template dep-free; consumers can swap in
- * a real markdown pipeline by overriding the page). The intent is
- * that the methodology is *visible on the page* even if the prose
- * isn't styled — the structured content stays discoverable.
+ * Mirrors the openapps section structure: breadcrumb, header with
+ * two-line intro, then a stack of cards (Why, Value, Data, Generic)
+ * followed by a CTA row. The copy is generic — references "directory",
+ * "record", "framework" — so it works for any blueprint.
+ *
+ * Side-by-side comparison with the older "Why" copy:
+ *   - Old: "A directory of real open-source apps. Started from
+ *          the Open Source Flutter Apps collection…"
+ *   - New: "A growing community knowledge site. A curated, health-
+ *          aware developer directory…"
+ *
+ * The card utility classes (`grove-card`, `grove-btn-*`) match the
+ * rest of the framework, and the data fields it references
+ * (`siteConfig.tagline`, `siteConfig.repoUrl`) all flow from the
+ * site config — no hardcoded brand or copy.
  */
-import { readFileSync, existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
-
+import BaseLayout from "../components/layout/BaseLayout.astro";
+import Container from "../components/layout/Container.astro";
 import siteConfig from "../../data/generated/site-config.json";
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import Container from "@grove-dev/astro/layouts/Container.astro";
-import MinimalAbout from "@grove-dev/astro/components/MinimalAbout.astro";
+import { indexSlug, itemLabel } from "../data/records";
 
+const githubUrl = siteConfig.repoUrl;
 const title = `About — ${siteConfig.name}`;
-const description = `About ${siteConfig.name} — ${siteConfig.tagline}`;
-
-// ── Load methodology.md from content/pages/ (build time) ──────
-const here = dirname(fileURLToPath(import.meta.url));
-const methodologyPath = [
-  resolve(here, "..", "..", "..", "content", "pages", "methodology.md"),
-  resolve(here, "..", "..", "..", "..", "content", "pages", "methodology.md"),
-  resolve(process.cwd(), "content", "pages", "methodology.md"),
-].find((p) => existsSync(p));
-
-let methodologyText: string | null = null;
-if (methodologyPath) {
-  try {
-    methodologyText = readFileSync(methodologyPath, "utf8");
-  } catch {
-    methodologyText = null;
-  }
-}
+const description = `${siteConfig.tagline} Built with Grove.`;
+const slug = indexSlug();
+const item = itemLabel();
 ---
 
 <BaseLayout title={title} description={description} site={siteConfig}>
-  <Container>
+  <Container size="narrow">
     <article class="py-12 sm:py-16">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        About
-      </span>
-      <h1 class="mt-1 text-[1.75rem] sm:text-[2.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0">
-        About {siteConfig.name}
-      </h1>
-      <p class="mt-4 max-w-[62ch] text-base text-ink-700 dark:text-ink-200 m-0">
-        {siteConfig.name} is a community knowledge site built with{" "}
-        <a
-          href="https://github.com/tortuvshin/grove"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-ink-900 underline hover:text-ink-700 dark:text-ink-100 dark:hover:text-white"
-        >
-          Grove
-        </a>{" "}
-        — an open-source framework for growing useful structured knowledge.
-      </p>
-    </article>
-  </Container>
+      <nav class="text-2xs text-ink-500 dark:text-ink-400" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-ink-900 dark:hover:text-ink-100">Home</a>
+        <span class="mx-1.5 text-ink-300 dark:text-ink-700">/</span>
+        <span class="text-ink-700 dark:text-ink-300">About</span>
+      </nav>
 
-  <MinimalAbout
-    title="Why this exists"
-    description="Three principles guide what gets listed and how it's surfaced."
-  />
-
-  <Container>
-    <section class="py-12 sm:py-16" aria-labelledby="methodology-heading">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Methodology
-      </span>
-      <h2
-        id="methodology-heading"
-        class="mt-1 text-[1.5rem] sm:text-[1.75rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100 m-0"
-      >
-        How records are picked, scored, and surfaced
-      </h2>
-      <p class="mt-3 max-w-[62ch] text-sm text-ink-500 dark:text-ink-400 m-0">
-        The full editorial + scoring methodology lives in
-        <code class="font-mono text-ink-900 dark:text-ink-100">content/pages/methodology.md</code>.
-        Below is the rendered source so reviewers can audit the criteria.
-      </p>
-      {methodologyText ? (
-        <pre
-          class="mt-6 overflow-x-auto rounded-md border border-ink-200 bg-ink-50 p-4 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"
-        ><code>{methodologyText}</code></pre>
-      ) : (
-        <p class="mt-6 max-w-[62ch] text-sm text-ink-500 dark:text-ink-400 m-0">
-          The methodology file is not yet present in this scaffold.
-          See <code class="font-mono">content/pages/methodology.md</code>.
+      <header class="mt-5">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          About
+        </span>
+        <h1 class="mt-1 m-0 text-[1.75rem] sm:text-[2.25rem] font-semibold tracking-[-0.02em] leading-[1.1] text-ink-900 dark:text-ink-100">
+          A growing community knowledge site.
+        </h1>
+        <p class="mt-4 m-0 text-[1rem] sm:text-[1.0625rem] leading-relaxed text-ink-700 dark:text-ink-200 max-w-[62ch]">
+          {siteConfig.name} is a curated, health-aware developer directory —
+          built so you can find, compare, run, study, and contribute to
+          open-source {item}s.
         </p>
-      )}
-    </section>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400 max-w-[62ch]">
+          A growing list, forked from the original. Same shape, same
+          spirit, fresh data.
+        </p>
+      </header>
+
+      <section class="grove-card mt-8 p-5 sm:p-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Why
+        </span>
+        <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          A curated starting point
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          GitHub search and README lists optimize for the repository
+          name and description. They rarely tell you whether a project
+          is a real {item} or a demo, which stack it uses beyond the
+          headline, how active it really is, or whether it has a clear
+          license.
+        </p>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          {siteConfig.name} turns that flat list into a structured,
+          health-aware index. Each entry carries the metadata a developer
+          actually needs to decide whether to open the repo.
+        </p>
+      </section>
+
+      <section class="grove-card mt-4 p-5 sm:p-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Why real {item}s
+        </span>
+        <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          Real, runnable source
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          Every {item} links back to its source. Skim, fork, learn — no
+          paywalls, no broken download links.
+        </p>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          The directory is hand-curated — no SEO spam, no affiliate
+          farms, no broken links.
+        </p>
+      </section>
+
+      <section class="grove-card mt-4 p-5 sm:p-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          What you get
+        </span>
+        <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          What every page gives you
+        </h2>
+        <ul class="m-0 mt-3 list-none space-y-1.5 p-0 text-[0.9375rem] text-ink-700 dark:text-ink-200">
+          <li class="flex items-baseline gap-2">
+            <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+            <span>Stack, category, and architecture at a glance</span>
+          </li>
+          <li class="flex items-baseline gap-2">
+            <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+            <span>Supported platforms and license</span>
+          </li>
+          <li class="flex items-baseline gap-2">
+            <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+            <span>Activity and status — last commit, monthly history, health signals</span>
+          </li>
+          <li class="flex items-baseline gap-2">
+            <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+            <span>License, stars, and curation tier</span>
+          </li>
+          <li class="flex items-baseline gap-2">
+            <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+            <span>Curated notes: best for, why listed, caveats</span>
+          </li>
+          <li class="flex items-baseline gap-2">
+            <span aria-hidden="true" class="text-ink-400 dark:text-ink-500">—</span>
+            <span>Filters that respect you — search by stack, platform, license, or status</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="grove-card mt-4 p-5 sm:p-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Generic by design
+        </span>
+        <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          Generic by design
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          The framework supports three blueprints: project-directory,
+          resource-hub, and ecosystem-map. Each can be configured
+          without touching the components — pages, schema, and
+          routes all derive from <code class="font-mono">grove.config.ts</code>.
+        </p>
+      </section>
+
+      <section class="grove-card mt-4 p-5 sm:p-6">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Free to fork, free to extend
+        </span>
+        <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          Free to fork, free to extend
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          The full data lives in this repository as plain YAML. The
+          static output is plain HTML. No database, no JavaScript
+          framework, no CDN with sticky sessions.
+        </p>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-700 dark:text-ink-200">
+          Anyone can suggest a new {item}, fix a typo, or improve the
+          metadata through a pull request.
+        </p>
+      </section>
+
+      <section class="mt-8 flex flex-wrap items-center gap-3">
+        <a href={`/${slug}`} class="grove-btn grove-btn-primary">Browse the directory</a>
+        {githubUrl && (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="grove-btn grove-btn-outline"
+          >
+            View on GitHub
+          </a>
+        )}
+        <a href="/submit" class="grove-btn grove-btn-ghost">Submit a {item} →</a>
+      </section>
+    </article>
   </Container>
 </BaseLayout>
