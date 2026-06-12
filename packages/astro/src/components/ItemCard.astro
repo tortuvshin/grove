@@ -1,6 +1,6 @@
 ---
 import type { Resource } from "../../data/types";
-import Icon from "../icons/Icon.astro";
+import Icon from "./Icon.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "../../lib/repo";
 import { formatStars, formatRelative } from "../../lib/format";
 import { statusDisplay } from "../../lib/display";
@@ -231,7 +231,7 @@ const statusText = statusDisplay(item.status);
 </article>
 
 <style>
-  @reference "../../styles/global.css";
+  @reference "../styles.css";
 
   .chip {
     @apply inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300;
