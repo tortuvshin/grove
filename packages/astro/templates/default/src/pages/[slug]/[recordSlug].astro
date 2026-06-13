@@ -17,7 +17,7 @@
  *  Generic across the 3 record kinds (project / resource / entity) —
  *  non-project fields simply render nothing. The URL is dynamic on
  *  both `[slug]` (blueprint route, e.g. `projects`/`resources`/
- *  `entities`) and `[itemSlug]` (the record slug), so a single page
+ *  `entities`) and `[recordSlug]` (the record slug), so a single page
  *  file serves every blueprint and every record.
  */
 import siteConfig from "../../../data/generated/site-config.json";
@@ -54,12 +54,12 @@ export async function getStaticPaths() {
     /* not present */
   }
   return fullRecords.map((record) => ({
-    params: { slug: dirSlug, itemSlug: record.slug },
+    params: { slug: dirSlug, recordSlug: record.slug },
   }));
 }
 
 const slug = Astro.params.slug ?? indexSlug();
-const recordSlug = Astro.params.itemSlug ?? "";
+const recordSlug = Astro.params.recordSlug ?? "";
 const project = projectBySlug(recordSlug);
 const resource = resourceBySlug(recordSlug);
 const entity = entityBySlug(recordSlug);
