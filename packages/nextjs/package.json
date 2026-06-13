@@ -2,7 +2,7 @@
   "name": "@grove-dev/nextjs",
   "version": "0.2.10",
   "type": "module",
-  "description": "Next.js framework adapter for Grove. Components, layouts, design tokens, and a default template.",
+  "description": "Roadmap-only Next.js adapter package for Grove. No runnable template or component exports ship in V1.",
   "license": "MIT",
   "keywords": [
     "grove",
@@ -35,9 +35,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./styles.css": "./src/styles.css",
-    "./components/*": "./src/components/*.tsx"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

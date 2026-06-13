@@ -48,7 +48,6 @@ import {
   listTemplates,
   packageNameFromProjectName,
   renameProjectInTemplate,
-  renameProjectInTemplatePreserveDeps,
   SUPPORTED_FRAMEWORKS,
   type DeployProvider,
   type Framework,
@@ -580,12 +579,17 @@ program
         s.start("Scaffolding");
         await mkdir(root, { recursive: true });
         await copyTemplate(framework, root, tpl.template);
-        // `renameProjectInTemplatePreserveDeps` only updates the
-        // package.json `name` field — it does NOT touch `workspace:*`
-        // Grove deps. The monorepo-root `pnpm install --filter` below
-        // then resolves those against the local `packages/*` siblings.
-        await renameProjectInTemplatePreserveDeps(framework, root, projectName, tpl.template);
-        s.stop("Scaffolded (workspace:* deps preserved)");
+        // Use local package paths for the dev-only run path. Installing
+        // the generated project as a standalone package avoids pnpm's
+        // workspace discovery cache when a project appears mid-command.
+        await renameProjectInTemplate(
+          framework,
+          root,
+          projectName,
+          tpl.template,
+          { mode: "file" },
+        );
+        s.stop("Scaffolded (local package deps)");
       }
 
       // ── git init ───────────────────────────────────────────────────
@@ -601,19 +605,17 @@ program
       // ── pnpm install (from monorepo root, scoped to this project) ──
       if (opts.install !== false) {
         const installSpinner = p.spinner();
-        installSpinner.start(
-          `Installing dependencies (monorepo filter on '${packageName}')`,
-        );
+        installSpinner.start("Installing dependencies");
         try {
-          await runExternal("pnpm", ["install", "--filter", packageName], {
+          await runExternal("pnpm", ["install", "--ignore-workspace", "--offline"], {
             stdio: "ignore",
-            cwd: monorepoRoot,
+            cwd: root,
           });
           installSpinner.stop("Installed dependencies");
         } catch {
           installSpinner.stop("Install failed");
           p.log.warn(
-            `Run \`pnpm install --filter ${packageName}\` from ${monorepoRoot} to retry.`,
+            `Run \`pnpm install --ignore-workspace\` from ${root} to retry.`,
           );
           if (runAction !== "init") {
             p.log.error("Cannot continue without a working install.");
@@ -876,7 +878,17 @@ program
       process.exit(1);
     }
     if (target === "contributors") {
-      console.log("[sync contributors] contributor sync is not yet implemented in V1.");
+      const script = resolve(process.cwd(), "scripts", "sync-contributors.mjs");
+      try {
+        await access(script);
+      } catch {
+        console.error(
+          `[sync contributors] Missing ${script}. ` +
+            "Restore the template script or run this command from a Grove project root.",
+        );
+        process.exit(1);
+      }
+      await runExternal(process.execPath, [script], { stdio: "inherit", cwd: process.cwd() });
       return;
     }
     const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
