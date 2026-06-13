@@ -5,7 +5,8 @@
  * Mirrors the openapps list structure:
  *   - SmartLensTabs (All / Trending / Recently added / Established / Featured)
  *   - RefinePanel  (Stack / Platform / Category / License / Sort)
- *   - ItemSection rows (full record cards via RecordSection)
+ *   - RecordSection rows (full record cards; the `ItemSection` V0
+ *     name was renamed to `RecordSection` in V1)
  *   - ExploreByCategory / ExploreByStack (compact pill lists)
  *
  * Generic: the URL slug (e.g. `/projects/`, `/resources/`,
@@ -15,11 +16,11 @@
  */
 import siteConfig from "../../../data/generated/site-config.json";
 import { items, itemLabel, itemLabelPlural } from "../../data/records";
-import type { AppsFilters } from "@grove-dev/astro";
+import type { IndexFilters } from "@grove-dev/astro";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import AppsIndexRow from "@grove-dev/astro/components/AppsIndexRow.astro";
+import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
@@ -30,7 +31,7 @@ import {
   countByStack,
   effectivePage,
   effectiveSort,
-  filterApps,
+  filterRecords,
   filtersFromSearchParams,
   paginate,
   searchParamsFromFilters,
@@ -57,7 +58,7 @@ const filters = filtersFromSearchParams(Astro.url.searchParams);
 const facets = buildFacets(items);
 const sort = effectiveSort(filters);
 const requestedPage = effectivePage(filters);
-const filtered = filterApps(items, filters);
+const filtered = filterRecords(items, filters);
 const sorted = applySort(filtered, sort);
 const pages = totalPages(sorted.length);
 const page = Math.min(requestedPage, pages);
@@ -106,15 +107,15 @@ const stackEntries = [...countByStack(items as Parameters<typeof countByStack>[0
   .map(([name, count]) => ({ name, slug: name, count }));
 
 function hrefForPage(target: number): string {
-  const next: AppsFilters = { ...filters, page: target };
+  const next: IndexFilters = { ...filters, page: target };
   const query = searchParamsFromFilters(next).toString();
   return query ? `/${slug}?${query}` : `/${slug}`;
 }
 
-function hrefForRemove(key: keyof AppsFilters, value: string): string {
-  const params = new URLSearchParams(Astro.url.searchParams);
-  params.delete("page");
-  const urlKey: Partial<Record<keyof AppsFilters, string>> = {
+function hrefForRemove(key: keyof IndexFilters, value: string): string {
+  const params = new URLSearchParams();
+  const next: IndexFilters = { ...filters, page: 1 };
+  const urlKey: Partial<Record<keyof IndexFilters, string>> = {
     stacks: "stack",
     platforms: "platform",
     categories: "category",
@@ -266,8 +267,8 @@ function hrefForRemove(key: keyof AppsFilters, value: string): string {
 
       <ul id="results-list" class="m-0 flex list-none flex-col gap-3 p-0">
         {sorted.map((item) => (
-            <li class="m-0 p-0" data-item-slug={item.slug}>
-              <AppsIndexRow record={item as Parameters<typeof AppsIndexRow>[0]["record"]} detailHref={`/${slug}/${item.slug}`} />
+            <li class="m-0 p-0" data-record-slug={item.slug}>
+              <IndexRow record={item as Parameters<typeof IndexRow>[0]["record"]} detailHref={`/${slug}/${item.slug}`} />
             </li>
         ))}
       </ul>
@@ -369,11 +370,11 @@ function hrefForRemove(key: keyof AppsFilters, value: string): string {
         var order = new Map(filtered.map(function (item, index) { return [item.slug, index]; }));
         Array.from(list.children)
           .sort(function (a, b) {
-            return (order.get(a.dataset.itemSlug) ?? Number.MAX_SAFE_INTEGER) -
-              (order.get(b.dataset.itemSlug) ?? Number.MAX_SAFE_INTEGER);
+            return (order.get(a.dataset.recordSlug) ?? Number.MAX_SAFE_INTEGER) -
+              (order.get(b.dataset.recordSlug) ?? Number.MAX_SAFE_INTEGER);
           })
           .forEach(function (node) {
-            node.hidden = !visible.has(node.dataset.itemSlug);
+            node.hidden = !visible.has(node.dataset.recordSlug);
             list.appendChild(node);
           });
 

@@ -67,6 +67,9 @@ interface SiteConfigPayload {
     kind?: "project" | "resource" | "entity";
     routeSlug?: string;
     itemSlug?: string;
+    /** V1 canonical field name for the record detail slug
+     * (replaces the V0 `itemSlug` field). */
+    recordSlug?: string;
     labelSingular?: string;
     labelPlural?: string;
   };
@@ -226,10 +229,11 @@ export function indexSlug(): string {
   return blueprintConfig.routeSlug ?? "projects";
 }
 
-/** URL slug for a single item detail page (the dynamic
- * `[itemSlug]` segment). */
-export function itemSlug(): string {
-  return blueprintConfig.itemSlug ?? "project";
+/** URL slug for a single record detail page (the dynamic
+ * `[recordSlug]` segment). Default "project" for backwards-compat
+ * with V0-published configs that exposed the field as `itemSlug`. */
+export function recordSlugConfig(): string {
+  return blueprintConfig.recordSlug ?? blueprintConfig.itemSlug ?? "project";
 }
 
 /** Singular human label, e.g. "project", "resource", "entity". */
