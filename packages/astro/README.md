@@ -12,33 +12,40 @@ pnpm add @grove-dev/astro
 
 ```txt
 src/
-├── components/        # ItemCard, CategoryGrid, HealthBadge, ScoreBars,
-│                      # DirectoryFilters, DirectoryHero, LensTabs,
-│                      # ActiveFilterChips, MethodologyPanel, Pagination,
-│                      # ProjectDetail, SubmitDraft
+├── components/        # ItemCard, CategoryGrid, ScoreBars, IndexRow,
+│                      # Pagination, RecordSection, RefinePanel, Hero,
+│                      # Icon, SmartLensTabs, ExploreByCategory,
+│                      # ExploreByStack, WhyThisExists, CurationGrid,
+│                      # ContributorsGrid, StackGrid, MinimalAbout,
+│                      # OriginalCollection, DecisionRow, FilterGroupMenu,
+│                      # FilterOptions
 ├── layouts/           # BaseLayout
 ├── styles.css         # design tokens + utility classes
-└── index.ts           # re-exports @grove-dev/ui
+└── index.ts           # re-exports @grove-dev/core + @grove-dev/ui
 
 templates/
 └── default/           # full Astro starter: pages/, layouts/, public/, data/,
-                       # .github/, astro.config.mjs, tailwind.config.mjs
+                       # .github/, astro.config.mjs
 ```
 
 The package publishes `dist/`, `src/`, and `templates/`. The `templates/` directory is **not** imported by consumers; it is copied by `@grove-dev/cli` at scaffold time.
+
+> **Component naming:** `ItemCard` is the V1 published API name (kept for stability — it appears in user docs and downstream sites). The internal `IndexRow` / `Pagination` / `RecordSection` aliases are V1 canonical names; the old `AppsIndexRow` / `AppsPagination` / `ItemSection` V0 names have been removed.
 
 ## Usage in a space
 
 ```astro
 ---
-import { ItemCard, ScoreBars, HealthBadge, DirectoryFilters } from "@grove-dev/astro";
+import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
+import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
+import { ScoreBars, filterRecords, sortDisplay } from "@grove-dev/astro";
 import "@grove-dev/astro/styles.css";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import apps from "../data/generated/apps.json";
+import records from "../data/generated/records.json";
 ---
 <BaseLayout title="My Grove space">
-  <DirectoryFilters facets={...} />
-  {apps.map((app) => <ItemCard item={app} />)}
+  <RefinePanel initial={filters} facets={facets} />
+  {records.map((r) => <ItemCard record={r} href={`/projects/${r.slug}`} />)}
 </BaseLayout>
 ```
 

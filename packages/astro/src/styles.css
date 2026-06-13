@@ -513,7 +513,8 @@
  * names (`card`, `btn-primary`, `btn-outline`, `btn-ghost`). New
  * components should use the `grove-` prefix. These rules mirror
  * the `grove-*` definitions above so the openapps-derived
- * components (ItemCard, AppCard, etc.) work without per-component
+ * components (ItemCard, AppCard, etc. — kept as `ItemCard` for V1
+ * published API stability) work without per-component
  * edits.
  * ────────────────────────────────────────────────────────────────────*/
 .card {
@@ -539,6 +540,7 @@
 
 /* Chip — small inline label used for platforms/stacks/etc. on
  * ItemCard. Mirrors openapps' `.chip` from the ItemCard.astro
+ * (component name retained for V1 published API stability).
  * `<style>` block so the @apply in the component still works. */
 .chip {
   display: inline-flex;
