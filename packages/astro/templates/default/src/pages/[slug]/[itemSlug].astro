@@ -31,6 +31,7 @@ import {
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Icon from "@grove-dev/astro/components/Icon.astro";
 import ScoreBars from "@grove-dev/astro/components/ScoreBars.astro";
+import CurationGrid from "@grove-dev/astro/components/CurationGrid.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro";
 import { formatRelative, formatStars } from "@grove-dev/astro";
 import { statusDisplay, prettySlug, labelDisplay } from "@grove-dev/astro";
@@ -38,6 +39,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { ProjectRecord } from "@grove-dev/core";
+import { marked } from "marked";
 
 export async function getStaticPaths() {
   // Walk every record and emit a path for it. The directory slug
@@ -75,6 +77,7 @@ const name =
 
 const title = `${name} — ${siteConfig.name}`;
 const description = record.description ?? `${name} on ${siteConfig.name}`;
+const itemSingular = siteConfig.blueprintConfig?.labelSingular ?? record.kind;
 
 const repoUrl = proj?.repoUrl ?? (record.links as { github?: string } | undefined)?.github ?? "";
 const homepageUrl = record.links?.website ?? "";
@@ -116,17 +119,8 @@ if (isProject && proj?.content) {
   const contentPath = candidates.find((p) => existsSync(p));
   if (contentPath) {
     try {
-      // Cheap markdown → HTML using a minimal renderer would be
-      // nice, but we don't want to pull another dep into the
-      // template. Render the file as a <pre> for now so the body
-      // still surfaces on the page. Consumers can replace this
-      // with a real markdown pipeline (`marked`, `remark`, ...)
-      // by overriding the `[slug].astro` page.
       const text = readFileSync(contentPath, "utf8");
-      contentHtml = text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+      contentHtml = await marked.parse(text);
     } catch {
       contentHtml = null;
     }
@@ -167,8 +161,8 @@ const languages = extras.github?.languages
   : [];
 const totalLanguageBytes = Math.max(1, languages.reduce((sum, [, b]) => sum + b, 0));
 
-// ── JSON-LD (SoftwareSourceCode) for project-kind records ──────
-let jsonLd: Record<string, unknown> | null = null;
+// ── Kind-aware JSON-LD ─────────────────────────────────────────
+let jsonLd: Record<string, unknown>;
 if (isProject && proj) {
   jsonLd = {
     "@context": "https://schema.org",
@@ -183,6 +177,33 @@ if (isProject && proj) {
       ? { "@type": "Organization", name: ownerRepo.owner, url: `https://github.com/${ownerRepo.owner}` }
       : undefined,
   };
+} else if (record.kind === "resource") {
+  const resourceSchemaType: Record<string, string> = {
+    article: "Article",
+    book: "Book",
+    course: "Course",
+    podcast: "PodcastSeries",
+    video: "VideoObject",
+  };
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": resourceSchemaType[record.type] ?? "CreativeWork",
+    name,
+    description: record.description || undefined,
+    url: homepageUrl || undefined,
+    author: record.author ? { "@type": "Person", name: record.author } : undefined,
+    datePublished: record.publishedAt || undefined,
+  };
+} else {
+  jsonLd = {
+    "@context": "https://schema.org",
+    "@type": record.type === "person" ? "Person" : "Organization",
+    name,
+    description: record.description || undefined,
+    url: homepageUrl || undefined,
+    foundingDate: record.founded || undefined,
+    location: record.location || undefined,
+  };
 }
 ---
 
@@ -191,7 +212,7 @@ if (isProject && proj) {
   description={description}
   site={siteConfig}
   type="article"
-  jsonLd={jsonLd ?? undefined}
+  jsonLd={jsonLd}
   submitHref="/submit"
   submitLabel={`Submit ${name}`}
 >
@@ -321,45 +342,13 @@ if (isProject && proj) {
       )}
 
       {/* ── BestFor / WhyListed / Caveats grid ──────────────── */}
-      {isProject && (bestFor.length > 0 || whyListed.length > 0 || caveats.length > 0) && (
-        <section class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3" aria-label="Curation notes">
-          {bestFor.length > 0 && (
-            <div class="grove-card p-5">
-              <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                Best for
-              </h3>
-              <ul class="mt-3 m-0 flex list-none flex-col gap-1.5 p-0">
-                {bestFor.map((b) => (
-                  <li class="text-sm text-ink-700 dark:text-ink-200">— {b}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {whyListed.length > 0 && (
-            <div class="grove-card p-5">
-              <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                Why listed
-              </h3>
-              <ul class="mt-3 m-0 flex list-none flex-col gap-1.5 p-0">
-                {whyListed.map((w) => (
-                  <li class="text-sm text-ink-700 dark:text-ink-200">— {w}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {caveats.length > 0 && (
-            <div class="grove-card p-5">
-              <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                Caveats
-              </h3>
-              <ul class="mt-3 m-0 flex list-none flex-col gap-1.5 p-0">
-                {caveats.map((c) => (
-                  <li class="text-sm text-ink-700 dark:text-ink-200">— {c}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
+      {isProject && (
+        <CurationGrid
+          bestFor={bestFor}
+          whyListed={whyListed}
+          caveats={caveats}
+          class="mt-8"
+        />
       )}
 
       {/* ── GitHub signals dl ────────────────────────────────── */}
@@ -644,15 +633,16 @@ if (isProject && proj) {
         </section>
       )}
 
-      {/* ── Content markdown (record.content → <pre> for now) ── */}
+      {/* ── Content markdown ─────────────────────────────────── */}
       {contentHtml && (
         <section class="mt-8" aria-labelledby="content-heading">
           <h2 id="content-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
             Notes
           </h2>
-          <pre
-            class="mt-4 overflow-x-auto rounded-md border border-ink-200 bg-ink-50 p-4 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"
-          ><code>{contentHtml}</code></pre>
+          <div
+            class="grove-prose mt-4"
+            set:html={contentHtml}
+          />
         </section>
       )}
     </div>
