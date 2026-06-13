@@ -19,7 +19,7 @@ import type { AppsFilters } from "@grove-dev/astro";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import ItemIndexRow from "@grove-dev/astro/components/AppsIndexRow.astro";
+import AppsIndexRow from "@grove-dev/astro/components/AppsIndexRow.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
@@ -267,7 +267,7 @@ function hrefForRemove(key: keyof AppsFilters, value: string): string {
       <ul id="results-list" class="m-0 flex list-none flex-col gap-3 p-0">
         {sorted.map((item) => (
             <li class="m-0 p-0" data-item-slug={item.slug}>
-              <ItemIndexRow record={item as Parameters<typeof ItemIndexRow>[0]["record"]} detailHref={`/${slug}/${item.slug}`} />
+              <AppsIndexRow record={item as Parameters<typeof AppsIndexRow>[0]["record"]} detailHref={`/${slug}/${item.slug}`} />
             </li>
         ))}
       </ul>

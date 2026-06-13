@@ -302,7 +302,7 @@ function rewriteWorkspaceDepsToVersion(
 
 /**
  * In-place: rewrite every `@grove-dev/*` dependency in the template's
- * `package.json` to a `file:` URL pointing at the matching package
+ * `package.json` to a `link:` URL pointing at the matching package
  * inside the local monorepo. Used by `grove run` to make a freshly
  * scaffolded project installable from this workspace without going
  * through the npm registry or `pnpm-workspace.yaml` membership.
@@ -312,8 +312,9 @@ function rewriteWorkspaceDepsToVersion(
  * the CLI's own dep tree already mirrors the local monorepo because
  * pnpm creates a symlink at `node_modules/@grove-dev/<pkg>` → real
  * path, so a single `resolvePackageRoot(name, cliLocation)` returns
- * the on-disk path. From there we compute a relative `file:` URL
- * anchored at the scaffolded project's root.
+ * the on-disk path. A direct link is required because repacking a
+ * workspace package via `file:` would expose its internal
+ * `workspace:*` dependencies to a standalone install.
  */
 function rewriteWorkspaceDepsToFile(pkg: {
   dependencies?: Record<string, string>;
@@ -339,8 +340,8 @@ function rewriteWorkspaceDepsToFile(pkg: {
         // install error and can fix it.
         continue;
       }
-      rewritten.push(`${name}: -> file:${pkgPath}`);
-      map[name] = `file:${pkgPath}`;
+      rewritten.push(`${name}: -> link:${pkgPath}`);
+      map[name] = `link:${pkgPath}`;
     }
   }
   return rewritten;

@@ -26,9 +26,9 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import siteConfig from "../../data/generated/site-config.json";
 
-const slug = (siteConfig.blueprintConfig?.routeSlug ?? "items") as string;
-const itemSingular = (siteConfig.blueprintConfig?.labelSingular ?? "item") as string;
-const itemPlural = (siteConfig.blueprintConfig?.labelPlural ?? "items") as string;
+const slug = (siteConfig.blueprintConfig?.routeSlug ?? "projects") as string;
+const itemSingular = (siteConfig.blueprintConfig?.labelSingular ?? "project") as string;
+const itemPlural = (siteConfig.blueprintConfig?.labelPlural ?? "projects") as string;
 
 // ── Lens sectioning (Hot / New / Mature) ────────────────────────
 const DAY_MS = 86_400_000;
@@ -57,20 +57,20 @@ const hotList = items
     const labelledHot = labelsOf(r).includes("hot");
     return labelledHot || starsOf(r) >= 1000 || daysSince(pushedAtOf(r)) <= 30;
   })
-  .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
+  .slice(0, 6);
 const newList = items
   .filter((r) => r.kind === "project")
   .filter((r) => {
     const labelledNew = labelsOf(r).includes("new");
     return daysSince(pushedAtOf(r)) <= 7 || labelledNew;
   })
-  .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
+  .slice(0, 6);
 const matureList = items
   .filter((r) => r.kind === "project")
   .filter((r) => {
     return tierOf(r) === "curated" && daysSince(pushedAtOf(r)) > 365;
   })
-  .slice(0, 6) as Parameters<typeof RecordSection>[0]["items"];
+  .slice(0, 6);
 
 // Stacks and categories derived from items
 const stackMap = new Map<string, number>();
