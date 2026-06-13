@@ -1,0 +1,39 @@
+packages/cli/src/template-loader.ts
+  s_3d2ebf79c659db::t_9685607e6d568a 201-202
+  s_3d2ebf79c659db::t_ac154ee8cb9863 196-200,203-212
+  s_3d2ebf79c659db::t_d1a5a2bc0a0b1b 10
+packages/nextjs/package.json
+  s_3d2ebf79c659db::t_5894907145c993 5,38
+packages/svelte/package.json
+  s_3d2ebf79c659db::t_5894907145c993 5,38
+packages/starlight/package.json
+  s_3d2ebf79c659db::t_5894907145c993 3
+packages/cli/src/index.ts
+  s_3d2ebf79c659db::t_d545b1dbbac2a8 586-589,591
+  s_3d2ebf79c659db::t_3f145a879b3911 610
+  s_3d2ebf79c659db::t_1a391b3e664660 582-585,590,592,608,612,618
+  s_3d2ebf79c659db::t_5894907145c993 881-891
+packages/starlight/core/plugin.ts
+  s_3d2ebf79c659db::t_5894907145c993 25,40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "fa57fc16fb575aae0738987d279fbdd4368e876f",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3d2ebf79c659db": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5f-e277-77d0-94ab-8f0d0fa4e217",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
