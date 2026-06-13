@@ -4,14 +4,17 @@ import Icon from "./Icon.astro";
 import { formatRelative, formatStars, getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, statusDisplay } from "@grove-dev/astro";
 
 interface Props {
-  item: IndexRecord;
-  pathPrefix?: string;
+  record: IndexRecord;
+  detailHref: string;
+  /** Whether to show stack/platform chips. Default true. */
+  showChips?: boolean;
+  class?: string;
 }
 
-const { item, pathPrefix = "/items" } = Astro.props;
+const { record, detailHref, showChips = true, class: className = "" } = Astro.props;
+const item = record;
 const project = item.kind === "project" ? item : null;
 const name = item.kind === "resource" ? item.title : item.name;
-const detailHref = `${pathPrefix.replace(/\/$/, "")}/${item.slug}`;
 const repoHref = project?.repoUrl ?? item.links.github;
 const { owner, repo } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
 const avatar = project ? project.logoUrl ?? getOwnerAvatarUrl(owner, 80) : undefined;
@@ -25,7 +28,7 @@ const status = project?.health?.status;
 const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.length || project.whyListed.length || project.caveats.length)));
 ---
 
-<article class="group relative flex flex-col gap-3 rounded-lg border border-ink-200 bg-white p-4 transition-colors hover:border-ink-300 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_-2px_rgba(0,0,0,0.06)] dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-700">
+<article class={`group relative flex flex-col gap-3 rounded-lg border border-ink-200 bg-white p-4 transition-colors hover:border-ink-300 hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_4px_12px_-2px_rgba(0,0,0,0.06)] dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-700 ${className}`}>
   <header class="flex items-start gap-3">
     <a href={detailHref} class="relative z-10 flex shrink-0" aria-label={`Open ${name} details`}>
       {avatar ? (
@@ -58,7 +61,7 @@ const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.
     <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500">License</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{license ?? "—"}</dd></div>
   </dl>
 
-  {(platforms.length > 0 || stacks.length > 0) && (
+  {showChips && (platforms.length > 0 || stacks.length > 0) && (
     <div class="flex flex-col gap-1.5">
       <div class="flex flex-wrap gap-1.5">{platforms.slice(0, 4).map((platform) => <span class="inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300"><Icon name={platform} category="platform" size={11} />{platform}</span>)}</div>
       <div class="flex flex-wrap gap-1.5">{stacks.slice(0, 4).map((stack) => <span class="inline-flex items-center gap-1 rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300"><Icon name={stack} category="stack" size={11} />{stack}</span>)}</div>

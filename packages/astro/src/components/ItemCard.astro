@@ -1,31 +1,94 @@
 ---
-import type { IndexRecord } from "@grove-dev/core";
+/**
+ * ItemCard — compact card for one record on the home page (or any
+ * 3-column grid).
+ *
+ * V1 (published) API: takes `record` (a Resource / IndexProjectRecord)
+ * and `href` (the full detail-page URL). The page that calls this
+ * component owns the path layout — blueprint-aware consumers
+ * (project-directory → /projects/<slug>, resource-hub →
+ * /resources/<slug>, ecosystem-map → /entities/<slug>) pass the
+ * correct href via `RecordSection`'s `hrefFor` callback.
+ *
+ * V1 (legacy) API: also accepts `item` + `pathPrefix` as a
+ * convenience for callers that haven't migrated. When both are
+ * provided, `href` wins; when only `pathPrefix` is provided, the
+ * detail href is `${pathPrefix}/${item.slug}`.
+ */
+import type { IndexRecord, Resource, ProjectRecord, IndexProjectRecord } from "@grove-dev/core";
 import Icon from "./Icon.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro";
 import { formatStars, formatRelative } from "@grove-dev/astro";
 import { statusDisplay } from "@grove-dev/astro";
 
+type CardRecord = IndexRecord | Resource | ProjectRecord | IndexProjectRecord;
+
 interface Props {
-  item: IndexRecord;
+  /** V1 API — full Resource/IndexProjectRecord. */
+  record?: CardRecord;
+  /** V1 API — full detail-page URL. */
+  href?: string;
+  /** Legacy API — singular item, equivalent to `record`. */
+  item?: CardRecord;
+  /** Legacy API — URL prefix, equivalent to deriving from
+   *  blueprint routeSlug + slug. */
   pathPrefix?: string;
+  /** When true, show owner/repo below the title. Default true. */
+  showOwner?: boolean;
+  /** When false, hide the platform + stack chip row. Default true. */
+  showChips?: boolean;
+  /** When false, hide the curated label. Default true. */
+  showLabel?: boolean;
+  /** When false, hide the stars/updated/license metadata row. */
+  showMeta?: boolean;
+  class?: string;
 }
 
-const { item, pathPrefix = "/items" } = Astro.props;
+const {
+  record: recordProp,
+  href: hrefProp,
+  item: itemProp,
+  pathPrefix = "/items",
+  showOwner = true,
+  showChips = true,
+  showLabel = true,
+  showMeta = true,
+  class: className = "",
+} = Astro.props;
+
+// Resolve `item` (legacy) → `record` (V1) and `hrefProp` → final.
+const item: CardRecord = (recordProp ?? itemProp) as CardRecord;
+const slug = (item as { slug: string }).slug;
+let detailHref: string;
+if (typeof hrefProp === "string" && hrefProp.length > 0) {
+  detailHref = hrefProp;
+} else {
+  const base = pathPrefix.replace(/\/$/, "");
+  detailHref = `${base}/${slug}`;
+}
+
 const isProject = item.kind === "project";
-const name = item.kind === "resource" ? item.title : item.name;
-const repoHref = isProject ? item.repoUrl : item.links.github;
-const homepageHref = item.links.website ?? item.links.source;
+const name = item.kind === "resource" ? (item as { title: string }).title : (item as { name: string }).name;
+const repoHref = isProject
+  ? (item as { repoUrl?: string }).repoUrl
+  : (item as { links: { github?: string } }).links?.github;
+const homepageHref = isProject
+  ? undefined
+  : (item.links as { website?: string; source?: string }).website ??
+    (item.links as { source?: string }).source;
 
 // Curated = at least one of the hand-written fields is filled in.
-// Stays on the card because it's an objective fact about whether a
-// human reviewed the entry, not a subjective curation label.
 const isCurated = Boolean(
-  item.curation?.reviewed ||
-    (isProject && (item.bestFor.length || item.whyListed.length || item.caveats.length)),
+  (item as { curation?: { reviewed?: boolean } }).curation?.reviewed ||
+    (isProject && (
+      ((item as { bestFor?: string[] }).bestFor?.length ?? 0) > 0 ||
+      ((item as { whyListed?: string[] }).whyListed?.length ?? 0) > 0 ||
+      ((item as { caveats?: string[] }).caveats?.length ?? 0) > 0
+    )),
 );
 
-// Initials for placeholder logo (first 2 letters of any word in name).
-const initials = name
+// Initials for placeholder logo.
+const initials = (name ?? "")
   .split(/\s+/)
   .map((w) => w[0])
   .filter(Boolean)
@@ -33,39 +96,43 @@ const initials = name
   .join("")
   .toUpperCase();
 
-// Resolve a logo URL for this item:
-//   1. Explicit `logoUrl` on the item
-//   2. GitHub owner avatar (extracted from `repoUrl`)
-//   3. Initials placeholder.
+// Logo URL: explicit `logoUrl` (project only) → GitHub owner avatar
+// → initials placeholder.
 const { owner, repo } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
-const logoUrl = isProject ? item.logoUrl ?? getOwnerAvatarUrl(owner, 80) : undefined;
+const logoUrl = isProject
+  ? (item as { logoUrl?: string }).logoUrl ?? getOwnerAvatarUrl(owner, 80)
+  : undefined;
 
-// Show up to 4 platforms; overflow as +N.
-const platforms = isProject ? item.platforms : [];
+// Up to 4 platforms + stack chips (project only).
+const platforms = isProject ? (item as { platforms?: string[] }).platforms ?? [] : [];
 const visiblePlatforms = platforms.slice(0, 4);
 const platformOverflow = platforms.length - visiblePlatforms.length;
 
-// Show up to 3 stack chips (primary + first 2 secondary).
-const allStacks = isProject ? [item.stack, ...item.stacks].filter(Boolean) : [];
+const allStacks = isProject
+  ? [
+      (item as { stack?: string }).stack,
+      ...((item as { stacks?: string[] }).stacks ?? []),
+    ].filter((s): s is string => Boolean(s))
+  : [];
 const visibleStacks = allStacks.slice(0, 3);
 const stackOverflow = allStacks.length - visibleStacks.length;
 
-const stars = isProject ? item.github?.stars : undefined;
-const updatedAt =
-  isProject ? item.github?.pushedAt : item.kind === "resource" ? item.publishedAt : null;
+const stars = isProject ? (item as { github?: { stars?: number } }).github?.stars : undefined;
+const updatedAt = isProject
+  ? (item as { github?: { pushedAt?: string | null } }).github?.pushedAt
+  : (item as { publishedAt?: string | null }).publishedAt;
 const starsLabel = formatStars(stars);
 const updatedLabel = formatRelative(updatedAt);
-const license = isProject ? item.github?.license : null;
-const status = isProject ? item.health?.status : undefined;
+const license = isProject ? (item as { github?: { license?: string } }).github?.license : null;
+const status = isProject ? (item as { health?: { status?: string } }).health?.status : undefined;
 
-const base = pathPrefix.replace(/\/$/, "");
-const detailHref = `${base}/${item.slug}`;
 const externalHref = repoHref ?? homepageHref;
-const statusText = statusDisplay(status);
+const statusText = status ? statusDisplay(status as Parameters<typeof statusDisplay>[0]) : "";
+const category = (item as { category?: string }).category;
 ---
 
 <article
-  class="card card-hover group relative flex h-full flex-col gap-3 p-4"
+  class={`card card-hover group relative flex h-full flex-col gap-3 p-4 ${className}`}
 >
   {/* Top row: logo + name + (optional) status + curated mark. */}
   <header class="relative z-10 flex items-start gap-3">
@@ -107,44 +174,46 @@ const statusText = statusDisplay(status);
           {name}
         </a>
       </h3>
-      <span class="truncate text-2xs text-ink-500 dark:text-ink-400">
-        {owner ? (
-          <>
-            <a
-              href={repoHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-event="external_repo_click"
-              data-event-source="card_owner"
-              data-event-item = {item.slug}
-              class="relative z-10 font-mono text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
-            >
-              <span class="text-ink-400 dark:text-ink-500">@</span>{owner}{repo ? <span class="text-ink-400 dark:text-ink-500">/{repo}</span> : ""}
-            </a>
-            <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-            {item.category}
-            {status && (
-              <>
-                <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-                <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            {item.category}
-            {status && (
-              <>
-                <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-                <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
-              </>
-            )}
-          </>
-        )}
-      </span>
+      {showLabel && (
+        <span class="truncate text-2xs text-ink-500 dark:text-ink-400">
+          {showOwner && owner ? (
+            <>
+              <a
+                href={repoHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-event="external_repo_click"
+                data-event-source="card_owner"
+                data-event-item={slug}
+                class="relative z-10 font-mono text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+              >
+                <span class="text-ink-400 dark:text-ink-500">@</span>{owner}{repo ? <span class="text-ink-400 dark:text-ink-500">/{repo}</span> : ""}
+              </a>
+              <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+              {category}
+              {status && (
+                <>
+                  <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+                  <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {category}
+              {status && (
+                <>
+                  <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
+                  <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
+                </>
+              )}
+            </>
+          )}
+        </span>
+      )}
     </div>
 
-    {isCurated && (
+    {isCurated && showLabel && (
       <span
         class="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
         title="Hand-curated entry: bestFor, whyListed, caveats, or scores are filled in"
@@ -158,66 +227,75 @@ const statusText = statusDisplay(status);
   </header>
 
   {/* Description */}
-  <p
-    class="relative z-10 m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400"
-  >
-    {item.description}
-  </p>
+  {item.description && (
+    <p
+      class="relative z-10 m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400"
+    >
+      {item.description}
+    </p>
+  )}
 
   {/* Metadata row: stars · updated · license — the three signals
       that answer "is this alive and usable?" at a glance. */}
-  <div class="relative z-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400">
-    {starsLabel !== null && (
-      <span class="inline-flex items-center gap-1" title={`${stars} stars on GitHub`}>
-        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
-          <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
-        </svg>
-        <span class="font-mono">{starsLabel}</span>
-      </span>
-    )}
-    {updatedAt && (
-      <span class="inline-flex items-center gap-1" title={`Last updated ${updatedAt}`}>
-        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-ink-400">
-          <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm-.5 1.5a.5.5 0 0 0-1 0v3.25c0 .15.07.29.18.39l1.95 1.65a.5.5 0 0 0 .66-.76L7.5 7.55V5Z"/>
-        </svg>
-        <span class="font-mono">Updated {updatedLabel}</span>
-      </span>
-    )}
-    {license && (
-      <span class="inline-flex items-center gap-1" title={`License: ${license}`}>
-        <span class="font-mono uppercase tracking-wide text-[10px]">{license}</span>
-      </span>
-    )}
-  </div>
+  {showMeta && (
+    <div class="relative z-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400">
+      {starsLabel !== null && (
+        <span class="inline-flex items-center gap-1" title={`${stars ?? 0} stars on GitHub`}>
+          <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
+            <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+          </svg>
+          <span class="font-mono">{starsLabel}</span>
+        </span>
+      )}
+      {updatedAt && (
+        <span class="inline-flex items-center gap-1" title={`Last updated ${updatedAt}`}>
+          <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-ink-400">
+            <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm-.5 1.5a.5.5 0 0 0-1 0v3.25c0 .15.07.29.18.39l1.95 1.65a.5.5 0 0 0 .66-.76L7.5 7.55V5Z"/>
+          </svg>
+          <span class="font-mono">Updated {updatedLabel}</span>
+        </span>
+      )}
+      {license && (
+        <span class="inline-flex items-center gap-1" title={`License: ${license}`}>
+          <span class="font-mono uppercase tracking-wide text-[10px]">{license}</span>
+        </span>
+      )}
+    </div>
+  )}
 
   {/* Platform + stack chips, pushed to the bottom. */}
-  <div class="relative z-10 mt-auto flex flex-col gap-1.5">
-    <div class="flex flex-wrap items-center gap-1.5">
-      {visiblePlatforms.map((p) => (
-        <span class="chip">
-          <Icon name={p} category="platform" size={11} />
-          <span>{p}</span>
-        </span>
-      ))}
-      {platformOverflow > 0 && (
-        <span class="chip text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
+  {showChips && (
+    <div class="relative z-10 mt-auto flex flex-col gap-1.5">
+      {visiblePlatforms.length > 0 && (
+        <div class="flex flex-wrap items-center gap-1.5">
+          {visiblePlatforms.map((p) => (
+            <span class="chip">
+              <Icon name={p} category="platform" size={11} />
+              <span>{p}</span>
+            </span>
+          ))}
+          {platformOverflow > 0 && (
+            <span class="chip text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
+          )}
+        </div>
+      )}
+      {visibleStacks.length > 0 && (
+        <div class="flex flex-wrap items-center gap-1.5">
+          {visibleStacks.map((s) => (
+            <span class="chip chip-stack">
+              <Icon name={s} category="stack" size={11} />
+              <span>{s}</span>
+            </span>
+          ))}
+          {stackOverflow > 0 && (
+            <span class="chip chip-stack text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
+          )}
+        </div>
       )}
     </div>
-    <div class="flex flex-wrap items-center gap-1.5">
-      {visibleStacks.map((s) => (
-        <span class="chip chip-stack">
-          <Icon name={s} category="stack" size={11} />
-          <span>{s}</span>
-        </span>
-      ))}
-      {stackOverflow > 0 && (
-        <span class="chip chip-stack text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
-      )}
-    </div>
-  </div>
+  )}
 
-  {/* Footer row: View repo + Details links, separated from chips.
-      Stacks above the stretched link via z-index. */}
+  {/* Footer row: View repo + Details links. */}
   <footer class="relative z-10 mt-1 flex items-center justify-between gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
     {externalHref && (
       <a
@@ -226,7 +304,7 @@ const statusText = statusDisplay(status);
         rel="noopener noreferrer"
         data-event="external_repo_click"
         data-event-source="card_view_repo"
-        data-event-item={item.slug}
+        data-event-item={slug}
         class="relative z-10 inline-flex items-center gap-1 font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
       >
         {repoHref ? "View repo" : "Visit source"}
@@ -249,7 +327,7 @@ const statusText = statusDisplay(status);
   @reference "../styles.css";
 
   .chip {
-    @apply inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300;
+    @apply inline-flex items-center gap-1 rounded-md border border-ink-200 bg-white px-1.5 py-0.5 text-2xs font-medium text-ink-700 transition-colors dark:border-ink-200 dark:bg-ink-950 dark:text-ink-300;
   }
   .chip-stack {
     @apply bg-ink-50 dark:bg-ink-900/60;
