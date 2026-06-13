@@ -1,0 +1,80 @@
+packages/astro/templates/default/scripts/build-llms.mjs
+  s_3d2ebf79c659db::t_a0269a2d4a276d 5-6,8-17,19-21,23-27,29-117,120-123
+packages/astro/templates/default/public/sitemap.xml
+  s_3d2ebf79c659db::t_a0269a2d4a276d 5,11,17,23,29,35,41,47,53,59
+packages/astro/templates/default/public/icons/stacks/go.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/public/icons/stacks/deno.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+CHANGELOG.md
+  s_3d2ebf79c659db::t_5894907145c993 100-102
+pnpm-lock.yaml
+  s_3d2ebf79c659db::t_a0269a2d4a276d 507-566
+packages/astro/templates/default/public/icons/stacks/llm.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/public/llms.txt
+  s_3d2ebf79c659db::t_a0269a2d4a276d 4-5,7-11,18-20,23-36,47,49-55,58-101,103,105-112
+packages/astro/templates/default/public/llms-full.txt
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1,3-4,6,8,10,12-19,21-33,37-59,62-84,87-109,112-134,137-159,162-184,186-206
+packages/astro/templates/default/package.json
+  s_3d2ebf79c659db::t_5894907145c993 33
+packages/astro/templates/default/public/icons/stacks/docker.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/public/icons/stacks/django.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/public/icons/stacks/node.js.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/src/styles.css
+  s_3d2ebf79c659db::t_ac154ee8cb9863 205-281
+packages/astro/src/lib/search.ts
+  s_3d2ebf79c659db::t_a0269a2d4a276d 403-413
+packages/astro/src/lib/display.ts
+  s_3d2ebf79c659db::t_5894907145c993 35,38,41-43,101,104,107-109
+packages/astro/templates/default/public/icons/stacks/sveltekit.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+docs/astro.config.mjs
+  s_3d2ebf79c659db::t_5894907145c993 74-75
+packages/astro/templates/default/wrangler.jsonc
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1-28
+packages/astro/templates/default/data/generated/records.full.json
+  s_3d2ebf79c659db::t_a0269a2d4a276d 4
+packages/astro/templates/default/public/icons/stacks/bun.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/public/icons/stacks/clojure.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+package.json
+  s_3d2ebf79c659db::t_ac154ee8cb9863 13-14,16
+packages/astro/templates/default/.gitignore
+  s_3d2ebf79c659db::t_ac154ee8cb9863 1-12
+packages/astro/templates/default/public/icons/stacks/clojurescript.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/data/generated/records.json
+  s_3d2ebf79c659db::t_a0269a2d4a276d 4
+packages/astro/templates/default/public/icons/stacks/vue.svg
+  s_3d2ebf79c659db::t_a0269a2d4a276d 1
+packages/astro/templates/default/scripts/fetch-icons.mjs
+  s_3d2ebf79c659db::t_a0269a2d4a276d 25-29,34,36-37,39-41,44,50,52-53,59,63
+packages/astro/templates/default/data/generated/records.index.json
+  s_3d2ebf79c659db::t_a0269a2d4a276d 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ef7d052f6a46d9225dc88583cc52f0b16a6e27ba",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3d2ebf79c659db": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5f-e277-77d0-94ab-8f0d0fa4e217",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
