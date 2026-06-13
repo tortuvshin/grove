@@ -19,7 +19,7 @@
  *   grove dev             run the framework's dev server
  */
 import { spawn } from "node:child_process";
-import { mkdir, readFile, writeFile, access } from "node:fs/promises";
+import { mkdir, readFile, writeFile, access, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -520,12 +520,62 @@ program
       p.log.info(`Monorepo root: ${monorepoRoot}`);
 
       // ── Resolve target directory ───────────────────────────────────
-      const stamp = new Date()
-        .toISOString()
-        .replace(/[-:]/g, "")
-        .replace(/\..+$/, "")
-        .replace("T", "-");
-      const dirRel = opts.dir ?? name ?? `grove-run-${stamp}`;
+      // If the caller did not pin a project (no `--dir`, no positional
+      // name), reuse an existing scaffold under `.grove/run/` so that
+      // repeat invocations of `pnpm grove:dev` / `grove:build` don't
+      // pile up a new timestamped folder on every run.
+      //
+      // Selection rules when no name is given:
+      //   - 0 existing scaffolds → fall back to a fresh timestamped name.
+      //   - 1 existing scaffold  → use it.
+      //   - 2+ existing scaffolds → refuse and ask the caller to pass
+      //                            `--dir <name>` so we don't pick
+      //                            silently and surprise the user.
+      const runRoot = resolve(monorepoRoot, ".grove", "run");
+      let dirRel: string;
+      if (opts.dir) {
+        dirRel = opts.dir;
+      } else if (name) {
+        dirRel = name;
+      } else {
+        const existing: string[] = [];
+        try {
+          const entries = await readdir(runRoot, { withFileTypes: true });
+          for (const entry of entries) {
+            if (!entry.isDirectory()) continue;
+            // Only count it as a scaffold if it has a package.json —
+            // that's the same sentinel `run` uses to detect a previous
+            // scaffold, so we stay consistent with the "is this
+            // reusable?" check below.
+            try {
+              await access(join(runRoot, entry.name, "package.json"));
+              existing.push(entry.name);
+            } catch {
+              /* not a scaffold, skip */
+            }
+          }
+        } catch {
+          /* runRoot doesn't exist yet — we'll create it */
+        }
+        if (existing.length === 0) {
+          const stamp = new Date()
+            .toISOString()
+            .replace(/[-:]/g, "")
+            .replace(/\..+$/, "")
+            .replace("T", "-");
+          dirRel = `grove-run-${stamp}`;
+        } else if (existing.length === 1) {
+          dirRel = existing[0];
+          p.log.info(`Reusing scaffold: ${dirRel} (pass --dir <name> to override)`);
+        } else {
+          p.log.error(
+            `Found ${existing.length} scaffolds under .grove/run/. ` +
+              `Pass --dir <name> to pick one:`,
+          );
+          for (const e of existing.sort()) p.log.info(`  - ${e}`);
+          process.exit(1);
+        }
+      }
       // Always live under <monorepo-root>/.grove/run/<name>/ so the
       // workspace picks it up via the `.grove/*` glob in
       // `pnpm-workspace.yaml`.
