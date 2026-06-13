@@ -15,6 +15,7 @@ interface StackEntry {
   name: string;
   slug: string;
   count?: number;
+  status?: "live" | "expanding" | "planned";
 }
 
 interface Props {
@@ -63,6 +64,11 @@ function buildHref(slug: string): string {
             <span>{s.name}</span>
             {typeof s.count === "number" && (
               <span class="font-mono text-ink-400">{s.count}</span>
+            )}
+            {s.status && s.status !== "live" && (
+              <span class="text-[10px] uppercase tracking-wide text-ink-400">
+                {s.status}
+              </span>
             )}
           </a>
         </li>
