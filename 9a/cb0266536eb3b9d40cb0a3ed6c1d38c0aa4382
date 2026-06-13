@@ -1,0 +1,32 @@
+packages/cli/src/template-loader.ts
+  s_3d2ebf79c659db::t_fe7311519e4b8f 142-144,217-219,263-265,284-285,308-309,343-345
+scripts/release.mjs
+  s_3d2ebf79c659db::t_f52bb8be376e13 44-49,112-114,119-124,126,130-152
+packages/cli/src/index.ts
+  s_3d2ebf79c659db::t_fe7311519e4b8f 9,415-416,422-424,428-429
+scripts/test-scaffold.mjs
+  s_3d2ebf79c659db::t_fe7311519e4b8f 9-10,17,91
+pnpm-workspace.yaml
+  s_3d2ebf79c659db::t_eddab4b2fee4e1 6-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9acb0266536eb3b9d40cb0a3ed6c1d38c0aa4382",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3d2ebf79c659db": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5f-e277-77d0-94ab-8f0d0fa4e217",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
