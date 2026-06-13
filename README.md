@@ -64,7 +64,7 @@ cd my-space
 pnpm install
 ```
 
-The scaffolder writes a `grove.config.ts`, a `data/` tree, GitHub Actions for refresh + deploy, and the framework project. Pick a framework (`astro` is the only fully supported target in V1; `svelte` lands in v0.3.0) and a deploy target (`vercel` / `netlify` / `cloudflare` / `github-pages`) when prompted.
+The scaffolder writes a `grove.config.ts`, a `data/` tree, GitHub Actions for refresh + deploy, and the framework project. Pick a framework (`astro` is the only accepted `--framework` value in V1; `nextjs` and `svelte` are refused by the CLI) and a deploy target (`vercel` / `netlify` / `cloudflare` / `github-pages` / `none`) when prompted. Each deploy target writes the matching provider config (`vercel.json`, `netlify.toml`, `wrangler.jsonc`, `.github/workflows/deploy.yml`) and a matching GitHub Actions workflow.
 
 ### Add resources, build, deploy
 
@@ -85,7 +85,7 @@ pnpm exec grove llms
 pnpm build
 ```
 
-The output is a fully static site — drop the `dist/` directory on Vercel, Netlify, Cloudflare Pages, or GitHub Pages.
+The output is a fully static site — drop the `dist/` directory on Vercel, Netlify, Cloudflare Pages, GitHub Pages, or any static host. Each `--deploy` value writes a provider-specific config and GitHub Actions workflow during scaffold; `--deploy none` skips both (you wire up your own CI).
 
 For the full reference (every CLI command, every config field), see the [docs site](https://github.com/tortuvshin/grove/tree/main/docs) and the [architecture overview](./docs/ARCHITECTURE.md).
 
@@ -100,21 +100,23 @@ For the full reference (every CLI command, every config field), see the [docs si
 - **LLM-friendly output** — `llms.txt` and `llms-full.txt` for AI assistants that need structured context.
 - **Static by default** — fast, cheap, forkable, archive-friendly.
 - **Easy to customize** — the engine is small; spaces fork the parts they want to change.
-- **One supported framework today, one on the runway** — `@grove-dev/astro` is the V1 renderer; `@grove-dev/svelte` is in active development for v0.3.0. `@grove-dev/nextjs` is reserved for a post-V1 wave. The data and CLI work the same regardless of renderer.
+- **One supported framework today** — `@grove-dev/astro` is the V1 renderer. `@grove-dev/nextjs` and `@grove-dev/svelte` are reserved for V1.1/V1.2 (skeleton packages; the V1 CLI refuses to scaffold them). The data, schema, and CLI work the same regardless of renderer.
+- **Framework-agnostic UI primitives** — `@grove-dev/ui` ships 5 typed primitive modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`) over the V1 `IndexRecord` discriminated union. The Astro adapter re-exports them; future framework adapters (Svelte, Next.js) plug in the same primitives.
 
 ---
 
 ## Status
 
-Grove is in **active development** (current release: **v0.2.x**). The core engine, CLI, and Astro adapter are stable enough to power a real space. The SvelteKit adapter is in active development (ships a working scaffold in v0.3.0). The Next.js adapter is post-V1 — we are not optimizing for Vercel-specific deployment in this framework. Breaking changes between minor versions follow the rules in [`docs/RELEASING.md`](./docs/RELEASING.md).
+Grove is in **active development** (current release: **v0.2.x**). The core engine, CLI, and Astro adapter are stable enough to power a real space end-to-end. `@grove-dev/ui` ships typed framework-agnostic primitives. The Next.js and SvelteKit adapters are skeleton packages; the V1 CLI refuses to scaffold them (`--framework` only accepts `astro`). Breaking changes between minor versions follow the rules in [`docs/RELEASING.md`](./docs/RELEASING.md).
 
 ### Framework matrix
 
 | Framework           | V1 status               | Notes                                                                              |
 | ------------------- | ----------------------- | ---------------------------------------------------------------------------------- |
-| `@grove-dev/astro`  | **Supported (V1)**      | Full default template, components, layouts, all four blueprints scaffold-tested.   |
-| `@grove-dev/svelte` | In development (v0.3.0) | Scaffold works and renders an empty directory page; full template lands in v0.3.0. |
-| `@grove-dev/nextjs` | Post-V1                 | Skeleton package only. Not on the V1 critical path.                                |
+| `@grove-dev/astro`  | **Supported (V1)**      | Full default template, 22 components, 1 layout, all three blueprints scaffold-tested. |
+| `@grove-dev/svelte` | Roadmap (V1.1+)         | Skeleton package; V1 CLI refuses to scaffold it. Not on the V1 critical path.      |
+| `@grove-dev/nextjs` | Roadmap (V1.2+)         | Skeleton package; V1 CLI refuses to scaffold it. Not on the V1 critical path.      |
+| `@grove-dev/ui`     | **Supported (V1)**      | 5 framework-agnostic primitive modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`). Re-exported by every adapter. |
 
 **Use it for:** personal projects, internal directories, OSS ecosystems, learning collections, prototypes.
 **Hold off for:** mission-critical production where a database migration is cheaper than a YAML migration.
@@ -140,12 +142,12 @@ Grove is a pnpm monorepo. Six published packages, three side directories.
 ```txt
 grove/
 ├── packages/
-│   ├── core/        # Headless engine: schema, config, importers, validators, sitemap, llms.txt
-│   ├── ui/          # Framework-agnostic UI primitives — v0.3.0 (currently a placeholder re-export)
-│   ├── cli/         # `new`, `import`, `validate`, `generate`, `sitemap`, `llms`, `sync`, `cleanup`, `workflows`, `build`, `dev`
-│   ├── astro/       # Astro adapter: components, layouts, design tokens, default template (V1 supported)
-│   ├── nextjs/      # Next.js adapter: skeleton only (post-V1)
-│   └── svelte/      # SvelteKit adapter: scaffold works in v0.3.0, full template in v0.3.0
+│   ├── core/        # Headless engine: schema, config, importers, validators, sitemap, llms.txt, GitHub sync
+│   ├── ui/          # Framework-agnostic UI primitives (V1: 5 typed modules over IndexRecord)
+│   ├── cli/         # `new`, `import`, `validate`, `generate`, `sitemap`, `llms`, `sync github`, `sync contributors`, `cleanup stale`, `workflows sync`, `build`, `dev`
+│   ├── astro/       # Astro adapter: 22 components, 1 layout, design tokens, default template (V1 supported)
+│   ├── nextjs/      # Next.js adapter: skeleton only (V1.2+)
+│   └── svelte/      # SvelteKit adapter: skeleton only (V1.1+)
 ├── examples/
 │   └── openapps/    # Real Grove-powered space (the reference implementation)
 ├── docs/            # Framework documentation site (Starlight)
@@ -175,13 +177,19 @@ my-space/
 
 Three layers, each with a single responsibility:
 
-1. **Grove Core** (`@grove-dev/core`) — generic, framework-free. Owns the resource schema, config loader, importers, validators, taxonomy types, optional GitHub signal sync, sitemap, `llms.txt` generation, and the build pipeline.
-2. **Grove UI** (`@grove-dev/ui`) — framework-agnostic UI primitives: filters, sort, stats, scores, slug helpers. Pure TypeScript, no Astro / React / Svelte. **V1 ships a placeholder re-export; the v0.3.0 milestone rebuilds primitives on the `Resource` union.**
-3. **Grove framework adapters** (`@grove-dev/astro` is the V1 supported renderer; `@grove-dev/svelte` lands in v0.3.0; `@grove-dev/nextjs` is post-V1) — thin wrappers that ship components, layouts, tokens, and a default template per framework. Each adapter's template contains only pages, layouts, static config, and `.github/`. No business logic.
+1. **Grove Core** (`@grove-dev/core`) — generic, framework-free. Owns the discriminated `Resource` union (`ProjectRecord` | `ResourceRecord` | `EntityRecord`), the config loader, importers, validators, taxonomy types, optional GitHub signal sync, sitemap, `llms.txt` generation, and the build pipeline. Zero framework dependencies.
+2. **Grove UI** (`@grove-dev/ui`) — framework-agnostic UI primitives. V1 ships 5 typed modules — `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format` — over the `IndexRecord` discriminated union. Pure TypeScript, no Astro / React / Svelte. Re-exported by every adapter so future frameworks plug into the same primitives.
+3. **Grove framework adapters** (`@grove-dev/astro` is the V1 supported renderer; `@grove-dev/nextjs` and `@grove-dev/svelte` are skeleton packages that V1.1/V1.2 will flesh out) — thin wrappers that ship components, layouts, tokens, and a default template per framework. Each adapter's template contains only pages, layouts, static config, and `.github/`. No business logic.
 
 Spaces are made by forking a framework template and editing it. Business logic stays in Core / UI, so theme changes never reach into the engine.
 
-For the full architecture write-up — including the three blueprints (`project-directory`, `resource-hub`, `ecosystem-map`) and the discriminated `Resource` union — see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
+### Naming conventions (V1 canonical)
+
+The framework uses **record-first** naming everywhere — `record`, `records`, `IndexRecord`. The V0 published Astro package exposed `ItemCard` for the record card; that name is kept for V1 published API stability (it appears in user docs and downstream sites). The internal V0 names `AppsIndexRow` / `AppsPagination` / `ItemSection` and the V0 type names `ItemsFilters` / `ItemsSort` / `filterApps` have been replaced with the V1 canonical names `IndexRow` / `Pagination` / `RecordSection` and `IndexFilters` / `IndexSort` / `filterRecords` (matching `@grove-dev/ui`).
+
+The canonical V1 directory URL is `/<blueprint-slug>/<record-slug>` (e.g. `/projects/coolify`). The V0-published `/apps/<slug>` alias still works via a static 301 redirect generated by the Astro template.
+
+For the full architecture write-up — including the three blueprints (`project-directory`, `resource-hub`, `ecosystem-map`), the discriminated `Resource` union, and the V0→V1 migration notes — see [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
 
 ---
 

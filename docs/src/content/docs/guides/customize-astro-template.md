@@ -59,7 +59,7 @@ See the [grove.config.ts reference](/reference/config/) for the full field list 
 
 ## 2. Content: pages, bodies, copy
 
-The template ships with four pages: `index.astro` (home), `projects/index.astro` (the list), `projects/[slug].astro` (the detail), `about.astro`, `submit.astro`. The default `astro.config.mjs` has the build configured with `format: 'directory'`, so `pnpm build` produces a static `dist/` with one HTML file per route.
+The template ships with the V1 page set: `index.astro` (home), `[slug]/index.astro` (blueprint-aware list — the same file renders `/projects/`, `/resources/`, `/entities/`), `[slug]/[recordSlug].astro` (blueprint-aware detail), `apps/[recordSlug].astro` (V0→V1 301 redirect), `about.astro`, `contributors.astro`, `submit.astro`, `404.astro`, and `sitemap.xml.ts`. The default `astro.config.mjs` produces a static `dist/` with one HTML file per route.
 
 ### Adding a new page
 
@@ -112,13 +112,13 @@ The `site.name` and `site.tagline` flow into the header and home page automatica
 
 ## 3. Components: overriding the defaults
 
-The template exposes five override points. They are template files you can replace with your own:
+The V1 package exposes the full 22-component surface under `@grove-dev/astro/components/`. Components are imported by path (not through the barrel) so `astro check` validates them in their own context. The V1 published names you can override:
 
-- `Header` — the top bar
-- `Footer` — the bottom
-- `Hero` — the home page hero
-- `ItemCard` — the card used in the project / resource / entity list
-- `DetailHeader` — the header on the detail page
+- `ItemCard` — the V1 record card (V0-published name kept for downstream stability). Used on home page and any record list.
+- `IndexRow` — the V1 canonical name for the blueprint-aware list row. The V0 name `AppsIndexRow` has been removed.
+- `Pagination` — the V1 canonical name for the list pagination control. The V0 name `AppsPagination` has been removed.
+- `RecordSection` — the V1 canonical name for the home-page section (was `ItemSection` in V0).
+- `Hero`, `WhyThisExists`, `SmartLensTabs`, `RefinePanel`, `ScoreBars`, `ExploreByCategory`, `ExploreByStack`, `CurationGrid`, `ContributorsGrid`, `StackGrid`, `MinimalAbout`, `OriginalCollection`, `DecisionRow`, `FilterGroupMenu`, `FilterOptions`, `CategoryGrid`, `Icon` — the rest of the V1 surface.
 
 Two ways to override:
 
@@ -133,16 +133,18 @@ This is the wrong approach for almost all sites. It works for forks; it does not
 ```ts
 // grove.config.ts
 import MyHeader from "./src/components/MyHeader.astro";
+import MyItemCard from "./src/components/MyItemCard.astro";
 
 export default defineConfig({
   // ...
   components: {
     Header: "./src/components/MyHeader.astro",
+    ItemCard: "./src/components/MyItemCard.astro",
   },
 });
 ```
 
-The Astro adapter resolves the path at build time. The override is local to your repo, so it survives `pnpm install`.
+The Astro adapter resolves the path at build time. The override is local to your repo, so it survives `pnpm install`. You can override any of the V1 components (`ItemCard`, `IndexRow`, `Pagination`, `RecordSection`, `Hero`, etc.) the same way.
 
 The override component must accept the same props as the original. Check the original component for the prop list — the contract is not formally versioned in V1.
 

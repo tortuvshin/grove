@@ -20,7 +20,7 @@ This means:
 
 ## V1 framework scope
 
-`@grove-dev/cli` V1 scaffolds **Astro** projects only. The Next.js and SvelteKit adapters (`@grove-dev/nextjs`, `@grove-dev/svelte`) still exist as skeleton packages, but their templates are not yet functional (no pages / components / layouts) — selecting `--framework nextjs` or `--framework svelte` will fail with an "Unknown framework" error. See [`/CHANGELOG.md`](/CHANGELOG.md) for the plan to land them in v0.3.0.
+`@grove-dev/cli` V1 scaffolds **Astro** projects only. `--framework` accepts `astro` and refuses `nextjs` / `svelte` with a clear error. The Next.js and SvelteKit adapters (`@grove-dev/nextjs`, `@grove-dev/svelte`) still exist as skeleton packages, but their templates are not yet functional (no pages / components / layouts). SvelteKit lands in V1.1; Next.js in V1.2.
 
 ## Commands
 
@@ -33,7 +33,7 @@ This means:
 | `grove sitemap` | Generate `public/sitemap.xml` from generated data. |
 | `grove llms` | Emit `public/llms.txt` and `public/llms-full.txt`. |
 | `grove sync github` | Optional: enrich records with GitHub metadata (stars, forks, last commit, license). |
-| `grove cleanup stale` | List cleanup candidates to `data/generated/stale-records.json`. |
+| `grove cleanup stale` | List cleanup candidates to `data/generated/cleanup-report.json`. |
 | `grove workflows sync` | Re-emit GitHub workflow files (with `--force` to overwrite). |
 | `grove build` | Run the project's framework build command (`pnpm exec astro build`). |
 | `grove dev` | Start the framework dev server (`pnpm exec astro dev`). |

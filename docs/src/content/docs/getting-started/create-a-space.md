@@ -100,7 +100,7 @@ my-space/
 │   ├── records/               # empty: .gitkeep, your records go here
 │   └── taxonomy/              # empty, for future taxonomy work
 ├── content/
-│   ├── pages/                 # Markdown pages (about.md, methodology.md, …)
+│   ├── pages/                 # Markdown pages (about.md, methodology.md — note: V1 template ships about + contributors + submit as .astro pages, not as Markdown content pages)
 │   └── records/               # optional Markdown body per record
 ├── public/                    # logo, OG image, llms.txt placeholder
 ├── .github/

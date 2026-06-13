@@ -11,59 +11,61 @@ pnpm add @grove-dev/svelte
 ## Status
 
 **Roadmap only — not in V1.** Grove V1 ships the Astro renderer only.
-The SvelteKit adapter is reserved for a future wave once `@grove-dev/core`
-and `@grove-dev/ui` are rebuilt on the V1 `Resource` discriminated
-union. See [`docs/roadmap.md`](../docs/roadmap.md) for the schedule.
+The V1 CLI refuses `--framework svelte` at scaffold time.
+The SvelteKit adapter is reserved for V1.1 once `@grove-dev/core`
+and `@grove-dev/ui` (V1) are stable. See [`docs/roadmap.md`](../docs/roadmap.md)
+for the schedule.
 
 This package currently ships a skeleton only:
 
-- `src/index.ts` — re-exports `@grove-dev/ui`
+- `src/index.ts` — re-exports `@grove-dev/ui` (V1 primitives: `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`)
 - `src/styles.css` — placeholder design tokens
 - `templates/default/package.json` — SvelteKit 2 + Svelte 5 wiring
 
 The component library, routes, and theme are still to be built. The architectural shape is locked: anything framework-specific lives in this package, anything generic stays in `@grove-dev/core` and `@grove-dev/ui`.
 
-## What it will ship (roadmap)
+## What it will ship (roadmap, V1.1)
 
 ```txt
 src/
-├── components/        # ItemCard.svelte, CategoryGrid.svelte, HealthBadge.svelte,
-│                      # ScoreBars.svelte, DirectoryFilters.svelte, ...
+├── components/        # ItemCard.svelte, IndexRow.svelte, RecordSection.svelte,
+│                      # Pagination.svelte, ScoreBars.svelte, RefinePanel.svelte,
+│                      # Hero.svelte, … (22 V1 surface, ported from @grove-dev/astro)
 ├── layouts/           # BaseLayout.svelte
-├── styles.css         # design tokens + Tailwind entry
+├── styles.css         # design tokens
 └── index.ts           # re-exports @grove-dev/ui
 
 templates/
 └── default/           # full SvelteKit starter: routes/, lib/, static/,
-                       # data/, .github/, svelte.config.js, tailwind.config.mjs
+                       # data/, .github/, svelte.config.js
 ```
 
-## Usage in a space
+## Usage in a space (planned)
 
 ```svelte
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
-  import { ItemCard } from "@grove-dev/svelte/components/ItemCard.svelte";
-  import { BaseLayout } from "@grove-dev/svelte/layouts/BaseLayout.svelte";
+  import ItemCard from "@grove-dev/svelte/components/ItemCard.svelte";
+  import BaseLayout from "@grove-dev/svelte/layouts/BaseLayout.svelte";
   import "@grove-dev/svelte/styles.css";
-  import apps from "$lib/data/generated/apps.json";
+  import records from "$lib/data/generated/records.json";
 </script>
 
 <BaseLayout title="My Grove space">
-  {#each apps as app (app.slug)}
-    <ItemCard {app} />
+  {#each records as record (record.slug)}
+    <ItemCard {record} href={`/projects/${record.slug}`} />
   {/each}
 </BaseLayout>
 ```
 
-Components are imported by path. The barrel re-exports `@grove-dev/ui` so generic helpers (`filterRecords`, `slugForCategory`, etc.) are available from the same import.
+Components are imported by path. The barrel re-exports `@grove-dev/ui` so generic helpers (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`, `LENSES`, `SORT_OPTIONS`) are available from the same import.
 
 ## Layering
 
 `@grove-dev/svelte` is the third layer of the Grove stack:
 
-1. **`@grove-dev/core`** — schemas, importers, build pipeline (headless).
-2. **`@grove-dev/ui`** — framework-agnostic UI primitives.
+1. **`@grove-dev/core`** — schemas, importers, build pipeline (headless, V1 `Resource` union).
+2. **`@grove-dev/ui`** — framework-agnostic UI primitives (V1: 5 typed modules over `IndexRecord`).
 3. **`@grove-dev/svelte`** ← you are here — Svelte components, layouts, template.
 
 ## Development

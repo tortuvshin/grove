@@ -5,7 +5,7 @@ description: How to ship the static site produced by grove build to Vercel, Netl
 
 The Astro adapter produces a fully static site. The build output is in `dist/` after `pnpm build`. There is no server runtime — every host that serves static files works.
 
-This guide covers the four hosts the CLI knows about (`vercel`, `netlify`, `cloudflare`, `github-pages`), plus a "none" option for self-hosting. See `DEPLOY_PROVIDERS` in `packages/cli/src/index.ts` for the canonical list.
+This guide covers the five hosts the CLI knows about (`vercel`, `netlify`, `cloudflare`, `github-pages`, `none`), plus notes for self-hosting. See `DEPLOY_PROVIDERS` in `packages/cli/src/index.ts` for the canonical list. Each `--deploy` value writes a provider-specific config file (e.g. `vercel.json`, `netlify.toml`, `wrangler.jsonc`) and a matching GitHub Actions workflow (e.g. `.github/workflows/deploy-vercel.yml`).
 
 ## The build command
 

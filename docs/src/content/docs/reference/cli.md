@@ -49,7 +49,7 @@ Scaffold a new Grove space from a framework template.
 - `<name>/.gitignore`
 - `<name>/LICENSE`
 - `<name>/data/decisions.yml` (empty `decisions: []`)
-- `<name>/content/methodology.md`
+- `<name>/content/pages/` (V1 template ships `about.astro`, `contributors.astro`, `submit.astro` as Astro components under `src/pages/`, not as Markdown content pages; the `content/pages/` directory is reserved for V1.1+)
 - `<name>/.github/workflows/validate-data.yml`
 - `<name>/.github/workflows/build.yml`
 - `<name>/.github/ISSUE_TEMPLATE/{record_submission,bug_report,feature_request}.md`
