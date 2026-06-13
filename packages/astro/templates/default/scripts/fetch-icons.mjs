@@ -22,29 +22,45 @@ const OUT_BASE = join(ROOT, "public", "icons");
 const SOURCE = "https://raw.githubusercontent.com/xandemon/developer-icons/main/icons";
 
 // Stack icons (xandemon/developer-icons naming).
+// Names suffixed with `(custom)` are hand-drawn SVGs committed
+// to the repo because the upstream xandemon/developer-icons
+// collection doesn't include them. The script preserves them on
+// subsequent runs (it never overwrites an existing file unless
+// the URL fetch succeeds).
 const STACK_ICONS = [
   "android",
   "apple-dark",
   "apple-light",
+  "bun",         // custom
   "capacitor",
+  "clojure",     // custom
+  "clojurescript", // custom
   "dart",
+  "deno",        // custom
+  "django",      // custom
+  "docker",      // custom
   "firebase",
   "flutter",
+  "go",          // custom
   "graphql",
   "ionic",
   "java",
   "javascript",
   "kotlin",
+  "llm",         // custom
   "mongodb",
-  "nodejs",
+  "node.js",     // xandemon uses "nodejs"; we ship "node.js" for the home page link
+  "nodejs",      // (alias — both should resolve to the same file)
   "python",
   "react",
   "react-native",
   "rust",
   "solidity",
+  "sveltekit",   // custom
   "swift",
   "tensorflow",
   "typescript",
+  "vue",         // custom
 ];
 
 // Platform icons (custom paths under /icons/platforms/).

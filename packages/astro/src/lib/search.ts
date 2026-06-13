@@ -400,3 +400,14 @@ export function buildFacets(items: IndexRecord[]) {
     licenses: sortByCountThenName(counts.license),
   };
 }
+
+// ── V1-published API aliases ─────────────────────────────────────────
+// The published `@grove-dev/astro@0.2.10` package exports these
+// under different names (`filterApps` for the filter function and
+// `AppsFilters` for the filter-state type). Re-export them under
+// the V1 names so templates can use either spelling, and so the
+// template's `apps/index.astro` (built against the published API)
+// also works against the local workspace source.
+export const filterApps = filterItems;
+export type AppsFilters = ItemsFilters;
+export type AppsSort = ItemsSort;

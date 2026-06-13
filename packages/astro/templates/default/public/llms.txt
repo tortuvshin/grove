@@ -1,22 +1,39 @@
 # Grove Directory
 
 Grove Directory is a curated, health-aware developer directory powered by
-the Grove framework. The directory is a structured, blueprint-aware
-mirror of every record in the showcase — every entry carries the
-metadata a developer needs to decide whether to open the source.
+the Grove framework. Every entry is real, runnable, and actively
+maintained — not an SDK, not a template, not a toy demo.
 
-## Important pages
+The directory is built from plain YAML files in the consumer's
+repository. The build pipeline renders a static Astro site. No
+database, no JavaScript framework, no CDN with sticky sessions.
+
+## Main URLs
 
 - Home: https://example.com/
 - Browse: https://example.com/projects
 - About: https://example.com/about
 - Contributors: https://example.com/contributors
 - Submit a record: https://example.com/submit
+
+## Filter views (one URL = one curated lens)
+
 - Trending: https://example.com/projects?label=hot
 - Recently added: https://example.com/projects?label=new
-- Established: https://example.com/projects?label=mature
-- Browse by stack: https://example.com/projects
-- Browse by category: https://example.com/projects
+- Established (mature): https://example.com/projects?label=mature
+- Featured: https://example.com/projects?label=featured
+- Good to learn: https://example.com/projects?lens=good-to-learn
+- Production-like: https://example.com/projects?lens=production-like
+- Beginner-friendly: https://example.com/projects?lens=beginner-friendly
+- Contribution-ready: https://example.com/projects?lens=contribution-ready
+
+## Browse axes
+
+- By stack: https://example.com/projects (use the `stack` query param)
+- By category: https://example.com/projects (use the `category` query param)
+- By platform: https://example.com/projects (use the `platform` query param)
+- By license: https://example.com/projects (use the `license` query param)
+- By health: https://example.com/projects (use the `status` query param)
 
 ## What the directory contains
 
@@ -27,20 +44,69 @@ metadata a developer needs to decide whether to open the source.
 - Curated notes: best for, why listed, caveats
 - Filters by stack, platform, license, and status
 
-## Data layout
+## Data layout (for AI agents that want to ingest the catalog)
 
-- `data/records/*.yml` — human-edited source of truth
-- `data/taxonomy/*.yml` — categories, stacks, platforms, channels
-- `data/generated/records.*.json` — build-time projection
+- `data/records/*.yml` — human-edited source of truth (one file per record)
+- `data/taxonomy/categories.yml` — 16 categories (Productivity, Finance, …)
+- `data/taxonomy/stacks.yml` — 6 stacks (Flutter, React Native, …)
+- `data/taxonomy/platforms.yml` — 7 platforms (iOS, Android, …)
+- `data/taxonomy/distribution-channels.yml` — 11 distribution channels
+- `data/generated/records.full.json` — full record projection
+- `data/generated/records.index.json` — slim list-page projection
 - `data/generated/site-config.json` — blueprint + site metadata
 
-## How it's built
+For per-record markdown (one section per record with description, repo,
+stack, platforms, stars, last-commit), see `/llms-full.txt`.
 
-The static site is rendered by Astro, fed by JSON projections
-produced by `@grove-dev/cli generate` from the YAML records. The
-build chains:
+## Blueprint system
 
-1. `pnpm run build:data` — yml → JSON
-2. `pnpm run build:sitemap` — emit public/sitemap.xml
-3. `pnpm run build:llms` — emit public/llms.txt + llms-full.txt
-4. `astro build` — render the static site
+Grove supports three blueprints out of the box:
+
+- `project-directory` (default) — `kind: project` records under
+  `/projects/<slug>`. Use this for code-reference showcases.
+- `resource-hub` — `kind: resource` records (datasets, libraries,
+  tools) under `/resources/<slug>`.
+- `ecosystem-map` — `kind: entity` records (companies, foundations,
+  people) under `/entities/<slug>`.
+
+The blueprint is selected in `grove.config.ts` and propagates through
+to every page, route, and component — no per-blueprint forks needed.
+
+## How the build runs
+
+```
+pnpm run build:data    # yml → JSON (grove generate)
+pnpm run build:sitemap # emit public/sitemap.xml (grove sitemap)
+pnpm run build:llms    # emit public/llms-full.txt (committed llms.txt is preserved)
+astro build            # render the static site
+```
+
+## Contributing
+
+Open a PR against `data/records/<slug>.yml`. The build pipeline will
+fail if your record doesn't validate against the blueprint schema.
+Read `grove.config.ts` and the `data/taxonomy/` files for the
+available fields and enum values.
+
+## License
+
+MIT — the directory content, schema, and source code are all
+permissively licensed. The data is yours to fork, mirror, or
+republish; attribution to the original author is appreciated but not
+required.
+
+## Contact
+
+Issues: open a ticket on the consumer repository's issue tracker.
+Pull requests: see `CONTRIBUTING.md` for the workflow.
+
+## LLM-specific guidance
+
+- Per-record markdown: `/llms-full.txt` (generated, ~2,000 lines for
+  ~150 records).
+- Sitemap: `/sitemap.xml` (lists every record's detail URL).
+- robots.txt: explicitly allows GPTBot, ChatGPT-User, ClaudeBot,
+  Claude-Web, anthropic-ai, PerplexityBot, Google-Extended,
+  Applebot-Extended, cohere-ai, CCBot, Amazonbot.
+- Schema: each detail page emits a `SoftwareSourceCode` (or
+  `Dataset` / `Organization`) JSON-LD block for AI crawlers.

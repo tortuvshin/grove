@@ -71,8 +71,8 @@ export default defineConfig({
                     label: 'Adapters',
                     items: [
                         { label: 'Astro', slug: 'adapters/astro' },
-                        { label: 'Next.js', slug: 'adapters/nextjs' },
-                        { label: 'SvelteKit', slug: 'adapters/svelte' },
+                        { label: 'Next.js (roadmap)', slug: 'adapters/nextjs' },
+                        { label: 'SvelteKit (roadmap)', slug: 'adapters/svelte' },
                     ],
                 },
                 {

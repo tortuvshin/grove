@@ -1,83 +1,206 @@
-# Grove Directory — full directory
+# example.com — full directory
 
-> Generated 2026-06-12T21:22:31.869Z from 8 records.
-> Source: https://example.com/projects · Regenerate with `grove generate`.
+Generated: 2026-06-12T22:46:40.706Z
+Records: 8
 
-Each section below mirrors one record detail page.
+---
 
-## Index
+## Coolify
 
-- [Coolify](#coolify) — DevOps · SvelteKit · 0★ — Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps and databases from a single dashboard.
-- [Gitea](#gitea) — DevOps · Go · 0★ — Lightweight, self-hosted Git service — painless, single-binary, low-resource alternative to GitHub.
-- [Hoppscotch](#hoppscotch) — Web · Vue · 0★ — Open-source API development ecosystem — design, test, and debug APIs faster from a single interface.
-- [InvenTree](#inventree) — Mobile · Flutter · 0★ — Open-source inventory management system with parts, stock, and purchase orders.
-- [Label Studio](#label-studio) — AI/ML · Python · 0★ — Open-source data labeling platform — annotate images, text, audio, video, and time series for ML training.
-- [Logseq](#logseq) — Web · ClojureScript · 0★ — Privacy-first, open-source knowledge base that works on top of plain text Markdown and Org-mode files.
-- [PrivateGPT](#private-gpt) — AI/ML · Python · 0★ — Interact privately with your documents using LLMs — 100% private, no data leaves your execution environment.
-- [Wakapi](#wakapi) — Mobile · Kotlin · 0★ — Open-source time tracker for developers — coding stats, language breakdowns, and project-level metrics.
-
-## Projects
-
-### Coolify
 Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps and databases from a single dashboard.
-- slug: coolify
-- category: DevOps
-- stack: SvelteKit
-- stars: 0
-- url: https://example.com/projects/coolify
 
-### Gitea
+- **URL**: https://example.com/coolify
+- **Repository**: https://github.com/coollabsio/coolify
+- **Stack**: SvelteKit
+- **Platforms**: linux, self-host
+- **Category**: DevOps
+- **Tags**: self-host, paas, deployment, svelte
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- Self-hosted PaaS
+- VPS deployments
+- Docker-based stacks
+
+**Why listed:**
+- One-click app + DB deploys
+- Active dev
+- Clear upgrade path from manual Docker
+
+---
+
+## Gitea
+
 Lightweight, self-hosted Git service — painless, single-binary, low-resource alternative to GitHub.
-- slug: gitea
-- category: DevOps
-- stack: Go
-- stars: 0
-- url: https://example.com/projects/gitea
 
-### Hoppscotch
+- **URL**: https://example.com/gitea
+- **Repository**: https://github.com/go-gitea/gitea
+- **Stack**: Go
+- **Platforms**: linux, self-host, docker
+- **Category**: DevOps
+- **Tags**: git, forge, self-host, go
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- Self-hosted Git hosting
+- Lightweight CI/CD integration
+- Internal team forges
+
+**Why listed:**
+- Single binary, easy install
+- Mature, stable releases
+- Active community
+
+---
+
+## Hoppscotch
+
 Open-source API development ecosystem — design, test, and debug APIs faster from a single interface.
-- slug: hoppscotch
-- category: Web
-- stack: Vue
-- stars: 0
-- url: https://example.com/projects/hoppscotch
 
-### InvenTree
+- **URL**: https://example.com/hoppscotch
+- **Repository**: https://github.com/hoppscotch/hoppscotch
+- **Stack**: Vue
+- **Platforms**: web, desktop, self-host
+- **Category**: Web
+- **Tags**: api, testing, developer-tools, vue
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- API exploration
+- REST/GraphQL/WebSocket testing
+- Self-hosted team workflows
+
+**Why listed:**
+- Lightweight, fast UI
+- PWA + desktop builds
+- Open-source Postman/Insomnia alternative
+
+---
+
+## InvenTree
+
 Open-source inventory management system with parts, stock, and purchase orders.
-- slug: inventree
-- category: Mobile
-- stack: Flutter
-- stars: 0
-- url: https://example.com/projects/inventree
 
-### Label Studio
+- **URL**: https://example.com/inventree
+- **Repository**: https://github.com/inventree/InvenTree
+- **Stack**: Flutter
+- **Platforms**: ios, android, web
+- **Category**: Mobile
+- **Tags**: inventory, stock, mobile, dart, flutter
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- Inventory tracking
+- Manufacturing
+- Hardware projects
+
+**Why listed:**
+- Production-grade mobile + web stack
+- Strong community
+- Cleanly factored Dart codebase
+
+---
+
+## Label Studio
+
 Open-source data labeling platform — annotate images, text, audio, video, and time series for ML training.
-- slug: label-studio
-- category: AI/ML
-- stack: Python
-- stars: 0
-- url: https://example.com/projects/label-studio
 
-### Logseq
+- **URL**: https://example.com/label-studio
+- **Repository**: https://github.com/HumanSignal/label-studio
+- **Stack**: Python
+- **Platforms**: web, self-host
+- **Category**: AI/ML
+- **Tags**: labeling, ml-ops, annotation, python
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- ML dataset labeling
+- Multi-modal annotation
+- Active learning pipelines
+
+**Why listed:**
+- Mature, production-grade
+- Strong ML backend
+- Active commercial + community backing
+
+---
+
+## Logseq
+
 Privacy-first, open-source knowledge base that works on top of plain text Markdown and Org-mode files.
-- slug: logseq
-- category: Web
-- stack: ClojureScript
-- stars: 0
-- url: https://example.com/projects/logseq
 
-### PrivateGPT
+- **URL**: https://example.com/logseq
+- **Repository**: https://github.com/logseq/logseq
+- **Stack**: ClojureScript
+- **Platforms**: web, desktop
+- **Category**: Web
+- **Tags**: notes, knowledge-base, productivity, clojure
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- PKM (personal knowledge management)
+- Local-first note taking
+- Graph-based outliner
+
+**Why listed:**
+- Local-first with sync
+- Active community
+- Strong plugin ecosystem
+
+---
+
+## PrivateGPT
+
 Interact privately with your documents using LLMs — 100% private, no data leaves your execution environment.
-- slug: private-gpt
-- category: AI/ML
-- stack: Python
-- stars: 0
-- url: https://example.com/projects/private-gpt
 
-### Wakapi
+- **URL**: https://example.com/private-gpt
+- **Repository**: https://github.com/zylon-ai/private-gpt
+- **Stack**: Python
+- **Platforms**: linux, macos, self-host
+- **Category**: AI/ML
+- **Tags**: llm, rag, privacy, python
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- Private document Q&A
+- Local LLM experimentation
+- Enterprise privacy use cases
+
+**Why listed:**
+- Strict no-network mode
+- Pluggable LLM providers
+- Clean ingestion pipeline
+
+---
+
+## Wakapi
+
 Open-source time tracker for developers — coding stats, language breakdowns, and project-level metrics.
-- slug: wakapi
-- category: Mobile
-- stack: Kotlin
-- stars: 0
-- url: https://example.com/projects/wakapi
+
+- **URL**: https://example.com/wakapi
+- **Repository**: https://github.com/muety/wakapi
+- **Stack**: Kotlin
+- **Platforms**: android
+- **Category**: Mobile
+- **Tags**: time-tracking, analytics, mobile, kotlin
+- **Stars**: 0
+- **Last commit**: —
+
+**Best for:**
+- Personal coding stats
+- WakaTime alternative
+- Privacy-first telemetry
+
+**Why listed:**
+- Self-host friendly
+- Companion mobile app
+- Clean MVVM architecture
+
+---
