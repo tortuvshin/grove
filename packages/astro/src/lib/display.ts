@@ -32,10 +32,15 @@ export function labelDisplay(id: string | null | undefined): string | null {
  */
 export const STATUS_DISPLAY: Record<string, string> = {
   active: "Active",
+  mature: "Mature",
   quiet: "Quiet",
   stale: "Not recently active",
+  inactive: "Inactive",
   "needs-maintainer": "Needs maintainer",
   archived: "Archived",
+  historical: "Historical",
+  needs_review: "Needs review",
+  unavailable: "Unavailable",
   unknown: "Unknown",
 };
 
@@ -93,9 +98,14 @@ export function prettySlug(value: string | null | undefined): string {
 // alongside the raw AppStatus values.
 export const STATUS_OPTIONS: string[] = [
   "active",
+  "mature",
   "quiet",
   "stale",
+  "inactive",
   "needs-maintainer",
   "archived",
+  "historical",
+  "needs_review",
+  "unavailable",
   "unknown",
 ];

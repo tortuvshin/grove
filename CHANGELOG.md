@@ -97,10 +97,9 @@ For the developer workflow that produces these entries, see
 
 ### Added
 - Removal of the deprecated landing and showcase pages; the
-  `lucode-starlight` theme now serves as the docs site shell.
-- `@grove-dev/astro`, `@grove-dev/nextjs`, and `@grove-dev/svelte` ship
-  the same surface area: components, layouts, design tokens, and a
-  default template.
+  `@grove-dev/starlight` theme now serves as the docs site shell.
+- `@grove-dev/astro` ships the V1 components, layouts, design tokens,
+  and default template. Next.js and SvelteKit remain roadmap adapters.
 - Optional `g-container-wide` layout class for wider landing-page
   sections.
 - Virtual module stubs for Starlight components in `@grove-dev/astro`

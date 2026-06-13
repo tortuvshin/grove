@@ -202,6 +202,84 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────
+ * Rendered record Markdown
+ * ────────────────────────────────────────────────────────────────── */
+.grove-prose {
+  max-width: 72ch;
+  color: var(--color-ink-700);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.dark .grove-prose {
+  color: var(--color-ink-200);
+}
+
+.grove-prose :where(h1, h2, h3, h4) {
+  margin: 1.75em 0 0.65em;
+  color: var(--color-ink-900);
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.dark .grove-prose :where(h1, h2, h3, h4) {
+  color: var(--color-ink-100);
+}
+
+.grove-prose :where(p, ul, ol, pre, blockquote) {
+  margin: 1em 0;
+}
+
+.grove-prose :where(ul, ol) {
+  padding-left: 1.5rem;
+}
+
+.grove-prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.grove-prose :where(code, pre) {
+  font-family: var(--font-mono);
+}
+
+.grove-prose code {
+  border-radius: 0.25rem;
+  background: var(--color-ink-100);
+  padding: 0.1em 0.3em;
+  font-size: 0.875em;
+}
+
+.dark .grove-prose code {
+  background: var(--color-ink-800);
+}
+
+.grove-prose pre {
+  overflow-x: auto;
+  border: 1px solid var(--color-ink-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-ink-50);
+  padding: 1rem;
+}
+
+.dark .grove-prose pre {
+  border-color: var(--color-ink-800);
+  background: var(--color-ink-900);
+}
+
+.grove-prose pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.grove-prose blockquote {
+  border-left: 3px solid var(--color-ink-300);
+  padding-left: 1rem;
+  color: var(--color-ink-500);
+}
+
+/* ──────────────────────────────────────────────────────────────────
  * Component classes — shared by the showcase component library.
  * Use these directly; you can also use the equivalent Tailwind
  * utilities (text-ink-900, bg-white, …) and mix freely.
@@ -431,6 +509,34 @@
   border-color: var(--color-ink-700);
   background: rgba(24, 24, 27, 0.4);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Chip — small inline label used for platforms/stacks/etc. on
+ * ItemCard. Mirrors openapps' `.chip` from the ItemCard.astro
+ * `<style>` block so the @apply in the component still works. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-ink-200);
+  background: #ffffff;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-ink-700);
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+}
+.dark .chip {
+  border-color: var(--color-ink-200);
+  background: var(--color-ink-950);
+  color: var(--color-ink-300);
+}
+.chip-stack {
+  background: var(--color-ink-50);
+}
+.dark .chip-stack {
+  background: rgba(24, 24, 27, 0.6);
 }
 .btn-primary,
 .btn-outline,
