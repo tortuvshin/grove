@@ -22,9 +22,9 @@
     "cleanup": "grove cleanup stale"
   },
   "dependencies": {
-    "@grove-dev/core": "*",
-    "@grove-dev/svelte": "*",
-    "@grove-dev/ui": "*",
+    "@grove-dev/core": "0.2.13",
+    "@grove-dev/svelte": "0.2.13",
+    "@grove-dev/ui": "1.0.3",
     "yaml": "^2.9.0"
   },
   "devDependencies": {

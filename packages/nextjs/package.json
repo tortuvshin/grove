@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/nextjs",
-  "version": "0.2.10",
+  "version": "0.2.13",
   "type": "module",
   "description": "Roadmap-only Next.js adapter package for Grove. No runnable template or component exports ship in V1.",
   "license": "MIT",
@@ -43,8 +43,8 @@
     "test": "echo \"No nextjs package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "workspace:*",
-    "@grove-dev/ui": "workspace:*"
+    "@grove-dev/core": "0.2.13",
+    "@grove-dev/ui": "1.0.3"
   },
   "peerDependencies": {
     "next": ">=14.0.0",

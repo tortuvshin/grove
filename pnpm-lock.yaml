@@ -18,684 +18,6 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  .grove/run/ecosystem-test:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/final-check:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/final-eco:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/final-grid:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/final-proj:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/generic-test:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-162019:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-162948:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-163125:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-163805:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-170247:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-171453:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-171655:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-175708:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-180700:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-184013:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-185356:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-193407:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-213428:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260612-213448:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260613-045328:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/grove-run-20260613-054423:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: link:/Users/turuu/Projects/Personal/grove/packages/astro
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: link:/Users/turuu/Projects/Personal/grove/packages/cli
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: link:/Users/turuu/Projects/Personal/grove/packages/core
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      marked:
-        specifier: ^18.0.0
-        version: 18.0.5
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/openapps-ui:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/resource-hub-test:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
-  .grove/run/smoke-30min:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
-      '@grove-dev/astro':
-        specifier: workspace:*
-        version: link:../../../packages/astro
-      '@grove-dev/cli':
-        specifier: workspace:*
-        version: link:../../../packages/cli
-      '@grove-dev/core':
-        specifier: workspace:*
-        version: link:../../../packages/core
-      '@tailwindcss/vite':
-        specifier: ^4.3.0
-        version: 4.3.0(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
-      astro:
-        specifier: ^6.4.4
-        version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
-      yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
-
   docs:
     dependencies:
       '@astrojs/starlight':
@@ -714,10 +36,10 @@ importers:
   packages/astro:
     dependencies:
       '@grove-dev/core':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../core
       '@grove-dev/ui':
-        specifier: workspace:*
+        specifier: 1.0.2
         version: link:../ui
       astro:
         specifier: ^6.4.6
@@ -729,13 +51,13 @@ importers:
         specifier: ^0.9.9
         version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
       '@grove-dev/astro':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../..
       '@grove-dev/cli':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../../../cli
       '@grove-dev/core':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../../../core
       '@tailwindcss/vite':
         specifier: ^4.3.0
@@ -759,16 +81,16 @@ importers:
         specifier: ^1.5.1
         version: 1.5.1
       '@grove-dev/astro':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../astro
       '@grove-dev/core':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../core
       '@grove-dev/nextjs':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../nextjs
       '@grove-dev/svelte':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../svelte
       commander:
         specifier: ^15.0.0
@@ -796,10 +118,10 @@ importers:
   packages/nextjs:
     dependencies:
       '@grove-dev/core':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../core
       '@grove-dev/ui':
-        specifier: workspace:*
+        specifier: 1.0.2
         version: link:../ui
       next:
         specifier: '>=14.0.0'
@@ -829,10 +151,10 @@ importers:
   packages/svelte:
     dependencies:
       '@grove-dev/core':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../core
       '@grove-dev/ui':
-        specifier: workspace:*
+        specifier: 1.0.2
         version: link:../ui
       '@sveltejs/kit':
         specifier: '>=2.0.0'
@@ -844,7 +166,7 @@ importers:
   packages/ui:
     dependencies:
       '@grove-dev/core':
-        specifier: workspace:*
+        specifier: 0.2.12
         version: link:../core
 
 packages:

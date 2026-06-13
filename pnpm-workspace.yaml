@@ -3,3 +3,6 @@ packages:
   - 'packages/astro/templates/default'
   - 'docs'
   - '.grove/run/*'
+
+linkWorkspacePackages: true
+preferWorkspacePackages: true

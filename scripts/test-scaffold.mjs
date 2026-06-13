@@ -6,15 +6,15 @@
  * Why this exists:
  *   - npm publish → install cycle is too slow to iterate on.
  *   - The CLI is published standalone, so npm install on the scaffolded
- *     project is the real test of whether `workspace:*` got rewritten to
- *     a real published version.
+ *     project verifies that no monorepo-only dependency protocol leaked
+ *     into the generated package.
  *
  * What it does:
  *   1. Builds all workspace packages.
  *   2. For the Astro framework:
  *      a. Runs `node packages/cli/dist/index.js new <name> --framework astro --yes`
  *         from a scratch dir.
- *      b. Asserts the scaffolded package.json has no `workspace:*` deps.
+ *      b. Asserts the scaffolded package.json has no workspace-protocol deps.
  *      c. Asserts the scaffolded package.json pins a real version for
  *         @grove-dev/astro / @grove-dev/cli / @grove-dev/core.
  *      d. Asserts pnpm install completes without 404s.
@@ -88,7 +88,7 @@ function checkProject(project, framework) {
     ...(pkg.peerDependencies ?? {}),
   };
 
-  // 1. No workspace:* deps should remain.
+  // 1. No workspace-protocol deps should remain.
   for (const [name, value] of Object.entries(allDeps)) {
     if (typeof value === "string" && value.startsWith("workspace:")) {
       throw new Error(

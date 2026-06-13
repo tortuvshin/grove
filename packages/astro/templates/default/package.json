@@ -25,9 +25,9 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
-    "@grove-dev/astro": "workspace:*",
-    "@grove-dev/cli": "workspace:*",
-    "@grove-dev/core": "workspace:*",
+    "@grove-dev/astro": "0.2.13",
+    "@grove-dev/cli": "0.2.13",
+    "@grove-dev/core": "0.2.13",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.4",
     "marked": "^18.0.0",
