@@ -11,6 +11,8 @@ The roadmap is grouped into **waves**. Each wave is a shippable milestone. A wav
 
 We are not optimizing for feature count. We are optimizing for **identity lock-in**: every wave should make Grove more clearly a *community knowledge framework* and less of an *OSS directory tool*.
 
+The roadmap below is **the original Wave 0 → Wave 5 plan** as it was written. Waves 0 and 1 are **done** as of V1; the rest is forward-looking. The V1 status section in the [homepage](/) and the [adapters docs](/adapters/astro/) reflect what is shipping right now, not the roadmap narrative.
+
 ---
 
 ## Wave 0 — Framework foundation (done)
@@ -18,17 +20,17 @@ We are not optimizing for feature count. We are optimizing for **identity lock-i
 > Status: complete. See `docs/MILESTONES.md` for the historical record.
 
 - pnpm workspace, `packages/core`, `packages/ui`, `packages/cli`, `packages/astro`.
-- Generic Zod resource schema.
-- Markdown awesome-list importer.
-- `data/apps/*.yml` model.
+- Generic Zod resource schema (now the V1 discriminated `Resource` union with `ProjectRecord`, `ResourceRecord`, `EntityRecord`).
+- Markdown awesome-list importer (`parseAwesomeMarkdown` in `@grove-dev/core/importer`).
+- `data/records/<slug>.yml` model (V1 file layout — V0 used `data/apps/*.yml`).
 - Astro components, layouts, tokens, default template.
-- `init` / `import` / `analyze` / `validate` / `build-data` / `build-llms-full` / `review` / `build` / `preview`.
+- CLI: `new` / `import` / `validate` / `generate` / `sitemap` / `llms` / `sync github` / `cleanup stale` / `workflows sync` / `build` / `dev`. (V0 names `analyze`, `enrich`, `build-data`, `build-llms-full`, `review`, `preview` have been replaced with the V1 names above.)
 
 This wave is what is in `main` today. The waves below reorganize and extend it.
 
 ---
 
-## Wave 1 — Identity & architecture lock
+## Wave 1 — Identity & architecture lock (done)
 
 > Goal: the codebase reflects the vision. `core` is framework-free. `ui` is framework-free. Framework adapters are thin. Templates contain only pages, layouts, and `.github/`. No business logic in templates.
 
@@ -44,13 +46,14 @@ space exposes. Records are a discriminated union keyed by `kind`:
   optional. **Built first, fully reusable.**
 - **`resource-hub`** → `kind: resource`. Guides, comparisons,
   explainers, links, and practical knowledge collections. Has
-  a `type` and a `topic`. **MVP in V1, full implementation in
-  Wave 2.**
+  a `type` and a `topic`. **MVP in V1 (data flows through
+  `grove generate`); polished default pages land in V1.1.**
 - **`ecosystem-map`** → `kind: entity`. Organizations, products,
   people, communities, schools, services, ecosystem actors.
   Has a `type` (company / community / school / ...) and
-  optional `founded` / `location` / `members`. **MVP in V1,
-  full implementation in Wave 2.**
+  optional `founded` / `location` / `members`. **MVP in V1
+  (data flows through `grove generate`); polished default pages
+  land in V1.1.**
 
 The `kind` field is required and must match the blueprint
 configured in `grove.config.ts`. A site running
@@ -58,7 +61,7 @@ configured in `grove.config.ts`. A site running
 `kind: entity` at validation time.
 
 **No custom blueprint API in V1.** If a real space needs fields
-the V1 schemas don't carry, Wave 2 will extend the union — not
+the V1 schemas don't carry, V1.1 will extend the union — not
 the per-site API.
 
 ### 1.2 Resource schema (under the blueprints)
@@ -75,49 +78,79 @@ the per-site API.
   `EntityRecord` carries `type` / `founded` / `location` /
   `members` / `parent`.
 
-### 1.3 Framework split
+### 1.3 Framework split (done)
 
 - `@grove-dev/core` — schemas, config, importers, validators,
   taxonomy, build pipeline, sitemap, llms.txt. **No
   Astro/React/Svelte dependencies.**
-- `@grove-dev/ui` — **roadmap only in V1.** The V0 primitives
-  (`filterRecords`, `sortRecords`, `paginateRecords`,
-  `scoreTier`, ...) all hang off the flat `CuratedItem` type
-  and cannot carry over to the discriminated `Resource`
-  union. V1 ships a stub that re-exports the new types and
-  an identity helper. Wave 2 rebuilds the primitives on top
-  of `Resource`.
-- `@grove-dev/astro` — V1 renderer. Components, layouts,
+- `@grove-dev/ui` — **shipped in V1.** 5 typed primitive modules
+  over the `IndexRecord` discriminated union:
+  `filterRecords`, `sortRecords`, `paginateRecords`,
+  `scoreRecords`, `format`. Re-exported by every adapter.
+- `@grove-dev/astro` — V1 renderer. 22 components, 1 layout,
   tokens, `templates/default/`. Templates contain only pages,
-  layouts, public assets, `astro.config.mjs`, and `.github/`.
-  No `lib/`, no business logic.
-- `@grove-dev/nextjs` and `@grove-dev/svelte` — roadmap only
-  in V1. Skeleton packages; the full implementation waits for
-  Wave 2 when the framework-agnostic core/ui primitives are
-  rebuilt on top of `Resource`.
+  layouts, public assets, `astro.config.mjs`, scripts, and
+  `.github/`. No business logic.
+- `@grove-dev/nextjs` and `@grove-dev/svelte` — skeleton
+  packages; the V1 CLI **refuses** `--framework nextjs` and
+  `--framework svelte` at scaffold time. SvelteKit lands in
+  V1.1, Next.js in V1.2.
 - `@grove-dev/cli` — `new` (scaffolds from any framework
   adapter's template), `import`, `validate`, `generate`,
-  `sitemap`, `llms`, `sync github`, `cleanup stale`, `build`,
+  `sitemap`, `llms`, `sync github`, `sync contributors`
+  (stub in V1), `cleanup stale`, `workflows sync`, `build`,
   `dev`. **No framework dependencies** in the CLI itself;
   framework commands are detected from the project's
   `package.json` and spawned.
 
-### 1.4 Theme/template hygiene
+### 1.4 Naming conventions (V0→V1 migration)
+
+The V0-published Astro package exposed several names that the
+V1 release standardises on `record` / `IndexRecord` instead of
+`item` / `app` / `App`. The renames are:
+
+| V0 name (deprecated) | V1 canonical name | Where |
+|---|---|---|
+| `AppsIndexRow.astro` | `IndexRow.astro` | `@grove-dev/astro/components` |
+| `AppsPagination.astro` | `Pagination.astro` | `@grove-dev/astro/components` |
+| `ItemSection` (component) | `RecordSection` | `@grove-dev/astro/components` |
+| `ItemsFilters` (type) | `IndexFilters` | `@grove-dev/astro` |
+| `ItemsSort` (type) | `IndexSort` | `@grove-dev/astro` |
+| `AppsFilters` / `AppsSort` (type aliases) | removed | (use `IndexFilters` / `IndexSort`) |
+| `filterItems` (function) | `filterRecords` | `@grove-dev/astro` |
+| `filterApps` (alias) | removed | (use `filterRecords`) |
+| `[itemSlug].astro` (file name) | `[recordSlug].astro` | Astro template pages |
+| `data-item-slug` / `dataset.itemSlug` | `data-record-slug` / `dataset.recordSlug` | client-side |
+| `itemSlug()` (config helper) | `recordSlugConfig()` | Astro template `data/records.ts` |
+| `itemSlug` (config field, deprecated) | `recordSlug` (canonical) | `grove.config.ts` blueprint config |
+
+The V0-published Astro template exposed `/apps/<slug>` as a
+static alias for the openapps-style directory. The V1 template
+uses the blueprint-aware dynamic route `/<blueprint>/<record-slug>`
+(e.g. `/projects/coolify`). The `apps/[recordSlug].astro` page
+is a 301 redirect so any existing `/apps/<slug>` bookmarks keep
+working.
+
+`ItemCard.astro` is **kept as the V1 published name** for
+downstream stability — it appears in user docs and downstream
+sites' imports. The component is the V1 record card; the
+name is a deliberate exception to the V0→V1 rename.
+
+### 1.5 Theme/template hygiene
 
 - `packages/astro/templates/default/` is the canonical
-  starting point. It contains pages, layouts, public assets,
-  `astro.config.mjs`, `tailwind.config.mjs`, and a placeholder
-  `data/` tree.
+  starting point. It contains pages, layouts, public assets
+  (icons, `llms.txt`, `robots.txt`, `og-image.svg`),
+  `astro.config.mjs`, `data/`, `scripts/`, and `.github/`.
 - All filter / sort / score / facet logic lives in
-  `@grove-dev/core` or `@grove-dev/ui`. V1 ships a minimal
-  template without the V0 page-fragment richness (lenses,
-  faceted filters, score bars, distribution channels, monthly
-  commit activity). The schema still carries the data, so
-  rebuilding the components is a Wave 2 task.
-- The `template/` (singular) legacy directory is removed; only
-  `templates/default/` remains.
+  `@grove-dev/core` or `@grove-dev/ui`. The V1 template ships
+  the full UI surface — lenses, faceted filters, score bars,
+  distribution channels, monthly commit activity — re-using
+  the `@grove-dev/ui` primitives.
+- Plain CSS + design tokens (no Tailwind required) is the
+  default; Tailwind 4 is supported as an opt-in.
 
-### 1.5 Documentation
+### 1.6 Documentation
 
 - `README.md` rewritten to match the vision. Hero says "Grow
   useful community knowledge." Open Apps is one of several
@@ -127,12 +160,18 @@ the per-site API.
 - `docs/ARCHITECTURE.md` updated to describe the
   core / ui / adapter / template split and the blueprint
   model.
+- All `@grove-dev/*` package READMEs updated to reflect V1
+  public APIs (no more V0 names like `defineGroveConfig`,
+  `curatedConfigSchema`, `buildData`, `buildSitemap`,
+  `buildLlmsFiles`, `fetchGithubMetadata`, `enrichFromGithubHtml`,
+  `ghFetch`, `pLimit`, `validateProject`).
 
-**Wave 1 exit criteria:** `pnpm -r build` is green. `grove new`
+**Wave 1 exit criteria (met):** `pnpm -r build` is green. `grove new`
 scaffolds a working space from
-`@grove-dev/astro/templates/default` with `workspace:*` deps in
-the generated `package.json`. The README reads as a community
-knowledge framework, not an OSS directory. `grove validate`,
+`@grove-dev/astro/templates/default` in ~25 seconds end-to-end
+(`grove new` + `pnpm install` + `pnpm build` + `pnpm dev` +
+11-endpoint curl). The README reads as a community knowledge
+framework, not an OSS directory. `grove validate`,
 `grove generate`, `grove sync github`, `grove cleanup stale`
 all work end-to-end against `data/records/*.yml`.
 
@@ -197,6 +236,14 @@ hypothetical. We do not add fields "in case".
 - A docs page that explains the workflow to a first-time
   contributor.
 
+### 2.4 Polished `resource-hub` and `ecosystem-map` templates
+
+The V1 default Astro template ships polished pages only for
+`project-directory`. V2.1 lands polished list and detail pages
+for `resource-hub` (`/resources/<slug>`) and `ecosystem-map`
+(`/entities/<slug>`) — the data already flows through
+`grove generate` correctly; only the page chrome is missing.
+
 **Wave 2 exit criteria:** a real space, on a real domain,
 with real contributions landing via PR. The README's
 "Spaces built with Grove" list has its first entry.
@@ -221,12 +268,14 @@ with real contributions landing via PR. The README's
 
 ### 3.2 Adapter parity
 
-- `@grove-dev/nextjs` ships a working template that
-  understands the V1 `Resource` union and renders each
+- **`@grove-dev/svelte`** (V1.1) — ships a working SvelteKit
+  template that re-uses `@grove-dev/ui` primitives and
+  understands the V1 `Resource` union. Renders each
   blueprint's kind.
-- `@grove-dev/svelte` ships the same.
-- Each template contains the same set of pages and the same
-  contribution workflow.
+- **`@grove-dev/nextjs`** (V1.2) — ships the same for Next.js
+  App Router.
+- Each adapter's template contains the same set of pages and
+  the same contribution workflow.
 
 ### 3.3 Spaces dashboard (read-only)
 
@@ -255,7 +304,7 @@ carefully:
   opt-in command (`grove sync github`).
 - **Blueprint-aware**: spaces running `project-directory` can
   sync GitHub metadata for `kind: project` records that
-  have a `links.github`. Spaces running `resource-hub` or
+  have a `repoUrl`. Spaces running `resource-hub` or
   `ecosystem-map` skip signal sync — the V1 schemas for
   those kinds don't carry a `github:` block. The CLI exits
   early with a friendly message if a space's blueprint has
@@ -269,8 +318,8 @@ carefully:
 
 - Optional `scores: { activity, maturity, learning,
   contribution, docs, overall }` per record. The V1 schema
-  already carries the block; the V1 UI just doesn't surface
-  it. Wave 4 turns on the surface.
+  already carries the block; the V1 UI surfaces it via the
+  `scoreRecords` primitive in `@grove-dev/ui`.
 - Curator-assigned, not algorithmically generated, by
   default. The framework stores and surfaces them; the
   gardener decides what they mean.

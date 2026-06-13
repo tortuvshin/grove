@@ -55,16 +55,17 @@ Components are imported by path, not through the barrel — that lets `astro che
 
 `templates/default/` is a complete Astro starter. It contains:
 
-- `src/pages/` — index, item detail, search, about, methodology, submit, sitemap
-- `src/components/` — layout primitives, page sections
-- `src/data/` — placeholder dataset; replaced by `grove build-data`
+- `src/pages/` — index, contributors, about, submit, 404, sitemap.xml, plus blueprint-aware dynamic routes at `[slug]/index.astro` (list) and `[slug]/[recordSlug].astro` (detail), plus `apps/[recordSlug].astro` (V0→V1 301 redirect)
+- `src/components/` — site-specific page sections (none by default; the V1 surface is in `packages/astro/src/components/`)
+- `src/data/records.ts` — typed loader for `data/generated/records.full.json` (V0 `src/data/config.ts` is replaced)
 - `src/lib/` — site-specific helpers (no business logic)
-- `public/` — icons, OG image, robots
-- `data/` — empty tree for the gardener to populate
-- `astro.config.mjs`, `tailwind.config.mjs`
-- `.github/` — issue templates
+- `scripts/` — `build-llms.mjs` (regenerates `llms-full.txt` only, preserves committed `llms.txt`), `fetch-icons.mjs`, `migrate-legacy-to-schema-v1.mjs`
+- `public/` — icons, OG image, robots, `llms.txt`, `llms-full.txt`
+- `data/` — empty tree for the gardener to populate; `data/records/<slug>.yml` is the V1 layout (V0 was `data/apps/*.yml`)
+- `astro.config.mjs` (no `tailwind.config.mjs` by default; plain CSS + design tokens)
+- `.github/` — issue templates + 11 GitHub Actions workflows (validate, build, deploy, sync, cleanup, …)
 
-Business logic (filtering, sorting, scoring, faceting) is **imported from `@grove-dev/ui`**, never re-implemented in the template.
+Business logic (filtering, sorting, scoring, faceting) is **imported from `@grove-dev/ui`**, never re-implemented in the template. The V0 commands (`grove build-data`, `grove build-llms-full`, `grove analyze`, `grove enrich`) have been replaced with V1 names (`grove generate`, `grove llms`, `grove sync github`).
 
 ## Layering
 

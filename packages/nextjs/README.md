@@ -11,59 +11,61 @@ pnpm add @grove-dev/nextjs
 ## Status
 
 **Roadmap only — not in V1.** Grove V1 ships the Astro renderer only.
-The Next.js adapter is reserved for a future wave once `@grove-dev/core`
-and `@grove-dev/ui` are rebuilt on the V1 `Resource` discriminated
-union. See [`docs/roadmap.md`](../docs/roadmap.md) for the schedule.
+The V1 CLI refuses `--framework nextjs` at scaffold time.
+The Next.js adapter is reserved for V1.2 once `@grove-dev/core`
+and `@grove-dev/ui` (V1) are stable. See [`docs/roadmap.md`](../docs/roadmap.md)
+for the schedule.
 
 This package currently ships a skeleton only:
 
-- `src/index.ts` — re-exports `@grove-dev/ui`
+- `src/index.ts` — re-exports `@grove-dev/ui` (V1 primitives: `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`)
 - `src/styles.css` — placeholder design tokens
 - `templates/default/package.json` — Next.js 15 + React 19 wiring
 
 The component library, app-router pages, and theme are still to be built. The architectural shape is locked: anything framework-specific lives in this package, anything generic stays in `@grove-dev/core` and `@grove-dev/ui`.
 
-## What it will ship (roadmap)
+## What it will ship (roadmap, V1.2)
 
 ```txt
 src/
-├── components/        # ItemCard, CategoryGrid, HealthBadge, ScoreBars,
-│                      # DirectoryFilters, DirectoryHero, LensTabs, ...
+├── components/        # ItemCard (V1 published name), IndexRow, RecordSection,
+│                      # Pagination, ScoreBars, RefinePanel, Hero, …
+│                      # (22 V1 surface, ported from @grove-dev/astro)
 ├── layouts/           # BaseLayout (RSC)
-├── styles.css         # design tokens + Tailwind entry
+├── styles.css         # design tokens
 └── index.ts           # re-exports @grove-dev/ui
 
 templates/
 └── default/           # full Next.js starter: app/, components/, public/,
-                       # data/, .github/, next.config.mjs, tailwind.config.mjs
+                       # data/, .github/, next.config.mjs
 ```
 
-## Usage in a space
+## Usage in a space (planned)
 
 ```tsx
 // app/page.tsx
-import { ItemCard } from "@grove-dev/nextjs/components/ItemCard";
-import { BaseLayout } from "@grove-dev/nextjs/layouts/BaseLayout";
+import ItemCard from "@grove-dev/nextjs/components/ItemCard";
+import BaseLayout from "@grove-dev/nextjs/layouts/BaseLayout";
 import "@grove-dev/nextjs/styles.css";
-import apps from "@/data/generated/apps.json";
+import records from "@/data/generated/records.json";
 
 export default function Page() {
   return (
     <BaseLayout title="My Grove space">
-      {apps.map((app) => <ItemCard key={app.slug} item={app} />)}
+      {records.map((r) => <ItemCard key={r.slug} record={r} href={`/projects/${r.slug}`} />)}
     </BaseLayout>
   );
 }
 ```
 
-Components are imported by path. The barrel re-exports `@grove-dev/ui` so generic helpers (`filterRecords`, `slugForCategory`, etc.) are available from the same import.
+Components are imported by path. The barrel re-exports `@grove-dev/ui` so generic helpers (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`, `LENSES`, `SORT_OPTIONS`) are available from the same import.
 
 ## Layering
 
 `@grove-dev/nextjs` is the third layer of the Grove stack:
 
-1. **`@grove-dev/core`** — schemas, importers, build pipeline (headless).
-2. **`@grove-dev/ui`** — framework-agnostic UI primitives.
+1. **`@grove-dev/core`** — schemas, importers, build pipeline (headless, V1 `Resource` union).
+2. **`@grove-dev/ui`** — framework-agnostic UI primitives (V1: 5 typed modules over `IndexRecord`).
 3. **`@grove-dev/nextjs`** ← you are here — Next.js components, layouts, template.
 
 ## Development

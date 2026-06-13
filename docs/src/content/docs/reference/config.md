@@ -208,7 +208,7 @@ you need.
 | `dataDir` | `"data"` | Root for all data files |
 | `contentDir` | `"content"` | Root for Markdown content |
 | `recordsDir` | `"data/records"` | Where record YAML files live |
-| `pagesDir` | `"content/pages"` | Markdown pages (about.md, methodology.md, …) |
+| `pagesDir` | `"content/pages"` | Reserved for V1.1+ — the V1 template ships `about.astro`, `contributors.astro`, `submit.astro` as Astro components under `src/pages/`, not as Markdown content pages. The `content/pages/` directory is currently unused by the V1 default template. |
 | `bodiesDir` | `"content/records"` | Optional Markdown body per record (referenced by `content:`) |
 | `publicDir` | `"public"` | Static assets served as-is |
 | `taxonomyDir` | `"data/taxonomy"` | Taxonomy configuration (categories, tags) |
