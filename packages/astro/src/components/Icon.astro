@@ -104,8 +104,14 @@ function resolveName(raw: string): string {
 }
 
 const resolved = resolveName(name);
+const platformStackIcons = new Set(["docker"]);
+const textOnlyPlatforms = new Set(["self-host", "self-hosted"]);
 const folder =
-  category === "stack" ? "stacks" : category === "platform" ? "platforms" : "brands";
+  category === "stack" || (category === "platform" && platformStackIcons.has(resolved))
+    ? "stacks"
+    : category === "platform"
+      ? "platforms"
+      : "brands";
 const baseUrl = `${base.replace(/\/$/, "")}/${folder}/${resolved}`;
 
 // Static: just point at the canonical svg.
@@ -116,7 +122,8 @@ const init = (fallbackInitials ?? name ?? "")
   .replace(/[^a-z0-9]/gi, "")
   .slice(0, 2)
   .toUpperCase();
-const showFallback = !resolved;
+const showFallback =
+  !resolved || (category === "platform" && textOnlyPlatforms.has(resolved));
 
 // Build aria-label.
 const ariaLabel = title ?? name;

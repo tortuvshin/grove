@@ -52,14 +52,14 @@ function fmt(n: number | undefined): string | null {
 
 const visible = contributors
   .filter((c) => c.username)
-  .slice(0, 24);
+  .slice(0, 100);
 ---
 
 <section
   class:list={["grove-section", className]}
   aria-labelledby="grove-contributors-heading"
 >
-  <div class="grove-container-wide mx-auto px-5 sm:px-7">
+  <div class="grove-container mx-auto px-5 sm:px-7">
     <header class="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
         <h2
@@ -95,7 +95,7 @@ const visible = contributors
       </p>
     ) : (
       <ul
-        class="m-0 grid list-none grid-cols-3 gap-3 p-0 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8"
+        class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-x-3 gap-y-5 p-0"
         aria-label="Contributors"
       >
         {visible.map((c) => {
