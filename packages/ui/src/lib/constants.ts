@@ -13,7 +13,8 @@
 /**
  * The sort orders exposed by the directory's `<select>`.
  * Aligned with the V1 openapps `SORT_OPTIONS` and the astro
- * `search.ts` `ItemsSort` union. The values are stable on the
+ * `@grove-dev/astro` `IndexSort` union (formerly `ItemsSort` before
+ * the V0→V1 rename). The values are stable on the
  * wire (URL + persisted prefs) — adding a value is non-breaking,
  * removing a value is breaking.
  */

@@ -112,12 +112,12 @@ The MVP exists to **lock the identity** in working code, not to ship every featu
 
 ### In scope for the first release
 
-1. `defineGroveConfig()` — typed config loader
-2. Generic resource schema (Zod, framework-agnostic)
+1. `defineConfig()` (V0's `defineGroveConfig` was renamed in V1) — typed config loader
+2. Discriminated `Resource` schema (Zod, framework-agnostic) — `ProjectRecord` | `ResourceRecord` | `EntityRecord`
 3. Categories, topics, tags
 4. Resource detail page
 5. Listing / search / filter page
-6. Content pages (about, methodology, custom)
+6. Content pages (about, contributors, submit — V1 ships these as Astro components under `src/pages/`, not as Markdown content pages)
 7. Custom branding + navigation overrides
 8. Static generation (Astro)
 9. Contribution guide structure (issue templates + PR-driven data)
@@ -125,7 +125,7 @@ The MVP exists to **lock the identity** in working code, not to ship every featu
 
 ### Out of scope (roadmap, not MVP)
 
-- GitHub metadata sync (`grove analyze`)
+- GitHub metadata sync (`grove sync github` — V0 name was `grove analyze`)
 - Health / freshness / scoring signals
 - AI-assisted curation
 - Multi-space dashboard

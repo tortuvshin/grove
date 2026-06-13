@@ -10,8 +10,9 @@
  * platform/category/label/license/status/lens, maintained toggle,
  * hideArchived — to the V1 shape.
  *
- * The `IndexFilters` shape mirrors the V1 `ItemsFilters` used by
- * the astro adapter's `search.ts` so a consumer can build a filter
+ * The `IndexFilters` shape mirrors `@grove-dev/astro`'s
+ * `IndexFilters` (formerly `ItemsFilters` before the V0→V1 rename)
+ * so a consumer can build a filter
  * object once and pass it through both layers.
  */
 import type { IndexRecord, HealthStatus } from "@grove-dev/core";
