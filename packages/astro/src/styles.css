@@ -17,6 +17,7 @@
  */
 
 @import "tailwindcss";
+@source "./**/*.{astro,html,js,jsx,ts,tsx}";
 
 @theme {
   /* ── Neutral ink scale (V1 default) ───────────────────────────── */
@@ -286,6 +287,31 @@
  * ────────────────────────────────────────────────────────────────── */
 
 @layer components {
+  /*
+   * Stable container classes for consumers of the packaged stylesheet.
+   * Tailwind does not emit utilities referenced only inside a dependency,
+   * so relying on `max-w-container` alone can leave template content
+   * unconstrained.
+   */
+  .grove-container,
+  .grove-container-wide,
+  .grove-container-narrow {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .grove-container {
+    max-width: var(--container-container);
+  }
+
+  .grove-container-wide {
+    max-width: var(--container-wide);
+  }
+
+  .grove-container-narrow {
+    max-width: var(--container-narrow);
+  }
+
   /* Section spacing — consistent vertical rhythm */
   .grove-section {
     padding-top: 3rem;

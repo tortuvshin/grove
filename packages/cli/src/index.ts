@@ -607,7 +607,7 @@ program
         const installSpinner = p.spinner();
         installSpinner.start("Installing dependencies");
         try {
-          await runExternal("pnpm", ["install", "--ignore-workspace", "--offline"], {
+          await runExternal("pnpm", ["install", "--ignore-workspace"], {
             stdio: "ignore",
             cwd: root,
           });

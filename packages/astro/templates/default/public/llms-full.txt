@@ -1,6 +1,6 @@
 # example.com — full directory
 
-Generated: 2026-06-12T22:46:40.706Z
+Generated: 2026-06-13T05:58:25.728Z
 Records: 8
 
 ---

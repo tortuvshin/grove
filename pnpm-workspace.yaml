@@ -1,4 +1,5 @@
 packages:
   - 'packages/*'
+  - 'packages/astro/templates/default'
   - 'docs'
   - '.grove/run/*'

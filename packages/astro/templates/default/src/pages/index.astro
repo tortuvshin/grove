@@ -44,6 +44,9 @@ function starsOf(r: typeof items[number]): number {
 function pushedAtOf(r: typeof items[number]): string | null {
   return (r as { github?: { pushedAt?: string | null } }).github?.pushedAt ?? null;
 }
+function reviewedAtOf(r: typeof items[number]): string | null {
+  return r.curation?.reviewedAt ?? null;
+}
 function labelsOf(r: typeof items[number]): string[] {
   return r.curation?.labels ?? [];
 }
@@ -62,14 +65,12 @@ const newList = items
   .filter((r) => r.kind === "project")
   .filter((r) => {
     const labelledNew = labelsOf(r).includes("new");
-    return daysSince(pushedAtOf(r)) <= 7 || labelledNew;
+    return daysSince(reviewedAtOf(r)) <= 21 || labelledNew;
   })
   .slice(0, 6);
 const matureList = items
   .filter((r) => r.kind === "project")
-  .filter((r) => {
-    return tierOf(r) === "curated" && daysSince(pushedAtOf(r)) > 365;
-  })
+  .filter((r) => labelsOf(r).includes("mature") || tierOf(r) === "curated")
   .slice(0, 6);
 
 // Stacks and categories derived from items
