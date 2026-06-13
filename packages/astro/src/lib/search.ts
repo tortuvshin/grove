@@ -7,7 +7,7 @@ import { labelDisplay, lensDisplay, statusDisplay } from "./display.js";
  * Multi-value fields use repeated keys in the URL: `?stack=Flutter&stack=React+Native`.
  * Empty / undefined fields mean "no filter on this dimension".
  */
-export type ItemsFilters = {
+export type IndexFilters = {
   q?: string;
   stacks?: string[];
   platforms?: string[];
@@ -18,7 +18,7 @@ export type ItemsFilters = {
   /** A curated lens (e.g. "good-to-learn", "production-like"). Single value. */
   lens?: string;
   /** Sort order. Single value, defaults to "recently-updated". */
-  sort?: ItemsSort;
+  sort?: IndexSort;
   /** 1-based page number. */
   page?: number;
 };
@@ -32,9 +32,9 @@ export const SORT_OPTIONS = [
   { value: "alphabetical", label: "Alphabetical" },
 ] as const;
 
-export type ItemsSort = (typeof SORT_OPTIONS)[number]["value"];
+export type IndexSort = (typeof SORT_OPTIONS)[number]["value"];
 
-const DEFAULT_SORT: ItemsSort = "recently-updated";
+const DEFAULT_SORT: IndexSort = "recently-updated";
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -55,13 +55,13 @@ const KEYS = {
  * Read filters from a URLSearchParams (or anything URLSearchParams-shaped,
  * e.g. the result of `new URL(req.url).searchParams`).
  */
-export function filtersFromSearchParams(sp: URLSearchParams): ItemsFilters {
+export function filtersFromSearchParams(sp: URLSearchParams): IndexFilters {
   const rawSort = sp.get(KEYS.sort);
   // Backwards-compat: old "most-mature" sort now maps to "best-overall".
   const normalizedSort = rawSort === "most-mature" ? "best-overall" : rawSort;
-  const sort: ItemsSort | undefined =
-    normalizedSort && SORT_OPTIONS.some((o) => o.value === normalizedSort)
-      ? (normalizedSort as ItemsSort)
+  const sort: IndexSort | undefined =
+    normalizedSort && (SORT_OPTIONS as readonly { value: string }[]).some((o) => o.value === normalizedSort)
+      ? (normalizedSort as IndexSort)
       : undefined;
   const rawPage = Number(sp.get(KEYS.page));
   const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : undefined;
@@ -84,7 +84,7 @@ export function filtersFromSearchParams(sp: URLSearchParams): ItemsFilters {
  * Undefined / empty values are dropped. Defaults (sort, page 1, comfortable
  * density) are also dropped to keep URLs short and canonical.
  */
-export function searchParamsFromFilters(f: ItemsFilters): URLSearchParams {
+export function searchParamsFromFilters(f: IndexFilters): URLSearchParams {
   const sp = new URLSearchParams();
   if (f.q) sp.set(KEYS.q, f.q);
   for (const v of f.stacks ?? []) sp.append(KEYS.stacks, v);
@@ -100,7 +100,7 @@ export function searchParamsFromFilters(f: ItemsFilters): URLSearchParams {
 }
 
 /** True if any filter is active (i.e. the result list isn't "all items"). */
-export function hasAnyFilter(f: ItemsFilters): boolean {
+export function hasAnyFilter(f: IndexFilters): boolean {
   if (f.q && f.q.trim()) return true;
   if (f.lens) return true;
   return Boolean(
@@ -139,7 +139,7 @@ function recordAddedAt(record: IndexRecord): string | null {
   return record.curation?.reviewedAt ?? null;
 }
 
-export function applySort(items: IndexRecord[], sort: ItemsSort): IndexRecord[] {
+export function applySort(items: IndexRecord[], sort: IndexSort): IndexRecord[] {
   const arr = items.slice();
   const ts = (s?: string | null): number => (s ? new Date(s).valueOf() : 0);
   switch (sort) {
@@ -183,12 +183,12 @@ export function totalPages(itemCount: number, pageSize = PAGE_SIZE): number {
 }
 
 /** Resolve the effective sort from a filters object, applying default. */
-export function effectiveSort(f: ItemsFilters): ItemsSort {
+export function effectiveSort(f: IndexFilters): IndexSort {
   return f.sort ?? DEFAULT_SORT;
 }
 
 /** Resolve the effective page from a filters object, applying default. */
-export function effectivePage(f: ItemsFilters): number {
+export function effectivePage(f: IndexFilters): number {
   return f.page ?? DEFAULT_PAGE;
 }
 
@@ -199,7 +199,7 @@ export function effectivePage(f: ItemsFilters): number {
  * `q` is a case-insensitive substring search across name, owner,
  * description, and category. Other dimensions are exact match.
  */
-export function filterItems(items: IndexRecord[], f: ItemsFilters): IndexRecord[] {
+export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecord[] {
   const q = f.q?.trim().toLowerCase();
   const stacks = f.stacks?.length ? new Set(f.stacks) : null;
   const platforms = f.platforms?.length ? new Set(f.platforms) : null;
@@ -297,9 +297,9 @@ export function filterItems(items: IndexRecord[], f: ItemsFilters): IndexRecord[
 
 /** Build a flat list of "active filter" chips for display + removal. */
 export function activeFilterChips(
-  f: ItemsFilters,
-): { key: keyof ItemsFilters; value: string; label: string }[] {
-  const out: { key: keyof ItemsFilters; value: string; label: string }[] = [];
+  f: IndexFilters,
+): { key: keyof IndexFilters; value: string; label: string }[] {
+  const out: { key: keyof IndexFilters; value: string; label: string }[] = [];
 
   if (f.q && f.q.trim()) {
     out.push({ key: "q", value: "", label: `“${f.q}”` });
@@ -346,11 +346,11 @@ export function activeFilterChips(
  * that no longer has results.
  */
 export function removeFilter(
-  f: ItemsFilters,
-  key: keyof ItemsFilters,
+  f: IndexFilters,
+  key: keyof IndexFilters,
   value: string,
-): ItemsFilters {
-  let next: ItemsFilters;
+): IndexFilters {
+  let next: IndexFilters;
   if (key === "q") {
     next = { ...f, q: undefined };
   } else {
@@ -401,13 +401,8 @@ export function buildFacets(items: IndexRecord[]) {
   };
 }
 
-// ── V1-published API aliases ─────────────────────────────────────────
-// The published `@grove-dev/astro@0.2.10` package exports these
-// under different names (`filterApps` for the filter function and
-// `AppsFilters` for the filter-state type). Re-export them under
-// the V1 names so templates can use either spelling, and so the
-// template's `apps/index.astro` (built against the published API)
-// also works against the local workspace source.
-export const filterApps = filterItems;
-export type AppsFilters = ItemsFilters;
-export type AppsSort = ItemsSort;
+// ── V1-published API ─────────────────────────────────────────────────
+// `IndexFilters` / `IndexSort` are the canonical V1 names for the
+// filter-state type. The internal functions (filterRecords, applySort,
+// paginate, buildFacets, etc.) operate on the generic `IndexRecord`
+// shape and are intentionally framework-agnostic.
