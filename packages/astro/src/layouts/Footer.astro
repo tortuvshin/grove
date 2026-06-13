@@ -109,7 +109,7 @@ const projectItems = project.items.length ? project.items : defaultProject;
   ]}
 >
   <div
-    class="mx-auto grid max-w-wide grid-cols-2 gap-8 px-5 py-12 md:grid-cols-4 sm:px-7"
+    class="grove-container-wide mx-auto grid max-w-wide grid-cols-2 gap-8 px-5 py-12 md:grid-cols-4 sm:px-7"
   >
     <div class="col-span-2 md:col-span-1">
       <div
@@ -225,7 +225,7 @@ const projectItems = project.items.length ? project.items : defaultProject;
 
   <div class="border-t border-ink-200 dark:border-ink-800">
     <div
-      class="mx-auto flex max-w-wide flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
+      class="grove-container-wide mx-auto flex max-w-wide flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
     >
       <span>© {year} {holder}{licenseLine ? `. ${licenseLine}` : "."}</span>
       {gh && (

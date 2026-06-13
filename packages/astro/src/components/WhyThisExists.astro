@@ -19,6 +19,7 @@ interface WhyPoint {
 
 interface Props {
   points?: WhyPoint[];
+  eyebrow?: string;
   title?: string;
   description?: string;
   class?: string;
@@ -26,26 +27,27 @@ interface Props {
 
 const {
   points,
-  title = "Why this directory exists",
-  description = "A short note on the point of all this.",
+  eyebrow = "Why this exists",
+  title = "Most directory discovery is fragmented.",
+  description = "Lists are useful, but they often become long, static pages without enough context to compare what is real, maintained, and worth exploring.",
   class: className = "",
 } = Astro.props;
 
 const defaultPoints: WhyPoint[] = [
   {
     icon: "item",
-    title: "A curated starting point",
-    body: "Skip the rabbit holes. Every entry here is something a real developer reached for, vetted for quality and longevity.",
+    title: "Real projects",
+    body: "Not SDKs, templates, or tiny demos. Focused on complete projects you can actually run.",
   },
   {
     icon: "code",
-    title: "Real, runnable source",
-    body: "Every project links back to its source. Skim, fork, learn — no paywalls, no broken download links.",
+    title: "Codebase context",
+    body: "Stack, platform, license, activity, maturity, and contribution signals in one place.",
   },
   {
     icon: "search",
-    title: "Search that respects you",
-    body: "Filter by stack, platform, license, or status. No SEO spam, no affiliate farms. The directory is the product.",
+    title: "Searchable discovery",
+    body: "Browse by category, stack, platform, stars, recency, and status instead of scanning a flat list.",
   },
 ];
 
@@ -53,33 +55,37 @@ const items = points && points.length > 0 ? points : defaultPoints;
 ---
 
 <section
-  class:list={["grove-section", className]}
+  id="about"
+  class:list={["grove-section scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
   aria-labelledby="grove-why-heading"
 >
   <div class="grove-container mx-auto px-5 sm:px-7">
-    <header class="mb-8 flex flex-col items-center gap-2 text-center">
+    <header class="flex flex-col gap-2">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        {eyebrow}
+      </span>
       <h2
         id="grove-why-heading"
-        class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+        class="m-0 max-w-[40ch] text-[1.5rem] sm:text-[1.75rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
       >
         {title}
       </h2>
       {description && (
-        <p class="m-0 max-w-2xl text-[0.9375rem] text-ink-500 dark:text-ink-400">
+        <p class="m-0 max-w-[64ch] text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400">
           {description}
         </p>
       )}
     </header>
 
-    <ol
-      class="m-0 grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-3"
+    <ul
+      class="m-0 mt-7 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-3"
       aria-label="Why this directory"
     >
-      {items.map((p, i) => (
-        <li class="flex flex-col items-center gap-2 text-center">
-          <span
+      {items.map((p) => (
+        <li class="grove-card p-4">
+          <div
             aria-hidden="true"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-200 bg-white text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-200"
+            class="mb-3 flex h-8 w-8 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300"
           >
             {p.icon === "item" && (
               <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -96,21 +102,15 @@ const items = points && points.length > 0 ? points : defaultPoints;
                 <path d="M10.68 11.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z"></path>
               </svg>
             )}
-          </span>
-          <span
-            aria-hidden="true"
-            class="font-mono text-2xs text-ink-400 dark:text-ink-500"
-          >
-            0{i + 1}
-          </span>
-          <h3 class="m-0 text-base font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          </div>
+          <h3 class="m-0 text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">
             {p.title}
           </h3>
-          <p class="m-0 max-w-xs text-[0.875rem] leading-relaxed text-ink-500 dark:text-ink-400">
+          <p class="m-0 mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
             {p.body}
           </p>
         </li>
       ))}
-    </ol>
+    </ul>
   </div>
 </section>
