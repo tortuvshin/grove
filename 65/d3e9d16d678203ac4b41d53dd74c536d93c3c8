@@ -1,0 +1,35 @@
+packages/cli/src/index.ts
+  s_3d2ebf79c659db::t_55ecc1647a58d6 610
+pnpm-workspace.yaml
+  s_3d2ebf79c659db::t_17b4790f1f684c 3
+packages/astro/src/styles.css
+  s_3d2ebf79c659db::t_cc65805081a137 20
+  s_3d2ebf79c659db::t_b85350fb1e8e5f 290-314
+packages/astro/templates/default/public/llms-full.txt
+  s_3d2ebf79c659db::t_4025c73302c232 3
+packages/astro/templates/default/public/sitemap.xml
+  s_3d2ebf79c659db::t_4025c73302c232 5,11,17,23,29,35,41,47,53,59
+packages/astro/templates/default/src/pages/index.astro
+  s_3d2ebf79c659db::t_b88ec1108022aa 47-49,68,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "65d3e9d16d678203ac4b41d53dd74c536d93c3c8",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3d2ebf79c659db": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5f-e277-77d0-94ab-8f0d0fa4e217",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
