@@ -1,0 +1,38 @@
+packages/astro/src/components/ContributorsGrid.astro
+  s_3d2ebf79c659db::t_b88ec1108022aa 55,62,98
+packages/astro/src/components/WhyThisExists.astro
+  s_3d2ebf79c659db::t_b85350fb1e8e5f 22,30-32,39-40,44-45,49-50,58-59,63-66,69,74,80-81,84-86,88,105-106,109,114
+packages/astro/src/components/CategoryGrid.astro
+  s_3d2ebf79c659db::t_b85350fb1e8e5f 47
+packages/astro/src/layouts/Container.astro
+  s_3d2ebf79c659db::t_b85350fb1e8e5f 10,12-13
+packages/astro/src/components/StackGrid.astro
+  s_3d2ebf79c659db::t_b85350fb1e8e5f 70
+packages/astro/src/layouts/Footer.astro
+  s_3d2ebf79c659db::t_b88ec1108022aa 112,228
+packages/astro/src/components/Icon.astro
+  s_3d2ebf79c659db::t_d1390c993461c4 107-108,110-114,125-126
+packages/astro/src/layouts/Header.astro
+  s_3d2ebf79c659db::t_b88ec1108022aa 81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "eb2e4d8a604489946de4f699969b068996a68e77",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_3d2ebf79c659db": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebf5f-e277-77d0-94ab-8f0d0fa4e217",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
