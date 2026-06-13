@@ -139,10 +139,9 @@ export function templatePath(framework: Framework, name = "default"): string {
 
 /**
  * Read the version of the framework adapter package
- * (`@grove-dev/<framework>`) that shipped the templates. We use this
- * to rewrite `workspace:*` dependencies in the scaffolded `package.json`
- * into a real published version, so the new project can `pnpm install`
- * from the npm registry instead of from the local monorepo workspace.
+ * (`@grove-dev/<framework>`) that shipped the templates. This is the
+ * fallback for older templates that still contain loose dependencies;
+ * current templates already carry exact published versions.
  */
 export function frameworkVersion(framework: Framework): string {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -215,9 +214,9 @@ export async function copyTemplate(
 }
 
 /**
- * Read the framework's `package.json` from the template and rewrite
- * the `name` to a project-friendly slug, then rewrite any
- * `workspace:*` Grove dependencies so the new project can install.
+ * Read the framework's `package.json` from the template, rewrite the
+ * `name` to a project-friendly slug, then normalize Grove dependencies
+ * for published or local development use.
  *
  * Two rewrite modes are supported:
  *
@@ -261,14 +260,9 @@ export async function renameProjectInTemplate(
 }
 
 /**
- * In-place: pin every `@grove-dev/*` dependency in the template's
- * `package.json` to the supplied published version. The templates
- * ship with placeholders like `workspace:*` (monorepo-internal
- * mode) or `*` (any version — too loose) so the framework adapter
- * can be developed against its own sibling packages, but a fresh
- * scaffold is not part of that monorepo and needs a real version
- * pin or `pnpm install` will either fail (`workspace:*` has no
- * registry match) or pull a breaking change (`*` is unpinned).
+ * In-place: replace loose or non-semver `@grove-dev/*` dependencies
+ * with the supplied published version. Exact versions already present
+ * in current templates are preserved.
  *
  * Non-Grove deps are left untouched.
  */
@@ -287,9 +281,8 @@ function rewriteWorkspaceDepsToVersion(
     for (const [name, value] of Object.entries(map)) {
       if (!name.startsWith("@grove-dev/")) continue;
       if (value === version) continue;
-      // Pin anything that's a placeholder: workspace:* (monorepo), *
-      // (any version), git/file URLs that don't exist in the
-      // scaffold, or versions that don't look like a real semver.
+      // Pin placeholders, git/file URLs that do not exist in the
+      // scaffold, or values that do not look like real semver.
       const looksPinned = /^[~^]?\d/.test(value);
       if (!looksPinned) {
         rewritten.push(`${name}: ${value} -> ${version}`);
@@ -312,9 +305,8 @@ function rewriteWorkspaceDepsToVersion(
  * the CLI's own dep tree already mirrors the local monorepo because
  * pnpm creates a symlink at `node_modules/@grove-dev/<pkg>` → real
  * path, so a single `resolvePackageRoot(name, cliLocation)` returns
- * the on-disk path. A direct link is required because repacking a
- * workspace package via `file:` would expose its internal
- * `workspace:*` dependencies to a standalone install.
+ * the on-disk path. A direct link avoids repacking the local package
+ * dependency graph for every smoke-test scaffold.
  */
 function rewriteWorkspaceDepsToFile(pkg: {
   dependencies?: Record<string, string>;
@@ -348,12 +340,9 @@ function rewriteWorkspaceDepsToFile(pkg: {
 }
 
 /**
- * Like `renameProjectInTemplate` but only renames the project — it
- * does NOT rewrite any `@grove-dev/*` dependencies. The template's
- * `workspace:*` placeholders are preserved as-is, so a downstream
- * `pnpm install` from inside the monorepo (or a `pnpm install
- * --filter` from the monorepo root) can resolve them against the
- * local `packages/*` siblings.
+ * Like `renameProjectInTemplate` but only renames the project. It does
+ * not rewrite any `@grove-dev/*` dependencies, preserving the exact
+ * published versions from the template.
  *
  * Used by `grove run` for the dev-internal "pretend user" flow where
  * the scaffolded project lives inside the monorepo.

@@ -41,6 +41,12 @@ const PACKAGES = [
   { name: "@grove-dev/starlight", dir: "packages/starlight" },
 ];
 
+const TEMPLATE_MANIFESTS = [
+  "packages/astro/templates/default/package.json",
+  "packages/nextjs/templates/default/package.json",
+  "packages/svelte/templates/default/package.json",
+];
+
 function parseArgs(argv) {
   const out = {};
   for (let i = 0; i < argv.length; i++) {
@@ -103,17 +109,47 @@ function run(cmd, args, opts = {}) {
 
 async function bumpAll() {
   logSection("Bumping versions");
+  const updates = [];
+  const nextVersions = new Map();
+
   for (const p of PACKAGES) {
     const pkg = await readPkg(p.dir);
     const before = pkg.version;
     const after = EXPLICIT_VERSION ?? bumpVersion(before, RELEASE_KIND);
+    updates.push({ package: p, pkg, before, after });
+    nextVersions.set(p.name, after);
+  }
+
+  for (const update of updates) {
+    const { package: p, pkg, before, after } = update;
     pkg.version = after;
-    // Note: we deliberately leave `workspace:*` deps untouched.
-    // Workspace symlinks stay intact, no `pnpm install` is needed,
-    // and `pnpm publish` rewrites `workspace:*` to the real version
-    // in the tarball at publish time.
+    syncInternalVersions(pkg, nextVersions);
     await writePkg(p.dir, pkg);
     logOk(`${p.name}: ${before} → ${after}`);
+  }
+
+  for (const manifest of TEMPLATE_MANIFESTS) {
+    const path = resolve(ROOT, manifest);
+    const pkg = JSON.parse(await readFile(path, "utf8"));
+    syncInternalVersions(pkg, nextVersions);
+    await writeFile(path, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
+    logOk(`Synced internal dependencies in ${manifest}`);
+  }
+}
+
+function syncInternalVersions(pkg, versions) {
+  for (const section of [
+    "dependencies",
+    "devDependencies",
+    "peerDependencies",
+    "optionalDependencies",
+  ]) {
+    const dependencies = pkg[section];
+    if (!dependencies) continue;
+    for (const name of Object.keys(dependencies)) {
+      const version = versions.get(name);
+      if (version) dependencies[name] = version;
+    }
   }
 }
 

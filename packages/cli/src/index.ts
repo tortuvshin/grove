@@ -6,7 +6,7 @@
  * V1 command surface:
  *   grove new <name>      scaffold a new project (asks blueprint + framework)
  *   grove run [action]    dev-internal: scaffold from LOCAL template and run it
- *                         (dev | build | init). Preserves workspace:* deps.
+ *                         (dev | build | init). Links local Grove packages.
  *   grove import <src>    turn an awesome list into records/*.yml
  *   grove validate        check records, taxonomy, health, decisions
  *   grove generate        build data/generated/records.{full,index}.json
@@ -412,25 +412,21 @@ program
 // ──────────────────────────────────────────────────────────────────────
 //
 // `grove new` is the production path: it copies the framework template
-// into a fresh dir, rewrites `workspace:*` deps to the published
-// version, and (optionally) installs + inits git. That's exactly what
-// we want for an end user.
+// into a fresh dir, keeps its published Grove package versions, and
+// (optionally) installs + inits git.
 //
 // `grove run` is the dev / CI-internal path. It does almost the same
 // scaffolding, but with two differences that make it useful when
 // iterating on the monorepo:
 //
-//   1. `workspace:*` deps in the scaffolded `package.json` are LEFT
-//      ALONE. pnpm resolves those to the local `packages/*` siblings
-//      inside the monorepo, so a template change in
-//      `packages/astro/templates/default/` is picked up by the next
-//      `grove run` without a publish step.
+//   1. Grove dependencies in the scaffolded `package.json` are
+//      rewritten to direct local links, so package changes are picked
+//      up by the next `grove run` without a publish step.
 //
 //   2. The scaffold lives INSIDE the monorepo, under
 //      `<monorepo-root>/.grove/run/<timestamp>/`. `.grove/*` is
-//      registered in `pnpm-workspace.yaml`, so `pnpm install --filter`
-//      from the monorepo root can resolve `workspace:*` deps against
-//      the local `packages/*` siblings.
+//      registered in `pnpm-workspace.yaml`, so root-level tooling can
+//      discover and operate on the generated project.
 //
 // After scaffolding and (optionally) installing, `grove run` can launch
 // the framework dev server in-process. That makes end-to-end smoke

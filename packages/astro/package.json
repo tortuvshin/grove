@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/astro",
-  "version": "0.2.10",
+  "version": "0.2.13",
   "type": "module",
   "description": "Astro framework adapter for Grove. Components, layouts, design tokens, and a default template.",
   "license": "MIT",
@@ -48,8 +48,8 @@
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "workspace:*",
-    "@grove-dev/ui": "workspace:*",
+    "@grove-dev/core": "0.2.13",
+    "@grove-dev/ui": "1.0.3",
     "astro": "^6.4.6"
   },
   "peerDependencies": {
