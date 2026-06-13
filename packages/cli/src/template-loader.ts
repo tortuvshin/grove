@@ -7,7 +7,7 @@
  * just works after `pnpm add @grove-dev/<framework>`.
  */
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -193,6 +193,23 @@ export async function copyTemplate(
     recursive: true,
     force: options.force ?? false,
     errorOnExist: false,
+    filter: (source) => {
+      const relative = source.slice(from.length).replace(/^[/\\]/, "");
+      if (!relative) return true;
+      const normalized = relative.replaceAll("\\", "/");
+      return !(
+        normalized === "node_modules" ||
+        normalized.startsWith("node_modules/") ||
+        normalized === ".astro" ||
+        normalized.startsWith(".astro/") ||
+        normalized === "dist" ||
+        normalized.startsWith("dist/") ||
+        normalized === "data/generated" ||
+        normalized.startsWith("data/generated/") ||
+        normalized.endsWith("/.DS_Store") ||
+        normalized === ".DS_Store"
+      );
+    },
   });
   return { from, to: targetRoot, files: -1 };
 }
@@ -314,7 +331,7 @@ function rewriteWorkspaceDepsToFile(pkg: {
       if (!name.startsWith("@grove-dev/")) continue;
       let pkgPath: string;
       try {
-        pkgPath = resolveGrovePackage(name, cliLocation);
+        pkgPath = realpathSync(resolveGrovePackage(name, cliLocation));
       } catch {
         // Not installed locally (e.g. a future framework like
         // `@grove-dev/svelte` that has no real template in V1). Skip

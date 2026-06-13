@@ -22,7 +22,7 @@ const parseConfig = (userConfig?: LucodeStarlightUserConfig): LucodeStarlightCon
 
 const plugin = (userConfig?: LucodeStarlightUserConfig): StarlightPlugin =>
     ({
-        name: 'lucode-starlight',
+        name: '@grove-dev/starlight',
         hooks: {
             'config:setup': ({ config, logger, updateConfig, addIntegration }) => {
                 updateConfig({
@@ -37,7 +37,7 @@ const plugin = (userConfig?: LucodeStarlightUserConfig): StarlightPlugin =>
                 });
 
                 addIntegration({
-                    name: 'lucode-starlight-integration',
+                    name: '@grove-dev/starlight/integration',
                     hooks: {
                         'astro:config:setup': ({ updateConfig }) => {
                             updateConfig({
