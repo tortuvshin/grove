@@ -18,9 +18,9 @@ export type IndexFilters = {
   /** A curated lens (e.g. "good-to-learn", "production-like"). Single value. */
   lens?: string;
   /** Sort order. Single value, defaults to "recently-updated". */
-  sort?: IndexSort;
+  sort?: IndexSort | undefined;
   /** 1-based page number. */
-  page?: number;
+  page?: number | undefined;
 };
 
 /** Available sort orders, in UI order. */
@@ -76,8 +76,8 @@ export function filtersFromSearchParams(sp: URLSearchParams): IndexFilters {
     licenses: sp.getAll(KEYS.licenses).filter(Boolean),
     statuses: sp.getAll(KEYS.statuses).flatMap((s) => s.split(",")).filter(Boolean),
     ...(lens !== null ? { lens } : {}),
-    sort,
-    page,
+    ...(sort !== undefined ? { sort } : {}),
+    ...(page !== undefined ? { page } : {}),
   };
 }
 
