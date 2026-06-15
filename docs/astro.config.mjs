@@ -22,6 +22,12 @@ export default defineConfig({
                 light: './src/assets/logo-light.svg',
             },
             customCss: ['./src/styles/global.css'],
+            // TODO(decision): confirm the org name. The real upstream org
+            // is `tortuvshin/grove` (per repo `homepage` / npm `repository`
+            // fields); the audit flagged this as `grove-dev/grove`. The
+            // Starlight "Edit this page" link resolves to this URL.
+            // Leaving as `grove-dev/grove` per audit recommendation (a) —
+            // flag in `outputs/docs-and-placeholders/deliverable.md`.
             editLink: {
                 baseUrl: 'https://github.com/grove-dev/grove/edit/main/docs',
             },
@@ -39,6 +45,7 @@ export default defineConfig({
                 }),
             ],
             social: [
+                // TODO(decision): confirm the org name (see editLink.baseUrl above).
                 { icon: 'github', label: 'GitHub', href: 'https://github.com/grove-dev/grove' },
             ],
             sidebar: [

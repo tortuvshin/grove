@@ -23,7 +23,7 @@ Report privately by email to:
 Include, where possible:
 
 1. The affected package and version (e.g. `@grove-dev/cli@0.2.2`).
-2. A minimal reproduction — the smallest `curated.config.ts` + data + command that triggers the issue.
+2. A minimal reproduction — the smallest `grove.config.ts` + data + command that triggers the issue.
 3. The expected behaviour and the actual behaviour.
 4. Whether the issue is exploitable from untrusted input (a forked data file, a third-party resource record, a user-submitted PR).
 5. Your contact info for follow-up questions. If you'd like to be credited in the release notes, say so.

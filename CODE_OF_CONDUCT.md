@@ -36,7 +36,7 @@ This Code of Conduct applies within all community spaces — GitHub repository (
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at **toroo.byamba@gmail.com**. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders responsible for enforcement at <!-- TODO(decision): the audit flagged `toroo.byamba@gmail.com` as a personal email that may not be the right moderation contact for a public open-source project. The repo owner (see [`CODEOWNERS`](./.github/CODEOWNERS)) needs to pick the right address — options include a project alias (e.g. `conduct@grove.dev` if such an alias exists or can be created), a team address, or an explicit personal address. Until that's decided, leave a TODO and the issue link below so this is filled in before the first public incident. --> **TODO: pick a moderation contact email and replace this line** ([tracking issue](https://github.com/tortuvshin/grove/issues/new?title=CODE_OF_CONDUCT%3A+pick+moderation+contact+email)). All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any incident.
 

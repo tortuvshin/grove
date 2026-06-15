@@ -16,49 +16,74 @@ The package ships 5 modules, each a small, well-tested, dependency-free TypeScri
 
 | Module | What it does | Key exports |
 |---|---|---|
-| `filter.ts` | Filter `IndexRecord[]` by URL-driven filter state | `IndexFilters`, `filterRecords`, `hasAnyFilter`, `activeFilterChips`, `FilterChip` |
-| `sort.ts` | Sort by sort field, defaulting to "recently updated" | `applySort` |
-| `paginate.ts` | Slice a sorted array into pages | `paginate<T>`, `totalPages`, `PAGE_SIZE` |
-| `scoring.ts` | Derive a 0-100 score cascade from curation + health signals | `scoreRecords` (typed over the V1 union) |
-| `format.ts` | Pretty-print numbers, dates, relative times, slugs | `formatStars`, `formatRelative`, `formatNumber`, `prettySlug`, `labelDisplay`, `lensDisplay`, `statusDisplay` |
-| `constants.ts` | The canonical lens / sort option / page size constants | `LENSES`, `PRIMARY_LENSES`, `SORT_OPTIONS`, `PAGE_SIZE` |
-| `index.ts` | Barrel | re-exports all of the above |
+| `filter.ts` | Filter `IndexRecord[]` by URL-driven filter state | `IndexFilters` (type), `FilterChip` (type), `filterRecords`, `hasAnyFilter`, `activeFilterChips`, `isMaintained` |
+| `sort.ts` | Sort by sort field, defaulting to "recently updated" | `sortRecords` |
+| `paginate.ts` | Slice a sorted array into pages | `paginateRecords`, `totalPages`, `PAGE_SIZE` |
+| `scoring.ts` | Derive a 0-100 score cascade from curation + health signals | `scoreTier`, `scoreTierLabel`, `scoreLabel`, `SCORE_DIMENSIONS`, `SCORE_LABELS`, `SCORE_REASONING`, `AppScores` (type) |
+| `format.ts` | Pretty-print numbers, dates, relative times | `compact`, `formatStars`, `formatNumber`, `formatRelative`, `formatDate` |
+| `constants.ts` | The canonical lens / sort option / page size constants | `SORT_OPTIONS`, `PRIMARY_LENSES`, `LENSES`, `lensById`, `isPrimaryLens`, `SortValue` (type), `LensId` (type), `LensDef` (type) |
+| `index.ts` | Barrel | re-exports all of the above plus `UI_VERSION` and the V1 `Resource` / record types re-exported from `@grove-dev/core` |
 
 ## Public surface (V1)
 
 ```ts
 import {
+  // meta
+  UI_VERSION,
+
+  // re-exported V1 core types
+  type Resource,
+  type ProjectRecord,
+  type ResourceRecord,
+  type EntityRecord,
+  type IndexRecord,
+  type IndexProjectRecord,
+  type IndexResourceRecord,
+  type IndexEntityRecord,
+  type HealthStatus,
+  type ResourceKind,
+
   // filter
   type IndexFilters,
   type FilterChip,
   filterRecords,
   hasAnyFilter,
   activeFilterChips,
+  isMaintained,
 
   // sort
-  applySort,
+  sortRecords,
+  type SortValue,
+  SORT_OPTIONS,
 
   // paginate
-  paginate,
+  paginateRecords,
   totalPages,
   PAGE_SIZE,
 
   // scoring
-  scoreRecords,
+  scoreTier,
+  scoreTierLabel,
+  scoreLabel,
+  SCORE_DIMENSIONS,
+  SCORE_LABELS,
+  SCORE_REASONING,
+  type AppScores,
 
   // format
+  compact,
   formatStars,
-  formatRelative,
   formatNumber,
-  prettySlug,
-  labelDisplay,
-  lensDisplay,
-  statusDisplay,
+  formatRelative,
+  formatDate,
 
-  // constants
+  // lens catalog
   LENSES,
   PRIMARY_LENSES,
-  SORT_OPTIONS,
+  type LensId,
+  type LensDef,
+  lensById,
+  isPrimaryLens,
 } from "@grove-dev/ui";
 ```
 
@@ -68,7 +93,7 @@ import {
 `@grove-dev/astro` exports) so consumers can write:
 
 ```ts
-import { filterRecords, applySort, sortDisplay } from "@grove-dev/astro";
+import { filterRecords, sortRecords, paginateRecords, scoreTier } from "@grove-dev/astro";
 ```
 
 instead of the deeper `@grove-dev/ui` path. Future adapters
@@ -77,17 +102,25 @@ canonical home is `@grove-dev/ui`; the adapter barrel is convenience.
 
 ## V0→V1 history
 
-The V0 published `@grove-dev/ui` exposed `filterRecords`,
-`sortRecords`, `paginateRecords`, `scoreTier`, … all hanging off the
-flat `CuratedItem` type. They did not carry over to the V1
-discriminated `Resource` union, so the V1 release rebuilds the
-primitives on top of `IndexRecord` (the slim projection the list
-view actually needs). The V0 names and V0 semantics are gone; the
-V1 module shape is the one above.
+The V0 published `@grove-dev/ui` shipped at `0.0.0-roadmap` as a
+stub (an identity helper and a version constant only) — there was
+no V0 primitive surface. The V1 release (`1.0.x`) is the first
+version that ships the typed modules listed above. The V0 names
+that earlier docs floated (`applySort`, `paginate<T>`, `scoreRecords`,
+`prettySlug`, `labelDisplay`, `lensDisplay`, `statusDisplay`)
+**do not exist** in any released version of the package — they
+were draft names that did not survive review. The canonical V1
+names are the ones in the table above (`sortRecords`,
+`paginateRecords`, `scoreTier` / `scoreTierLabel` / `scoreLabel`,
+`formatStars` / `formatRelative` / `formatNumber`, etc.).
 
-The V1 release is `1.0.x`. Earlier `0.0.0-roadmap` stub releases
-shipped an identity helper and a version constant only — they are
-not the V1 surface.
+The V1 release is `1.0.x`.
+
+## CSS
+
+The package ships a `dist/styles.css` (subpath export
+`@grove-dev/ui/styles.css`) — shared design tokens and component
+classes. No Tailwind dependency required.
 
 ## Development
 

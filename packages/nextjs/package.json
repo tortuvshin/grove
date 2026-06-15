@@ -2,6 +2,7 @@
   "name": "@grove-dev/nextjs",
   "version": "0.2.16",
   "type": "module",
+  "private": true,
   "description": "Roadmap-only Next.js adapter package for Grove. No runnable template or component exports ship in V1.",
   "license": "MIT",
   "keywords": [
