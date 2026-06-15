@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { stringify as stringifyYaml } from "yaml";
 import { blueprintKind, type Blueprint, type ProjectRecord } from "./schema.js";
+import { uniqueSlug } from "./slug.js";
 
 export interface ImportedRecord {
   slug: string;
@@ -84,12 +85,12 @@ function headingText(line: string): string | undefined {
 }
 
 function slugify(label: string, seen: Map<string, number>): string {
-  const base =
-    label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) ||
-    "item";
-  const existing = seen.get(base) ?? 0;
-  seen.set(base, existing + 1);
-  return existing === 0 ? base : `${base}-${existing}`;
+  // Delegate to the public `uniqueSlug` so the package ships a single
+  // collision-counter behavior (foo, foo-2, foo-3). The previous
+  // hand-rolled version (foo, foo-1, foo-2) had an off-by-one against
+  // `slug.ts:uniqueSlug` and was the source of subtle duplicate-slug
+  // reports from awesome-list importers.
+  return uniqueSlug(label, seen);
 }
 
 function githubReadmeUrl(input: string): string | undefined {
