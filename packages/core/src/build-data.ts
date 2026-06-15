@@ -189,7 +189,8 @@ export async function generate(
     for (const p of ps) platforms.add(p);
     const gh = (r as { github?: { fullName?: string; stars?: number } }).github;
     if (gh?.fullName && gh.fullName.includes("/")) {
-      owners.add(gh.fullName.split("/")[0]);
+      const [owner] = gh.fullName.split("/");
+      if (owner) owners.add(owner);
     }
     if (typeof gh?.stars === "number") totalStars += gh.stars;
   }
