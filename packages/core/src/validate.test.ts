@@ -140,7 +140,7 @@ describe("validateProject — silent try/catch at line 70 (missing records dir)"
           health: "data/health.yml",
           decisions: "data/decisions.yml",
         },
-      });
+      } as Partial<GroveConfig>);
       const result = await validateProject(config);
       expect(result.ok).toBe(false);
       expect(result.errors.some((e) => e.code === "missing_records_dir")).toBe(true);

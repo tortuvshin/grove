@@ -17,6 +17,11 @@ coverage/
 *.log
 *.tsbuildinfo
 *.svelte-kit/
+# Integration smoke artifacts — `grove new` scaffolds land here
+# if the test mis-routes. Keeping them out of git.
+test-tmp/
+test-tmp-*/
+
 
 # Local Grove state — `grove run` writes timestamped scratch projects
 # under <monorepo>/.grove/run/, and the release script writes a

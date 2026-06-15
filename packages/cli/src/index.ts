@@ -49,9 +49,9 @@ import {
   packageNameFromProjectName,
   renameProjectInTemplate,
   SUPPORTED_FRAMEWORKS,
-  type DeployProvider,
   type Framework,
 } from "./template-loader.js";
+import { DEPLOY_PROVIDERS, type DeployProvider, parseDeployProvider } from "./helpers.js";
 
 /**
  * Resolve the CLI's own version. After `tsc` builds, the build script
@@ -80,7 +80,6 @@ function readOwnVersion(): string {
 const CLI_VERSION = readOwnVersion();
 const program = new Command();
 
-const DEPLOY_PROVIDERS = ["vercel", "netlify", "cloudflare", "github-pages", "none"] as const;
 const DEPLOY_LABELS: Record<DeployProvider, { label: string; hint: string }> = {
   vercel: { label: "Vercel", hint: "Vercel — best for Next.js and SSR" },
   netlify: { label: "Netlify", hint: "Netlify — strong form handling and edge" },
@@ -1300,26 +1299,11 @@ async function existsLocal(path: string): Promise<boolean> {
   }
 }
 
-/**
- * Parse a `--deploy` flag value into a typed `DeployProvider`.
- *
- * - `undefined` (flag not passed) → "github-pages" (the historical
- *   default; matches commander.js's default-arg behaviour).
- * - A valid provider name → returned unchanged.
- * - Anything else → process exits 1 with the list of valid providers.
- *
- * The previous implementation silently coerced invalid values to
- * "github-pages", which masked typos in CI scripts (audit finding).
- */
-function parseDeployProvider(value: string | undefined): DeployProvider {
-  if (value === undefined) return "github-pages";
-  if ((DEPLOY_PROVIDERS as readonly string[]).includes(value)) {
-    return value as DeployProvider;
-  }
-  console.error(`Unknown deploy provider: ${value}.`);
-  console.error(`Try one of: ${DEPLOY_PROVIDERS.join(", ")}`);
-  process.exit(1);
-}
+// parseDeployProvider and DEPLOY_PROVIDERS live in ./helpers.js
+// so they can be unit-tested without booting the whole CLI
+// program. Re-exported here for consumers that previously
+// imported them from the index.
+export { parseDeployProvider, DEPLOY_PROVIDERS };
 
 // ──────────────────────────────────────────────────────────────────────
 // Helper: project file templates

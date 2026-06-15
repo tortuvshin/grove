@@ -41,7 +41,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\"",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --dir src",
+    "test": "cd ../.. && pnpm exec vitest run --project unit packages/cli",
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {

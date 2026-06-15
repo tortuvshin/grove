@@ -40,7 +40,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --dir src"
+    "test": "cd ../.. && pnpm exec vitest run --project unit packages/core"
   },
   "dependencies": {
     "jiti": "^2.6.1",
