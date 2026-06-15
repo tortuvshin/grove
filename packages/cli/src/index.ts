@@ -493,17 +493,17 @@ program
         process.exit(1);
       }
       const framework = opts.framework;
-      if (framework !== "astro") {
-        // V1 only supports astro. The CLI rejects other frameworks at
-        // the `--framework` boundary in `grove new`; `grove run` keeps
-        // the same restriction by virtue of the `Framework` union
-        // (see template-loader.ts). This branch is therefore
-        // unreachable in V1; kept as a safety net for any future
-        // framework that slips past the type guard.
-        p.log.warn(
-          `Framework "${framework}" is not supported in V1. Only astro is wired up — proceeding anyway and hoping for the best.`,
-        );
-      }
+      // `framework` is now typed as `Framework`, which in V1 is the
+      // single-value union `"astro"` (see template-loader.ts). The
+      // previous safety-net `if (framework !== "astro")` branch was
+      // unreachable — the type system had already narrowed it. The
+      // `AssertExhaustive` helper below is a sentinel: it compiles as
+      // long as `Framework` has only the `"astro"` member, and it
+      // fails to compile the moment a second framework is added to
+      // the union — surfacing this exact spot as a type error so we
+      // make a deliberate decision about the `grove run` path.
+      type AssertExhaustive<T extends Framework> = T extends "astro" ? T : never;
+      const _exhaustive: AssertExhaustive<Framework> = framework;
 
       p.intro(`🧪 Grove run — ${runAction}`);
 
@@ -585,9 +585,9 @@ program
       // `pnpm-workspace.yaml`.
       const root = resolve(monorepoRoot, ".grove", "run", dirRel);
       // The dir name and the package.json `name` are not the same —
-      // `renameProjectInTemplatePreserveDeps` slugifies the dir name
-      // and appends `-<framework>-<template>`. We need the package
-      // name to drive `pnpm --filter`, so compute it once and reuse.
+      // `packageNameFromProjectName` slugifies the dir name and appends
+      // `-<framework>-<template>`. We need the package name to drive
+      // `pnpm --filter`, so compute it once and reuse.
       const projectName = root.split("/").filter(Boolean).pop() ?? dirRel;
 
       // ── Look up the LOCAL template via @grove-dev/<framework>'s

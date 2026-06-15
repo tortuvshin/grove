@@ -24,14 +24,15 @@
  *  blueprints — `project-directory` (default), `resource-hub`, and
  *  `ecosystem-map` — without per-blueprint forks.
  *
- *  When the JSON files are missing (e.g. before `grove generate`
- *  runs, or in a fresh scaffold with no records) this module falls
- *  back to empty arrays so the Astro build still succeeds — every
- *  page must render a graceful "no records yet" state.
+ *  JSON imports are static at the top of this module so Vite
+ *  resolves them at build time. A fresh scaffold that has not yet
+ *  run `grove generate` will fail the build with a clear Vite
+ *  resolution error, which is the correct signal — a build that
+ *  silently renders an empty directory hides real config mistakes.
  */
-import { existsSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import fullPayload from "../../data/generated/records.full.json";
+import indexPayload from "../../data/generated/records.index.json";
+import siteConfigPayload from "../../data/generated/site-config.json";
 import type {
   ProjectRecord,
   ResourceRecord,
@@ -76,65 +77,9 @@ interface SiteConfigPayload {
   name?: string;
 }
 
-function loadGenerated<T>(filename: string, parser: (raw: string) => T): T {
-  // The Astro build resolves JSON imports from `src/data/*.ts`, but
-  // we want to be defensive about the order of operations: a fresh
-  // scaffold runs `astro build` without first running
-  // `grove generate`, in which case the JSON file does not exist.
-  // Resolve the path relative to this module's URL, then fall back
-  // to an empty list.
-  try {
-    const here = dirname(fileURLToPath(import.meta.url));
-    const candidates = [
-      resolve(here, "..", "..", "data", "generated", filename),
-      resolve(here, "..", "..", "..", "data", "generated", filename),
-      resolve(process.cwd(), "data", "generated", filename),
-    ];
-    const path = candidates.find((p) => existsSync(p));
-    if (!path) return parser("");
-    return parser(readFileSync(path, "utf8"));
-  } catch {
-    return parser("");
-  }
-}
-
-const fullRecordsRaw: Resource[] = loadGenerated(
-  "records.full.json",
-  (raw) => {
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw) as FullPayload;
-      return (parsed.records ?? []) as Resource[];
-    } catch {
-      return [];
-    }
-  },
-);
-
-const indexRecordsRaw: IndexRecord[] = loadGenerated(
-  "records.index.json",
-  (raw) => {
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw) as IndexPayload;
-      return (parsed.records ?? []) as IndexRecord[];
-    } catch {
-      return [];
-    }
-  },
-);
-
-const siteConfigRaw: SiteConfigPayload = loadGenerated(
-  "site-config.json",
-  (raw) => {
-    if (!raw) return {};
-    try {
-      return JSON.parse(raw) as SiteConfigPayload;
-    } catch {
-      return {};
-    }
-  },
-);
+const fullRecordsRaw: Resource[] = (fullPayload as FullPayload).records ?? [];
+const indexRecordsRaw: IndexRecord[] = (indexPayload as IndexPayload).records ?? [];
+const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
 
 /**
  *  Full records (all visibility). Use this for the detail page,
