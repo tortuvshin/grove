@@ -114,6 +114,7 @@ program
   .option("-t, --template <name>", "template name", "default")
   .option("-d, --deploy <provider>", `deploy provider: ${DEPLOY_PROVIDERS.join(" | ")}`)
   .option("-g, --github <mode>", "GitHub workflow mode: none | public (V1: none=private, public=community)")
+  .option("--local", "link @grove-dev/* dependencies to the local monorepo (workspace development only)")
   .option("--no-git", "skip `git init` after scaffolding")
   .option("--no-install", "skip `pnpm install` after scaffolding")
   .option("-y, --yes", "accept defaults for every prompt (CI / scripted use)")
@@ -126,6 +127,7 @@ program
         template: string;
         deploy?: string;
         github?: string;
+        local?: boolean;
         git?: boolean;
         install?: boolean;
         yes?: boolean;
@@ -299,10 +301,12 @@ program
         root,
         projectName,
         tpl.template,
+        { mode: opts.local ? "file" : "published" },
       );
       if (renameResult.rewrittenDeps.length > 0) {
+        const depLabel = opts.local ? "local monorepo link" : "published version";
         p.log.step(
-          `Rewrote workspace deps to published version: ${renameResult.rewrittenDeps.join(", ")}`,
+          `Rewrote @grove-dev/* deps to ${depLabel}: ${renameResult.rewrittenDeps.join(", ")}`,
         );
       }
 
