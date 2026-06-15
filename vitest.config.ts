@@ -43,7 +43,15 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          include: ["src/**/*.{test,spec}.ts"],
+          // `name` makes the project show up in the vitest
+          // run list (`pnpm test --project unit`) and groups
+          // its output under a single banner.
+          name: "unit",
+          // Each package's `src/` is the unit-test home. The
+          // brief calls for "include the packages/* directories";
+          // the `{test,spec}.ts` suffix keeps `.d.ts` and the
+          // test files co-located in the same directory.
+          include: ["packages/*/src/**/*.{test,spec}.ts"],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its
@@ -77,6 +85,10 @@ export default defineConfig({
           pool: "forks",
           maxWorkers: 1,
           isolate: false,
+          // Vitest 4 requires distinct sequence.groupOrder for
+          // projects that have different maxWorkers, so the
+          // run scheduling can keep them apart.
+          sequence: { groupOrder: 1 },
         },
       },
     ],

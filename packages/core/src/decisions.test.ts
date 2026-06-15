@@ -13,7 +13,7 @@ import { mkdir, writeFile, readFile, rm, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pickCleanupCandidates, cleanupStale } from "./decisions.js";
-import type { Resource } from "./schema.js";
+import type { Resource, GroveConfig } from "./schema.js";
 
 function makeProjectResource(overrides: Partial<Resource> = {}): Resource {
   return {
@@ -222,7 +222,7 @@ describe("cleanupStale — filesystem integration (real tmpdir)", () => {
       nav: [],
       theme: {},
       integrations: {},
-    };
+    } as unknown as GroveConfig;
     const { report, path } = await cleanupStale(cwd, noRecordsConfig);
     expect(report.totalCandidates).toBe(0);
     expect(report.candidates).toEqual([]);

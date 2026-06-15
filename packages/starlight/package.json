@@ -52,6 +52,6 @@
     "marked": "^18.0.2"
   },
   "scripts": {
-    "test": "vitest run --dir tests"
+    "test": "cd ../.. && pnpm exec vitest run --project starlight"
   }
 }
