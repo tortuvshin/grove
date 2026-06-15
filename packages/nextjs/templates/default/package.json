@@ -22,9 +22,9 @@
     "cleanup": "grove cleanup stale"
   },
   "dependencies": {
-    "@grove-dev/core": "0.2.14",
-    "@grove-dev/nextjs": "0.2.14",
-    "@grove-dev/ui": "1.0.4",
+    "@grove-dev/core": "0.2.16",
+    "@grove-dev/nextjs": "0.2.16",
+    "@grove-dev/ui": "1.0.6",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
