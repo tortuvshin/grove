@@ -4,23 +4,34 @@
 
 A thin layer of Svelte components, layouts, and design tokens, on top of the framework-agnostic `@grove-dev/core` and `@grove-dev/ui`. Includes a default `templates/default/` directory that `grove new --framework svelte` copies into a new project.
 
+> **⚠️ Roadmap only — not in V1 — package is private.**
+> Marked `"private": true` (line 5 of `package.json`) and the registry
+> will refuse to publish it. Note: `publishConfig.access: "public"`
+> is retained for if/when the package is later revived; it is gated
+> by `private` at the registry level. Do not depend on the
+> `@grove-dev/svelte` name from outside this monorepo — there is no
+> public artifact. The real V1 entry point is `@grove-dev/astro` (and
+> the framework-agnostic `@grove-dev/core` / `@grove-dev/ui`).
+
 ```bash
-pnpm add @grove-dev/svelte
+# This will fail — the package is private:
+pnpm add @grove-dev/svelte   # 404 (not published) or 403 (private)
 ```
 
 ## Status
 
 **Roadmap only — not in V1.** Grove V1 ships the Astro renderer only.
-The V1 CLI refuses `--framework svelte` at scaffold time.
-The SvelteKit adapter is reserved for V1.1 once `@grove-dev/core`
-and `@grove-dev/ui` (V1) are stable. See [`docs/roadmap.md`](../docs/roadmap.md)
-for the schedule.
+The V1 CLI refuses `--framework svelte` at scaffold time (see
+[`@grove-dev/cli/src/index.ts`](../../cli/src/index.ts) — the
+`isFramework()` helper accepts only `"astro"` in V1). The SvelteKit
+adapter is reserved for V1.1 once `@grove-dev/core` and `@grove-dev/ui`
+(V1) are stable. See [`docs/roadmap.md`](../docs/roadmap.md) for the
+schedule.
 
 This package currently ships a skeleton only:
 
-- `src/index.ts` — re-exports `@grove-dev/ui` (V1 primitives: `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`)
-- `src/styles.css` — placeholder design tokens
-- `templates/default/package.json` — SvelteKit 2 + Svelte 5 wiring
+- `src/index.ts` — re-exports `@grove-dev/ui` (V1 primitives: `filterRecords`, `sortRecords`, `paginateRecords`, `scoreTier`, `scoreTierLabel`, `scoreLabel`, `format*`, `LENSES`, `SORT_OPTIONS`, etc.)
+- `templates/default/package.json` — SvelteKit 2 + Svelte 5 wiring (not exercised by V1)
 
 The component library, routes, and theme are still to be built. The architectural shape is locked: anything framework-specific lives in this package, anything generic stays in `@grove-dev/core` and `@grove-dev/ui`.
 
@@ -58,7 +69,7 @@ templates/
 </BaseLayout>
 ```
 
-Components are imported by path. The barrel re-exports `@grove-dev/ui` so generic helpers (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`, `LENSES`, `SORT_OPTIONS`) are available from the same import.
+Components are imported by path. The barrel re-exports `@grove-dev/ui` so generic helpers (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreTier`, `scoreTierLabel`, `scoreLabel`, `compact`, `formatStars`, `formatNumber`, `formatRelative`, `formatDate`, `LENSES`, `SORT_OPTIONS`) are available from the same import.
 
 ## Layering
 
