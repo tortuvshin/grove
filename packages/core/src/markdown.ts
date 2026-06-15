@@ -53,9 +53,12 @@ const REPO_RESERVED = new Set(["issues", "pulls", "stargazers", "network"]);
 export function detectGithubRepo(url: string): string | undefined {
   const match = url.match(/^https?:\/\/github\.com\/([^/\s]+)\/([^/#?\s]+)(?:[/?#].*)?$/i);
   if (!match) return undefined;
-  const repo = match[2].replace(/\.git$/, "");
+  const owner = match[1];
+  const repoName = match[2];
+  if (!owner || !repoName) return undefined;
+  const repo = repoName.replace(/\.git$/, "");
   if (!repo || REPO_RESERVED.has(repo)) return undefined;
-  return `https://github.com/${match[1]}/${repo}`;
+  return `https://github.com/${owner}/${repo}`;
 }
 
 function isAnchorLink(url: string): boolean {
@@ -140,8 +143,8 @@ export function parseAwesomeMarkdown(
 
     const body = line.replace(/^\s*[-*+]\s+/, "").trim();
     const parsedLinks = [...body.matchAll(markdownLinkPattern)].map((match) => ({
-      label: match[1].trim(),
-      url: match[2].trim(),
+      label: (match[1] ?? "").trim(),
+      url: (match[2] ?? "").trim(),
     }));
     if (parsedLinks.length === 0) {
       skipped++;
@@ -231,7 +234,7 @@ export async function importAwesomeList(input: string): Promise<ImportResult> {
     text = await readFile(path, "utf8");
     file = basename(path);
   }
-  return parseAwesomeMarkdown(text, { file, sourceUrl });
+  return parseAwesomeMarkdown(text, sourceUrl !== undefined ? { file, sourceUrl } : { file });
 }
 
 /**

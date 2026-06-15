@@ -9,9 +9,12 @@ export function parseGithubRepoUrl(url: string | undefined): GithubRepoRef | und
   if (!url) return undefined;
   const match = url.match(/^https?:\/\/github\.com\/([^/\s]+)\/([^/#?\s]+)(?:[/?#].*)?$/i);
   if (!match) return undefined;
+  const owner = match[1];
+  const repo = match[2];
+  if (!owner || !repo) return undefined;
   return {
-    owner: match[1],
-    repo: match[2].replace(/\.git$/, ""),
+    owner,
+    repo: repo.replace(/\.git$/, ""),
   };
 }
 
