@@ -56,6 +56,35 @@ grove new my-space --framework astro --deploy vercel
 # 6. writes validate-data.yml, issue templates, LICENSE
 ```
 
+## Two modes for `@grove-dev/*` dependencies
+
+The CLI scaffolds projects with `@grove-dev/*` dependencies pinned in the new project's `package.json`. There are two ways to set that version string, controlled by a flag:
+
+| Mode | Flag | When to use | What it writes |
+|---|---|---|---|
+| **Published** *(default)* | *(omit `--local`)* | Real end users installing from the npm registry. | `^X.Y.Z` (the published version of `@grove-dev/astro` on the registry). |
+| **Local** | `--local` | Grove maintainers testing a *new* version of `@grove-dev/*` *before* it is published. | `link:/abs/path/to/monorepo/packages/<pkg>` — `pnpm install` uses the local sibling. |
+
+```bash
+# End-user scaffold (default)
+grove new my-app --framework astro --yes
+cd my-app && pnpm install   # installs @grove-dev/* from npm
+
+# Maintainer / CI smoke-test scaffold (use the local monorepo's code)
+grove new /tmp/smoke --framework astro --local --yes
+cd /tmp/smoke && pnpm install   # links @grove-dev/* to the monorepo siblings
+```
+
+**Caveat (Astro 6.4 + workspace symlinks).** `--local` installs cleanly and the dev server works, but `astro build` fails on a symlinked `@grove-dev/astro` because Astro's `.astro` virtual module cache assumes a canonical (non-symlinked) path. For workspace development of the framework itself, **use `grove run` instead** — it builds a project from the local template under `<monorepo>/.grove/run/<timestamp>/` and installs via pnpm workspace protocol, which Astro handles correctly.
+
+```bash
+# Inside the grove monorepo, with the source you want to test in
+# packages/astro, packages/core, packages/cli:
+pnpm exec grove run dev   # scaffolds + installs + starts astro dev
+```
+
+`grove run` is the canonical workspace-development workflow; `--local` is for CI smoke tests where you want a project outside the monorepo.
+
 ## Peer dependencies
 
 | Peer | Purpose |
