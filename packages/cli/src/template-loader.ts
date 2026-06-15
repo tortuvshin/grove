@@ -339,31 +339,6 @@ function rewriteWorkspaceDepsToFile(pkg: {
   return rewritten;
 }
 
-/**
- * Like `renameProjectInTemplate` but only renames the project. It does
- * not rewrite any `@grove-dev/*` dependencies, preserving the exact
- * published versions from the template.
- *
- * Used by `grove run` for the dev-internal "pretend user" flow where
- * the scaffolded project lives inside the monorepo.
- */
-export async function renameProjectInTemplatePreserveDeps(
-  framework: Framework,
-  targetRoot: string,
-  projectName: string,
-  templateName = "default",
-): Promise<{ packageJsonPath: string; finalName: string }> {
-  const packageJsonPath = join(targetRoot, "package.json");
-  const raw = await readFile(packageJsonPath, "utf8");
-  const pkg = JSON.parse(raw) as {
-    name?: string;
-    [k: string]: unknown;
-  };
-  pkg.name = packageNameFromProjectName(projectName, framework, templateName);
-  await writeFile(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
-  return { packageJsonPath, finalName: pkg.name };
-}
-
 export function packageNameFromProjectName(name: string, framework: Framework, templateName: string): string {
   const slug = name
     .toLowerCase()
