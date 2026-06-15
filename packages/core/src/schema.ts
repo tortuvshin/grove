@@ -338,13 +338,6 @@ export const projectRecordSchema = resourceBaseSchema.extend({
   platforms: z.array(z.string()).default([]),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   codebaseSize: z.enum(["small", "medium", "large", "huge"]).optional(),
-  // Project shape — secondary architecture metadata used by the
-  // openapps-style "Project shape" card on the detail page.
-  // Optional and additive; downstream consumers that don't set
-  // these still validate.
-  stateManagement: z.string().optional(),
-  backend: z.string().optional(),
-  architecture: z.string().optional(),
   // Canonical repo URL. Distinct from `links.github`, which is the
   // human-facing link on the page; `repoUrl` is the single source
   // for owner/repo extraction, avatar fallback, and "view repo" CTAs.
@@ -693,9 +686,6 @@ export interface IndexProjectRecord extends IndexBase {
   logoUrl: ProjectRecord["logoUrl"];
   difficulty: ProjectRecord["difficulty"];
   codebaseSize: ProjectRecord["codebaseSize"];
-  stateManagement: ProjectRecord["stateManagement"];
-  backend: ProjectRecord["backend"];
-  architecture: ProjectRecord["architecture"];
   bestFor: string[];
   whyListed: string[];
   caveats: string[];
@@ -782,9 +772,6 @@ export function toIndexRecord(record: Resource): IndexRecord {
       logoUrl: r.logoUrl,
       difficulty: r.difficulty,
       codebaseSize: r.codebaseSize,
-      stateManagement: r.stateManagement,
-      backend: r.backend,
-      architecture: r.architecture,
       bestFor: r.bestFor,
       whyListed: r.whyListed,
       caveats: r.caveats,
