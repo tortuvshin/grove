@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/svelte",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "type": "module",
   "description": "Roadmap-only SvelteKit adapter package for Grove. No runnable template or component exports ship in V1.",
   "license": "MIT",
@@ -43,8 +43,8 @@
     "test": "echo \"No svelte package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "0.2.13",
-    "@grove-dev/ui": "1.0.3"
+    "@grove-dev/core": "0.2.14",
+    "@grove-dev/ui": "1.0.4"
   },
   "peerDependencies": {
     "@sveltejs/kit": ">=2.0.0",

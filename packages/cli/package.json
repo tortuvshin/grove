@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/cli",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "type": "module",
   "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
   "license": "MIT",
@@ -46,14 +46,14 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.5.1",
-    "@grove-dev/astro": "0.2.13",
-    "@grove-dev/core": "0.2.13",
+    "@grove-dev/astro": "0.2.14",
+    "@grove-dev/core": "0.2.14",
     "commander": "^15.0.0",
     "yaml": "^2.6.0"
   },
   "peerDependencies": {
-    "@grove-dev/nextjs": "0.2.13",
-    "@grove-dev/svelte": "0.2.13"
+    "@grove-dev/nextjs": "0.2.14",
+    "@grove-dev/svelte": "0.2.14"
   },
   "peerDependenciesMeta": {
     "@grove-dev/nextjs": {
