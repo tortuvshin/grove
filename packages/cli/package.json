@@ -41,7 +41,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\"",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "echo \"No cli package tests yet\"",
+    "test": "vitest run --dir src",
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {

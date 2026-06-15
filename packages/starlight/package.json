@@ -50,5 +50,8 @@
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
     "marked": "^18.0.2"
+  },
+  "scripts": {
+    "test": "vitest run --dir tests"
   }
 }
