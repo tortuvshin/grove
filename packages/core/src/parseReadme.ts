@@ -21,7 +21,10 @@ function extractLinks(text: string): Array<{ label: string; href: string }> {
   let m: RegExpExecArray | null;
   markdownLinkRe.lastIndex = 0;
   while ((m = markdownLinkRe.exec(text)) !== null) {
-    out.push({ label: m[1], href: m[2] });
+    const label = m[1];
+    const href = m[2];
+    if (label === undefined || href === undefined) continue;
+    out.push({ label, href });
   }
   return out;
 }
