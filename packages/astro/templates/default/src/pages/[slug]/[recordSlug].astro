@@ -27,6 +27,7 @@ import {
   resourceBySlug,
   entityBySlug,
   indexSlug,
+  getContentHtml,
 } from "../../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Icon from "@grove-dev/astro/components/Icon.astro";
@@ -36,11 +37,7 @@ import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro"
 import { formatRelative, formatStars } from "@grove-dev/astro";
 import { statusDisplay, prettySlug, labelDisplay } from "@grove-dev/astro";
 import type { LabelId } from "@grove-dev/astro";
-import { readFileSync, existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
 import type { ProjectRecord } from "@grove-dev/core";
-import { marked } from "marked";
 
 export function getStaticPaths() {
   // Walk every record and emit a path for it. The directory slug
@@ -120,23 +117,11 @@ const labelClassMap: Record<LabelId, string> = {
 
 // ── Optional content markdown (record.content is a path under
 // content/records/<slug>.md) ────────────────────────────────────
-let contentHtml: string | null = null;
-if (isProject && proj?.content) {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    resolve(here, "..", "..", "..", proj.content),
-    resolve(process.cwd(), proj.content),
-  ];
-  const contentPath = candidates.find((p) => existsSync(p));
-  if (contentPath) {
-    try {
-      const text = readFileSync(contentPath, "utf8");
-      contentHtml = await marked.parse(text);
-    } catch {
-      contentHtml = null;
-    }
-  }
-}
+// The read + marked.parse + sanitize-html pipeline lives in
+// `data/records.ts` and runs once at module load. The page just
+// looks up the pre-sanitized HTML by record slug; no node:fs
+// import needed here.
+const contentHtml: string | null = isProject ? getContentHtml(recordSlug) : null;
 
 // ── Detail-page decision-signal data (5 sections) ────────────
 // Hoist out of the template body so the JSX stays free of
