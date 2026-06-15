@@ -210,7 +210,34 @@ export async function copyTemplate(
       );
     },
   });
-  return { from, to: targetRoot, files: -1 };
+  // Count the files we actually wrote — used by callers that surface
+  // a "(N files)" line in their success message. We walk the
+  // destination tree post-copy because Node's `cp` callback doesn't
+  // report a file count. The `filter` above matches the exclude
+  // list one-to-one, so this count reflects exactly what was copied.
+  // (Audit finding: was returning `files: -1` as a sentinel.)
+  const copiedFiles = walkDir(targetRoot);
+  return { from, to: targetRoot, files: copiedFiles };
+}
+
+/**
+ * Count the regular files under `dir`, recursively. Used by
+ * `copyTemplate` to report a real file count instead of a `-1`
+ * sentinel. Symlinks are counted as one file each (we don't follow
+ * them — the symlink itself is the artefact, the target is a
+ * pre-existing tree we shouldn't be double-counting).
+ */
+function walkDir(dir: string): number {
+  let count = 0;
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      count += walkDir(join(dir, entry.name));
+    } else if (entry.isFile() || entry.isSymbolicLink()) {
+      count++;
+    }
+  }
+  return count;
 }
 
 /**
