@@ -16,15 +16,21 @@
  * Order (dependency graph): core -> ui -> {astro,nextjs,svelte} -> cli.
  */
 import { spawn } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { readFile, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, "..");
+const LOCK_FILE = resolve(ROOT, ".release-in-progress");
 
 const args = parseArgs(process.argv.slice(2));
+if (args.help) {
+  printHelp();
+  process.exit(0);
+}
 const RELEASE_KIND = args.kind ?? "patch";
 const EXPLICIT_VERSION = args.bump;
 const DRY_RUN = Boolean(args["dry-run"]);
@@ -57,10 +63,42 @@ function parseArgs(argv) {
     else if (a === "--dry-run") out["dry-run"] = true;
     else if (a === "--skip-build") out["skip-build"] = true;
     else if (a === "--skip-bump") out["skip-bump"] = true;
+    else if (a === "--help" || a === "-h") out.help = true;
     else if (a.startsWith("--bump=")) out.bump = a.slice("--bump=".length);
     else if (a.startsWith("--otp=")) out.otp = a.slice("--otp=".length);
   }
   return out;
+}
+
+function printHelp() {
+  console.log(
+    `Grove release script — build, bump, publish in dependency order.
+
+Usage:
+  node scripts/release.mjs [options]
+
+Options:
+  --minor          bump minor version (0.1.0 -> 0.2.0)
+  --major          bump major version (0.1.0 -> 1.0.0)
+  --patch          bump patch version (0.1.0 -> 0.1.1, default)
+  --bump=2.3.4     pin an explicit version for every package
+  --dry-run        build + bump + dry-run publish (no actual publish)
+  --skip-build     skip the pnpm -r build step
+  --skip-bump      skip the version bump step
+  --otp=<code>     one-time password for 2FA-protected npm accounts
+                   (also read from the NPM_OTP env var)
+  -h, --help       print this help and exit
+
+Idempotency:
+  The script writes <repo-root>/.release-in-progress on entry and
+  removes it on a clean exit. If the file is present on entry, the
+  script aborts with an actionable error — re-run only after the
+  previous run has been verified (committed or reverted).
+
+Order (dependency graph):
+  core -> ui -> {astro, nextjs, svelte} -> cli -> starlight
+`,
+  );
 }
 
 function bumpVersion(current, kind) {
@@ -110,47 +148,45 @@ function run(cmd, args, opts = {}) {
 async function bumpAll() {
   logSection("Bumping versions");
   const updates = [];
-  const nextVersions = new Map();
 
   for (const p of PACKAGES) {
     const pkg = await readPkg(p.dir);
     const before = pkg.version;
     const after = EXPLICIT_VERSION ?? bumpVersion(before, RELEASE_KIND);
     updates.push({ package: p, pkg, before, after });
-    nextVersions.set(p.name, after);
   }
 
   for (const update of updates) {
     const { package: p, pkg, before, after } = update;
     pkg.version = after;
-    syncInternalVersions(pkg, nextVersions);
+    // Note: we deliberately do NOT rewrite `workspace:*` ranges.
+    // `pnpm publish` already does that for us in the tarball (verified
+    // by inspecting grove-dev-cli-0.1.0.tgz). Rewriting them here
+    // before `pnpm install` runs caused 404s because the bumped
+    // version doesn't exist on the npm registry yet. See
+    // docs/RELEASING.md ("Why we don't rewrite workspace:* manually").
     await writePkg(p.dir, pkg);
     logOk(`${p.name}: ${before} → ${after}`);
   }
-
-  for (const manifest of TEMPLATE_MANIFESTS) {
-    const path = resolve(ROOT, manifest);
-    const pkg = JSON.parse(await readFile(path, "utf8"));
-    syncInternalVersions(pkg, nextVersions);
-    await writeFile(path, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
-    logOk(`Synced internal dependencies in ${manifest}`);
-  }
+  // Templates intentionally have NO version field — they're not
+  // published packages, so bumping the monorepo version does not
+  // need to touch them. `pnpm publish` doesn't touch them either.
+  // (The previous code rewrote their `workspace:*` ranges to the
+  // new version, which was the same footgun and is now removed.)
 }
 
-function syncInternalVersions(pkg, versions) {
-  for (const section of [
-    "dependencies",
-    "devDependencies",
-    "peerDependencies",
-    "optionalDependencies",
-  ]) {
-    const dependencies = pkg[section];
-    if (!dependencies) continue;
-    for (const name of Object.keys(dependencies)) {
-      const version = versions.get(name);
-      if (version) dependencies[name] = version;
-    }
-  }
+async function installAll() {
+  // Re-resolve `node_modules/@grove-dev/*` symlinks against the
+  // newly-bumped version fields. With `linkWorkspacePackages: true`
+  // (the default for this monorepo), pnpm rewrites those symlinks
+  // during install to point at the current local `packages/*`
+  // siblings. We run this BETWEEN bumpAll and buildAll so the build
+  // step sees the new versions and not stale symlinks to the old
+  // ones. We don't pass `--frozen-lockfile` because the version
+  // bump necessarily invalidates the lockfile's
+  // `packages/<x>:name` / `version` rows.
+  logSection("Refreshing node_modules");
+  await run("pnpm", ["install"]);
 }
 
 async function buildAll() {
@@ -186,9 +222,53 @@ async function main() {
   console.log(`  skip-bump:  ${SKIP_BUMP}`);
   console.log(`  order:      ${PACKAGES.map((p) => p.name).join(" → ")}`);
 
-  if (!SKIP_BUMP) await bumpAll();
-  if (!SKIP_BUILD) await buildAll();
-  await publishAll();
+  // Idempotency guard (audit finding: release script is not
+  // idempotent on failure). We write `.release-in-progress` at the
+  // repo root on entry, remove it on a clean exit. If the file is
+  // already present on entry, we ABORT — a previous run did not
+  // finish cleanly (network error, Ctrl-C, build failure mid-flight)
+  // and the working tree may already be in a half-bumped state.
+  // Re-running would double-bump. The user must investigate first:
+  //   - Inspect the file's mtime to find the partial run.
+  //   - Run `git status` to see which `package.json` files were
+  //     touched (the bump step is the only thing that mutates the
+  //     tree before publish).
+  //   - Either revert (`git checkout -- packages/*/package.json`)
+  //     or finish the publish manually, then `rm .release-in-progress`
+  //     and re-run.
+  if (existsSync(LOCK_FILE)) {
+    logErr(
+      `.release-in-progress exists at ${LOCK_FILE} — a previous run did not finish cleanly.\n` +
+        `Inspect the working tree, then either:\n` +
+        `  rm ${LOCK_FILE}                       # to acknowledge and retry, OR\n` +
+        `  git checkout -- packages/*/package.json   # to revert the bump and retry`,
+    );
+    process.exit(1);
+  }
+  await writeFile(LOCK_FILE, `${new Date().toISOString()}\n`, "utf8");
+
+  try {
+    if (!SKIP_BUMP) await bumpAll();
+    // pnpm install MUST run between bumpAll and buildAll. With
+    // linkWorkspacePackages: true (the default for this monorepo),
+    // the symlinks under node_modules/@grove-dev/* still point at
+    // the old-version local packages after a bump; pnpm install
+    // refreshes them. Skipping this step built the old version's
+    // dist/ against the new version's package.json (audit finding).
+    if (!SKIP_BUMP) await installAll();
+    if (!SKIP_BUILD) await buildAll();
+    await publishAll();
+  } finally {
+    // Clean up the lock file on every exit path (success OR failure)
+    // so the user can re-run after addressing the failure. The
+    // existence check at the top of main() will then let the
+    // re-run proceed.
+    try {
+      await unlink(LOCK_FILE);
+    } catch {
+      /* already gone — fine */
+    }
+  }
 
   logSection("Done");
   console.log(DRY_RUN ? "Dry-run complete — no actual publishes." : "All packages published.");
