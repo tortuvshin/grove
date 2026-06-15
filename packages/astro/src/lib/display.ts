@@ -45,8 +45,8 @@ export const STATUS_DISPLAY: Record<string, string> = {
 };
 
 export function statusDisplay(s: string | null | undefined): string {
-  if (!s) return STATUS_DISPLAY.unknown;
-  return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown;
+  if (!s) return STATUS_DISPLAY.unknown ?? "";
+  return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown ?? "";
 }
 
 // ── Lens ids (the curated tabs on /items) ────────────────────────────
@@ -65,7 +65,7 @@ export const LENS_DISPLAY: Record<string, string> = {
 };
 
 export function lensDisplay(id: string | null | undefined): string {
-  if (!id) return LENS_DISPLAY.all;
+  if (!id) return LENS_DISPLAY.all ?? "All";
   return LENS_DISPLAY[id] ?? id;
 }
 
@@ -79,7 +79,7 @@ export const SORT_DISPLAY: Record<string, string> = {
 };
 
 export function sortDisplay(id: string | null | undefined): string {
-  if (!id) return SORT_DISPLAY["recently-updated"];
+  if (!id) return SORT_DISPLAY["recently-updated"] ?? "";
   return SORT_DISPLAY[id] ?? id;
 }
 

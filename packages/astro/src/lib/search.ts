@@ -65,15 +65,17 @@ export function filtersFromSearchParams(sp: URLSearchParams): IndexFilters {
       : undefined;
   const rawPage = Number(sp.get(KEYS.page));
   const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : undefined;
+  const q = sp.get(KEYS.q);
+  const lens = sp.get(KEYS.lens);
   return {
-    q: sp.get(KEYS.q) ?? undefined,
+    ...(q !== null ? { q } : {}),
     stacks: sp.getAll(KEYS.stacks).filter(Boolean),
     platforms: sp.getAll(KEYS.platforms).filter(Boolean),
     categories: sp.getAll(KEYS.categories).filter(Boolean),
     labels: sp.getAll(KEYS.labels).filter(Boolean),
     licenses: sp.getAll(KEYS.licenses).filter(Boolean),
     statuses: sp.getAll(KEYS.statuses).flatMap((s) => s.split(",")).filter(Boolean),
-    lens: sp.get(KEYS.lens) ?? undefined,
+    ...(lens !== null ? { lens } : {}),
     sort,
     page,
   };
@@ -352,12 +354,20 @@ export function removeFilter(
 ): IndexFilters {
   let next: IndexFilters;
   if (key === "q") {
-    next = { ...f, q: undefined };
+    // `q` is `string | undefined` under exactOptionalPropertyTypes; the
+    // cleanest way to drop it is to omit the key entirely (delete-style).
+    const { q: _drop, ...rest } = f;
+    next = rest;
   } else {
     const current = f[key] as string[] | undefined;
     if (!current) return f;
     const filtered = current.filter((v) => v !== value);
-    next = { ...f, [key]: filtered.length ? filtered : undefined };
+    if (filtered.length === 0) {
+      const { [key]: _drop, ...rest } = f;
+      next = rest;
+    } else {
+      next = { ...f, [key]: filtered };
+    }
   }
   next.page = 1;
   return next;
