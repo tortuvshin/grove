@@ -18,5 +18,12 @@ coverage/
 *.tsbuildinfo
 *.svelte-kit/
 
+# Local Grove state — `grove run` writes timestamped scratch projects
+# under <monorepo>/.grove/run/, and the release script writes a
+# `.release-in-progress` lock file at the repo root. None of this
+# should be committed. (Audit finding #10.)
+.grove/
+.release-in-progress
+
 # Local scaffold smoke tests — never commit a `grove new` scratch site.
 examples/*/
