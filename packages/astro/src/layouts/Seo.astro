@@ -85,6 +85,14 @@ const organizationLd = {
   logo: new URL("/og-image.svg", siteUrl).toString(),
   ...(siteConfig.repoUrl ? { sameAs: [siteConfig.repoUrl] } : {}),
 };
+
+// Pre-stringify the JSON-LD payloads in the frontmatter so the
+// template body just interpolates the resulting strings. For SSR
+// this saves the JSON.stringify call on every render; for static
+// builds the cost is unchanged but the template reads cleaner.
+const websiteLdJson = JSON.stringify(websiteLd);
+const organizationLdJson = JSON.stringify(organizationLd);
+const perPageLdJson = jsonLd ? JSON.stringify(Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : null;
 ---
 
 <!-- Primary meta -->
@@ -113,14 +121,14 @@ const organizationLd = {
 <meta name="twitter:image:alt" content={`${siteConfig.name} social preview`} />
 
 <!-- JSON-LD: site-wide identity -->
-<script is:inline type="application/ld+json" set:html={JSON.stringify(websiteLd)} />
-<script is:inline type="application/ld+json" set:html={JSON.stringify(organizationLd)} />
+<script is:inline type="application/ld+json" set:html={websiteLdJson} />
+<script is:inline type="application/ld+json" set:html={organizationLdJson} />
 
 <!-- JSON-LD: per-page (SoftwareSourceCode for /items/[slug], etc.) -->
-{jsonLd && (
+{perPageLdJson && (
   <script
     is:inline
     type="application/ld+json"
-    set:html={JSON.stringify(Array.isArray(jsonLd) ? jsonLd : [jsonLd])}
+    set:html={perPageLdJson}
   />
 )}
