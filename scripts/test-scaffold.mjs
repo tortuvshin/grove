@@ -27,7 +27,7 @@
  * Usage: pnpm test:scaffold
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -61,10 +61,29 @@ function scaffold(name, framework) {
   const cliPath = join(REPO_ROOT, "packages/cli/dist/index.js");
   // The CLI resolves framework templates from `process.cwd()` first (see
   // template-loader.templatesRoot), so we need node_modules/@grove-dev/<framework>
-  // visible from the parent dir. Easiest: symlink the workspace's node_modules.
+  // visible from the parent dir. We COPY the workspace's node_modules
+  // recursively rather than symlinking it. The symlink shortcut is
+  // tempting but it's the wrong thing to test: the scaffold test is
+  // supposed to validate against real published versions, not the
+  // repo's local symlinks (which would let a broken template ship
+  // because the symlink hides it from the test's install path).
+  // The copy is slower but it exercises the same install path a
+  // real user hits, which is the point of the smoke test.
+  // (Audit #12.)
   const sourceNm = join(REPO_ROOT, "node_modules");
   if (existsSync(sourceNm)) {
-    run("ln", ["-s", sourceNm, join(parent, "node_modules")]);
+    cpSync(sourceNm, join(parent, "node_modules"), {
+      recursive: true,
+      // Don't follow symlinks: the workspace's node_modules contains
+      // symlinks to local `packages/*` siblings (pnpm's default for
+      // linkWorkspacePackages: true). Following them and copying the
+      // TARGETS would balloon the copy to gigabytes of pnpm-store
+      // data. The CLI only needs to RESOLVE the symlinks, not read
+      // through them at copy time — and `dereference: false` preserves
+      // the same path structure a fresh `pnpm install` would produce
+      // for any consumer who depends on `@grove-dev/<framework>`.
+      dereference: false,
+    });
   }
   try {
     run("node", [cliPath, "new", name, "--framework", framework, "--yes"], {
@@ -138,6 +157,39 @@ function checkProject(project, framework) {
 }
 
 function main() {
+  // `--help` / `-h` exits early with usage text. Lets `node
+  // scripts/test-scaffold.mjs --help` confirm the script still
+  // loads and parses without running the build + scaffold cycle.
+  if (process.argv.slice(2).some((a) => a === "--help" || a === "-h")) {
+    console.log(
+      `test-scaffold — local smoke test for the freshly built CLI.
+
+Usage:
+  node scripts/test-scaffold.mjs [options]
+
+Options:
+  -h, --help   print this help and exit
+
+What it does:
+  1. Runs scripts/check-starlight-sidebar.mjs (slug integrity).
+  2. Builds every @grove-dev/* workspace.
+  3. For each framework in V1 (astro):
+     a. Copies the workspace's node_modules into a temp dir
+        (recursive, no symlink — see scaffold() for why).
+     b. Runs \`node packages/cli/dist/index.js new <name> --framework
+        <f> --yes\` from the temp dir.
+     c. Asserts the scaffolded package.json has no workspace-protocol
+        deps, pins a real version for @grove-dev/<framework> and
+        @grove-dev/core, and every @grove-dev/* dep is installed.
+     d. Runs \`pnpm install --prefer-offline\` and confirms every
+        @grove-dev/* dep has a real version under node_modules.
+
+Exits non-zero if any step fails.
+`,
+    );
+    return;
+  }
+
   console.log("[test:scaffold] checking Starlight sidebar slugs…");
   // Fast smoke test: every `slug:` in docs/astro.config.mjs must
   // resolve to an existing file. Runs in milliseconds and lists
