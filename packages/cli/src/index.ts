@@ -907,15 +907,29 @@ program
     }>;
     const result = await buildLlmsFiles({
       generatedAt: payload.generatedAt ?? new Date().toISOString(),
-      records: records.map((r) => ({
-        slug: r.slug,
-        name: r.name ?? r.title ?? r.slug,
-        description: r.description,
-        category: r.category,
-        stack: r.stack,
-        stars: r.stars,
-        visibility: r.visibility,
-      })),
+      records: records.map((r) => {
+        // Build the optional fields conditionally so we never assign
+        // `undefined` to a property typed as `string` (breaks
+        // `exactOptionalPropertyTypes` in the consumer's types).
+        const base: {
+          slug: string;
+          name: string;
+          description?: string;
+          category?: string;
+          stack?: string;
+          stars?: number;
+          visibility?: string;
+        } = {
+          slug: r.slug,
+          name: r.name ?? r.title ?? r.slug,
+        };
+        if (r.description !== undefined) base.description = r.description;
+        if (r.category !== undefined) base.category = r.category;
+        if (r.stack !== undefined) base.stack = r.stack;
+        if (r.stars !== undefined) base.stars = r.stars;
+        if (r.visibility !== undefined) base.visibility = r.visibility;
+        return base;
+      }),
     });
     console.log(`[llms] ${result.indexed} indexed → ${result.txtPath} + ${result.fullPath}`);
   });
