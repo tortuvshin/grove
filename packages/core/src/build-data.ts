@@ -10,6 +10,7 @@ import {
   type GroveConfig,
   type Resource,
 } from "./schema.js";
+import { classifyHealth } from "./health.js";
 import { loadConfig } from "./config.js";
 
 /**
@@ -24,6 +25,15 @@ import { loadConfig } from "./config.js";
  *
  * The full override pipeline (with reasons surfaced in the index
  * payload) is a V2 feature; V1 keeps the merge intentional and small.
+ *
+ * When a project record has no existing health block but a decisions
+ * override exists, we call `classifyHealth` (the V1 single source of
+ * truth) with no GitHub metadata to fabricate an "unknown" health
+ * block whose `visibility` we then overwrite with the decision. This
+ * fabrication is required by the index payload: `toIndexRecord` reads
+ * `record.health?.visibility` to populate the index, so the override
+ * cannot flow through without a health block. Without the fabrication
+ * the override would silently disappear from the rendered index.
  */
 function applyDecision(
   record: Resource,
@@ -33,17 +43,12 @@ function applyDecision(
   if (!override) return record;
   if (record.kind === "project") {
     const existing = record.health;
-    const fallback = {
-      status: "unknown" as const,
-      maturity: "unknown" as const,
-      tier: "listed" as const,
-      visibility: "keep" as const,
-      cleanupCandidate: false,
-      staleReason: null,
-      confidence: "medium" as const,
-      reasons: [] as string[],
-    };
-    const merged = { ...(existing ?? fallback), visibility: override as typeof fallback.visibility };
+    // Fabricate a default "no signals" health block via the canonical
+    // classifier. Keeps the threshold/format in lockstep with the rest
+    // of the package — if `classifyHealth` ever changes its unknown
+    // shape, this fabrication updates automatically.
+    const fabricated = classifyHealth(record.slug).health;
+    const merged = { ...(existing ?? fabricated), visibility: override as typeof fabricated.visibility };
     return { ...record, health: merged };
   }
   // Resource-hub / ecosystem-map: no `health` block; the top-level

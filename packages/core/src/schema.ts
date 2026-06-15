@@ -834,78 +834,13 @@ export function toIndexRecord(record: Resource): IndexRecord {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-// Health signal derivation
+// Health classification
 // ──────────────────────────────────────────────────────────────────────
-
-function daysSince(value: string | null | undefined): number {
-  if (!value) return Infinity;
-  const d = new Date(value);
-  if (Number.isNaN(d.valueOf())) return Infinity;
-  return (Date.now() - d.valueOf()) / 86_400_000;
-}
-
-export function healthFromSignals(params: {
-  repo?: z.infer<typeof githubRepositorySchema>;
-  monthlyCommits?: Array<number | { month: string; commits: number }>;
-}): {
-  status: z.infer<typeof healthStatusSchema>;
-  tier: z.infer<typeof healthTierSchema>;
-  visibility: z.infer<typeof decisionVisibilitySchema>;
-  cleanupCandidate: boolean;
-  staleReason: string | null;
-} {
-  const { repo, monthlyCommits } = params;
-  const stars = repo?.stargazers_count ?? 0;
-  const lastCommitAt = repo?.pushed_at;
-  const archived = Boolean(repo?.archived);
-  const disabled = Boolean(repo?.disabled);
-  const staleDays = daysSince(lastCommitAt);
-  const activeMonths = Array.isArray(monthlyCommits)
-    ? monthlyCommits.filter((m) => {
-        const commits = typeof m === "number" ? m : m?.commits;
-        return Number(commits) > 0;
-      }).length
-    : 0;
-
-  const status: z.infer<typeof healthStatusSchema> = archived
-    ? "archived"
-    : disabled
-      ? "unavailable"
-      : staleDays <= 180
-        ? "active"
-        : staleDays <= 365
-          ? "quiet"
-          : staleDays <= 730
-            ? "stale"
-            : "inactive";
-
-  const tier: z.infer<typeof healthTierSchema> =
-    status === "archived" || status === "unavailable"
-      ? "hidden"
-      : stars >= 500 || activeMonths >= 4
-        ? "curated"
-        : stars >= 50
-          ? "listed"
-          : "experimental";
-
-  return {
-    status,
-    tier,
-    visibility: tier === "hidden" ? "hide" : "keep",
-    cleanupCandidate:
-      status === "stale" ||
-      status === "archived" ||
-      status === "inactive" ||
-      status === "unavailable",
-    staleReason:
-      status === "inactive"
-        ? "no_commits_24_months"
-        : status === "stale"
-          ? "no_commits_365_days"
-          : status === "archived"
-            ? "github_archived"
-            : status === "unavailable"
-              ? "github_unavailable"
-              : null,
-  };
-}
+//
+// The single source of truth for health derivation is `classifyHealth`
+// in `./health.js`. It takes a normalized `GithubMetadata` and returns
+// a full `HealthEntry` (id + github + health block). The earlier
+// `healthFromSignals` helper (raw `githubRepositorySchema` + monthly
+// commits input) was deleted: it had different thresholds from
+// `classifyHealth` and no remaining callers. New code that needs
+// health should import `classifyHealth` from `@grove-dev/core`.
