@@ -36,10 +36,10 @@ importers:
   packages/astro:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../core
       '@grove-dev/ui':
-        specifier: 1.0.2
+        specifier: 1.0.6
         version: link:../ui
       astro:
         specifier: ^6.4.6
@@ -51,13 +51,13 @@ importers:
         specifier: ^0.9.9
         version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
       '@grove-dev/astro':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../..
       '@grove-dev/cli':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../../../cli
       '@grove-dev/core':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../../../core
       '@tailwindcss/vite':
         specifier: ^4.3.0
@@ -69,8 +69,8 @@ importers:
         specifier: ^18.0.0
         version: 18.0.5
       tailwindcss:
-        specifier: ^4.3.0
-        version: 4.3.0
+        specifier: ^4.3.1
+        version: 4.3.1
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
@@ -81,16 +81,16 @@ importers:
         specifier: ^1.5.1
         version: 1.5.1
       '@grove-dev/astro':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../astro
       '@grove-dev/core':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../core
       '@grove-dev/nextjs':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../nextjs
       '@grove-dev/svelte':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../svelte
       commander:
         specifier: ^15.0.0
@@ -118,10 +118,10 @@ importers:
   packages/nextjs:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../core
       '@grove-dev/ui':
-        specifier: 1.0.2
+        specifier: 1.0.6
         version: link:../ui
       next:
         specifier: '>=14.0.0'
@@ -151,10 +151,10 @@ importers:
   packages/svelte:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../core
       '@grove-dev/ui':
-        specifier: 1.0.2
+        specifier: 1.0.6
         version: link:../ui
       '@sveltejs/kit':
         specifier: '>=2.0.0'
@@ -166,7 +166,7 @@ importers:
   packages/ui:
     dependencies:
       '@grove-dev/core':
-        specifier: 0.2.12
+        specifier: 0.2.16
         version: link:../core
 
 packages:
@@ -2417,6 +2417,9 @@ packages:
 
   tailwindcss@4.3.0:
     resolution: {integrity: sha512-y6nxMGB1nMW9R6k96e5gdIFzcfL/gTJRNaqGes1YvkLnPVXzWgbqFF2yLC0T8G774n24cx3Pe8XrKoniCOAH+Q==}
+
+  tailwindcss@4.3.1:
+    resolution: {integrity: sha512-hk+TB1m+K8CYNrP6rjQaq/Y+4Zylwpa87mLYBKCunwnnQ9p+fHb7kmSfGqyEJoxF/O6CDyABWVFEafNSYKll+Q==}
 
   tapable@2.3.3:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
@@ -5498,6 +5501,8 @@ snapshots:
       sax: 1.6.0
 
   tailwindcss@4.3.0: {}
+
+  tailwindcss@4.3.1: {}
 
   tapable@2.3.3: {}
 
