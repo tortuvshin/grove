@@ -21,6 +21,7 @@ import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
 import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
+import Pagination from "@grove-dev/astro/components/Pagination.astro";
 import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
 import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
@@ -302,9 +303,34 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
         </p>
         <a href={`/${slug}`} class="grove-btn grove-btn-outline mt-4">Clear filters</a>
       </div>
-      <nav id="client-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination"></nav>
+      <nav class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
+        <Pagination current={page} total={pages} hrefFor={hrefForPage} />
+      </nav>
     </div>
   </section>
+
+  {siteConfig.repoUrl && (
+    <section class="border-t border-ink-200 dark:border-ink-800">
+      <div class="grove-container-wide mx-auto px-5 sm:px-7">
+        <div class="flex flex-col items-center gap-3 py-12 text-center">
+          <h2 class="m-0 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            {`Know a real ${itemLabel()} that belongs here?`}
+          </h2>
+          <p class="m-0 max-w-2xl text-sm text-ink-500 dark:text-ink-400">
+            {`Open a pull request with a YAML file. We review every submission against the bar — no marketing, no tutorials.`}
+          </p>
+          <a
+            href={`${siteConfig.repoUrl}/blob/main/CONTRIBUTING.md`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="grove-btn grove-btn-primary mt-2"
+          >
+            Submit via GitHub
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
 
   <script is:inline define:vars={{ clientItems, slug, itemSingular: itemLabel(), itemPlural: itemLabelPlural() }}>
     (function () {
@@ -463,21 +489,9 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
           });
         });
 
-        var pager = document.getElementById("client-pagination");
-        if (pager) {
-          pager.innerHTML = "";
-          if (totalPages > 1) {
-            for (var number = 1; number <= totalPages; number += 1) {
-              var link = document.createElement("a");
-              link.href = pageHref(params, number);
-              link.textContent = String(number);
-              link.className = "grove-btn min-w-9 px-2 py-1.5 text-2xs " +
-                (number === page ? "grove-btn-primary" : "grove-btn-outline");
-              if (number === page) link.setAttribute("aria-current", "page");
-              pager.appendChild(link);
-            }
-          }
-        }
+        // Pagination is server-rendered (see <Pagination /> in the
+        // template) so the static HTML contains the page-number
+        // links for SEO. No client-side rendering loop here.
 
         var chipHost = document.getElementById("active-filters");
         if (chipHost) {

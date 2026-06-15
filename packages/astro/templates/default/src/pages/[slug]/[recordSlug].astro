@@ -162,20 +162,51 @@ const languages = extras.github?.languages
 const totalLanguageBytes = Math.max(1, languages.reduce((sum, [, b]) => sum + b, 0));
 
 // ── Kind-aware JSON-LD ─────────────────────────────────────────
+// Mirrors the openapps field set (10+ fields for projects):
+//   name, headline, description, url, codeRepository, sameAs,
+//   programmingLanguage, license, applicationCategory,
+//   operatingSystem, keywords, dateCreated, dateModified,
+//   interactionStatistic, author, isAccessibleForFree.
 let jsonLd: Record<string, unknown>;
 if (isProject && proj) {
+  const sameAs = [repoUrl, homepageUrl].filter((value): value is string =>
+    typeof value === "string" && value.length > 0,
+  );
+  const keywords = (record.tags ?? []).length > 0 ? (record.tags ?? []).join(", ") : undefined;
+  const operatingSystem = (proj.platforms ?? []).length > 0
+    ? (proj.platforms ?? []).join(", ")
+    : undefined;
+  const applicationCategory = (record.category ?? "") || undefined;
+  const dateCreated = (record as { curation?: { reviewedAt?: string } }).curation?.reviewedAt;
+  const dateModified = pushedAt ?? dateCreated;
+  const interactionStatistic = stars > 0
+    ? {
+        "@type": "InteractionCounter",
+        interactionType: { "@type": "LikeAction" },
+        userInteractionCount: stars,
+      }
+    : undefined;
   jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
     name,
+    headline: name,
     description: record.description ?? undefined,
     url: repoUrl || homepageUrl || undefined,
     codeRepository: repoUrl || undefined,
+    sameAs: sameAs.length > 0 ? sameAs : undefined,
     programmingLanguage: language ?? undefined,
     license: licenseSpdx ?? undefined,
+    applicationCategory,
+    operatingSystem,
+    keywords,
+    dateCreated: dateCreated ?? undefined,
+    dateModified: dateModified ?? undefined,
+    interactionStatistic,
     author: ownerRepo
       ? { "@type": "Organization", name: ownerRepo.owner, url: `https://github.com/${ownerRepo.owner}` }
       : undefined,
+    isAccessibleForFree: true,
   };
 } else if (record.kind === "resource") {
   const resourceSchemaType: Record<string, string> = {
@@ -189,20 +220,25 @@ if (isProject && proj) {
     "@context": "https://schema.org",
     "@type": resourceSchemaType[record.type] ?? "CreativeWork",
     name,
+    headline: name,
     description: record.description || undefined,
     url: homepageUrl || undefined,
     author: record.author ? { "@type": "Person", name: record.author } : undefined,
     datePublished: record.publishedAt || undefined,
+    keywords: (record.tags ?? []).length > 0 ? (record.tags ?? []).join(", ") : undefined,
+    isAccessibleForFree: true,
   };
 } else {
   jsonLd = {
     "@context": "https://schema.org",
     "@type": record.type === "person" ? "Person" : "Organization",
     name,
+    headline: name,
     description: record.description || undefined,
     url: homepageUrl || undefined,
     foundingDate: record.founded || undefined,
     location: record.location || undefined,
+    keywords: (record.tags ?? []).length > 0 ? (record.tags ?? []).join(", ") : undefined,
   };
 }
 ---
