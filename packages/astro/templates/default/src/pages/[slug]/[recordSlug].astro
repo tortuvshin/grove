@@ -35,24 +35,21 @@ import CurationGrid from "@grove-dev/astro/components/CurationGrid.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro";
 import { formatRelative, formatStars } from "@grove-dev/astro";
 import { statusDisplay, prettySlug, labelDisplay } from "@grove-dev/astro";
+import type { LabelId } from "@grove-dev/astro";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { ProjectRecord } from "@grove-dev/core";
 import { marked } from "marked";
 
-export async function getStaticPaths() {
+export function getStaticPaths() {
   // Walk every record and emit a path for it. The directory slug
-  // (`projects` / `resources` / `entities`) is taken from the
-  // blueprint config so a `resource-hub` blueprint produces
-  // `/resources/<slug>` URLs without any per-blueprint fork.
-  let dirSlug = "projects";
-  try {
-    const raw = await import("../../../data/generated/site-config.json");
-    dirSlug = raw.default?.blueprintConfig?.routeSlug ?? "projects";
-  } catch {
-    /* not present */
-  }
+  // is read from the static site-config import at the top of this
+  // file (Vite resolves the JSON at build time). This template
+  // ships with the `project-directory` blueprint, so the slug is
+  // always `projects`; swapping in a different blueprint means
+  // changing the blueprint config that drives this value.
+  const dirSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
   return fullRecords.map((record) => ({
     params: { slug: dirSlug, recordSlug: record.slug },
   }));
@@ -106,6 +103,20 @@ const curationLabels = record.curation?.labels ?? [];
 const tags = record.tags ?? [];
 const healthStatus = proj?.health?.status;
 const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+
+// ── Badge class lookup ────────────────────────────────────────────
+// The previous code interpolated `LabelId` straight into the class
+// string (`grove-badge-{l}`), which Astro renders as a literal class
+// name — every badge became `grove-badge-{l}` regardless of value.
+// Map each known id to its stable CSS class in the package
+// stylesheet. Unknown ids (e.g. legacy "featured") fall back to the
+// neutral `.grove-badge` look instead of producing broken classes.
+const labelClassMap: Record<LabelId, string> = {
+  new: "grove-badge-new",
+  hot: "grove-badge-hot",
+  mature: "grove-badge-mature",
+  featured: "grove-badge",
+};
 
 // ── Optional content markdown (record.content is a path under
 // content/records/<slug>.md) ────────────────────────────────────
@@ -296,7 +307,7 @@ if (isProject && proj) {
               </span>
             )}
             {curationLabels.map((l) => (
-              <span class="grove-badge grove-badge-{l}" title={`Curated: ${labelDisplay(l) ?? l}`}>
+              <span class={`grove-badge ${labelClassMap[l as LabelId] ?? ""}`} title={`Curated: ${labelDisplay(l) ?? l}`}>
                 {labelDisplay(l) ?? prettySlug(l)}
               </span>
             ))}
