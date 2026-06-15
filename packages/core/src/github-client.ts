@@ -88,16 +88,18 @@ export async function pLimit<T, U>(
   items: T[],
   fn: (item: T, index: number) => Promise<U>,
 ): Promise<U[]> {
-  const out = new Array<U>(items.length);
+  const out = new Array<U | undefined>(items.length);
   let next = 0;
   const worker = async (): Promise<void> => {
     while (true) {
       const i = next++;
       if (i >= items.length) return;
-      out[i] = await fn(items[i], i);
+      const item = items[i];
+      if (item === undefined) return;
+      out[i] = await fn(item, i);
     }
   };
   const workers = Array.from({ length: Math.max(1, concurrency) }, () => worker());
   await Promise.all(workers);
-  return out;
+  return out as U[];
 }
