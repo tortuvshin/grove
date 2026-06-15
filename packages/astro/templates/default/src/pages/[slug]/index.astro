@@ -13,6 +13,12 @@
  * `/entities/`) is derived from the blueprint via `getStaticPaths`,
  * so the same page works for every blueprint without per-blueprint
  * forks.
+ *
+ * Navigation model: full-page render. The form posts via `method="get"`
+ * so the browser navigates to `?q=...&sort=...&stack=...`, and the
+ * server re-runs `filterRecords` / `applySort` / `paginate` from
+ * those query params. No client-side filter shim, no duplicated
+ * logic. The URL stays the single source of truth for filter state.
  */
 import siteConfig from "../../../data/generated/site-config.json";
 import { items, itemLabel, itemLabelPlural } from "../../data/records";
@@ -34,24 +40,19 @@ import {
   effectiveSort,
   filterRecords,
   filtersFromSearchParams,
-  paginate,
   searchParamsFromFilters,
   sortDisplay,
   SORT_OPTIONS,
   totalPages,
 } from "@grove-dev/astro";
 
-export async function getStaticPaths() {
-  let activeSlug = "projects";
-  try {
-    const raw = await import("../../../data/generated/site-config.json");
-    activeSlug = raw.default?.blueprintConfig?.routeSlug ?? "projects";
-  } catch {
-    /* not present */
-  }
-  const all = ["projects", "resources", "entities"];
-  if (!all.includes(activeSlug)) all.push(activeSlug);
-  return all.map((slug) => ({ params: { slug } }));
+// This template ships with the `project-directory` blueprint, so the
+// only directory slug it ever needs is `projects`. While it ships
+// as the project directory, pre-generate the single path the build
+// actually needs. Swapping in a different blueprint is a one-config
+// change that flows through the static import at the top.
+export function getStaticPaths() {
+  return [{ params: { slug: "projects" } }];
 }
 
 const slug = Astro.params.slug as string;
@@ -64,36 +65,7 @@ const filtered = filterRecords(items, filters);
 const sorted = applySort(filtered, sort);
 const pages = totalPages(sorted.length);
 const page = Math.min(requestedPage, pages);
-const visibleItems = paginate(sorted, page);
 const chips = activeFilterChips(filters);
-const clientItems = items.map((item) => ({
-  slug: item.slug,
-  name: item.kind === "resource" ? item.title : item.name,
-  description: item.description,
-  category: item.category,
-  tags: item.tags,
-  labels: item.curation?.labels ?? [],
-  lenses: item.curation?.lenses ?? [],
-  reviewed: Boolean(item.curation?.reviewed),
-  addedAt: item.curation?.reviewedAt ?? "",
-  stacks: item.kind === "project" ? [item.stack, ...item.stacks].filter(Boolean) : [],
-  platforms: item.kind === "project" ? item.platforms : [],
-  license: item.kind === "project" ? item.github?.license ?? "" : "",
-  status: item.kind === "project" ? item.health?.status ?? "" : "",
-  stars: item.kind === "project" ? item.github?.stars ?? 0 : 0,
-  updatedAt:
-    item.kind === "project"
-      ? item.github?.pushedAt ?? ""
-      : item.kind === "resource"
-        ? item.publishedAt ?? ""
-        : "",
-  extra:
-    item.kind === "project"
-      ? [item.repoUrl, item.projectType, item.difficulty, item.codebaseSize, ...item.bestFor, ...item.whyListed]
-      : item.kind === "resource"
-        ? [item.type, item.topic, item.author ?? ""]
-        : [item.type, item.location ?? "", item.parent ?? ""],
-}));
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
@@ -327,12 +299,7 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
       </div>
     </div>
   </section>
-
-  <script is:inline define:vars={{ clientItems, slug, itemSingular: itemLabel(), itemPlural: itemLabelPlural() }}>
-    (function () {
-      var PAGE_SIZE = 20;
-      var list = document.getElementById("results-list");
-      if (!list) return;
+</BaseLayout>
 
       // Sort dropdown: navigate on change so the server re-renders
       // the sorted list (URL is the source of truth for filters/sort).
