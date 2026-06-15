@@ -43,7 +43,7 @@
     "build": "tsc -p tsconfig.json && cp src/styles.css dist/styles.css",
     "build:tsc": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "echo \"No ui package tests yet\""
+    "test": "vitest run --dir src"
   },
   "dependencies": {
     "@grove-dev/core": "0.2.16"

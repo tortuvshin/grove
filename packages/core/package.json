@@ -40,7 +40,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "echo \"No core package tests yet\""
+    "test": "vitest run --dir src"
   },
   "dependencies": {
     "jiti": "^2.6.1",

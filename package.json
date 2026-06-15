@@ -13,7 +13,9 @@
     "build": "pnpm --filter './packages/**' --filter './docs' -r build",
     "check": "pnpm --filter './packages/**' --filter './docs' -r check",
     "docs:check": "node scripts/check-starlight-sidebar.mjs",
-    "test": "pnpm --filter './packages/**' --filter './docs' -r test",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:scaffold": "node scripts/test-scaffold.mjs",
     "dev": "pnpm --filter @grove-dev/cli dev",
     "dev:docs": "pnpm --filter @grove-dev/docs dev",
@@ -26,6 +28,8 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@types/node": "^25.9.2",
-    "typescript": "^6.0.3"
+    "@vitest/coverage-v8": "^4.1.9",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   }
 }
