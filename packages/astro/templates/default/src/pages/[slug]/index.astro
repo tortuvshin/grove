@@ -309,28 +309,24 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
     </div>
   </section>
 
-  {siteConfig.repoUrl && (
-    <section class="border-t border-ink-200 dark:border-ink-800">
-      <div class="grove-container-wide mx-auto px-5 sm:px-7">
-        <div class="flex flex-col items-center gap-3 py-12 text-center">
-          <h2 class="m-0 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-            {`Know a real ${itemLabel()} that belongs here?`}
-          </h2>
-          <p class="m-0 max-w-2xl text-sm text-ink-500 dark:text-ink-400">
-            {`Open a pull request with a YAML file. We review every submission against the bar — no marketing, no tutorials.`}
-          </p>
-          <a
-            href={`${siteConfig.repoUrl}/blob/main/CONTRIBUTING.md`}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="grove-btn grove-btn-primary mt-2"
-          >
-            Submit via GitHub
-          </a>
-        </div>
+  <section class="border-t border-ink-200 dark:border-ink-800">
+    <div class="grove-container-wide mx-auto px-5 sm:px-7">
+      <div class="flex flex-col items-center gap-3 py-12 text-center">
+        <h2 class="m-0 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {`Know a real ${itemLabel()} that belongs here?`}
+        </h2>
+        <p class="m-0 max-w-2xl text-sm text-ink-500 dark:text-ink-400">
+          {`Open a pull request with a YAML file. We review every submission against the bar — no marketing, no tutorials.`}
+        </p>
+        <a
+          href={siteConfig.submitUrl ?? "/submit"}
+          class="grove-btn grove-btn-primary mt-2"
+        >
+          {`Submit ${itemLabel()}`}
+        </a>
       </div>
-    </section>
-  )}
+    </div>
+  </section>
 
   <script is:inline define:vars={{ clientItems, slug, itemSingular: itemLabel(), itemPlural: itemLabelPlural() }}>
     (function () {
