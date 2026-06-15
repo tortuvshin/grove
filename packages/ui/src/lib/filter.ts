@@ -33,8 +33,8 @@ const STATUS_DISPLAY: Record<string, string> = {
 };
 
 function statusToText(s: HealthStatus | undefined | null): string {
-  if (!s) return STATUS_DISPLAY.unknown;
-  return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown;
+  if (!s) return STATUS_DISPLAY.unknown ?? "";
+  return STATUS_DISPLAY[s] ?? STATUS_DISPLAY.unknown ?? "";
 }
 
 /** URL-driven filter state for the directory index. */

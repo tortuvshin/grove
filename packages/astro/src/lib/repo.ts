@@ -17,10 +17,9 @@ export function getOwnerAndRepoFromRepoUrl(repoUrl: string): {
   }
   const m = repoUrl.match(/github\.com\/([^/]+)\/([^/?#]+)/);
   if (!m) return { owner: null, repo: null };
-  return {
-    owner: m[1],
-    repo: m[2].replace(/\.git$/, ""),
-  };
+  const owner = m[1] ?? null;
+  const repo = m[2]?.replace(/\.git$/, "") ?? null;
+  return { owner, repo };
 }
 
 /**
