@@ -154,20 +154,18 @@ program
       } else if (opts.yes) {
         blueprint = "project-directory";
       } else {
-        const b = await p.select({
-          message: "Pick a blueprint",
-          options: validBlueprints.map((b) => ({
-            value: b,
-            label: BLUEPRINT_LABELS[b].label,
-            hint: BLUEPRINT_LABELS[b].hint,
-          })),
-          initialValue: "project-directory",
-        });
-        if (p.isCancel(b)) {
-          p.cancel("Aborted.");
-          process.exit(0);
-        }
-        blueprint = b as Blueprint;
+        const b = unwrapPrompt<Blueprint>(
+          await p.select({
+            message: "Pick a blueprint",
+            options: validBlueprints.map((b) => ({
+              value: b,
+              label: BLUEPRINT_LABELS[b].label,
+              hint: BLUEPRINT_LABELS[b].hint,
+            })),
+            initialValue: "project-directory",
+          }),
+        );
+        blueprint = b;
       }
 
       // GitHub integration
@@ -183,26 +181,24 @@ program
       } else if (opts.yes) {
         githubMode = "none";
       } else {
-        const g = (await p.select({
-          message: "GitHub automation mode?",
-          options: [
-            {
-              value: "none",
-              label: "none / private",
-              hint: "Private or local — no GitHub token, only validate + build",
-            },
-            {
-              value: "public",
-              label: "public GitHub metadata",
-              hint: "Community sites — syncs stars, contributors, stale records (token-gated)",
-            },
-          ],
-          initialValue: "none",
-        })) as "none" | "public";
-        if (p.isCancel(g)) {
-          p.cancel("Aborted.");
-          process.exit(0);
-        }
+        const g = unwrapPrompt<"none" | "public">(
+          await p.select({
+            message: "GitHub automation mode?",
+            options: [
+              {
+                value: "none",
+                label: "none / private",
+                hint: "Private or local — no GitHub token, only validate + build",
+              },
+              {
+                value: "public",
+                label: "public GitHub metadata",
+                hint: "Community sites — syncs stars, contributors, stale records (token-gated)",
+              },
+            ],
+            initialValue: "none",
+          }),
+        );
         githubMode = g;
       }
 
@@ -217,20 +213,18 @@ program
       } else if (opts.yes) {
         framework = "astro";
       } else {
-        const f = await p.select({
-          message: "Pick a framework (V1: astro only — nextjs/svelte land in v0.3.0)",
-          options: SUPPORTED_FRAMEWORKS.map((f) => ({
-            value: f,
-            label: FRAMEWORK_LABELS[f].label,
-            hint: FRAMEWORK_LABELS[f].hint,
-          })),
-          initialValue: "astro",
-        });
-        if (p.isCancel(f)) {
-          p.cancel("Aborted.");
-          process.exit(0);
-        }
-        framework = f as Framework;
+        const f = unwrapPrompt<Framework>(
+          await p.select({
+            message: "Pick a framework (V1: astro only — nextjs/svelte land in v0.3.0)",
+            options: SUPPORTED_FRAMEWORKS.map((f) => ({
+              value: f,
+              label: FRAMEWORK_LABELS[f].label,
+              hint: FRAMEWORK_LABELS[f].hint,
+            })),
+            initialValue: "astro",
+          }),
+        );
+        framework = f;
       }
 
       const template = opts.template;
@@ -245,43 +239,37 @@ program
       } else if (opts.yes) {
         deploy = "github-pages";
       } else {
-        const d = await p.select({
-          message: "Where will this space be deployed?",
-          options: DEPLOY_PROVIDERS.map((d) => ({
-            value: d,
-            label: DEPLOY_LABELS[d].label,
-            hint: DEPLOY_LABELS[d].hint,
-          })),
-          initialValue: "github-pages",
-        });
-        if (p.isCancel(d)) {
-          p.cancel("Aborted.");
-          process.exit(0);
-        }
-        deploy = d as DeployProvider;
+        const d = unwrapPrompt<DeployProvider>(
+          await p.select({
+            message: "Where will this space be deployed?",
+            options: DEPLOY_PROVIDERS.map((d) => ({
+              value: d,
+              label: DEPLOY_LABELS[d].label,
+              hint: DEPLOY_LABELS[d].hint,
+            })),
+            initialValue: "github-pages",
+          }),
+        );
+        deploy = d;
       }
 
       const initGit = opts.yes
         ? (opts.git ?? true)
-        : await p.confirm({
-            message: "Initialize a git repository?",
-            initialValue: opts.git ?? true,
-          });
-      if (p.isCancel(initGit)) {
-        p.cancel("Aborted.");
-        process.exit(0);
-      }
+        : unwrapPrompt<boolean>(
+            await p.confirm({
+              message: "Initialize a git repository?",
+              initialValue: opts.git ?? true,
+            }),
+          );
 
       const installDeps = opts.yes
         ? (opts.install ?? true)
-        : await p.confirm({
-            message: "Install dependencies with pnpm?",
-            initialValue: opts.install ?? true,
-          });
-      if (p.isCancel(installDeps)) {
-        p.cancel("Aborted.");
-        process.exit(0);
-      }
+        : unwrapPrompt<boolean>(
+            await p.confirm({
+              message: "Install dependencies with pnpm?",
+              initialValue: opts.install ?? true,
+            }),
+          );
 
       const root = resolve(projectDir);
       const templates = await listTemplates(framework);
@@ -386,6 +374,14 @@ program
         } catch {
           installSpinner.stop("Install failed");
           p.log.warn(`Run \`pnpm install\` inside ${root} to retry.`);
+          // The scaffold succeeded but the install didn't — flag the
+          // partial-success state to the parent process. The outro
+          // still prints so the user sees the path + next steps, but
+          // the non-zero exit code means CI / shell wrappers can
+          // detect the failure and stop before calling `grove build`
+          // on a half-installed project. (Audit finding: a warning
+          // alone is silent failure for `grove new`.)
+          process.exitCode = 1;
         }
       }
 
@@ -460,8 +456,23 @@ program
   .option("--no-git", "skip `git init` after scaffolding")
   .option(
     "--port <port>",
-    "dev server port (only used by `dev` action; passed to astro dev)",
-    (value) => Number(value),
+    "dev server port (only used by `dev` action; passed to astro dev; 1-65535)",
+    (value) => {
+      // Commander passes the raw string here. We accept decimal
+      // integers, reject floats, NaN, and out-of-range values.
+      // Throwing makes commander surface the message AND exit 1
+      // before the action handler runs — exactly the behaviour the
+      // audit wanted (a non-integer or out-of-range port used to
+      // silently become `NaN`, which astro dev then printed as
+      // `--port NaN` and refused to bind).
+      const port = Number(value);
+      if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        throw new Error(
+          `Invalid --port: "${value}" is not an integer in 1..65535.`,
+        );
+      }
+      return port;
+    },
   )
   .action(
     async (
@@ -676,6 +687,10 @@ program
             p.log.error("Cannot continue without a working install.");
             process.exit(1);
           }
+          // For `grove run init` we still want a non-zero exit so CI
+          // / shell wrappers can detect the partial-success state
+          // (audit finding: warnings alone are silent failures).
+          process.exitCode = 1;
         }
       }
 
@@ -1122,8 +1137,7 @@ program
   .option("--force", "overwrite existing workflow files")
   .option(
     "-d, --deploy <provider>",
-    `deploy provider for the build workflow + config files: ${DEPLOY_PROVIDERS.join(" | ")}`,
-    "github-pages",
+    `deploy provider for the build workflow + config files: ${DEPLOY_PROVIDERS.join(" | ")} (default: github-pages)`,
   )
   .action(
     async (
@@ -1141,11 +1155,16 @@ program
         config.integrations?.github === false || config.integrations?.github === undefined
           ? "none"
           : "public";
-      // Validate the deploy option; default to github-pages for back-compat.
-      const deploy: DeployProvider =
-        opts.deploy && (DEPLOY_PROVIDERS as readonly string[]).includes(opts.deploy)
-          ? (opts.deploy as DeployProvider)
-          : "github-pages";
+      // Validate the --deploy option. The previous implementation
+      // silently fell back to "github-pages" for any value not in
+      // DEPLOY_PROVIDERS — which is a footgun for scripted use: a
+      // typo (e.g. `--deploy vercels`) would write a Pages deploy
+      // workflow for a project the user explicitly targeted at
+      // Vercel. We now fail loudly with the valid set, and default
+      // to "github-pages" only when --deploy is omitted entirely
+      // (commander leaves the field `undefined` for the no-flag
+      // case). The default text moved to the help string above.
+      const deploy: DeployProvider = parseDeployProvider(opts.deploy);
       const root = process.cwd();
 
       // Make sure the directories exist. `ensureDir` returns a
@@ -1281,28 +1300,82 @@ async function existsLocal(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * Parse a `--deploy` flag value into a typed `DeployProvider`.
+ *
+ * - `undefined` (flag not passed) → "github-pages" (the historical
+ *   default; matches commander.js's default-arg behaviour).
+ * - A valid provider name → returned unchanged.
+ * - Anything else → process exits 1 with the list of valid providers.
+ *
+ * The previous implementation silently coerced invalid values to
+ * "github-pages", which masked typos in CI scripts (audit finding).
+ */
+function parseDeployProvider(value: string | undefined): DeployProvider {
+  if (value === undefined) return "github-pages";
+  if ((DEPLOY_PROVIDERS as readonly string[]).includes(value)) {
+    return value as DeployProvider;
+  }
+  console.error(`Unknown deploy provider: ${value}.`);
+  console.error(`Try one of: ${DEPLOY_PROVIDERS.join(", ")}`);
+  process.exit(1);
+}
+
 // ──────────────────────────────────────────────────────────────────────
 // Helper: project file templates
 // ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Unwrap a clack prompt result, treating cancellation as a clean exit.
+ *
+ * Clack's `p.isCancel(x)` is the only blessed way to detect that the
+ * user pressed Ctrl-C / Escape on a prompt. The standard exit shape is
+ *   - log the abort message via `p.cancel(...)`
+ *   - terminate the process with exit 0 (clean exit, not an error)
+ *
+ * Seven call sites in this file used to inline that three-line dance.
+ * Centralising it here:
+ *   1. makes the abort behaviour auditable from one place,
+ *   2. lets the verifier grep for a single `process.exit(0)` and
+ *      confirm there are no stragglers, and
+ *   3. makes future changes (e.g. switching the abort message to a
+ *      localised string) a one-line edit.
+ *
+ * Callers should pass the raw `p.text(...)` / `p.select(...)` / etc.
+ * return value and a TypeScript type parameter so the narrowed return
+ * is correctly inferred. Example:
+ *
+ *   const b = unwrapPrompt<Blueprint>(await p.select({ ... }));
+ */
+function unwrapPrompt<T>(value: T | symbol, message = "Aborted."): T {
+  if (p.isCancel(value)) {
+    p.cancel(message);
+    process.exit(0);
+  }
+  return value as T;
+}
 
 async function resolveText(
   message: string,
   fallback: string,
   placeholder?: string,
 ): Promise<string> {
-  const result = await p.text({
+  // Build the options object conditionally so `placeholder` is
+  // omitted entirely (not set to `undefined`) — the CLI library's
+  // TextOptions has `placeholder: string` under
+  // exactOptionalPropertyTypes, so passing `undefined` is a type
+  // error.
+  const textOpts = {
     message,
-    ...(placeholder !== undefined ? { placeholder } : {}),
     defaultValue: fallback,
-    validate: (value) => {
+    ...(placeholder !== undefined ? { placeholder } : {}),
+    validate: (value: string | undefined) => {
       if (!value || value.trim().length === 0) return `${message} is required`;
+      return undefined;
     },
-  });
-  if (p.isCancel(result)) {
-    p.cancel("Aborted.");
-    process.exit(0);
-  }
-  return String(result);
+  };
+  const result = unwrapPrompt<string>(await p.text(textOpts));
+  return result;
 }
 
 async function writeIfMissing(path: string, content: string): Promise<void> {
@@ -2189,6 +2262,16 @@ SOFTWARE.
 }
 
 program.parseAsync().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  // Prefer the full stack trace so the user can see where in their
+  // .ts file the throw originated. `error.stack` is always present
+  // for Error subclasses; `error.message` is the fallback when
+  // something non-Error was thrown (e.g. a bare string).
+  if (error instanceof Error && error.stack) {
+    console.error(error.stack);
+  } else if (error instanceof Error) {
+    console.error(error.message);
+  } else {
+    console.error(String(error));
+  }
   process.exit(1);
 });
