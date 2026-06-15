@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { type GroveConfig, loadConfig } from "./config.js";
+import { slugify } from "./slug.js";
 
 export interface LlmsRecordInput {
   slug: string;
@@ -43,10 +44,11 @@ const BLUEPRINT_PLURAL: Record<string, string> = {
 };
 
 function slug(value: string): string {
-  return String(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  // Delegate to the package's single public slugifier. llms.txt anchor
+  // links only need the base form (no collision counter), and the
+  // public `slugify` matches the GitHub-flavored anchor format the
+  // downstream Markdown renderer expects.
+  return slugify(String(value));
 }
 
 function truncate(value: string, max: number): string {
