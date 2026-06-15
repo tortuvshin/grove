@@ -2,9 +2,11 @@
 
 Status legend: done / in progress / not started.
 
+> **Note on naming.** These milestones predate the V0→V1 rename (see `CHANGELOG.md` for the migration). The V0 names used below — `data/items.yml`, `curated.config.ts`, "items" as the generic term — are kept verbatim so the historical record is faithful. The V1 canonical names are `data/records/<slug>.yml`, `grove.config.ts`, and "records".
+
 ## Milestone 1 - Framework Foundation (done)
 
-Goal: an empty project can build a basic static directory from config and `data/items.yml`.
+Goal: an empty project can build a basic static directory from config and `data/items.yml` (V0 name — V1 is `data/records/`).
 
 Tasks:
 
@@ -17,7 +19,7 @@ Tasks:
 - Add basic renderer surface
 - Add build command
 
-Definition of done: `curated.config.ts` plus `data/items.yml` can drive a static directory project.
+Definition of done: `curated.config.ts` (V0 name — V1 is `grove.config.ts`) plus `data/items.yml` (V0 name — V1 is `data/records/`) can drive a static directory project.
 
 Verified: `examples/basic` builds via `pnpm build` and produces a static site
 with homepage, item pages, llms.txt, sitemap.xml.
@@ -34,10 +36,10 @@ Tasks:
 - GitHub repo detection
 - Description extraction
 - Duplicate detection
-- `data/items.yml` generation
+- `data/items.yml` (V0) generation → `data/records/<slug>.yml` (V1)
 - `import-report.md` generation
 
-Definition of done: an awesome list README imports into items.yml.
+Definition of done: an awesome list README imports into per-record YAML files (V0: `items.yml`; V1: `data/records/<slug>.yml`).
 
 Verified: `punkpeye/awesome-mcp-servers` (2571 items across 56 real categories
 after TOC and anchor filtering).

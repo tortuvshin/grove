@@ -23,7 +23,7 @@ cd my-space
 # ...whatever you ran after
 ```
 
-If the bug only happens with a specific data file, paste a minimal `data/resources/*.yml` (or attach the smallest sample you can).
+If the bug only happens with a specific data file, paste a minimal `data/records/*.yml` (or attach the smallest sample you can).
 
 ### Expected behaviour
 

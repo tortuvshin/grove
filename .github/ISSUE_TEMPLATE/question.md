@@ -25,4 +25,4 @@ Grove usage questions are welcome here. For security issues, see SECURITY.md. Fo
 
 ### Code / config
 
-<!-- A `curated.config.ts` or a small command snippet helps a lot. -->
+<!-- A `grove.config.ts` or a small command snippet helps a lot. -->

@@ -1,0 +1,56 @@
+# CODEOWNERS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Rules are evaluated top-to-bottom; the LAST matching rule wins.
+# Keep this file in sync with the actual maintainer roster — the
+# handles below are PLACEHOLDERS that the project owner must confirm
+# before relying on GitHub's review-request routing.
+#
+# TODO(decision): the audit flagged the owner handle as a placeholder.
+# The repo's published-package metadata consistently points at the
+# GitHub user `tortuvshin` (see `homepage` / `repository` in every
+# `packages/*/package.json`), so the @grove-dev/* packages are
+# effectively single-maintainer today. The right owner for a CODEOWNERS
+# rule depends on the project's governance model:
+#   - Single-maintainer: replace `@tortuvshin` below with the actual
+#     GitHub handle.
+#   - Team-owned: replace with the @org/team-name handle once a
+#     maintainers team is created.
+#   - Org-wide: replace with `@grove-dev/maintainers` (a team that
+#     must be created first).
+# Until that's decided, the placeholder below is correct enough that
+# drive-by PRs to the core packages will at least get a single review
+# request. Tracking issue:
+# https://github.com/tortuvshin/grove/issues/new?title=CODEOWNERS%3A+confirm+owner+handle+or+create+maintainers+team
+
+# Default owner for any file in the monorepo not matched by a more
+# specific rule below. Catches docs, scripts, .github/, etc.
+*                                       @tortuvshin
+
+# Core packages — drive-by edits to the engine should require
+# maintainer sign-off. Each of these is a path-prefix rule, applied
+# recursively. The trailing `/**` matches the package's source.
+# GitHub treats `packages/<x>/src/**` as the source tree and
+# `packages/<x>/dist/**` as build output (typically gitignored).
+/packages/core/src/**                   @tortuvshin
+/packages/core/test/**                  @tortuvshin
+/packages/core/scripts/**               @tortuvshin
+
+/packages/ui/src/**                     @tortuvshin
+/packages/ui/test/**                    @tortuvshin
+
+/packages/cli/src/**                    @tortuvshin
+/packages/cli/test/**                   @tortuvshin
+
+# Framework adapters — only the V1-supported one is in the V1
+# critical path; svelte/nextjs are roadmap skeletons (private) so
+# they can be touched more freely.
+/packages/astro/src/**                  @tortuvshin
+/packages/astro/templates/**            @tortuvshin
+/packages/astro/test/**                 @tortuvshin
+
+# Starlight docs-site theme — credited to lucode/lucas-labs upstream
+# (see packages/starlight/THIRD_PARTY_LICENSES.md), so changes to the
+# component overrides or theme tokens deserve a deliberate review.
+/packages/starlight/**                  @tortuvshin
+/docs/**                                 @tortuvshin

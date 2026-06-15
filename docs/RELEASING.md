@@ -41,7 +41,7 @@ Grove follows **semver**:
 ### What's a "breaking change" for Grove?
 
 - Renaming or removing a CLI subcommand.
-- Changing the shape of `curated.config.ts` in a way that requires user edits.
+- Changing the shape of `grove.config.ts` in a way that requires user edits.
 - Changing the resource YAML schema in a way that makes existing data files fail to validate.
 - Renaming or removing a published export from any `@grove-dev/*` package.
 - Changing the default scaffold output in a way that breaks an existing space.
@@ -134,7 +134,7 @@ So the rule is: **bump `version`, leave `workspace:*` alone, let publish do the 
 
 - [ ] The new version appears on npm under `@grove-dev/core` (the canary — it's published first because the others depend on it).
 - [ ] The other five packages appear in dependency order: `core` → `ui` → `astro` / `nextjs` / `svelte` → `cli`.
-- [ ] Smoke-test one package in a downstream space: `pnpm add @grove-dev/cli@latest` in `examples/openapps` and run `grove build`.
+- [ ] Smoke-test one package in a downstream space: install it in a fresh scaffolded space (e.g. a temporary `grove new my-test-space --framework astro`) and run the framework's build / `grove build` to confirm a clean install.
 - [ ] Post a short note in the GitHub Discussions "Announcements" category, or open a discussion if there isn't one yet.
 - [ ] Update [`roadmap.md`](./roadmap.md) — close out the items that the release shipped.
 

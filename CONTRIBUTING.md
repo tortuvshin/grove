@@ -19,7 +19,7 @@ There are a lot of ways to contribute, and you don't have to write code to be us
 - **Report a bug** — open an issue with a minimal reproduction.
 - **Suggest a feature** — open an issue and describe the use case, not just the solution.
 - **Improve the docs** — typo, missing example, clearer wording — all welcome.
-- **Submit a resource or fix a record** — file an issue or PR in one of the [example spaces](./examples) or in a downstream space you maintain.
+- **Submit a resource or fix a record** — file an issue or PR in a downstream space you maintain (e.g. [Open Apps](https://github.com/tortuvshin/open-apps) or your own fork). The `examples/` directory in this repo is gitignored; reference spaces live in their own repositories.
 - **Triage issues** — reproduce a report, add missing context, suggest labels.
 - **Write code** — see the area guides below.
 
@@ -29,21 +29,22 @@ If you're new, look for issues labelled [`good first issue`](https://github.com/
 
 ## Project layout
 
-Grove is a pnpm workspace with six published packages and three side directories:
+Grove is a pnpm workspace with six published packages and two side directories:
 
 ```txt
 grove/
 ├── packages/
 │   ├── core/       # Headless engine: schema, config, importers, validators, sitemap, llms.txt
-│   ├── ui/         # Framework-agnostic UI primitives (filters, sort, stats) — roadmap only
-│   ├── cli/        # `new`, `import`, `analyze`, `validate`, `build`, `dev`
-│   └── astro/      # Astro adapter (components, layouts, tokens, template)
-│       nextjs/     # Next.js adapter
-│       svelte/     # SvelteKit adapter
-├── examples/       # Real Grove-powered spaces (oss-dev-mn, open-apps, ...)
+│   ├── ui/         # Framework-agnostic UI primitives (filters, sort, stats) — V1
+│   ├── cli/        # `new`, `import`, `validate`, `generate`, `sitemap`, `llms`, `sync github`, `build`, `dev`
+│   ├── astro/      # Astro adapter (components, layouts, tokens, template) — V1 supported
+│   ├── nextjs/     # Next.js adapter — skeleton only (V1.2+)
+│   └── svelte/     # SvelteKit adapter — skeleton only (V1.1+)
 ├── docs/           # Framework documentation site (Starlight)
 └── scripts/        # release.mjs, test-scaffold.mjs
 ```
+
+Reference Grove-powered spaces live in their own repos (e.g. [Open Apps](https://github.com/tortuvshin/open-apps)). The `examples/` directory in this repo is gitignored — it's a local scratch dir for `pnpm test:scaffold` and `grove new` smoke tests, never committed.
 
 Each package is published independently under `@grove-dev/*`. Changes that affect multiple packages usually need updates in the right order: `core` → `ui` → `astro` / `nextjs` / `svelte` → `cli`.
 
@@ -165,7 +166,7 @@ This is the most common "big" contribution. The pattern is documented in `docs/A
 1. Create `packages/<framework>/` with a `package.json` named `@grove-dev/<framework>`.
 2. Add a `peerDependencies` block for the framework version range.
 3. Implement `src/index.ts` re-exporting the components/layouts from `src/components` and `src/layouts`.
-4. Add a `templates/default/` containing the user-facing scaffold: pages, layouts, `curated.config.ts`, `astro.config.mjs` (or framework equivalent), and a starter `data/resources/` with one example record.
+4. Add a `templates/default/` containing the user-facing scaffold: pages, layouts, `grove.config.ts`, `astro.config.mjs` (or framework equivalent), and a starter `data/records/<slug>.yml` with one example record.
 5. Add a `tests` block in `scripts/test-scaffold.mjs` that scaffolds the new framework into a temp dir and asserts `pnpm install` succeeds.
 6. Add the package to `pnpm-workspace.yaml` (it's already a wildcard, but verify) and to the release script's `PACKAGES` array.
 7. Update the root `README.md` "Repository layout" section and the docs site's framework list.
@@ -176,9 +177,9 @@ If you want, open an issue first describing the adapter and we'll help shape the
 
 ## Adding a new resource to a Grove-powered space
 
-This is for contributors to **downstream spaces** (e.g. `examples/openapps`, `examples/grove-demo`), not the framework itself:
+This is for contributors to **downstream spaces** (e.g. [Open Apps](https://github.com/tortuvshin/open-apps), `my-grove-space`), not the framework itself:
 
-- A resource is a single YAML file in `data/resources/`. Look at the existing records for the schema.
+- A record is a single YAML file in `data/records/<slug>.yml`. Look at the existing records for the schema.
 - Validate locally with `grove validate` (or the `pnpm` script in the space's `package.json`).
 - Open a PR. The space maintainer reviews, may ask for a `homepage` or `license` field, and merges.
 - For new **categories** or **topics**, edit `data/taxonomy/` and add a short blurb in `content/methodology.mdx` if the space has one.
