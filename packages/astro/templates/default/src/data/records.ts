@@ -81,7 +81,22 @@ const fullRecordsRaw: Resource[] = (fullPayload as FullPayload).records ?? [];
 const indexRecordsRaw: IndexRecord[] = (indexPayload as IndexPayload).records ?? [];
 const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
 
+/** Full records (every record, all visibility). Use this for the
+ *  detail page (where you need `content`, `bestFor`, `whyListed`,
+ *  `caveats`, the full `github.repository` block, ...) and for
+ *  the V0-published alias page at `/apps/[recordSlug]` that
+ *  enumerates all records for `getStaticPaths`. */
+export const fullRecords: Resource[] = fullRecordsRaw;
+
+/** Index-payload records (visible-only slim shape). */
+export const records: IndexRecord[] = indexRecordsRaw;
+
 /** Resource-kind records — slim shape. */
+/** Project-kind records — slim shape, ready for list pages. */
+export const projects = records.filter(
+  (r): r is IndexProjectRecord => r.kind === "project",
+);
+
 export const resources = records.filter(
   (r): r is IndexResourceRecord => r.kind === "resource",
 );
