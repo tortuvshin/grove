@@ -36,6 +36,7 @@ import {
   paginate,
   searchParamsFromFilters,
   sortDisplay,
+  SORT_OPTIONS,
   totalPages,
 } from "@grove-dev/astro";
 
@@ -165,6 +166,7 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
       <form
         method="get"
         action={`/${slug}`}
+        id="search-form"
         class="mt-6 flex flex-col gap-2 sm:flex-row"
         role="search"
       >
@@ -178,9 +180,10 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
             class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
             fill="currentColor"
           >
-            <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.75.75 0 0 1-1.06 1.06l-3.04-3.04ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z" />
+            <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z" />
           </svg>
           <input
+            id="search-input"
             type="search"
             name="q"
             value={filters.q ?? ""}
@@ -188,7 +191,28 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
             class="h-10 w-full rounded-md border border-ink-200 bg-white py-2 pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
           />
         </label>
-        {filters.sort && <input type="hidden" name="sort" value={filters.sort} />}
+        <label class="relative">
+          <span class="sr-only">{`Sort ${itemLabelPlural()}`}</span>
+          <select
+            id="sort-select"
+            name="sort"
+            class="h-10 cursor-pointer appearance-none rounded-md border border-ink-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-ink-700 transition-colors hover:border-ink-300 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:focus:border-ink-100 dark:focus:ring-ink-100/15"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option value={o.value} selected={o.value === sort}>{o.label}</option>
+            ))}
+          </select>
+          <svg
+            viewBox="0 0 16 16"
+            width="11"
+            height="11"
+            aria-hidden="true"
+            class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400"
+            fill="currentColor"
+          >
+            <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" />
+          </svg>
+        </label>
         <button type="submit" class="grove-btn grove-btn-primary">Search</button>
       </form>
 
@@ -287,6 +311,49 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
       var PAGE_SIZE = 20;
       var list = document.getElementById("results-list");
       if (!list) return;
+
+      // Sort dropdown: navigate on change so the server re-renders
+      // the sorted list (URL is the source of truth for filters/sort).
+      var sortSelect = document.getElementById("sort-select");
+      if (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+          var params = new URLSearchParams(location.search);
+          if (sortSelect.value && sortSelect.value !== "recently-updated") {
+            params.set("sort", sortSelect.value);
+          } else {
+            params.delete("sort");
+          }
+          params.delete("page");
+          var qs = params.toString();
+          location.assign(qs ? "?" + qs : location.pathname);
+        });
+      }
+
+      // Search: 250ms debounce; pressing Enter still submits
+      // immediately via the form's normal submit handler.
+      var searchInput = document.getElementById("search-input");
+      var searchForm = document.getElementById("search-form");
+      if (searchInput && searchForm) {
+        var debounceTimer = null;
+        var submit = function () {
+          var params = new URLSearchParams(location.search);
+          var term = searchInput.value.trim();
+          if (term) params.set("q", term);
+          else params.delete("q");
+          params.delete("page");
+          var qs = params.toString();
+          location.assign(qs ? "?" + qs : location.pathname);
+        };
+        searchInput.addEventListener("input", function () {
+          if (debounceTimer) window.clearTimeout(debounceTimer);
+          debounceTimer = window.setTimeout(submit, 250);
+        });
+        searchForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          if (debounceTimer) window.clearTimeout(debounceTimer);
+          submit();
+        });
+      }
 
       function values(params, key) {
         return params.getAll(key).filter(Boolean);
