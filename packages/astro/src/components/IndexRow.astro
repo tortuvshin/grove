@@ -8,10 +8,14 @@ interface Props {
   detailHref: string;
   /** Whether to show stack/platform chips. Default true. */
   showChips?: boolean;
+  /** Set true on the first 1-2 rows of a list to bypass lazy
+   * loading for the above-the-fold avatars. Pair with
+   * `fetchpriority="high"`. */
+  eager?: boolean;
   class?: string;
 }
 
-const { record, detailHref, showChips = true, class: className = "" } = Astro.props;
+const { record, detailHref, showChips = true, eager = false, class: className = "" } = Astro.props;
 const item = record;
 const project = item.kind === "project" ? item : null;
 const name = item.kind === "resource" ? item.title : item.name;
@@ -32,7 +36,16 @@ const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.
   <header class="flex items-start gap-3">
     <a href={detailHref} class="relative z-10 flex shrink-0" aria-label={`Open ${name} details`}>
       {avatar ? (
-        <img src={avatar} alt={`${name} avatar`} width="44" height="44" loading="lazy" class="h-11 w-11 rounded-md border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900" />
+        <img
+          src={avatar}
+          alt={`${name} avatar`}
+          width="44"
+          height="44"
+          loading={eager ? "eager" : "lazy"}
+          fetchpriority={eager ? "high" : undefined}
+          decoding="async"
+          class="h-11 w-11 rounded-md border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900"
+        />
       ) : (
         <span class="flex h-11 w-11 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-sm font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">{initials}</span>
       )}
