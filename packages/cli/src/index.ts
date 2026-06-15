@@ -569,8 +569,13 @@ program
             .replace("T", "-");
           dirRel = `grove-run-${stamp}`;
         } else if (existing.length === 1) {
-          dirRel = existing[0];
-          p.log.info(`Reusing scaffold: ${dirRel} (pass --dir <name> to override)`);
+          const only = existing[0];
+          if (only) {
+            dirRel = only;
+            p.log.info(`Reusing scaffold: ${dirRel} (pass --dir <name> to override)`);
+          } else {
+            dirRel = "grove-run-default";
+          }
         } else {
           p.log.error(
             `Found ${existing.length} scaffolds under .grove/run/. ` +
@@ -786,7 +791,10 @@ program
   .option("--strict", "fail on warnings as well as errors")
   .action(async (opts: { strict?: boolean }) => {
     const config: GroveConfig = await loadConfig();
-    const result = await validateProject(config, { strict: opts.strict });
+    const result = await validateProject(
+      config,
+      opts.strict !== undefined ? { strict: opts.strict } : {},
+    );
     for (const issue of result.errors) {
       console.log(`✖ ${issue.code}: ${issue.message}`);
     }
@@ -1270,7 +1278,7 @@ async function resolveText(
 ): Promise<string> {
   const result = await p.text({
     message,
-    placeholder,
+    ...(placeholder !== undefined ? { placeholder } : {}),
     defaultValue: fallback,
     validate: (value) => {
       if (!value || value.trim().length === 0) return `${message} is required`;

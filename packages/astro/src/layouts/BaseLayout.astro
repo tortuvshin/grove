@@ -100,6 +100,11 @@ const favicon =
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={favicon} />
     <link rel="sitemap" href="/sitemap.xml" />
+    {/* Preconnect to GitHub's avatar CDN — most pages render at least
+        one avatar (record list cards, detail page logo) and the
+        connection is reusable across cards. Cross-origin only, no
+        document fetch, so the cost is one TLS handshake per page. */}
+    <link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin="anonymous" />
     <link
       rel="alternate"
       type="text/plain"
@@ -270,6 +275,12 @@ const favicon =
     {gaId && (
       <script is:inline define:vars={{ gaId }}>
         (function () {
+          // GA4's `gtag('config', id)` call in the <head> already auto-pings
+          // `page_view` on full navigations, so this block only needs to
+          // catch history changes (back/forward). No history.pushState /
+          // replaceState wrap: the package does not install
+          // @astrojs/transitions' ClientRouter, and those wraps
+          // double-fired page_view events on every navigation.
           var last = location.pathname + location.search;
           function report() {
             var next = location.pathname + location.search;
@@ -282,16 +293,6 @@ const favicon =
             });
           }
           window.addEventListener("popstate", report);
-          var origPush = history.pushState;
-          var origReplace = history.replaceState;
-          history.pushState = function () {
-            origPush.apply(this, arguments);
-            report();
-          };
-          history.replaceState = function () {
-            origReplace.apply(this, arguments);
-            report();
-          };
         })();
       </script>
     )}

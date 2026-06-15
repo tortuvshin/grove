@@ -74,15 +74,18 @@ export type {
 export { generate } from "./build-data.js";
 export type { GenerateResult, RecordsFullPayload, RecordsIndexPayload } from "./build-data.js";
 
+// ── Record YAML helpers (used by `grove import` and the generator) ──
+export { stringifyRecordYaml } from "./schema.js";
+
 // ── Sitemap (library form of `grove sitemap`) ────────────────────────
 export { buildSitemap, buildSitemapXml } from "./sitemap.js";
 
 // ── llms.txt (library form of `grove llms`) ───────────────────────────
-export { buildLlmsTxt, buildLlmsFullTxt } from "./llms.js";
+export { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "./llms.js";
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from "./llms.js";
 
 // ── Cleanup (library form of `grove cleanup stale`) ──────────────────
-export { pickCleanupCandidates } from "./decisions.js";
+export { pickCleanupCandidates, cleanupStale } from "./decisions.js";
 export type { CleanupCandidate, CleanupReport } from "./decisions.js";
 
 // ── GitHub: parsing + REST metadata ──────────────────────────────────
