@@ -33,6 +33,11 @@
 import fullPayload from "../../data/generated/records.full.json";
 import indexPayload from "../../data/generated/records.index.json";
 import siteConfigPayload from "../../data/generated/site-config.json";
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import type {
   ProjectRecord,
   ResourceRecord,
@@ -218,3 +223,96 @@ export const items: IndexRecord[] = (() => {
 export const fullItems: Resource[] = (() => {
   return fullRecords.filter((r) => r.kind === blueprintKind);
 })();
+
+// ──────────────────────────────────────────────────────────────────────
+// Markdown content rendering (sanitized)
+// ──────────────────────────────────────────────────────────────────────
+//
+// `record.content` is a path to a markdown file under
+// `content/records/<slug>.md` (see the project schema in
+// @grove-dev/core). The previous page-level implementation
+// imported `node:fs`, called `marked.parse` on the result, and
+// inlined the raw HTML through `set:html` — a live XSS footgun
+// the moment a record body is added. This module owns the read
+// + render + sanitize pipeline at build time:
+//
+//   1. Resolve the path relative to this module's URL (or
+//      `process.cwd` for tool-driven runs).
+//   2. Read the file (gracefully absent → `null`).
+//   3. `marked.parse` to HTML.
+//   4. `sanitize-html` with a conservative allowlist that
+//      matches the elements the `grove-prose` CSS actually
+//      styles (h1-h4, p, ul/ol/li, pre/code, blockquote, a).
+//      Links are restricted to safe schemes and external links
+//      are hardened to `rel="noopener noreferrer" target="_blank"`.
+//      javascript: / data: URIs are blocked; event handlers,
+//      iframes, and scripts are stripped.
+//
+// The result is computed once at module load (per record) and
+// memoized in `contentHtmlBySlug`. Pages call
+// `getContentHtml(recordSlug)` to receive the sanitized HTML or
+// `null` if the record has no `content` field / the file is
+// missing. No page module needs to import `node:fs` anymore.
+
+const here = dirname(fileURLToPath(import.meta.url));
+function resolveContentPath(contentPath: string): string {
+  const candidates = [
+    resolve(here, "..", "..", contentPath),
+    resolve(here, "..", "..", "..", contentPath),
+    resolve(process.cwd(), contentPath),
+  ];
+  return candidates.find((p) => existsSync(p)) ?? "";
+}
+
+const contentHtmlBySlug = new Map<string, string>();
+for (const r of fullRecords) {
+  if (r.kind !== "project") continue;
+  const projectRecord = r as ProjectRecord;
+  if (!projectRecord.content) continue;
+  const path = resolveContentPath(projectRecord.content);
+  if (!path) continue;
+  try {
+    const text = readFileSync(path, "utf8");
+    // `async: false` keeps the call synchronous so we can populate
+    // the map at module-load time. (marked v18 defaults to
+    // Promise-returning; v9-17 also support this flag.)
+    const rawHtml = marked.parse(text, { async: false }) as string;
+    const safeHtml = sanitizeHtml(rawHtml, {
+      allowedTags: [
+        "h1", "h2", "h3", "h4",
+        "p", "br", "hr",
+        "ul", "ol", "li",
+        "strong", "em", "b", "i", "u", "s", "del",
+        "a", "code", "pre", "blockquote",
+      ],
+      allowedAttributes: {
+        a: ["href", "title", "rel", "target"],
+      },
+      allowedSchemes: ["http", "https", "mailto", "tel"],
+      allowedSchemesByTag: { a: ["http", "https", "mailto", "tel"] },
+      transformTags: {
+        a: sanitizeHtml.simpleTransform("a", {
+          rel: "noopener noreferrer",
+          target: "_blank",
+        }, true),
+      },
+      disallowedTagsMode: "discard",
+    });
+    contentHtmlBySlug.set(r.slug, safeHtml);
+  } catch {
+    // Missing / unreadable / parse-failed content: skip the record
+    // rather than render broken HTML. The page treats `null` as
+    // "no Notes section".
+  }
+}
+
+/**
+ *  Pre-sanitized HTML for a record's `content` markdown body, or
+ *  `null` if the record has no `content` field / the file is
+ *  missing / parse failed. Safe to feed straight into
+ *  `set:html` — the render and sanitize steps already ran at
+ *  module load.
+ */
+export function getContentHtml(slug: string): string | null {
+  return contentHtmlBySlug.get(slug) ?? null;
+}
