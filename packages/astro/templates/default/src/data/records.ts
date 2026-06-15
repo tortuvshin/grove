@@ -81,26 +81,6 @@ const fullRecordsRaw: Resource[] = (fullPayload as FullPayload).records ?? [];
 const indexRecordsRaw: IndexRecord[] = (indexPayload as IndexPayload).records ?? [];
 const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
 
-/**
- *  Full records (all visibility). Use this for the detail page,
- *  where you need `content`, `bestFor`, `whyListed`, `caveats`,
- *  the full `github.repository` block, etc.
- */
-export const fullRecords: Resource[] = fullRecordsRaw;
-
-/**
- *  Index-payload records (visible only). Use this for the list
- *  page and any home-page sectioning, where you only need the
- *  slim search-index fields.
- */
-export const records: IndexRecord[] =
-  indexRecordsRaw.length > 0 ? indexRecordsRaw : [];
-
-/** Project-kind records only — slim shape, ready for list pages. */
-export const projects = records.filter(
-  (r): r is IndexProjectRecord => r.kind === "project",
-);
-
 /** Resource-kind records — slim shape. */
 export const resources = records.filter(
   (r): r is IndexResourceRecord => r.kind === "resource",
