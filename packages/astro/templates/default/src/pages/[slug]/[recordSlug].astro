@@ -389,6 +389,21 @@ if (isProject && proj) {
           <div class="mt-4">
             <ScoreBars scores={scores} />
           </div>
+          <dl class="mt-5 flex flex-col gap-1.5 border-t border-ink-200 pt-4 text-2xs dark:border-ink-800">
+            {[
+              { key: "activity", label: "Activity", note: "Recency and frequency of commits." },
+              { key: "maturity", label: "Maturity", note: "Stability and production-readiness." },
+              { key: "learning", label: "Learning", note: "Quality of docs, examples, and onboarding." },
+              { key: "contribution", label: "Contribution", note: "Openness to outside contributions." },
+              { key: "docs", label: "Docs", note: "Quality of documentation." },
+              { key: "overall", label: "Overall", note: "Composite of the five dimensions above." },
+            ].map((dim) => (
+              <div class="flex items-baseline gap-2">
+                <dt class="w-24 shrink-0 font-medium text-ink-500 dark:text-ink-400">{dim.label}</dt>
+                <dd class="text-ink-600 dark:text-ink-300">{dim.note}</dd>
+              </div>
+            ))}
+          </dl>
         </section>
       )}
 
@@ -626,6 +641,59 @@ if (isProject && proj) {
               </div>
             )}
           </div>
+        </section>
+      )}
+
+      {/* ── Project shape (optional, openapps-style) ────────── */}
+      {isProject && (proj?.projectType || proj?.difficulty || proj?.codebaseSize || proj?.stateManagement || proj?.backend || proj?.architecture) && (
+        <section class="mt-8 grove-card p-6" aria-labelledby="project-shape-heading">
+          <h2 id="project-shape-heading" class="m-0 text-lg font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+            Project shape
+          </h2>
+          <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            {proj?.projectType && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Type</dt>
+                <dd class="m-0 mt-0.5 text-ink-700 dark:text-ink-200">
+                  {proj.projectType === "real-app" ? "Real app" :
+                   proj.projectType === "production" ? "Production" :
+                   proj.projectType === "reference" ? "Reference" :
+                   proj.projectType === "demo" ? "Demo" :
+                   proj.projectType === "template" ? "Template" : proj.projectType}
+                </dd>
+              </div>
+            )}
+            {proj?.stateManagement && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">State management</dt>
+                <dd class="m-0 mt-0.5 text-ink-700 dark:text-ink-200">{proj.stateManagement}</dd>
+              </div>
+            )}
+            {proj?.backend && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Backend</dt>
+                <dd class="m-0 mt-0.5 text-ink-700 dark:text-ink-200">{proj.backend}</dd>
+              </div>
+            )}
+            {proj?.architecture && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Architecture</dt>
+                <dd class="m-0 mt-0.5 text-ink-700 dark:text-ink-200">{proj.architecture}</dd>
+              </div>
+            )}
+            {proj?.difficulty && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Difficulty</dt>
+                <dd class="m-0 mt-0.5 capitalize text-ink-700 dark:text-ink-200">{proj.difficulty}</dd>
+              </div>
+            )}
+            {proj?.codebaseSize && (
+              <div>
+                <dt class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Codebase size</dt>
+                <dd class="m-0 mt-0.5 capitalize text-ink-700 dark:text-ink-200">{proj.codebaseSize}</dd>
+              </div>
+            )}
+          </dl>
         </section>
       )}
 
