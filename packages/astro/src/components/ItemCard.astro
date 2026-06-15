@@ -10,10 +10,18 @@
  * /resources/<slug>, ecosystem-map → /entities/<slug>) pass the
  * correct href via `RecordSection`'s `hrefFor` callback.
  *
+ * V1 (alternative) API: pass `routeSlug` (e.g. `"projects"`,
+ * `"resources"`, `"entities"`) to let the component derive the
+ * detail URL itself as `/${routeSlug}/${slug}`. This is a thin
+ * alternative to passing `href`; the page-level `hrefFor` callback
+ * is still the recommended API.
+ *
  * V1 (legacy) API: also accepts `item` + `pathPrefix` as a
- * convenience for callers that haven't migrated. When both are
- * provided, `href` wins; when only `pathPrefix` is provided, the
- * detail href is `${pathPrefix}/${item.slug}`.
+ * convenience for callers that haven't migrated. When any of
+ * `href` / `routeSlug` / `pathPrefix` is provided, the priority is
+ * `href` > `routeSlug` > `pathPrefix`. The `pathPrefix` default
+ * is `"/items"` for V0 backwards-compat, but the canonical V1
+ * pattern is to pass `routeSlug` (or `href` directly).
  */
 import type { IndexRecord, Resource, ProjectRecord, IndexProjectRecord } from "@grove-dev/core";
 import Icon from "./Icon.astro";
@@ -26,12 +34,16 @@ type CardRecord = IndexRecord | Resource | ProjectRecord | IndexProjectRecord;
 interface Props {
   /** V1 API — full Resource/IndexProjectRecord. */
   record?: CardRecord;
-  /** V1 API — full detail-page URL. */
+  /** V1 API — full detail-page URL. Wins over `routeSlug` / `pathPrefix`. */
   href?: string;
+  /** V1 API — blueprint route slug (e.g. "projects", "resources",
+   *  "entities"). When `href` is not provided, the detail URL is
+   *  derived as `/${routeSlug}/${slug}`. */
+  routeSlug?: string;
   /** Legacy API — singular item, equivalent to `record`. */
   item?: CardRecord;
   /** Legacy API — URL prefix, equivalent to deriving from
-   *  blueprint routeSlug + slug. */
+   *  blueprint routeSlug + slug. Default `"/items"` (V0 leftover). */
   pathPrefix?: string;
   /** When true, show owner/repo below the title. Default true. */
   showOwner?: boolean;
@@ -47,6 +59,7 @@ interface Props {
 const {
   record: recordProp,
   href: hrefProp,
+  routeSlug,
   item: itemProp,
   pathPrefix = "/items",
   showOwner = true,
@@ -62,7 +75,12 @@ const slug = (item as { slug: string }).slug;
 let detailHref: string;
 if (typeof hrefProp === "string" && hrefProp.length > 0) {
   detailHref = hrefProp;
+} else if (typeof routeSlug === "string" && routeSlug.length > 0) {
+  // V1 alternative API: blueprint routeSlug → /<routeSlug>/<slug>.
+  const base = routeSlug.replace(/^\/+|\/+$/g, "");
+  detailHref = base ? `/${base}/${slug}` : `/${slug}`;
 } else {
+  // V0 legacy fallback: explicit `pathPrefix` (default "/items").
   const base = pathPrefix.replace(/\/$/, "");
   detailHref = `${base}/${slug}`;
 }
@@ -187,6 +205,16 @@ const category = (item as { category?: string }).category;
                 data-event-item={slug}
                 class="relative z-10 font-mono text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
               >
+                {/* `data-event` and `data-event-*` are forwarding hooks
+                    for downstream analytics. Sites wire their own
+                    gtag/PostHog/Plausible handler in BaseLayout.astro
+                    to read these and forward to their analytics
+                    provider. The V1 names are stable: `data-event` is
+                    the action ("external_repo_click"), `data-event-source`
+                    is the surface ("card_owner" | "card_view_repo" |
+                    "detail_owner" | "detail_view_github" | "detail_homepage"
+                    | "detail_distribution"), and `data-event-item` is
+                    the record slug. */}
                 <span class="text-ink-400 dark:text-ink-500">@</span>{owner}{repo ? <span class="text-ink-400 dark:text-ink-500">/{repo}</span> : ""}
               </a>
               <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
