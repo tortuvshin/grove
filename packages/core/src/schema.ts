@@ -635,7 +635,10 @@ export function getOwnerRepoFromUrl(
   if (!repoUrl) return null;
   const m = String(repoUrl).match(/github\.com\/([^/]+)\/([^/?#]+)/);
   if (!m) return null;
-  return { owner: m[1], repo: m[2].replace(/\.git$/, "") };
+  const owner = m[1];
+  const repo = m[2];
+  if (!owner || !repo) return null;
+  return { owner, repo: repo.replace(/\.git$/, "") };
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -659,7 +662,7 @@ export interface IndexBase {
   tags: string[];
   links: Links;
   description: string;
-  content?: string;
+  content?: string | undefined;
   curation: ProjectRecord["curation"];
 }
 
