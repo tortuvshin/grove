@@ -1,0 +1,39 @@
+packages/astro/templates/default/data/generated/records.json
+  s_937fa9bdba46ca::t_1407b25b41e6db 4
+packages/astro/templates/default/package.json
+  s_937fa9bdba46ca::t_65e94fc3472711 28
+packages/astro/src/styles.css
+  s_937fa9bdba46ca::t_b61644f618d406 20,24-35,38-39,42-74,77-79,83-87,166,170,223-224,229,235-236,243-263,273-274,277-282
+packages/astro/src/components/Hero.astro
+  s_937fa9bdba46ca::t_7ab35743601213 117-119
+packages/astro/src/components/Icon.astro
+  s_937fa9bdba46ca::t_7ab35743601213 188-189,196-197
+packages/astro/templates/default/public/llms-full.txt
+  s_937fa9bdba46ca::t_c3a84b29417264 3
+packages/astro/templates/default/public/sitemap.xml
+  s_937fa9bdba46ca::t_c3a84b29417264 5,11,17,23,29,35,41,47,53,59
+packages/astro/templates/default/data/generated/records.index.json
+  s_937fa9bdba46ca::t_1407b25b41e6db 4
+pnpm-lock.yaml
+  s_937fa9bdba46ca::t_1407b25b41e6db 123-124
+packages/astro/templates/default/src/styles/global.css
+  s_937fa9bdba46ca::t_acb8e071d633d0 2,16-26,28-31,50,52-54,56,59
+packages/astro/templates/default/data/generated/records.full.json
+  s_937fa9bdba46ca::t_1407b25b41e6db 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "eed8d41e657c1f70bceb00e75bfe9b0473f664f6",
+  "prompts": {},
+  "sessions": {
+    "s_937fa9bdba46ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ecb97-b52d-7981-b49b-93f2ffbaea08",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
