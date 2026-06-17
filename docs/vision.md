@@ -40,7 +40,7 @@ Grove Core
   - contribution workflow primitives
 
 Grove Space
-  - curated.config.ts
+  - grove.config.ts
   - data/             # resources, taxonomy, health, decisions
   - content/          # methodology, about, guides
   - public/           # logo, OG image, custom assets

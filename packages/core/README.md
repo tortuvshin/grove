@@ -96,7 +96,6 @@ import {
   fetchGithubMetadata,
   enrichFromGithubHtml,
   classifyHealth,
-  healthFromSignals,
   type GithubMetadata,
   type HealthEntry,
   type EnrichedFields,
@@ -144,7 +143,8 @@ The V0 published `@grove-dev/core` exposed several names that the V1 release rep
 | `buildReviewReport` | removed (the cleanup report is a side effect of `pickCleanupCandidates`) |
 | `parseAppYaml` | removed (V0 `apps` model is gone; use `readYamlFile` + Zod parse) |
 | `normalizeAppRecord` / `toIndexApp` | internal to `build-data.ts`; not part of the V1 public surface |
-| `validateProject` / `validateAppRecord` | removed (replaced by `generate` which surfaces validation errors) |
+| `validateAppRecord` | removed (V0 `apps` model is gone) |
+| `validateProject` | kept (V1 name — used by tests and CLI for the structured `ValidationIssue[]` output that `generate`'s throw path does not produce) |
 
 ## Development
 
