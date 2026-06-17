@@ -109,7 +109,7 @@ importers:
         version: 0.2.16
       '@grove-dev/ui':
         specifier: 1.0.6
-        version: link:../ui
+        version: 1.0.6
       astro:
         specifier: ^6.4.6
         version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
@@ -121,10 +121,10 @@ importers:
         version: 0.9.9(prettier@3.8.3)(typescript@6.0.3)
       '@grove-dev/astro':
         specifier: 0.2.16
-        version: link:../..
+        version: 0.2.16(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))
       '@grove-dev/cli':
         specifier: 0.2.16
-        version: link:../../../cli
+        version: 0.2.16(@grove-dev/nextjs@0.2.16(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@grove-dev/svelte@0.2.16(@sveltejs/kit@2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3))(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))
       '@grove-dev/core':
         specifier: 0.2.16
         version: 0.2.16
@@ -154,16 +154,16 @@ importers:
         version: 1.5.1
       '@grove-dev/astro':
         specifier: 0.2.16
-        version: link:../astro
+        version: 0.2.16(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))
       '@grove-dev/core':
         specifier: 0.2.16
         version: 0.2.16
       '@grove-dev/nextjs':
         specifier: 0.2.16
-        version: link:../nextjs
+        version: 0.2.16(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@grove-dev/svelte':
         specifier: 0.2.16
-        version: link:../svelte
+        version: 0.2.16(@sveltejs/kit@2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -194,7 +194,7 @@ importers:
         version: 0.2.16
       '@grove-dev/ui':
         specifier: 1.0.6
-        version: link:../ui
+        version: 1.0.6
       next:
         specifier: '>=14.0.0'
         version: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -227,7 +227,7 @@ importers:
         version: 0.2.16
       '@grove-dev/ui':
         specifier: 1.0.6
-        version: link:../ui
+        version: 1.0.6
       '@sveltejs/kit':
         specifier: '>=2.0.0'
         version: 2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
@@ -691,14 +691,47 @@ packages:
   '@expressive-code/plugin-text-markers@0.43.1':
     resolution: {integrity: sha512-JWf8wdbZSNoGY4TFv3lmt3/NNDaCP7iYL6rRYD05g8YYjKL62hKUHLl5+B47+v0+bqbuMhXDN7qz2wywFUvMkg==}
 
+  '@grove-dev/astro@0.2.16':
+    resolution: {integrity: sha512-xZNzv+CsllsW5ie+cmMhvcmgrpfPQr7r7rIXREGckHv0brGeL6UhpnNH228v8GenYf85hZSd8hAe/PCuqZKe9w==}
+    peerDependencies:
+      astro: ^6.0.0
+
+  '@grove-dev/cli@0.2.16':
+    resolution: {integrity: sha512-f1KdX7tC9AdtktZ7h12J/7SnWJRhdyXfWwfEO4z3WwVBucEcWPcu2J45rvfQmCM9+gyses6bPCj2vp1DysSC1g==}
+    hasBin: true
+    peerDependencies:
+      '@grove-dev/nextjs': 0.2.16
+      '@grove-dev/svelte': 0.2.16
+    peerDependenciesMeta:
+      '@grove-dev/nextjs':
+        optional: true
+      '@grove-dev/svelte':
+        optional: true
+
   '@grove-dev/core@0.2.16':
     resolution: {integrity: sha512-RVqrsUloEknePgu+3M2CD6D9TTJQEKENysuOE6/B1cMad/3kacIepwS3N0QUk1AVqbiBVfdIUYUX45dfImQYEw==}
+
+  '@grove-dev/nextjs@0.2.16':
+    resolution: {integrity: sha512-Jz7CGX92qpywjlJYWijR7VHs5GxyXJe33N07kke3waXSSdrrNB5GyVn9+H/mG17n4bQEww+n1o3ZltdwUHBy3w==}
+    peerDependencies:
+      next: '>=14.0.0'
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   '@grove-dev/starlight@0.1.10':
     resolution: {integrity: sha512-272WuMZWxiQcY5k3+apAx0hzu2LYZwVc/mOabPfg9Q1jBsSfRs9jN+XingX4o526jucZRElI9knSVw1d3GU1zg==}
     peerDependencies:
       '@astrojs/starlight': '>=0.38.3'
       astro: '>=5.0.0'
+
+  '@grove-dev/svelte@0.2.16':
+    resolution: {integrity: sha512-NMsk9ftIrPjS6NZ9hMLsg6Oeqxox2ykXFfUVmqtQNo9s+mWjwUXcarwGcoBrXvXhvnDFtQk+9+2DX7e3fgNzxA==}
+    peerDependencies:
+      '@sveltejs/kit': '>=2.0.0'
+      svelte: '>=4.0.0'
+
+  '@grove-dev/ui@1.0.6':
+    resolution: {integrity: sha512-fkksLt7YWyGBvk7UlVQMfGMu9srD8pJTfzkUADwjKM05r5mHSRCJRqllvMZhMgl4A7P9dA9Z43+H8kM8HXCAIA==}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -3455,11 +3488,38 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.43.1
 
+  '@grove-dev/astro@0.2.16(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))':
+    dependencies:
+      '@grove-dev/core': 0.2.16
+      '@grove-dev/ui': 1.0.6
+      astro: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
+
+  '@grove-dev/cli@0.2.16(@grove-dev/nextjs@0.2.16(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@grove-dev/svelte@0.2.16(@sveltejs/kit@2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3))(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))':
+    dependencies:
+      '@clack/prompts': 1.5.1
+      '@grove-dev/astro': 0.2.16(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))
+      '@grove-dev/core': 0.2.16
+      commander: 15.0.0
+      yaml: 2.9.0
+    optionalDependencies:
+      '@grove-dev/nextjs': 0.2.16(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@grove-dev/svelte': 0.2.16(@sveltejs/kit@2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)
+    transitivePeerDependencies:
+      - astro
+
   '@grove-dev/core@0.2.16':
     dependencies:
       jiti: 2.7.0
       yaml: 2.9.0
       zod: 4.4.3
+
+  '@grove-dev/nextjs@0.2.16(next@16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@grove-dev/core': 0.2.16
+      '@grove-dev/ui': 1.0.6
+      next: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   '@grove-dev/starlight@0.1.10(@astrojs/starlight@0.40.0(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3))(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))':
     dependencies:
@@ -3467,6 +3527,17 @@ snapshots:
       '@pagefind/default-ui': 1.5.2
       astro: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
       marked: 18.0.5
+
+  '@grove-dev/svelte@0.2.16(@sveltejs/kit@2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)':
+    dependencies:
+      '@grove-dev/core': 0.2.16
+      '@grove-dev/ui': 1.0.6
+      '@sveltejs/kit': 2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0))
+      svelte: 5.56.3
+
+  '@grove-dev/ui@1.0.6':
+    dependencies:
+      '@grove-dev/core': 0.2.16
 
   '@img/colour@1.1.0': {}
 

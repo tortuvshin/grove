@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/svelte",
-  "version": "0.2.16",
+  "version": "0.2.18",
   "type": "module",
   "private": true,
   "description": "Roadmap-only SvelteKit adapter package for Grove. No runnable template or component exports ship in V1.",
