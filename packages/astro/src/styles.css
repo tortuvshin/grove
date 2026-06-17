@@ -17,60 +17,73 @@
  */
 
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @source "./**/*.{astro,html,js,jsx,ts,tsx}";
 
 @theme {
-  /* ── Neutral ink scale (V1 default) ───────────────────────────── */
-  --color-ink-50: #fafafa;
-  --color-ink-100: #f4f4f5;
-  --color-ink-200: #e4e4e7;
-  --color-ink-300: #d4d4d8;
-  --color-ink-400: #a1a1aa;
-  --color-ink-500: #71717a;
-  --color-ink-600: #52525b;
-  --color-ink-700: #3f3f46;
-  --color-ink-800: #27272a;
-  --color-ink-900: #18181b;
-  --color-ink-950: #09090b;
+  /* ── Starlight-aligned neutral scale ──────────────────────────── */
+  --color-ink-50: oklch(98.5% 0 0);
+  --color-ink-100: oklch(97% 0 0);
+  --color-ink-200: oklch(92.2% 0 0);
+  --color-ink-300: oklch(87% 0 0);
+  --color-ink-400: oklch(70.8% 0 0);
+  --color-ink-500: oklch(55.6% 0 0);
+  --color-ink-600: oklch(43.9% 0 0);
+  --color-ink-700: oklch(37.1% 0 0);
+  --color-ink-800: oklch(26.9% 0 0);
+  --color-ink-900: oklch(20.5% 0 0);
+  --color-ink-950: oklch(14.5% 0 0);
 
   /* ── Accent (interactive states) ─────────────────────────────── */
-  --color-accent: #1f6feb;
-  --color-accent-muted: #388bfd1a;
+  --color-accent: var(--color-ink-900);
+  --color-accent-muted: oklch(20.5% 0 0 / 0.08);
 
   /* ── Status palettes (badges only) ───────────────────────────── */
-  --color-emerald-50: #ecfdf5;
-  --color-emerald-300: #6ee7b7;
-  --color-emerald-400: #34d399;
-  --color-emerald-700: #047857;
-  --color-emerald-800: #065f46;
-  --color-emerald-950: #022c22;
+  --color-emerald-50: oklch(98.2% 0.018 155.826);
+  --color-emerald-300: oklch(87.1% 0.15 154.449);
+  --color-emerald-400: oklch(79.2% 0.209 151.711);
+  --color-emerald-500: oklch(72.3% 0.219 149.579);
+  --color-emerald-600: oklch(52.7% 0.154 150.069);
+  --color-emerald-700: oklch(52.7% 0.154 150.069);
+  --color-emerald-800: oklch(26.6% 0.065 152.934);
+  --color-emerald-950: oklch(26.6% 0.065 152.934);
 
-  --color-orange-50: #fff7ed;
-  --color-orange-300: #fdba74;
-  --color-orange-400: #fb923c;
-  --color-orange-700: #c2410c;
-  --color-orange-800: #9a3412;
-  --color-orange-950: #431407;
+  --color-orange-50: oklch(98% 0.016 73.684);
+  --color-orange-300: oklch(90.1% 0.076 70.697);
+  --color-orange-400: oklch(83.7% 0.128 66.29);
+  --color-orange-500: oklch(70.5% 0.213 47.604);
+  --color-orange-700: oklch(70.5% 0.213 47.604);
+  --color-orange-800: oklch(55.3% 0.195 38.402);
+  --color-orange-950: oklch(40.8% 0.123 38.172);
 
-  --color-blue-50: #eff6ff;
-  --color-blue-300: #93c5fd;
-  --color-blue-400: #60a5fa;
-  --color-blue-700: #1d4ed8;
-  --color-blue-800: #1e40af;
-  --color-blue-950: #172554;
+  --color-blue-50: oklch(97% 0.014 254.604);
+  --color-blue-300: oklch(82.8% 0.111 230.318);
+  --color-blue-400: oklch(70.7% 0.165 254.624);
+  --color-blue-700: oklch(48.8% 0.243 264.376);
+  --color-blue-800: oklch(29.3% 0.066 243.157);
+  --color-blue-950: oklch(29.3% 0.066 243.157);
 
-  --color-amber-50: #fffbeb;
-  --color-amber-300: #fcd34d;
-  --color-amber-400: #fbbf24;
-  --color-amber-700: #b45309;
-  --color-amber-800: #92400e;
-  --color-amber-950: #451a03;
+  --color-amber-50: oklch(98% 0.016 73.684);
+  --color-amber-300: oklch(90.1% 0.076 70.697);
+  --color-amber-400: oklch(83.7% 0.128 66.29);
+  --color-amber-500: oklch(83.7% 0.128 66.29);
+  --color-amber-600: oklch(70.5% 0.213 47.604);
+  --color-amber-700: oklch(70.5% 0.213 47.604);
+  --color-amber-800: oklch(55.3% 0.195 38.402);
+  --color-amber-900: oklch(40.8% 0.123 38.172);
+  --color-amber-950: oklch(40.8% 0.123 38.172);
 
   /* ── Font stacks ─────────────────────────────────────────────── */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
+
+  /* ── Starlight typography weight/rhythm ──────────────────────── */
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  --leading-relaxed: 1.75;
 
   /* ── Font size extensions (2xs) ──────────────────────────────── */
   --text-2xs: 0.6875rem;
@@ -150,11 +163,11 @@
 
   body {
     margin: 0;
-    background: #ffffff;
+    background: oklch(100% 0 0);
     color: var(--color-ink-900);
     font-family: var(--font-sans);
     font-size: 15px;
-    line-height: 1.55;
+    line-height: 1.75;
   }
 
   .dark body {
@@ -207,24 +220,45 @@
  * ────────────────────────────────────────────────────────────────── */
 .grove-prose {
   max-width: 72ch;
-  color: var(--color-ink-700);
-  font-size: 0.9375rem;
+  color: var(--color-ink-800);
+  font-size: 15px;
   line-height: 1.75;
 }
 
 .dark .grove-prose {
-  color: var(--color-ink-200);
+  color: var(--color-ink-300);
 }
 
 .grove-prose :where(h1, h2, h3, h4) {
   margin: 1.75em 0 0.65em;
   color: var(--color-ink-900);
-  font-weight: 650;
-  line-height: 1.25;
+  font-weight: 500;
+  letter-spacing: -0.025em;
 }
 
 .dark .grove-prose :where(h1, h2, h3, h4) {
   color: var(--color-ink-100);
+}
+
+.grove-prose h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 2.25rem;
+}
+
+.grove-prose h2 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.grove-prose h3 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.grove-prose h4 {
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 
 .grove-prose :where(p, ul, ol, pre, blockquote) {
@@ -236,9 +270,16 @@
 }
 
 .grove-prose a {
-  color: var(--color-accent);
+  color: var(--color-ink-900);
+  font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 0.18em;
+  text-decoration-color: var(--color-ink-500);
+}
+
+.dark .grove-prose a {
+  color: var(--color-ink-50);
+  text-decoration-color: var(--color-ink-400);
 }
 
 .grove-prose :where(code, pre) {
