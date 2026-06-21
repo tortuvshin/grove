@@ -17,7 +17,16 @@
  */
 
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
+/*
+ * Custom `dark` variant — `dark:` utilities must key off the `.dark`
+ * class on <html> (set by the THEME_INIT script in BaseLayout.astro),
+ * NOT off `prefers-color-scheme`. Tailwind v4.3.0 splits the selector
+ * argument on commas — including commas inside `:where(...)` — so
+ * `(&:where(.dark, .dark *))` is silently parsed as two separate
+ * (and broken) selectors and the variant never registers. Use two
+ * selectors joined by a space instead.
+ */
+@custom-variant dark (&:where(.dark), &:where(.dark *));
 @source "./**/*.{astro,html,js,jsx,ts,tsx}";
 
 @theme {

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * Grove V1 design tokens. Theme is overridable from `grove.config.ts`
@@ -11,6 +10,15 @@
  * reference it. New pages should prefer the default Tailwind
  * `gray-*` / `slate-*` palettes; the ink scale exists for
  * back-compat with the V1 minimal template.
+ *
+ * NOTE: do NOT add `@custom-variant dark` here. `@grove-dev/astro`'s
+ * `styles.css` already declares the `.dark`-class variant, and
+ * Tailwind v4 only honors one definition per build — adding a
+ * second one in this consumer file has been observed to confuse
+ * the variant resolution and produce utilities that key off
+ * `prefers-color-scheme` instead of the `.dark` class on <html>.
+ * The net effect: `<html class="dark">` is set but the page stays
+ * in light mode because the `dark:` utilities never match.
  */
 @theme {
   --color-ink-50: oklch(98.5% 0 0);
