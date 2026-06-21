@@ -7,7 +7,6 @@
  *   - RefinePanel  (Stack / Platform / Category / License / Sort)
  *   - RecordSection rows (full record cards; the `ItemSection` V0
  *     name was renamed to `RecordSection` in V1)
- *   - ExploreByCategory / ExploreByStack (compact pill lists)
  *
  * Generic: the URL slug (e.g. `/projects/`, `/resources/`,
  * `/entities/`) is derived from the blueprint via `getStaticPaths`,
@@ -28,14 +27,10 @@ import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
 import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
 import Pagination from "@grove-dev/astro/components/Pagination.astro";
-import ExploreByCategory from "@grove-dev/astro/components/ExploreByCategory.astro";
-import ExploreByStack from "@grove-dev/astro/components/ExploreByStack.astro";
 import {
   activeFilterChips,
   applySort,
   buildFacets,
-  countByCategory,
-  countByStack,
   effectivePage,
   effectiveSort,
   filterRecords,
@@ -69,16 +64,6 @@ const chips = activeFilterChips(filters);
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
-
-// Compute the top categories and stacks for the explore pills
-const categoryEntries = [...countByCategory(items as Parameters<typeof countByCategory>[0]).entries()]
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  .slice(0, 12)
-  .map(([name, count]) => ({ name, slug: name, count }));
-const stackEntries = [...countByStack(items as Parameters<typeof countByStack>[0]).entries()]
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  .slice(0, 18)
-  .map(([name, count]) => ({ name, slug: name, count }));
 
 function hrefForPage(target: number): string {
   const next: IndexFilters = { ...filters, page: target };
@@ -206,20 +191,6 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
       </div>
     </div>
   </section>
-
-  {categoryEntries.length > 0 && (
-    <ExploreByCategory
-      categories={categoryEntries}
-      pathPrefix={`/${slug}`}
-    />
-  )}
-
-  {stackEntries.length > 0 && (
-    <ExploreByStack
-      stacks={stackEntries}
-      pathPrefix={`/${slug}`}
-    />
-  )}
 
   <section class="grove-section-tight">
     <div class="grove-container-wide mx-auto px-5 sm:px-7">

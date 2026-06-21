@@ -16,7 +16,15 @@
  *  - Re-exports the generic `lib/` helpers (search, lenses, scores,
  *    repo, format, display, taxonomy-counts) under a single import
  *    path so consumers can `import { ... } from "@grove-dev/astro"`.
+ *
+ * Also auto-loads the consumer's `src/styles/global.css` when it
+ * exists. Without this hook the scaffold's global.css (which the
+ * CLI generates for theme overrides) sits on disk unused, and any
+ * custom theme tokens silently degrade to the package defaults —
+ * which is the classic "I changed the brand color in global.css
+ * and nothing happened" surprise.
  */
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { AstroIntegration } from "astro";
@@ -38,16 +46,27 @@ const srcRoot = resolve(here, "..", "src");
 const componentsDir = resolve(srcRoot, "components");
 const layoutsDir = resolve(srcRoot, "layouts");
 
+// Virtual module id used to inject the consumer's `src/styles/global.css`.
+// Resolved by the inline Vite plugin below to the absolute file path
+// when the file exists, or to an empty module when it doesn't.
+const CONSUMER_GLOBAL_CSS_VIRTUAL_ID = "virtual:grove-consumer-global-css";
+const CONSUMER_GLOBAL_CSS_EMPTY_ID =
+  "\0virtual:grove-consumer-global-css:empty";
+
 export default function groveAstro(): AstroIntegration {
   return {
     name: "@grove-dev/astro",
     hooks: {
-      "astro:config:setup": ({ updateConfig }) => {
+      "astro:config:setup": ({ config, updateConfig, injectScript }) => {
         // Alias the components/layouts source directories so
         // consumer builds can import from
         //   @grove-dev/astro/components/ItemCard.astro
         // without us shipping a glob-shaped `exports` map that
         // Vite/Rollup does not expand reliably.
+        const consumerRoot = fileURLToPath(config.root);
+        const globalCssPath = resolve(consumerRoot, "src/styles/global.css");
+        const globalCssExists = existsSync(globalCssPath);
+
         updateConfig({
           vite: {
             resolve: {
@@ -56,9 +75,41 @@ export default function groveAstro(): AstroIntegration {
                 "@grove-dev/astro/layouts": layoutsDir,
               },
             },
+            plugins: [
+              {
+                name: "grove:consumer-global-css-resolver",
+                resolveId(id) {
+                  if (id === CONSUMER_GLOBAL_CSS_VIRTUAL_ID) {
+                    return globalCssExists
+                      ? globalCssPath
+                      : CONSUMER_GLOBAL_CSS_EMPTY_ID;
+                  }
+                  return null;
+                },
+                load(id) {
+                  if (id === CONSUMER_GLOBAL_CSS_EMPTY_ID) {
+                    return "";
+                  }
+                  return null;
+                },
+              },
+            ],
           },
         });
+
+        // Always inject the virtual module so the build is symmetric
+        // regardless of whether the consumer has a global.css yet.
+        // Vite's CSS pipeline (with @tailwindcss/vite) handles the
+        // resulting import as a stylesheet — no JS bundle weight.
+        injectScript(
+          "page-ssr",
+          `import "${CONSUMER_GLOBAL_CSS_VIRTUAL_ID}";`,
+        );
       },
     },
   };
 }
+
+// Re-export the virtual module id so consumers (and tests) can
+// reason about it without copy-pasting the literal string.
+export const CONSUMER_GLOBAL_CSS_ID = CONSUMER_GLOBAL_CSS_VIRTUAL_ID;
