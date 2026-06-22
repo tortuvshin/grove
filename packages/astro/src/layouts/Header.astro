@@ -73,7 +73,7 @@ const starsLabel =
 
 <header
   class:list={[
-    "sticky top-0 z-50 border-b border-ink-200 bg-white/85 backdrop-blur dark:border-ink-800 dark:bg-ink-950/85",
+    "grove-site-header sticky top-0 z-50 border-b backdrop-blur",
     className,
   ]}
 >
@@ -110,7 +110,7 @@ const starsLabel =
       {submitHref && (
         <a
           href={submitHref}
-          class="hidden h-9 items-center gap-1.5 rounded-md border border-ink-200 bg-white px-3 text-[0.875rem] font-medium text-ink-700 transition-colors hover:border-ink-300 hover:bg-ink-50 sm:inline-flex dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:hover:bg-ink-900/40"
+          class="grove-btn grove-btn-outline hidden sm:inline-flex"
         >
           <svg
             viewBox="0 0 16 16"
@@ -132,7 +132,7 @@ const starsLabel =
           rel="noopener noreferrer"
           aria-label={`${repoLabel} on GitHub — ${stars} stars`}
           title={`${repoLabel} on GitHub`}
-          class="inline-flex h-9 items-center divide-x divide-ink-200 overflow-hidden rounded-md border border-ink-200 text-[0.875rem] font-medium transition-colors hover:border-ink-300 hover:bg-ink-50 dark:divide-ink-800 dark:border-ink-800 dark:hover:border-ink-700 dark:hover:bg-ink-900/40"
+          class="grove-repo-button grove-btn grove-btn-outline overflow-hidden p-0"
         >
           <span class="flex items-center gap-1.5 px-2.5 py-1.5 text-ink-900 dark:text-ink-100">
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
@@ -140,7 +140,7 @@ const starsLabel =
             </svg>
             <span>{repoLabel}</span>
           </span>
-          <span class="flex items-center gap-1 bg-ink-50 px-2 py-1.5 text-ink-700 dark:bg-ink-900/60 dark:text-ink-300">
+          <span class="grove-repo-count flex items-center gap-1 px-2 py-1.5">
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
               <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
             </svg>
