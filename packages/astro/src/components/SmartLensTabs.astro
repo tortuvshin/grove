@@ -55,10 +55,10 @@ const lenses =
       <a
         href={hrefForLens(lens.id, currentParams, pathPrefix)}
         class:list={[
-          "grove-btn rounded-md px-3 py-1.5 text-2xs font-medium transition-colors",
+          "grove-btn px-3 py-1.5 text-2xs font-medium transition-colors",
           active
             ? "grove-btn-primary"
-            : "grove-btn-ghost border border-ink-200 dark:border-ink-800",
+            : "grove-btn-outline",
         ]}
         aria-current={active ? "page" : undefined}
         data-event="lens_tab_click"
