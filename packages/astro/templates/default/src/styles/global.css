@@ -5,11 +5,10 @@
  * at scaffold time; we expose the same names as CSS variables so
  * consumers can layer their own brand colors in without forking.
  *
- * The `ink-*` color scale is preserved from the V0 template because
- * the page-level classes (`text-ink-900`, `bg-ink-50`, ...) still
- * reference it. New pages should prefer the default Tailwind
- * `gray-*` / `slate-*` palettes; the ink scale exists for
- * back-compat with the V1 minimal template.
+ * The package owns the Starlight-aligned palette, semantic theme tokens,
+ * font stacks, and light/dark base styles. This consumer sheet contains
+ * only scaffold-level overrides so those foundations cannot drift when
+ * the package theme changes.
  *
  * NOTE: do NOT add `@custom-variant dark` here. `@grove-dev/astro`'s
  * `styles.css` already declares the `.dark`-class variant, and
@@ -21,22 +20,7 @@
  * in light mode because the `dark:` utilities never match.
  */
 @theme {
-  --color-ink-50: oklch(98.5% 0 0);
-  --color-ink-100: oklch(97% 0 0);
-  --color-ink-200: oklch(92.2% 0 0);
-  --color-ink-300: oklch(87% 0 0);
-  --color-ink-400: oklch(70.8% 0 0);
-  --color-ink-500: oklch(55.6% 0 0);
-  --color-ink-600: oklch(43.9% 0 0);
-  --color-ink-700: oklch(37.1% 0 0);
-  --color-ink-800: oklch(26.9% 0 0);
-  --color-ink-900: oklch(20.5% 0 0);
-  --color-ink-950: oklch(14.5% 0 0);
-
-  --color-grove-primary: oklch(20.5% 0 0);
-  --font-weight-semibold: 500;
-  --font-weight-bold: 600;
-  --leading-relaxed: 1.75;
+  --color-grove-primary: var(--color-foreground);
 }
 
 @layer base {
@@ -45,27 +29,5 @@
     --grove-radius: 0.5rem;
     --grove-container-width: 72rem;
 
-    color-scheme: light dark;
-  }
-
-  html {
-    -webkit-text-size-adjust: 100%;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    background: oklch(100% 0 0);
-    color: var(--color-ink-900);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    font-size: 15px;
-    line-height: 1.75;
-  }
-
-  .dark body {
-    background: var(--color-ink-950);
-    color: var(--color-ink-100);
   }
 }
