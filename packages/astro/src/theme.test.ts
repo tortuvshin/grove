@@ -49,4 +49,12 @@ describe("Astro theme contract", () => {
     expect(scaffoldTheme).not.toContain("font-family:");
     expect(scaffoldTheme).not.toContain("color-scheme:");
   });
+
+  it("keeps chips and buttons aligned with Starlight primitives", () => {
+    expect(astroTheme).toContain("border-radius: 9999px");
+    expect(astroTheme).toContain("min-height: 1.25rem");
+    expect(astroTheme).toContain("font-size: 0.75rem");
+    expect(astroTheme).toContain("height: 2rem");
+    expect(astroTheme).toContain("box-shadow: 0 0 0 3px color-mix");
+  });
 });
