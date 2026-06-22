@@ -622,11 +622,10 @@ program
       p.log.info(`Project: ${projectName} (package: ${packageName}) → ${root}`);
 
       // ── Scaffold (or reuse an existing scaffold) ──────────────────
-      // If the target dir already contains a package.json whose
-      // name matches what we would have written, treat it as a
-      // re-run of `grove run dev` against an already-initialised
-      // project and skip the copy. That makes iterative development
-      // a one-line affair: edit template, run `grove run dev` again.
+      // If the target dir already contains the expected package, this
+      // is a re-run. Refresh template-owned files in place so edits to
+      // the local adapter are visible immediately; node_modules and
+      // generated data are excluded by copyTemplate and stay reusable.
       const sentinel = join(root, "package.json");
       let alreadyScaffolded = false;
       try {
@@ -638,8 +637,16 @@ program
       }
       const s = p.spinner();
       if (alreadyScaffolded) {
-        s.start("Reusing existing scaffold");
-        s.stop("Reusing existing scaffold");
+        s.start("Refreshing scaffold from local template");
+        await copyTemplate(framework, root, tpl.template, { force: true });
+        await renameProjectInTemplate(
+          framework,
+          root,
+          projectName,
+          tpl.template,
+          { mode: "file" },
+        );
+        s.stop("Refreshed scaffold (local package deps)");
       } else {
         s.start("Scaffolding");
         await mkdir(root, { recursive: true });
