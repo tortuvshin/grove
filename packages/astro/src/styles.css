@@ -43,9 +43,32 @@
   --color-ink-900: oklch(20.5% 0 0);
   --color-ink-950: oklch(14.5% 0 0);
 
+  /* ── Semantic colors ────────────────────────────────────────────
+   * These point at runtime variables instead of fixed palette steps so
+   * Tailwind utilities such as `bg-background` and `text-foreground`
+   * follow the resolved theme without requiring a `dark:` twin. The
+   * values below mirror packages/starlight/styles/{theme,base}.css.
+   */
+  --color-background: var(--grove-background);
+  --color-foreground: var(--grove-foreground);
+  --color-primary: var(--grove-primary);
+  --color-primary-foreground: var(--grove-primary-foreground);
+  --color-secondary: var(--grove-secondary);
+  --color-secondary-foreground: var(--grove-secondary-foreground);
+  --color-muted: var(--grove-muted);
+  --color-muted-foreground: var(--grove-muted-foreground);
+  --color-accent: var(--grove-accent);
+  --color-accent-foreground: var(--grove-accent-foreground);
+  --color-border: var(--grove-border);
+  --color-input: var(--grove-input);
+  --color-ring: var(--grove-ring);
+  --color-card: var(--grove-card);
+  --color-card-foreground: var(--grove-card-foreground);
+  --color-popover: var(--grove-popover);
+  --color-popover-foreground: var(--grove-popover-foreground);
+
   /* ── Accent (interactive states) ─────────────────────────────── */
-  --color-accent: var(--color-ink-900);
-  --color-accent-muted: oklch(20.5% 0 0 / 0.08);
+  --color-accent-muted: color-mix(in oklab, var(--grove-foreground) 8%, transparent);
 
   /* ── Status palettes (badges only) ───────────────────────────── */
   --color-emerald-50: oklch(98.2% 0.018 155.826);
@@ -161,7 +184,61 @@
 
 @layer base {
   :root {
-    color-scheme: light dark;
+    color-scheme: light;
+
+    /* Starlight light theme, expressed as Grove's public semantic API. */
+    --grove-background: oklch(100% 0 0);
+    --grove-foreground: var(--color-ink-950);
+    --grove-gray-1: var(--color-ink-900);
+    --grove-gray-2: var(--color-ink-800);
+    --grove-gray-3: var(--color-ink-700);
+    --grove-gray-4: var(--color-ink-500);
+    --grove-gray-5: var(--color-ink-400);
+    --grove-gray-6: var(--color-ink-300);
+    --grove-gray-7: var(--color-ink-100);
+    --grove-primary: var(--grove-foreground);
+    --grove-primary-foreground: var(--grove-gray-7);
+    --grove-secondary: var(--grove-gray-7);
+    --grove-secondary-foreground: var(--grove-foreground);
+    --grove-muted: var(--grove-gray-7);
+    --grove-muted-foreground: var(--grove-gray-4);
+    --grove-accent: var(--grove-gray-7);
+    --grove-accent-foreground: var(--grove-foreground);
+    --grove-border: var(--grove-gray-6);
+    --grove-input: var(--grove-gray-6);
+    --grove-ring: var(--grove-gray-4);
+    --grove-card: var(--grove-background);
+    --grove-card-foreground: var(--grove-foreground);
+    --grove-popover: var(--grove-background);
+    --grove-popover-foreground: var(--grove-foreground);
+  }
+
+  :root.dark {
+    color-scheme: dark;
+    --grove-background: var(--color-ink-950);
+    --grove-foreground: var(--color-ink-50);
+    --grove-gray-1: var(--color-ink-50);
+    --grove-gray-2: var(--color-ink-300);
+    --grove-gray-3: var(--color-ink-400);
+    --grove-gray-4: var(--color-ink-500);
+    --grove-gray-5: var(--color-ink-700);
+    --grove-gray-6: var(--color-ink-800);
+    --grove-gray-7: var(--color-ink-900);
+    --grove-primary: var(--grove-foreground);
+    --grove-primary-foreground: var(--grove-gray-7);
+    --grove-secondary: var(--grove-gray-6);
+    --grove-secondary-foreground: var(--grove-foreground);
+    --grove-muted: var(--grove-gray-6);
+    --grove-muted-foreground: var(--grove-gray-3);
+    --grove-accent: var(--grove-gray-5);
+    --grove-accent-foreground: var(--grove-foreground);
+    --grove-border: var(--grove-gray-6);
+    --grove-input: var(--grove-gray-5);
+    --grove-ring: var(--grove-gray-4);
+    --grove-card: var(--grove-background);
+    --grove-card-foreground: var(--grove-foreground);
+    --grove-popover: var(--grove-gray-7);
+    --grove-popover-foreground: var(--grove-foreground);
   }
 
   html {
@@ -172,16 +249,11 @@
 
   body {
     margin: 0;
-    background: oklch(100% 0 0);
-    color: var(--color-ink-900);
+    background: var(--grove-background);
+    color: var(--grove-foreground);
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.75;
-  }
-
-  .dark body {
-    background: var(--color-ink-950);
-    color: var(--color-ink-100);
   }
 
   a {
@@ -191,29 +263,22 @@
 
   /* Subtle selection */
   ::selection {
-    background: var(--color-ink-200);
-    color: var(--color-ink-900);
-  }
-  .dark ::selection {
-    background: var(--color-ink-800);
-    color: var(--color-ink-100);
+    background: var(--grove-muted);
+    color: var(--grove-foreground);
   }
 
   /* Slim, neutral scrollbar */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-ink-300) transparent;
+    scrollbar-color: var(--grove-border) transparent;
   }
   *::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
   *::-webkit-scrollbar-thumb {
-    background: var(--color-ink-200);
+    background: var(--grove-border);
     border-radius: 4px;
-  }
-  .dark *::-webkit-scrollbar-thumb {
-    background: var(--color-ink-800);
   }
 
   input,
