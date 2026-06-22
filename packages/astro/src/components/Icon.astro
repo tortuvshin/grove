@@ -135,7 +135,10 @@ const a11y: Record<string, string> = title
 {
   showFallback ? (
     <span
-      class:list={["grove-icon grove-icon-fallback", className]}
+      class:list={[
+        "inline-flex shrink-0 select-none items-center justify-center rounded-sm bg-ink-100 align-middle font-semibold uppercase leading-none text-ink-700 dark:bg-ink-800 dark:text-ink-200",
+        className,
+      ]}
       style={`width:${size}px;height:${size}px;font-size:${Math.max(10, size - 6)}px;`}
       {...a11y}
     >
@@ -151,7 +154,7 @@ const a11y: Record<string, string> = title
       width={size}
       height={size}
       alt=""
-      class:list={["grove-icon grove-icon-themed", className]}
+      class:list={["inline-block shrink-0 align-middle", className]}
       {...a11y}
     />
   ) : (
@@ -160,43 +163,13 @@ const a11y: Record<string, string> = title
       width={size}
       height={size}
       alt=""
-      class:list={["grove-icon", className]}
+      class:list={["inline-block shrink-0 align-middle", className]}
       loading="lazy"
       decoding="async"
       {...a11y}
     />
   )
 }
-
-<style>
-  .grove-icon {
-    display: inline-block;
-    vertical-align: middle;
-    flex-shrink: 0;
-  }
-  .grove-icon-themed {
-    /* Theme-aware: dark/light variants selected by the inline script
-       below based on `data-resolved-theme` set by BaseLayout's
-       THEME_INIT. Default to the light variant so the markup looks
-       correct even before the script runs. */
-  }
-  .grove-icon-fallback {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.25rem;
-    background: var(--color-ink-100, oklch(97% 0 0));
-    color: var(--color-ink-700, oklch(37.1% 0 0));
-    font-weight: 600;
-    line-height: 1;
-    text-transform: uppercase;
-    user-select: none;
-  }
-  :global(.dark) .grove-icon-fallback {
-    background: var(--color-ink-800, oklch(26.9% 0 0));
-    color: var(--color-ink-200, oklch(92.2% 0 0));
-  }
-</style>
 
 {mode === "auto" && (
   <script is:inline>

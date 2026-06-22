@@ -24,7 +24,7 @@ const { class: className = "" } = Astro.props;
   data-theme-toggle
   aria-label="Toggle theme"
   title="Toggle theme"
-  class={`grove-btn grove-btn-outline relative h-8 w-8 p-0 ${className}`}
+  class={`inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent relative h-8 w-8 p-0 ${className}`}
 >
   {/* Sun — shown in dark mode (click to go light) */}
   <svg

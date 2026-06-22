@@ -69,7 +69,7 @@ const cleanup = project?.health?.cleanupCandidate;
   </td>
   <td class="px-3 py-2 text-2xs">
     {cleanup ? (
-      <span class="grove-badge grove-badge-stale">cleanup</span>
+      <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-amber-50 !text-amber-800 dark:!bg-amber-950/80 dark:!text-amber-300">cleanup</span>
     ) : (
       <span class="text-ink-400">—</span>
     )}

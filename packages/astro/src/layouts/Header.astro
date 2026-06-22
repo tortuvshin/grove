@@ -73,12 +73,12 @@ const starsLabel =
 
 <header
   class:list={[
-    "grove-site-header sticky top-0 z-50 border-b backdrop-blur",
+    "border-border bg-background/85 sticky top-0 z-50 border-b backdrop-blur",
     className,
   ]}
 >
   <div
-    class="grove-container-wide mx-auto flex max-w-wide items-center gap-6 px-5 py-3 sm:px-7"
+    class="mx-auto flex w-full max-w-wide items-center gap-6 px-5 py-3 sm:px-7"
   >
     <a
       href="/"
@@ -110,7 +110,7 @@ const starsLabel =
       {submitHref && (
         <a
           href={submitHref}
-          class="grove-btn grove-btn-outline hidden sm:inline-flex"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent hidden sm:inline-flex"
         >
           <svg
             viewBox="0 0 16 16"
@@ -132,7 +132,7 @@ const starsLabel =
           rel="noopener noreferrer"
           aria-label={`${repoLabel} on GitHub — ${stars} stars`}
           title={`${repoLabel} on GitHub`}
-          class="grove-repo-button grove-btn grove-btn-outline overflow-hidden p-0"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-[var(--radius)] border border-border bg-secondary p-0 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
         >
           <span class="flex items-center gap-1.5 px-2.5 py-1.5 text-ink-900 dark:text-ink-100">
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
@@ -140,7 +140,7 @@ const starsLabel =
             </svg>
             <span>{repoLabel}</span>
           </span>
-          <span class="grove-repo-count flex items-center gap-1 px-2 py-1.5">
+          <span class="flex items-center gap-1 border-s border-border bg-secondary px-2 py-1.5 text-secondary-foreground">
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
               <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
             </svg>

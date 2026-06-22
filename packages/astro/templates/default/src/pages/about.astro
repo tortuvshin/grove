@@ -13,7 +13,7 @@
  *   - New: "A growing community knowledge site. A curated, health-
  *          aware developer directory…"
  *
- * The card utility classes (`grove-card`, `grove-btn-*`) match the
+ * The Tailwind card and button utilities match the
  * rest of the framework, and the data fields it references
  * (`siteConfig.tagline`, `siteConfig.repoUrl`) all flow from the
  * site config — no hardcoded brand or copy.
@@ -57,7 +57,7 @@ const item = itemLabel();
         </p>
       </header>
 
-      <section class="grove-card mt-8 p-5 sm:p-6">
+      <section class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors mt-8 p-5 sm:p-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           Why
         </span>
@@ -78,7 +78,7 @@ const item = itemLabel();
         </p>
       </section>
 
-      <section class="grove-card mt-4 p-5 sm:p-6">
+      <section class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors mt-4 p-5 sm:p-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           Why real {item}s
         </span>
@@ -95,7 +95,7 @@ const item = itemLabel();
         </p>
       </section>
 
-      <section class="grove-card mt-4 p-5 sm:p-6">
+      <section class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors mt-4 p-5 sm:p-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           What you get
         </span>
@@ -130,7 +130,7 @@ const item = itemLabel();
         </ul>
       </section>
 
-      <section class="grove-card mt-4 p-5 sm:p-6">
+      <section class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors mt-4 p-5 sm:p-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           Generic by design
         </span>
@@ -145,7 +145,7 @@ const item = itemLabel();
         </p>
       </section>
 
-      <section class="grove-card mt-4 p-5 sm:p-6">
+      <section class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors mt-4 p-5 sm:p-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           Free to fork, free to extend
         </span>
@@ -164,18 +164,18 @@ const item = itemLabel();
       </section>
 
       <section class="mt-8 flex flex-wrap items-center gap-3">
-        <a href={`/${slug}`} class="grove-btn grove-btn-primary">Browse the directory</a>
+        <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">Browse the directory</a>
         {githubUrl && (
           <a
             href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="grove-btn grove-btn-outline"
+            class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent"
           >
             View on GitHub
           </a>
         )}
-        <a href="/submit" class="grove-btn grove-btn-ghost">Submit a {item} →</a>
+        <a href="/submit" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground">Submit a {item} →</a>
       </section>
     </article>
   </Container>

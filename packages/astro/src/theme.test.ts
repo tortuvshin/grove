@@ -7,6 +7,11 @@ const scaffoldTheme = readFileSync(
   resolve(import.meta.dirname, "../templates/default/src/styles/global.css"),
   "utf8",
 );
+const tailwindMarkup = [
+  "components/ItemCard.astro",
+  "layouts/Header.astro",
+  "../templates/default/src/pages/submit.astro",
+].map((file) => readFileSync(resolve(import.meta.dirname, file), "utf8")).join("\n");
 
 describe("Astro theme contract", () => {
   it("keeps Starlight's light and dark foundation values", () => {
@@ -50,11 +55,13 @@ describe("Astro theme contract", () => {
     expect(scaffoldTheme).not.toContain("color-scheme:");
   });
 
-  it("keeps chips and buttons aligned with Starlight primitives", () => {
-    expect(astroTheme).toContain("border-radius: 9999px");
-    expect(astroTheme).toContain("min-height: 1.25rem");
-    expect(astroTheme).toContain("font-size: 0.75rem");
-    expect(astroTheme).toContain("height: 2rem");
-    expect(astroTheme).toContain("box-shadow: 0 0 0 3px color-mix");
+  it("styles components in HTML with Starlight-aligned Tailwind utilities", () => {
+    expect(tailwindMarkup).toContain("rounded-[calc(var(--radius)+0.25rem)]");
+    expect(tailwindMarkup).toContain("rounded-full");
+    expect(tailwindMarkup).toContain("min-h-5");
+    expect(tailwindMarkup).toContain("h-8");
+    expect(tailwindMarkup).toContain("focus-visible:ring-3");
+    expect(astroTheme).not.toContain(".grove-card");
+    expect(astroTheme).not.toContain(".grove-btn");
   });
 });

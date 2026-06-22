@@ -214,7 +214,7 @@ const trustStats: { value: string; label: string }[] = [
         </label>
         <a
           href={searchHref}
-          class="grove-btn grove-btn-outline h-10"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent h-10"
           aria-label={`Browse all ${itemsLabel} with filters`}
         >
           <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="currentColor">
@@ -224,7 +224,7 @@ const trustStats: { value: string; label: string }[] = [
         </a>
         <button
           type="submit"
-          class="grove-btn grove-btn-primary h-10 px-4 sm:px-5"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 sm:px-5"
         >
           Search
         </button>
@@ -256,12 +256,12 @@ const trustStats: { value: string; label: string }[] = [
             <a
               href={cta.href}
               class:list={[
-                "grove-btn",
+                "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35",
                 cta.variant === "primary"
-                  ? "grove-btn-primary"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : cta.variant === "ghost"
-                    ? "grove-btn-ghost"
-                    : "grove-btn-outline",
+                    ? "bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
+                    : "border-border bg-secondary text-foreground hover:bg-accent",
               ]}
               {...(cta.external
                 ? { target: "_blank", rel: "noopener noreferrer" }
@@ -278,14 +278,14 @@ const trustStats: { value: string; label: string }[] = [
       {/* Help debug the type system when callers forget to pass ctas. */}
       {ctas.length === 0 && githubUrl && (
         <div class="mt-5 flex flex-wrap items-center gap-2">
-          <a href={searchHref} class="grove-btn grove-btn-primary">
+          <a href={searchHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">
             Browse {itemsLabel}
           </a>
           <a
             href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
             target="_blank"
             rel="noopener noreferrer"
-            class="grove-btn grove-btn-outline"
+            class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent"
           >
             Submit via GitHub
           </a>

@@ -60,7 +60,7 @@ const pleaseAvoid = [
           ["2", "Edit the draft", "Fix the category, stack, platforms, and notes."],
           ["3", "Open a pull request", "Reviewers will validate and merge the record."],
         ].map(([number, heading, copy]) => (
-          <li class="card flex items-start gap-2 p-3">
+          <li class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex items-start gap-2 p-3">
             <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-ink-300 font-mono font-semibold text-ink-700 dark:border-ink-700 dark:text-ink-300">{number}</span>
             <div>
               <div class="font-medium text-ink-900 dark:text-ink-100">{heading}</div>
@@ -71,43 +71,43 @@ const pleaseAvoid = [
       </ol>
 
       <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.8fr)]">
-        <form id="submit-form" class="card p-5">
+        <form id="submit-form" class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors p-5">
           <div class="grid gap-5">
             <label class="grid gap-1.5">
-              <span class="label">GitHub URL</span>
+              <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">GitHub URL</span>
               <div class="flex flex-col gap-2 sm:flex-row">
-                <input id="repo-url" type="url" required placeholder="https://github.com/owner/repo" class="field flex-1" />
-                <button id="fetch-repo" type="button" class="btn-primary min-h-10 justify-center">Generate draft</button>
+                <input id="repo-url" type="url" required placeholder="https://github.com/owner/repo" class="min-h-10 flex-1 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
+                <button id="fetch-repo" type="button" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius)] border border-transparent bg-primary px-3 text-sm font-medium leading-none text-primary-foreground no-underline outline-none transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 min-h-10 justify-center">Generate draft</button>
               </div>
-              <span class="help">The repository must be public. We never write to it.</span>
+              <span class="text-2xs text-muted-foreground">The repository must be public. We never write to it.</span>
             </label>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label class="grid gap-1.5"><span class="label">Name</span><input id="item-name" type="text" class="field" /></label>
-              <label class="grid gap-1.5"><span class="label">Slug</span><input id="item-slug" type="text" class="field font-mono" /><span class="help">URL fragment, auto-filled from the repository name.</span></label>
+              <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Name</span><input id="item-name" type="text" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
+              <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Slug</span><input id="item-slug" type="text" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 font-mono text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /><span class="text-2xs text-muted-foreground">URL fragment, auto-filled from the repository name.</span></label>
             </div>
 
             <label class="grid gap-1.5">
-              <span class="label">Description</span>
-              <textarea id="item-description" rows="3" class="field resize-y"></textarea>
-              <span class="help">One or two sentences in plain language.</span>
+              <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Description</span>
+              <textarea id="item-description" rows="3" class="min-h-10 resize-y rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"></textarea>
+              <span class="text-2xs text-muted-foreground">One or two sentences in plain language.</span>
             </label>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label class="grid gap-1.5">
-                <span class="label">Category</span>
-                <input id="item-category" list="category-options" class="field" />
+                <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Category</span>
+                <input id="item-category" list="category-options" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
                 <datalist id="category-options">{categories.map((value) => <option value={value} />)}</datalist>
               </label>
               <label class="grid gap-1.5">
-                <span class="label">Primary stack</span>
-                <input id="primary-stack" list="stack-options" class="field" />
+                <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Primary stack</span>
+                <input id="primary-stack" list="stack-options" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
                 <datalist id="stack-options">{stacks.map((value) => <option value={value} />)}</datalist>
               </label>
             </div>
 
             <fieldset class="grid gap-2">
-              <legend class="label">Platforms</legend>
+              <legend class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Platforms</legend>
               <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {platformOptions.map((platform) => (
                   <label class="flex min-h-9 items-center gap-2 rounded-md border border-ink-200 px-2 text-sm dark:border-ink-800">
@@ -118,14 +118,14 @@ const pleaseAvoid = [
               </div>
             </fieldset>
 
-            <label class="grid gap-1.5"><span class="label">Tags</span><input id="item-tags" type="text" placeholder="self-hosted, developer-tools, offline-first" class="field" /></label>
-            <label class="grid gap-1.5"><span class="label">Website</span><input id="item-website" type="url" placeholder="https://example.com" class="field" /></label>
-            <label class="grid gap-1.5"><span class="label">Best for</span><textarea id="best-for" rows="3" class="field resize-y" placeholder="One use case per line"></textarea></label>
+            <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Tags</span><input id="item-tags" type="text" placeholder="self-hosted, developer-tools, offline-first" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
+            <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Website</span><input id="item-website" type="url" placeholder="https://example.com" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
+            <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Best for</span><textarea id="best-for" rows="3" class="min-h-10 resize-y rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" placeholder="One use case per line"></textarea></label>
           </div>
         </form>
 
         <aside class="flex flex-col gap-4">
-          <div class="card p-5">
+          <div class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors p-5">
             <h2 class="m-0 text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">Submission criteria</h2>
             <p class="m-0 mt-1 text-2xs text-ink-500 dark:text-ink-400">Use this checklist before opening the draft.</p>
             <div class="mt-4 grid grid-cols-1 gap-4 text-2xs sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -140,12 +140,12 @@ const pleaseAvoid = [
             </div>
           </div>
 
-          <div class="card flex min-h-[420px] flex-col p-5">
+          <div class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex min-h-[420px] flex-col p-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <h2 class="m-0 text-base font-semibold text-ink-900 dark:text-ink-100">YAML draft</h2>
               <div class="flex items-center gap-2">
-                <button id="copy-yaml" type="button" class="btn-outline pointer-events-none opacity-50" disabled>Copy YAML</button>
-                <a id="open-pr-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-outline pointer-events-none opacity-50">Open PR draft</a>
+                <button id="copy-yaml" type="button" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius)] border border-border bg-secondary px-3 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 pointer-events-none opacity-50" disabled>Copy YAML</button>
+                <a id="open-pr-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius)] border border-border bg-secondary px-3 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 pointer-events-none opacity-50">Open PR draft</a>
               </div>
             </div>
             <pre class="mt-4 min-h-0 flex-1 overflow-auto rounded-md border border-ink-200 bg-ink-50 p-3 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"><code id="yaml-preview">Paste a GitHub URL to generate a draft.</code></pre>
@@ -155,14 +155,6 @@ const pleaseAvoid = [
       </div>
     </section>
   </Container>
-
-  <style>
-    .field { min-height: 2.5rem; border-radius: .375rem; border: 1px solid var(--color-ink-200); background: white; padding: .5rem .75rem; color: var(--color-ink-900); font-size: .875rem; outline: none; }
-    .field:focus { border-color: var(--color-ink-500); }
-    :global(.dark) .field { border-color: var(--color-ink-800); background: var(--color-ink-950); color: var(--color-ink-100); }
-    .label { font-size: var(--text-2xs); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; color: var(--color-ink-500); }
-    .help { font-size: var(--text-2xs); color: var(--color-ink-500); }
-  </style>
 
   <script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl }}>
     // @ts-nocheck

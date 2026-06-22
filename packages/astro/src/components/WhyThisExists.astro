@@ -56,10 +56,10 @@ const items = points && points.length > 0 ? points : defaultPoints;
 
 <section
   id="about"
-  class:list={["grove-section scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
+  class:list={["py-12 sm:py-16 scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
   aria-labelledby="grove-why-heading"
 >
-  <div class="grove-container mx-auto px-5 sm:px-7">
+  <div class="mx-auto w-full max-w-container px-5 sm:px-7">
     <header class="flex flex-col gap-2">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
         {eyebrow}
@@ -82,7 +82,7 @@ const items = points && points.length > 0 ? points : defaultPoints;
       aria-label="Why this directory"
     >
       {items.map((p) => (
-        <li class="grove-card p-4">
+        <li class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors p-4">
           <div
             aria-hidden="true"
             class="mb-3 flex h-8 w-8 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-700 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300"
