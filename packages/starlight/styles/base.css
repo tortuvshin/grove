@@ -330,6 +330,11 @@
     /* built-in Starlight Cards and LinkCards */
     .sl-markdown-content .card-grid {
         gap: 1rem;
+        grid-auto-rows: 1fr;
+    }
+
+    .sl-markdown-content .card-grid > * {
+        height: 100%;
     }
 
     .sl-markdown-content :is(.card, .sl-link-card) {
@@ -339,6 +344,7 @@
         background-color: var(--code-background);
         box-shadow: none;
         transition: background-color 0.15s;
+        height: 100%;
     }
 
     .sl-markdown-content :is(.card, .sl-link-card):hover {

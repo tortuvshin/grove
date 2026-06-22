@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/cli",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "type": "module",
   "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
   "license": "MIT",
