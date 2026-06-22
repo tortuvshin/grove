@@ -1,0 +1,19 @@
+packages/astro/templates/default/public/icons/stacks/rag.svg
+  s_12f951b6d2f638::t_a54cc4cd4d53a2 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "41b53726ef02acbe06aac322f8d52bfce6b05d89",
+  "prompts": {},
+  "sessions": {
+    "s_12f951b6d2f638": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eefc3-3858-7ff2-ad85-faa1e19c941d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
