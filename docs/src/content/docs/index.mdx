@@ -20,24 +20,24 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-import { ContainerSection } from '@grove-dev/starlight/components';
+import { CardGrid } from '@astrojs/starlight/components';
+import { Card, ContainerSection } from '@grove-dev/starlight/components';
 
 <ContainerSection>
 
 ## What you can build
 
 <CardGrid>
-  <Card title="Open-source app directories" icon="open-book">
+  <Card title="Open-source app directories" icon="open-book" href="/adapters/astro/">
     Curate production-ready OSS apps with health, taxonomy, and a contributor workflow.
   </Card>
-  <Card title="AI tools directories" icon="starlight">
+  <Card title="AI tools directories" icon="starlight" href="/reference/cli/">
     Track tools, models, and resources with structured records and built-in `llms.txt` output.
   </Card>
-  <Card title="Local ecosystem maps" icon="setting">
+  <Card title="Local ecosystem maps" icon="setting" href="/concepts/philosophy/">
     Map your city, industry, or community with structured profiles and decision logs.
   </Card>
-  <Card title="Internal knowledge hubs" icon="puzzle">
+  <Card title="Internal knowledge hubs" icon="puzzle" href="/concepts/blueprints/">
     Replace ad-hoc spreadsheets with versioned, reviewable, contributor-friendly data.
   </Card>
 </CardGrid>
