@@ -45,58 +45,18 @@ import { ContainerSection } from '@grove-dev/starlight/components';
 ## Start here
 
 <CardGrid>
-  <Card title="What is Grove?" href="/getting-started/what-is-grove/">
+  <Card title="What is Grove?" icon="information" href="/getting-started/what-is-grove/">
     60-second pitch and the "why not just an awesome list?" answer.
   </Card>
-  <Card title="Create a space" href="/getting-started/create-a-space/">
+  <Card title="Create a space" icon="rocket" href="/getting-started/create-a-space/">
     Scaffold your first Grove space with the CLI in under 10 minutes.
   </Card>
-  <Card title="Add your first record" href="/getting-started/add-your-first-record/">
+  <Card title="Add your first record" icon="add-document" href="/getting-started/add-your-first-record/">
     Write a YAML record, validate it, and see it render in your site.
   </Card>
-  <Card title="Browse the CLI reference" href="/reference/cli/">
+  <Card title="Browse the CLI reference" icon="list-format" href="/reference/cli/">
     Every command, every option, every output file.
   </Card>
 </CardGrid>
-
-## Current status
-
-Grove is in **active development** (current release: **v0.2.x**).
-
-**End-to-end supported in V1:**
-
-- The `project-directory` blueprint, the `project` record kind, and the Astro adapter (the default template ships a working directory site out of the box, scaffolded in ~25 seconds end-to-end)
-- File-based YAML records under `data/records/`
-- The full CLI: `new`, `import`, `validate`, `generate`, `sitemap`, `llms`, `sync github`, `cleanup stale`, `workflows sync`, `build`, `dev`
-- `llms.txt` and `sitemap.xml` output, wired into the Astro build pipeline
-- GitHub workflows for CI validation, scheduled metadata sync, and stale-record reports
-- All 5 `--deploy` targets (`vercel`, `netlify`, `cloudflare`, `github-pages`, `none`) — each writes a matching provider config + GitHub Actions workflow
-- The `@grove-dev/ui` framework-agnostic primitives — 5 typed modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`) over the V1 `IndexRecord` discriminated union
-- 22 Astro components and 1 layout shipped by the default template; V0-published `ItemCard` API name retained for downstream stability
-- V0 `/apps/<slug>` URL alias preserved as a static 301 redirect to V1 canonical `/<blueprint>/<record-slug>`
-
-**Schema-ready, no template yet:**
-
-- The `resource-hub` blueprint and the `resource` record kind
-- The `ecosystem-map` blueprint and the `entity` record kind
-
-The Zod schemas and CLI support exist for both, but the Astro template does not yet ship polished default pages for these kinds. The data flows through `grove generate` and the URLs (`/resources/<slug>`, `/entities/<slug>`) work; the polished list/detail pages are a V1.1 task.
-
-**Roadmap (not in V1):**
-
-- The **Next.js** adapter — the package is reserved, but the default template is `package.json` only, and `grove new` refuses `--framework nextjs` in V1.
-- The **SvelteKit** adapter — same status as Next.js. `grove new` refuses `--framework svelte` in V1.
-
-## A note on honesty
-
-Grove V1 supports the Astro adapter and the `project-directory` blueprint.
-The Next.js and SvelteKit adapter packages exist to reserve the package
-boundary, but the V1 CLI refuses `--framework nextjs` and `--framework svelte` (scaffolding is `astro` only). The
-`resource-hub` and `ecosystem-map` blueprints describe the schema
-direction, but their default templates and polished workflows are still
-experimental (data flows through `grove generate` correctly; polished list/detail pages land in V1.1).
-
-If you find a doc that says "supported" but the code says otherwise, that's
-a bug — please [open an issue](https://github.com/grove-dev/grove/issues).
 
 </ContainerSection>
