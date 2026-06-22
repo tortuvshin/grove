@@ -318,8 +318,8 @@ importers:
         specifier: ^0.40.0
         version: 0.40.0(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3)
       '@grove-dev/starlight':
-        specifier: 0.1.10
-        version: 0.1.10(@astrojs/starlight@0.40.0(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3))(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))
+        specifier: workspace:*
+        version: link:../packages/starlight
       astro:
         specifier: ^6.4.6
         version: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
@@ -947,12 +947,6 @@ packages:
       next: '>=14.0.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
-
-  '@grove-dev/starlight@0.1.10':
-    resolution: {integrity: sha512-272WuMZWxiQcY5k3+apAx0hzu2LYZwVc/mOabPfg9Q1jBsSfRs9jN+XingX4o526jucZRElI9knSVw1d3GU1zg==}
-    peerDependencies:
-      '@astrojs/starlight': '>=0.38.3'
-      astro: '>=5.0.0'
 
   '@grove-dev/svelte@0.2.16':
     resolution: {integrity: sha512-NMsk9ftIrPjS6NZ9hMLsg6Oeqxox2ykXFfUVmqtQNo9s+mWjwUXcarwGcoBrXvXhvnDFtQk+9+2DX7e3fgNzxA==}
@@ -3756,13 +3750,6 @@ snapshots:
       next: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
-
-  '@grove-dev/starlight@0.1.10(@astrojs/starlight@0.40.0(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3))(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))':
-    dependencies:
-      '@astrojs/starlight': 0.40.0(astro@6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0))(typescript@6.0.3)
-      '@pagefind/default-ui': 1.5.2
-      astro: 6.4.6(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      marked: 18.0.5
 
   '@grove-dev/svelte@0.2.16(@sveltejs/kit@2.63.1(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)(typescript@6.0.3)(vite@7.3.5(@types/node@25.9.2)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)(yaml@2.9.0)))(svelte@5.56.3)':
     dependencies:

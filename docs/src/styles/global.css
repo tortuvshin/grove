@@ -240,11 +240,12 @@ pre {
 	font-family: var(--sl-font-system-mono);
 }
 
-img,
-svg {
-	max-width: 100%;
-	display: block;
-}
+/* `img, svg { display: block }` and `max-width: 100%` are already declared
+ * by Starlight's reset.css and markdown.css inside cascade layers. Re-declaring
+ * them at the top level of this stylesheet gives them higher cascade priority
+ * than `@layer starlight.utils { .light\:sl-hidden { display: none } }`, which
+ * silently breaks the dual dark/light logo swap in the site header. The rule
+ * is intentionally omitted here — see BaseLayout.astro for the same note. */
 
 .g-container {
 	max-width: var(--g-container);

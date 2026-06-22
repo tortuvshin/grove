@@ -200,11 +200,15 @@ const canonical = new URL(Astro.url.pathname, siteUrl).toString();
         font-family: var(--sl-font-system-mono);
     }
 
-    img,
-    svg {
-        max-width: 100%;
-        display: block;
-    }
+    /* `img, svg { display: block }` and `max-width: 100%` are already
+     * declared by Starlight's reset.css and markdown.css (inside
+     * `@layer starlight.reset` / `starlight.components`). Declaring them
+     * globally in this layout puts them outside any cascade layer, which
+     * gives them higher priority than Starlight's `[data-theme="light"]
+     * .light\:sl-hidden { display: none }` utility — and silently breaks
+     * the dual-logo dark/light swap in the site header. Keep the layout
+     * override free of `display` / `max-width` on `img, svg` so the
+     * Starlight utility can win. */
 
     .g-container {
         max-width: var(--g-container);
