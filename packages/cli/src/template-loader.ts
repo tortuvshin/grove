@@ -53,10 +53,10 @@ function templatesRoot(framework: Framework): string {
     // installed as a dep of the consumer's project, as a
     // workspace sibling, or as a global package.
     const here = dirname(fileURLToPath(import.meta.url));
-    packageRoot = resolvePackageRoot(pkg, here);
+    packageRoot = resolveGrovePackage(pkg, here);
   } catch {
     try {
-      packageRoot = resolvePackageRoot(pkg, process.cwd());
+      packageRoot = resolveGrovePackage(pkg, process.cwd());
     } catch {
       throw new Error(
         `Framework package ${pkg} is not installed.\n` +
@@ -108,13 +108,34 @@ function findMonorepoRoot(from: string): string {
 /**
  * Resolve a `@grove-dev/*` package's on-disk path. Two strategies:
  *
- *  1. Standard: walk up from `from` looking for `node_modules/<pkg>`.
- *     Works for any package the CLI has as a dep (e.g. `@grove-dev/astro`).
- *  2. Self: if `pkg` is the CLI's own name, look for `packages/<short>`
- *     inside the monorepo root. Necessary because the CLI is a root
- *     package and is not symlinked under its own `node_modules`.
+ *  1. Workspace: when running inside the Grove monorepo, prefer the
+ *     matching `packages/<short>` source package. This is essential for
+ *     `grove run`: the CLI may depend on an older published adapter, but
+ *     local template work must be scaffolded from the current checkout.
+ *  2. Standard: walk up from `from` looking for `node_modules/<pkg>`.
+ *     This is the normal path for published/global CLI installations.
  */
 function resolveGrovePackage(pkg: string, from: string): string {
+  const shortName = pkg.startsWith("@grove-dev/")
+    ? pkg.slice("@grove-dev/".length)
+    : "";
+  if (shortName) {
+    try {
+      const monorepoRoot = findMonorepoRoot(from);
+      const workspacePath = join(monorepoRoot, "packages", shortName);
+      const manifestPath = join(workspacePath, "package.json");
+      if (existsSync(manifestPath)) {
+        const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+          name?: string;
+        };
+        if (manifest.name === pkg) return workspacePath;
+      }
+    } catch {
+      // Not inside the Grove source workspace (or not a Grove package
+      // checkout). Fall through to normal node_modules resolution.
+    }
+  }
+
   if (pkg === "@grove-dev/cli") {
     const monorepoRoot = findMonorepoRoot(from);
     const cliPath = join(monorepoRoot, "packages", "cli");
@@ -145,7 +166,7 @@ export function templatePath(framework: Framework, name = "default"): string {
  */
 export function frameworkVersion(framework: Framework): string {
   const here = dirname(fileURLToPath(import.meta.url));
-  const root = resolvePackageRoot(`@grove-dev/${framework}`, here);
+  const root = resolveGrovePackage(`@grove-dev/${framework}`, here);
   const pkgPath = join(root, "package.json");
   const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { version?: string };
   if (!pkg.version) {
@@ -327,13 +348,10 @@ function rewriteWorkspaceDepsToVersion(
  * scaffolded project installable from this workspace without going
  * through the npm registry or `pnpm-workspace.yaml` membership.
  *
- * We resolve each package by walking the `@grove-dev/cli`'s
- * `node_modules` ancestry, exactly the way `templatesRoot` does —
- * the CLI's own dep tree already mirrors the local monorepo because
- * pnpm creates a symlink at `node_modules/@grove-dev/<pkg>` → real
- * path, so a single `resolvePackageRoot(name, cliLocation)` returns
- * the on-disk path. A direct link avoids repacking the local package
- * dependency graph for every smoke-test scaffold.
+ * We resolve each package from the Grove workspace first, falling back
+ * to the CLI's `node_modules` ancestry outside a source checkout. A
+ * direct link avoids repacking the local package dependency graph for
+ * every smoke-test scaffold.
  */
 function rewriteWorkspaceDepsToFile(pkg: {
   dependencies?: Record<string, string>;

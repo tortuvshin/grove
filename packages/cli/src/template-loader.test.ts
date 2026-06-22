@@ -18,6 +18,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtemp, mkdir, writeFile, readFile, rm, readdir, stat } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -233,6 +234,11 @@ describe("renameProjectInTemplate — published vs file mode", () => {
     for (const line of r.rewrittenDeps) {
       expect(line).toMatch(/@grove-dev\/.*->\s*link:/);
     }
+    const pkg = JSON.parse(await readFile(join(cwd, "package.json"), "utf8")) as {
+      dependencies: Record<string, string>;
+    };
+    expect(realpathSync(pkg.dependencies["@grove-dev/astro"]!.slice("link:".length)))
+      .toBe(realpathSync(resolve("packages/astro")));
   });
 
   it("leaves the package.json `name` field rewritten to the slug form", async () => {
