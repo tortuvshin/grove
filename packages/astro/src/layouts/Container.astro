@@ -7,12 +7,12 @@ interface Props {
 const { size = "default", class: className = "" } = Astro.props;
 const sizeClass =
   size === "wide"
-    ? "grove-container-wide max-w-wide"
+    ? "mx-auto w-full max-w-wide"
     : size === "narrow"
-      ? "grove-container-narrow max-w-narrow"
-      : "grove-container max-w-container";
+      ? "mx-auto w-full max-w-narrow"
+      : "mx-auto w-full max-w-container";
 ---
 
-<div class={`${sizeClass} mx-auto px-5 sm:px-7 ${className}`}>
+<div class={`${sizeClass} px-5 sm:px-7 ${className}`}>
   <slot />
 </div>

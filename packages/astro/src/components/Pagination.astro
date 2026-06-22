@@ -23,7 +23,7 @@ function pageList(active: number, count: number): Array<number | "ellipsis"> {
 
 const pages = pageList(current, total);
 const linkClass =
-  "grove-btn grove-btn-outline min-w-9 px-2 py-1.5 text-2xs";
+  "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent min-w-9 px-2 py-1.5 text-2xs";
 ---
 
 {total > 1 && (
@@ -45,7 +45,7 @@ const linkClass =
           href={hrefFor(page)}
           class:list={[
             linkClass,
-            page === current && "grove-btn-primary",
+            page === current && "bg-primary text-primary-foreground hover:bg-primary/90",
           ]}
           aria-current={page === current ? "page" : undefined}
         >

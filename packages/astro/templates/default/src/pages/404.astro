@@ -21,8 +21,8 @@ const description = `That page doesn't exist on ${siteConfig.name}.`;
   site={siteConfig}
   noindex
 >
-  <section class="grove-section">
-    <div class="grove-container mx-auto px-5 py-20 sm:px-7 sm:py-28">
+  <section class="py-12 sm:py-16">
+    <div class="mx-auto w-full max-w-container px-5 py-20 sm:px-7 sm:py-28">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
         404
       </span>
@@ -50,14 +50,14 @@ const description = `That page doesn't exist on ${siteConfig.name}.`;
             class="w-full rounded-md border border-ink-200 bg-white py-2.5 px-3 text-sm placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
           />
         </label>
-        <button type="submit" class="grove-btn grove-btn-primary">
+        <button type="submit" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">
           Search
         </button>
       </form>
 
       <div class="mt-6 flex flex-wrap gap-3">
-        <a href="/" class="grove-btn grove-btn-primary">Back to home</a>
-        <a href={`/${slug}`} class="grove-btn grove-btn-outline">Browse {slug}</a>
+        <a href="/" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">Back to home</a>
+        <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent">Browse {slug}</a>
       </div>
     </div>
   </section>

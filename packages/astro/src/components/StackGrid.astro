@@ -64,10 +64,10 @@ function statusLabel(s: StackEntry["status"]): string | null {
 
 <section
   id="stacks"
-  class:list={["grove-section scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
+  class:list={["py-12 sm:py-16 scroll-mt-20 border-b border-ink-200 dark:border-ink-800", className]}
   aria-labelledby={bare ? undefined : "grove-stackgrid-heading"}
 >
-  <div class="grove-container mx-auto px-5 sm:px-7">
+  <div class="mx-auto w-full max-w-container px-5 sm:px-7">
     {!bare && (
       <header class="mb-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
@@ -89,7 +89,7 @@ function statusLabel(s: StackEntry["status"]): string | null {
       {stacks.map((s) => (
         <a
           href={buildHref(s.slug)}
-          class="card card-hover group flex h-full items-center gap-3 p-3.5 no-underline"
+          class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group flex h-full items-center gap-3 p-3.5 no-underline"
           data-event="stack_grid_click"
           data-event-source="stack_grid"
         >
@@ -115,10 +115,10 @@ function statusLabel(s: StackEntry["status"]): string | null {
               class:list={[
                 "shrink-0 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider",
                 s.status === "live"
-                  ? "grove-badge-new"
+                  ? "!bg-emerald-50 !text-emerald-700 dark:!bg-emerald-950/80 dark:!text-emerald-300"
                   : s.status === "expanding"
-                    ? "grove-badge-mature"
-                    : "grove-badge-stale",
+                    ? "!bg-blue-50 !text-blue-700 dark:!bg-blue-950/80 dark:!text-blue-300"
+                    : "!bg-amber-50 !text-amber-800 dark:!bg-amber-950/80 dark:!text-amber-300",
               ]}
             >
               {statusLabel(s.status)}
@@ -129,12 +129,3 @@ function statusLabel(s: StackEntry["status"]): string | null {
     </div>
   </div>
 </section>
-
-<style>
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>

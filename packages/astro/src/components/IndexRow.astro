@@ -32,7 +32,7 @@ const status = project?.health?.status;
 const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.length || project.whyListed.length || project.caveats.length)));
 ---
 
-<article class={`grove-card grove-card-hover group relative flex flex-col gap-3 p-4 transition-colors ${className}`}>
+<article class={`rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group relative flex flex-col gap-3 p-4  ${className}`}>
   <header class="flex items-start gap-3">
     <a href={detailHref} class="relative z-10 flex shrink-0" aria-label={`Open ${name} details`}>
       {avatar ? (
@@ -76,13 +76,13 @@ const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.
 
   {showChips && (platforms.length > 0 || stacks.length > 0) && (
     <div class="flex flex-col gap-1.5">
-      <div class="flex flex-wrap gap-1.5">{platforms.slice(0, 4).map((platform) => <span class="chip"><Icon name={platform} category="platform" size={11} />{platform}</span>)}</div>
-      <div class="flex flex-wrap gap-1.5">{stacks.slice(0, 4).map((stack) => <span class="chip chip-stack"><Icon name={stack} category="stack" size={11} />{stack}</span>)}</div>
+      <div class="flex flex-wrap gap-1.5">{platforms.slice(0, 4).map((platform) => <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground"><Icon name={platform} category="platform" size={11} />{platform}</span>)}</div>
+      <div class="flex flex-wrap gap-1.5">{stacks.slice(0, 4).map((stack) => <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground"><Icon name={stack} category="stack" size={11} />{stack}</span>)}</div>
     </div>
   )}
 
   <footer class="relative z-10 mt-1 flex items-center gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
-    <a href={detailHref} class="grove-btn grove-btn-outline px-2 text-2xs">View details →</a>
-    {repoHref && <a href={repoHref} target="_blank" rel="noopener noreferrer" class="grove-btn grove-btn-outline px-2 text-2xs">GitHub</a>}
+    <a href={detailHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent px-2 text-2xs">View details →</a>
+    {repoHref && <a href={repoHref} target="_blank" rel="noopener noreferrer" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent px-2 text-2xs">GitHub</a>}
   </footer>
 </article>

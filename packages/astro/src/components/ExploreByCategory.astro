@@ -34,8 +34,8 @@ function buildHref(slug: string): string {
 }
 ---
 
-<section class:list={["grove-section-tight", className]}>
-  <div class="grove-container-wide mx-auto px-5 sm:px-7">
+<section class:list={["py-10 sm:py-12", className]}>
+  <div class="mx-auto w-full max-w-wide px-5 sm:px-7">
     <header class="mb-3 flex flex-col gap-1">
       <h2 class="m-0 text-[1.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
         {title}
@@ -51,7 +51,7 @@ function buildHref(slug: string): string {
         <li>
           <a
             href={buildHref(c.slug)}
-            class="grove-badge inline-flex items-center gap-1.5 transition-colors hover:border-ink-400 dark:hover:border-ink-600"
+            class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground items-center gap-1.5 transition-colors hover:border-ink-400 dark:hover:border-ink-600"
             data-event="explore_category_click"
             data-event-source="explore_category"
           >

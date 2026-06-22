@@ -56,10 +56,10 @@ const visible = contributors
 ---
 
 <section
-  class:list={["grove-section", className]}
+  class:list={["py-12 sm:py-16", className]}
   aria-labelledby="grove-contributors-heading"
 >
-  <div class="grove-container mx-auto px-5 sm:px-7">
+  <div class="mx-auto w-full max-w-container px-5 sm:px-7">
     <header class="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
         <h2
@@ -138,12 +138,3 @@ const visible = contributors
     )}
   </div>
 </section>
-
-<style>
-  .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>

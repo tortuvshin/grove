@@ -150,7 +150,7 @@ const category = (item as { category?: string }).category;
 ---
 
 <article
-  class={`card card-hover group relative flex h-full flex-col gap-3 p-4 ${className}`}
+  class={`rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group relative flex h-full flex-col gap-3 p-4 ${className}`}
 >
   {/* Top row: logo + name + (optional) status + curated mark. */}
   <header class="relative z-10 flex items-start gap-3">
@@ -297,26 +297,26 @@ const category = (item as { category?: string }).category;
       {visiblePlatforms.length > 0 && (
         <div class="flex flex-wrap items-center gap-1.5">
           {visiblePlatforms.map((p) => (
-            <span class="chip">
+            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground">
               <Icon name={p} category="platform" size={11} />
               <span>{p}</span>
             </span>
           ))}
           {platformOverflow > 0 && (
-            <span class="chip text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
+            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
           )}
         </div>
       )}
       {visibleStacks.length > 0 && (
         <div class="flex flex-wrap items-center gap-1.5">
           {visibleStacks.map((s) => (
-            <span class="chip chip-stack">
+            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground">
               <Icon name={s} category="stack" size={11} />
               <span>{s}</span>
             </span>
           ))}
           {stackOverflow > 0 && (
-            <span class="chip chip-stack text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
+            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
           )}
         </div>
       )}
