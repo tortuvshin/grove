@@ -28,6 +28,7 @@ test-tmp-*/
 # `.release-in-progress` lock file at the repo root. None of this
 # should be committed. (Audit finding #10.)
 .grove/
+.worktrees/
 .release-in-progress
 
 # Local scaffold smoke tests — never commit a `grove new` scratch site.
