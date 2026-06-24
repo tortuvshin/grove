@@ -46,6 +46,6 @@
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/ui"
   },
   "dependencies": {
-    "@grove-dev/core": "0.2.16"
+    "@grove-dev/core": "workspace:*"
   }
 }

@@ -24,7 +24,7 @@
     "grove:build": "pnpm grove:run build",
     "release": "node scripts/release.mjs",
     "release:dry": "node scripts/release.mjs --dry-run",
-    "postinstall": "pnpm --filter @grove-dev/cli build"
+    "postinstall": "pnpm --filter @grove-dev/cli... build"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

@@ -40,6 +40,50 @@ const ASTRO_TEMPLATE = resolve(
   "../../../astro/templates/default",
 );
 
+describe("Grove workspace dependency coherence", () => {
+  const manifests = [
+    "packages/ui/package.json",
+    "packages/astro/package.json",
+    "packages/nextjs/package.json",
+    "packages/svelte/package.json",
+    "packages/cli/package.json",
+    "packages/astro/templates/default/package.json",
+    "packages/nextjs/templates/default/package.json",
+    "packages/svelte/templates/default/package.json",
+  ];
+
+  it.each(manifests)("%s uses workspace references for internal Grove dependencies", async (relativePath) => {
+    const manifest = JSON.parse(
+      await readFile(resolve(import.meta.dirname, "../../..", relativePath), "utf8"),
+    ) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+    };
+
+    for (const section of [
+      manifest.dependencies,
+      manifest.devDependencies,
+      manifest.peerDependencies,
+    ]) {
+      for (const [name, version] of Object.entries(section ?? {})) {
+        if (!name.startsWith("@grove-dev/")) continue;
+        expect(version, `${relativePath}: ${name}`).toBe("workspace:*");
+      }
+    }
+  });
+
+  it("builds the CLI dependency graph during root postinstall", async () => {
+    const rootManifest = JSON.parse(
+      await readFile(resolve(import.meta.dirname, "../../..", "package.json"), "utf8"),
+    ) as { scripts?: Record<string, string> };
+
+    expect(rootManifest.scripts?.postinstall).toBe(
+      "pnpm --filter @grove-dev/cli... build",
+    );
+  });
+});
+
 describe("packageNameFromProjectName", () => {
   it("slugifies a multi-word project name and appends framework+template", () => {
     expect(packageNameFromProjectName("My Cool Project", "astro", "default")).toBe(

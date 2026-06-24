@@ -48,8 +48,8 @@
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
-    "@grove-dev/core": "0.2.16",
-    "@grove-dev/ui": "1.0.6",
+    "@grove-dev/core": "workspace:*",
+    "@grove-dev/ui": "workspace:*",
     "astro": "^6.4.6"
   },
   "peerDependencies": {
