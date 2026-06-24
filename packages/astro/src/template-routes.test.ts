@@ -26,6 +26,17 @@ describe("default Astro route configuration", () => {
     expect(manifest.devDependencies?.["@types/node"]).toMatch(/^\^/);
   });
 
+  it("treats generated JSON as an untyped boundary before applying payload types", async () => {
+    const recordsModule = await readFile(
+      resolve(pagesDir, "../data/records.ts"),
+      "utf8",
+    );
+
+    expect(recordsModule).toContain(
+      "fullPayload as unknown as FullPayload",
+    );
+  });
+
   it("derives the directory route from generated site config", async () => {
     const listPage = await readFile(resolve(pagesDir, "[slug]/index.astro"), "utf8");
 
