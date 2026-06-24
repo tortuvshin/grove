@@ -64,7 +64,7 @@ if (!record) {
 }
 
 const isProject = record.kind === "project";
-const proj: ProjectRecord | null = project;
+const proj: ProjectRecord | null = project ?? null;
 
 const name =
   record.kind === "resource" ? (record as { title: string }).title : (record as { name: string }).name;
@@ -220,18 +220,20 @@ if (isProject && proj) {
     keywords: (record.tags ?? []).length > 0 ? (record.tags ?? []).join(", ") : undefined,
     isAccessibleForFree: true,
   };
-} else {
+} else if (entity) {
   jsonLd = {
     "@context": "https://schema.org",
-    "@type": record.type === "person" ? "Person" : "Organization",
+    "@type": entity.type === "person" ? "Person" : "Organization",
     name,
     headline: name,
-    description: record.description || undefined,
+    description: entity.description || undefined,
     url: homepageUrl || undefined,
-    foundingDate: record.founded || undefined,
-    location: record.location || undefined,
-    keywords: (record.tags ?? []).length > 0 ? (record.tags ?? []).join(", ") : undefined,
+    foundingDate: entity.founded || undefined,
+    location: entity.location || undefined,
+    keywords: (entity.tags ?? []).length > 0 ? (entity.tags ?? []).join(", ") : undefined,
   };
+} else {
+  jsonLd = {};
 }
 ---
 

@@ -83,7 +83,8 @@ interface SiteConfigPayload {
 }
 
 const fullRecordsRaw: Resource[] = (fullPayload as FullPayload).records ?? [];
-const indexRecordsRaw: IndexRecord[] = (indexPayload as IndexPayload).records ?? [];
+const indexRecordsRaw: IndexRecord[] =
+  (indexPayload as unknown as IndexPayload).records ?? [];
 const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
 
 /** Full records (every record, all visibility). Use this for the
@@ -223,6 +224,10 @@ export const items: IndexRecord[] = (() => {
 export const fullItems: Resource[] = (() => {
   return fullRecords.filter((r) => r.kind === blueprintKind);
 })();
+
+export const fullProjects: ProjectRecord[] = fullRecords.filter(
+  (record): record is ProjectRecord => record.kind === "project",
+);
 
 // ──────────────────────────────────────────────────────────────────────
 // Markdown content rendering (sanitized)

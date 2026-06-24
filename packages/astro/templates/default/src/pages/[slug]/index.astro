@@ -262,7 +262,7 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
           {`Open a pull request with a YAML file. We review every submission against the bar — no marketing, no tutorials.`}
         </p>
         <a
-          href={siteConfig.submitUrl ?? "/submit"}
+          href="/submit"
           class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90 mt-2"
         >
           {`Submit ${itemLabel()}`}

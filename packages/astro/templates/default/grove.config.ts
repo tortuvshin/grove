@@ -25,7 +25,7 @@ export default defineConfig({
 
   facets: ["category", "stacks", "platforms", "tags"],
 
-  integrations: {},
+  integrations: { github: false },
 
   theme: {
     primaryColor: "#1f6feb",

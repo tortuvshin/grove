@@ -9,7 +9,7 @@
  */
 // ── Config ────────────────────────────────────────────────────────────
 export { defineConfig, loadConfig } from "./config.js";
-export type { GroveConfig } from "./schema.js";
+export type { GroveConfig, GroveConfigInput } from "./schema.js";
 
 // ── Schemas (Zod) ─────────────────────────────────────────────────────
 export {

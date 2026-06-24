@@ -30,8 +30,8 @@ function absoluteUrl(siteUrl: string, path: string): string {
   return `${base}${tail}`;
 }
 
-function buildEntries(siteUrl: string, blueprint: string | undefined): SitemapEntry[] {
-  const slug = indexSlug(blueprint);
+function buildEntries(siteUrl: string): SitemapEntry[] {
+  const slug = indexSlug();
   const now = new Date().toISOString().slice(0, 10);
 
   const top: SitemapEntry[] = [
@@ -78,7 +78,7 @@ function renderXml(entries: SitemapEntry[]): string {
 }
 
 export const GET: APIRoute = () => {
-  const xml = renderXml(buildEntries(siteConfig.siteUrl ?? "", siteConfig.blueprint));
+  const xml = renderXml(buildEntries(siteConfig.siteUrl ?? ""));
   return new Response(xml, {
     status: 200,
     headers: {

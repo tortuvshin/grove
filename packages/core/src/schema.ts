@@ -569,6 +569,7 @@ export const groveConfigSchema = z.object({
 });
 
 export type GroveConfig = z.infer<typeof groveConfigSchema>;
+export type GroveConfigInput = z.input<typeof groveConfigSchema>;
 export type NavItem = z.infer<typeof navItemSchema>;
 export type GithubIntegration = z.infer<typeof githubIntegrationSchema>;
 export type Theme = z.infer<typeof themeSchema>;
