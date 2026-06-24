@@ -1,8 +1,12 @@
 import { resolve } from "node:path";
 import { createJiti } from "jiti";
-import { groveConfigSchema, type GroveConfig } from "./schema.js";
+import {
+  groveConfigSchema,
+  type GroveConfig,
+  type GroveConfigInput,
+} from "./schema.js";
 
-export type { GroveConfig };
+export type { GroveConfig, GroveConfigInput };
 
 /**
  * Load the Grove project config. The config file is the single source
@@ -26,6 +30,6 @@ export async function loadConfig(
  * Define and validate a Grove config. Used at the bottom of a
  * `grove.config.ts` file so editors get good type hints.
  */
-export function defineConfig(config: GroveConfig): GroveConfig {
+export function defineConfig(config: GroveConfigInput): GroveConfig {
   return groveConfigSchema.parse(config);
 }

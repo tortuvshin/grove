@@ -1,6 +1,6 @@
 ---
 import siteConfig from "../../data/generated/site-config.json";
-import { fullItems, itemLabel } from "../data/records";
+import { fullProjects, itemLabel } from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 
@@ -10,12 +10,12 @@ const description = `Submit a new ${singular} to ${siteConfig.name}.`;
 const repoUrl = siteConfig.repoUrl ?? "https://github.com/tortuvshin/grove";
 
 const values = (key: "category" | "stack") =>
-  [...new Set(fullItems.map((item) => String(item[key] ?? "")).filter(Boolean))]
+  [...new Set(fullProjects.map((item) => String(item[key] ?? "")).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b));
 const categories = values("category");
 const stacks = values("stack");
-const existingSlugs = fullItems.map((item) => item.slug).filter(Boolean);
-const existingFullNames = fullItems
+const existingSlugs = fullProjects.map((item) => item.slug).filter(Boolean);
+const existingFullNames = fullProjects
   .map((item) => {
     const url = String(item.repoUrl ?? item.links?.github ?? "");
     const match = url.match(/github\.com\/([^/]+)\/([^/?#]+)/i);

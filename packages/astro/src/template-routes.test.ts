@@ -5,6 +5,27 @@ import { resolve } from "node:path";
 const pagesDir = resolve(import.meta.dirname, "../templates/default/src/pages");
 
 describe("default Astro route configuration", () => {
+  it("ships TypeScript settings that resolve package exports and Node built-ins", async () => {
+    const templateRoot = resolve(pagesDir, "../..");
+    const tsconfig = JSON.parse(
+      await readFile(resolve(templateRoot, "tsconfig.json"), "utf8"),
+    ) as {
+      extends?: string;
+      compilerOptions?: {
+        moduleResolution?: string;
+        types?: string[];
+      };
+    };
+    const manifest = JSON.parse(
+      await readFile(resolve(templateRoot, "package.json"), "utf8"),
+    ) as { devDependencies?: Record<string, string> };
+
+    expect(tsconfig.extends).toBe("astro/tsconfigs/base");
+    expect(tsconfig.compilerOptions?.moduleResolution).toBe("Bundler");
+    expect(tsconfig.compilerOptions?.types).toContain("node");
+    expect(manifest.devDependencies?.["@types/node"]).toMatch(/^\^/);
+  });
+
   it("derives the directory route from generated site config", async () => {
     const listPage = await readFile(resolve(pagesDir, "[slug]/index.astro"), "utf8");
 
