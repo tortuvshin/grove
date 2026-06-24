@@ -41,13 +41,9 @@ import {
   totalPages,
 } from "@grove-dev/astro";
 
-// This template ships with the `project-directory` blueprint, so the
-// only directory slug it ever needs is `projects`. While it ships
-// as the project directory, pre-generate the single path the build
-// actually needs. Swapping in a different blueprint is a one-config
-// change that flows through the static import at the top.
 export function getStaticPaths() {
-  return [{ params: { slug: "projects" } }];
+  const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+  return [{ params: { slug: routeSlug } }];
 }
 
 const slug = Astro.params.slug as string;

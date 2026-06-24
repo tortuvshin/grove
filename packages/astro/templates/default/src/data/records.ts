@@ -316,3 +316,49 @@ for (const r of fullRecords) {
 export function getContentHtml(slug: string): string | null {
   return contentHtmlBySlug.get(slug) ?? null;
 }
+
+/**
+ * Sanitized Markdown for a consumer-authored page under
+ * `content/pages/<page>.md`. Default template pages use this to
+ * accept custom copy while keeping Grove's layout and components.
+ */
+export function getPageContentHtml(page: string): string | null {
+  const candidates = [
+    resolve(here, "..", "..", "content", "pages", `${page}.md`),
+    resolve(here, "..", "..", "..", "content", "pages", `${page}.md`),
+    resolve(process.cwd(), "content", "pages", `${page}.md`),
+  ];
+  const path = candidates.find((candidate) => existsSync(candidate));
+  if (!path) return null;
+
+  try {
+    const rawHtml = marked.parse(readFileSync(path, "utf8"), { async: false }) as string;
+    return sanitizeHtml(rawHtml, {
+      allowedTags: [
+        "h1", "h2", "h3", "h4",
+        "p", "br", "hr",
+        "ul", "ol", "li",
+        "strong", "em", "b", "i", "u", "s", "del",
+        "a", "code", "pre", "blockquote", "img",
+      ],
+      allowedAttributes: {
+        a: ["href", "title", "rel", "target"],
+        img: ["src", "alt", "title", "width", "height", "loading"],
+      },
+      allowedSchemes: ["http", "https", "mailto", "tel"],
+      allowedSchemesByTag: {
+        a: ["http", "https", "mailto", "tel"],
+        img: ["http", "https"],
+      },
+      transformTags: {
+        a: sanitizeHtml.simpleTransform("a", {
+          rel: "noopener noreferrer",
+          target: "_blank",
+        }, true),
+      },
+      disallowedTagsMode: "discard",
+    });
+  } catch {
+    return null;
+  }
+}
