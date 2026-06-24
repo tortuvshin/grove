@@ -72,4 +72,12 @@ describe("default Astro route configuration", () => {
     expect(script).toContain("site-config.json");
     expect(script).toContain("blueprintConfig?.routeSlug");
   });
+
+  it("hydrates static list pages with URL-driven search and pagination", async () => {
+    const listPage = await readFile(resolve(pagesDir, "[slug]/index.astro"), "utf8");
+
+    expect(listPage).toContain('id="grove-index-data"');
+    expect(listPage).toContain("function applyClientFilters()");
+    expect(listPage).toContain("const PAGE_SIZE = 20");
+  });
 });

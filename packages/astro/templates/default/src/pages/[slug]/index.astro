@@ -57,6 +57,7 @@ const sorted = applySort(filtered, sort);
 const pages = totalPages(sorted.length);
 const page = Math.min(requestedPage, pages);
 const chips = activeFilterChips(filters);
+const clientItemsJson = JSON.stringify(items).replace(/</g, "\\u003c");
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
@@ -69,7 +70,6 @@ function hrefForPage(target: number): string {
 
 function hrefForRemove(key: keyof IndexFilters, value: string): string {
   const params = new URLSearchParams();
-  const next: IndexFilters = { ...filters, page: 1 };
   const urlKey: Partial<Record<keyof IndexFilters, string>> = {
     stacks: "stack",
     platforms: "platform",
@@ -246,7 +246,7 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
         </p>
         <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent mt-4">Clear filters</a>
       </div>
-      <nav class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
+      <nav id="results-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
         <Pagination current={page} total={pages} hrefFor={hrefForPage} />
       </nav>
     </div>
@@ -271,4 +271,171 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
       </div>
     </div>
   </section>
+
+  <script is:inline id="grove-index-data" type="application/json" set:html={clientItemsJson}></script>
+  <script is:inline define:vars={{ slug, singular: itemLabel(), plural: itemLabelPlural() }}>
+    (() => {
+      const PAGE_SIZE = 20;
+      const source = document.querySelector("#grove-index-data");
+      const list = document.querySelector("#results-list");
+      if (!source || !list) return;
+
+      const items = JSON.parse(source.textContent || "[]");
+      const nodes = new Map(
+        [...list.querySelectorAll("[data-record-slug]")].map((node) => [
+          node.dataset.recordSlug,
+          node,
+        ]),
+      );
+      const params = new URLSearchParams(location.search);
+      const values = (key) => params.getAll(key).filter(Boolean);
+      const q = (params.get("q") || "").trim().toLowerCase();
+      const stacks = values("stack");
+      const platforms = values("platform");
+      const categories = values("category");
+      const labels = values("label");
+      const licenses = values("license");
+      const statuses = values("status").flatMap((value) => value.split(",")).filter(Boolean);
+      const lens = params.get("lens") || "";
+      const sort = params.get("sort") || "recently-updated";
+      const requestedPage = Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1);
+
+      const nameOf = (record) => record.kind === "resource" ? record.title : record.name;
+      const projectValues = (record) => record.kind === "project"
+        ? [record.stack, ...(record.stacks || [])].filter(Boolean)
+        : [];
+      const matchesAny = (actual, expected) =>
+        expected.length === 0 || actual.some((value) => expected.includes(value));
+      const matches = (record) => {
+        if (q) {
+          const repo = record.kind === "project"
+            ? record.repoUrl || record.links?.github || ""
+            : record.links?.github || "";
+          const owner = /github\.com\/([^/]+)\//.exec(repo)?.[1] || "";
+          const projectFields = record.kind === "project"
+            ? [
+                record.stack,
+                ...(record.stacks || []),
+                ...(record.platforms || []),
+                record.projectType,
+                ...(record.bestFor || []),
+                ...(record.whyListed || []),
+                record.github?.license,
+                record.health?.status,
+              ]
+            : [];
+          const haystack = [
+            nameOf(record),
+            owner,
+            record.description,
+            record.category,
+            ...(record.tags || []),
+            ...projectFields,
+          ].filter(Boolean).join(" ").toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        if (!matchesAny(projectValues(record), stacks)) return false;
+        if (!matchesAny(record.kind === "project" ? record.platforms || [] : [], platforms)) return false;
+        if (categories.length && !categories.includes(record.category)) return false;
+        if (!matchesAny(record.curation?.labels || [], labels)) return false;
+        if (licenses.length && !licenses.includes(record.kind === "project" ? record.github?.license : "")) return false;
+        if (statuses.length && !statuses.includes(record.kind === "project" ? record.health?.status : "")) return false;
+        if (lens && !(record.curation?.lenses || []).includes(lens)) return false;
+        return true;
+      };
+      const time = (value) => value ? new Date(value).valueOf() || 0 : 0;
+      const stars = (record) => record.kind === "project" ? record.github?.stars || 0 : 0;
+      const compare = {
+        "most-starred": (a, b) => stars(b) - stars(a),
+        "recently-updated": (a, b) =>
+          time(b.kind === "project" ? b.github?.pushedAt : b.publishedAt) -
+          time(a.kind === "project" ? a.github?.pushedAt : a.publishedAt),
+        "recently-added": (a, b) =>
+          time(b.curation?.reviewedAt) - time(a.curation?.reviewedAt),
+        "best-overall": (a, b) =>
+          Number(Boolean(b.curation?.reviewed)) - Number(Boolean(a.curation?.reviewed)) ||
+          stars(b) - stars(a),
+        "alphabetical": (a, b) => String(nameOf(a)).localeCompare(String(nameOf(b))),
+      }[sort];
+
+      function applyClientFilters() {
+        const filtered = items.filter(matches);
+        if (compare) filtered.sort(compare);
+        const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        const page = Math.min(requestedPage, pageCount);
+        const visible = new Set(
+          filtered
+            .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+            .map((record) => record.slug),
+        );
+
+        for (const record of filtered) {
+          const node = nodes.get(record.slug);
+          if (node) list.append(node);
+        }
+        for (const [recordSlug, node] of nodes) {
+          node.hidden = !visible.has(recordSlug);
+        }
+
+        const count = document.querySelector("#results-count");
+        const pageLabel = document.querySelector("#results-page");
+        const empty = document.querySelector("#empty-state");
+        if (count) count.textContent = `${filtered.length} ${filtered.length === 1 ? singular : plural}`;
+        if (pageLabel) pageLabel.textContent = pageCount > 1 ? ` · page ${page} of ${pageCount}` : "";
+        if (empty) empty.classList.toggle("hidden", filtered.length > 0);
+
+        const pagination = document.querySelector("#results-pagination");
+        if (pagination) {
+          pagination.innerHTML = "";
+          if (pageCount > 1) {
+            for (let target = 1; target <= pageCount; target += 1) {
+              const next = new URLSearchParams(params);
+              if (target === 1) next.delete("page");
+              else next.set("page", String(target));
+              const link = document.createElement("a");
+              link.href = `/${slug}${next.size ? `?${next}` : ""}`;
+              link.textContent = String(target);
+              link.setAttribute("aria-label", `Page ${target}`);
+              if (target === page) link.setAttribute("aria-current", "page");
+              link.className = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-sm";
+              pagination.append(link);
+            }
+          }
+        }
+      }
+
+      const searchInput = document.querySelector("#search-input");
+      if (searchInput) searchInput.value = params.get("q") || "";
+      document.querySelectorAll('select[name="sort"]').forEach((select) => {
+        select.value = sort;
+      });
+      const filterKeys = {
+        stacks: "stack",
+        platforms: "platform",
+        categories: "category",
+        licenses: "license",
+      };
+      const filterLabels = {
+        stacks: "Stack",
+        platforms: "Platform",
+        categories: "Category",
+        licenses: "License",
+      };
+      document.querySelectorAll(".grove-filter").forEach((group) => {
+        const selected = values(filterKeys[group.dataset.filterGroupKey]);
+        group.querySelectorAll(".grove-filter-input").forEach((input) => {
+          input.checked = selected.includes(input.dataset.filterValue);
+        });
+        const trigger = group.querySelector(".grove-filter-trigger span");
+        if (trigger && selected.length) {
+          const label = filterLabels[group.dataset.filterGroupKey];
+          trigger.textContent = `${label}: ${
+            selected.length === 1 ? selected[0] : `${selected.length} selected`
+          }`;
+        }
+      });
+
+      applyClientFilters();
+    })();
+  </script>
 </BaseLayout>
