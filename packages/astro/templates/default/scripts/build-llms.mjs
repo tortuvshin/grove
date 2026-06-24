@@ -23,10 +23,9 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SOURCE = join(ROOT, "data", "generated", "records.full.json");
+const SITE_CONFIG = join(ROOT, "data", "generated", "site-config.json");
 const OUT_DIR = join(ROOT, "public");
 const FULL = join(OUT_DIR, "llms-full.txt");
-
-const SITE = process.env.GROVE_SITE ?? "https://example.com";
 
 function compactStars(n) {
   if (typeof n !== "number" || !Number.isFinite(n)) return "—";
@@ -50,9 +49,9 @@ function relativeTime(iso) {
   return `${Math.floor(days / 365)} years ago`;
 }
 
-function buildFullTxt(records) {
+function buildFullTxt(records, site, routeSlug) {
   const lines = [];
-  lines.push(`# ${SITE.replace(/^https?:\/\//, "")} — full directory`);
+  lines.push(`# ${site.replace(/^https?:\/\//, "")} — full directory`);
   lines.push("");
   lines.push(`Generated: ${new Date().toISOString()}`);
   lines.push(`Records: ${records.length}`);
@@ -65,10 +64,17 @@ function buildFullTxt(records) {
     const stack = r.stack ?? (Array.isArray(r.stacks) ? r.stacks.join(", ") : "");
     const platforms = Array.isArray(r.platforms) ? r.platforms.join(", ") : "";
     const tags = Array.isArray(r.tags) ? r.tags.join(", ") : "";
-    const stars = compactStars(r.stars ?? r.github?.stars ?? 0);
-    const updated = relativeTime(r.lastCommitAt ?? r.github?.pushedAt ?? null);
+    const stars = compactStars(
+      r.stars ?? r.github?.stars ?? r.github?.repository?.stargazers_count ?? 0,
+    );
+    const updated = relativeTime(
+      r.lastCommitAt ??
+        r.github?.pushedAt ??
+        r.github?.repository?.pushed_at ??
+        null,
+    );
     const repoUrl = r.repoUrl ?? r.links?.github ?? "";
-    const url = `${SITE.replace(/\/$/, "")}/${r.slug}`;
+    const url = `${site.replace(/\/$/, "")}/${routeSlug}/${r.slug}`;
     const desc = r.description ?? "";
 
     lines.push(`## ${name}`);
@@ -107,12 +113,19 @@ async function main() {
     process.exit(1);
   }
   const raw = JSON.parse(await readFile(SOURCE, "utf8"));
+  const siteConfig = JSON.parse(await readFile(SITE_CONFIG, "utf8"));
+  const site =
+    process.env.GROVE_SITE ??
+    process.env.SITE_URL ??
+    siteConfig.siteUrl ??
+    "https://example.com";
+  const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
   const records = (raw.records ?? []).filter(
     (r) => r.visibility !== "hide" && r.visibility !== "remove",
   );
 
   await mkdir(OUT_DIR, { recursive: true });
-  await writeFile(FULL, buildFullTxt(records), "utf8");
+  await writeFile(FULL, buildFullTxt(records, site, routeSlug), "utf8");
   console.log(`[llms] ${records.length} indexed → ${FULL}`);
   console.log(`[llms] public/llms.txt is committed (NOT regenerated) — see scripts/build-llms.mjs`);
 }
