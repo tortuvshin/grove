@@ -44,4 +44,11 @@ describe("default Astro route configuration", () => {
 
     expect(aboutPage).toContain('getPageContentHtml("about")');
   });
+
+  it("generates submission drafts accepted by the Grove record schema", async () => {
+    const submitPage = await readFile(resolve(pagesDir, "submit.astro"), "utf8");
+
+    expect(submitPage).toContain('"  type: manual"');
+    expect(submitPage).not.toContain('"  type: github"');
+  });
 });
