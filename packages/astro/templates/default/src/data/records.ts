@@ -82,7 +82,8 @@ interface SiteConfigPayload {
   name?: string;
 }
 
-const fullRecordsRaw: Resource[] = (fullPayload as FullPayload).records ?? [];
+const fullRecordsRaw: Resource[] =
+  (fullPayload as unknown as FullPayload).records ?? [];
 const indexRecordsRaw: IndexRecord[] =
   (indexPayload as unknown as IndexPayload).records ?? [];
 const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
