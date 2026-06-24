@@ -27,6 +27,8 @@ export {
   projectRecordSchema,
   resourceRecordSchema,
   entityRecordSchema,
+  resourceSchema,
+  recordsFileSchema,
   projectTypeSchema,
   resourceTypeSchema,
   entityTypeSchema,
