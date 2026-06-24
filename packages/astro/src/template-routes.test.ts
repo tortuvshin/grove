@@ -62,4 +62,14 @@ describe("default Astro route configuration", () => {
     expect(submitPage).toContain('"  type: manual"');
     expect(submitPage).not.toContain('"  type: github"');
   });
+
+  it("builds full LLM URLs from generated consumer config", async () => {
+    const script = await readFile(
+      resolve(pagesDir, "../../scripts/build-llms.mjs"),
+      "utf8",
+    );
+
+    expect(script).toContain("site-config.json");
+    expect(script).toContain("blueprintConfig?.routeSlug");
+  });
 });
