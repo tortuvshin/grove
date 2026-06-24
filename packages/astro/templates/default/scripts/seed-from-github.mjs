@@ -8,7 +8,7 @@
  * "add my repo" onboarding path.
  */
 import { mkdir, writeFile } from "node:fs/promises";
-import { parse, stringify } from "yaml";
+import { stringify } from "yaml";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 

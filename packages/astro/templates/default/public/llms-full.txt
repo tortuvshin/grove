@@ -1,6 +1,6 @@
 # example.com — full directory
 
-Generated: 2026-06-22T16:19:40.464Z
+Generated: 2026-06-24T09:55:25.077Z
 Records: 8
 
 ---
@@ -9,7 +9,7 @@ Records: 8
 
 Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps and databases from a single dashboard.
 
-- **URL**: https://example.com/coolify
+- **URL**: https://example.com/projects/coolify
 - **Repository**: https://github.com/coollabsio/coolify
 - **Stack**: SvelteKit
 - **Platforms**: linux, self-host
@@ -34,7 +34,7 @@ Open-source, self-hostable Heroku / Netlify / Vercel alternative — deploy apps
 
 Lightweight, self-hosted Git service — painless, single-binary, low-resource alternative to GitHub.
 
-- **URL**: https://example.com/gitea
+- **URL**: https://example.com/projects/gitea
 - **Repository**: https://github.com/go-gitea/gitea
 - **Stack**: Go
 - **Platforms**: linux, self-host, docker
@@ -59,7 +59,7 @@ Lightweight, self-hosted Git service — painless, single-binary, low-resource a
 
 Open-source API development ecosystem — design, test, and debug APIs faster from a single interface.
 
-- **URL**: https://example.com/hoppscotch
+- **URL**: https://example.com/projects/hoppscotch
 - **Repository**: https://github.com/hoppscotch/hoppscotch
 - **Stack**: Vue
 - **Platforms**: web, desktop, self-host
@@ -84,7 +84,7 @@ Open-source API development ecosystem — design, test, and debug APIs faster fr
 
 Open-source inventory management system with parts, stock, and purchase orders.
 
-- **URL**: https://example.com/inventree
+- **URL**: https://example.com/projects/inventree
 - **Repository**: https://github.com/inventree/InvenTree
 - **Stack**: Flutter
 - **Platforms**: ios, android, web
@@ -109,7 +109,7 @@ Open-source inventory management system with parts, stock, and purchase orders.
 
 Open-source data labeling platform — annotate images, text, audio, video, and time series for ML training.
 
-- **URL**: https://example.com/label-studio
+- **URL**: https://example.com/projects/label-studio
 - **Repository**: https://github.com/HumanSignal/label-studio
 - **Stack**: Python
 - **Platforms**: web, self-host
@@ -134,7 +134,7 @@ Open-source data labeling platform — annotate images, text, audio, video, and 
 
 Privacy-first, open-source knowledge base that works on top of plain text Markdown and Org-mode files.
 
-- **URL**: https://example.com/logseq
+- **URL**: https://example.com/projects/logseq
 - **Repository**: https://github.com/logseq/logseq
 - **Stack**: ClojureScript
 - **Platforms**: web, desktop
@@ -159,7 +159,7 @@ Privacy-first, open-source knowledge base that works on top of plain text Markdo
 
 Interact privately with your documents using LLMs — 100% private, no data leaves your execution environment.
 
-- **URL**: https://example.com/private-gpt
+- **URL**: https://example.com/projects/private-gpt
 - **Repository**: https://github.com/zylon-ai/private-gpt
 - **Stack**: Python
 - **Platforms**: linux, macos, self-host
@@ -184,7 +184,7 @@ Interact privately with your documents using LLMs — 100% private, no data leav
 
 Open-source time tracker for developers — coding stats, language breakdowns, and project-level metrics.
 
-- **URL**: https://example.com/wakapi
+- **URL**: https://example.com/projects/wakapi
 - **Repository**: https://github.com/muety/wakapi
 - **Stack**: Kotlin
 - **Platforms**: android
