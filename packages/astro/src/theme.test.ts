@@ -12,6 +12,10 @@ const tailwindMarkup = [
   "layouts/Header.astro",
   "../templates/default/src/pages/submit.astro",
 ].map((file) => readFileSync(resolve(import.meta.dirname, file), "utf8")).join("\n");
+const iconMarkup = readFileSync(
+  resolve(import.meta.dirname, "components/Icon.astro"),
+  "utf8",
+);
 
 describe("Astro theme contract", () => {
   it("keeps Starlight's light and dark foundation values", () => {
@@ -63,5 +67,10 @@ describe("Astro theme contract", () => {
     expect(tailwindMarkup).toContain("focus-visible:ring-3");
     expect(astroTheme).not.toContain(".grove-card");
     expect(astroTheme).not.toContain(".grove-btn");
+  });
+
+  it("falls back to initials when a consumer has no matching icon asset", () => {
+    expect(iconMarkup).toContain("data-grove-icon-fallback-initials");
+    expect(iconMarkup).toContain("onerror=");
   });
 });
