@@ -21,13 +21,14 @@
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 import siteConfig from "../../data/generated/site-config.json";
-import { indexSlug, itemLabel } from "../data/records";
+import { getPageContentHtml, indexSlug, itemLabel } from "../data/records";
 
 const githubUrl = siteConfig.repoUrl;
 const title = `About — ${siteConfig.name}`;
 const description = `${siteConfig.tagline} Built with Grove.`;
 const slug = indexSlug();
 const item = itemLabel();
+const pageContentHtml = getPageContentHtml("about");
 ---
 
 <BaseLayout title={title} description={description} site={siteConfig}>
@@ -39,6 +40,10 @@ const item = itemLabel();
         <span class="text-ink-700 dark:text-ink-300">About</span>
       </nav>
 
+      {pageContentHtml ? (
+        <section class="grove-prose mt-8" set:html={pageContentHtml} />
+      ) : (
+      <>
       <header class="mt-5">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           About
@@ -177,6 +182,8 @@ const item = itemLabel();
         )}
         <a href="/submit" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground">Submit a {item} →</a>
       </section>
+      </>
+      )}
     </article>
   </Container>
 </BaseLayout>

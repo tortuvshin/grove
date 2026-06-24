@@ -43,6 +43,15 @@ const BLUEPRINT_PLURAL: Record<string, string> = {
   "ecosystem-map": "Entities",
 };
 
+function directorySlug(config: GroveConfig): string {
+  return config.routes.directory ?? BLUEPRINT_INDEX[config.blueprint] ?? "items";
+}
+
+function pluralLabel(config: GroveConfig): string {
+  const label = config.labels.plural ?? BLUEPRINT_PLURAL[config.blueprint] ?? "Items";
+  return label.replace(/^./, (value) => value.toUpperCase());
+}
+
 function slug(value: string): string {
   // Delegate to the package's single public slugifier. llms.txt anchor
   // links only need the base form (no collision counter), and the
@@ -92,7 +101,7 @@ function buildDetailSection(
 
 export function buildLlmsTxt(input: LlmsInput, config: GroveConfig): string {
   const siteUrl = (input.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
-  const indexSlug = BLUEPRINT_INDEX[config.blueprint] ?? "items";
+  const indexSlug = directorySlug(config);
   const visible = input.records.filter(
     (r) => r.visibility !== "hide" && r.visibility !== "remove",
   );
@@ -112,11 +121,11 @@ Use /llms-full.txt for record-level details. Prefer detail pages for citations.
 
 export function buildLlmsFullTxt(input: LlmsInput, config: GroveConfig): string {
   const siteUrl = (input.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
-  const indexSlug = BLUEPRINT_INDEX[config.blueprint] ?? "items";
+  const indexSlug = directorySlug(config);
   const visible = input.records.filter(
     (r) => r.visibility !== "hide" && r.visibility !== "remove",
   );
-  const plural = BLUEPRINT_PLURAL[config.blueprint] ?? "Items";
+  const plural = pluralLabel(config);
   const index = visible.map(buildIndexLine).join("\n");
   const sections = visible
     .map((record) => buildDetailSection(record, siteUrl, indexSlug))

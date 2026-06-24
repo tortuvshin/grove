@@ -60,6 +60,10 @@ const BLUEPRINT_INDEX: Record<string, string> = {
   "ecosystem-map": "entities",
 };
 
+function directorySlug(config: GroveConfig): string {
+  return config.routes.directory ?? BLUEPRINT_INDEX[config.blueprint] ?? "items";
+}
+
 /**
  * Build a sitemap from generated records data + Grove config.
  * Writes to public/sitemap.xml.
@@ -71,7 +75,7 @@ export async function buildSitemap(
 ): Promise<SitemapResult> {
   const cfg = config ?? (await loadConfig(cwd));
   const siteUrl = (input.siteUrl ?? cfg.site.url ?? "https://example.com").replace(/\/$/, "");
-  const indexSlug = input.indexSlug ?? BLUEPRINT_INDEX[cfg.blueprint] ?? "items";
+  const indexSlug = input.indexSlug ?? directorySlug(cfg);
   const entries: SitemapEntry[] = [];
 
   entries.push({

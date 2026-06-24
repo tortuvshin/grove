@@ -10,9 +10,10 @@
  * this page is a pure redirect: any `/apps/<slug>` request is
  * sent to the blueprint-canonical path.
  */
-import { indexSlug, fullRecords, projectBySlug, recordBySlug } from "../../data/records";
+import { indexSlug, fullRecords, recordBySlug } from "../../data/records";
 
 export async function getStaticPaths() {
+  if (indexSlug() === "apps") return [];
   return fullRecords.map((r) => ({ params: { recordSlug: r.slug } }));
 }
 
