@@ -38,6 +38,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
+import { prettySlug } from "@grove-dev/astro";
 import type {
   ProjectRecord,
   ResourceRecord,
@@ -110,7 +111,7 @@ export function taxonomyLabel(
   kind: "categories" | "stacks" | "platforms" | "distributionChannels",
   id: string,
 ): string {
-  return taxonomyMaps[kind]?.get(id) ?? id;
+  return taxonomyMaps[kind]?.get(id) ?? prettySlug(id);
 }
 
 /** Full records (every record, all visibility). Use this for the
