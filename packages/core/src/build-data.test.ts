@@ -198,4 +198,42 @@ describe("generate — filesystem round-trip", () => {
     expect(site.stats.totalRecords).toBe(1);
     expect(site.stats.totalApps).toBe(1);
   });
+
+  it("writes configured taxonomy names to site-config.json", async () => {
+    await mkdir(join(cwd, "data", "taxonomy"), { recursive: true });
+    await writeFile(
+      join(cwd, "data", "taxonomy", "categories.yml"),
+      [
+        "- id: news",
+        "  name: News and Magazine",
+        "- id: tools",
+        "  name: Developer Tools",
+      ].join("\n"),
+    );
+    await writeFile(
+      join(cwd, "data", "records", "reader.yml"),
+      [
+        "kind: project",
+        "slug: reader",
+        "name: Reader",
+        "description: news reader",
+        "category: news",
+        "links: {}",
+        "curation: { reviewed: false, labels: [], lenses: [] }",
+        "scores: {}",
+      ].join("\n"),
+    );
+
+    await generate(cwd);
+    const site = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "site-config.json"), "utf8"),
+    ) as {
+      taxonomy?: { categories?: Array<{ id: string; name: string }> };
+    };
+
+    expect(site.taxonomy?.categories).toEqual([
+      { id: "news", name: "News and Magazine" },
+      { id: "tools", name: "Developer Tools" },
+    ]);
+  });
 });

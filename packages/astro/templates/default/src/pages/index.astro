@@ -20,7 +20,7 @@ import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
 import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
 import OriginalCollection from "@grove-dev/astro/components/OriginalCollection.astro";
 
-import { items, fullItems } from "../data/records";
+import { items, fullItems, taxonomyLabel } from "../data/records";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -87,10 +87,18 @@ for (const r of fullItems) {
 const stacks = [...stackMap.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .slice(0, 12)
-  .map(([name, count]) => ({ name, slug: name, count }));
+  .map(([name, count]) => ({
+    name: taxonomyLabel("stacks", name),
+    slug: name,
+    count,
+  }));
 const categories = [...catMap.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  .map(([name, count]) => ({ name, slug: name, count }));
+  .map(([name, count]) => ({
+    name: taxonomyLabel("categories", name),
+    slug: name,
+    count,
+  }));
 
 // Contributors (best-effort from data/generated/contributors.json)
 const here = dirname(fileURLToPath(import.meta.url));

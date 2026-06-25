@@ -20,7 +20,13 @@
  * logic. The URL stays the single source of truth for filter state.
  */
 import siteConfig from "../../../data/generated/site-config.json";
-import { items, itemLabel, itemLabelPlural } from "../../data/records";
+import {
+  items,
+  itemLabel,
+  itemLabelPlural,
+  taxonomy,
+  taxonomyLabel,
+} from "../../data/records";
 import type { IndexFilters } from "@grove-dev/astro";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
@@ -49,7 +55,24 @@ export function getStaticPaths() {
 const slug = Astro.params.slug as string;
 const total = items.length;
 const filters = filtersFromSearchParams(Astro.url.searchParams);
-const facets = buildFacets(items);
+function labelFacetsWithTaxonomy(facets: ReturnType<typeof buildFacets>) {
+  return {
+    ...facets,
+    stacks: facets.stacks.map((option) => ({
+      ...option,
+      label: taxonomyLabel("stacks", option.value),
+    })),
+    platforms: facets.platforms.map((option) => ({
+      ...option,
+      label: taxonomyLabel("platforms", option.value),
+    })),
+    categories: facets.categories.map((option) => ({
+      ...option,
+      label: taxonomyLabel("categories", option.value),
+    })),
+  };
+}
+const facets = labelFacetsWithTaxonomy(buildFacets(items));
 const sort = effectiveSort(filters);
 const requestedPage = effectivePage(filters);
 const filtered = filterRecords(items, filters);
@@ -273,7 +296,15 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
   </section>
 
   <script is:inline id="grove-index-data" type="application/json" set:html={clientItemsJson}></script>
-  <script is:inline define:vars={{ slug, singular: itemLabel(), plural: itemLabelPlural() }}>
+  <script
+    is:inline
+    define:vars={{
+      slug,
+      singular: itemLabel(),
+      plural: itemLabelPlural(),
+      taxonomy,
+    }}
+  >
     (() => {
       const PAGE_SIZE = 20;
       const source = document.querySelector("#grove-index-data");
@@ -421,6 +452,14 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
         categories: "Category",
         licenses: "License",
       };
+      const taxonomyKinds = {
+        stacks: "stacks",
+        platforms: "platforms",
+        categories: "categories",
+      };
+      const taxonomyName = (groupKey, value) =>
+        (taxonomy[taxonomyKinds[groupKey]] || []).find((entry) => entry.id === value)?.name ??
+        value;
       document.querySelectorAll(".grove-filter").forEach((group) => {
         const selected = values(filterKeys[group.dataset.filterGroupKey]);
         group.querySelectorAll(".grove-filter-input").forEach((input) => {
@@ -430,7 +469,9 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
         if (trigger && selected.length) {
           const label = filterLabels[group.dataset.filterGroupKey];
           trigger.textContent = `${label}: ${
-            selected.length === 1 ? selected[0] : `${selected.length} selected`
+            selected.length === 1
+              ? taxonomyName(group.dataset.filterGroupKey, selected[0])
+              : `${selected.length} selected`
           }`;
         }
       });

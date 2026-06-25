@@ -79,6 +79,12 @@ interface SiteConfigPayload {
     labelSingular?: string;
     labelPlural?: string;
   };
+  taxonomy?: Partial<
+    Record<
+      "categories" | "stacks" | "platforms" | "distributionChannels",
+      Array<{ id: string; name: string }>
+    >
+  >;
   name?: string;
 }
 
@@ -87,6 +93,25 @@ const fullRecordsRaw: Resource[] =
 const indexRecordsRaw: IndexRecord[] =
   (indexPayload as unknown as IndexPayload).records ?? [];
 const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
+const taxonomyMaps = Object.fromEntries(
+  Object.entries(siteConfigRaw.taxonomy ?? {}).map(([kind, entries]) => [
+    kind,
+    new Map((entries ?? []).map((entry) => [entry.id, entry.name])),
+  ]),
+) as Partial<
+  Record<
+    "categories" | "stacks" | "platforms" | "distributionChannels",
+    Map<string, string>
+  >
+>;
+export const taxonomy = siteConfigRaw.taxonomy ?? {};
+
+export function taxonomyLabel(
+  kind: "categories" | "stacks" | "platforms" | "distributionChannels",
+  id: string,
+): string {
+  return taxonomyMaps[kind]?.get(id) ?? id;
+}
 
 /** Full records (every record, all visibility). Use this for the
  *  detail page (where you need `content`, `bestFor`, `whyListed`,
