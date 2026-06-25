@@ -39,6 +39,24 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+async function taxonomyIds(path: string): Promise<Set<string>> {
+  try {
+    const raw = parseYaml(await readFile(path, "utf8"));
+    if (!Array.isArray(raw)) return new Set();
+    return new Set(
+      raw
+        .map((entry) =>
+          entry && typeof entry === "object"
+            ? (entry as { id?: unknown }).id
+            : undefined,
+        )
+        .filter((id): id is string => typeof id === "string"),
+    );
+  } catch {
+    return new Set();
+  }
+}
+
 /**
  * Validate a Grove project: read every record YAML under
  * `config.paths.recordsDir`, run full Zod parsing, and surface any
@@ -72,6 +90,31 @@ export async function validateProject(
   const slugs = new Set<string>();
   /** Slugs that have a github link and therefore need a health entry. */
   const slugsNeedingHealth = new Set<string>();
+  const taxonomyDir = config.paths.taxonomyDir ?? "data/taxonomy";
+  const taxonomy = {
+    categories: await taxonomyIds(
+      resolve(process.cwd(), taxonomyDir, "categories.yml"),
+    ),
+    stacks: await taxonomyIds(resolve(process.cwd(), taxonomyDir, "stacks.yml")),
+    platforms: await taxonomyIds(
+      resolve(process.cwd(), taxonomyDir, "platforms.yml"),
+    ),
+  };
+
+  const warnUnknownTaxonomy = (
+    fileSlug: string,
+    field: string,
+    value: string,
+    ids: Set<string>,
+    filename: string,
+  ) => {
+    if (ids.size === 0 || ids.has(value)) return;
+    warnings.push({
+      code: "unknown_taxonomy_value",
+      message: `${fileSlug}: ${field} "${value}" is not defined in ${taxonomyDir}/${filename}`,
+      severity: "warning",
+    });
+  };
 
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
@@ -136,6 +179,35 @@ export async function validateProject(
         message: `${fileSlug}: record slug "${parsed.slug}" does not match filename`,
         severity: "warning",
       });
+    }
+    warnUnknownTaxonomy(
+      fileSlug,
+      "category",
+      parsed.category,
+      taxonomy.categories,
+      "categories.yml",
+    );
+    if (parsed.kind === "project") {
+      for (const stack of [parsed.stack, ...parsed.stacks].filter(
+        (value): value is string => Boolean(value),
+      )) {
+        warnUnknownTaxonomy(
+          fileSlug,
+          "stack",
+          stack,
+          taxonomy.stacks,
+          "stacks.yml",
+        );
+      }
+      for (const platform of parsed.platforms) {
+        warnUnknownTaxonomy(
+          fileSlug,
+          "platform",
+          platform,
+          taxonomy.platforms,
+          "platforms.yml",
+        );
+      }
     }
     // Records that link to a GitHub repo need a matching health entry
     // so list/detail UIs can render staleness signals. Track here and

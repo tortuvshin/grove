@@ -73,6 +73,38 @@ describe("validateProject — happy path", () => {
     });
   });
 
+  it("warns when a record uses a category missing from configured taxonomy", async () => {
+    await withTmpCwd("grove-validate-taxonomy-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await mkdir(join(cwd, "data", "taxonomy"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "taxonomy", "categories.yml"),
+        "- id: news\n  name: News and Magazine\n",
+      );
+      await writeFile(
+        join(cwd, "data", "records", "reader.yml"),
+        [
+          "kind: project",
+          "slug: reader",
+          "name: Reader",
+          "description: a reader",
+          "category: news-and-magazine",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+        ].join("\n"),
+      );
+
+      const result = await validateProject(makeConfig());
+      expect(result.warnings).toContainEqual({
+        code: "unknown_taxonomy_value",
+        message:
+          'reader: category "news-and-magazine" is not defined in data/taxonomy/categories.yml',
+        severity: "warning",
+      });
+    });
+  });
+
   it("validates a single well-formed record and returns ok=true", async () => {
     await withTmpCwd("grove-validate-ok-", async (cwd) => {
       await mkdir(join(cwd, "data", "records"), { recursive: true });
