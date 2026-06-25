@@ -971,17 +971,16 @@ program
       process.exit(1);
     }
     if (target === "contributors") {
-      const script = resolve(process.cwd(), "scripts", "sync-contributors.mjs");
-      try {
-        await access(script);
-      } catch {
-        console.error(
-          `[sync contributors] Missing ${script}. ` +
-            "Restore the template script or run this command from a Grove project root.",
-        );
-        process.exit(1);
-      }
-      await runExternal(process.execPath, [script], { stdio: "inherit", cwd: process.cwd() });
+      const { syncContributors } = await import("@grove-dev/core");
+      const result = await syncContributors({
+        cwd: process.cwd(),
+        generatedDir: config.paths.generatedDir,
+      });
+      console.log(
+        `[sync contributors] ${result.contributors} contributors from ` +
+          `${result.repositories} repositories → ${result.outputPath}` +
+          (result.failed ? ` (${result.failed} failed)` : ""),
+      );
       return;
     }
     const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
