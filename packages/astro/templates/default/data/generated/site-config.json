@@ -36,6 +36,286 @@
   "integrations": {
     "github": false
   },
+  "taxonomy": {
+    "categories": [
+      {
+        "id": "productivity",
+        "name": "Productivity"
+      },
+      {
+        "id": "finance",
+        "name": "Finance"
+      },
+      {
+        "id": "education",
+        "name": "Education"
+      },
+      {
+        "id": "tools",
+        "name": "Tools"
+      },
+      {
+        "id": "communication",
+        "name": "Communication"
+      },
+      {
+        "id": "health-and-fitness",
+        "name": "Health and Fitness"
+      },
+      {
+        "id": "business",
+        "name": "Business"
+      },
+      {
+        "id": "games",
+        "name": "Games"
+      },
+      {
+        "id": "media",
+        "name": "Media"
+      },
+      {
+        "id": "entertainment",
+        "name": "Entertainment"
+      },
+      {
+        "id": "social-network",
+        "name": "Social Network"
+      },
+      {
+        "id": "shopping",
+        "name": "Shopping"
+      },
+      {
+        "id": "news",
+        "name": "News and Magazine"
+      },
+      {
+        "id": "travel",
+        "name": "Travel"
+      },
+      {
+        "id": "lifestyle",
+        "name": "Lifestyle"
+      },
+      {
+        "id": "personalization",
+        "name": "Personalization"
+      }
+    ],
+    "stacks": [
+      {
+        "id": "flutter",
+        "name": "Flutter",
+        "family": "cross-platform",
+        "languages": [
+          "dart"
+        ],
+        "platforms": [
+          "ios",
+          "android",
+          "web",
+          "macos",
+          "windows",
+          "linux"
+        ],
+        "icon": "flutter"
+      },
+      {
+        "id": "react-native",
+        "name": "React Native",
+        "family": "cross-platform",
+        "languages": [
+          "typescript",
+          "javascript"
+        ],
+        "platforms": [
+          "ios",
+          "android"
+        ],
+        "icon": "react-native"
+      },
+      {
+        "id": "ios",
+        "name": "Native iOS",
+        "family": "native",
+        "languages": [
+          "swift",
+          "objective-c"
+        ],
+        "platforms": [
+          "ios"
+        ],
+        "icon": "swift"
+      },
+      {
+        "id": "android",
+        "name": "Native Android",
+        "family": "native",
+        "languages": [
+          "kotlin",
+          "java"
+        ],
+        "platforms": [
+          "android"
+        ],
+        "icon": "android"
+      },
+      {
+        "id": "capacitor",
+        "name": "Capacitor",
+        "family": "hybrid",
+        "languages": [
+          "typescript",
+          "javascript"
+        ],
+        "platforms": [
+          "ios",
+          "android",
+          "web"
+        ],
+        "icon": "capacitor"
+      },
+      {
+        "id": "kmp",
+        "name": "Kotlin Multiplatform",
+        "family": "cross-platform",
+        "languages": [
+          "kotlin"
+        ],
+        "platforms": [
+          "ios",
+          "android",
+          "desktop"
+        ],
+        "icon": "kotlin"
+      }
+    ],
+    "platforms": [
+      {
+        "id": "ios",
+        "name": "iOS",
+        "icon": "ios"
+      },
+      {
+        "id": "android",
+        "name": "Android",
+        "icon": "android"
+      },
+      {
+        "id": "web",
+        "name": "Web",
+        "icon": "web"
+      },
+      {
+        "id": "macos",
+        "name": "macOS",
+        "icon": "macos"
+      },
+      {
+        "id": "windows",
+        "name": "Windows",
+        "icon": "windows"
+      },
+      {
+        "id": "linux",
+        "name": "Linux",
+        "icon": "linux"
+      },
+      {
+        "id": "desktop",
+        "name": "Desktop",
+        "icon": "desktop"
+      }
+    ],
+    "distributionChannels": [
+      {
+        "id": "app-store",
+        "name": "App Store",
+        "platforms": [
+          "ios",
+          "macos"
+        ]
+      },
+      {
+        "id": "play-store",
+        "name": "Play Store",
+        "platforms": [
+          "android"
+        ]
+      },
+      {
+        "id": "fdroid",
+        "name": "F-Droid",
+        "platforms": [
+          "android"
+        ]
+      },
+      {
+        "id": "github-releases",
+        "name": "GitHub Releases",
+        "platforms": [
+          "android",
+          "ios",
+          "macos",
+          "windows",
+          "linux"
+        ]
+      },
+      {
+        "id": "apk",
+        "name": "APK download",
+        "platforms": [
+          "android"
+        ]
+      },
+      {
+        "id": "testflight",
+        "name": "TestFlight",
+        "platforms": [
+          "ios"
+        ]
+      },
+      {
+        "id": "website",
+        "name": "Website download",
+        "platforms": [
+          "web",
+          "ios",
+          "android",
+          "macos",
+          "windows",
+          "linux"
+        ]
+      },
+      {
+        "id": "snapcraft",
+        "name": "Snapcraft",
+        "platforms": [
+          "linux"
+        ]
+      },
+      {
+        "id": "flathub",
+        "name": "Flathub",
+        "platforms": [
+          "linux"
+        ]
+      },
+      {
+        "id": "microsoft-store",
+        "name": "Microsoft Store",
+        "platforms": [
+          "windows"
+        ]
+      },
+      {
+        "id": "other",
+        "name": "Other",
+        "platforms": []
+      }
+    ]
+  },
   "stats": {
     "totalRecords": 8,
     "totalApps": 8,

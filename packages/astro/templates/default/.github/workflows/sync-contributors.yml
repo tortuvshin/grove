@@ -38,7 +38,7 @@ jobs:
       - name: Sync contributors from GitHub
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/sync-contributors.mjs
+        run: pnpm exec grove sync contributors
 
       - name: Commit contributors.json
         run: |

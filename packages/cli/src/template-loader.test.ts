@@ -138,6 +138,7 @@ describe("copyTemplate — force flag, filter rules", () => {
     // Spot-check: the template's package.json should be there.
     const pkg = JSON.parse(await readFile(join(target, "package.json"), "utf8")) as { name: string };
     expect(pkg.name).toBe("grove-site");
+    await expect(stat(join(target, "scripts"))).rejects.toThrow();
   });
 
   it("throws when the target dir is non-empty and force is not set", async () => {
