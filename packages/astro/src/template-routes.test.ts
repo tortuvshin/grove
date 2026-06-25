@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const pagesDir = resolve(import.meta.dirname, "../templates/default/src/pages");
@@ -63,14 +63,20 @@ describe("default Astro route configuration", () => {
     expect(submitPage).not.toContain('"  type: github"');
   });
 
-  it("builds full LLM URLs from generated consumer config", async () => {
-    const script = await readFile(
-      resolve(pagesDir, "../../scripts/build-llms.mjs"),
-      "utf8",
-    );
+  it("keeps generic maintenance behavior in Grove instead of consumer scripts", async () => {
+    const templateRoot = resolve(pagesDir, "../..");
+    const manifest = JSON.parse(
+      await readFile(resolve(templateRoot, "package.json"), "utf8"),
+    ) as { scripts?: Record<string, string> };
+    const scriptsDirExists = await stat(resolve(templateRoot, "scripts"))
+      .then(() => true)
+      .catch(() => false);
 
-    expect(script).toContain("site-config.json");
-    expect(script).toContain("blueprintConfig?.routeSlug");
+    expect(manifest.scripts?.["build:llms"]).toBe("grove llms");
+    expect(manifest.scripts?.["sync:contributors"]).toBe(
+      "grove sync contributors",
+    );
+    expect(scriptsDirExists).toBe(false);
   });
 
   it("hydrates static list pages with URL-driven search and pagination", async () => {

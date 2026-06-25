@@ -13,7 +13,7 @@
     "validate:data": "grove validate",
     "build:data": "grove generate",
     "build:sitemap": "grove sitemap",
-    "build:llms": "node scripts/build-llms.mjs",
+    "build:llms": "grove llms",
     "build": "pnpm run build:data && pnpm run build:sitemap && pnpm run build:llms && astro build",
     "dev": "pnpm run build:data && astro dev",
     "start": "astro dev",
@@ -21,6 +21,7 @@
     "astro": "astro",
     "check": "astro check",
     "sync:github": "grove sync github",
+    "sync:contributors": "grove sync contributors",
     "cleanup": "grove cleanup stale"
   },
   "dependencies": {
