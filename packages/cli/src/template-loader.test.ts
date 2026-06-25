@@ -37,7 +37,7 @@ const ASTRO_TEMPLATE = resolve(
   // Walk up from packages/cli/src to the monorepo root, then into
   // packages/astro/templates/default.
   import.meta.dirname, // src/
-  "../../../astro/templates/default",
+  "../../astro/templates/default",
 );
 
 describe("Grove workspace dependency coherence", () => {
@@ -80,6 +80,32 @@ describe("Grove workspace dependency coherence", () => {
 
     expect(rootManifest.scripts?.postinstall).toBe(
       "pnpm --filter @grove-dev/cli... build",
+    );
+  });
+});
+
+describe("generated GitHub Actions runtime", () => {
+  it("uses Node 24 and packageManager-owned pnpm versions", async () => {
+    const workflowDir = join(ASTRO_TEMPLATE, ".github", "workflows");
+    const workflows = (await readdir(workflowDir))
+      .filter((filename) => filename.endsWith(".yml"))
+      .sort();
+
+    for (const filename of workflows) {
+      const source = await readFile(join(workflowDir, filename), "utf8");
+      expect(source, filename).toContain('node-version: "24"');
+      expect(source, filename).not.toMatch(
+        /uses: pnpm\/action-setup@v4\s+with:\s+version:/m,
+      );
+    }
+
+    const cliSource = await readFile(
+      resolve(import.meta.dirname, "index.ts"),
+      "utf8",
+    );
+    expect(cliSource).not.toContain('node-version: "20"');
+    expect(cliSource).not.toMatch(
+      /uses: pnpm\/action-setup@v4\s+with:\s+version:/m,
     );
   });
 });
