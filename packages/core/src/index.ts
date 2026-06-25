@@ -100,6 +100,14 @@ export type { EnrichedFields, EnrichResult } from "./enrich.js";
 
 // ── GitHub: client helpers (V1 public subset) ────────────────────────
 export { rateLimitWaitMs, sleep } from "./github-client.js";
+
+// ── Contributor aggregation ───────────────────────────────────────────
+export { syncContributors } from "./contributors.js";
+export type {
+  Contributor,
+  ContributorSyncResult,
+  SyncContributorsOptions,
+} from "./contributors.js";
 export type { GhFetchOptions } from "./github-client.js";
 
 // ── Health: classification ────────────────────────────────────────────
