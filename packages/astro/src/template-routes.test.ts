@@ -80,4 +80,17 @@ describe("default Astro route configuration", () => {
     expect(listPage).toContain("function applyClientFilters()");
     expect(listPage).toContain("const PAGE_SIZE = 20");
   });
+
+  it("uses generated taxonomy names as display labels", async () => {
+    const recordsModule = await readFile(
+      resolve(pagesDir, "../data/records.ts"),
+      "utf8",
+    );
+    const homePage = await readFile(resolve(pagesDir, "index.astro"), "utf8");
+    const listPage = await readFile(resolve(pagesDir, "[slug]/index.astro"), "utf8");
+
+    expect(recordsModule).toContain("export function taxonomyLabel");
+    expect(homePage).toContain('taxonomyLabel("categories"');
+    expect(listPage).toContain("labelFacetsWithTaxonomy");
+  });
 });

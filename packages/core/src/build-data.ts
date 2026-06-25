@@ -98,6 +98,39 @@ export interface RecordsIndexPayload {
   records: Array<Record<string, unknown>>;
 }
 
+type GeneratedTaxonomyItem = {
+  id: string;
+  name: string;
+  [key: string]: unknown;
+};
+
+async function loadTaxonomyFile(
+  cwd: string,
+  taxonomyDir: string,
+  filename: string,
+): Promise<GeneratedTaxonomyItem[]> {
+  try {
+    const text = await readFile(resolve(cwd, taxonomyDir, filename), "utf8");
+    const raw = parseYaml(text);
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter(
+        (item): item is Record<string, unknown> =>
+          Boolean(item) &&
+          typeof item === "object" &&
+          typeof item.id === "string" &&
+          typeof item.name === "string",
+      )
+      .map((item) => ({
+        ...item,
+        id: item.id as string,
+        name: item.name as string,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 /**
  * `generate` reads every records/*.yml in the project, normalizes them
  * via the blueprint schema, and writes:
@@ -263,6 +296,24 @@ export async function generate(
         entity: "entities",
       }[kind] ?? "items"),
   };
+  const taxonomy = {
+    categories: await loadTaxonomyFile(
+      cwd,
+      cfg.paths.taxonomyDir,
+      "categories.yml",
+    ),
+    stacks: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, "stacks.yml"),
+    platforms: await loadTaxonomyFile(
+      cwd,
+      cfg.paths.taxonomyDir,
+      "platforms.yml",
+    ),
+    distributionChannels: await loadTaxonomyFile(
+      cwd,
+      cfg.paths.taxonomyDir,
+      "distribution-channels.yml",
+    ),
+  };
 
   const siteConfigPayload = {
     blueprint: cfg.blueprint,
@@ -275,6 +326,7 @@ export async function generate(
     nav: cfg.nav,
     theme: cfg.theme,
     integrations: cfg.integrations,
+    taxonomy,
     stats: {
       totalRecords: indexRecords.length,
       totalApps: projects.length,
