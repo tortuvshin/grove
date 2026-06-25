@@ -96,6 +96,7 @@ describe("default Astro route configuration", () => {
     const listPage = await readFile(resolve(pagesDir, "[slug]/index.astro"), "utf8");
 
     expect(recordsModule).toContain("export function taxonomyLabel");
+    expect(recordsModule).toContain("?? prettySlug(id)");
     expect(homePage).toContain('taxonomyLabel("categories"');
     expect(listPage).toContain("labelFacetsWithTaxonomy");
   });
