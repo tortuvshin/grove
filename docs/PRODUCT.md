@@ -425,7 +425,7 @@ Each space is its own repository, with its own data, branding, and community rul
 
 ## 16. Roadmap status
 
-The Wave 0 → Wave 5 plan is in `docs/roadmap.md`. Summary of where things stand:
+The Wave 0 → Wave 5 plan is in the [Roadmap](/roadmap/) page on the docs site. Summary of where things stand:
 
 | Wave   | Goal                                 | Status                                                                                                                                     |
 | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |

@@ -121,7 +121,7 @@ Grove is in **active development** (current release: **v0.2.x**). The core engin
 **Use it for:** personal projects, internal directories, OSS ecosystems, learning collections, prototypes.
 **Hold off for:** mission-critical production where a database migration is cheaper than a YAML migration.
 
-For what's planned, see [`docs/roadmap.md`](./docs/roadmap.md).
+For what's planned, see the [Roadmap](/roadmap/) page on the docs site.
 
 ---
 

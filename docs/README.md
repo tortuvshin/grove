@@ -70,7 +70,7 @@ This way the doc shows up on the site _and_ on GitHub.
 
 ## Deploying
 
-We don't have a single canonical deploy pipeline yet — see [`../roadmap.md`](../roadmap.md) for the backlog entry. In the meantime, the project is happy with any of:
+We don't have a single canonical deploy pipeline yet — see the [Roadmap](/roadmap/) page on the docs site for the backlog entry. In the meantime, the project is happy with any of:
 
 - **GitHub Pages** — push `docs/dist/` to a `gh-pages` branch (or use `actions/deploy-pages`).
 - **Netlify / Vercel / Cloudflare Pages** — point at `docs/`, set the build command to `pnpm build`, the publish directory to `docs/dist`.
