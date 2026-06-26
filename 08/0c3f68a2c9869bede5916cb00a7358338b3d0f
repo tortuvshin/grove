@@ -1,0 +1,32 @@
+docs/README.md
+  s_a0ed7c152a4c3a::t_450510817d9c59 5
+docs/astro.config.mjs
+  s_a0ed7c152a4c3a::t_38a8b98552d3ef 57-64
+  s_a0ed7c152a4c3a::t_eb07fb93ed282a 11
+  s_a0ed7c152a4c3a::t_782a81e751361c 48-56,65-95
+docs/superpowers/specs/2026-06-26-terminal-display-design.md
+  s_a0ed7c152a4c3a::t_22cd29628d5fa5 358
+docs/src/content/docs/maintainers/release-process.md
+  s_a0ed7c152a4c3a::t_fbb77bcee2805d 158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "080c3f68a2c9869bede5916cb00a7358338b3d0f",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a0ed7c152a4c3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "723c0a4e-c970-416d-af64-45cdb658cc33",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
