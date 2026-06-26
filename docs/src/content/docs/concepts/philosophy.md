@@ -3,7 +3,7 @@ title: Philosophy
 description: Why Grove is built around files, static output, and reviewable data — and what we are not.
 ---
 
-Grove is an opinionated framework. The opinions are not arbitrary — they're the result of watching a lot of community knowledge spaces grow, age, and break. This page is the short version of the longer position; the long version lives in [`vision.md`](https://github.com/grove-dev/grove/blob/main/vision.md) in the repo.
+Grove is an opinionated framework. The opinions are not arbitrary — they're the result of watching a lot of community knowledge spaces grow, age, and break. This page is the short version of the longer position; the long version lives in [`vision.md`](https://github.com/tortuvshin/grove/blob/main/vision.md) in the repo.
 
 If you read one page on this site, read this one. It explains why the rest of the docs are shaped the way they are.
 
@@ -75,4 +75,4 @@ If any of these are dealbreakers, that's fine — use a CMS, a wiki, or a databa
 
 This site uses the word carefully. "Supported" means: the feature works in the current release, the docs cover it, and a maintainer will accept PRs against it. "Schema-ready" means: the Zod schema exists and the CLI accepts the data, but no polished template ships. "Roadmap" means: not in the current release; tracked in the [Roadmap](/roadmap/).
 
-The homepage lists the current status. If a doc says "supported" but the code says otherwise, that's a bug — please [open an issue](https://github.com/grove-dev/grove/issues). See the [Blueprints](/concepts/blueprints/) page for the current status of each blueprint, and the [Astro adapter](/adapters/astro/) / [Next.js adapter](/adapters/nextjs/) / [SvelteKit adapter](/adapters/svelte/) pages for the adapter status.
+The homepage lists the current status. If a doc says "supported" but the code says otherwise, that's a bug — please [open an issue](https://github.com/tortuvshin/grove/issues). See the [Blueprints](/concepts/blueprints/) page for the current status of each blueprint, and the [Astro adapter](/adapters/astro/) / [Next.js adapter](/adapters/nextjs/) / [SvelteKit adapter](/adapters/svelte/) pages for the adapter status.

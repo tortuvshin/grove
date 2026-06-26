@@ -3,7 +3,7 @@ title: Security
 description: The security policy for Grove — supported versions, how to report a vulnerability, what data is and is not collected.
 ---
 
-This page documents the security posture of the Grove framework and the `@grove-dev/*` packages. If you maintain a *Grove-powered directory*, the same policy applies to your directory, with the maintainer team as the contact point. The complete policy lives in [`SECURITY.md`](https://github.com/grove-dev/grove/blob/main/SECURITY.md) at the repo root; this page is the summary.
+This page documents the security posture of the Grove framework and the `@grove-dev/*` packages. If you maintain a *Grove-powered directory*, the same policy applies to your directory, with the maintainer team as the contact point. The complete policy lives in [`SECURITY.md`](https://github.com/tortuvshin/grove/blob/main/SECURITY.md) at the repo root; this page is the summary.
 
 ## Supported versions
 
@@ -94,7 +94,7 @@ The legal niceties aside, the practical posture is: we want the report, we want 
 
 ## Past advisories
 
-Public security advisories are listed at [GitHub Security Advisories for this repo](https://github.com/grove-dev/grove/security/advisories). The list is empty in V1; it is the right place to look if you want to confirm a CVE.
+Public security advisories are listed at [GitHub Security Advisories for this repo](https://github.com/tortuvshin/grove/security/advisories). The list is empty in V1; it is the right place to look if you want to confirm a CVE.
 
 ## For directory maintainers
 

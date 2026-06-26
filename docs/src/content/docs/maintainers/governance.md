@@ -62,7 +62,7 @@ Maintainers leave. The graceful path:
 
 1. **Step down voluntarily** — open an issue titled "Stepping down as maintainer". Tag the other maintainers. The repo permissions are removed after a 2-week overlap, during which the departing maintainer helps hand off active work.
 2. **Inactive for 6+ months** — the remaining maintainers agree to remove the inactive member, with a 2-week notice via the issue tracker. The "step down" issue is filed by a remaining maintainer on the inactive member's behalf.
-3. **Removed for cause** — a code of conduct violation, a public dispute that can't be resolved internally. The removal is immediate, governed by the [Code of Conduct](https://github.com/grove-dev/grove/blob/main/CODE_OF_CONDUCT.md). This is rare; the [Security policy](/maintainers/security/) and the CoC together cover the cases.
+3. **Removed for cause** — a code of conduct violation, a public dispute that can't be resolved internally. The removal is immediate, governed by the [Code of Conduct](https://github.com/tortuvshin/grove/blob/main/CODE_OF_CONDUCT.md). This is rare; the [Security policy](/maintainers/security/) and the CoC together cover the cases.
 
 In all cases, the departing maintainer's write access is removed. Their record PRs and decisions remain in the git history.
 
@@ -84,7 +84,7 @@ Grove the framework does not maintain a list of "official" Grove directories. Th
 This means:
 
 - **Your directory's governance is yours.** The framework does not impose a structure. The model above is a starting point.
-- **The framework's governance is separate.** The `@grove-dev/*` packages are maintained by the framework's own maintainer team. See the [framework's CONTRIBUTING.md](https://github.com/grove-dev/grove/blob/main/CONTRIBUTING.md) for that side.
+- **The framework's governance is separate.** The `@grove-dev/*` packages are maintained by the framework's own maintainer team. See the [framework's CONTRIBUTING.md](https://github.com/tortuvshin/grove/blob/main/CONTRIBUTING.md) for that side.
 - **Forks are welcome.** If a directory's governance goes in a direction you disagree with, fork it. The data is yours to take. The license is MIT.
 
 ## Tooling the framework does provide
