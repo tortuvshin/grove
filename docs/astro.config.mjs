@@ -1,119 +1,114 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from '@grove-dev/starlight';
 
-// https://astro.build/config
+// Grove docs — the canonical Astro/Starlight site for the project.
+// This site is itself a Grove space: it uses the same record schema,
+// Astro template, and CLI workflow as any user-built space.
 export default defineConfig({
     site: 'https://grove.dev',
     integrations: [
         starlight({
-            // The custom landing page at "/" is a Starlight splash
-            // content entry (src/content/docs/index.mdx). The deep
-            // showcase gallery lives at /showcase/* (also from
-            // src/content/docs/showcase/).
+            // The custom landing page at "/" is the product landing page
+            // (src/content/docs/index.mdx). The Open Apps case study lives
+            // at /open-apps/. The deep docs/sidebar lives under
+            // /getting-started/, /build/, /customize/, /automation/,
+            // /reference/, /project/.
             title: 'Grove',
             description:
-                'Grove is an open-source framework for building living, file-based community knowledge spaces.',
+                'Grove turns structured files into fast, searchable, contributor-friendly community knowledge spaces.',
             logo: {
                 replacesTitle: false,
                 alt: 'Grove',
-                dark: './src/assets/logo-dark.svg',
-                light: './src/assets/logo-light.svg',
             },
-            customCss: ['./src/styles/global.css'],
-            // TODO(decision): confirm the org name. The real upstream org
-            // is `tortuvshin/grove` (per repo `homepage` / npm `repository`
-            // fields); the audit flagged this as `grove-dev/grove`. The
-            // Starlight "Edit this page" link resolves to this URL.
-            // Leaving as `grove-dev/grove` per audit recommendation (a) —
-            // flag in `outputs/docs-and-placeholders/deliverable.md`.
-            editLink: {
-                baseUrl: 'https://github.com/grove-dev/grove/edit/main/docs',
-            },
-            lastUpdated: true,
+            customCss: ['./src/styles/custom.css'],
             plugins: [
-                lucode({
-                    docs: {
-                        includeAiUtilities: true,
-                    },
-                    navLinks: [
-                        { label: 'Docs', link: '/getting-started/create-a-space/' },
-                        { label: 'Showcase', link: '/showcase/starlight-components/' },
-                        { label: 'API', link: '/reference/cli/' },
-                    ],
+                starlightLinksValidator({
+                    // Use the production site as the validation baseline
+                    // so we don't fail on links that only resolve in
+                    // production (e.g. cross-locale slugs).
+                    exclude: [],
+                    errorOnLocalLinks: false,
+                    errorOnFallbackPages: false,
                 }),
             ],
-            social: [
-                // TODO(decision): confirm the org name (see editLink.baseUrl above).
-                { icon: 'github', label: 'GitHub', href: 'https://github.com/grove-dev/grove' },
-            ],
+            components: {
+                ...starlightOpenInGH({
+                    // Link directly to the repo on the main branch so
+                    // users always edit the canonical copy.
+                    editingLinkBaseUrl:
+                        'https://github.com/tortuvshin/grove/edit/main/docs/',
+                }),
+                ...starlightAi({
+                    // Reuse the AI utilities (llms.txt, llms-full.txt)
+                    // from any rendered page so AI assistants can
+                    // crawl the docs without a sitemap.
+                    aiPageTitle: 'Grove Documentation',
+                    includeAiUtilities: true,
+                }),
+                navLinks: [
+                    { label: 'Open Apps', link: '/open-apps/' },
+                    { label: 'Docs', link: '/getting-started/introduction/' },
+                    { label: 'Roadmap', link: '/roadmap' },
+                    { label: 'GitHub', link: 'https://github.com/tortuvshin/grove', attrs: { target: '_blank', rel: 'noopener noreferrer' } },
+                ],
+                social: [
+                    { icon: 'github', label: 'GitHub', href: 'https://github.com/tortuvshin/grove' },
+                ],
+            },
             sidebar: [
                 {
-                    label: 'Start here',
+                    label: 'Getting Started',
                     items: [
-                        { label: 'What is Grove?', slug: 'getting-started/what-is-grove' },
-                        { label: 'Create a space', slug: 'getting-started/create-a-space' },
-                        { label: 'Add your first record', slug: 'getting-started/add-your-first-record' },
+                        { label: 'Introduction', slug: 'getting-started/introduction' },
+                        { label: 'Create a project directory', slug: 'getting-started/create-a-space' },
+                        { label: 'Add your first project', slug: 'getting-started/add-your-first-project' },
+                        { label: 'Deploy your site', slug: 'getting-started/deploy' },
                     ],
                 },
                 {
-                    label: 'Concepts',
+                    label: 'Build your directory',
                     items: [
-                        { label: 'Blueprints', slug: 'concepts/blueprints' },
-                        { label: 'Philosophy', slug: 'concepts/philosophy' },
+                        { label: 'Configure your space', slug: 'build/configure' },
+                        { label: 'Projects', slug: 'build/projects' },
+                        { label: 'Categories and tags', slug: 'build/taxonomy' },
+                        { label: 'Pages and content', slug: 'build/pages' },
+                        { label: 'Images and assets', slug: 'build/assets' },
+                    ],
+                },
+                {
+                    label: 'Customize',
+                    items: [
+                        { label: 'Branding', slug: 'customize/branding' },
+                        { label: 'Theme', slug: 'customize/theme' },
+                        { label: 'Components', slug: 'customize/components' },
+                        { label: 'Custom pages', slug: 'customize/pages' },
+                    ],
+                },
+                {
+                    label: 'Automation',
+                    items: [
+                        { label: 'GitHub metadata', slug: 'automation/github-metadata' },
+                        { label: 'Community submissions', slug: 'automation/submissions' },
+                        { label: 'Validation', slug: 'automation/validation' },
+                        { label: 'Scheduled maintenance', slug: 'automation/scheduled' },
                     ],
                 },
                 {
                     label: 'Reference',
                     items: [
+                        { label: 'Configuration', slug: 'reference/config' },
+                        { label: 'Project record', slug: 'reference/record-schema' },
                         { label: 'CLI', slug: 'reference/cli' },
-                        { label: 'grove.config.ts', slug: 'reference/config' },
-                        { label: 'Record schema', slug: 'reference/record-schema' },
-                        { label: 'Plugin API', slug: 'reference/plugin-api' },
-                        { label: 'Theme Components', slug: 'reference/components' },
-                    ],
-                },
-                {
-                    label: 'Adapters',
-                    items: [
-                        { label: 'Astro', slug: 'adapters/astro' },
-                        { label: 'Next.js (roadmap)', slug: 'adapters/nextjs' },
-                        { label: 'SvelteKit (roadmap)', slug: 'adapters/svelte' },
-                    ],
-                },
-                {
-                    label: 'Guides',
-                    items: [
-                        { label: 'Author a record', slug: 'guides/author-a-record' },
-                        { label: 'Maintain health signals', slug: 'guides/maintain-health-signals' },
-                        { label: 'Manage decisions', slug: 'guides/manage-decisions' },
-                        { label: 'Sync GitHub metadata', slug: 'guides/sync-github-metadata' },
-                        { label: 'Customize the Astro template', slug: 'guides/customize-astro-template' },
-                        { label: 'Deploy', slug: 'guides/deploy' },
-                    ],
-                },
-                {
-                    label: 'Showcase',
-                    items: [
-                        { label: 'Splash pages', slug: 'showcase/splash-pages' },
-                        { label: 'Starlight components', slug: 'showcase/starlight-components' },
-                        { label: 'Typography', slug: 'showcase/typography' },
+                        { label: 'Astro components', slug: 'reference/components' },
                     ],
                 },
                 {
                     label: 'Project',
                     items: [
+                        { label: 'Framework status', slug: 'reference/frameworks' },
                         { label: 'Roadmap', slug: 'roadmap' },
-                    ],
-                },
-                {
-                    label: 'Maintainers',
-                    items: [
-                        { label: 'Governance', slug: 'maintainers/governance' },
-                        { label: 'Release process', slug: 'maintainers/release-process' },
-                        { label: 'Contributing', slug: 'maintainers/contributing' },
-                        { label: 'Security', slug: 'maintainers/security' },
+                        { label: 'Maintainers', slug: 'maintainers/contributing' },
                     ],
                 },
             ],

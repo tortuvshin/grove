@@ -51,7 +51,7 @@ export default defineConfig({
           // brief calls for "include the packages/* directories";
           // the `{test,spec}.ts` suffix keeps `.d.ts` and the
           // test files co-located in the same directory.
-          include: ["packages/*/src/**/*.{test,spec}.ts"],
+          include: ["packages/*/src/**/*.{test,spec}.ts", "docs/src/**/*.{test,spec}.ts"],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its
