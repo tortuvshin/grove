@@ -82,7 +82,7 @@ describe("docs homepage (standalone Astro route)", () => {
 
     // Starlight integration still present (other docs pages need it)
     expect(config).toContain("starlight({");
-    expect(config).toContain("import lucode from '@grove-dev/starlight'");
+    expect(config).toContain("import grove from '@grove-dev/starlight'");
   });
 
   it("removes the Starlight splash content/docs/index.mdx so the custom route owns /", async () => {
@@ -378,7 +378,7 @@ describe("docs homepage (standalone Astro route)", () => {
     );
     // Intro was removed from the Getting Started sidebar (now 3 items)
     expect(config).not.toContain("slug: 'getting-started/introduction'");
-    // The lucode Docs link points at the new root route
+    // The Grove plugin's Docs link points at the new root route
     expect(config).toContain("link: '/introduction/'");
   });
 });
