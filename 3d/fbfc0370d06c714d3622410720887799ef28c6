@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-06-26-terminal-display-design.md
+  s_b1868093fc5f90::t_5c7667b80e7f0a 1-379
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "3dfbfc0370d06c714d3622410720887799ef28c6",
+  "prompts": {},
+  "sessions": {
+    "s_b1868093fc5f90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fcf3f80-2695-4c74-8fe3-0aa3463e46c9",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
