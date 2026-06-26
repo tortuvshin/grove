@@ -75,7 +75,6 @@ interface Props {
 interface Props {
   tabs: { label: string; commands: string[] }[];
   defaultTab?: string; // default: tabs[0].label
-  prompt?: string; // default: "$"
   copyLabel?: string; // default: "Copy commands"
 }
 ```
@@ -265,11 +264,21 @@ that `docs/src/home-landing.test.ts` already uses:
   - asserts the command string is present
   - asserts the copy button has `data-copy="<command>"`
 
-`docs/src/home-landing.test.ts` gets three small updates: change the
-`.hero-command` substring assertion to look for the new component name,
-replace the `.code-card` substring with `CodeCard`, and replace the inline
-CTA `<code>` substring check with `CtaCode`. Net: same coverage, just
-pointed at the new components.
+`docs/src/home-landing.test.ts` does **not** require updates. Its existing
+assertions (`command` string present, section headings present, feature
+data present, no `powered-circuit` / `circuit-line`) all remain true after
+migration:
+
+- `command` is still defined in the frontmatter (still used by
+  `HeroCommand` and `CtaCode`).
+- The install-commands data still contains the literal
+  `npx @grove-dev/cli@latest new my-space`.
+- All section headings ("What Is Grove", "Get Started In Seconds",
+  "Ecosystem", "Start building with Grove") remain in the template.
+- Feature icons and stack-logo data are untouched.
+
+The test continues to pass unchanged, but now exercises the same content
+through the new components rather than through inline markup.
 
 ## Migration of `HomeLanding.astro`
 
