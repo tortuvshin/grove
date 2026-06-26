@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://grove.dev.mn/sitemap-index.xml
