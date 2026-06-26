@@ -107,7 +107,7 @@ For the full reference (every CLI command, every config field), see the [docs si
 
 ## Status
 
-Grove is in **active development** (current release: **v0.2.x**). The core engine, CLI, and Astro adapter are stable enough to power a real space end-to-end. `@grove-dev/ui` ships typed framework-agnostic primitives. The Next.js and SvelteKit adapters are skeleton packages; the V1 CLI refuses to scaffold them (`--framework` only accepts `astro`). Breaking changes between minor versions follow the rules in [`docs/RELEASING.md`](./docs/RELEASING.md).
+Grove is in **active development** (current release: **v0.3.0**). The core engine, CLI, and Astro adapter are stable enough to power a real space end-to-end. `@grove-dev/ui` ships typed framework-agnostic primitives. The Next.js and SvelteKit adapters are skeleton packages; the V1 CLI refuses to scaffold them (`--framework` only accepts `astro`). Breaking changes between minor versions follow the rules in [`docs/RELEASING.md`](./docs/RELEASING.md).
 
 ### Framework matrix
 

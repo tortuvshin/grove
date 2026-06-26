@@ -436,4 +436,4 @@ The Wave 0 → Wave 5 plan is in the [Roadmap](/roadmap/) page on the docs site.
 | Wave 4 | Maintenance signals as opt-in        | Mostly done — `sync github` and `cleanup stale` exist; scoring and AI-assisted curation are roadmap                                        |
 | Wave 5 | Federation (cross-space references)  | Do not build unless asked                                                                                                                  |
 
-The framework is at **V0.2.x** (pre-V1). The CLI, core, and Astro adapter are stable enough to power a real space end-to-end. The Next.js and SvelteKit adapters are skeleton packages; the V1 CLI refuses to scaffold them.
+The framework is at **v0.3.0** (initial public release; pre-V1). The CLI, core, and Astro adapter are stable enough to power a real space end-to-end. The Next.js and SvelteKit adapters are skeleton packages; the V1 CLI refuses to scaffold them.
