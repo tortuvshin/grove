@@ -14,11 +14,11 @@ export default defineConfig({
     },
     integrations: [
         starlight({
-            // The custom landing page at "/" is the product landing page
-            // (src/content/docs/index.mdx). The Open Apps case study lives
-            // at /open-apps/. The deep docs/sidebar lives under
-            // /getting-started/, /build/, /customize/, /automation/,
-            // /reference/, /project/.
+            // The custom landing page at "/" is the standalone Astro build
+            // (src/pages/index.astro). The Starlight docs own every other
+            // route. The introduction page lives at /introduction/ (its
+            // content file is content/docs/introduction.md) and is linked
+            // from the home header as the Docs entry.
             title: 'Grove',
             description:
                 'Grove turns structured files into fast, searchable, contributor-friendly community knowledge spaces.',
@@ -36,7 +36,7 @@ export default defineConfig({
                     },
                     navLinks: [
                         { label: 'Open Apps', link: '/open-apps/' },
-                        { label: 'Docs', link: '/getting-started/introduction/' },
+                        { label: 'Docs', link: '/introduction/' },
                         { label: 'Roadmap', link: '/roadmap' },
                         { label: 'GitHub', link: 'https://github.com/tortuvshin/grove', attrs: { target: '_blank', rel: 'noopener noreferrer' } },
                     ],
@@ -49,7 +49,9 @@ export default defineConfig({
                 {
                     label: 'Getting Started',
                     items: [
-                        { label: 'Introduction', slug: 'getting-started/introduction' },
+                        // Introduction was moved to /introduction/ and linked
+                        // from the home header — the remaining three items
+                        // stay under the Getting Started sidebar.
                         { label: 'Create a project directory', slug: 'getting-started/create-a-space' },
                         { label: 'Add your first project', slug: 'getting-started/add-your-first-project' },
                         { label: 'Deploy your site', slug: 'getting-started/deploy' },

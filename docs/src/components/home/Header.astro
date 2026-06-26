@@ -1,9 +1,9 @@
 ---
 const navLinks = [
-  { label: 'Open Apps', href: '#' },
-  { label: 'Docs', href: '#' },
-  { label: 'Roadmap', href: '#' },
-  { label: 'GitHub', href: '#' },
+  { label: 'Demo', href: 'https://open-apps.dev.mn', external: true },
+  { label: 'Docs', href: '/introduction/' },
+  { label: 'Open Apps', href: '/open-apps/' },
+  { label: 'Roadmap', href: '/roadmap' },
 ]
 ---
 
@@ -31,6 +31,8 @@ const navLinks = [
             <a
               href={link.href}
               class="text-sm text-muted transition-colors hover:text-fg"
+              target={link.external ? '_blank' : undefined}
+              rel={link.external ? 'noopener noreferrer' : undefined}
             >
               {link.label}
             </a>
@@ -40,19 +42,12 @@ const navLinks = [
     </div>
 
     <div class="flex items-center gap-3">
-      <div
-        class="hidden items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 sm:flex"
-      >
-        <span class="text-sm text-subtle">Search</span>
-        <kbd
-          class="ml-6 rounded border border-border-strong bg-card px-1.5 py-0.5 text-[11px] text-subtle"
-          >⌘ K</kbd
-        >
-      </div>
       <a
-        href="#"
+        href="https://github.com/tortuvshin/grove"
         class="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card hover:text-fg"
         aria-label="GitHub"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         <svg class="size-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path
@@ -60,16 +55,6 @@ const navLinks = [
           ></path>
         </svg>
       </a>
-      <button
-        type="button"
-        class="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card hover:text-fg"
-        aria-label="Toggle theme"
-      >
-        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-        </svg>
-      </button>
     </div>
   </div>
 </header>
