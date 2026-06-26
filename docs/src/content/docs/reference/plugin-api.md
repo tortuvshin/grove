@@ -48,7 +48,7 @@ lucode({
     { label: 'API', link: '/reference/plugin-api/' },
     {
       label: 'GitHub',
-      link: 'https://github.com/grove-dev/grove',
+      link: 'https://github.com/tortuvshin/grove',
       attrs: { target: '_blank', rel: 'noreferrer' },
     },
   ],
@@ -144,14 +144,14 @@ starlight({
   title: 'Grove',
   customCss: ['./src/styles/global.css'],
   lastUpdated: true,
-  editLink: { baseUrl: 'https://github.com/grove-dev/grove/edit/main/docs' },
+  editLink: { baseUrl: 'https://github.com/tortuvshin/grove/edit/main/docs' },
   plugins: [
     lucode({
       docs: { includeAiUtilities: true },
       navLinks: [
         { label: 'Docs', link: '/guides/getting-started/' },
         { label: 'Showcase', link: '/showcase/starlight-components/' },
-        { label: 'GitHub', link: 'https://github.com/grove-dev/grove' },
+        { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
       ],
     }),
   ],
