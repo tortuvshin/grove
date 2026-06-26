@@ -14,9 +14,9 @@ const orbiting = [
   <!-- starfield -->
   <div class="stars pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
-  <div class="relative mx-auto max-w-7xl px-6 py-24">
+  <div class="relative mx-auto max-w-7xl px-6 py-24" aria-labelledby="integrations-title">
     <div class="mx-auto flex max-w-2xl flex-col items-center text-center">
-      <!-- orbital diagram -->
+      <!-- orbital diagram (decorative — hidden from assistive tech) -->
       <div class="relative mx-auto aspect-square w-full max-w-md" aria-hidden="true">
         <!-- concentric rings -->
         <div class="absolute left-1/2 top-1/2 size-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10"></div>
@@ -34,12 +34,21 @@ const orbiting = [
           </div>
         </div>
 
-        <!-- orbiting logos -->
+        <!-- orbiting logos (decorative — alt="" because the h2 below
+             carries the meaning for assistive tech). -->
         {
           orbiting.map((o) => (
             <div class={`absolute z-10 ${o.class}`}>
               <div class={`flex size-12 items-center justify-center rounded-full border border-border-strong bg-surface/90 backdrop-blur ${o.pad}`}>
-                <img src={o.src} alt={o.name} class="size-full object-contain" />
+                <img
+                  src={o.src}
+                  alt=""
+                  width="48"
+                  height="48"
+                  loading="lazy"
+                  decoding="async"
+                  class="size-full object-contain"
+                />
               </div>
             </div>
           ))
@@ -47,6 +56,7 @@ const orbiting = [
       </div>
 
       <h2
+        id="integrations-title"
         class="mt-4 text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
       >
         Integrate with your favorite tools
