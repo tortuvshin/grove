@@ -2,12 +2,16 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import lucode from '@grove-dev/starlight';
+import tailwindcss from '@tailwindcss/vite';
 
 // Grove docs — the canonical Astro/Starlight site for the project.
 // This site is itself a Grove space: it uses the same record schema,
 // Astro template, and CLI workflow as any user-built space.
 export default defineConfig({
     site: 'https://grove.dev',
+    vite: {
+        plugins: [tailwindcss()],
+    },
     integrations: [
         starlight({
             // The custom landing page at "/" is the product landing page

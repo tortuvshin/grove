@@ -1,0 +1,81 @@
+---
+// Logos placed on the orbital rings around the central node.
+const orbiting = [
+  { src: '/logos/astro.svg', name: 'Astro', class: 'left-1/2 top-0 -translate-x-1/2', pad: 'p-3' },
+  { src: '/logos/svelte.svg', name: 'Svelte', class: 'left-1/2 top-[18%] -translate-x-1/2', pad: 'p-2.5' },
+  { src: '/logos/nextdotjs.svg', name: 'Next.js', class: 'left-[12%] top-[34%]', pad: 'p-2.5' },
+  { src: '/logos/nodedotjs.svg', name: 'Node.js', class: 'right-[12%] top-[34%]', pad: 'p-2.5' },
+  { src: '/logos/vuedotjs.svg', name: 'Vue', class: 'left-[26%] top-[52%]', pad: 'p-2.5' },
+  { src: '/logos/react.svg', name: 'React', class: 'right-[26%] top-[52%]', pad: 'p-2.5' },
+]
+---
+
+<section class="relative overflow-hidden border-t border-border/60">
+  <!-- starfield -->
+  <div class="stars pointer-events-none absolute inset-0" aria-hidden="true"></div>
+
+  <div class="relative mx-auto max-w-7xl px-6 py-24">
+    <div class="mx-auto flex max-w-2xl flex-col items-center text-center">
+      <!-- orbital diagram -->
+      <div class="relative mx-auto aspect-square w-full max-w-md" aria-hidden="true">
+        <!-- concentric rings -->
+        <div class="absolute left-1/2 top-1/2 size-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10"></div>
+        <div class="absolute left-1/2 top-1/2 size-[82%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.07]"></div>
+        <div class="absolute left-1/2 top-1/2 size-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.04]"></div>
+
+        <!-- center node -->
+        <div class="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+          <div class="flex size-16 items-center justify-center rounded-full border border-accent-blue/40 bg-surface shadow-[0_0_40px_-8px_rgba(96,165,250,0.6)]">
+            <svg class="size-7 text-accent-blue" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <path
+                d="M14.2 14.2H17V6.9375C17 4.76288 15.2371 3 13.0625 3H5.8V5.8M14.2 14.2V7.79063L7.79062 14.2H14.2ZM14.2 14.2V17H6.9375C4.76288 17 3 15.2371 3 13.0625V5.8H5.8M5.8 5.8V12.2313L12.2313 5.8H5.8Z"
+                stroke-linejoin="round"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- orbiting logos -->
+        {
+          orbiting.map((o) => (
+            <div class={`absolute z-10 ${o.class}`}>
+              <div class={`flex size-12 items-center justify-center rounded-full border border-border-strong bg-surface/90 backdrop-blur ${o.pad}`}>
+                <img src={o.src} alt={o.name} class="size-full object-contain" />
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      <h2
+        class="mt-4 text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
+      >
+        Integrate with your favorite tools
+      </h2>
+      <p class="mt-5 text-base leading-relaxed text-muted">
+        Connect seamlessly with popular platforms and services to enhance your
+        workflow.
+      </p>
+      <a
+        href="#"
+        class="mt-8 inline-flex items-center justify-center rounded-full bg-fg px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90"
+      >
+        Get Started
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stars {
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.5) 50%, transparent),
+      radial-gradient(1px 1px at 75% 20%, rgba(255, 255, 255, 0.4) 50%, transparent),
+      radial-gradient(1px 1px at 40% 70%, rgba(255, 255, 255, 0.35) 50%, transparent),
+      radial-gradient(1px 1px at 85% 65%, rgba(255, 255, 255, 0.45) 50%, transparent),
+      radial-gradient(1px 1px at 10% 80%, rgba(255, 255, 255, 0.3) 50%, transparent),
+      radial-gradient(1.5px 1.5px at 60% 40%, rgba(255, 255, 255, 0.5) 50%, transparent),
+      radial-gradient(1px 1px at 30% 12%, rgba(255, 255, 255, 0.35) 50%, transparent),
+      radial-gradient(1px 1px at 90% 85%, rgba(255, 255, 255, 0.3) 50%, transparent);
+    background-repeat: no-repeat;
+  }
+</style>

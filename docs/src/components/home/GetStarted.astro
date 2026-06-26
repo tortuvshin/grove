@@ -1,0 +1,88 @@
+---
+const steps = [
+  {
+    num: '01',
+    title: 'Create a space',
+    cmd: 'grove new',
+    desc: 'Scaffold a Grove project with the CLI.',
+  },
+  {
+    num: '02',
+    title: 'Add records',
+    cmd: 'grove add',
+    desc: 'Write structured files for projects, resources, or places.',
+  },
+  {
+    num: '03',
+    title: 'Build the site',
+    cmd: 'grove build',
+    desc: 'Generate a static, searchable knowledge space.',
+  },
+  {
+    num: '04',
+    title: 'Publish anywhere',
+    cmd: 'grove deploy',
+    desc: 'Ship cacheable output to any static host.',
+  },
+]
+---
+
+<section class="mx-auto max-w-7xl px-6 py-20">
+  <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+    Get started in seconds
+  </p>
+  <h2
+    class="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
+  >
+    Create, run, and publish a Grove space.
+  </h2>
+
+  <div class="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <ol class="flex flex-col gap-3">
+      {
+        steps.map((step, i) => (
+          <li
+            class={`flex items-start gap-4 rounded-xl border p-5 transition-colors ${
+              i === 0
+                ? 'border-border-strong bg-card'
+                : 'border-border bg-surface hover:bg-card'
+            }`}
+          >
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border border-border-strong bg-bg font-mono text-xs text-muted">
+              {step.num}
+            </span>
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-semibold text-fg">{step.title}</h3>
+                <code class="font-mono text-xs text-subtle">{step.cmd}</code>
+              </div>
+              <p class="mt-1 text-sm leading-relaxed text-muted">{step.desc}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div
+      class="overflow-hidden rounded-xl border border-border-strong bg-[#0a0b0c]"
+    >
+      <div class="flex items-center gap-2 border-b border-border px-4 py-3">
+        <span class="size-3 rounded-full bg-[#ff5f57]"></span>
+        <span class="size-3 rounded-full bg-[#febc2e]"></span>
+        <span class="size-3 rounded-full bg-[#28c840]"></span>
+        <span class="ml-3 font-mono text-xs text-subtle">grove — create a space</span>
+      </div>
+      <pre class="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed"><code><span class="text-subtle">$</span> <span class="text-fg">npx @grove-dev/cli@latest new my-space</span>
+
+<span class="text-muted">Creating project structure...</span>
+
+<span class="text-accent-green">✓ Created my-space</span>
+<span class="text-accent-green">✓ Added grove.config.yaml</span>
+<span class="text-accent-green">✓ Initialized records/</span>
+
+<span class="text-muted">Next steps:</span>
+  <span class="text-subtle">cd my-space</span>
+  <span class="text-subtle">grove build</span></code></pre>
+    </div>
+  </div>
+</section>
