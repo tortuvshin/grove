@@ -6,26 +6,33 @@ description: Type-level reference for the @grove-dev/starlight plugin used by Gr
 ## Import
 
 ```ts
-import lucode from '@grove-dev/starlight';
+import grove from '@grove-dev/starlight';
 ```
+
+> The plugin's default export is also still importable as `lucode` for
+> back-compat with V0 docs that pre-date the Grove rebrand. New code
+> should import as `grove`.
 
 Use the default export inside Starlight's `plugins` array:
 
 ```js
 starlight({
-  plugins: [lucode()],
+  plugins: [grove()],
 });
 ```
 
-## `LucodeStarlightUserConfig`
+## `GroveStarlightUserConfig`
 
 ```ts
-type LucodeStarlightUserConfig = {
+type GroveStarlightUserConfig = {
   navLinks?: Link[];
   docs?: { includeAiUtilities?: boolean };
   footerText?: string;
   warnOverrides?: boolean;
 };
+
+/** @deprecated Use GroveStarlightUserConfig. */
+type LucodeStarlightUserConfig = GroveStarlightUserConfig;
 ```
 
 ### `navLinks`
@@ -42,13 +49,13 @@ type Link = {
 ```
 
 ```js
-lucode({
+grove({
   navLinks: [
     { label: 'Docs', link: '/guides/getting-started/' },
     { label: 'API', link: '/reference/plugin-api/' },
     {
       label: 'GitHub',
-      link: 'https://github.com/grove-dev/grove',
+      link: 'https://github.com/tortuvshin/grove',
       attrs: { target: '_blank', rel: 'noreferrer' },
     },
   ],
@@ -60,8 +67,8 @@ lucode({
 Markdown rendered in the footer text slot.
 
 ```js
-lucode({
-  footerText: 'Built by [grove](https://github.com/grove-dev). Released under the MIT License.',
+grove({
+  footerText: 'Built by [grove](https://github.com/tortuvshin/grove). Released under the MIT License.',
 });
 ```
 
@@ -72,7 +79,7 @@ If omitted, the theme uses its built-in credit line.
 Toggles a per-page AI utilities menu (ChatGPT and Claude) in the page header.
 
 ```js
-lucode({
+grove({
   docs: { includeAiUtilities: true },
 });
 ```
@@ -90,7 +97,7 @@ schema: docsSchema({ extend: ExtendDocsSchema });
 The extension adds:
 
 ```ts
-type LucodeDocsFrontmatter = {
+type GroveDocsFrontmatter = {
   links?: {
     doc?: string;
     api?: string;
@@ -101,6 +108,9 @@ type LucodeDocsFrontmatter = {
     shadcn?: { actions: ShadcnAction[] };
   };
 };
+
+/** @deprecated Use GroveDocsFrontmatter. */
+type LucodeDocsFrontmatter = GroveDocsFrontmatter;
 
 type ShadcnAction = {
   text: string;
@@ -136,7 +146,7 @@ integration or intentionally composing with one of the theme overrides.
 
 ## Grove Theme Wiring
 
-`@grove-dev/docs` enables the Lucode plugin with this configuration:
+`@grove-dev/docs` enables the Grove Starlight plugin with this configuration:
 
 ```js
 // docs/astro.config.mjs
@@ -144,14 +154,14 @@ starlight({
   title: 'Grove',
   customCss: ['./src/styles/global.css'],
   lastUpdated: true,
-  editLink: { baseUrl: 'https://github.com/grove-dev/grove/edit/main/docs' },
+  editLink: { baseUrl: 'https://github.com/tortuvshin/grove/edit/main/docs' },
   plugins: [
-    lucode({
+    grove({
       docs: { includeAiUtilities: true },
       navLinks: [
         { label: 'Docs', link: '/guides/getting-started/' },
         { label: 'Showcase', link: '/showcase/starlight-components/' },
-        { label: 'GitHub', link: 'https://github.com/grove-dev/grove' },
+        { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
       ],
     }),
   ],

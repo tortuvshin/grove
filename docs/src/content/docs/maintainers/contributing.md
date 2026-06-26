@@ -107,6 +107,6 @@ Don't take it personally. The most common reasons for rejection are scope, not q
 
 ## What this page is not
 
-This page covers the contributor's path for a *record submission*. For contributing to the framework itself (`@grove-dev/*` packages), the rules are different — see the [framework's CONTRIBUTING.md](https://github.com/grove-dev/grove/blob/main/CONTRIBUTING.md). For contributing to the docs site, see the [docs site repo](https://github.com/grove-dev/grove/tree/main/docs).
+This page covers the contributor's path for a *record submission*. For contributing to the framework itself (`@grove-dev/*` packages), the rules are different — see the [framework's CONTRIBUTING.md](https://github.com/tortuvshin/grove/blob/main/CONTRIBUTING.md). For contributing to the docs site, see the [docs site repo](https://github.com/tortuvshin/grove/tree/main/docs).
 
 The three paths share the same `Code of Conduct` and the same etiquette, but the review bars, the test gates, and the merge criteria are all different.

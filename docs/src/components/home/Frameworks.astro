@@ -1,38 +1,125 @@
 ---
-const logos = [
-  { src: '/logos/astro.svg', name: 'Astro' },
-  { src: '/logos/nextdotjs.svg', name: 'Next.js' },
-  { src: '/logos/react.svg', name: 'React' },
-  { src: '/logos/vuedotjs.svg', name: 'Vue' },
-  { src: '/logos/svelte.svg', name: 'Svelte' },
-  { src: '/logos/tailwindcss.svg', name: 'Tailwind CSS' },
-  { src: '/logos/nodedotjs.svg', name: 'Node.js' },
-  { src: '/logos/github.svg', name: 'GitHub' },
-]
+// Honest framework support matrix.
+// Audit finding (public-claim-matrix.md §A): the previous version displayed
+// 8 framework logos at the same status. Reality: only Astro is supported
+// today. SvelteKit and Next.js are skeleton adapters planned for V1.1 / V1.2.
+// Tailwind, Node.js, and GitHub are not framework adapters — they're tooling
+// the framework is built on — so they get their own category below.
+const supported = [
+  { src: '/logos/astro.svg', name: 'Astro', note: 'V1 supported renderer' },
+];
+
+const planned = [
+  { src: '/logos/svelte.svg', name: 'SvelteKit', note: 'Skeleton · planned V1.1' },
+  { src: '/logos/nextdotjs.svg', name: 'Next.js', note: 'Skeleton · planned V1.2' },
+];
+
+const tooling = [
+  { src: '/logos/tailwindcss.svg', name: 'Tailwind CSS', note: 'Styling' },
+  { src: '/logos/nodedotjs.svg', name: 'Node.js', note: 'Runtime (>=20)' },
+  { src: '/logos/github.svg', name: 'GitHub', note: 'Data source + Actions' },
+];
 ---
 
-<section class="mx-auto max-w-7xl px-6 py-16">
+<section class="mx-auto max-w-7xl px-6 py-16" aria-labelledby="frameworks-title">
   <p class="text-center text-xs font-semibold uppercase tracking-widest text-subtle">
-    Works with the frameworks you already use
+    Framework support
   </p>
-  <div
-    class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8"
+  <h2
+    id="frameworks-title"
+    class="mt-3 text-balance text-center text-2xl font-bold tracking-tight text-fg sm:text-3xl"
   >
-    {
-      logos.map((l) => (
-        <div class="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-6 transition-colors hover:bg-card-hover">
-          <img
-            src={l.src}
-            alt={`${l.name} logo`}
-            width="28"
-            height="28"
-            loading="lazy"
-            decoding="async"
-            class="h-7 w-7 object-contain opacity-80"
-          />
-          <span class="text-xs font-medium text-muted">{l.name}</span>
-        </div>
-      ))
-    }
+    One renderer today. Two more on the roadmap.
+  </h2>
+  <p class="mx-auto mt-3 max-w-2xl text-center text-sm text-muted">
+    Grove's adapter layer keeps the engine framework-agnostic. The same data
+    drives any renderer; the renderer you ship today decides what users see.
+  </p>
+
+  <div class="mt-12 grid gap-6 md:grid-cols-3">
+    <div class="rounded-xl border border-border bg-card p-6">
+      <p class="text-xs font-semibold uppercase tracking-widest text-accent-green">
+        Supported today
+      </p>
+      <ul class="mt-5 flex flex-wrap gap-3">
+        {
+          supported.map((l) => (
+            <li class="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+              <img
+                src={l.src}
+                alt={`${l.name} logo`}
+                width="24"
+                height="24"
+                loading="lazy"
+                decoding="async"
+                class="h-6 w-6 object-contain"
+              />
+              <div>
+                <p class="text-sm font-semibold text-fg">{l.name}</p>
+                <p class="text-xs text-muted">{l.note}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="rounded-xl border border-border bg-card p-6">
+      <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+        Planned adapters
+      </p>
+      <ul class="mt-5 flex flex-wrap gap-3">
+        {
+          planned.map((l) => (
+            <li class="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 opacity-80">
+              <img
+                src={l.src}
+                alt={`${l.name} logo`}
+                width="24"
+                height="24"
+                loading="lazy"
+                decoding="async"
+                class="h-6 w-6 object-contain grayscale"
+              />
+              <div>
+                <p class="text-sm font-semibold text-fg">{l.name}</p>
+                <p class="text-xs text-muted">{l.note}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-4 text-xs text-muted">
+        The CLI refuses <code class="font-mono text-[11px]">--framework &#123;svelte|nextjs&#125;</code>
+        until the adapter ships components, layouts, and a working template.
+      </p>
+    </div>
+
+    <div class="rounded-xl border border-border bg-card p-6">
+      <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+        Built on
+      </p>
+      <ul class="mt-5 flex flex-wrap gap-3">
+        {
+          tooling.map((l) => (
+            <li class="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+              <img
+                src={l.src}
+                alt={`${l.name} logo`}
+                width="24"
+                height="24"
+                loading="lazy"
+                decoding="async"
+                class="h-6 w-6 object-contain opacity-80"
+              />
+              <div>
+                <p class="text-sm font-semibold text-fg">{l.name}</p>
+                <p class="text-xs text-muted">{l.note}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </div>
 </section>

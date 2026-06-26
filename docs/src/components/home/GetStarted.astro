@@ -4,25 +4,25 @@ const steps = [
     num: '01',
     title: 'Create a space',
     cmd: 'grove new',
-    desc: 'Scaffold a Grove project with the CLI.',
+    desc: 'Scaffold a Grove project with the CLI (interactive).',
   },
   {
     num: '02',
     title: 'Add records',
-    cmd: 'grove add',
-    desc: 'Write structured files for projects, resources, or places.',
+    cmd: 'grove import',
+    desc: 'Turn a Markdown list (or hand-write YAML) into records/*.yml.',
   },
   {
     num: '03',
     title: 'Build the site',
-    cmd: 'grove build',
-    desc: 'Generate a static, searchable knowledge space.',
+    cmd: 'grove generate',
+    desc: 'Build data, then run your framework build (astro build today).',
   },
   {
     num: '04',
-    title: 'Publish anywhere',
-    cmd: 'grove deploy',
-    desc: 'Ship cacheable output to any static host.',
+    title: 'Deploy',
+    cmd: '--deploy <provider>',
+    desc: 'Pick vercel / netlify / cloudflare / github-pages at scaffold time.',
   },
 ]
 ---
@@ -73,17 +73,24 @@ const steps = [
         <span class="size-3 rounded-full bg-[#28c840]"></span>
         <span class="ml-3 font-mono text-xs text-subtle">grove — create a space</span>
       </div>
-      <pre class="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed"><code><span class="text-subtle">$</span> <span class="text-fg">npx @grove-dev/cli@latest new my-space</span>
+      <pre class="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed"><code><span class="text-subtle">$</span> <span class="text-fg">pnpm dlx @grove-dev/cli@latest new my-space</span>
+
+<span class="text-muted">? Where should the new space live?</span> <span class="text-fg">my-space</span>
+<span class="text-muted">? Pick a blueprint</span> <span class="text-fg">project-directory</span>
+<span class="text-muted">? Pick a framework (V1: astro only)</span> <span class="text-fg">astro</span>
+<span class="text-muted">? Where will this space be deployed?</span> <span class="text-fg">github-pages</span>
 
 <span class="text-muted">Creating project structure...</span>
 
-<span class="text-accent-green">✓ Created my-space</span>
-<span class="text-accent-green">✓ Added grove.config.yaml</span>
-<span class="text-accent-green">✓ Initialized records/</span>
+<span class="text-accent-green">✓ Copied 47 files into my-space</span>
+<span class="text-accent-green">✓ Wrote grove.config.ts</span>
+<span class="text-accent-green">✓ Pinned @grove-dev/{astro,cli,core}@0.2.20</span>
 
 <span class="text-muted">Next steps:</span>
   <span class="text-subtle">cd my-space</span>
-  <span class="text-subtle">grove build</span></code></pre>
+  <span class="text-subtle">pnpm install</span>
+  <span class="text-subtle">pnpm exec grove validate</span>
+  <span class="text-subtle">pnpm build</span></code></pre>
     </div>
   </div>
 </section>

@@ -5,7 +5,7 @@ description: How a contributor writes a new YAML record, from "I found an app" t
 
 This guide is the contributor's path. The companion [Record schema reference](/reference/record-schema/) lists every field; this guide walks through *deciding* which fields matter for your record.
 
-If you just want the minimum viable record, see [Add your first record](/getting-started/add-your-first-record/) first. Come back here when your record needs to be more than a stub.
+If you just want the minimum viable record, see [Add your first project](/getting-started/add-your-first-project/) first. Come back here when your record needs to be more than a stub.
 
 ## The decision tree
 

@@ -1,6 +1,6 @@
 ---
 title: Typography
-description: A sample documentation page that shows how Markdown content renders with Lucode Starlight.
+description: A sample documentation page that shows how Markdown content renders with the Grove Starlight theme.
 ---
 
 This page is intentionally content-heavy. Use it to inspect the reading experience after changing
@@ -8,11 +8,11 @@ fonts, colors, spacing, or Markdown component styles.
 
 ## A Real Documentation Section
 
-Lucode Starlight favors compact headings, generous line height, and restrained link styling. The
-result should feel like product documentation: calm enough for repeated reading, but still sharp
+The Grove Starlight theme favors compact headings, generous line height, and restrained link styling.
+The result should feel like product documentation: calm enough for repeated reading, but still sharp
 enough for launch pages and component references.
 
-The theme maps Starlight colors to Lucode tokens, so prose, links, sidebars, cards, and code blocks
+The theme maps Starlight colors to Grove tokens, so prose, links, sidebars, cards, and code blocks
 stay coordinated when you customize the palette.
 
 ### When to Create a Guide
@@ -58,20 +58,20 @@ Longer quotes should still feel aligned with the surrounding prose:
 ```ts
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from '@grove-dev/starlight';
+import grove from '@grove-dev/starlight';
 
 export default defineConfig({
   integrations: [
     starlight({
       title: 'Acme Docs',
-      plugins: [lucode()],
+      plugins: [grove()],
     }),
   ],
 });
 ```
 
 ```css
-@layer lucode {
+@layer grove {
   :root {
     --radius: 0.5rem;
     --container-max-width: 1440px;
