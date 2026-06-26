@@ -355,7 +355,7 @@ that nothing else in the file depends on them.
 ## Risks
 
 - **Clipboard API requires a secure context.** The docs site is served
-  over HTTPS in production (`astro.config.mjs` `site: 'https://grove.dev'`)
+  over HTTPS in production (`astro.config.mjs` `site: 'https://grove.dev.mn'`)
   so this is fine in production. Local dev runs over `http://localhost`
   which is treated as secure by all modern browsers. Fallback: if
   `navigator.clipboard` is unavailable, the catch block sets

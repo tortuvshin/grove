@@ -2,7 +2,7 @@
 
 The documentation site for [Grove](https://github.com/tortuvshin/grove), built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and themed with [`@grove-dev/starlight`](https://lucas-labs.github.io/@grove-dev/starlight-theme/).
 
-This site is **not** a published npm package — it's the source for <https://grove.tortuvshin.dev> (or wherever the project points it next). It lives in the workspace so that doc changes ship in the same PR as the code they describe.
+This site is **not** a published npm package — it's the source for <https://grove.dev.mn>. It lives in the workspace so that doc changes ship in the same PR as the code they describe.
 
 ## Develop
 

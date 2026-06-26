@@ -8,7 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 // This site is itself a Grove space: it uses the same record schema,
 // Astro template, and CLI workflow as any user-built space.
 export default defineConfig({
-    site: 'https://grove.dev',
+    site: 'https://grove.dev.mn',
     vite: {
         plugins: [tailwindcss()],
     },
@@ -44,6 +44,54 @@ export default defineConfig({
             ],
             social: [
                 { icon: 'github', label: 'GitHub', href: 'https://github.com/tortuvshin/grove' },
+            ],
+            head: [
+                // Mobile / PWA defaults — paired with public/manifest.json and
+                // public/og-image.svg. Lighthouse "best practices" expects
+                // these on every page so the home/launch icon, theme color,
+                // and PWA install hint are never missing.
+                { tag: 'meta', attrs: { name: 'theme-color', content: '#08090a' } },
+                { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
+                { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.json' } },
+                { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/og-image.svg' } },
+                // Open Graph image (default for every Starlight content
+                // page). Individual pages can override via frontmatter
+                // `socialImage: { src: '...' }`. Starlight emits
+                // og:title / og:type / og:url / og:description / twitter:card
+                // on its own — we only fill the dimensional + image pieces
+                // it leaves blank.
+                { tag: 'meta', attrs: { property: 'og:image', content: 'https://grove.dev.mn/og-image.svg' } },
+                { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://grove.dev.mn/og-image.svg' } },
+                { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+                { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+                { tag: 'meta', attrs: { property: 'og:image:alt', content: 'Grove — The framework for community knowledge' } },
+                { tag: 'meta', attrs: { name: 'twitter:image:alt', content: 'Grove — The framework for community knowledge' } },
+                // JSON-LD WebSite schema (organization + search action) on
+                // every Starlight content page. The home page renders richer
+                // schemas via HomeLayout.astro.
+                {
+                    tag: 'script',
+                    attrs: { type: 'application/ld+json' },
+                    content: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'WebSite',
+                        name: 'Grove',
+                        url: 'https://grove.dev.mn',
+                        description:
+                            'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
+                        inLanguage: 'en',
+                        publisher: {
+                            '@type': 'Organization',
+                            name: 'Grove',
+                            url: 'https://github.com/tortuvshin/grove',
+                        },
+                        potentialAction: {
+                            '@type': 'SearchAction',
+                            target: 'https://grove.dev.mn/search?q={search_term_string}',
+                            'query-input': 'required name=search_term_string',
+                        },
+                    }),
+                },
             ],
             sidebar: [
                 {
