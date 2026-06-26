@@ -85,11 +85,13 @@ export default defineConfig({
                             name: 'Grove',
                             url: 'https://github.com/tortuvshin/grove',
                         },
-                        potentialAction: {
-                            '@type': 'SearchAction',
-                            target: 'https://grove.dev.mn/search?q={search_term_string}',
-                            'query-input': 'required name=search_term_string',
-                        },
+                        // SearchAction intentionally omitted: the docs site
+                        // uses Starlight's client-side search overlay, which
+                        // is not exposed at a real `/search?q=...` route.
+                        // Google's Rich Results guidelines flag an
+                        // unreachable `target` as invalid structured data,
+                        // so we omit it until a server-rendered search
+                        // route exists.
                     }),
                 },
             ],
