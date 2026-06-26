@@ -1,15 +1,83 @@
 ---
-import '../styles/home.css'
+import '../styles/home.css';
 
 interface Props {
-  title?: string
-  description?: string
+  title?: string;
+  description?: string;
 }
 
 const {
-  title = 'Grove',
-  description = 'Grove turns structured files into static, searchable, contributor-friendly knowledge spaces.',
-} = Astro.props
+  title = 'Grove — The framework for community knowledge',
+  description = 'Grove turns structured files into static, searchable, contributor-friendly knowledge spaces. The open-source framework for community-curated directories, docs spaces, wikis, and dataset catalogs.',
+} = Astro.props;
+
+const siteUrl = Astro.site?.toString() ?? 'https://grove.dev.mn';
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageUrl = new URL('/og-image.svg', siteUrl).toString();
+
+/**
+ * JSON-LD for the standalone home page. Emits three schemas:
+ *
+ *  - WebSite: identifies the site, its publisher, and its search entry point.
+ *  - SoftwareApplication: describes Grove itself (a CLI + framework),
+ *    so search engines can render rich "app" results.
+ *  - Organization: identifies the project and its canonical repo.
+ */
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Grove',
+  url: siteUrl,
+  description,
+  inLanguage: 'en',
+  publisher: {
+    '@type': 'Organization',
+    name: 'Grove',
+    url: 'https://github.com/tortuvshin/grove',
+  },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${siteUrl}/search?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const softwareJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Grove',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Any',
+  description:
+    'Open-source framework for community knowledge — structured files into static, searchable, contributor-friendly knowledge spaces. CLI, Astro template, and adapters for SvelteKit and Next.js.',
+  url: siteUrl,
+  downloadUrl: 'https://www.npmjs.com/package/@grove-dev/cli',
+  softwareVersion: '0.2.x',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  author: {
+    '@type': 'Organization',
+    name: 'Grove',
+    url: 'https://github.com/tortuvshin/grove',
+  },
+  license: 'https://opensource.org/licenses/MIT',
+  keywords:
+    'knowledge base, community, directory, awesome-list, github-native, static site, astro, open source, llm-friendly, blueprint',
+};
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Grove',
+  url: 'https://github.com/tortuvshin/grove',
+  logo: ogImageUrl,
+  description:
+    'Open-source framework for community knowledge — collect, structure, maintain, and publish the projects, tools, resources, and knowledge a community relies on.',
+  sameAs: ['https://github.com/tortuvshin/grove', 'https://www.npmjs.com/org/grove-dev'],
+};
 ---
 
 <!doctype html>
@@ -18,6 +86,35 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#08090a" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/og-image.svg" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Grove" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Grove — The framework for community knowledge" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content="Grove — The framework for community knowledge" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -27,6 +124,38 @@ const {
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-bg text-fg antialiased">
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
     <slot />
   </body>
 </html>
+
+<style is:global>
+  .skip-to-content {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    padding: 0.5rem 0.875rem;
+    background: var(--color-bg, #08090a);
+    color: var(--color-fg, #ffffff);
+    border: 1px solid var(--color-border-strong, #2a2d31);
+    border-radius: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 0.18s ease;
+  }
+
+  .skip-to-content:focus,
+  .skip-to-content:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--color-accent-blue, #60a5fa);
+    outline-offset: 2px;
+  }
+
+  main {
+    scroll-margin-top: 5rem;
+  }
+</style>
