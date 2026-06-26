@@ -1,0 +1,31 @@
+docs/src/components/home/Integrations.astro
+  s_a0ed7c152a4c3a::t_fc5761e6720017 43-51
+  s_a0ed7c152a4c3a::t_306c36cb783254 17
+  s_a0ed7c152a4c3a::t_c76fecdece72e4 19,37-38,59
+docs/src/components/home/Hero.astro
+  s_a0ed7c152a4c3a::t_041aa531c6dfd9 4,6,20,26-28
+docs/src/components/home/Blueprints.astro
+  s_a0ed7c152a4c3a::t_9fc58630253c02 34,39
+docs/src/components/home/FinalCta.astro
+  s_a0ed7c152a4c3a::t_9cde171bc48736 4,9,22,28-30
+docs/src/components/home/Features.astro
+  s_a0ed7c152a4c3a::t_134c746dbdb7ef 54,59
+docs/src/components/home/GetStarted.astro
+  s_a0ed7c152a4c3a::t_a2cd33c147cb48 30,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "8f314f97216634afadc0edefd4237c847cdb2cc7",
+  "prompts": {},
+  "sessions": {
+    "s_a0ed7c152a4c3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "723c0a4e-c970-416d-af64-45cdb658cc33",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
