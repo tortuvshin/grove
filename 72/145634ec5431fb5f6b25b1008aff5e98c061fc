@@ -1,0 +1,30 @@
+docs/public/manifest.json
+  s_a0ed7c152a4c3a::t_35a39728a8a2e8 1-17
+docs/public/_headers
+  s_a0ed7c152a4c3a::t_a8a19dd52c39ad 1-50
+docs/public/og-image.svg
+  s_a0ed7c152a4c3a::t_05f4a53d312dc8 1-29
+docs/public/robots.txt
+  s_a0ed7c152a4c3a::t_d9a107ddd6e4f6 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "72145634ec5431fb5f6b25b1008aff5e98c061fc",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_a0ed7c152a4c3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "723c0a4e-c970-416d-af64-45cdb658cc33",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
