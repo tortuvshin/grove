@@ -27,5 +27,11 @@ describe("docs homepage landing page", () => {
     expect(homeLanding).toContain("npx @grove-dev/cli@latest new my-space");
     expect(homeLanding).toContain("Project Directory");
     expect(homeLanding).toContain("Coming soon / Schema-ready");
+    expect(homeLanding).toContain("feature-icon");
+    expect(homeLanding).toContain('"file", "File-based records"');
+    expect(homeLanding).toContain("stack-logo-grid");
+    expect(homeLanding).toContain("stack-logo-card");
+    expect(homeLanding).not.toContain("powered-circuit");
+    expect(homeLanding).not.toContain("circuit-line");
   });
 });

@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import lucode from '@grove-dev/starlight';
 
 // Grove docs — the canonical Astro/Starlight site for the project.
 // This site is itself a Grove space: it uses the same record schema,
@@ -20,42 +21,26 @@ export default defineConfig({
             logo: {
                 replacesTitle: false,
                 alt: 'Grove',
+                dark: './src/assets/logo-dark.svg',
+                light: './src/assets/logo-light.svg',
             },
-            customCss: ['./src/styles/custom.css'],
+            customCss: ['./src/styles/global.css'],
             plugins: [
-                starlightLinksValidator({
-                    // Use the production site as the validation baseline
-                    // so we don't fail on links that only resolve in
-                    // production (e.g. cross-locale slugs).
-                    exclude: [],
-                    errorOnLocalLinks: false,
-                    errorOnFallbackPages: false,
+                lucode({
+                    docs: {
+                        includeAiUtilities: true,
+                    },
+                    navLinks: [
+                        { label: 'Open Apps', link: '/open-apps/' },
+                        { label: 'Docs', link: '/getting-started/introduction/' },
+                        { label: 'Roadmap', link: '/roadmap' },
+                        { label: 'GitHub', link: 'https://github.com/tortuvshin/grove', attrs: { target: '_blank', rel: 'noopener noreferrer' } },
+                    ],
                 }),
             ],
-            components: {
-                ...starlightOpenInGH({
-                    // Link directly to the repo on the main branch so
-                    // users always edit the canonical copy.
-                    editingLinkBaseUrl:
-                        'https://github.com/tortuvshin/grove/edit/main/docs/',
-                }),
-                ...starlightAi({
-                    // Reuse the AI utilities (llms.txt, llms-full.txt)
-                    // from any rendered page so AI assistants can
-                    // crawl the docs without a sitemap.
-                    aiPageTitle: 'Grove Documentation',
-                    includeAiUtilities: true,
-                }),
-                navLinks: [
-                    { label: 'Open Apps', link: '/open-apps/' },
-                    { label: 'Docs', link: '/getting-started/introduction/' },
-                    { label: 'Roadmap', link: '/roadmap' },
-                    { label: 'GitHub', link: 'https://github.com/tortuvshin/grove', attrs: { target: '_blank', rel: 'noopener noreferrer' } },
-                ],
-                social: [
-                    { icon: 'github', label: 'GitHub', href: 'https://github.com/tortuvshin/grove' },
-                ],
-            },
+            social: [
+                { icon: 'github', label: 'GitHub', href: 'https://github.com/tortuvshin/grove' },
+            ],
             sidebar: [
                 {
                     label: 'Getting Started',
