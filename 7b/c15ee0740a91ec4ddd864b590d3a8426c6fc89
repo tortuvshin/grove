@@ -1,0 +1,66 @@
+docs/public/logos/astro.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1
+docs/src/components/home/Blueprints.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-97
+docs/src/components/home/FinalCta.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-41
+docs/public/logos/react.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1-11
+docs/src/components/home/Hero.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-50
+docs/src/pages/index.astro
+  s_a0ed7c152a4c3a::t_55c3e7f44803e0 1-26
+docs/public/logos/tailwindcss.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1
+docs/src/components/home/Integrations.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-81
+docs/public/logos/nextdotjs.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1
+docs/public/logos/nodedotjs.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1
+docs/src/components/home/GetStarted.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-88
+docs/src/layouts/HomeLayout.astro
+  s_a0ed7c152a4c3a::t_ee99b6906a4143 2
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1,3-32
+docs/public/logos/vuedotjs.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1
+docs/src/components/home/Footer.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-27
+docs/src/components/home/Header.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-75
+docs/public/logos/github.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1-3
+docs/public/logos/svelte.svg
+  s_a0ed7c152a4c3a::t_8611f1aacbc5b1 1
+docs/src/components/home/Frameworks.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-34
+docs/package.json
+  s_a0ed7c152a4c3a::t_58aa44aa70b2a3 16-19
+docs/src/components/home/Features.astro
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-133
+docs/src/styles/home.css
+  s_a0ed7c152a4c3a::t_5ebf04c8b05d40 1-39
+docs/astro.config.mjs
+  s_a0ed7c152a4c3a::t_db203d244f86bd 5,12-14
+docs/src/home-landing.test.ts
+  s_a0ed7c152a4c3a::t_b33ecbe7ebb5f9 1,6,8-93,96-97,100-122,124-138,140-154,156
+pnpm-lock.yaml
+  s_a0ed7c152a4c3a::t_2bb44a9101c759 35-37,44-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "7bc15ee0740a91ec4ddd864b590d3a8426c6fc89",
+  "prompts": {},
+  "sessions": {
+    "s_a0ed7c152a4c3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "723c0a4e-c970-416d-af64-45cdb658cc33",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
