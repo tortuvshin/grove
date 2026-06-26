@@ -2,14 +2,14 @@
 const command = "npx @grove-dev/cli@latest new my-space";
 
 const features = [
-  ["File-based records", "Keep knowledge in reviewable YAML and Markdown files."],
-  ["GitHub-native workflows", "Use pull requests, issues, history, and ownership."],
-  ["Static publishing", "Ship fast, cacheable sites without a backend runtime."],
-  ["Search and discovery", "Make directories browsable, filterable, and useful."],
-  ["Human review", "Let maintainers approve every community contribution."],
-  ["LLM-friendly outputs", "Publish structured outputs built for agents and search."],
-  ["Metadata enrichment", "Add health, repository, and taxonomy signals over time."],
-  ["Customizable frontend", "Start from a blueprint, then make the space yours."],
+  ["file", "File-based records", "Keep knowledge in reviewable YAML and Markdown files."],
+  ["branch", "GitHub-native workflows", "Use pull requests, issues, history, and ownership."],
+  ["publish", "Static publishing", "Ship fast, cacheable sites without a backend runtime."],
+  ["search", "Search and discovery", "Make directories browsable, filterable, and useful."],
+  ["review", "Human review", "Let maintainers approve every community contribution."],
+  ["llm", "LLM-friendly outputs", "Publish structured outputs built for agents and search."],
+  ["metadata", "Metadata enrichment", "Add health, repository, and taxonomy signals over time."],
+  ["frontend", "Customizable frontend", "Start from a blueprint, then make the space yours."],
 ];
 
 const steps = [
@@ -30,22 +30,21 @@ const integrations = [
   ["Svelte", "S", "Coming soon"],
 ];
 
-const tools = [
-  "TypeScript",
-  "Astro",
-  "GitHub Actions",
-  "Zod",
-  "YAML / Markdown",
-  "Static hosting",
-  "pnpm",
-  "Starlight docs ecosystem",
+const stackLogos = [
+  ["typescript", "TS", "TypeScript", "Typed core"],
+  ["astro", "A", "Astro", "Static frontend"],
+  ["actions", "GA", "GitHub Actions", "Automation"],
+  ["zod", "Z", "Zod", "Validation"],
+  ["yaml", "Y", "YAML / Markdown", "Content files"],
+  ["hosting", "S", "Static hosting", "Deploy anywhere"],
+  ["pnpm", "P", "pnpm", "Workspace tooling"],
+  ["starlight", "SL", "Starlight", "Docs ecosystem"],
 ];
 ---
 
 <main class="home-landing">
   <section class="home-hero" aria-labelledby="home-title">
     <div class="hero-copy">
-      <p class="eyebrow">Grove Framework</p>
       <h1 id="home-title">The framework for community knowledge</h1>
       <p class="lede">
         Grove turns structured files into static, searchable, contributor-friendly knowledge spaces.
@@ -54,15 +53,10 @@ const tools = [
         <a class="button primary" href="/getting-started/create-a-space/">Get Started</a>
         <a class="button secondary" href="https://github.com/tortuvshin/grove">View on GitHub</a>
       </div>
-    </div>
-
-    <div class="command-panel" aria-label="Create a new Grove space">
-      <div class="window-bar">
-        <span></span>
-        <span></span>
-        <span></span>
+      <div class="hero-command" aria-label="Create a new Grove space">
+        <span aria-hidden="true">$</span>
+        <code>{command}</code>
       </div>
-      <pre><code>{command}</code></pre>
     </div>
   </section>
 
@@ -72,11 +66,18 @@ const tools = [
       <h2 id="what-is-grove">Everything a knowledge community needs to ship.</h2>
     </div>
     <div class="feature-grid">
-      {features.map(([title, description]) => (
+      {features.map(([icon, title, description]) => (
         <article class="feature-card">
-          <span class="feature-icon" aria-hidden="true">
+          <span class={`feature-icon ${icon}`} aria-hidden="true">
             <svg viewBox="0 0 20 20" role="img">
-              <path d="M4 5.5h12M4 10h12M4 14.5h8" />
+              {icon === "file" && <path d="M6 3.5h5l3 3v10H6zM11 3.5v3h3M8 10h4M8 13h3" />}
+              {icon === "branch" && <path d="M6 5.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM14 10.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM8 7.5h2.5A3.5 3.5 0 0 1 14 11" />}
+              {icon === "publish" && <path d="M4 14.5h12M10 14.5v-10M6.5 8 10 4.5 13.5 8" />}
+              {icon === "search" && <path d="M9 4.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9ZM12.5 12.5 16 16" />}
+              {icon === "review" && <path d="M4.5 10.5 8 14l7.5-8M4 5h6M4 15h3" />}
+              {icon === "llm" && <path d="M5 6.5h10M5 10h7M5 13.5h4M13 12.5l1 2 1-2 2-1-2-1-1-2-1 2-2 1z" />}
+              {icon === "metadata" && <path d="M5 5.5h10v3H5zM5 11.5h5v3H5zM12 11.5h3v3h-3z" />}
+              {icon === "frontend" && <path d="M4 5h12v10H4zM4 8h12M7 12h3M12 12h2" />}
             </svg>
           </span>
           <h3>{title}</h3>
@@ -180,8 +181,16 @@ pnpm dev</code></pre>
       <p class="eyebrow">Powered By</p>
       <h2 id="powered-by">Built on a foundation of production-grade open tooling</h2>
     </div>
-    <div class="tool-grid">
-      {tools.map((tool) => <span>{tool}</span>)}
+    <div class="stack-logo-grid" aria-label="Grove technology stack">
+      {stackLogos.map(([kind, mark, name, caption]) => (
+        <article class={`stack-logo-card ${kind}`}>
+          <span class="stack-logo-mark" aria-hidden="true">{mark}</span>
+          <div>
+            <h3>{name}</h3>
+            <p>{caption}</p>
+          </div>
+        </article>
+      ))}
     </div>
   </section>
 
@@ -201,6 +210,10 @@ pnpm dev</code></pre>
     display: none;
   }
 
+  :global(div[data-slot='doc-title']) {
+    display: none !important;
+  }
+
   :global(.sl-markdown-content) {
     max-width: none;
   }
@@ -218,8 +231,8 @@ pnpm dev</code></pre>
     --home-amber: hsl(38, 88%, 52%);
     display: flex;
     flex-direction: column;
-    gap: 6rem;
-    padding: 3rem 1.25rem 5rem;
+    gap: 7rem;
+    padding: 4.5rem 1.25rem 5rem;
   }
 
   .home-hero,
@@ -231,16 +244,18 @@ pnpm dev</code></pre>
   }
 
   .home-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+    display: flex;
     align-items: center;
-    gap: 3rem;
-    min-height: min(42rem, calc(100vh - var(--sl-nav-height) - 3rem));
+    justify-content: center;
+    min-height: min(31rem, calc(100vh - var(--sl-nav-height) - 2rem));
+    text-align: center;
   }
 
   .hero-copy {
     display: grid;
+    justify-items: center;
     gap: 1.35rem;
+    width: min(100%, 54rem);
   }
 
   .eyebrow {
@@ -260,24 +275,25 @@ pnpm dev</code></pre>
   }
 
   h1 {
-    max-width: 13ch;
+    max-width: 16ch;
     color: var(--sl-color-white);
-    font-size: clamp(3rem, 9vw, 6.75rem);
-    font-weight: 760;
-    line-height: 0.96;
+    font-size: clamp(2.6rem, 4.9vw, 4.35rem);
+    font-weight: 740;
+    line-height: 1;
     letter-spacing: 0;
   }
 
   .lede {
-    max-width: 42rem;
+    max-width: 41rem;
     color: var(--sl-color-gray-2);
-    font-size: 1.18rem;
+    font-size: 1.04rem;
     line-height: 1.7;
   }
 
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0.75rem;
   }
 
@@ -315,7 +331,6 @@ pnpm dev</code></pre>
     color: var(--sl-color-white);
   }
 
-  .command-panel,
   .code-card,
   .starter-preview,
   .compact-card,
@@ -327,22 +342,25 @@ pnpm dev</code></pre>
     box-shadow: 0 22px 80px color-mix(in oklab, var(--sl-color-black) 45%, transparent);
   }
 
-  .command-panel {
-    overflow: hidden;
-  }
-
-  .window-bar {
+  .hero-command {
     display: flex;
-    gap: 0.45rem;
-    border-bottom: 1px solid var(--home-border);
-    padding: 0.8rem 1rem;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--home-text-soft);
+    font-family: var(--sl-font-system-mono);
+    font-size: 0.82rem;
+    line-height: 1.4;
   }
 
-  .window-bar span {
-    width: 0.65rem;
-    height: 0.65rem;
-    border-radius: 999px;
-    background: var(--sl-color-gray-4);
+  .hero-command span {
+    color: var(--sl-color-gray-4);
+  }
+
+  .hero-command code {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   pre {
@@ -380,32 +398,67 @@ pnpm dev</code></pre>
   .feature-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    align-items: stretch;
     gap: 0.75rem;
   }
 
   .feature-card {
     display: grid;
-    gap: 0.7rem;
-    min-height: 12rem;
-    padding: 1rem;
+    grid-template-rows: auto auto 1fr;
+    height: 100%;
+    gap: 0.8rem;
+    min-height: 9.75rem;
+    padding: 1.05rem;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .feature-card:hover {
+    border-color: color-mix(in oklab, var(--sl-color-gray-4) 72%, var(--sl-color-white));
+    background: color-mix(in oklab, var(--home-panel) 84%, var(--sl-color-gray-5));
+    transform: translateY(-2px);
   }
 
   .feature-icon {
     display: inline-grid;
     place-items: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.15rem;
+    height: 2.15rem;
     border-radius: 0.5rem;
-    background: color-mix(in oklab, var(--sl-color-accent) 18%, transparent);
-    color: var(--sl-color-text-accent);
+    background: color-mix(in oklab, var(--sl-color-gray-5) 24%, transparent);
+    color: var(--sl-color-gray-1);
+  }
+
+  .feature-icon.file,
+  .feature-icon.publish,
+  .feature-icon.search {
+    color: hsl(194, 83%, 66%);
+  }
+
+  .feature-icon.branch,
+  .feature-icon.review {
+    color: hsl(153, 68%, 56%);
+  }
+
+  .feature-icon.llm,
+  .feature-icon.metadata {
+    color: hsl(39, 92%, 64%);
+  }
+
+  .feature-icon.frontend {
+    color: hsl(267, 88%, 74%);
   }
 
   .feature-icon svg {
-    width: 1.1rem;
-    height: 1.1rem;
+    width: 1.15rem;
+    height: 1.15rem;
     fill: none;
     stroke: currentColor;
     stroke-linecap: round;
+    stroke-linejoin: round;
     stroke-width: 1.8;
   }
 
@@ -500,8 +553,7 @@ pnpm dev</code></pre>
     gap: 0.5rem;
   }
 
-  .preview-stack span,
-  .tool-grid span {
+  .preview-stack span {
     border: 1px solid var(--home-border);
     border-radius: 999px;
     background: color-mix(in oklab, var(--sl-color-gray-6) 56%, transparent);
@@ -579,13 +631,98 @@ pnpm dev</code></pre>
   .powered-section {
     border-top: 1px solid var(--home-border);
     border-bottom: 1px solid var(--home-border);
-    padding-block: 3rem;
+    padding-block: 4rem;
+    gap: 2.5rem;
   }
 
-  .tool-grid {
+  .powered-section .section-heading {
+    max-width: none;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .powered-section h2 {
+    max-width: 24ch;
+  }
+
+  .stack-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 0.8rem;
+  }
+
+  .stack-logo-card {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
+    height: 100%;
+    min-height: 7.5rem;
+    align-items: center;
+    gap: 0.9rem;
+    border: 1px solid var(--home-border);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--sl-color-gray-5) 12%, transparent), transparent),
+      var(--home-panel);
+    box-shadow: 0 18px 70px color-mix(in oklab, var(--sl-color-black) 42%, transparent);
+    padding: 1rem;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .stack-logo-card.astro {
+    --accent-color: hsl(279, 88%, 68%);
+  }
+
+  .stack-logo-card.typescript {
+    --accent-color: hsl(204, 86%, 60%);
+  }
+
+  .stack-logo-card.actions,
+  .stack-logo-card.zod {
+    --accent-color: hsl(153, 68%, 56%);
+  }
+
+  .stack-logo-card.yaml,
+  .stack-logo-card.hosting {
+    --accent-color: hsl(39, 92%, 64%);
+  }
+
+  .stack-logo-card.pnpm,
+  .stack-logo-card.starlight {
+    --accent-color: hsl(194, 83%, 66%);
+  }
+
+  .stack-logo-card:hover {
+    border-color: color-mix(in oklab, var(--accent-color, var(--sl-color-white)) 54%, var(--sl-color-gray-5));
+    background: color-mix(in oklab, var(--home-panel) 86%, var(--sl-color-gray-5));
+    transform: translateY(-2px);
+  }
+
+  .stack-logo-mark {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 3.1rem;
+    height: 3.1rem;
+    border-radius: 0.5rem;
+    background: color-mix(in oklab, var(--accent-color) 18%, transparent);
+    color: color-mix(in oklab, var(--accent-color) 70%, var(--sl-color-white));
+    font-size: 0.85rem;
+    font-weight: 850;
+    letter-spacing: 0;
+  }
+
+  .stack-logo-card h3 {
+    font-size: 1rem;
+  }
+
+  .stack-logo-card p {
+    margin-top: 0.2rem;
+    color: var(--home-text-soft);
+    font-size: 0.82rem;
+    line-height: 1.35;
   }
 
   .final-cta {
@@ -617,21 +754,24 @@ pnpm dev</code></pre>
 
   @media (max-width: 58rem) {
     .home-landing {
-      gap: 4.25rem;
-      padding-top: 2rem;
+      gap: 5rem;
+      padding-top: 3rem;
     }
 
-    .home-hero,
     .start-layout,
     .ecosystem-layout {
       grid-template-columns: 1fr;
     }
 
     .home-hero {
-      min-height: auto;
+      min-height: min(29rem, calc(100vh - var(--sl-nav-height) - 1rem));
     }
 
     .feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stack-logo-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -642,7 +782,7 @@ pnpm dev</code></pre>
     }
 
     h1 {
-      font-size: clamp(2.65rem, 17vw, 4.3rem);
+      font-size: clamp(2.35rem, 12vw, 3.5rem);
     }
 
     .feature-grid {
@@ -662,6 +802,26 @@ pnpm dev</code></pre>
     .final-cta {
       justify-items: stretch;
       text-align: left;
+    }
+
+    .powered-section {
+      padding-block: 3rem;
+    }
+
+    .stack-logo-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stack-logo-card {
+      min-height: 6.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button,
+    .feature-card,
+    .stack-logo-card {
+      transition: none;
     }
   }
 </style>
