@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from '@grove-dev/starlight';
+import grove from '@grove-dev/starlight';
 import tailwindcss from '@tailwindcss/vite';
 
 // Grove docs — the canonical Astro/Starlight site for the project.
@@ -30,7 +30,7 @@ export default defineConfig({
             },
             customCss: ['./src/styles/global.css'],
             plugins: [
-                lucode({
+                grove({
                     docs: {
                         includeAiUtilities: true,
                     },
