@@ -1,0 +1,34 @@
+---
+const logos = [
+  { src: '/logos/astro.svg', name: 'Astro' },
+  { src: '/logos/nextdotjs.svg', name: 'Next.js' },
+  { src: '/logos/react.svg', name: 'React' },
+  { src: '/logos/vuedotjs.svg', name: 'Vue' },
+  { src: '/logos/svelte.svg', name: 'Svelte' },
+  { src: '/logos/tailwindcss.svg', name: 'Tailwind CSS' },
+  { src: '/logos/nodedotjs.svg', name: 'Node.js' },
+  { src: '/logos/github.svg', name: 'GitHub' },
+]
+---
+
+<section class="mx-auto max-w-7xl px-6 py-16">
+  <p class="text-center text-xs font-semibold uppercase tracking-widest text-subtle">
+    Works with the frameworks you already use
+  </p>
+  <div
+    class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8"
+  >
+    {
+      logos.map((l) => (
+        <div class="flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-6 transition-colors hover:bg-card-hover">
+          <img
+            src={l.src}
+            alt={`${l.name} logo`}
+            class="h-7 w-7 object-contain opacity-80"
+          />
+          <span class="text-xs font-medium text-muted">{l.name}</span>
+        </div>
+      ))
+    }
+  </div>
+</section>
