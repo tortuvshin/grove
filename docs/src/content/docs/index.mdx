@@ -1,62 +1,9 @@
 ---
 title: Grove
-description: Build living, file-based community knowledge spaces. Open-source framework for curating open-source apps, AI tools, ecosystem maps, and internal knowledge hubs.
+description: Grove turns structured files into static, searchable, contributor-friendly community knowledge spaces.
 template: splash
-hero:
-  layout: split-left
-  tagline: |
-    Grove is an open-source framework for building living community
-    knowledge spaces. Files are the source of truth, every change
-    is reviewable, and every space is static, forkable, and
-    contributor-friendly.
-  actions:
-    - text: Get started
-      link: /getting-started/create-a-space/
-      icon: right-arrow
-      variant: primary
-    - text: View on GitHub
-      link: https://github.com/grove-dev/grove
-      icon: external
-      variant: minimal
 ---
 
-import { CardGrid } from '@astrojs/starlight/components';
-import { Card, ContainerSection } from '@grove-dev/starlight/components';
+import HomeLanding from '../../components/HomeLanding.astro';
 
-<ContainerSection>
-
-## What you can build
-
-<CardGrid>
-  <Card title="Open-source app directories" icon="open-book" href="/adapters/astro/">
-    Curate production-ready OSS apps with health, taxonomy, and a contributor workflow.
-  </Card>
-  <Card title="AI tools directories" icon="starlight" href="/reference/cli/">
-    Track tools, models, and resources with structured records and built-in `llms.txt` output.
-  </Card>
-  <Card title="Local ecosystem maps" icon="setting" href="/concepts/philosophy/">
-    Map your city, industry, or community with structured profiles and decision logs.
-  </Card>
-  <Card title="Internal knowledge hubs" icon="puzzle" href="/concepts/blueprints/">
-    Replace ad-hoc spreadsheets with versioned, reviewable, contributor-friendly data.
-  </Card>
-</CardGrid>
-
-## Start here
-
-<CardGrid>
-  <Card title="What is Grove?" icon="information" href="/getting-started/what-is-grove/">
-    60-second pitch and the "why not just an awesome list?" answer.
-  </Card>
-  <Card title="Create a space" icon="rocket" href="/getting-started/create-a-space/">
-    Scaffold your first Grove space with the CLI in under 10 minutes.
-  </Card>
-  <Card title="Add your first record" icon="add-document" href="/getting-started/add-your-first-record/">
-    Write a YAML record, validate it, and see it render in your site.
-  </Card>
-  <Card title="Browse the CLI reference" icon="list-format" href="/reference/cli/">
-    Every command, every option, every output file.
-  </Card>
-</CardGrid>
-
-</ContainerSection>
+<HomeLanding />

@@ -100,8 +100,8 @@ For the full reference (every CLI command, every config field), see the [docs si
 - **LLM-friendly output** — `llms.txt` and `llms-full.txt` for AI assistants that need structured context.
 - **Static by default** — fast, cheap, forkable, archive-friendly.
 - **Easy to customize** — the engine is small; spaces fork the parts they want to change.
-- **One supported framework today** — `@grove-dev/astro` is the V1 renderer. `@grove-dev/nextjs` and `@grove-dev/svelte` are reserved for V1.1/V1.2 (skeleton packages; the V1 CLI refuses to scaffold them). The data, schema, and CLI work the same regardless of renderer.
-- **Framework-agnostic UI primitives** — `@grove-dev/ui` ships 5 typed primitive modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`) over the V1 `IndexRecord` discriminated union. The Astro adapter re-exports them; future framework adapters (Svelte, Next.js) plug in the same primitives.
+- **One supported framework today** — `@grove-dev/astro` is the V1 renderer and ships a complete default template. SvelteKit and Next.js adapters are reserved for V1.1 and V1.2; they are skeleton workspaces today and the V1 CLI refuses to scaffold them.
+- **Framework-agnostic UI primitives** — `@grove-dev/ui` ships 5 typed primitive modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`) over the V1 `IndexRecord` discriminated union. The Astro adapter re-exports them.
 
 ---
 
@@ -111,12 +111,12 @@ Grove is in **active development** (current release: **v0.2.x**). The core engin
 
 ### Framework matrix
 
-| Framework           | V1 status               | Notes                                                                              |
-| ------------------- | ----------------------- | ---------------------------------------------------------------------------------- |
-| `@grove-dev/astro`  | **Supported (V1)**      | Full default template, 22 components, 1 layout, all three blueprints scaffold-tested. |
-| `@grove-dev/svelte` | Roadmap (V1.1+)         | Skeleton package; V1 CLI refuses to scaffold it. Not on the V1 critical path.      |
-| `@grove-dev/nextjs` | Roadmap (V1.2+)         | Skeleton package; V1 CLI refuses to scaffold it. Not on the V1 critical path.      |
-| `@grove-dev/ui`     | **Supported (V1)**      | 5 framework-agnostic primitive modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`). Re-exported by every adapter. |
+| Framework           | Status        | Notes                                                                              |
+| ------------------- | ------------- | ---------------------------------------------------------------------------------- |
+| `@grove-dev/astro`  | **Available** | V1 supported renderer. Ships the default template, 22 components, 1 layout.        |
+| `@grove-dev/svelte` | Coming soon   | Skeleton workspace; planned for V1.1. The V1 CLI refuses `--framework svelte`.    |
+| `@grove-dev/nextjs` | Coming soon   | Skeleton workspace; planned for V1.2. The V1 CLI refuses `--framework nextjs`.    |
+| `@grove-dev/ui`     | **Available** | 5 framework-agnostic primitive modules (`filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`). Re-exported by the Astro adapter. |
 
 **Use it for:** personal projects, internal directories, OSS ecosystems, learning collections, prototypes.
 **Hold off for:** mission-critical production where a database migration is cheaper than a YAML migration.
@@ -179,7 +179,7 @@ Three layers, each with a single responsibility:
 
 1. **Grove Core** (`@grove-dev/core`) — generic, framework-free. Owns the discriminated `Resource` union (`ProjectRecord` | `ResourceRecord` | `EntityRecord`), the config loader, importers, validators, taxonomy types, optional GitHub signal sync, sitemap, `llms.txt` generation, and the build pipeline. Zero framework dependencies.
 2. **Grove UI** (`@grove-dev/ui`) — framework-agnostic UI primitives. V1 ships 5 typed modules — `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format` — over the `IndexRecord` discriminated union. Pure TypeScript, no Astro / React / Svelte. Re-exported by every adapter so future frameworks plug into the same primitives.
-3. **Grove framework adapters** (`@grove-dev/astro` is the V1 supported renderer; `@grove-dev/nextjs` and `@grove-dev/svelte` are skeleton packages that V1.1/V1.2 will flesh out) — thin wrappers that ship components, layouts, tokens, and a default template per framework. Each adapter's template contains only pages, layouts, static config, and `.github/`. No business logic.
+3. **Grove framework adapters** — `@grove-dev/astro` is the V1 supported renderer and ships components, layouts, tokens, and a complete default template. `@grove-dev/nextjs` and `@grove-dev/svelte` are skeleton workspaces reserved for V1.2 and V1.1; they don't ship templates yet. Each adapter's template contains only pages, layouts, static config, and `.github/`. No business logic.
 
 Spaces are made by forking a framework template and editing it. Business logic stays in Core / UI, so theme changes never reach into the engine.
 
