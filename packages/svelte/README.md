@@ -25,7 +25,7 @@ The V1 CLI refuses `--framework svelte` at scaffold time (see
 [`@grove-dev/cli/src/index.ts`](../../cli/src/index.ts) — the
 `isFramework()` helper accepts only `"astro"` in V1). The SvelteKit
 adapter is reserved for V1.1 once `@grove-dev/core` and `@grove-dev/ui`
-(V1) are stable. See [`docs/roadmap.md`](../docs/roadmap.md) for the
+(V1) are stable. See the [Roadmap](/roadmap/) page on the docs site for the
 schedule.
 
 This package currently ships a skeleton only:

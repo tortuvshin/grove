@@ -1,6 +1,6 @@
 # Grove docs site
 
-The documentation site for [Grove](https://github.com/tortuvshin/grove), built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and themed with [`@grove-dev/starlight`](https://lucas-labs.github.io/@grove-dev/starlight-theme/).
+The documentation site for [Grove](https://github.com/tortuvshin/grove), built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and themed with [`@grove-dev/starlight`](https://www.npmjs.com/package/@grove-dev/starlight).
 
 This site is **not** a published npm package — it's the source for <https://grove.dev.mn>. It lives in the workspace so that doc changes ship in the same PR as the code they describe.
 
@@ -70,7 +70,7 @@ This way the doc shows up on the site _and_ on GitHub.
 
 ## Deploying
 
-We don't have a single canonical deploy pipeline yet — see [`../roadmap.md`](../roadmap.md) for the backlog entry. In the meantime, the project is happy with any of:
+We don't have a single canonical deploy pipeline yet — see the [Roadmap](/roadmap/) page on the docs site for the backlog entry. In the meantime, the project is happy with any of:
 
 - **GitHub Pages** — push `docs/dist/` to a `gh-pages` branch (or use `actions/deploy-pages`).
 - **Netlify / Vercel / Cloudflare Pages** — point at `docs/`, set the build command to `pnpm build`, the publish directory to `docs/dist`.

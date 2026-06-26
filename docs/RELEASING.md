@@ -1,6 +1,6 @@
 # Releasing Grove
 
-This is the **operational** release doc. The framing — "what we ship, in what order, and why" — lives in [`vision.md`](./vision.md) and [`roadmap.md`](./roadmap.md). Come here when you're about to push the button.
+This is the **operational** release doc. The framing — "what we ship, in what order, and why" — lives in [`vision.md`](./vision.md) and the [Roadmap](/roadmap/) page on the docs site. Come here when you're about to push the button.
 
 ## TL;DR
 
@@ -120,7 +120,7 @@ We use annotated tags so `git describe` is useful.
 
 ### GitHub release
 
-After tagging, open a GitHub release from the tag. The release body should be a copy of the corresponding `CHANGELOG.md` section. There's no automation for this yet — see [`roadmap.md`](./roadmap.md) for the backlog.
+After tagging, open a GitHub release from the tag. The release body should be a copy of the corresponding `CHANGELOG.md` section. There's no automation for this yet — see the [Roadmap](/roadmap/) page on the docs site for the backlog.
 
 ## Why we don't rewrite `workspace:*` manually
 
@@ -136,7 +136,7 @@ So the rule is: **bump `version`, leave `workspace:*` alone, let publish do the 
 - [ ] The other five packages appear in dependency order: `core` → `ui` → `astro` / `nextjs` / `svelte` → `cli`.
 - [ ] Smoke-test one package in a downstream space: install it in a fresh scaffolded space (e.g. a temporary `grove new my-test-space --framework astro`) and run the framework's build / `grove build` to confirm a clean install.
 - [ ] Post a short note in the GitHub Discussions "Announcements" category, or open a discussion if there isn't one yet.
-- [ ] Update [`roadmap.md`](./roadmap.md) — close out the items that the release shipped.
+- [ ] Update the [Roadmap](/roadmap/) page — close out the items that the release shipped.
 
 ## Emergency hotfix
 
@@ -163,6 +163,6 @@ If you genuinely shipped something that is unsafe (security), see [`SECURITY.md`
 ## See also
 
 - [`vision.md`](./vision.md) — why Grove exists and the broader direction.
-- [`roadmap.md`](./roadmap.md) — what's queued, what shipped, what's deferred.
+- The [Roadmap](/roadmap/) page on the docs site — what's queued, what shipped, what's deferred.
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — how the six packages fit together.
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) — what to expect from a PR.

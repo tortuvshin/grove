@@ -117,7 +117,7 @@ whose `kind:` is now wrong.
 
 ## Related docs
 
-- **[What is Grove?](/getting-started/what-is-grove/)** — the
+- **[What is Grove?](/introduction/)** — the
   60-second pitch.
 - **[Create a space](/getting-started/create-a-space/)** — scaffold
   a new space; you pick the blueprint here.
