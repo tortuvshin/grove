@@ -1,0 +1,21 @@
+docs/src/components/home/Header.astro
+  s_3fe8ac32b5b639::t_f181c538a088f5 16,20-24
+docs/src/components/home/Footer.astro
+  s_3fe8ac32b5b639::t_8eb699ee8578c1 11,15-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "6ca494b95ec37b56ec7c289cf933b03b275f72ff",
+  "prompts": {},
+  "sessions": {
+    "s_3fe8ac32b5b639": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be16cf72-d2af-489f-bc9d-2710664da211",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
