@@ -1,0 +1,14 @@
+.gitignore
+  h_62cffde5d182b0 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "ef357734bf52ac96a9d1d702586cc5d8fd2339fe",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
