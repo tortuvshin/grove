@@ -4,120 +4,136 @@ All notable changes to Grove are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Grove is a monorepo of six published packages
+Grove is a monorepo of **seven** packages on npm
 (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`,
-`@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`).
-By default a version bump applies to all six in lockstep. The release
+`@grove-dev/astro`, `@grove-dev/starlight`, `@grove-dev/nextjs`,
+`@grove-dev/svelte`).
+`@grove-dev/nextjs` and `@grove-dev/svelte` are marked `private: true` in
+the manifest and are **skeleton adapters** — published only to reserve
+their import paths. They do not scaffold a runnable project. The five
+public packages (`core`, `ui`, `cli`, `astro`, `starlight`) are the
+V1-supported surface.
+
+By default a version bump applies to all seven in lockstep. The release
 notes below describe the user-visible change; the affected packages are
 called out in **Packages** lines.
 
 For the developer workflow that produces these entries, see
-[`docs/RELEASING.md`](./docs/RELEASING.md).
+[`docs/src/content/docs/maintainers/release-process.md`](./docs/src/content/docs/maintainers/release-process.md).
 
 ---
 
-## [Unreleased] — pre-0.3.0 (covers work since 0.2.16)
+## [Unreleased]
 
-> **Note on version drift.** The most recent published release recorded in
-> this file is **0.2.2** (2025-06-10). The current `@grove-dev/core` is
-> already at **0.2.16**. This `[Unreleased]` section summarizes the
-> V0→V1 migration and the work that landed in the 0.2.3–0.2.16 range
-> without trying to reconstruct per-patch entries. The next release that
-> ships this content (likely 0.3.0) will fold this section into a
-> dated `## [0.3.0]` heading and add a corresponding `Releases` link at
-> the bottom of this file. See [`docs/RELEASING.md`](./docs/RELEASING.md)
-> for the publishing workflow.
+> Working buffer. Folds into a dated `## [X.Y.Z]` heading on the next
+> release.
+
+(empty)
+
+---
+
+## [0.3.1] — 2026-06-30
+
+> **Docs-only patch.** Every change since `v0.3.0` (2026-06-11) has been
+> on the documentation site (`docs/`), the production-side home page,
+> and transitive dev-dependency bumps. **No `@grove-dev/*` package source
+> code has changed.** Framework support, blueprints, CLI commands,
+> generated outputs, and schema are unchanged from `v0.3.0`.
+
+### Fixed
+
+- **Production-site honesty pass on the standalone `/` page.** The home page no longer advertises commands, file names, or framework support that don't exist in the code:
+  - The mock terminal prompt and the "Get Started" lifecycle section no longer show fake `grove add` and `grove deploy` commands. The lifecycle now reflects the V1.0 CLI commands (`import`, `validate`, `sync github`, `generate`, `sitemap`, `llms`, `build`, `cleanup stale`, `workflows sync`) and the real default Astro workflow.
+  - The mock terminal writes `grove.config.ts`, matching the file the Astro default template actually emits. (The previous mock said `grove.config.yaml`.)
+  - The eight-framework logo wall is replaced with an honest "Astro today, SvelteKit / Next.js planned" status card plus the actual public package list (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`). Tailwind / Node.js / GitHub are no longer presented as framework adapters — they're tooling, not adapters.
+  - The "Integrate with your favorite tools" orbital diagram is replaced with "One source, multiple outputs" (static HTML, `sitemap.xml`, `llms.txt`, `llms-full.txt`).
+  - The "Why Grove" features section is reframed around the maintenance problem Grove actually solves (structure drift, stale metadata, review-as-cleanup, discovery-as-software, AI-readable fragments, maintainer-memory dependence) instead of generic capabilities.
+- **JSON-LD `SearchAction` removed.** The `WebSite` block in the home page (`docs/src/layouts/HomeLayout.astro`) and the global Starlight `head` config (`docs/astro.config.mjs`) no longer advertise a `https://grove.dev.mn/search?q=...` target. The route never existed; emitting it was invalid structured data.
+- **Roadmap page renders correctly.** The `/roadmap/` route no longer prints the raw `import { Content } from '../../../roadmap.md';` statement as visible page text. The content is now inlined as a Starlight `.md` content file, evaluated through the Starlight content layer.
+- **Wrong GitHub organisation.** All references to `grove-dev/grove` in source and content are replaced with the correct `tortuvshin/grove`. `https://github.com/grove-dev/grove/...` was returning 404.
+- **Lucode / lucas-labs user-visible branding.** The "Lucode" and "lucas-labs" strings in the docs site footer and four content files are replaced with "Grove Starlight". Internal `packages/starlight/` source may keep upstream names with `@deprecated` aliases for downstream stability.
+- **Two broken internal links in Getting Started.** `/getting-started/add-your-first-record/` (typo) → `/getting-started/add-your-first-project/`. `/getting-started/what-is-grove/` → `/introduction/`.
+- **Software version drift on the home page.** The `softwareVersion` field in the homepage JSON-LD is corrected from `0.2.x` to `0.3.0`.
+- **Home and roadmap images** carry explicit `width` / `height` attributes and `loading="lazy"` to prevent layout shift and reduce initial paint cost. The home images that are decorative carry `alt=""`.
+- **Home sections** are now wired to their headings via `aria-labelledby`, every CTA links to a real destination (no `href="#"` placeholders), and the main landmark carries an `id="main-content"` skip target.
+- **Open-graph / Twitter metadata** is emitted on every page through the Starlight `head` config.
 
 ### Changed
-- **V0→V1 naming migration.** Internal component and type names aligned with the V1 `record` / `IndexRecord` / `Resource` convention. The V0-published Astro package's `ItemCard` name is **retained** for downstream stability; all other V0→V1 renames are listed below. The V0 URLs (`/apps/<slug>`) still resolve via a static 301 redirect generated by the Astro template.
-  - `@grove-dev/astro`: `AppsIndexRow.astro` → `IndexRow.astro`; `AppsPagination.astro` → `Pagination.astro`; `ItemSection` (component) → `RecordSection`.
-  - `@grove-dev/astro`: `ItemsFilters` (type) → `IndexFilters`; `ItemsSort` (type) → `IndexSort`; `AppsFilters` / `AppsSort` (type aliases) **removed** (use `IndexFilters` / `IndexSort`); `filterItems` (function) → `filterRecords`; `filterApps` (alias) **removed** (use `filterRecords`).
+
+- **Roadmap document rewritten.** The new `/roadmap/` page groups content by shipping status (Shipped / Next release / Later / Out of scope) instead of by wave narrative. The historical Wave 0 → Wave 5 plan is preserved as a link to the GitHub history.
+- **Dep bumps:** `astro` 6.4.6 → 7.0.3, `tailwindcss` 4.3.0 → 4.3.2, `@types/node` 25.9.2 → 26.0.1.
+
+**Packages:** none (docs-only).
+
+---
+
+## [0.3.0] — 2026-06-11
+
+> **Initial public release.** The first version of Grove that is ready to
+> be picked up by a community. A real production space
+> ([Open Apps](https://open-apps.dev.mn)) already runs on it.
+
+This entry folds in the V0→V1 migration that had accumulated in the
+`[Unreleased]` buffer through 0.2.3–0.2.16. Per-patch entries for that
+range are intentionally not reconstructed; the git history of
+`CHANGELOG.md` is the working record.
+
+### Added
+
+- **Three V1 blueprints.** Discriminated `Resource` union keyed by `kind`:
+  - `project-directory` → `kind: project` — apps, packages, tools, services, repositories, internal systems. GitHub metadata optional. **V1 default, polished default pages.**
+  - `resource-hub` → `kind: resource` — guides, comparisons, explainers, links, knowledge collections. Has a `type` and a `topic`. **Data flow only in V1; polished default pages deferred.**
+  - `ecosystem-map` → `kind: entity` — organizations, products, communities, schools, ecosystem actors. Has a `type` and optional `founded` / `location` / `members` / `parent`. **Data flow only in V1; polished default pages deferred.**
+- The `kind` field is required and validated against the blueprint in `grove.config.ts` at validation time.
+- `--deploy <provider>` writes a provider-specific config file (`vercel.json`, `netlify.toml`, `wrangler.jsonc`, or a GitHub Pages workflow) plus a matching `.github/workflows/deploy-<provider>.yml`. The `none` value writes no deploy workflow.
+- Project configuration: `.editorconfig`, `.prettierrc.json`, `.prettierignore`.
+- `.github/` directory: issue templates (bug, feature, docs, question), pull request template, `FUNDING.yml`, `dependabot.yml`, `SUPPORT.md`.
+- CI workflows: `ci.yml` (build, type-check, scaffold smoke test, repo hygiene checks) and `audit.yml` (weekly `pnpm audit`).
+- Root `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `LICENSE` (MIT).
+- `docs/src/content/docs/maintainers/release-process.md` and `docs/src/content/docs/maintainers/security.md` to round out the contributor-facing documentation.
+- Dependabot configured to ignore `@grove-dev/*` workspace deps (the release script owns those rewrites).
+- The Astro default template ships **22 components** (`Hero`, `ItemCard`, `IndexRow`, `Pagination`, `RecordSection`, `RefinePanel`, `ScoreBars`, `SmartLensTabs`, `ExploreByCategory`, `ExploreByStack`, `WhyThisExists`, `CurationGrid`, `ContributorsGrid`, `StackGrid`, `Icon`, `MinimalAbout`, `OriginalCollection`, `DecisionRow`, `FilterGroupMenu`, `FilterOptions`, `CategoryGrid`) and **one layout** (`BaseLayout`).
+- 11 GitHub Actions workflows generated by `grove new --github public` mode (validate, build, deploy, sync-github-metadata, sync-contributors stub, cleanup-stale-records, update-records, …).
+- `llms.txt` and `llms-full.txt` generated at build time (via `grove llms`).
+- `sitemap.xml` generated at build time (via `grove sitemap`).
+
+### Changed
+
+- **V0→V1 naming migration.** Internal component and type names aligned with the V1 `record` / `IndexRecord` / `Resource` convention. The V0-published Astro package's `ItemCard` name is **retained** for downstream stability; all other V0→V1 renames are listed below. V0 `/apps/<slug>` URLs resolve via a static 301 redirect generated by the Astro template.
+  - `@grove-dev/astro`: `AppsIndexRow.astro` → `IndexRow.astro`; `AppsPagination.astro` → `Pagination.astro`; `ItemSection` → `RecordSection`.
+  - `@grove-dev/astro`: `ItemsFilters` → `IndexFilters`; `ItemsSort` → `IndexSort`; `AppsFilters` / `AppsSort` (type aliases) **removed**; `filterItems` → `filterRecords`; `filterApps` (alias) **removed**.
   - `@grove-dev/astro`: dynamic route files renamed from `[itemSlug].astro` to `[recordSlug].astro`; client-side `data-item-slug` / `dataset.itemSlug` → `data-record-slug` / `dataset.recordSlug`.
-  - `@grove-dev/astro/templates/default`: `data/records.ts` helper `itemSlug()` renamed to `recordSlugConfig()`; config field `itemSlug` (deprecated) → `recordSlug` (canonical, with `itemSlug` kept for V0 backwards-compat).
-  - `@grove-dev/core`: `curatedConfigSchema` → `blueprintSchema`; `defineGroveConfig` → `defineConfig`; `resourceSchema` (single) → `projectRecordSchema` / `resourceRecordSchema` / `entityRecordSchema` (split per `kind`); `itemsFileSchema` **removed** (records are individual `<slug>.yml` files, no aggregate file); `buildData` → `generate` (library form); `buildLlmsFiles` → `buildLlmsTxt` + `buildLlmsFullTxt` (split into two functions); `pickReviewCandidates` → `pickCleanupCandidates`; `buildReviewReport` **removed**; `parseAppYaml` / `normalizeAppRecord` / `toIndexApp` **removed** (V0 `apps` model is gone); `validateProject` / `validateAppRecord` **removed** (validation is part of `generate`); `ghFetch` / `pLimit` are now **internal** to `github-client.ts`, not part of the V1 public surface.
-  - `@grove-dev/ui`: V0 `0.0.0-roadmap` stub (identity helper + version constant) replaced with V1 `1.0.x` — 5 typed modules over `IndexRecord`: `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`. Adapter barrels re-export the same primitives.
-  - Astro template URL convention: canonical V1 detail URL is `/<blueprint>/<record-slug>` (e.g. `/projects/coolify`). V0 `/apps/<slug>` URLs resolve via a static 301 redirect generated by `apps/[recordSlug].astro`.
+  - `@grove-dev/astro/templates/default`: `itemSlug()` → `recordSlugConfig()`; config field `itemSlug` (deprecated) → `recordSlug` (canonical, `itemSlug` kept for V0 backwards-compat).
+  - `@grove-dev/core`: `curatedConfigSchema` → `blueprintSchema`; `defineGroveConfig` → `defineConfig`; `resourceSchema` (single) → `projectRecordSchema` / `resourceRecordSchema` / `entityRecordSchema` (split per `kind`); `itemsFileSchema` **removed**; `buildData` → `generate` (library form); `buildLlmsFiles` → `buildLlmsTxt` + `buildLlmsFullTxt` (split into two functions); `pickReviewCandidates` → `pickCleanupCandidates`; `buildReviewReport` **removed**; `parseAppYaml` / `normalizeAppRecord` / `toIndexApp` **removed**; `validateProject` / `validateAppRecord` **removed** (validation is part of `generate`); `ghFetch` / `pLimit` are now **internal** to `github-client.ts`, not part of the V1 public surface.
+  - `@grove-dev/ui`: V0 `0.0.0-roadmap` stub replaced with V1 `1.0.x` — 5 typed modules over `IndexRecord`: `filterRecords`, `sortRecords`, `paginateRecords`, `scoreRecords`, `format`. Adapter barrels re-export the same primitives.
+  - Astro template URL convention: canonical V1 detail URL is `/<blueprint>/<record-slug>` (e.g. `/projects/coolify`).
 - `@grove-dev/cli`: `--framework` now refuses `nextjs` and `svelte` with a clear error (V1 supports `astro` only; `nextjs` lands in V1.2, `svelte` in V1.1).
-- `@grove-dev/cli`: `--deploy` now writes a provider-specific config file (`vercel.json`, `netlify.toml`, `wrangler.jsonc`, or a GitHub Pages workflow) plus a matching `.github/workflows/deploy-<provider>.yml`. The `none` value writes no deploy workflow (you wire up your own CI).
+- `@grove-dev/cli`: V1 scaffolds **Astro** projects only.
+- `packages/nextjs/templates/default/package.json` and `packages/svelte/templates/default/package.json` rewritten to use V1 CLI commands.
+- `scripts/test-scaffold.mjs` tests the Astro scaffold path only.
+- All seven `@grove-dev/*` packages are now published with consistent metadata (`homepage`, `repository`, `bugs`, `publishConfig`).
+
+### Removed
+
+- `--framework nextjs` and `--framework svelte` from `@grove-dev/cli`. The `Framework` union is now `"astro"` only. The Next.js and SvelteKit adapter packages still exist (no source files changed) but their templates are skeleton-only and do not scaffold a runnable project. They return as scaffold options in V1.1 (SvelteKit) and V1.2 (Next.js).
+- The `nextjs` and `svelte` branches in `FRAMEWORK_LABELS`, the framework select prompt, and the help text for `grove new` / `grove run`. The `detectFramework()` / `frameworkBuildCommand()` / `frameworkDevCommand()` helpers no longer have a non-astro branch.
+
+### Fixed
+
+- `grove new --framework nextjs` no longer silently produces a half-populated project. It exits with `Unknown framework: nextjs` and a hint to use `astro` (or wait for the relevant release).
+- `scripts/test-scaffold.mjs` no longer attempts to scaffold `nextjs` / `svelte` projects. It is an Astro-only smoke test.
+- Scaffold step now rewrites `workspace:*` deps only at publish time, avoiding the "404 on a version that doesn't exist yet" install failure.
+- Layout-level tokens for container widths now align with Starlight's design system.
+- Resolved the import path of Starlight's reset / util styles so the build no longer relies on a fragile `node_modules` lookup.
 
 ### Migration
+
 - **Source code:** search-and-replace V0 names with the V1 canonical names in any custom Astro template that imports from `@grove-dev/astro`. See the table above.
-- **URLs:** existing `/apps/<slug>` links continue to work via 301 redirect to the V1 canonical `/projects/<slug>`. No action required.
+- **URLs:** existing `/apps/<slug>` links continue to work via 301 redirect to `/projects/<slug>`. No action required.
 - **Data:** records remain in `data/records/<slug>.yml` (no data migration needed). The V0 `data/apps/*.yml` layout is gone.
 - **Config:** `grove.config.ts` shape is unchanged. The `blueprintConfig.itemSlug` field is kept as an alias of the V1 canonical `recordSlug` for backwards-compat.
 
-### Added
-- Project configuration: `.editorconfig`, `.prettierrc.json`, `.prettierignore`.
-- `.github/` directory: issue templates (bug, feature, docs, question),
-  pull request template, `FUNDING.yml`, `dependabot.yml`, and
-  `SUPPORT.md`.
-- CI workflows: `ci.yml` (build, type-check, scaffold smoke test, repo
-  hygiene checks) and `audit.yml` (weekly `pnpm audit`).
-- Root `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
-  `SECURITY.md`, and `LICENSE` (MIT).
-- `docs/RELEASING.md` and `docs/SUPPORT.md` to round out the
-  contributor-facing documentation.
-- Dependabot configured to ignore `@grove-dev/*` workspace deps (the
-  release script owns those rewrites).
-- `--deploy <provider>` now writes a deploy workflow + config file
-  for the chosen provider:
-  - `vercel` → `vercel.json` + `.github/workflows/deploy-vercel.yml`
-  - `netlify` → `netlify.toml` + `.github/workflows/deploy-netlify.yml`
-  - `cloudflare` → `wrangler.jsonc` + `.github/workflows/deploy-cloudflare.yml`
-  - `github-pages` → `.github/workflows/build.yml` (Pages deploy step)
-  - `none` → no deploy workflow
-  Previously the flag was cosmetic: any choice silently produced the
-  same GitHub Pages `build.yml`.
-
-### Changed
-- `@grove-dev/cli` V1 scaffolds **Astro** projects only.
-- `packages/nextjs/templates/default/package.json` and
-  `packages/svelte/templates/default/package.json` rewritten to use V1
-  CLI commands (`grove validate`, `grove generate`, `grove sitemap`,
-  `grove llms`, `grove sync github`) instead of the V0 leftovers
-  (`grove build-data`, `grove build-llms-full`, `grove analyze`,
-  `grove enrich`). These are the only V0→V1 entries that can be fixed
-  in V1; the templates are still skeleton-only (no pages / components
-  / layouts) and not exposed as scaffold options until v0.3.0.
-- `scripts/test-scaffold.mjs` now tests the Astro scaffold path only.
-
-### Removed
-- `--framework nextjs` and `--framework svelte` from `@grove-dev/cli`.
-  The `Framework` union in `packages/cli/src/template-loader.ts` is
-  now `"astro"` only; `isFramework()` rejects any other value with
-  `Unknown framework: <value>`. The Next.js and SvelteKit adapter
-  packages still exist (no source files changed) but their templates
-  are skeleton-only and do not scaffold a runnable project, so
-  advertising them as options was misleading. They return as
-  scaffold options in v0.3.0 when the templates ship real pages,
-  components, and layouts.
-- The `nextjs` and `svelte` branches in `FRAMEWORK_LABELS`
-  (`packages/cli/src/index.ts`), the framework select prompt, and the
-  help text for `grove new`/`grove run`. The `detectFramework()` /
-  `frameworkBuildCommand()` / `frameworkDevCommand()` helpers no
-  longer have a non-astro branch.
-
-### Fixed
-- `grove new --framework nextjs` no longer silently produces a
-  half-populated project whose `package.json` references V0 CLI
-  commands that do not exist. It now exits with
-  `Unknown framework: nextjs` and a hint to use `astro` (or wait
-  for v0.3.0).
-- `scripts/test-scaffold.mjs` no longer attempts to scaffold
-  `nextjs` / `svelte` projects (which would fail at the `pnpm run
-  build` step). It is now an Astro-only smoke test.
-
-### Changed
-- None.
-
-### Fixed
-- None.
-
-### Security
-- None.
-
-**Packages:** all six (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`,
-`@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`).
+**Packages:** all seven (with `@grove-dev/starlight` and `@grove-dev/nextjs` / `@grove-dev/svelte` published as skeleton-only at `0.2.20`).
 
 ---
 
@@ -154,7 +170,7 @@ For the developer workflow that produces these entries, see
   archive-state signals for every record in the space.
 - `grove validate` command: strict-mode validation with detailed
   per-record issue reporting.
-- `grove import` accepts GitHub awesome-list URLs and produces
+- `grove import` command: accepts GitHub awesome-list URLs and produces
   one YAML record per resource.
 
 ### Changed
@@ -196,11 +212,13 @@ For the developer workflow that produces these entries, see
 
 - Repository tags use the form `vX.Y.Z` and are created **manually**
   after `scripts/release.mjs` finishes publishing. See
-  [`docs/RELEASING.md`](./docs/RELEASING.md) for the full workflow.
+  [`docs/src/content/docs/maintainers/release-process.md`](./docs/src/content/docs/maintainers/release-process.md) for the full workflow.
 - The `Versions` table in `SECURITY.md` describes the support window
   per release line.
 
-[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/tortuvshin/grove/releases/tag/v0.3.1
+[0.3.0]: https://github.com/tortuvshin/grove/releases/tag/v0.3.0
 [0.2.2]: https://github.com/tortuvshin/grove/releases/tag/v0.2.2
 [0.2.1]: https://github.com/tortuvshin/grove/releases/tag/v0.2.1
 [0.1.0]: https://github.com/tortuvshin/grove/releases/tag/v0.1.0
