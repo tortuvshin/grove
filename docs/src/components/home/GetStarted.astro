@@ -1,96 +1,100 @@
 ---
-const steps = [
-  {
-    num: '01',
-    title: 'Create a space',
-    cmd: 'grove new',
-    desc: 'Scaffold a Grove project with the CLI (interactive).',
-  },
-  {
-    num: '02',
-    title: 'Add records',
-    cmd: 'grove import',
-    desc: 'Turn a Markdown list (or hand-write YAML) into records/*.yml.',
-  },
-  {
-    num: '03',
-    title: 'Build the site',
-    cmd: 'grove generate',
-    desc: 'Build data, then run your framework build (astro build today).',
-  },
-  {
-    num: '04',
-    title: 'Deploy',
-    cmd: '--deploy <provider>',
-    desc: 'Pick vercel / netlify / cloudflare / github-pages at scaffold time.',
-  },
-]
+const stages = [
+  { id: 'collect', title: 'Collect', desc: 'Issues, pull requests, imports, or hand-authored records.', input: 'A community suggestion', action: 'Import a Markdown list or add a YAML record.', control: 'Maintainers define what belongs.', output: 'data/records/<slug>.yml', command: 'pnpm exec grove import <awesome-list-url>' },
+  { id: 'structure', title: 'Structure', desc: 'Typed records and shared taxonomies replace loose conventions.', input: 'An unstructured candidate', action: 'Map fields to the selected blueprint and taxonomy.', control: 'Maintainers own categories and wording.', output: 'A typed project, resource, or entity', command: 'kind: project\ncategory: self-hosted' },
+  { id: 'validate', title: 'Validate', desc: 'Catch invalid records and taxonomy references before publishing.', input: 'Records + taxonomy files', action: 'Check schemas, slugs, decisions, health, and references.', control: 'Warnings can become strict CI failures.', output: 'Actionable validation results', command: 'pnpm exec grove validate --strict' },
+  { id: 'enrich', title: 'Enrich', desc: 'Optionally refresh repository evidence without replacing judgment.', input: 'A project with a repository URL', action: 'Fetch activity, releases, license, topics, and archive state.', control: 'Synced signals remain reviewable data.', output: 'Current repository metadata', command: 'pnpm exec grove sync github' },
+  { id: 'review', title: 'Review', desc: 'Every content change remains a normal Git diff.', input: 'A proposed record change', action: 'Run checks in Actions and review the pull request.', control: 'A human makes the editorial decision.', output: 'Accepted, revised, or rejected change', command: 'git diff data/records/immich.yml' },
+  { id: 'publish', title: 'Publish', desc: 'Generate portable data and a static website.', input: 'Reviewed records', action: 'Build JSON, sitemap, AI-readable files, and Astro pages.', control: 'Choose the host, routes, and presentation.', output: 'Static, cacheable output', command: 'pnpm exec grove generate && pnpm build' },
+  { id: 'maintain', title: 'Maintain', desc: 'Turn staleness into a repeatable review queue.', input: 'A growing, aging collection', action: 'Report stale, inactive, archived, and incomplete records.', control: 'Humans decide to keep, hide, or remove.', output: 'A focused maintenance report', command: 'pnpm exec grove cleanup stale --report' },
+];
 ---
 
-<section class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="get-started-title">
-  <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
-    Get started in seconds
-  </p>
-  <h2
-    id="get-started-title"
-    class="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
-  >
-    Create, run, and publish a Grove space.
+<section id="how-it-works" class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="get-started-title">
+  <p class="text-xs font-semibold uppercase tracking-widest text-subtle">How Grove works</p>
+  <h2 id="get-started-title" class="mt-5 max-w-3xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl">
+    One lifecycle, with maintainers in control.
   </h2>
+  <p class="mt-5 max-w-2xl text-base leading-relaxed text-muted">
+    Grove automates repeatable checks and generation. It does not automate editorial judgment.
+  </p>
 
-  <div class="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <ol class="flex flex-col gap-3">
-      {
-        steps.map((step, i) => (
-          <li
-            class={`flex items-start gap-4 rounded-xl border p-5 transition-colors ${
-              i === 0
-                ? 'border-border-strong bg-card'
-                : 'border-border bg-surface hover:bg-card'
-            }`}
-          >
-            <span class="flex size-8 shrink-0 items-center justify-center rounded-full border border-border-strong bg-bg font-mono text-xs text-muted">
-              {step.num}
-            </span>
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <h3 class="text-sm font-semibold text-fg">{step.title}</h3>
-                <code class="font-mono text-xs text-subtle">{step.cmd}</code>
-              </div>
-              <p class="mt-1 text-sm leading-relaxed text-muted">{step.desc}</p>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
+  <div class="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-[0.9fr_1.1fr]" data-lifecycle>
+    <div class="flex flex-col gap-2" role="tablist" aria-label="Grove lifecycle stages">
+      {stages.map((stage, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`stage-${stage.id}`}
+          aria-controls={`stage-panel-${stage.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-stage={stage.id}
+          class="lifecycle-step flex min-h-16 w-full items-start gap-4 rounded-xl border border-border bg-surface p-4 text-left transition-colors hover:bg-card"
+        >
+          <span class="flex size-8 shrink-0 items-center justify-center rounded-full border border-border-strong bg-bg font-mono text-xs text-muted">0{i + 1}</span>
+          <span class="min-w-0"><strong class="block text-sm font-semibold text-fg">{stage.title}</strong><span class="mt-1 block text-sm leading-relaxed text-muted">{stage.desc}</span></span>
+        </button>
+      ))}
+    </div>
 
-    <div
-      class="overflow-hidden rounded-xl border border-border-strong bg-[#0a0b0c]"
-    >
+    <div class="overflow-hidden rounded-xl border border-border-strong bg-[#0a0b0c]">
       <div class="flex items-center gap-2 border-b border-border px-4 py-3">
-        <span class="size-3 rounded-full bg-[#ff5f57]"></span>
-        <span class="size-3 rounded-full bg-[#febc2e]"></span>
-        <span class="size-3 rounded-full bg-[#28c840]"></span>
-        <span class="ml-3 font-mono text-xs text-subtle">grove — create a space</span>
+        <span class="size-3 rounded-full bg-[#ff5f57]"></span><span class="size-3 rounded-full bg-[#febc2e]"></span><span class="size-3 rounded-full bg-[#28c840]"></span>
+        <span class="ml-3 font-mono text-xs text-subtle">grove — maintained knowledge lifecycle</span>
       </div>
-      <pre class="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed"><code><span class="text-subtle">$</span> <span class="text-fg">pnpm dlx @grove-dev/cli@latest new my-space</span>
-
-<span class="text-muted">? Where should the new space live?</span> <span class="text-fg">my-space</span>
-<span class="text-muted">? Pick a blueprint</span> <span class="text-fg">project-directory</span>
-<span class="text-muted">? Pick a framework (V1: astro only)</span> <span class="text-fg">astro</span>
-<span class="text-muted">? Where will this space be deployed?</span> <span class="text-fg">github-pages</span>
-
-<span class="text-muted">Creating project structure...</span>
-
-<span class="text-accent-green">✓ Copied 47 files into my-space</span>
-<span class="text-accent-green">✓ Wrote grove.config.ts</span>
-<span class="text-accent-green">✓ Pinned @grove-dev/{astro,cli,core}@0.2.20</span>
-
-<span class="text-muted">Next steps:</span>
-  <span class="text-subtle">cd my-space</span>
-  <span class="text-subtle">pnpm install</span>
-  <span class="text-subtle">pnpm exec grove validate</span>
-  <span class="text-subtle">pnpm build</span></code></pre>
+      <div class="p-5 sm:p-7">
+        {stages.map((stage) => (
+          <div role="tabpanel" id={`stage-panel-${stage.id}`} aria-labelledby={`stage-${stage.id}`} data-panel={stage.id} class="lifecycle-panel">
+            <p class="font-mono text-xs text-accent-green">✓ {stage.input}</p>
+            <h3 class="mt-5 text-2xl font-semibold tracking-tight text-fg">{stage.title}</h3>
+            <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+              <div class="rounded-lg border border-border bg-surface p-4"><dt class="font-mono text-[10px] uppercase tracking-wider text-subtle">Grove does</dt><dd class="mt-2 leading-relaxed text-muted">{stage.action}</dd></div>
+              <div class="rounded-lg border border-border bg-surface p-4"><dt class="font-mono text-[10px] uppercase tracking-wider text-subtle">Maintainer controls</dt><dd class="mt-2 leading-relaxed text-muted">{stage.control}</dd></div>
+            </dl>
+            <div class="mt-4 rounded-lg border border-border bg-surface p-4"><span class="font-mono text-[10px] uppercase tracking-wider text-subtle">Output</span><p class="mt-2 text-sm text-fg">{stage.output}</p></div>
+            <pre class="mt-5 overflow-x-auto rounded-lg border border-border bg-bg p-4 font-mono text-[12px] leading-6 text-muted"><code><span class="text-subtle">$</span> {stage.command}</code></pre>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-lifecycle]');
+    if (!root) return;
+    const tabs = [...root.querySelectorAll('[role="tab"]')];
+    const panels = [...root.querySelectorAll('[role="tabpanel"]')];
+    const activate = (tab, focus = true) => {
+      tabs.forEach((item) => {
+        const selected = item === tab;
+        item.setAttribute('aria-selected', String(selected));
+        item.tabIndex = selected ? 0 : -1;
+      });
+      panels.forEach((panel) => { panel.hidden = panel.dataset.panel !== tab.dataset.stage; });
+      if (focus) tab.focus();
+    };
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activate(tab, false));
+      tab.addEventListener('keydown', (event) => {
+        let next = index;
+        if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        activate(tabs[next]);
+      });
+    });
+    tabs.slice(1).forEach((_, index) => { panels[index + 1].hidden = true; });
+  })();
+</script>
+
+<style>
+  .lifecycle-step[aria-selected='true'] { border-color: var(--color-border-strong); background: var(--color-card); }
+  .lifecycle-step[aria-selected='true'] > span:first-child { border-color: color-mix(in srgb, var(--color-accent-cyan) 55%, var(--color-border)); color: var(--color-accent-cyan); }
+  .lifecycle-panel[hidden] { display: none; }
+</style>

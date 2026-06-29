@@ -21,6 +21,7 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(indexAstro).toContain("import Blueprints from '../components/home/Blueprints.astro'");
     expect(indexAstro).toContain("import Frameworks from '../components/home/Frameworks.astro'");
     expect(indexAstro).toContain("import Integrations from '../components/home/Integrations.astro'");
+    expect(indexAstro).toContain("import OpenApps from '../components/home/OpenApps.astro'");
     expect(indexAstro).toContain("import FinalCta from '../components/home/FinalCta.astro'");
     expect(indexAstro).toContain("import Footer from '../components/home/Footer.astro'");
 
@@ -32,6 +33,7 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(indexAstro).toMatch(/<Blueprints\s*\/>/);
     expect(indexAstro).toMatch(/<Frameworks\s*\/>/);
     expect(indexAstro).toMatch(/<Integrations\s*\/>/);
+    expect(indexAstro).toMatch(/<OpenApps\s*\/>/);
     expect(indexAstro).toMatch(/<FinalCta\s*\/>/);
     expect(indexAstro).toMatch(/<Footer\s*\/>/);
   });
@@ -64,8 +66,8 @@ describe("docs homepage (standalone Astro route)", () => {
     // Standalone Grove tokens — dark canvas + Geist typography
     expect(homeCss).toMatch(/--color-bg:\s*#08090a/);
     expect(homeCss).toMatch(/--color-fg:\s*#ffffff/);
-    expect(homeCss).toMatch(/--font-sans:\s*['"]Geist['"]/);
-    expect(homeCss).toMatch(/--font-mono:\s*['"]Geist Mono['"]/);
+    expect(homeCss).toContain("--font-sans: ui-sans-serif");
+    expect(homeCss).toContain("--font-mono: ui-monospace");
 
     // No Starlight tokens leak in
     expect(homeCss).not.toContain("--sl-");
@@ -140,27 +142,26 @@ describe("docs homepage (standalone Astro route)", () => {
       "utf8",
     );
 
-    expect(hero).toContain("The framework for community knowledge");
-    expect(hero).toContain("npx @grove-dev/cli@latest new my-space");
+    expect(hero).toContain("Build community knowledge that stays useful.");
+    expect(hero).toContain("pnpm dlx @grove-dev/cli@latest new my-space");
+    expect(hero).toContain("data/records/immich.yml");
 
-    expect(features).toContain("File-based records");
-    expect(features).toContain("GitHub-native workflows");
-    expect(features).toContain("Static publishing");
+    expect(features).toContain("Lists are easy to start and difficult to maintain.");
+    expect(features).toContain("Structure drifts");
+    expect(features).toContain("Maintenance lives in memory");
 
-    expect(getStarted).toContain("grove new");
-    expect(getStarted).toContain("grove build");
-    expect(getStarted).toContain("grove deploy");
+    expect(getStarted).toContain("pnpm exec grove validate --strict");
+    expect(getStarted).toContain("pnpm exec grove sync github");
+    expect(getStarted).toContain("pnpm exec grove cleanup stale --report");
 
-    expect(blueprints).toContain("Awesome List");
-    expect(blueprints).toContain("Docs Space");
-    expect(blueprints).toContain("Community Wiki");
-    expect(blueprints).toContain("Dataset Catalog");
+    expect(blueprints).toContain("Project directories");
+    expect(blueprints).toContain("Resource hubs");
+    expect(blueprints).toContain("Ecosystem maps");
 
-    expect(integrations).toContain("/logos/astro.svg");
-    expect(integrations).toContain("/logos/svelte.svg");
-    expect(integrations).toContain("Integrate with your favorite tools");
+    expect(integrations).toContain("One source, multiple outputs");
+    expect(integrations).toContain("llms-full.txt");
 
-    expect(finalCta).toContain("Build your knowledge space today.");
+    expect(finalCta).toContain("Start with the Astro implementation.");
   });
 
   it("wires each section to its heading via aria-labelledby for assistive tech", async () => {
@@ -197,13 +198,7 @@ describe("docs homepage (standalone Astro route)", () => {
       ["Integrations", integrations],
       ["FinalCta", finalCta],
     ] as const) {
-      // Integrations wraps its section in a <div> (orbital diagram lives
-      // outside the heading landmark); every other component uses <section>.
-      const landmarkPattern =
-        name === "Integrations"
-          ? /<div[^>]+aria-labelledby=/
-          : /<section[^>]+aria-labelledby=/;
-      expect(src, name).toMatch(landmarkPattern);
+      expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
       // Hero uses <h1> (the page title); every other section uses <h2>.
       const headingPattern =
         name === "Hero" ? /<h1[^>]+id=/ : /<h2[^>]+id=/;
@@ -212,32 +207,31 @@ describe("docs homepage (standalone Astro route)", () => {
 
     // Hero links should point at real destinations, not placeholder "#"
     expect(hero).toContain('href="/introduction/"');
-    expect(hero).toContain('href="https://github.com/tortuvshin/grove"');
+    expect(hero).toContain('href="https://open-apps.dev.mn"');
     expect(hero).toContain('target="_blank"');
-    expect(finalCta).toContain('href="/introduction/"');
+    expect(finalCta).toContain('href="/getting-started/create-a-space/"');
     expect(finalCta).toContain('href="https://github.com/tortuvshin/grove"');
   });
 
-  it("marks decorative <img> tags with empty alt and gives every visible image dimensions", async () => {
+  it("uses honest framework logos and keyboard-operable lifecycle tabs", async () => {
     const frameworks = await readFile(
       resolve(docsRoot, "src/components/home/Frameworks.astro"),
       "utf8",
     );
-    const integrations = await readFile(
-      resolve(docsRoot, "src/components/home/Integrations.astro"),
+    const lifecycle = await readFile(
+      resolve(docsRoot, "src/components/home/GetStarted.astro"),
       "utf8",
     );
 
-    // Frameworks: each logo is meaningful — alt + dimensions + lazy
     expect(frameworks).toMatch(/<img[^>]+alt=/);
-    expect(frameworks).toMatch(/<img[^>]+width="28"/);
-    expect(frameworks).toMatch(/<img[^>]+height="28"/);
+    expect(frameworks).toMatch(/<img[^>]+width="24"/);
+    expect(frameworks).toMatch(/<img[^>]+height="24"/);
     expect(frameworks).toContain('loading="lazy"');
-
-    // Integrations: orbital logos are decorative (the h2 carries meaning)
-    expect(integrations).toMatch(/<img[^>]+alt=""/);
-    expect(integrations).toMatch(/<img[^>]+width="48"/);
-    expect(integrations).toMatch(/<img[^>]+height="48"/);
+    expect(lifecycle).toContain('role="tablist"');
+    expect(lifecycle).toContain('role="tab"');
+    expect(lifecycle).toContain('role="tabpanel"');
+    expect(lifecycle).toContain("event.key === 'ArrowDown'");
+    expect(lifecycle).toContain("event.key === 'Home'");
   });
 
   it("serves the 8 framework logo SVGs from docs/public/logos/", async () => {
@@ -289,7 +283,7 @@ describe("docs homepage (standalone Astro route)", () => {
     // computed at build time from Astro.site.
     expect(home).toContain("https://grove.dev.mn");
     expect(home).toContain('url: siteUrl');
-    expect(home).toContain('target: `${siteUrl}');
+    expect(home).not.toContain("'@type': 'SearchAction'");
   });
 
   it("emits a global WebSite JSON-LD on every Starlight page via head config", async () => {
@@ -300,7 +294,7 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(config).toMatch(/head:\s*\[/);
     expect(config).toContain("'@type': 'WebSite'");
     expect(config).toContain("'@context': 'https://schema.org'");
-    expect(config).toContain("'@type': 'SearchAction'");
+    expect(config).not.toContain("'@type': 'SearchAction'");
     expect(config).toContain("'application/ld+json'");
   });
 
@@ -342,17 +336,17 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(config).toContain("rel: 'apple-touch-icon'");
   });
 
-  it("serves the home Header nav as Demo · Docs · Open Apps · Roadmap with no search or theme toggle", async () => {
+  it("serves focused navigation with a mobile menu", async () => {
     const header = await readFile(
       resolve(docsRoot, "src/components/home/Header.astro"),
       "utf8",
     );
 
-    // Canonical nav order with the Demo entry first
-    expect(header).toContain("https://open-apps.dev.mn");
+    expect(header).toContain("#how-it-works");
+    expect(header).toContain("#open-apps");
     expect(header).toContain("/introduction/");
-    expect(header).toContain("/open-apps/");
-    expect(header).toContain("/roadmap");
+    expect(header).toContain("/roadmap/");
+    expect(header).toContain("/getting-started/create-a-space/");
 
     // GitHub icon links to the project repo, opens in a new tab
     expect(header).toContain("https://github.com/tortuvshin/grove");
@@ -363,6 +357,7 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(header).not.toMatch(/Search\b/);
     expect(header).not.toContain("⌘ K");
     expect(header).not.toContain('aria-label="Toggle theme"');
+    expect(header).toContain('aria-label="Open navigation menu"');
   });
 
   it("hosts the introduction page at /introduction/ with the Getting Started sidebar trimmed", async () => {

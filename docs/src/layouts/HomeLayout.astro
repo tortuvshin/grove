@@ -7,8 +7,8 @@ interface Props {
 }
 
 const {
-  title = 'Grove — The framework for community knowledge',
-  description = 'Grove turns structured files into static, searchable, contributor-friendly knowledge spaces. The open-source framework for community-curated directories, docs spaces, wikis, and dataset catalogs.',
+  title = 'Grove — Build community knowledge that stays useful',
+  description = 'Grove is an open-source, GitHub-native framework for turning community submissions into structured, searchable, and maintainable knowledge spaces.',
 } = Astro.props;
 
 const siteUrl = Astro.site?.toString() ?? 'https://grove.dev.mn';
@@ -18,7 +18,7 @@ const ogImageUrl = new URL('/og-image.svg', siteUrl).toString();
 /**
  * JSON-LD for the standalone home page. Emits three schemas:
  *
- *  - WebSite: identifies the site, its publisher, and its search entry point.
+ *  - WebSite: identifies the site and its publisher.
  *  - SoftwareApplication: describes Grove itself (a CLI + framework),
  *    so search engines can render rich "app" results.
  *  - Organization: identifies the project and its canonical repo.
@@ -35,11 +35,6 @@ const websiteJsonLd = {
     name: 'Grove',
     url: 'https://github.com/tortuvshin/grove',
   },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: `${siteUrl}/search?q={search_term_string}`,
-    'query-input': 'required name=search_term_string',
-  },
 };
 
 const softwareJsonLd = {
@@ -49,10 +44,10 @@ const softwareJsonLd = {
   applicationCategory: 'DeveloperApplication',
   operatingSystem: 'Any',
   description:
-    'Open-source framework for community knowledge — structured files into static, searchable, contributor-friendly knowledge spaces. CLI, Astro template, and adapters for SvelteKit and Next.js.',
+    'Open-source framework for turning community submissions into structured, searchable, and maintainable knowledge spaces. Includes a CLI, headless core, UI primitives, and an Astro renderer.',
   url: siteUrl,
   downloadUrl: 'https://www.npmjs.com/package/@grove-dev/cli',
-  softwareVersion: '0.2.x',
+  softwareVersion: '0.3.0',
   offers: {
     '@type': 'Offer',
     price: '0',
@@ -103,24 +98,18 @@ const organizationJsonLd = {
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Grove — The framework for community knowledge" />
+    <meta property="og:image:alt" content="Grove — Build community knowledge that stays useful" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
-    <meta name="twitter:image:alt" content="Grove — The framework for community knowledge" />
+    <meta name="twitter:image:alt" content="Grove — Build community knowledge that stays useful" />
 
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-bg text-fg antialiased">

@@ -7,19 +7,21 @@ import GetStarted from '../components/home/GetStarted.astro';
 import Blueprints from '../components/home/Blueprints.astro';
 import Frameworks from '../components/home/Frameworks.astro';
 import Integrations from '../components/home/Integrations.astro';
+import OpenApps from '../components/home/OpenApps.astro';
 import FinalCta from '../components/home/FinalCta.astro';
 import Footer from '../components/home/Footer.astro';
 ---
 
 <Layout>
   <Header />
-  <main>
+  <main id="main-content">
     <Hero />
     <Features />
     <GetStarted />
+    <Integrations />
+    <OpenApps />
     <Blueprints />
     <Frameworks />
-    <Integrations />
     <FinalCta />
   </main>
   <Footer />
