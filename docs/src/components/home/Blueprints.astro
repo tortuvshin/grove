@@ -1,30 +1,30 @@
 ---
 const blueprints = [
   {
-    name: 'Awesome List',
-    desc: 'Curate links, tools, and resources into a browsable directory.',
-    tag: 'Directory',
+    name: 'Project directories',
+    desc: 'Developer tools, open-source apps, packages, services, or internal systems.',
+    tag: 'Available today',
     color: 'text-accent-cyan',
     icon: 'star',
   },
   {
-    name: 'Docs Space',
-    desc: 'Versioned guides and references with full-text search built in.',
-    tag: 'Documentation',
+    name: 'Resource hubs',
+    desc: 'Guides, comparisons, explainers, learning collections, and curated links.',
+    tag: 'Schema available',
     color: 'text-accent-blue',
     icon: 'book',
   },
   {
-    name: 'Community Wiki',
-    desc: 'Collaborative pages reviewed and merged through pull requests.',
-    tag: 'Knowledge base',
+    name: 'Ecosystem maps',
+    desc: 'Organizations, products, communities, schools, and local ecosystem actors.',
+    tag: 'Schema available',
     color: 'text-accent-green',
     icon: 'users',
   },
   {
-    name: 'Dataset Catalog',
-    desc: 'Structured records with metadata, taxonomy, and health signals.',
-    tag: 'Data',
+    name: 'Maintained awesome lists',
+    desc: 'Import a Markdown collection, then add structure, review, and static discovery.',
+    tag: 'Import path',
     color: 'text-accent-orange',
     icon: 'grid',
   },
@@ -33,17 +33,16 @@ const blueprints = [
 
 <section class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="blueprints-title">
   <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
-    Blueprints
+    What Grove can power
   </p>
   <h2
     id="blueprints-title"
     class="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
   >
-    Start from a blueprint, ship in minutes.
+    For collections that need to stay useful.
   </h2>
   <p class="mt-5 max-w-2xl text-base leading-relaxed text-muted">
-    Every Grove space begins with a blueprint — a fully wired starting point you
-    can customize end to end.
+    Grove is not only a directory template. Its record model supports three typed blueprints; the polished default frontend is available for project directories today.
   </p>
 
   <div class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -84,13 +83,6 @@ const blueprints = [
           </span>
           <h3 class="mt-1.5 text-base font-semibold text-fg">{b.name}</h3>
           <p class="mt-2 text-sm leading-relaxed text-muted">{b.desc}</p>
-          <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fg opacity-70 transition-opacity group-hover:opacity-100">
-            Use blueprint
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </span>
         </article>
       ))
     }

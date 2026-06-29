@@ -1,53 +1,84 @@
 ---
+const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
 ---
 
-<section class="mx-auto max-w-7xl px-6 pt-24 pb-28 text-center sm:pt-32" aria-labelledby="hero-title">
+<section class="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center sm:pb-28 sm:pt-32" aria-labelledby="hero-title">
+  <p class="text-xs font-semibold uppercase tracking-widest text-accent-cyan">
+    Open-source framework for maintained knowledge spaces
+  </p>
   <h1
     id="hero-title"
-    class="mx-auto max-w-4xl text-balance text-5xl font-bold leading-[1.05] tracking-tight text-fg sm:text-6xl md:text-7xl"
+    class="mx-auto mt-6 max-w-5xl text-balance text-5xl font-bold leading-[1.02] tracking-tight text-fg sm:text-6xl md:text-7xl"
   >
-    The framework for community knowledge
+    Build community knowledge that stays useful.
   </h1>
-  <p
-    class="mx-auto mt-7 max-w-xl text-pretty text-lg leading-relaxed text-muted"
-  >
-    Grove turns structured files into static, searchable, contributor-friendly
-    knowledge spaces.
+  <p class="mx-auto mt-7 max-w-2xl text-pretty text-lg leading-relaxed text-muted">
+    Grove turns community submissions into structured, searchable, and maintainable knowledge spaces—using portable files, Git-based review, and static publishing.
   </p>
 
   <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-    <a
-      href="/introduction/"
-      class="rounded-lg bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90"
-    >
-      Get Started
+    <a href="/introduction/" class="rounded-lg bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">
+      Read the docs
     </a>
-    <a
-      href="https://github.com/tortuvshin/grove"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="rounded-lg border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover"
-    >
-      View on GitHub
+    <a href="https://open-apps.dev.mn" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover">
+      Explore Open Apps
     </a>
   </div>
 
-  <div class="mt-12 flex items-center justify-center">
-    <div
-      class="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-2.5 font-mono text-sm"
-    >
+  <div class="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-subtle">
+    <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>Astro renderer available</span>
+    <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>MIT licensed</span>
+    <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-orange"></span>Active development</span>
+  </div>
+
+  <div class="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-xl border border-border-strong bg-card text-left shadow-2xl shadow-black/20 lg:grid-cols-[1fr_0.78fr_1fr]" aria-label="A Grove source record becoming published outputs">
+    <div class="border-b border-border p-5 lg:border-b-0 lg:border-r">
+      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-cyan">●</span>data/records/immich.yml</p>
+      <pre class="mt-4 overflow-x-auto font-mono text-[12px] leading-6"><code><span class="text-accent-blue">kind:</span> <span class="text-muted">project</span>
+<span class="text-accent-blue">name:</span> <span class="text-muted">Immich</span>
+<span class="text-accent-blue">category:</span> <span class="text-muted">media</span>
+<span class="text-accent-blue">repoUrl:</span>
+  <span class="text-muted">https://github.com/immich-app/immich</span></code></pre>
+    </div>
+
+    <div class="border-b border-border p-5 lg:border-b-0 lg:border-r">
+      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-green">●</span>Grove</p>
+      <ol class="mt-4 space-y-2 font-mono text-[11px] text-muted">
+        <li class="rounded-md border border-border bg-surface px-3 py-2">01 Validate</li>
+        <li class="rounded-md border border-border bg-surface px-3 py-2">02 Enrich</li>
+        <li class="rounded-md border border-border bg-surface px-3 py-2">03 Review</li>
+        <li class="rounded-md border border-border bg-surface px-3 py-2">04 Generate</li>
+      </ol>
+    </div>
+
+    <div class="p-5">
+      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-orange">●</span>Generated output</p>
+      <div class="mt-4 grid grid-cols-2 gap-2 font-mono text-[11px] text-muted">
+        <span class="rounded-md border border-border bg-surface px-3 py-3">/projects/immich</span>
+        <span class="rounded-md border border-border bg-surface px-3 py-3">records.index.json</span>
+        <span class="rounded-md border border-border bg-surface px-3 py-3">sitemap.xml</span>
+        <span class="rounded-md border border-border bg-surface px-3 py-3">llms-full.txt</span>
+      </div>
+      <p class="mt-4 text-xs leading-relaxed text-subtle">One reviewed record, ready for people, search engines, and AI systems.</p>
+    </div>
+  </div>
+
+  <div class="mx-auto mt-4 grid max-w-5xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4" aria-label="Lighthouse scores">
+    {scores.map((score) => (
+      <div class="bg-surface px-3 py-3 text-left sm:text-center">
+        <strong class="font-mono text-sm text-accent-green">100</strong>
+        <span class="ml-2 text-[11px] text-muted sm:ml-1">{score}</span>
+      </div>
+    ))}
+  </div>
+  <p class="mx-auto mt-3 max-w-3xl text-[11px] leading-relaxed text-subtle">
+    Measured on this landing page’s production build. Custom content and third-party integrations can affect individual scores.
+  </p>
+
+  <div class="mt-10 flex items-center justify-center">
+    <div class="flex max-w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-2.5 font-mono text-sm">
       <span class="text-subtle">$</span>
-      <code class="text-muted">npx @grove-dev/cli@latest new my-space</code>
-      <button
-        type="button"
-        class="flex size-7 items-center justify-center rounded-md border border-border-strong text-subtle transition-colors hover:bg-card hover:text-fg"
-        aria-label="Copy command"
-      >
-        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
-      </button>
+      <code class="overflow-x-auto whitespace-nowrap text-muted">pnpm dlx @grove-dev/cli@latest new my-space</code>
     </div>
   </div>
 </section>

@@ -1,9 +1,9 @@
 ---
 const navLinks = [
-  { label: 'Demo', href: 'https://open-apps.dev.mn', external: true },
+  { label: 'How it works', href: '#how-it-works' },
+  { label: 'Example', href: '#open-apps' },
   { label: 'Docs', href: '/introduction/' },
-  { label: 'Open Apps', href: '/open-apps/' },
-  { label: 'Roadmap', href: '/roadmap' },
+  { label: 'Roadmap', href: '/roadmap/' },
 ]
 ---
 
@@ -31,8 +31,6 @@ const navLinks = [
             <a
               href={link.href}
               class="text-sm text-muted transition-colors hover:text-fg"
-              target={link.external ? '_blank' : undefined}
-              rel={link.external ? 'noopener noreferrer' : undefined}
             >
               {link.label}
             </a>
@@ -42,6 +40,21 @@ const navLinks = [
     </div>
 
     <div class="flex items-center gap-3">
+      <a
+        href="/getting-started/create-a-space/"
+        class="hidden rounded-lg bg-fg px-4 py-2 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:inline-flex"
+      >
+        Get started
+      </a>
+      <details class="relative md:hidden">
+        <summary class="flex size-11 cursor-pointer list-none items-center justify-center rounded-lg border border-border text-muted" aria-label="Open navigation menu">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </summary>
+        <nav class="absolute right-0 top-12 w-60 rounded-xl border border-border-strong bg-card p-2 shadow-2xl" aria-label="Mobile navigation">
+          {navLinks.map((link) => <a href={link.href} class="block rounded-lg px-4 py-3 text-sm text-muted hover:bg-card-hover hover:text-fg">{link.label}</a>)}
+          <a href="/getting-started/create-a-space/" class="mt-1 block rounded-lg bg-fg px-4 py-3 text-center text-sm font-semibold text-bg">Get started</a>
+        </nav>
+      </details>
       <a
         href="https://github.com/tortuvshin/grove"
         class="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card hover:text-fg"

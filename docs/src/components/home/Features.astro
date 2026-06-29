@@ -1,68 +1,59 @@
 ---
 const features = [
   {
-    title: 'File-based records',
-    desc: 'Keep knowledge in reviewable YAML and Markdown files.',
+    title: 'Structure drifts',
+    desc: 'Fields, naming, and categories diverge as more people contribute.',
     color: 'text-accent-cyan',
     icon: 'file',
   },
   {
-    title: 'GitHub-native workflows',
-    desc: 'Use pull requests, issues, history, and ownership.',
+    title: 'Metadata goes stale',
+    desc: 'Archived projects and old releases remain visible without a repeatable refresh.',
     color: 'text-accent-teal',
     icon: 'git',
   },
   {
-    title: 'Static publishing',
-    desc: 'Ship fast, cacheable sites without a backend runtime.',
+    title: 'Review becomes cleanup',
+    desc: 'Maintainers normalize every submission before they can judge its value.',
     color: 'text-accent-cyan',
     icon: 'upload',
   },
   {
-    title: 'Search and discovery',
-    desc: 'Make directories browsable, filterable, and useful.',
+    title: 'Discovery becomes software',
+    desc: 'Search, filters, routes, metadata, and sitemaps become another app to maintain.',
     color: 'text-accent-blue',
     icon: 'search',
   },
   {
-    title: 'Human review',
-    desc: 'Let maintainers approve every community contribution.',
+    title: 'Machines receive fragments',
+    desc: 'A README is readable, but it is not a predictable record set or generated context.',
     color: 'text-accent-green',
     icon: 'check',
   },
   {
-    title: 'LLM-friendly outputs',
-    desc: 'Publish structured outputs built for agents and search.',
+    title: 'Maintenance lives in memory',
+    desc: 'Quality depends on someone remembering what needs review and why.',
     color: 'text-accent-orange',
     icon: 'list',
-  },
-  {
-    title: 'Metadata enrichment',
-    desc: 'Add health, repository, and taxonomy signals over time.',
-    color: 'text-accent-orange',
-    icon: 'database',
-  },
-  {
-    title: 'Customizable frontend',
-    desc: 'Start from a blueprint, then make the space yours.',
-    color: 'text-accent-purple',
-    icon: 'layout',
   },
 ]
 ---
 
 <section class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="features-title">
   <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
-    What is Grove
+    The maintenance problem
   </p>
   <h2
     id="features-title"
     class="mt-5 max-w-3xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
   >
-    Everything a knowledge community needs to ship.
+    Lists are easy to start and difficult to maintain.
   </h2>
+  <p class="mt-5 max-w-2xl text-base leading-relaxed text-muted">
+    A README or small static site works until the collection becomes shared infrastructure. Growth turns publishing into recurring maintenance work.
+  </p>
 
-  <div class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {
       features.map((f) => (
         <article class="group flex flex-col rounded-xl border border-border bg-card p-6 transition-colors hover:bg-card-hover">
