@@ -1,0 +1,35 @@
+packages/core/src/build-data.ts
+  s_57d3d4ba29db40::t_6ef0b6fbdad27e 236,341-343,345
+  s_57d3d4ba29db40::t_163baa593b7e7c 346-350
+packages/core/src/validate.test.ts
+  s_57d3d4ba29db40::t_aad90f7947857c 108-135
+packages/core/src/contributors.ts
+  s_57d3d4ba29db40::t_35719a992afb1a 14-15,23,51-54,56-62,74-85,91-106,108-117,137-154,158-159
+packages/core/src/build-data.test.ts
+  s_57d3d4ba29db40::t_9673b42579b251 202-225
+packages/cli/src/index.ts
+  s_57d3d4ba29db40::t_8be630ae6e731f 1992
+packages/core/src/contributors.test.ts
+  s_57d3d4ba29db40::t_a1a122d97c8177 15-16,24,27-37,42,50,58,77-86
+  s_57d3d4ba29db40::t_a6474c39c89b4c 87
+packages/cli/package.json
+  s_57d3d4ba29db40::t_93f0a2942d83ff 7-9
+packages/core/src/validate.ts
+  s_57d3d4ba29db40::t_aad90f7947857c 191-193,197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "e6de8c649e45bff722010f5e88098969d3b50d09",
+  "prompts": {},
+  "sessions": {
+    "s_57d3d4ba29db40": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f236b-5e69-78e3-825e-aa473451391b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
