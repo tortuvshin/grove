@@ -1,0 +1,23 @@
+packages/astro/src/components/Hero.astro
+  s_57d3d4ba29db40::t_18e28a4906d7b7 40,99,102
+packages/astro/src/components/ContributorsGrid.astro
+  s_57d3d4ba29db40::t_3aebcea3e65583 39-40,94
+packages/astro/src/components/FinalCta.astro
+  s_57d3d4ba29db40::t_3aebcea3e65583 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "3b2d505c4867bec5df80428caf7c879fb879a2c1",
+  "prompts": {},
+  "sessions": {
+    "s_57d3d4ba29db40": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f236b-5e69-78e3-825e-aa473451391b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
