@@ -36,8 +36,8 @@ const {
   total,
   viewAllHref,
   viewAllLabel = "View all",
-  title = "Top contributors",
-  description,
+  title = "Built by the community",
+  description = "The people improving this directory through code, curation, and review.",
   class: className = "",
 } = Astro.props;
 
@@ -91,7 +91,7 @@ const visible = contributors
 
     {visible.length === 0 ? (
       <p class="m-0 text-sm text-ink-500 dark:text-ink-400">
-        No contributors yet.
+        Community profiles appear after the first repository metadata sync.
       </p>
     ) : (
       <ul
