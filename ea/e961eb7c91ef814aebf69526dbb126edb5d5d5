@@ -1,0 +1,58 @@
+packages/astro/templates/default/.gitignore
+  s_57d3d4ba29db40::t_96bdf2865cf90b 8-10
+packages/astro/templates/default/src/pages/index.astro
+  s_57d3d4ba29db40::t_c8216c7b39933c 22,128,132,153,213-218,230-235
+packages/astro/templates/default/public/sitemap.xml
+  s_57d3d4ba29db40::t_a67c57f5833a18 5,11,17,23,29,35,41,47,53,59
+packages/astro/templates/default/data/generated/site-config.json
+  s_57d3d4ba29db40::t_f2693a7f65b270 329-332
+packages/astro/templates/default/public/llms-full.txt
+  s_57d3d4ba29db40::t_a67c57f5833a18 3
+packages/astro/src/layouts/Header.astro
+  s_57d3d4ba29db40::t_18e28a4906d7b7 31-32,68,70,72,134,144,149
+packages/astro/src/layouts/ThemeToggle.astro
+  s_57d3d4ba29db40::t_455faff9f2eda8 27,31-33,47-49
+packages/astro/templates/default/data/generated/repo-stats.json
+  s_57d3d4ba29db40::t_f2693a7f65b270 1
+packages/astro/templates/default/package.json
+  s_57d3d4ba29db40::t_93f0a2942d83ff 10
+package.json
+  s_57d3d4ba29db40::t_93f0a2942d83ff 10
+packages/astro/src/template-routes.test.ts
+  s_57d3d4ba29db40::t_46e1c276902b8e 103-115,118-120
+  s_57d3d4ba29db40::t_e414ee5ed08abc 116-117
+packages/astro/templates/default/src/pages/submit.astro
+  s_57d3d4ba29db40::t_c7426fffa1e7ea 15-22,32-33
+  s_57d3d4ba29db40::t_96bdf2865cf90b 199-203
+  s_57d3d4ba29db40::t_e29b6b5d7c9d7a 3,80-81,107,112,134-135,150
+packages/astro/src/layouts/Footer.astro
+  s_57d3d4ba29db40::t_18f0450f73d79a 149
+packages/astro/src/theme.test.ts
+  s_57d3d4ba29db40::t_46e1c276902b8e 19-22,82-87
+  s_57d3d4ba29db40::t_9f7457cdcb0e66 79-81
+packages/astro/templates/default/src/pages/contributors.astro
+  s_57d3d4ba29db40::t_ef010f1411a924 54,56,66,69,73-74
+  s_57d3d4ba29db40::t_2eda2fe83715d4 11-12
+packages/astro/templates/default/data/generated/records.full.json
+  s_57d3d4ba29db40::t_a39b5411266a6c 4
+packages/astro/templates/default/data/generated/records.index.json
+  s_57d3d4ba29db40::t_26130f8cc45972 4
+packages/astro/templates/default/data/generated/records.json
+  s_57d3d4ba29db40::t_744c984276cc8a 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "eae961eb7c91ef814aebf69526dbb126edb5d5d5",
+  "prompts": {},
+  "sessions": {
+    "s_57d3d4ba29db40": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f236b-5e69-78e3-825e-aa473451391b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
