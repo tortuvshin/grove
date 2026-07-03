@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "keywords": [
     "grove",
     "cli",
