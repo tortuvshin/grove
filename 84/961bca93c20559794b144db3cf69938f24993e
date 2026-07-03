@@ -1,0 +1,25 @@
+packages/astro/src/components/Icon.astro
+  s_57d3d4ba29db40::t_9f7457cdcb0e66 66-69,90,103-117,119,127-146,166-168,189,192,196,246
+  s_57d3d4ba29db40::t_be283a78438857 65
+packages/astro/src/components/StackGrid.astro
+  s_57d3d4ba29db40::t_9f7457cdcb0e66 97
+packages/astro/src/layouts/BaseLayout.astro
+  s_57d3d4ba29db40::t_18e28a4906d7b7 33-35
+  s_57d3d4ba29db40::t_18f0450f73d79a 221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "84961bca93c20559794b144db3cf69938f24993e",
+  "prompts": {},
+  "sessions": {
+    "s_57d3d4ba29db40": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f236b-5e69-78e3-825e-aa473451391b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
