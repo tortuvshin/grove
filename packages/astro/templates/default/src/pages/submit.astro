@@ -1,6 +1,6 @@
 ---
 import siteConfig from "../../data/generated/site-config.json";
-import { fullProjects, itemLabel } from "../data/records";
+import { fullProjects, itemLabel, taxonomyLabel } from "../data/records";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 
@@ -12,8 +12,14 @@ const repoUrl = siteConfig.repoUrl ?? "https://github.com/tortuvshin/grove";
 const values = (key: "category" | "stack") =>
   [...new Set(fullProjects.map((item) => String(item[key] ?? "")).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b));
-const categories = values("category");
-const stacks = values("stack");
+const categories = (siteConfig.taxonomy?.categories?.length
+  ? siteConfig.taxonomy.categories.map(({ id }) => id)
+  : values("category")
+).map((id) => ({ id, label: taxonomyLabel("categories", id) }));
+const stacks = (siteConfig.taxonomy?.stacks?.length
+  ? siteConfig.taxonomy.stacks.map(({ id }) => id)
+  : values("stack")
+).map((id) => ({ id, label: taxonomyLabel("stacks", id) }));
 const existingSlugs = fullProjects.map((item) => item.slug).filter(Boolean);
 const existingFullNames = fullProjects
   .map((item) => {
@@ -23,7 +29,8 @@ const existingFullNames = fullProjects
   })
   .filter(Boolean);
 
-const platformOptions = ["iOS", "Android", "Web", "macOS", "Windows", "Linux"];
+const platformOptions = siteConfig.taxonomy?.platforms?.map(({ name }) => name) ??
+  ["iOS", "Android", "Web", "macOS", "Windows", "Linux"];
 const goodSubmissions = [
   `A real, usable ${singular}, not a tutorial or one-screen demo`,
   "A public repository with a clear open-source license",
@@ -70,8 +77,8 @@ const pleaseAvoid = [
         ))}
       </ol>
 
-      <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.8fr)]">
-        <form id="submit-form" class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors p-5">
+      <div class="mt-8 grid grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.72fr)]">
+        <form id="submit-form" class="rounded-[calc(var(--radius)+0.25rem)] border border-ink-200 bg-background p-5 shadow-sm dark:border-ink-800">
           <div class="grid gap-5">
             <label class="grid gap-1.5">
               <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">GitHub URL</span>
@@ -97,12 +104,12 @@ const pleaseAvoid = [
               <label class="grid gap-1.5">
                 <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Category</span>
                 <input id="item-category" list="category-options" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
-                <datalist id="category-options">{categories.map((value) => <option value={value} />)}</datalist>
+                <datalist id="category-options">{categories.map((option) => <option value={option.id}>{option.label}</option>)}</datalist>
               </label>
               <label class="grid gap-1.5">
                 <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Primary stack</span>
                 <input id="primary-stack" list="stack-options" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
-                <datalist id="stack-options">{stacks.map((value) => <option value={value} />)}</datalist>
+                <datalist id="stack-options">{stacks.map((option) => <option value={option.id}>{option.label}</option>)}</datalist>
               </label>
             </div>
 
@@ -124,8 +131,8 @@ const pleaseAvoid = [
           </div>
         </form>
 
-        <aside class="flex flex-col gap-4">
-          <div class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors p-5">
+        <aside class="flex flex-col gap-4 md:sticky md:top-24">
+          <div class="rounded-[calc(var(--radius)+0.25rem)] border border-ink-200 bg-muted p-5 dark:border-ink-800">
             <h2 class="m-0 text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">Submission criteria</h2>
             <p class="m-0 mt-1 text-2xs text-ink-500 dark:text-ink-400">Use this checklist before opening the draft.</p>
             <div class="mt-4 grid grid-cols-1 gap-4 text-2xs sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -140,7 +147,7 @@ const pleaseAvoid = [
             </div>
           </div>
 
-          <div class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex min-h-[420px] flex-col p-5">
+          <div class="flex min-h-[360px] flex-col rounded-[calc(var(--radius)+0.25rem)] border border-ink-200 bg-muted p-5 dark:border-ink-800">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <h2 class="m-0 text-base font-semibold text-ink-900 dark:text-ink-100">YAML draft</h2>
               <div class="flex items-center gap-2">
@@ -189,10 +196,11 @@ const pleaseAvoid = [
     const inferStack = (repo) => {
       const language = String(repo.language || "").toLowerCase();
       const topics = (repo.topics || []).map((topic) => String(topic).toLowerCase());
-      if (topics.includes("flutter") || language === "dart") return "Flutter";
-      if (topics.includes("react-native")) return "React Native";
-      if (language === "typescript" || language === "javascript") return "TypeScript";
-      return repo.language || "";
+      if (topics.includes("flutter") || language === "dart") return "flutter";
+      if (topics.includes("react-native")) return "react-native";
+      if (language === "swift" || language === "objective-c") return "ios";
+      if (language === "kotlin" || language === "java") return "android";
+      return language;
     };
     const generateYaml = () => {
       if (!repository) return "";

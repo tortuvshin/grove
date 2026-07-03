@@ -28,7 +28,8 @@ interface Site {
   repoUrl?: string;
   url?: string;
   stats?: {
-    totalStars?: number;
+    /** Stars on this site's own source repository. */
+    repositoryStars?: number;
   };
   blueprintConfig?: {
     routeSlug?: string;
@@ -64,11 +65,11 @@ const navItems = site.blueprintConfig
       { label: "About", href: "/about" },
     ]
   : site.nav;
-const stars = site.stats?.totalStars ?? 0;
+const stars = site.stats?.repositoryStars;
 const starsLabel =
-  stars >= 1000
+  typeof stars === "number" && stars >= 1000
     ? `${(stars / 1000).toFixed(stars >= 10000 ? 0 : 1)}k`
-    : String(stars);
+    : typeof stars === "number" ? String(stars) : null;
 ---
 
 <header
@@ -130,7 +131,7 @@ const starsLabel =
           href={site.repoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`${repoLabel} on GitHub — ${stars} stars`}
+          aria-label={`${repoLabel} on GitHub${starsLabel ? ` — ${stars} stars` : ""}`}
           title={`${repoLabel} on GitHub`}
           class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-[var(--radius)] border border-border bg-secondary p-0 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
         >
@@ -140,12 +141,12 @@ const starsLabel =
             </svg>
             <span>{repoLabel}</span>
           </span>
-          <span class="flex items-center gap-1 border-s border-border bg-secondary px-2 py-1.5 text-secondary-foreground">
+          {starsLabel && <span class="flex items-center gap-1 border-s border-border bg-secondary px-2 py-1.5 text-secondary-foreground">
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
               <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
             </svg>
             <span class="font-mono">{starsLabel}</span>
-          </span>
+          </span>}
         </a>
       )}
 

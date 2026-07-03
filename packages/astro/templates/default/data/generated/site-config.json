@@ -326,7 +326,10 @@
     "totalPlatforms": 8,
     "totalOwners": 0,
     "totalStars": 0,
-    "originalRepo": "https://github.com/example/repo",
+    "repositoryStars": 0,
+    "repositoryForks": 0,
+    "repositoryContributors": 0,
+    "originalRepo": "",
     "originalStars": 0,
     "originalForks": 0,
     "originalContributors": 0

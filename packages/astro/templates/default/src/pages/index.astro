@@ -19,6 +19,7 @@ import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
 import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
 import OriginalCollection from "@grove-dev/astro/components/OriginalCollection.astro";
+import FinalCta from "@grove-dev/astro/components/FinalCta.astro";
 
 import { items, fullItems, taxonomyLabel } from "../data/records";
 import { existsSync, readFileSync } from "node:fs";
@@ -81,8 +82,6 @@ for (const r of fullItems) {
   if (cat) catMap.set(cat, (catMap.get(cat) ?? 0) + 1);
   const s1 = (r as { stack?: string }).stack;
   if (s1) stackMap.set(s1, (stackMap.get(s1) ?? 0) + 1);
-  const s2 = (r as { stacks?: string[] }).stacks ?? [];
-  for (const s of s2) stackMap.set(s, (stackMap.get(s) ?? 0) + 1);
 }
 const stacks = [...stackMap.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -126,11 +125,11 @@ if (contributorsPath) {
 }
 
 const stats = {
-  originalRepo: siteConfig.repoUrl ?? "",
+  originalRepo: siteConfig.stats?.originalRepo ?? "",
   apps: siteConfig.stats?.totalApps ?? 0,
   categories: siteConfig.stats?.totalCategories ?? 0,
   stacks: siteConfig.stats?.totalStacks ?? 0,
-  contributors: siteConfig.stats?.totalOwners ?? 0,
+  owners: siteConfig.stats?.totalOwners ?? 0,
   stars: siteConfig.stats?.totalStars ?? 0,
 };
 
@@ -151,7 +150,7 @@ const description =
       totalApps: stats.apps,
       totalCategories: stats.categories,
       totalStacks: stats.stacks,
-      totalOwners: stats.contributors,
+      totalOwners: stats.owners,
       totalStars: stats.stars,
       originalRepo: stats.originalRepo,
     }}
@@ -211,14 +210,12 @@ const description =
   <StackGrid stacks={stacks} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
   <CategoryGrid categories={categories} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
 
-  {contributors.length > 0 && (
-    <ContributorsGrid
-      contributors={contributors}
-      total={contributors.length}
-      viewAllHref={`/contributors`}
-      viewAllLabel="View all contributors"
-    />
-  )}
+  <ContributorsGrid
+    contributors={contributors}
+    total={contributors.length || undefined}
+    viewAllHref={`/contributors`}
+    viewAllLabel="Meet the community"
+  />
 
   {siteConfig.stats?.originalRepo && (
     <OriginalCollection
@@ -230,4 +227,10 @@ const description =
       }}
     />
   )}
+
+  <FinalCta
+    itemLabel={itemSingular}
+    itemsLabel={itemPlural}
+    browseHref={`/${slug}`}
+  />
 </BaseLayout>
