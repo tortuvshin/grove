@@ -199,6 +199,30 @@ describe("generate — filesystem round-trip", () => {
     expect(site.stats.totalApps).toBe(1);
   });
 
+  it("keeps site repository metadata separate from directory aggregates", async () => {
+    await writeFile(
+      join(cwd, "data", "generated", "repo-stats.json"),
+      JSON.stringify({
+        repoUrl: "https://github.com/acme/community",
+        stars: 42,
+        forks: 7,
+        contributors: 3,
+      }),
+    );
+
+    await generate(cwd);
+    const site = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "site-config.json"), "utf8"),
+    ) as {
+      stats: Record<string, number | string>;
+    };
+
+    expect(site.stats.repositoryStars).toBe(42);
+    expect(site.stats.repositoryForks).toBe(7);
+    expect(site.stats.repositoryContributors).toBe(3);
+    expect(site.stats.originalRepo).toBe("");
+  });
+
   it("writes configured taxonomy names to site-config.json", async () => {
     await mkdir(join(cwd, "data", "taxonomy"), { recursive: true });
     await writeFile(

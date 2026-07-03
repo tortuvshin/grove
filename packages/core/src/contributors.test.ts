@@ -12,21 +12,8 @@ describe("syncContributors", () => {
     cwd = await mkdtemp(join(tmpdir(), "grove-contributors-"));
     await mkdir(join(cwd, "data", "generated"), { recursive: true });
     await writeFile(
-      join(cwd, "data", "generated", "records.index.json"),
-      JSON.stringify({
-        records: [
-          {
-            kind: "project",
-            slug: "one",
-            repoUrl: "https://github.com/acme/one",
-          },
-          {
-            kind: "project",
-            slug: "two",
-            github: { fullName: "acme/two" },
-          },
-        ],
-      }),
+      join(cwd, "data", "generated", "site-config.json"),
+      JSON.stringify({ repoUrl: "https://github.com/acme/community" }),
     );
   });
 
@@ -34,24 +21,25 @@ describe("syncContributors", () => {
     await rm(cwd, { recursive: true, force: true });
   });
 
-  it("aggregates contributors across repositories and writes generated JSON", async () => {
+  it("syncs the site repository community and repository stats", async () => {
     const fetchImpl: typeof fetch = async (input) => {
       const url = String(input);
-      const contributors = url.includes("/one/")
-        ? [
+      if (url.endsWith("/repos/acme/community")) {
+        return new Response(JSON.stringify({
+          stargazers_count: 42,
+          forks_count: 7,
+          subscribers_count: 3,
+          open_issues_count: 2,
+          default_branch: "main",
+          pushed_at: "2026-07-01T00:00:00Z",
+        }), { status: 200 });
+      }
+      return new Response(JSON.stringify([
             {
               login: "alice",
               avatar_url: "https://avatars.example/alice",
               html_url: "https://github.com/alice",
-              contributions: 3,
-            },
-          ]
-        : [
-            {
-              login: "alice",
-              avatar_url: "https://avatars.example/alice",
-              html_url: "https://github.com/alice",
-              contributions: 4,
+              contributions: 7,
             },
             {
               login: "bob",
@@ -59,8 +47,7 @@ describe("syncContributors", () => {
               html_url: "https://github.com/bob",
               contributions: 2,
             },
-          ];
-      return new Response(JSON.stringify(contributors), { status: 200 });
+          ]), { status: 200 });
     };
 
     const result = await syncContributors({ cwd, fetchImpl, generatedAt: "2026-06-25T00:00:00.000Z" });
@@ -68,8 +55,8 @@ describe("syncContributors", () => {
       generatedAt: string;
       contributors: Array<{ username: string; contributions: number }>;
     };
+    const repoStats = JSON.parse(await readFile(result.repoStatsPath, "utf8"));
 
-    expect(result.repositories).toBe(2);
     expect(output).toEqual({
       generatedAt: "2026-06-25T00:00:00.000Z",
       contributors: [
@@ -86,6 +73,17 @@ describe("syncContributors", () => {
           contributions: 2,
         },
       ],
+    });
+    expect(result.repositories).toBe(1);
+    expect(repoStats).toEqual({
+      repoUrl: "https://github.com/acme/community",
+      stars: 42,
+      forks: 7,
+      watchers: 3,
+      openIssues: 2,
+      contributors: 2,
+      defaultBranch: "main",
+      pushedAt: "2026-07-01T00:00:00Z",
     });
   });
 });

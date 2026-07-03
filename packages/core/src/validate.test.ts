@@ -105,6 +105,34 @@ describe("validateProject — happy path", () => {
     });
   });
 
+  it("allows open-ended supporting technologies outside the primary stack taxonomy", async () => {
+    await withTmpCwd("grove-validate-supporting-stacks-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await mkdir(join(cwd, "data", "taxonomy"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "taxonomy", "stacks.yml"),
+        "- id: ios\n  name: Native iOS\n",
+      );
+      await writeFile(
+        join(cwd, "data", "records", "reader.yml"),
+        [
+          "kind: project",
+          "slug: reader",
+          "name: Reader",
+          "description: a reader",
+          "stack: ios",
+          "stacks: [swiftui, spritekit]",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+        ].join("\n"),
+      );
+
+      const result = await validateProject(makeConfig());
+      expect(result.warnings).toEqual([]);
+    });
+  });
+
   it("validates a single well-formed record and returns ok=true", async () => {
     await withTmpCwd("grove-validate-ok-", async (cwd) => {
       await mkdir(join(cwd, "data", "records"), { recursive: true });

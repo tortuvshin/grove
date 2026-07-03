@@ -11,6 +11,8 @@ export interface Contributor {
 export interface SyncContributorsOptions {
   cwd?: string;
   generatedDir?: string;
+  /** Site repository URL. Falls back to generated site-config.json. */
+  repoUrl?: string;
   token?: string;
   fetchImpl?: typeof fetch;
   generatedAt?: string;
@@ -18,6 +20,7 @@ export interface SyncContributorsOptions {
 
 export interface ContributorSyncResult {
   outputPath: string;
+  repoStatsPath: string;
   repositories: number;
   contributors: number;
   failed: number;
@@ -45,9 +48,18 @@ export async function syncContributors(
   const generatedDir = options.generatedDir ?? "data/generated";
   const indexPath = resolve(cwd, generatedDir, "records.index.json");
   const outputPath = resolve(cwd, generatedDir, "contributors.json");
-  const payload = JSON.parse(await readFile(indexPath, "utf8")) as {
-    records?: Array<Record<string, unknown>>;
+  const repoStatsPath = resolve(cwd, generatedDir, "repo-stats.json");
+  const siteConfigPath = resolve(cwd, generatedDir, "site-config.json");
+  const siteConfig = JSON.parse(await readFile(siteConfigPath, "utf8")) as {
+    repoUrl?: string;
   };
+  const repoUrl = options.repoUrl ?? siteConfig.repoUrl ?? "";
+  const ref = ownerRepo({ repoUrl });
+  if (!ref) {
+    throw new Error(
+      `Cannot sync community metadata: ${indexPath} has no valid site repository URL.`,
+    );
+  }
   const fetchImpl = options.fetchImpl ?? fetch;
   const token =
     options.token ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN ?? "";
@@ -57,49 +69,52 @@ export async function syncContributors(
     "X-GitHub-Api-Version": "2022-11-28",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  const repositories = new Map<string, { owner: string; repo: string }>();
-  for (const record of payload.records ?? []) {
-    const ref = ownerRepo(record);
-    if (ref) repositories.set(`${ref.owner}/${ref.repo}`.toLowerCase(), ref);
-  }
-
   const byUsername = new Map<string, Contributor>();
   let failed = 0;
-  for (const ref of repositories.values()) {
-    try {
-      const response = await fetchImpl(
-        `https://api.github.com/repos/${ref.owner}/${ref.repo}/contributors?per_page=100&anon=false`,
-        { headers },
-      );
-      if (response.status === 404 || response.status === 204) continue;
-      if (!response.ok) {
-        failed += 1;
-        continue;
-      }
-      const data = (await response.json()) as Array<{
+  const contributorsResponse = await fetchImpl(
+    `https://api.github.com/repos/${ref.owner}/${ref.repo}/contributors?per_page=100&anon=false`,
+    { headers },
+  );
+  if (!contributorsResponse.ok && contributorsResponse.status !== 204) {
+    throw new Error(
+      `GitHub contributors request failed for ${ref.owner}/${ref.repo}: ${contributorsResponse.status}`,
+    );
+  }
+  const data = contributorsResponse.status === 204
+    ? []
+    : (await contributorsResponse.json()) as Array<{
         login?: string;
         avatar_url?: string;
         html_url?: string;
         contributions?: number;
       }>;
-      for (const entry of data) {
-        if (!entry.login) continue;
-        const current = byUsername.get(entry.login);
-        if (current) {
-          current.contributions += entry.contributions ?? 0;
-        } else {
-          byUsername.set(entry.login, {
-            username: entry.login,
-            ...(entry.avatar_url ? { avatarUrl: entry.avatar_url } : {}),
-            ...(entry.html_url ? { profileUrl: entry.html_url } : {}),
-            contributions: entry.contributions ?? 0,
-          });
-        }
-      }
-    } catch {
-      failed += 1;
-    }
+  for (const entry of data) {
+    if (!entry.login) continue;
+    byUsername.set(entry.login, {
+      username: entry.login,
+      ...(entry.avatar_url ? { avatarUrl: entry.avatar_url } : {}),
+      ...(entry.html_url ? { profileUrl: entry.html_url } : {}),
+      contributions: entry.contributions ?? 0,
+    });
   }
+
+  const repositoryResponse = await fetchImpl(
+    `https://api.github.com/repos/${ref.owner}/${ref.repo}`,
+    { headers },
+  );
+  if (!repositoryResponse.ok) {
+    failed += 1;
+  }
+  const repository = repositoryResponse.ok
+    ? await repositoryResponse.json() as {
+        stargazers_count?: number;
+        forks_count?: number;
+        subscribers_count?: number;
+        open_issues_count?: number;
+        default_branch?: string;
+        pushed_at?: string;
+      }
+    : {};
 
   const contributors = [...byUsername.values()].sort(
     (a, b) =>
@@ -119,10 +134,29 @@ export async function syncContributors(
     ),
     "utf8",
   );
+  await writeFile(
+    repoStatsPath,
+    JSON.stringify(
+      {
+        repoUrl: `https://github.com/${ref.owner}/${ref.repo}`,
+        stars: repository.stargazers_count ?? 0,
+        forks: repository.forks_count ?? 0,
+        watchers: repository.subscribers_count ?? 0,
+        openIssues: repository.open_issues_count ?? 0,
+        contributors: contributors.length,
+        defaultBranch: repository.default_branch,
+        pushedAt: repository.pushed_at,
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
 
   return {
     outputPath,
-    repositories: repositories.size,
+    repoStatsPath,
+    repositories: 1,
     contributors: contributors.length,
     failed,
   };
