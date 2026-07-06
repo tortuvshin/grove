@@ -63,6 +63,11 @@ interface Props {
    */
   aliases?: Record<string, string>;
   /**
+   * Asset ids supplied by a consumer in addition to Grove's bundled registry.
+   * Unknown stack/platform ids render initials without issuing a failed request.
+   */
+  available?: string[];
+  /**
    * Initials to render when the icon file is missing. Defaults to
    * the first 1–2 characters of `name`.
    */
@@ -82,6 +87,7 @@ const {
   title,
   mode = "static",
   aliases,
+  available,
   fallbackInitials,
   base = "/icons",
 } = Astro.props;
@@ -94,9 +100,23 @@ function slugify(s: string): string {
 // Resolve `name` through the aliases map.
 function resolveName(raw: string): string {
   if (!raw) return "";
-  if (aliases) {
+  const defaultAliases: Partial<Record<IconCategory, Record<string, string>>> = {
+    stack: {
+      ios: "apple",
+      "native-ios": "apple",
+      ipados: "apple",
+      macos: "apple",
+      "objective-c": "apple",
+      spritekit: "apple",
+      swiftui: "apple",
+      kmp: "kotlin",
+      "kotlin-multiplatform": "kotlin",
+    },
+  };
+  for (const registry of [aliases, defaultAliases[category]]) {
+    if (!registry) continue;
     const lower = raw.toLowerCase();
-    for (const [k, v] of Object.entries(aliases)) {
+    for (const [k, v] of Object.entries(registry)) {
       if (k.toLowerCase() === lower) return slugify(v);
     }
   }
@@ -104,6 +124,26 @@ function resolveName(raw: string): string {
 }
 
 const resolved = resolveName(name);
+const bundledIcons: Record<"stack" | "platform", Set<string>> = {
+  stack: new Set([
+    "android", "apple", "bun", "capacitor", "clojure", "clojurescript",
+    "dart", "deno", "django", "docker", "firebase", "flutter", "go",
+    "graphql", "ionic", "java", "javascript", "kotlin", "llm", "mongodb",
+    "node.js", "nodejs", "python", "rag", "react", "react-native", "rust",
+    "solidity", "sveltekit", "swift", "tensorflow", "typescript", "vue",
+  ]),
+  platform: new Set([
+    "android", "apple", "chrome", "chromeos", "desktop", "embedded", "ios",
+    "linux", "macos", "ubuntu", "web", "windows",
+  ]),
+};
+const availableIcons = available?.map(slugify);
+const hasAsset =
+  category === "brand" ||
+  (availableIcons
+    ? availableIcons.includes(resolved)
+    : bundledIcons[category].has(resolved));
+const effectiveMode: IconMode = resolved === "apple" ? "auto" : mode;
 const platformStackIcons = new Set(["docker"]);
 const textOnlyPlatforms = new Set(["self-host", "self-hosted"]);
 const folder =
@@ -123,7 +163,9 @@ const init = (fallbackInitials ?? name ?? "")
   .slice(0, 2)
   .toUpperCase();
 const showFallback =
-  !resolved || (category === "platform" && textOnlyPlatforms.has(resolved));
+  !resolved ||
+  !hasAsset ||
+  (category === "platform" && textOnlyPlatforms.has(resolved));
 
 // Build aria-label.
 const ariaLabel = title ?? name;
@@ -144,14 +186,14 @@ const a11y: Record<string, string> = title
     >
       {init || "·"}
     </span>
-  ) : mode === "auto" ? (
+  ) : effectiveMode === "auto" ? (
     <>
       <img
-        src={staticSrc}
+        src={`${baseUrl}-light.svg`}
         data-grove-icon
         data-grove-icon-light={`${baseUrl}-light.svg`}
         data-grove-icon-dark={`${baseUrl}-dark.svg`}
-        data-grove-icon-fallback={staticSrc}
+        data-grove-icon-fallback={`${baseUrl}-light.svg`}
         width={size}
         height={size}
         alt=""
@@ -201,7 +243,7 @@ const a11y: Record<string, string> = title
   )
 }
 
-{mode === "auto" && (
+{effectiveMode === "auto" && (
   <script is:inline>
     // Theme-aware icon swap. Runs after THEME_INIT (BaseLayout) so
     // `data-resolved-theme` is already populated. Idempotent — the

@@ -94,7 +94,7 @@ function statusLabel(s: StackEntry["status"]): string | null {
           data-event-source="stack_grid"
         >
           <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-950" aria-hidden="true">
-            <Icon name={iconAliases?.[s.slug] ?? s.name} category="stack" size={18} />
+            <Icon name={iconAliases?.[s.slug] ?? s.slug} category="stack" size={18} />
           </div>
 
           <div class="flex min-w-0 flex-1 flex-col gap-0.5">

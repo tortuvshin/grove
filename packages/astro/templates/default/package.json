@@ -7,7 +7,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.12.1",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "validate:data": "grove validate",

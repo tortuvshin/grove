@@ -233,6 +233,7 @@ export async function generate(
   // generate step must not require it — fallback to a sane empty shape.
   const repoStatsPath = join(outDir, "repo-stats.json");
   let repoStats: {
+    repoUrl?: string;
     originalRepo?: string;
     stars?: number;
     forks?: number;
@@ -337,11 +338,16 @@ export async function generate(
       totalPlatforms: platforms.size,
       totalOwners: owners.size,
       totalStars,
+      repositoryStars: repoStats.stars ?? 0,
+      repositoryForks: repoStats.forks ?? 0,
+      repositoryContributors: repoStats.contributors ?? 0,
       // origin / source repo — only present when sync:repo-stats has run
-      originalRepo: repoStats.originalRepo ?? cfg.site.repoUrl ?? "",
-      originalStars: repoStats.stars ?? 0,
-      originalForks: repoStats.forks ?? 0,
-      originalContributors: repoStats.contributors ?? 0,
+      originalRepo: repoStats.originalRepo ?? "",
+      originalStars: repoStats.originalRepo ? repoStats.stars ?? 0 : 0,
+      originalForks: repoStats.originalRepo ? repoStats.forks ?? 0 : 0,
+      originalContributors: repoStats.originalRepo
+        ? repoStats.contributors ?? 0
+        : 0,
     },
   };
   await writeFile(

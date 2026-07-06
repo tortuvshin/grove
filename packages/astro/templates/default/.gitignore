@@ -5,7 +5,9 @@ dist/
 .env
 .env.*
 !.env.example
-data/generated/
+data/generated/*
+!data/generated/contributors.json
+!data/generated/repo-stats.json
 coverage/
 .tmp-test/
 *.log
