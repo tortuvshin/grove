@@ -37,6 +37,7 @@ interface Props {
     totalStacks?: number;
     totalOwners?: number;
     totalStars?: number;
+    repositoryContributors?: number;
     originalRepo?: string;
   };
   /** Search form target — the list page. */
@@ -95,10 +96,10 @@ const trustStats: { value: string; label: string }[] = [
     ? [{ value: String(stats.totalStacks), label: "stacks" }]
     : []),
   ...(stats.totalOwners !== undefined
-    ? [{ value: compact(stats.totalOwners) ?? "0", label: "contributors" }]
+    ? [{ value: compact(stats.totalOwners) ?? "0", label: "project owners" }]
     : []),
   ...(stats.totalStars !== undefined
-    ? [{ value: compact(stats.totalStars) ?? "0", label: "GitHub stars" }]
+    ? [{ value: compact(stats.totalStars) ?? "0", label: "stars across projects" }]
     : []),
 ];
 ---

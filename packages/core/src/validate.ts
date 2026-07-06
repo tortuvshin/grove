@@ -188,13 +188,13 @@ export async function validateProject(
       "categories.yml",
     );
     if (parsed.kind === "project") {
-      for (const stack of [parsed.stack, ...parsed.stacks].filter(
-        (value): value is string => Boolean(value),
-      )) {
+      // `stack` is the canonical browse taxonomy. `stacks` contains
+      // supporting technologies and is intentionally open-ended.
+      if (parsed.stack) {
         warnUnknownTaxonomy(
           fileSlug,
           "stack",
-          stack,
+          parsed.stack,
           taxonomy.stacks,
           "stacks.yml",
         );

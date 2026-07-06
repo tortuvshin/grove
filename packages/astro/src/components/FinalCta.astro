@@ -1,0 +1,39 @@
+---
+interface Props {
+  itemLabel?: string;
+  itemsLabel?: string;
+  browseHref?: string;
+  submitHref?: string;
+  class?: string;
+}
+
+const {
+  itemLabel = "item",
+  itemsLabel = "items",
+  browseHref = "/items",
+  submitHref = "/submit",
+  class: className = "",
+} = Astro.props;
+---
+
+<section class:list={["border-t border-ink-200 py-14 sm:py-20 dark:border-ink-800", className]} aria-labelledby="grove-final-cta-heading">
+  <div class="mx-auto w-full max-w-container px-5 sm:px-7">
+    <div class="overflow-hidden rounded-[calc(var(--radius)+0.5rem)] bg-ink-900 px-6 py-10 text-center text-white sm:px-10 sm:py-14 dark:bg-ink-100 dark:text-ink-950">
+      <p class="m-0 text-2xs font-semibold uppercase tracking-wider text-ink-300 dark:text-ink-600">Keep the directory useful</p>
+      <h2 id="grove-final-cta-heading" class="mx-auto mt-2 max-w-2xl text-[1.75rem] font-semibold tracking-tight sm:text-[2.125rem]">
+        Know {itemLabel === "app" ? "an" : "a"} {itemLabel} that belongs here?
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-ink-300 dark:text-ink-600">
+        Add a real, inspectable project or help improve the metadata behind the {itemsLabel} already listed.
+      </p>
+      <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <a href={submitHref} class="inline-flex min-h-10 items-center justify-center rounded-[var(--radius)] bg-white px-4 text-sm font-semibold text-ink-950 no-underline hover:bg-ink-100 dark:bg-ink-950 dark:text-white dark:hover:bg-ink-800">
+          Submit {itemLabel}
+        </a>
+        <a href={browseHref} class="inline-flex min-h-10 items-center justify-center rounded-[var(--radius)] border border-white/25 px-4 text-sm font-semibold text-white no-underline hover:bg-white/10 dark:border-ink-950/20 dark:text-ink-950 dark:hover:bg-ink-950/10">
+          Explore {itemsLabel}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

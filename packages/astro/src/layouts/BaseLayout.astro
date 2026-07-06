@@ -30,6 +30,9 @@ interface SiteStats {
   totalStacks?: number;
   totalOwners?: number;
   totalStars?: number;
+  repositoryStars?: number;
+  repositoryForks?: number;
+  repositoryContributors?: number;
   originalRepo?: string;
   originalStars?: number;
   originalForks?: number;
@@ -215,7 +218,7 @@ const favicon =
             ...(site.stats?.totalApps
               ? [{ label: "Browse all", href: directoryPath }]
               : []),
-            { label: "Contributors", href: "/contributors" },
+            { label: "Community", href: "/contributors" },
             ...(site.stats?.originalRepo
               ? [{ label: "View on GitHub", href: site.stats.originalRepo, external: true }]
               : []),

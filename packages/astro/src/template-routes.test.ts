@@ -100,4 +100,22 @@ describe("default Astro route configuration", () => {
     expect(homePage).toContain('taxonomyLabel("categories"');
     expect(listPage).toContain("labelFacetsWithTaxonomy");
   });
+
+  it("ships community and final call-to-action sections on the homepage", async () => {
+    const homePage = await readFile(resolve(pagesDir, "index.astro"), "utf8");
+
+    expect(homePage).toContain("<ContributorsGrid");
+    expect(homePage).toContain("<FinalCta");
+    expect(homePage).toContain('viewAllLabel="Meet the community"');
+  });
+
+  it("keeps submission controls responsive and taxonomy-labelled", async () => {
+    const submitPage = await readFile(resolve(pagesDir, "submit.astro"), "utf8");
+
+    expect(submitPage).toContain('taxonomyLabel("categories"');
+    expect(submitPage).toContain("siteConfig.taxonomy?.stacks?.length");
+    expect(submitPage).not.toContain('return "typescript"');
+    expect(submitPage).toContain("md:grid-cols-[minmax(0,1fr)_minmax(300px,0.72fr)]");
+    expect(submitPage).toContain("md:sticky md:top-24");
+  });
 });

@@ -1989,7 +1989,7 @@ jobs:
             - Triggered by: \${{ github.event_name }}
           add-paths: |
             data/generated/contributors.json
-            .grove/cache/contributors.json
+            data/generated/repo-stats.json
 `;
 }
 

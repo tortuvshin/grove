@@ -8,13 +8,11 @@
  * a graceful empty state. The file is produced by the
  * `sync-contributors` GitHub Action (see `.github/workflows/`).
  *
- * Falls back to deriving contributors from the records themselves
- * (record.github.fullName → owner handle) when no JSON file exists,
- * so a fresh scaffold still shows something useful.
+ * The list represents contributors to the directory's own source
+ * repository. Project owners in the directory are a separate metric.
  */
 import siteConfig from "../../data/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import { projects } from "../data/records";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -45,26 +43,6 @@ if (contributorsPath) {
   }
 }
 
-// Fallback: derive owners from record.github.fullName when no JSON
-// is present (fresh scaffold before the first sync run).
-if (contributors.length === 0) {
-  const seen = new Map<string, Contributor>();
-  for (const r of projects) {
-    const full = r.github?.fullName;
-    if (!full || !full.includes("/")) continue;
-    const username = full.split("/")[0];
-    if (seen.has(username)) continue;
-    seen.set(username, {
-      username,
-      avatarUrl: `https://avatars.githubusercontent.com/${username}?v=4&s=80`,
-      profileUrl: `https://github.com/${username}`,
-    });
-  }
-  contributors = [...seen.values()].sort((a, b) =>
-    a.username.localeCompare(b.username),
-  );
-}
-
 const total = contributors.length;
 const sorted = [...contributors].sort((a, b) => {
   const ac = a.contributions ?? 0;
@@ -73,9 +51,9 @@ const sorted = [...contributors].sort((a, b) => {
   return a.username.localeCompare(b.username);
 });
 
-const title = `Contributors — ${siteConfig.name}`;
+const title = `Community — ${siteConfig.name}`;
 const description =
-  `Every person who has helped build ${siteConfig.name} — from a single line to long-running stewardship.`;
+  `The people who have contributed to ${siteConfig.name} through code, curation, and review.`;
 
 const repoUrl = siteConfig.repoUrl;
 const contributorsGraphHref = repoUrl ? `${repoUrl.replace(/\/$/, "")}/graphs/contributors` : null;
@@ -85,15 +63,15 @@ const contributorsGraphHref = repoUrl ? `${repoUrl.replace(/\/$/, "")}/graphs/co
   <section class="py-12 sm:py-16">
     <div class="mx-auto w-full max-w-wide px-5 py-12 sm:px-7 sm:py-16">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Contributors
+        Community
       </span>
       <h1 class="m-0 mt-2 text-[2rem] sm:text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-ink-900 dark:text-ink-100">
-        {total > 0 ? `Showing all ${total} contributors` : "Contributors"}
+        {total > 0 ? `${total} community contributors` : "Community"}
       </h1>
       <p class="m-0 mt-3 max-w-2xl text-base leading-relaxed text-ink-700 dark:text-ink-200">
         {total > 0
-          ? `Every person who has helped build ${siteConfig.name} — from a single line to long-running stewardship.`
-          : `Contributors will appear here once ${siteConfig.name} syncs its first set of GitHub metadata. The list is auto-generated from ${repoUrl ? repoUrl : "the project's source repository"}.`}
+          ? `People who have improved ${siteConfig.name} through code, curation, and review.`
+          : `Community profiles will appear after ${siteConfig.name} syncs its source repository metadata.`}
       </p>
 
       {contributorsGraphHref && (

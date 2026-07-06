@@ -16,6 +16,10 @@ const iconMarkup = readFileSync(
   resolve(import.meta.dirname, "components/Icon.astro"),
   "utf8",
 );
+const themeToggleMarkup = readFileSync(
+  resolve(import.meta.dirname, "layouts/ThemeToggle.astro"),
+  "utf8",
+);
 
 describe("Astro theme contract", () => {
   it("keeps Starlight's light and dark foundation values", () => {
@@ -72,5 +76,14 @@ describe("Astro theme contract", () => {
   it("falls back to initials when a consumer has no matching icon asset", () => {
     expect(iconMarkup).toContain("data-grove-icon-fallback-initials");
     expect(iconMarkup).toContain("onerror=");
+    expect(iconMarkup).toContain("bundledIcons[category].has(resolved)");
+    expect(iconMarkup).toContain('"native-ios": "apple"');
+    expect(iconMarkup).toContain('kmp: "kotlin"');
+  });
+
+  it("gives the theme control and glyph explicit accessible dimensions", () => {
+    expect(themeToggleMarkup).toContain("h-9 w-9");
+    expect(themeToggleMarkup).toContain('width="18"');
+    expect(themeToggleMarkup).toContain('height="18"');
   });
 });
