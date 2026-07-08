@@ -29,7 +29,7 @@
     "@grove-dev/astro": "workspace:*",
     "@grove-dev/cli": "workspace:*",
     "@grove-dev/core": "workspace:*",
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.2",
     "astro": "^6.4.4",
     "marked": "^18.0.0",
     "sanitize-html": "^2.17.5",
