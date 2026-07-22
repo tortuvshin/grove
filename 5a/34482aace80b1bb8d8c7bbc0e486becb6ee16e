@@ -1,0 +1,152 @@
+packages/astro/src/lib/display.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+packages/astro/src/lib/lenses.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+packages/astro/src/server/index.ts
+  s_01328764f9abd4::t_54fc1dca564ccf 1-2
+site/data/taxonomy/categories.yml
+  s_01328764f9abd4::t_8141202063fadb 1-10
+site/src/pages/index.astro
+  s_01328764f9abd4::t_f4bdf98e82c2d0 37
+  s_01328764f9abd4::t_30c3d75c194083 27-28
+  s_01328764f9abd4::t_ad09c3be31aeaa 31-33
+  s_01328764f9abd4::t_d1c86ba494e1bc 35
+  s_01328764f9abd4::t_b5038ced64e575 24
+  s_01328764f9abd4::t_43493585c8f931 1-23,25-26,29-30,34,36,38-131
+site/package.json
+  s_01328764f9abd4::t_8141202063fadb 6,18,31
+  s_01328764f9abd4::t_98d0dad87c7e9e 1-5,7-17,19-30,32-33
+site/data/records/dify.yml
+  s_01328764f9abd4::t_5a8762a18a618f 18
+  s_01328764f9abd4::t_8141202063fadb 1-17,19-21
+site/.github/workflows/sync-contributors.yml
+  s_01328764f9abd4::t_7f109e0c2d5261 1-28
+site/data/records/crewai.yml
+  s_01328764f9abd4::t_8141202063fadb 1-9,11-21
+  s_01328764f9abd4::t_d93d55ac125c0d 10
+site/data/records/ollama.yml
+  s_01328764f9abd4::t_8141202063fadb 1-9,11-19,21-28
+  s_01328764f9abd4::t_5a8762a18a618f 20
+  s_01328764f9abd4::t_d93d55ac125c0d 10
+site/content/pages/about.md
+  s_01328764f9abd4::t_d83a781dfb6d4f 1-63
+packages/astro/src/components/FinalCta.astro
+  s_01328764f9abd4::t_2eeaaad4171d71 19,21-32,35
+packages/astro/src/components/SubmissionClient.astro
+  s_01328764f9abd4::t_11b562976a4990 1-132
+site/tsconfig.json
+  s_01328764f9abd4::t_77e3d5e3708ff6 1-13
+site/data/records/llamaindex.yml
+  s_01328764f9abd4::t_d93d55ac125c0d 10
+  s_01328764f9abd4::t_8141202063fadb 1-9,11-21
+packages/astro/src/lib/format.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+site/.github/workflows/deploy.yml
+  s_01328764f9abd4::t_7f109e0c2d5261 1-36
+site/src/pages/404.astro
+  s_01328764f9abd4::t_43493585c8f931 1-64
+site/src/pages/apps/[recordSlug].astro
+  s_01328764f9abd4::t_43493585c8f931 1-34
+packages/astro/src/lib/repo.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+site/data/health.yml
+  s_01328764f9abd4::t_1d6e2a1d97045a 1-13
+site/.github/workflows/sync-github.yml
+  s_01328764f9abd4::t_7f109e0c2d5261 1-31
+packages/astro/src/template-routes.test.ts
+  s_01328764f9abd4::t_14303ce4546af5 5,11,20,31,71,73,77-82,99
+  s_01328764f9abd4::t_ce6818ab2ef93e 6,60-63,65-66,87-90,92-94,102,106-107,120,122-124,128-136
+  s_01328764f9abd4::t_fa427c1ed43d55 137
+packages/astro/src/layouts/Header.astro
+  s_01328764f9abd4::t_28b3e717ea08c2 59,67-68,83,87,93,112-127,131,159,161
+packages/astro/tsconfig.json
+  s_01328764f9abd4::t_9780ba6b2f1fb3 8
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_01328764f9abd4::t_d9060d9d3ceb16 1-250
+site/src/pages/about.astro
+  s_01328764f9abd4::t_43493585c8f931 1-189
+packages/astro/src/components/Hero.astro
+  s_01328764f9abd4::t_6ecf299567ff27 98,101,125,171-173,175-177,196
+  s_01328764f9abd4::t_b8b211b206fd54 194
+  s_01328764f9abd4::t_36e7292e97ef9e 174
+site/.github/workflows/cleanup.yml
+  s_01328764f9abd4::t_7f109e0c2d5261 1-23
+site/data/records/flowise.yml
+  s_01328764f9abd4::t_5a8762a18a618f 18
+  s_01328764f9abd4::t_8141202063fadb 1-17,19-21
+packages/astro/src/server/directory.ts
+  s_01328764f9abd4::t_3081511e266ff3 367-371
+  s_01328764f9abd4::t_d83a781dfb6d4f 4,29,179
+  s_01328764f9abd4::t_9780ba6b2f1fb3 1-3,5-28,30-178,180-366,372-400
+site/src/pages/[slug]/[recordSlug].astro
+  s_01328764f9abd4::t_43493585c8f931 1-25,27-31,33-48,63-527
+  s_01328764f9abd4::t_4bceb7bd39a453 26,32
+  s_01328764f9abd4::t_29066599df011e 56-57
+  s_01328764f9abd4::t_f78efe8ba4cfea 49-55,58-62
+packages/astro/src/components/CurationGrid.astro
+  s_01328764f9abd4::t_3081511e266ff3 33,35
+site/src/pages/submit.astro
+  s_01328764f9abd4::t_43493585c8f931 1-2,4-5,7,19-150,156
+  s_01328764f9abd4::t_80d00dad655046 3,8-18
+  s_01328764f9abd4::t_349d79bd339164 6
+  s_01328764f9abd4::t_3310401a88ac42 151-155
+site/astro.config.mjs
+  s_01328764f9abd4::t_d83a781dfb6d4f 1-24
+packages/astro/src/index.ts
+  s_01328764f9abd4::t_40df513057c994 61,71-74
+  s_01328764f9abd4::t_26d1df271b7b1b 68-70,75
+  s_01328764f9abd4::t_eaa58c0b12f042 31,85
+site/data/taxonomy/stacks.yml
+  s_01328764f9abd4::t_8141202063fadb 1-30
+site/.github/workflows/ci.yml
+  s_01328764f9abd4::t_7f109e0c2d5261 1-21
+packages/astro/src/lib/taxonomy-counts.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+packages/astro/src/lib/search.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+site/src/pages/contributors.astro
+  s_01328764f9abd4::t_43493585c8f931 1-15,17,20-113
+  s_01328764f9abd4::t_e00e4cd988f8d9 16,18-19
+packages/astro/src/theme.test.ts
+  s_01328764f9abd4::t_ce6818ab2ef93e 13-14
+  s_01328764f9abd4::t_237daee8cb04ae 7
+site/src/pages/[slug]/index.astro
+  s_01328764f9abd4::t_1ffde066e685df 30
+  s_01328764f9abd4::t_e71fa44c589c67 233-239
+  s_01328764f9abd4::t_43493585c8f931 1-22,24-29,32-38,41-232,240
+  s_01328764f9abd4::t_4d51f2665e3c02 23,31,39-40
+site/data/records/open-webui.yml
+  s_01328764f9abd4::t_8141202063fadb 1-17,19-21
+  s_01328764f9abd4::t_5a8762a18a618f 18
+site/grove.config.ts
+  s_01328764f9abd4::t_8141202063fadb 1-32
+packages/astro/src/server/models.ts
+  s_01328764f9abd4::t_f5bf718523025c 9,18-22,26,29,33-34,232-399,404
+  s_01328764f9abd4::t_54fc1dca564ccf 1-8,10-17,23-25,27-28,30-32,35-231,400-403,405
+packages/astro/src/lib/scores.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1
+packages/astro/src/layouts/Footer.astro
+  s_01328764f9abd4::t_b8b211b206fd54 79,137,145,148
+site/.gitignore
+  s_01328764f9abd4::t_a498c203d2a5ed 1-17
+packages/astro/package.json
+  s_01328764f9abd4::t_40df513057c994 5,42
+  s_01328764f9abd4::t_54fc1dca564ccf 43
+  s_01328764f9abd4::t_9780ba6b2f1fb3 11,52-54,58-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "5a34482aace80b1bb8d8c7bbc0e486becb6ee16e",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
