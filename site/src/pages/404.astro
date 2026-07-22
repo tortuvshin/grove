@@ -1,0 +1,64 @@
+---
+/**
+ * 404 — generic fallback page.
+ *
+ * Renders the normal shell (header / footer / theme toggle) with a
+ * short message and a search form pointing at the list page. Stays
+ * on-brand regardless of blueprint.
+ */
+import siteConfig from "@grove/generated/site-config.json";
+import { indexSlug } from "@grove-dev/astro/server";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+
+const slug = indexSlug();
+const title = `Not found — ${siteConfig.name}`;
+const description = `That page doesn't exist on ${siteConfig.name}.`;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  site={siteConfig}
+  noindex
+>
+  <section class="py-12 sm:py-16">
+    <div class="mx-auto w-full max-w-container px-5 py-20 sm:px-7 sm:py-28">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        404
+      </span>
+      <h1 class="m-0 mt-2 text-[2.25rem] sm:text-[3rem] font-semibold leading-[1.05] tracking-tight text-ink-900 dark:text-ink-100">
+        Page not found
+      </h1>
+      <p class="m-0 mt-4 max-w-xl text-lg leading-relaxed text-ink-700 dark:text-ink-200">
+        The page you're looking for doesn't exist on {siteConfig.name}.
+        It may have been moved, renamed, or never existed.
+      </p>
+
+      <form
+        class="mt-8 flex max-w-xl flex-col gap-2 sm:flex-row sm:items-center"
+        role="search"
+        action={`/${slug}`}
+        method="get"
+      >
+        <label class="relative flex-1">
+          <span class="sr-only">Search</span>
+          <input
+            type="search"
+            name="q"
+            placeholder={`Search ${slug}...`}
+            autocomplete="off"
+            class="w-full rounded-md border border-ink-200 bg-white py-2.5 px-3 text-sm placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          />
+        </label>
+        <button type="submit" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">
+          Search
+        </button>
+      </form>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">Back to home</a>
+        <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent">Browse {slug}</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

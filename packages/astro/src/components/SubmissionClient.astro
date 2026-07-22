@@ -1,0 +1,132 @@
+---
+interface Props {
+  existingSlugs: string[];
+  existingFullNames: string[];
+  repoUrl: string;
+}
+const { existingSlugs, existingFullNames, repoUrl } = Astro.props;
+---
+
+<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl }}>
+    // @ts-nocheck
+    const $ = (selector) => document.querySelector(selector);
+    const inputs = {
+      repo: $("#repo-url"), name: $("#item-name"), slug: $("#item-slug"),
+      description: $("#item-description"), category: $("#item-category"),
+      stack: $("#primary-stack"), tags: $("#item-tags"),
+      website: $("#item-website"), bestFor: $("#best-for"),
+    };
+    const fetchButton = $("#fetch-repo");
+    const preview = $("#yaml-preview");
+    const status = $("#submit-status");
+    const copyButton = $("#copy-yaml");
+    const openPrLink = $("#open-pr-link");
+    const slugSet = new Set(existingSlugs);
+    const repoSet = new Set(existingFullNames);
+    let repository = null;
+
+    const slugify = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const parseRepo = (value) => {
+      const match = String(value).match(/github\.com\/([^/]+)\/([^/?#]+)/);
+      return match ? { owner: match[1], repo: match[2].replace(/\.git$/, "") } : null;
+    };
+    const quote = (value) => `"${String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    const lines = (values, indent = 2) => values.map((value) => `${" ".repeat(indent)}- ${value}`).join("\n");
+    const selectedPlatforms = () => [...document.querySelectorAll("input[name=platform]:checked")].map((input) => input.value);
+    const setStatus = (text, tone = "muted") => {
+      status.textContent = text;
+      status.className = `mt-3 min-h-5 text-2xs ${tone === "error" ? "text-red-600 dark:text-red-400" : tone === "warn" ? "text-amber-700 dark:text-amber-400" : tone === "success" ? "text-emerald-700 dark:text-emerald-400" : "text-ink-500 dark:text-ink-400"}`;
+    };
+    const inferStack = (repo) => {
+      const language = String(repo.language || "").toLowerCase();
+      const topics = (repo.topics || []).map((topic) => String(topic).toLowerCase());
+      if (topics.includes("flutter") || language === "dart") return "flutter";
+      if (topics.includes("react-native")) return "react-native";
+      if (language === "swift" || language === "objective-c") return "ios";
+      if (language === "kotlin" || language === "java") return "android";
+      return language;
+    };
+    const generateYaml = () => {
+      if (!repository) return "";
+      const parsed = parseRepo(inputs.repo.value);
+      if (!parsed) return "";
+      const tags = inputs.tags.value.split(",").map((tag) => tag.trim()).filter(Boolean);
+      const platforms = selectedPlatforms();
+      const bestFor = inputs.bestFor.value.split("\n").map((item) => item.trim()).filter(Boolean);
+      return [
+        "kind: project",
+        `slug: ${slugify(inputs.slug.value || repository.name)}`,
+        `name: ${quote(inputs.name.value)}`,
+        `description: ${quote(inputs.description.value)}`,
+        `category: ${inputs.category.value || "other"}`,
+        "projectType: real-app",
+        `stack: ${quote(inputs.stack.value)}`,
+        "platforms:", platforms.length ? lines(platforms) : "  []",
+        "tags:", tags.length ? lines(tags) : "  []",
+        `repoUrl: ${repository.html_url}`,
+        "links:",
+        `  github: ${repository.html_url}`,
+        ...(inputs.website.value ? [`  website: ${inputs.website.value}`] : []),
+        "bestFor:", bestFor.length ? lines(bestFor) : "  []",
+        "source:",
+        "  type: manual",
+        `  owner: ${parsed.owner}`,
+        `  repo: ${parsed.repo}`,
+        "curation:",
+        "  reviewed: false",
+        "  labels: []",
+        "  lenses: []",
+        "",
+      ].join("\n");
+    };
+    const refresh = () => {
+      const yaml = generateYaml();
+      preview.textContent = yaml || "Paste a GitHub URL to generate a draft.";
+      if (!yaml) return;
+      const params = new URLSearchParams({ filename: `data/records/${slugify(inputs.slug.value)}.yml`, value: yaml });
+      openPrLink.href = `${repoUrl}/new/main?${params}`;
+      openPrLink.classList.remove("pointer-events-none", "opacity-50");
+      copyButton.disabled = false;
+      copyButton.classList.remove("pointer-events-none", "opacity-50");
+    };
+
+    fetchButton.addEventListener("click", async () => {
+      const parsed = parseRepo(inputs.repo.value);
+      if (!parsed) return setStatus("Enter a valid GitHub repository URL.", "error");
+      const fullName = `${parsed.owner}/${parsed.repo}`.toLowerCase();
+      if (repoSet.has(fullName)) setStatus("This repository is already listed. The draft can update its record.", "warn");
+      fetchButton.disabled = true;
+      setStatus("Fetching GitHub metadata...");
+      try {
+        const response = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`, { headers: { Accept: "application/vnd.github+json" } });
+        if (response.status === 404) throw new Error("Repository not found or not public.");
+        if (response.status === 403) throw new Error("GitHub rate limit reached. Try again shortly.");
+        if (!response.ok) throw new Error(`GitHub returned ${response.status}.`);
+        repository = await response.json();
+        if (repository.private) throw new Error("Private repositories cannot be submitted.");
+        inputs.name.value = repository.name || parsed.repo;
+        inputs.slug.value = slugify(repository.name || parsed.repo);
+        inputs.description.value = repository.description || "";
+        inputs.stack.value = inferStack(repository);
+        inputs.tags.value = (repository.topics || []).slice(0, 8).join(", ");
+        inputs.website.value = repository.homepage || "";
+        const duplicate = slugSet.has(inputs.slug.value);
+        setStatus(duplicate ? "That slug already exists. Choose another or update the existing record." : "Draft generated. Edit any field and the YAML will refresh.", duplicate ? "warn" : "success");
+        refresh();
+      } catch (error) {
+        repository = null;
+        setStatus(error.message || "Unable to fetch repository metadata.", "error");
+      } finally {
+        fetchButton.disabled = false;
+      }
+    });
+    $("#submit-form").addEventListener("input", refresh);
+    copyButton.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(preview.textContent || "");
+        setStatus("Copied YAML to clipboard.", "success");
+      } catch {
+        setStatus("Couldn't copy automatically. Select the YAML and copy it.", "error");
+      }
+    });
+  </script>

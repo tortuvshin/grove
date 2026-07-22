@@ -56,7 +56,7 @@ const {
   class: className = "",
 } = Astro.props;
 const directoryPath = `/${site.blueprintConfig?.routeSlug ?? "items"}`;
-const navItems = site.blueprintConfig
+const defaultNavItems = site.blueprintConfig
   ? [
       { label: "Recently added", href: `${directoryPath}?label=new` },
       { label: "Trending", href: `${directoryPath}?label=hot` },
@@ -64,7 +64,8 @@ const navItems = site.blueprintConfig
       { label: "Stacks", href: directoryPath },
       { label: "About", href: "/about" },
     ]
-  : site.nav;
+  : [];
+const navItems = site.nav?.length ? site.nav : defaultNavItems;
 const stars = site.stats?.repositoryStars;
 const starsLabel =
   typeof stars === "number" && stars >= 1000
@@ -79,17 +80,17 @@ const starsLabel =
   ]}
 >
   <div
-    class="mx-auto flex w-full max-w-wide items-center gap-6 px-5 py-3 sm:px-7"
+    class="mx-auto flex w-full max-w-wide items-center gap-3 px-5 py-3 sm:gap-6 sm:px-7"
   >
     <a
       href="/"
-      class="inline-flex items-center gap-2 text-[0.95rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
+      class="inline-flex min-w-0 shrink items-center gap-2 text-[0.95rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
     >
       <span
         aria-hidden="true"
         class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100"
       ></span>
-      <span>{site.name}</span>
+      <span class="truncate">{site.name}</span>
     </a>
 
     <nav class="hidden flex-1 md:block" aria-label="Primary">
@@ -108,10 +109,26 @@ const starsLabel =
     </nav>
 
     <div class="ml-auto flex items-center gap-2">
+      <details class="group relative md:hidden">
+        <summary class="inline-flex h-9 cursor-pointer list-none items-center justify-center rounded-[var(--radius)] border border-border bg-secondary px-2.5 text-sm font-medium text-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35">
+          Menu
+        </summary>
+        <nav aria-label="Mobile primary" class="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-56 rounded-[var(--radius)] border border-border bg-background p-2 shadow-lg">
+          <ul class="m-0 flex list-none flex-col gap-1 p-0">
+            {navItems.map((item) => (
+              <li><a href={item.href} class="block rounded-md px-3 py-2 text-sm font-medium text-foreground no-underline hover:bg-accent">{item.label}</a></li>
+            ))}
+            {submitHref && (
+              <li class="border-t border-border pt-1"><a href={submitHref} class="block rounded-md px-3 py-2 text-sm font-medium text-foreground no-underline hover:bg-accent">{submitLabel ?? "Submit"}</a></li>
+            )}
+          </ul>
+        </nav>
+      </details>
+
       {submitHref && (
         <a
           href={submitHref}
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent hidden sm:inline-flex"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent max-sm:!hidden"
         >
           <svg
             viewBox="0 0 16 16"
@@ -139,9 +156,9 @@ const starsLabel =
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"></path>
             </svg>
-            <span>{repoLabel}</span>
+            <span class="hidden lg:inline">{repoLabel}</span>
           </span>
-          {starsLabel && <span class="flex items-center gap-1 border-s border-border bg-secondary px-2 py-1.5 text-secondary-foreground">
+          {starsLabel && <span class="hidden items-center gap-1 border-s border-border bg-secondary px-2 py-1.5 text-secondary-foreground sm:flex">
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
               <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
             </svg>

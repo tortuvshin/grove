@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.env
+.env.*
+!.env.example
+data/generated/*
+!data/generated/contributors.json
+!data/generated/repo-stats.json
+public/llms.txt
+public/llms-full.txt
+public/sitemap.xml
+coverage/
+.tmp-test/
+*.log
+*.tsbuildinfo

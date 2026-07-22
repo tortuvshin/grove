@@ -1,0 +1,250 @@
+---
+interface Props {
+  clientItemsJson: string;
+  slug: string;
+  singular: string;
+  plural: string;
+  taxonomy: Record<string, unknown>;
+}
+
+const { clientItemsJson, slug, singular, plural, taxonomy } = Astro.props;
+---
+
+<script is:inline id="grove-index-data" type="application/json" set:html={clientItemsJson}></script>
+  <script
+    is:inline
+    define:vars={{
+      slug,
+      singular,
+      plural,
+      taxonomy,
+    }}
+  >
+    (() => {
+      const PAGE_SIZE = 20;
+      const source = document.querySelector("#grove-index-data");
+      const list = document.querySelector("#results-list");
+      if (!source || !list) return;
+
+      const items = JSON.parse(source.textContent || "[]");
+      const nodes = new Map(
+        [...list.querySelectorAll("[data-record-slug]")].map((node) => [
+          node.dataset.recordSlug,
+          node,
+        ]),
+      );
+      const params = new URLSearchParams(location.search);
+      const values = (key) => params.getAll(key).filter(Boolean);
+      const q = (params.get("q") || "").trim().toLowerCase();
+      const stacks = values("stack");
+      const platforms = values("platform");
+      const categories = values("category");
+      const labels = values("label");
+      const licenses = values("license");
+      const statuses = values("status").flatMap((value) => value.split(",")).filter(Boolean);
+      const lens = params.get("lens") || "";
+      const sort = params.get("sort") || "recently-updated";
+      const requestedPage = Math.max(1, Number.parseInt(params.get("page") || "1", 10) || 1);
+
+      const nameOf = (record) => record.kind === "resource" ? record.title : record.name;
+      const projectValues = (record) => record.kind === "project"
+        ? [record.stack, ...(record.stacks || [])].filter(Boolean)
+        : [];
+      const matchesAny = (actual, expected) =>
+        expected.length === 0 || actual.some((value) => expected.includes(value));
+      const matches = (record) => {
+        if (q) {
+          const repo = record.kind === "project"
+            ? record.repoUrl || record.links?.github || ""
+            : record.links?.github || "";
+          const owner = /github\.com\/([^/]+)\//.exec(repo)?.[1] || "";
+          const projectFields = record.kind === "project"
+            ? [
+                record.stack,
+                ...(record.stacks || []),
+                ...(record.platforms || []),
+                record.projectType,
+                ...(record.bestFor || []),
+                ...(record.whyListed || []),
+                record.github?.license,
+                record.health?.status,
+              ]
+            : [];
+          const haystack = [
+            nameOf(record),
+            owner,
+            record.description,
+            record.category,
+            ...(record.tags || []),
+            ...projectFields,
+          ].filter(Boolean).join(" ").toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        if (!matchesAny(projectValues(record), stacks)) return false;
+        if (!matchesAny(record.kind === "project" ? record.platforms || [] : [], platforms)) return false;
+        if (categories.length && !categories.includes(record.category)) return false;
+        if (!matchesAny(record.curation?.labels || [], labels)) return false;
+        if (licenses.length && !licenses.includes(record.kind === "project" ? record.github?.license : "")) return false;
+        if (statuses.length && !statuses.includes(record.kind === "project" ? record.health?.status : "")) return false;
+        if (lens && !(record.curation?.lenses || []).includes(lens)) return false;
+        return true;
+      };
+      const time = (value) => value ? new Date(value).valueOf() || 0 : 0;
+      const stars = (record) => record.kind === "project" ? record.github?.stars || 0 : 0;
+      const compare = {
+        "most-starred": (a, b) => stars(b) - stars(a),
+        "recently-updated": (a, b) =>
+          time(b.kind === "project" ? b.github?.pushedAt : b.publishedAt) -
+          time(a.kind === "project" ? a.github?.pushedAt : a.publishedAt),
+        "recently-added": (a, b) =>
+          time(b.curation?.reviewedAt) - time(a.curation?.reviewedAt),
+        "best-overall": (a, b) =>
+          Number(Boolean(b.curation?.reviewed)) - Number(Boolean(a.curation?.reviewed)) ||
+          stars(b) - stars(a),
+        "alphabetical": (a, b) => String(nameOf(a)).localeCompare(String(nameOf(b))),
+      }[sort];
+
+      function applyClientFilters() {
+        const filtered = items.filter(matches);
+        if (compare) filtered.sort(compare);
+        const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        const page = Math.min(requestedPage, pageCount);
+        const visible = new Set(
+          filtered
+            .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+            .map((record) => record.slug),
+        );
+
+        for (const record of filtered) {
+          const node = nodes.get(record.slug);
+          if (node) list.append(node);
+        }
+        for (const [recordSlug, node] of nodes) {
+          node.hidden = !visible.has(recordSlug);
+        }
+
+        const count = document.querySelector("#results-count");
+        const pageLabel = document.querySelector("#results-page");
+        const empty = document.querySelector("#empty-state");
+        if (count) count.textContent = `${filtered.length} ${filtered.length === 1 ? singular : plural}`;
+        if (pageLabel) pageLabel.textContent = pageCount > 1 ? ` · page ${page} of ${pageCount}` : "";
+        if (empty) empty.classList.toggle("hidden", filtered.length > 0);
+
+        const pagination = document.querySelector("#results-pagination");
+        if (pagination) {
+          pagination.innerHTML = "";
+          if (pageCount > 1) {
+            for (let target = 1; target <= pageCount; target += 1) {
+              const next = new URLSearchParams(params);
+              if (target === 1) next.delete("page");
+              else next.set("page", String(target));
+              const link = document.createElement("a");
+              link.href = `/${slug}${next.size ? `?${next}` : ""}`;
+              link.textContent = String(target);
+              link.setAttribute("aria-label", `Page ${target}`);
+              if (target === page) link.setAttribute("aria-current", "page");
+              link.className = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-sm";
+              pagination.append(link);
+            }
+          }
+        }
+      }
+
+      const searchInput = document.querySelector("#search-input");
+      if (searchInput) searchInput.value = params.get("q") || "";
+      document.querySelectorAll('select[name="sort"]').forEach((select) => {
+        select.value = sort;
+      });
+      const filterKeys = {
+        stacks: "stack",
+        platforms: "platform",
+        categories: "category",
+        licenses: "license",
+      };
+      const filterLabels = {
+        stacks: "Stack",
+        platforms: "Platform",
+        categories: "Category",
+        licenses: "License",
+      };
+      const taxonomyKinds = {
+        stacks: "stacks",
+        platforms: "platforms",
+        categories: "categories",
+      };
+      const taxonomyName = (groupKey, value) =>
+        (taxonomy[taxonomyKinds[groupKey]] || []).find((entry) => entry.id === value)?.name ??
+        value;
+      const pretty = (value) => value
+        .split(/[-_]/)
+        .map((part) => part ? part[0].toUpperCase() + part.slice(1) : part)
+        .join(" ");
+
+      // This route is prerendered, so Astro cannot see the browser's query
+      // string. Rebuild active-filter controls from the live URL instead of
+      // leaving the server-rendered (empty) state in place.
+      const activeFilters = document.querySelector("#active-filters");
+      if (activeFilters) {
+        activeFilters.innerHTML = "";
+        const chips = [
+          ...(q ? [{ key: "q", value: params.get("q"), label: `“${params.get("q")}”` }] : []),
+          ...stacks.map((value) => ({ key: "stack", value, label: `Stack: ${taxonomyName("stacks", value)}` })),
+          ...platforms.map((value) => ({ key: "platform", value, label: `Platform: ${taxonomyName("platforms", value)}` })),
+          ...categories.map((value) => ({ key: "category", value, label: `Category: ${taxonomyName("categories", value)}` })),
+          ...labels.map((value) => ({ key: "label", value, label: pretty(value) })),
+          ...licenses.map((value) => ({ key: "license", value, label: `License: ${value}` })),
+          ...(lens ? [{ key: "lens", value: lens, label: pretty(lens) }] : []),
+          ...(statuses.length
+            ? statuses.join(",") === "stale,quiet"
+              ? [{ key: "status", value: "stale,quiet", label: "Needs maintainer" }]
+              : statuses.map((value) => ({ key: "status", value, label: pretty(value) }))
+            : []),
+        ];
+
+        for (const chip of chips) {
+          const next = new URLSearchParams(params);
+          const remaining = next.getAll(chip.key).filter((value) => value !== chip.value);
+          next.delete(chip.key);
+          if (!(chip.key === "status" && chip.value === "stale,quiet")) {
+            remaining.forEach((value) => next.append(chip.key, value));
+          }
+          next.delete("page");
+          const link = document.createElement("a");
+          link.href = `/${slug}${next.size ? `?${next}` : ""}`;
+          link.className = "inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground transition-colors hover:border-ink-400";
+          link.append(document.createTextNode(`${chip.label} `));
+          const close = document.createElement("span");
+          close.setAttribute("aria-hidden", "true");
+          close.textContent = "x";
+          link.append(close);
+          activeFilters.append(link);
+        }
+        if (chips.length) {
+          const clear = document.createElement("a");
+          clear.href = `/${slug}`;
+          clear.className = "text-2xs font-medium text-ink-500 hover:text-ink-900";
+          clear.textContent = "Clear all";
+          activeFilters.append(clear);
+        }
+        activeFilters.classList.toggle("hidden", chips.length === 0);
+      }
+
+      document.querySelectorAll(".grove-filter").forEach((group) => {
+        const selected = values(filterKeys[group.dataset.filterGroupKey]);
+        group.querySelectorAll(".grove-filter-input").forEach((input) => {
+          input.checked = selected.includes(input.dataset.filterValue);
+        });
+        const trigger = group.querySelector(".grove-filter-trigger span");
+        if (trigger && selected.length) {
+          const label = filterLabels[group.dataset.filterGroupKey];
+          trigger.textContent = `${label}: ${
+            selected.length === 1
+              ? taxonomyName(group.dataset.filterGroupKey, selected[0])
+              : `${selected.length} selected`
+          }`;
+        }
+      });
+
+      applyClientFilters();
+    })();
+  </script>
