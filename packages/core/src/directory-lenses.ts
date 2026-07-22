@@ -2,7 +2,7 @@
  * Curated lenses for the list page.
  *
  * Two flavors:
- * - "label-based": maps to a single `labels` value (e.g. new / hot / mature).
+ * - "label-based": maps to a single `labels` value (e.g. hot / mature).
  *   No extra curation needed — every item already has a label.
  * - "curator-assigned": maps to a `lenses` value on the item. The 5 anchor
  *   items get these populated. Other items will simply not match.
@@ -10,7 +10,7 @@
  * The lens id is what shows up in the URL as `?lens=...`. For
  * label-based lenses, the lens id is the same as the label.
  *
- * The 6 lenses in `PRIMARY_LENSES` are rendered as top-row tabs. The rest
+ * The curated lenses in `PRIMARY_LENSES` are rendered as top-row tabs. The rest
  * remain in the union type for URL deep-linking and future use, but are
  * not shown in the UI by default.
  */
@@ -46,8 +46,8 @@ export const LENSES: LensDef[] = [
   {
     id: "new",
     label: "Recently added",
-    description: "Apps recently added to the directory",
-    toParams: () => ({ label: "new" }),
+    description: "Every item ordered by when it joined the directory",
+    toParams: () => ({ sort: "recently-added" }),
   },
   {
     id: "hot",
@@ -107,13 +107,13 @@ export const LENSES: LensDef[] = [
 ];
 
 /**
- * The 6 lenses shown as top-row tabs on /items. Order matters — left to right.
+ * The curated lenses shown as top-row tabs on /items. Sorting stays in the
+ * dedicated sort control, so Recently added is deliberately not a tab.
  * Keep this list aligned with what the design calls for: All, signal lenses,
  * and the two curator-assigned lenses that have any matches.
  */
 export const PRIMARY_LENSES: LensId[] = [
   "all",
-  "new",
   "hot",
   "mature",
   "production-like",

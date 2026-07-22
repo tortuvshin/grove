@@ -10,6 +10,8 @@ const {
   title,
   description,
   repoUrl,
+  copy,
+  fields,
   categories,
   stacks,
   existingSlugs,
@@ -17,16 +19,20 @@ const {
   platformOptions,
 } = getSubmissionPageModel(siteConfig);
 const goodSubmissions = [
-  `A real, usable ${singular}, not a tutorial or one-screen demo`,
-  "A public repository with a clear open-source license",
-  "Enough documentation to understand, run, or contribute",
-  "Recent maintenance, releases, or meaningful project history",
+  ...(copy.good?.length ? copy.good : [
+    `A real, usable ${singular}, not a tutorial or one-screen demo`,
+    "A public repository with a clear open-source license",
+    "Enough documentation to understand, run, or contribute",
+    "Recent maintenance, releases, or meaningful project history",
+  ]),
 ];
 const pleaseAvoid = [
-  "Snippets, exercises, abandoned experiments, or duplicate entries",
-  "Private repositories or projects without source",
-  "Marketing pages with no usable project behind them",
-  "Records with no license or verifiable repository",
+  ...(copy.avoid?.length ? copy.avoid : [
+    "Snippets, exercises, abandoned experiments, or duplicate entries",
+    "Private repositories or projects without source",
+    "Marketing pages with no usable project behind them",
+    "Records with no license or verifiable repository",
+  ]),
 ];
 ---
 
@@ -35,21 +41,20 @@ const pleaseAvoid = [
     <section class="py-10 sm:py-14">
       <div class="max-w-3xl">
         <p class="m-0 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
-          {singular} submission
+          {copy.eyebrow ?? `${singular} submission`}
         </p>
         <h1 class="mt-2 text-[2rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          Add {singular === "app" ? "an" : "a"} {singular} to the directory
+          {copy.title ?? `Add ${singular === "app" ? "an" : "a"} ${singular} to the directory`}
         </h1>
         <p class="m-0 mt-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400">
-          Paste a GitHub URL to pull in the basics, edit the generated draft,
-          then open a pull request. The data stays in this repository.
+          {copy.description ?? `Paste a GitHub URL to pull in the basics, edit the generated draft, then open a pull request. The data stays in this repository.`}
         </p>
       </div>
 
       <ol class="mt-6 grid grid-cols-1 gap-2 text-2xs sm:grid-cols-3 sm:gap-3" aria-label="Submission steps">
         {[
           ["1", "Paste a GitHub URL", "We'll pull the metadata automatically."],
-          ["2", "Edit the draft", "Fix the category, stack, platforms, and notes."],
+          ["2", "Edit the draft", "Review the configured taxonomy and project details."],
           ["3", "Open a pull request", "Reviewers will validate and merge the record."],
         ].map(([number, heading, copy]) => (
           <li class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex items-start gap-2 p-3">
@@ -85,32 +90,40 @@ const pleaseAvoid = [
               <span class="text-2xs text-muted-foreground">One or two sentences in plain language.</span>
             </label>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {(fields.category || fields.stack) && <div class:list={["grid grid-cols-1 gap-4", fields.category && fields.stack && "sm:grid-cols-2"]}>
+              {fields.category && (
               <label class="grid gap-1.5">
                 <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Category</span>
-                <input id="item-category" list="category-options" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
-                <datalist id="category-options">{categories.map((option) => <option value={option.id}>{option.label}</option>)}</datalist>
+                <select id="item-category" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35">
+                  <option value="">Choose a category</option>
+                  {categories.map((option) => <option value={option.id}>{option.label}</option>)}
+                </select>
               </label>
+              )}
+              {fields.stack && (
               <label class="grid gap-1.5">
                 <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Primary stack</span>
-                <input id="primary-stack" list="stack-options" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
-                <datalist id="stack-options">{stacks.map((option) => <option value={option.id}>{option.label}</option>)}</datalist>
+                <select id="primary-stack" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35">
+                  <option value="">Choose a stack</option>
+                  {stacks.map((option) => <option value={option.id}>{option.label}</option>)}
+                </select>
               </label>
-            </div>
+              )}
+            </div>}
 
-            <fieldset class="grid gap-2">
+            {fields.platforms && <fieldset class="grid gap-2">
               <legend class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Platforms</legend>
               <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {platformOptions.map((platform) => (
                   <label class="flex min-h-9 items-center gap-2 rounded-md border border-ink-200 px-2 text-sm dark:border-ink-800">
-                    <input type="checkbox" name="platform" value={platform.toLowerCase()} class="h-4 w-4" />
-                    <span>{platform}</span>
+                    <input type="checkbox" name="platform" value={platform.id} class="h-4 w-4" />
+                    <span>{platform.label}</span>
                   </label>
                 ))}
               </div>
-            </fieldset>
+            </fieldset>}
 
-            <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Tags</span><input id="item-tags" type="text" placeholder="self-hosted, developer-tools, offline-first" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
+            {fields.tags && <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Tags</span><input id="item-tags" type="text" placeholder="self-hosted, developer-tools, offline-first" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>}
             <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Website</span><input id="item-website" type="url" placeholder="https://example.com" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
             <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Best for</span><textarea id="best-for" rows="3" class="min-h-10 resize-y rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" placeholder="One use case per line"></textarea></label>
           </div>
@@ -152,5 +165,6 @@ const pleaseAvoid = [
     existingSlugs={existingSlugs}
     existingFullNames={existingFullNames}
     repoUrl={repoUrl}
+    fields={fields}
   />
 </BaseLayout>

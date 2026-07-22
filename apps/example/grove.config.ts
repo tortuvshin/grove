@@ -19,7 +19,51 @@ export default defineConfig({
     { label: "About", href: "/about" },
   ],
 
-  facets: ["category", "stacks", "platforms", "tags"],
+  footer: {
+    columns: [
+      {
+        heading: "Discover",
+        items: [
+          { label: "Browse projects", href: "/projects" },
+          { label: "Contributors", href: "/contributors" },
+        ],
+      },
+      {
+        heading: "Contribute",
+        items: [
+          { label: "Submit a project", href: "/submit" },
+          { label: "Report an issue", href: "https://github.com/tortuvshin/grove/issues", external: true },
+        ],
+      },
+      {
+        heading: "Project",
+        items: [
+          { label: "Source on GitHub", href: "https://github.com/tortuvshin/grove", external: true },
+          { label: "About", href: "/about" },
+        ],
+      },
+    ],
+    license: "Directory content is community curated.",
+  },
+
+  submission: {
+    eyebrow: "AI project submission",
+    title: "Add an open-source AI project",
+    description:
+      "Generate a Grove record from a public GitHub repository, review the AI taxonomy, then open a pull request.",
+    good: [
+      "A usable open-source AI tool, agent framework, interface, or infrastructure project",
+      "A public repository with a clear license and enough documentation to evaluate",
+      "A category, stack, and tags chosen from this directory's taxonomy",
+    ],
+    avoid: [
+      "Closed-source AI products or marketing-only landing pages",
+      "Prompt collections, tutorials, snippets, or duplicate entries",
+      "Abandoned experiments without documentation or a verifiable license",
+    ],
+  },
+
+  facets: ["category", "stack", "platform", "tags"],
 
   integrations: { github: false },
 

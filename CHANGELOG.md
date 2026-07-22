@@ -27,6 +27,7 @@ For the developer workflow that produces these entries, see
 
 - **`@grove-dev/core`:** adds the browser-safe `@grove-dev/core/directory` entry point for canonical filtering, sorting, facets, display labels, pagination, and curated lens URL rules.
 - **`@grove-dev/astro`:** adds reusable directory view-models and a client controller so consumer-owned pages can stay thin while keeping URL-driven discovery behavior consistent.
+- **`@grove-dev/core` / `@grove-dev/astro`:** adds config-driven footer columns, submission copy, and browse/submission facets; record tags are now a first-class facet separate from controlled taxonomy.
 
 ### Changed
 
@@ -37,6 +38,8 @@ For the developer workflow that produces these entries, see
 ### Fixed
 
 - **`@grove-dev/astro` / `@grove-dev/core`:** makes search, sort, facets, active-filter chips, and all curated lenses use one canonical filter contract in static pages. Lens links now preserve unrelated query state, active UI state hydrates from the live URL, and empty demo lenses have real curated records.
+- Treats Recently added as a true sort over every record instead of a `new` label filter, keeps sort state when clearing filters, and removes the duplicate Recently added lens tab.
+- Keeps selected lens and facet text readable on hover and places curated views and configured facets in one responsive toolbar row.
 - Aligns directory search, sort, lens, and filter control sizing across desktop and mobile layouts.
 - Improves repository statistics, contributor presentation, icon fallback behavior, submission drafting, and homepage calls to action in the canonical example.
 

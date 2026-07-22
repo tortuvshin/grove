@@ -2,8 +2,8 @@
 /**
  * SmartLensTabs — curated single-select lens tabs.
  *
- * Renders the primary lenses (All / Trending / Recently added /
- * Established / Featured / Needs review) as a horizontal tab bar.
+ * Renders configured curated lenses as a horizontal tab bar. Sort choices,
+ * including Recently added, belong in the separate sort control.
  * Clicking a tab navigates to the same list page with the `lens=`
  * query param updated. Other filter params (q, stack, platform,
  * category, sort) are preserved.
@@ -57,7 +57,7 @@ const lenses =
         class:list={[
           "inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-[0.8125rem] font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35",
           active
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+            ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
             : "border-border bg-secondary text-foreground hover:bg-accent",
         ]}
         aria-current={active ? "page" : undefined}

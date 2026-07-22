@@ -16,15 +16,3 @@
   languages: [go]
   platforms: [linux, macos, windows]
   icon: go
-- id: llm
-  name: LLM
-  family: ai
-  languages: []
-  platforms: [linux, macos, windows]
-  icon: llm
-- id: rag
-  name: RAG
-  family: ai
-  languages: []
-  platforms: [web, linux]
-  icon: rag

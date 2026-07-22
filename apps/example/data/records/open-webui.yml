@@ -5,7 +5,7 @@ description: A self-hosted AI interface supporting Ollama and OpenAI-compatible 
 category: interfaces
 tags: [chat, self-host, llm]
 stack: typescript
-stacks: [typescript, python, llm]
+stacks: [typescript, python]
 platforms: [web, linux]
 projectType: real-app
 difficulty: beginner
