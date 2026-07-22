@@ -5,5 +5,5 @@
     "rootDir": "src"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules", "templates", "**/*.astro"]
+  "exclude": ["dist", "node_modules", "templates", "**/*.astro", "src/server", "src/**/*.test.ts"]
 }

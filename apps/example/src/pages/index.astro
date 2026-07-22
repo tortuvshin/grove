@@ -1,0 +1,131 @@
+---
+/**
+ * Home page — generic.
+ *
+ * Mirrors the openapps structure: Hero → WhyThisExists → three
+ * lens sections (hot / new / mature) → StackGrid → CategoryGrid →
+ * ContributorsGrid → OriginalCollection.
+ *
+ * All data derives from `data/generated/records.{index,full}.json`
+ * and `data/generated/site-config.json`. Nothing here is hardcoded
+ * to a specific blueprint — section copy uses singular/plural
+ * labels from `itemLabel()`/`itemLabelPlural()`.
+ */
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import Hero from "@grove-dev/astro/components/Hero.astro";
+import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
+import RecordSection from "@grove-dev/astro/components/RecordSection.astro";
+import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
+import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
+import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
+import OriginalCollection from "@grove-dev/astro/components/OriginalCollection.astro";
+import FinalCta from "@grove-dev/astro/components/FinalCta.astro";
+
+import { getHomePageModel } from "@grove-dev/astro/server";
+import siteConfig from "@grove/generated/site-config.json";
+
+const home = getHomePageModel(siteConfig);
+const { slug, itemSingular, itemPlural } = home;
+
+// ── Lens sectioning (Hot / New / Mature) ────────────────────────
+const hotList = home.hot;
+const newList = home.recentlyAdded;
+const matureList = home.established;
+
+const { stacks, categories } = home;
+
+const { contributors, stats, title, description } = home;
+---
+
+<BaseLayout title={title} description={description} site={siteConfig}>
+  <Hero
+    name={`Find ${itemPlural} you can actually`}
+    tagline="run, study, and contribute to."
+    description={description}
+    eyebrow={`A directory of real curated ${itemPlural}`}
+    eyebrowBadge="Beta"
+    stats={{
+      totalApps: stats.apps,
+      totalCategories: stats.categories,
+      totalStacks: stats.stacks,
+      totalOwners: stats.owners,
+      totalStars: stats.stars,
+      originalRepo: stats.originalRepo,
+    }}
+    itemsLabel={itemPlural}
+    itemLabel={itemSingular}
+    searchHref={`/${slug}`}
+    searchPlaceholder={`Search ${itemPlural}, stacks, or categories...`}
+    quickFilters={[
+      { label: `Trending ${itemPlural}`, href: `/${slug}?label=hot` },
+      { label: "Recently added", href: `/${slug}?label=new` },
+      { label: "Established", href: `/${slug}?label=mature` },
+    ]}
+    ctas={[
+      { label: `Browse ${itemPlural}`, href: `/${slug}`, variant: "primary" },
+      { label: `Submit ${itemSingular}`, href: "/submit", variant: "outline" },
+    ]}
+  />
+
+  <WhyThisExists />
+
+  <RecordSection
+    id="hot"
+    title="Trending now"
+    description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} gaining stars, activity, or attention recently.`}
+    eyebrow="Hot"
+    items={hotList}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
+    viewAllHref={`/${slug}?label=hot`}
+    viewAllLabel={`View all trending ${itemPlural}`}
+  />
+
+  <RecordSection
+    id="new"
+    title="Recently added"
+    description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} added to the directory in the last few weeks.`}
+    eyebrow="New"
+    items={newList}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
+    viewAllHref={`/${slug}?label=new`}
+    viewAllLabel={`View all recently added`}
+  />
+
+  <RecordSection
+    id="mature"
+    title="Established"
+    description={`Long-running curated ${itemPlural} with strong history, active maintainers, and real-world usage.`}
+    eyebrow="Mature"
+    items={matureList}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
+    viewAllHref={`/${slug}?label=mature`}
+    viewAllLabel={`View all established`}
+  />
+
+  <StackGrid stacks={stacks} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
+  <CategoryGrid categories={categories} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
+
+  <ContributorsGrid
+    contributors={contributors}
+    total={contributors.length || undefined}
+    viewAllHref={`/contributors`}
+    viewAllLabel="Meet the community"
+  />
+
+  {siteConfig.stats?.originalRepo && (
+    <OriginalCollection
+      repoUrl={siteConfig.stats.originalRepo}
+      stats={{
+        stars: siteConfig.stats.originalStars,
+        forks: siteConfig.stats.originalForks,
+        contributors: siteConfig.stats.originalContributors,
+      }}
+    />
+  )}
+
+  <FinalCta
+    itemLabel={itemSingular}
+    itemsLabel={itemPlural}
+    browseHref={`/${slug}`}
+  />
+</BaseLayout>

@@ -1,0 +1,30 @@
+- id: python
+  name: Python
+  family: language
+  languages: [python]
+  platforms: [linux, macos, windows]
+  icon: python
+- id: typescript
+  name: TypeScript
+  family: language
+  languages: [typescript]
+  platforms: [web]
+  icon: typescript
+- id: go
+  name: Go
+  family: language
+  languages: [go]
+  platforms: [linux, macos, windows]
+  icon: go
+- id: llm
+  name: LLM
+  family: ai
+  languages: []
+  platforms: [linux, macos, windows]
+  icon: llm
+- id: rag
+  name: RAG
+  family: ai
+  languages: []
+  platforms: [web, linux]
+  icon: rag

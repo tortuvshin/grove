@@ -1,0 +1,21 @@
+kind: project
+name: Flowise
+slug: flowise
+description: A visual builder for AI agents and LLM workflows based on composable nodes.
+category: orchestration
+tags: [workflow, low-code, agents]
+stack: typescript
+stacks: [typescript, llm, rag]
+platforms: [web, linux]
+projectType: real-app
+difficulty: beginner
+codebaseSize: large
+repoUrl: https://github.com/FlowiseAI/Flowise
+links: { github: https://github.com/FlowiseAI/Flowise, website: https://flowiseai.com }
+bestFor: [Rapid agent prototypes, Visual LLM pipelines]
+whyListed: [Approachable node editor, Large integration catalog]
+caveats: [Complex production flows still require careful testing]
+distribution: { channels: [] }
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [new], lenses: [production-like, good-to-learn] }
+visibility: keep

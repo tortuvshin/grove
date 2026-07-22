@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Grove's six published packages (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`, `@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`) follow the same support window:
+Grove's published packages (`@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`, and `@grove-dev/starlight`) follow the same support window:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -28,7 +28,7 @@ Include, where possible:
 4. Whether the issue is exploitable from untrusted input (a forked data file, a third-party resource record, a user-submitted PR).
 5. Your contact info for follow-up questions. If you'd like to be credited in the release notes, say so.
 
-You can optionally encrypt the report with PGP — see [`docs/SUPPORT.md`](./docs/SUPPORT.md#contact) for a public key fingerprint if we publish one in the future.
+You can optionally encrypt the report with PGP — see [`apps/docs/SUPPORT.md`](./apps/docs/SUPPORT.md#contact) for a public key fingerprint if we publish one in the future.
 
 ## What to expect
 

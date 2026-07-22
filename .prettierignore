@@ -24,4 +24,4 @@ yarn.lock
 coverage/
 
 # Vendored / third-party
-docs/public/
+apps/docs/public/

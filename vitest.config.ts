@@ -51,7 +51,7 @@ export default defineConfig({
           // brief calls for "include the packages/* directories";
           // the `{test,spec}.ts` suffix keeps `.d.ts` and the
           // test files co-located in the same directory.
-          include: ["packages/*/src/**/*.{test,spec}.ts", "docs/src/**/*.{test,spec}.ts"],
+          include: ["packages/*/src/**/*.{test,spec}.ts", "apps/docs/src/**/*.{test,spec}.ts"],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its
@@ -78,7 +78,7 @@ export default defineConfig({
           // Integration tests are slow; give them room.
           testTimeout: 60_000,
           hookTimeout: 60_000,
-          // One worker + no isolate so the `grove new` subprocess
+          // One worker + no isolate so the `grove init` subprocess
           // never races another scaffold for the same tmpdir.
           // `isolate: false` is the Vitest 4 spelling for what was
           // `poolOptions.forks.singleFork: true` in Vitest 3.

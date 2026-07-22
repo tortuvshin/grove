@@ -13,7 +13,7 @@
  *   pnpm release --skip-build   # skip build step
  *   pnpm release --skip-bump    # skip version bump
  *
- * Order (dependency graph): core -> ui -> {astro,nextjs,svelte} -> cli.
+ * Order (dependency graph): core -> astro -> cli -> starlight.
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -25,6 +25,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, "..");
 const LOCK_FILE = resolve(ROOT, ".release-in-progress");
+const WORKSPACE_LOCK_FILE = resolve(ROOT, "pnpm-lock.yaml");
 
 const args = parseArgs(process.argv.slice(2));
 if (args.help) {
@@ -39,19 +40,22 @@ const SKIP_BUMP = Boolean(args["skip-bump"]);
 
 const PACKAGES = [
   { name: "@grove-dev/core", dir: "packages/core" },
-  { name: "@grove-dev/ui", dir: "packages/ui" },
   { name: "@grove-dev/astro", dir: "packages/astro" },
-  { name: "@grove-dev/nextjs", dir: "packages/nextjs" },
-  { name: "@grove-dev/svelte", dir: "packages/svelte" },
   { name: "@grove-dev/cli", dir: "packages/cli" },
   { name: "@grove-dev/starlight", dir: "packages/starlight" },
 ];
 
-const TEMPLATE_MANIFESTS = [
-  "packages/astro/templates/default/package.json",
-  "packages/nextjs/templates/default/package.json",
-  "packages/svelte/templates/default/package.json",
-];
+async function snapshotReleaseFiles() {
+  const paths = [
+    ...PACKAGES.map((pkg) => resolve(ROOT, pkg.dir, "package.json")),
+    WORKSPACE_LOCK_FILE,
+  ];
+  return new Map(await Promise.all(paths.map(async (path) => [path, await readFile(path, "utf8")])));
+}
+
+async function restoreReleaseFiles(snapshot) {
+  await Promise.all([...snapshot].map(([path, contents]) => writeFile(path, contents, "utf8")));
+}
 
 function parseArgs(argv) {
   const out = {};
@@ -96,7 +100,7 @@ Idempotency:
   previous run has been verified (committed or reverted).
 
 Order (dependency graph):
-  core -> ui -> {astro, nextjs, svelte} -> cli -> starlight
+  core -> astro -> cli -> starlight
 `,
   );
 }
@@ -164,7 +168,7 @@ async function bumpAll() {
     // by inspecting grove-dev-cli-0.1.0.tgz). Rewriting them here
     // before `pnpm install` runs caused 404s because the bumped
     // version doesn't exist on the npm registry yet. See
-    // docs/RELEASING.md ("Why we don't rewrite workspace:* manually").
+    // apps/docs/RELEASING.md ("Why we don't rewrite workspace:* manually").
     await writePkg(p.dir, pkg);
     logOk(`${p.name}: ${before} → ${after}`);
   }
@@ -245,8 +249,10 @@ async function main() {
     );
     process.exit(1);
   }
+  const dryRunSnapshot = DRY_RUN ? await snapshotReleaseFiles() : null;
   await writeFile(LOCK_FILE, `${new Date().toISOString()}\n`, "utf8");
 
+  let completed = false;
   try {
     if (!SKIP_BUMP) await bumpAll();
     // pnpm install MUST run between bumpAll and buildAll. With
@@ -258,15 +264,21 @@ async function main() {
     if (!SKIP_BUMP) await installAll();
     if (!SKIP_BUILD) await buildAll();
     await publishAll();
+    completed = true;
   } finally {
-    // Clean up the lock file on every exit path (success OR failure)
-    // so the user can re-run after addressing the failure. The
-    // existence check at the top of main() will then let the
-    // re-run proceed.
-    try {
-      await unlink(LOCK_FILE);
-    } catch {
-      /* already gone — fine */
+    // A dry run must leave the repository exactly as it found it. A failed
+    // real publish intentionally keeps both the bumped files and lock so the
+    // maintainer cannot accidentally double-bump by re-running blindly.
+    if (dryRunSnapshot) {
+      await restoreReleaseFiles(dryRunSnapshot);
+      logOk("Restored versions and lockfile after dry-run");
+    }
+    if (completed || dryRunSnapshot) {
+      try {
+        await unlink(LOCK_FILE);
+      } catch {
+        /* already gone — fine */
+      }
     }
   }
 

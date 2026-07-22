@@ -1,8 +1,10 @@
 packages:
-  - 'packages/*'
-  - 'packages/astro/templates/default'
-  - 'docs'
-  - '.grove/run/*'
+  - 'packages/core'
+  - 'packages/astro'
+  - 'packages/cli'
+  - 'packages/starlight'
+  - 'apps/example'
+  - 'apps/docs'
 
 linkWorkspacePackages: true
 preferWorkspacePackages: true

@@ -4,7 +4,7 @@ Looking for help? Pick the channel that matches the question. The right one usua
 
 ## Documentation
 
-Start with the [README](./README.md) and the [`docs/`](./docs) site — most "how do I…?" questions are already covered there.
+Start with the [README](../README.md) and the [`apps/docs/`](../apps/docs) site — most "how do I…?" questions are already covered there.
 
 If you find something wrong or missing, open a [documentation issue](https://github.com/tortuvshin/grove/issues/new?template=documentation.md). Docs PRs are very welcome.
 

@@ -53,4 +53,5 @@
 # (see packages/starlight/THIRD_PARTY_LICENSES.md), so changes to the
 # component overrides or theme tokens deserve a deliberate review.
 /packages/starlight/**                  @tortuvshin
-/docs/**                                 @tortuvshin
+/apps/docs/**                            @tortuvshin
+/apps/example/**                         @tortuvshin

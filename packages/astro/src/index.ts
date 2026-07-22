@@ -28,6 +28,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { AstroIntegration } from "astro";
+import { loadConfig, prepareDirectory } from "@grove-dev/core";
 
 export * from "@grove-dev/core";
 
@@ -57,13 +58,21 @@ export default function groveAstro(): AstroIntegration {
   return {
     name: "@grove-dev/astro",
     hooks: {
-      "astro:config:setup": ({ config, updateConfig, injectScript }) => {
+      "astro:config:setup": async ({ config, updateConfig, injectScript }) => {
         // Alias the components/layouts source directories so
         // consumer builds can import from
         //   @grove-dev/astro/components/ItemCard.astro
         // without us shipping a glob-shaped `exports` map that
         // Vite/Rollup does not expand reliably.
         const consumerRoot = fileURLToPath(config.root);
+        const groveConfigPath = resolve(consumerRoot, "grove.config.ts");
+        if (existsSync(groveConfigPath)) {
+          await prepareDirectory(consumerRoot);
+          // Preparation is the integration's only site-level side effect.
+          // Routes belong to the consumer's `src/pages`, where they remain
+          // visible, editable, and safe from future Grove syncs.
+          await loadConfig(consumerRoot);
+        }
         const globalCssPath = resolve(consumerRoot, "src/styles/global.css");
         const globalCssExists = existsSync(globalCssPath);
 
@@ -73,6 +82,7 @@ export default function groveAstro(): AstroIntegration {
               alias: {
                 "@grove-dev/astro/components": componentsDir,
                 "@grove-dev/astro/layouts": layoutsDir,
+                "@grove/generated": resolve(consumerRoot, "data/generated"),
               },
             },
             plugins: [

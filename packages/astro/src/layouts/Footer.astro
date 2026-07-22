@@ -76,6 +76,7 @@ const {
 const year = new Date().getFullYear();
 const holder = copyrightHolder ?? site.name;
 const gh = site.repoUrl;
+const showOwners = (stats?.totalOwners ?? 0) > 0;
 
 const defaultDiscover: NavItem[] = gh
   ? [
@@ -133,7 +134,7 @@ const projectItems = project.items.length ? project.items : defaultProject;
               <span class="font-mono">{stats.totalApps}</span> {itemsLabel}
             </>
           )}
-          {stats.totalApps !== undefined && (stats.totalCategories !== undefined || stats.totalOwners !== undefined) && (
+          {stats.totalApps !== undefined && (stats.totalCategories !== undefined || showOwners) && (
             <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
           )}
           {stats.totalCategories !== undefined && (
@@ -141,10 +142,10 @@ const projectItems = project.items.length ? project.items : defaultProject;
               <span class="font-mono">{stats.totalCategories}</span> categories
             </>
           )}
-          {stats.totalCategories !== undefined && stats.totalOwners !== undefined && (
+          {stats.totalCategories !== undefined && showOwners && (
             <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
           )}
-          {stats.totalOwners !== undefined && (
+          {showOwners && (
             <>
               <span class="font-mono">{stats.totalOwners}</span> project owners
             </>

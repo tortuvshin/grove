@@ -1,0 +1,21 @@
+kind: project
+name: Dify
+slug: dify
+description: A visual platform for building and operating LLM applications, workflows, agents, and retrieval pipelines.
+category: orchestration
+tags: [workflow, agents, rag]
+stack: python
+stacks: [python, typescript, rag]
+platforms: [web, linux]
+projectType: real-app
+difficulty: intermediate
+codebaseSize: huge
+repoUrl: https://github.com/langgenius/dify
+links: { github: https://github.com/langgenius/dify, website: https://dify.ai }
+bestFor: [LLM application teams, Visual workflows, RAG products]
+whyListed: [Complete application lifecycle, Self-hostable, Provider-neutral]
+caveats: [Operational footprint is larger than a library]
+distribution: { channels: [] }
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [production-like] }
+visibility: keep
