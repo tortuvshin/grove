@@ -1,0 +1,49 @@
+vitest.config.ts
+  s_01328764f9abd4::t_d83a781dfb6d4f 81
+scripts/release.mjs
+  s_01328764f9abd4::t_237daee8cb04ae 16,90
+tests/integration/grove-init.test.ts
+  s_01328764f9abd4::t_3e940dbc0bf332 30,41-43
+  s_01328764f9abd4::t_237daee8cb04ae 1-29,31-40,44-47
+package.json
+  s_01328764f9abd4::t_cd09daf0bdaebc 13-14
+  s_01328764f9abd4::t_98d0dad87c7e9e 20
+scripts/package-site.mjs
+  s_01328764f9abd4::t_2965872c8e24a5 1-28
+packages/cli/src/init.ts
+  s_01328764f9abd4::t_2965872c8e24a5 1-96,98-101
+  s_01328764f9abd4::t_14303ce4546af5 97
+packages/cli/package.json
+  s_01328764f9abd4::t_fa4a79d4e92c2e 45
+scripts/test-scaffold.mjs
+  s_01328764f9abd4::t_e82d4c069ec1c5 32-33,35-36
+  s_01328764f9abd4::t_3e9682119e69c4 2-3,8-10,13-17,21,26-29,39,50,52-54
+  s_01328764f9abd4::t_01d44c761e8a5a 4,11,22-24,30-31,38,40-49,51
+packages/cli/src/init.test.ts
+  s_01328764f9abd4::t_ce6818ab2ef93e 24-29
+  s_01328764f9abd4::t_bcfe3c01095779 1-23,30-32
+pnpm-workspace.yaml
+  s_01328764f9abd4::t_98d0dad87c7e9e 2-6
+packages/cli/src/index.ts
+  s_01328764f9abd4::t_9d609de0476a6c 47,49,62-64,75,93
+  s_01328764f9abd4::t_2965872c8e24a5 2,4,13,15,19,23-32,36-37,40-46,50-53,57-61,65-67,69,73,77,83-85,89,96,100-101,103-108,112,114-115,117,119,124,128-130,134,147,150,152,156,162-163,166,169-171,174-181,183-184,189-191,193-195,197,201-202
+  s_01328764f9abd4::t_fa4a79d4e92c2e 5,48
+pnpm-lock.yaml
+  s_01328764f9abd4::t_52be3e48968371 110,112-115,117-118,120,123-139,5459-5460
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "a3b1484cc488237c07f3f4c1d0e62fc66536aa13",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
