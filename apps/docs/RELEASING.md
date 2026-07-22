@@ -158,11 +158,11 @@ A hotfix does **not** require a new minor / major bump. The semver discipline is
 npm deprecate @grove-dev/core@0.2.3 "broken on Windows; use 0.2.4"
 ```
 
-If you genuinely shipped something that is unsafe (security), see [`SECURITY.md`](../SECURITY.md) and coordinate a security advisory instead of a quiet rollback.
+If you genuinely shipped something that is unsafe (security), see [`SECURITY.md`](../../SECURITY.md) and coordinate a security advisory instead of a quiet rollback.
 
 ## See also
 
 - [`vision.md`](./vision.md) — why Grove exists and the broader direction.
 - The [Roadmap](/roadmap/) page on the docs site — what's queued, what shipped, what's deferred.
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — how the six packages fit together.
-- [`CONTRIBUTING.md`](../CONTRIBUTING.md) — what to expect from a PR.
+- [`CONTRIBUTING.md`](../../CONTRIBUTING.md) — what to expect from a PR.

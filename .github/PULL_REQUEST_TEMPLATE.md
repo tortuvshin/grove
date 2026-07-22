@@ -33,7 +33,7 @@ Fill out the sections below. Delete any that don't apply — partial is better t
 - [ ] `@grove-dev/astro`
 - [ ] `@grove-dev/nextjs`
 - [ ] `@grove-dev/svelte`
-- [ ] `docs/`
+- [ ] `apps/docs/`
 - [ ] `examples/`
 - [ ] Other: <!-- describe -->
 

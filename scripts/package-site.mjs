@@ -2,7 +2,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const source = resolve(root, "site");
+const source = resolve(root, "apps/example");
 const target = resolve(root, "packages/cli/dist/site");
 const skipped = new Set(["node_modules", "dist", ".astro", ".DS_Store"]);
 

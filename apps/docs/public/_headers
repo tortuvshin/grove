@@ -1,6 +1,6 @@
 # Cloudflare Pages / Workers static-assets response headers for grove.dev.mn.
 #
-# These run on EVERY request that lands on docs/dist/. Source routes are
+# These run on EVERY request that lands on apps/docs/dist/. Source routes are
 # owned by Astro/Starlight; this file tightens what the browser is allowed
 # to load (security headers) and how long it should cache each asset type
 # (performance headers).

@@ -27,7 +27,7 @@ describe("grove init integration", () => {
     });
   });
 
-  it("copies the canonical site with consumer-owned pages and without generated data", async () => {
+  it("copies the canonical example app with consumer-owned pages and without generated data", async () => {
     const parent = await mkdtemp(join(tmpdir(), "grove-init-integration-"));
     await run(["init", "open-apps", "--no-install", "--no-git"], parent);
     const target = join(parent, "open-apps");

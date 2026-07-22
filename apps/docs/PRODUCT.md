@@ -1,6 +1,6 @@
 # Grove — Product Reference
 
-This document is the source of truth for what Grove actually is, what it ships today, and what is reserved for the roadmap. Every claim here is grounded in the code under `packages/`, `docs/`, and the `packages/astro/templates/default/` template.
+This document is the source of truth for what Grove actually is, what it ships today, and what is reserved for the roadmap. Every claim here is grounded in the code under `packages/`, `apps/docs/`, and the canonical `apps/example/` application.
 
 ---
 

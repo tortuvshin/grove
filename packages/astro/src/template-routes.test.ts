@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const siteRoot = resolve(import.meta.dirname, "../../../site");
+const siteRoot = resolve(import.meta.dirname, "../../../apps/example");
 const pagesDir = resolve(siteRoot, "src/pages");
 
 describe("default Astro route configuration", () => {

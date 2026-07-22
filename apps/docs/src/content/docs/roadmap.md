@@ -15,7 +15,7 @@ The roadmap is grouped by status, not by chronology:
 - **Later** — directional. Will happen only if real spaces need it.
 - **Out of scope** — explicit non-goals we will not build.
 
-For the historical record of how Grove got here, see the [original Wave 0 → Wave 5 plan](https://github.com/tortuvshin/grove/blob/main/docs/roadmap.md) on GitHub. This page replaces it.
+For the historical record of how Grove got here, see this repository's archived planning documents under [`apps/docs/superpowers/`](https://github.com/tortuvshin/grove/tree/main/apps/docs/superpowers). This page replaces them.
 
 For the per-version changelog, see [`CHANGELOG.md`](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md) at the repo root.
 

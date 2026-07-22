@@ -4,14 +4,14 @@ import { describe, expect, it } from "vitest";
 
 const astroTheme = readFileSync(resolve(import.meta.dirname, "styles.css"), "utf8");
 const scaffoldTheme = readFileSync(
-  resolve(import.meta.dirname, "../../../site/src/styles/global.css"),
+  resolve(import.meta.dirname, "../../../apps/example/src/styles/global.css"),
   "utf8",
 );
 const tailwindMarkup = [
   "components/ItemCard.astro",
   "layouts/Header.astro",
 ].map((file) => readFileSync(resolve(import.meta.dirname, file), "utf8")).join("\n") +
-  readFileSync(resolve(import.meta.dirname, "../../../site/src/pages/submit.astro"), "utf8");
+  readFileSync(resolve(import.meta.dirname, "../../../apps/example/src/pages/submit.astro"), "utf8");
 const iconMarkup = readFileSync(
   resolve(import.meta.dirname, "components/Icon.astro"),
   "utf8",

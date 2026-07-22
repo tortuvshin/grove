@@ -3,8 +3,8 @@ packages:
   - 'packages/astro'
   - 'packages/cli'
   - 'packages/starlight'
-  - 'site'
-  - 'docs'
+  - 'apps/example'
+  - 'apps/docs'
 
 linkWorkspacePackages: true
 preferWorkspacePackages: true

@@ -149,7 +149,7 @@ integration or intentionally composing with one of the theme overrides.
 `@grove-dev/docs` enables the Grove Starlight plugin with this configuration:
 
 ```js
-// docs/astro.config.mjs
+// apps/docs/astro.config.mjs
 starlight({
   title: 'Grove',
   customCss: ['./src/styles/global.css'],

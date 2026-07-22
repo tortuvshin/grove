@@ -1,6 +1,6 @@
 # Support
 
-This page is the in-docs version of [`.github/SUPPORT.md`](../.github/SUPPORT.md) — the same rules, framed for someone reading the docs site rather than the GitHub repo.
+This page is the in-docs version of [`.github/SUPPORT.md`](../../.github/SUPPORT.md) — the same rules, framed for someone reading the docs site rather than the GitHub repo.
 
 ## Where to ask
 
@@ -10,7 +10,7 @@ This page is the in-docs version of [`.github/SUPPORT.md`](../.github/SUPPORT.md
 | "Something is broken" | [Bug report](https://github.com/tortuvshin/grove/issues/new?template=bug_report.md) |
 | "I want a feature" | [Feature request](https://github.com/tortuvshin/grove/issues/new?template=feature_request.md) |
 | "The docs are wrong / missing" | [Documentation issue](https://github.com/tortuvshin/grove/issues/new?template=documentation.md) |
-| "I found a security issue" | **Email** toroo.byamba@gmail.com — see [`SECURITY.md`](../SECURITY.md). Do **not** file a public issue. |
+| "I found a security issue" | **Email** toroo.byamba@gmail.com — see [`SECURITY.md`](../../SECURITY.md). Do **not** file a public issue. |
 | "I need enterprise / paid help" | Open a discussion — there's no paid support tier. |
 
 ## Maintainer response time
@@ -31,4 +31,4 @@ If you want custom adapter work, a migration from a different directory / wiki /
 
 ## Code of conduct
 
-All community spaces follow [`CODE_OF_CONDUCT.md`](../CODE_OF_CONDUCT.md). Be kind, assume good faith, and steer technical disagreement back to the technical facts.
+All community spaces follow [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md). Be kind, assume good faith, and steer technical disagreement back to the technical facts.

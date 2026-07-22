@@ -20,12 +20,12 @@ The site is served at <http://localhost:4321> by default. Edits in `src/content/
 pnpm --filter @grove-dev/docs build
 ```
 
-The static site lands in `docs/dist/`. Hosting is intentionally simple — the site is fully static, so it deploys cleanly to Vercel, Netlify, Cloudflare Pages, or GitHub Pages.
+The static site lands in `apps/docs/dist/`. Hosting is intentionally simple — the site is fully static, so it deploys cleanly to Vercel, Netlify, Cloudflare Pages, or GitHub Pages.
 
 ## Layout
 
 ```txt
-docs/
+apps/docs/
 ├── astro.config.mjs        # Starlight config (sidebar, plugins, integrations)
 ├── src/
 │   ├── assets/             # images, logos
@@ -72,8 +72,8 @@ This way the doc shows up on the site _and_ on GitHub.
 
 We don't have a single canonical deploy pipeline yet — see the [Roadmap](/roadmap/) page on the docs site for the backlog entry. In the meantime, the project is happy with any of:
 
-- **GitHub Pages** — push `docs/dist/` to a `gh-pages` branch (or use `actions/deploy-pages`).
-- **Netlify / Vercel / Cloudflare Pages** — point at `docs/`, set the build command to `pnpm build`, the publish directory to `docs/dist`.
+- **GitHub Pages** — push `apps/docs/dist/` to a `gh-pages` branch (or use `actions/deploy-pages`).
+- **Netlify / Vercel / Cloudflare Pages** — point at `apps/docs/`, set the build command to `pnpm build`, the publish directory to `apps/docs/dist`.
 
 ## Conventions
 
@@ -84,4 +84,4 @@ We don't have a single canonical deploy pipeline yet — see the [Roadmap](/road
 
 ## License
 
-The docs site is part of the Grove monorepo and is released under the [MIT License](../LICENSE).
+The docs site is part of the Grove monorepo and is released under the [MIT License](../../LICENSE).
