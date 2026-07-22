@@ -72,21 +72,23 @@ export type {
   GithubRepository,
 } from "./schema.js";
 
-// ── Build pipeline (library form of `grove generate`) ────────────────
+// ── Build pipeline ───────────────────────────────────────────────────
 export { generate } from "./build-data.js";
 export type { GenerateResult, RecordsFullPayload, RecordsIndexPayload } from "./build-data.js";
+export { prepareDirectory } from "./prepare.js";
+export type { PrepareDirectoryResult } from "./prepare.js";
 
 // ── Record YAML helpers (used by `grove import` and the generator) ──
 export { stringifyRecordYaml } from "./schema.js";
 
-// ── Sitemap (library form of `grove sitemap`) ────────────────────────
+// ── Sitemap ──────────────────────────────────────────────────────────
 export { buildSitemap, buildSitemapXml } from "./sitemap.js";
 
-// ── llms.txt (library form of `grove llms`) ───────────────────────────
+// ── llms.txt ─────────────────────────────────────────────────────────
 export { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "./llms.js";
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from "./llms.js";
 
-// ── Cleanup (library form of `grove cleanup stale`) ──────────────────
+// ── Cleanup ──────────────────────────────────────────────────────────
 export { pickCleanupCandidates, cleanupStale } from "./decisions.js";
 export type { CleanupCandidate, CleanupReport } from "./decisions.js";
 
@@ -131,10 +133,21 @@ export type { ParsedEntry, ParsedSection } from "./parseReadme.js";
 export { readYamlFile, writeYamlFile, writeTextFile } from "./io.js";
 
 // ── Validation ────────────────────────────────────────────────────────
-// `validateProject` is the library form of `grove validate`. It is
-// kept in the V1 surface because the CLI's `validate` command needs
+// `validateProject` is kept public because the CLI's `check` command needs
 // the structured issue output (codes + messages) that `generate`'s
 // throw path does not produce. This is the only V0-era name that
 // survives — every other removed name from V0 is gone.
 export { validateProject } from "./validate.js";
 export type { ValidationResult, ValidationIssue, ValidationSeverity } from "./validate.js";
+
+// ── Directory presentation model ────────────────────────────────────
+// Framework-independent logic shared by Astro pages and any future
+// renderer. These helpers intentionally know nothing about Astro, HTML,
+// generated file locations, or component structure.
+export * from "./directory-display.js";
+export * from "./directory-format.js";
+export * from "./directory-lenses.js";
+export * from "./directory-repo.js";
+export * from "./directory-scores.js";
+export * from "./directory-search.js";
+export * from "./directory-taxonomy.js";
