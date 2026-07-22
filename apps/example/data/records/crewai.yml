@@ -5,7 +5,7 @@ description: A Python framework for coordinating role-based autonomous agents, t
 category: agents
 tags: [agents, multi-agent, automation]
 stack: python
-stacks: [python, llm]
+stacks: [python]
 platforms: [linux, macos, windows]
 projectType: library
 difficulty: intermediate

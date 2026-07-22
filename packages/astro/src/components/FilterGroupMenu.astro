@@ -27,7 +27,7 @@ const group = Astro.props;
     class:list={[
       "grove-filter-trigger inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-[0.8125rem] font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35",
       group.active
-        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+        ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
         : "border-border bg-secondary text-foreground hover:bg-accent",
     ]}
     aria-haspopup="listbox"

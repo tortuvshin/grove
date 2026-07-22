@@ -5,7 +5,7 @@ description: Data framework for connecting private and public data to language-m
 category: data-tools
 tags: [rag, data, agents]
 stack: python
-stacks: [python, typescript, rag]
+stacks: [python, typescript]
 platforms: [linux, macos, windows]
 projectType: library
 difficulty: intermediate

@@ -23,6 +23,13 @@ YAML/config -> core prepare/generate -> data/generated/*.json
 
 Pages decide section order, copy, component choice, and custom routes. View-model functions prepare reusable directory state but do not return page markup. Large browser behaviors live in reusable Astro client-controller components rather than being duplicated in pages.
 
+`grove.config.ts` owns site-level presentation choices: header navigation,
+footer columns, submission copy, and the facet dimensions exposed by browse and
+submission pages. `data/taxonomy/*.yml` owns the allowed category, stack, and
+platform values; record tags remain a separate many-to-many discovery facet.
+Core serializes these choices into `site-config.json`, so Astro components do
+not infer site taxonomy or navigation from a particular demo dataset.
+
 ## Initialization and updates
 
 `grove init` copies the canonical `apps/example/` once. After initialization, page and style changes are user code. `grove sync` updates generated metadata and public build artifacts only; it is not a template updater.

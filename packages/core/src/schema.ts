@@ -456,6 +456,33 @@ export const navItemSchema = z.object({
   href: z.string().min(1),
 });
 
+export const footerNavItemSchema = navItemSchema.extend({
+  external: z.boolean().optional(),
+});
+
+export const footerColumnSchema = z.object({
+  heading: z.string().min(1),
+  items: z.array(footerNavItemSchema).default([]),
+});
+
+export const footerSchema = z
+  .object({
+    columns: z.array(footerColumnSchema).max(3).default([]),
+    copyright: z.string().optional(),
+    license: z.string().optional(),
+  })
+  .default({ columns: [] });
+
+export const submissionSchema = z
+  .object({
+    eyebrow: z.string().optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    good: z.array(z.string()).default([]),
+    avoid: z.array(z.string()).default([]),
+  })
+  .default({ good: [], avoid: [] });
+
 export const githubIntegrationSchema = z.union([
   z.boolean(),
   z.object({
@@ -493,6 +520,10 @@ export const groveConfigSchema = z.object({
 
   nav: z.array(navItemSchema).default([]),
 
+  footer: footerSchema,
+
+  submission: submissionSchema,
+
   /**
    * Optional URL slug overrides. By default the blueprint id maps
    * to a route — `project-directory` → `/projects/`,
@@ -522,6 +553,11 @@ export const groveConfigSchema = z.object({
     })
     .default({}),
 
+  /**
+   * Browse and submission dimensions owned by this directory. Taxonomy
+   * values live in data/taxonomy; this list decides which dimensions the
+   * site exposes. Singular and plural spellings are both accepted.
+   */
   facets: z.array(z.string()).default(["category", "tags"]),
 
   integrations: z
@@ -571,6 +607,8 @@ export const groveConfigSchema = z.object({
 export type GroveConfig = z.infer<typeof groveConfigSchema>;
 export type GroveConfigInput = z.input<typeof groveConfigSchema>;
 export type NavItem = z.infer<typeof navItemSchema>;
+export type FooterConfig = z.infer<typeof footerSchema>;
+export type SubmissionConfig = z.infer<typeof submissionSchema>;
 export type GithubIntegration = z.infer<typeof githubIntegrationSchema>;
 export type Theme = z.infer<typeof themeSchema>;
 export type ComponentOverride = z.infer<typeof componentOverrideSchema>;

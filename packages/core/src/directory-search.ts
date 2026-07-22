@@ -12,6 +12,7 @@ export type IndexFilters = {
   stacks?: string[];
   platforms?: string[];
   categories?: string[];
+  tags?: string[];
   labels?: string[];
   licenses?: string[];
   statuses?: string[];
@@ -43,6 +44,7 @@ const KEYS = {
   stacks: "stack",
   platforms: "platform",
   categories: "category",
+  tags: "tag",
   labels: "label",
   licenses: "license",
   statuses: "status",
@@ -72,6 +74,7 @@ export function filtersFromSearchParams(sp: URLSearchParams): IndexFilters {
     stacks: sp.getAll(KEYS.stacks).filter(Boolean),
     platforms: sp.getAll(KEYS.platforms).filter(Boolean),
     categories: sp.getAll(KEYS.categories).filter(Boolean),
+    tags: sp.getAll(KEYS.tags).filter(Boolean),
     labels: sp.getAll(KEYS.labels).filter(Boolean),
     licenses: sp.getAll(KEYS.licenses).filter(Boolean),
     statuses: sp.getAll(KEYS.statuses).flatMap((s) => s.split(",")).filter(Boolean),
@@ -92,6 +95,7 @@ export function searchParamsFromFilters(f: IndexFilters): URLSearchParams {
   for (const v of f.stacks ?? []) sp.append(KEYS.stacks, v);
   for (const v of f.platforms ?? []) sp.append(KEYS.platforms, v);
   for (const v of f.categories ?? []) sp.append(KEYS.categories, v);
+  for (const v of f.tags ?? []) sp.append(KEYS.tags, v);
   for (const v of f.labels ?? []) sp.append(KEYS.labels, v);
   for (const v of f.licenses ?? []) sp.append(KEYS.licenses, v);
   if (f.statuses?.length) sp.set(KEYS.statuses, f.statuses.join(","));
@@ -109,6 +113,7 @@ export function hasAnyFilter(f: IndexFilters): boolean {
     (f.stacks?.length ?? 0) +
       (f.platforms?.length ?? 0) +
       (f.categories?.length ?? 0) +
+      (f.tags?.length ?? 0) +
       (f.labels?.length ?? 0) +
       (f.licenses?.length ?? 0) +
       (f.statuses?.length ?? 0),
@@ -206,6 +211,7 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
   const stacks = f.stacks?.length ? new Set(f.stacks) : null;
   const platforms = f.platforms?.length ? new Set(f.platforms) : null;
   const categories = f.categories?.length ? new Set(f.categories) : null;
+  const tags = f.tags?.length ? new Set(f.tags) : null;
   const labels = f.labels?.length ? new Set(f.labels) : null;
   const licenses = f.licenses?.length ? new Set(f.licenses) : null;
   const statuses = f.statuses?.length ? new Set(f.statuses) : null;
@@ -273,6 +279,8 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
       if (!categories.has(a.category)) return false;
     }
 
+    if (tags && !a.tags.some((tag) => tags.has(tag))) return false;
+
     if (labels) {
       if (!a.curation?.labels?.some((l) => labels.has(l))) return false;
     }
@@ -314,6 +322,9 @@ export function activeFilterChips(
   }
   for (const v of f.categories ?? []) {
     out.push({ key: "categories", value: v, label: `Category: ${v}` });
+  }
+  for (const v of f.tags ?? []) {
+    out.push({ key: "tags", value: v, label: `Tag: ${v}` });
   }
   for (const v of f.labels ?? []) {
     out.push({ key: "labels", value: v, label: labelDisplay(v) ?? v });
@@ -386,6 +397,7 @@ export function buildFacets(items: IndexRecord[]) {
     stack: new Map<string, number>(),
     platform: new Map<string, number>(),
     category: new Map<string, number>(),
+    tag: new Map<string, number>(),
     label: new Map<string, number>(),
     license: new Map<string, number>(),
   };
@@ -400,6 +412,7 @@ export function buildFacets(items: IndexRecord[]) {
       if (license) counts.license.set(license, (counts.license.get(license) ?? 0) + 1);
     }
     counts.category.set(a.category, (counts.category.get(a.category) ?? 0) + 1);
+    for (const tag of a.tags) counts.tag.set(tag, (counts.tag.get(tag) ?? 0) + 1);
     for (const l of a.curation?.labels ?? []) counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
   }
   const sortByCountThenName = (m: Map<string, number>) =>
@@ -410,6 +423,7 @@ export function buildFacets(items: IndexRecord[]) {
     stacks: sortByCountThenName(counts.stack),
     platforms: sortByCountThenName(counts.platform),
     categories: sortByCountThenName(counts.category),
+    tags: sortByCountThenName(counts.tag),
     labels: sortByCountThenName(counts.label),
     licenses: sortByCountThenName(counts.license),
   };

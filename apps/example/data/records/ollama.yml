@@ -5,7 +5,7 @@ description: Run and manage open language models locally through a small command
 category: local-models
 tags: [llm, local-ai, inference]
 stack: go
-stacks: [go, llm]
+stacks: [go]
 platforms: [macos, linux, windows]
 projectType: tool
 difficulty: beginner

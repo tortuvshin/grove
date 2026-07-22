@@ -58,7 +58,7 @@ const {
 const directoryPath = `/${site.blueprintConfig?.routeSlug ?? "items"}`;
 const defaultNavItems = site.blueprintConfig
   ? [
-      { label: "Recently added", href: `${directoryPath}?label=new` },
+      { label: "Recently added", href: `${directoryPath}?sort=recently-added` },
       { label: "Trending", href: `${directoryPath}?label=hot` },
       { label: "Categories", href: directoryPath },
       { label: "Stacks", href: directoryPath },

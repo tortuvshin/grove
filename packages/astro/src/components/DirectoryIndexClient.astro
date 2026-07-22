@@ -119,12 +119,14 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         stacks: "stack",
         platforms: "platform",
         categories: "category",
+        tags: "tag",
         licenses: "license",
       };
       const filterLabels = {
         stacks: "Stack",
         platforms: "Platform",
         categories: "Category",
+        tags: "Tag",
         licenses: "License",
       };
       const taxonomyKinds = {
@@ -167,7 +169,8 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         }
         if (chips.length) {
           const clear = document.createElement("a");
-          clear.href = `/${slug}`;
+          const clearParams = searchParamsFromFilters({ sort });
+          clear.href = `/${slug}${clearParams.size ? `?${clearParams}` : ""}`;
           clear.className = "text-2xs font-medium text-ink-500 hover:text-ink-900";
           clear.textContent = "Clear all";
           activeFilters.append(clear);
@@ -198,9 +201,12 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         if (triggerButton) {
           triggerButton.classList.toggle("bg-primary", selected.length > 0);
           triggerButton.classList.toggle("text-primary-foreground", selected.length > 0);
+          triggerButton.classList.toggle("hover:bg-primary/90", selected.length > 0);
+          triggerButton.classList.toggle("hover:text-primary-foreground", selected.length > 0);
           triggerButton.classList.toggle("border-border", selected.length === 0);
           triggerButton.classList.toggle("bg-secondary", selected.length === 0);
           triggerButton.classList.toggle("text-foreground", selected.length === 0);
+          triggerButton.classList.toggle("hover:bg-accent", selected.length === 0);
         }
         group.querySelector(".grove-filter-clear")?.classList.toggle("hidden", selected.length === 0);
       });
@@ -216,9 +222,12 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         else node.removeAttribute("aria-current");
         node.classList.toggle("bg-primary", active);
         node.classList.toggle("text-primary-foreground", active);
+        node.classList.toggle("hover:bg-primary/90", active);
+        node.classList.toggle("hover:text-primary-foreground", active);
         node.classList.toggle("border-border", !active);
         node.classList.toggle("bg-secondary", !active);
         node.classList.toggle("text-foreground", !active);
+        node.classList.toggle("hover:bg-accent", !active);
         if (active) activeLens = lens;
       });
       const heading = document.querySelector("#results-heading");

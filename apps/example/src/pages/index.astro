@@ -58,7 +58,7 @@ const { contributors, stats, title, description } = home;
     searchPlaceholder={`Search ${itemPlural}, stacks, or categories...`}
     quickFilters={[
       { label: `Trending ${itemPlural}`, href: `/${slug}?label=hot` },
-      { label: "Recently added", href: `/${slug}?label=new` },
+      { label: "Recently added", href: `/${slug}?sort=recently-added` },
       { label: "Established", href: `/${slug}?label=mature` },
     ]}
     ctas={[
@@ -87,7 +87,7 @@ const { contributors, stats, title, description } = home;
     eyebrow="New"
     items={newList}
     hrefFor={(r) => `/${slug}/${r.slug}`}
-    viewAllHref={`/${slug}?label=new`}
+    viewAllHref={`/${slug}?sort=recently-added`}
     viewAllLabel={`View all recently added`}
   />
 

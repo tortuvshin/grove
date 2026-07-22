@@ -44,6 +44,21 @@ interface Site {
   tagline?: string;
   description?: string;
   nav: NavItem[];
+  footer?: {
+    columns?: Array<{
+      heading: string;
+      items: Array<{ label: string; href: string; external?: boolean }>;
+    }>;
+    copyright?: string;
+    license?: string;
+  };
+  submission?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    good?: string[];
+    avoid?: string[];
+  };
   repoUrl?: string;
   url?: string;
   /** Optional directory-level stats — populated from site-config.json
