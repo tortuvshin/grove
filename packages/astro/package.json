@@ -2,13 +2,13 @@
   "name": "@grove-dev/astro",
   "version": "0.3.1",
   "type": "module",
-  "description": "Astro framework adapter for Grove. Components, layouts, design tokens, and a default template.",
+  "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
   "license": "MIT",
   "keywords": [
     "grove",
     "astro",
     "ui",
-    "template",
+    "directory",
     "components",
     "static-site"
   ],
@@ -28,7 +28,6 @@
   "files": [
     "dist",
     "src",
-    "templates",
     "README.md"
   ],
   "exports": {
@@ -40,7 +39,8 @@
     "./components/*.astro": "./src/components/*.astro",
     "./components/*": "./src/components/*.astro",
     "./layouts/*.astro": "./src/layouts/*.astro",
-    "./layouts/*": "./src/layouts/*.astro"
+    "./layouts/*": "./src/layouts/*.astro",
+    "./server": "./src/server/index.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -49,10 +49,14 @@
   },
   "dependencies": {
     "@grove-dev/core": "workspace:*",
-    "@grove-dev/ui": "workspace:*",
-    "astro": "^6.4.6"
+    "astro": "^6.4.6",
+    "marked": "^18.0.0",
+    "sanitize-html": "^2.17.5"
   },
   "peerDependencies": {
     "astro": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.16.0"
   }
 }

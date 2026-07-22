@@ -1,0 +1,21 @@
+kind: project
+name: Open WebUI
+slug: open-webui
+description: A self-hosted AI interface supporting Ollama and OpenAI-compatible model providers.
+category: interfaces
+tags: [chat, self-host, llm]
+stack: typescript
+stacks: [typescript, python, llm]
+platforms: [web, linux]
+projectType: real-app
+difficulty: beginner
+codebaseSize: large
+repoUrl: https://github.com/open-webui/open-webui
+links: { github: https://github.com/open-webui/open-webui, website: https://openwebui.com }
+bestFor: [Team AI chat, Self-hosted model access]
+whyListed: [Polished interface, Multiple model providers, Active community]
+caveats: []
+distribution: { channels: [] }
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [hot], lenses: [] }
+visibility: keep

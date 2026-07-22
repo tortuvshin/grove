@@ -1,0 +1,21 @@
+kind: project
+name: CrewAI
+slug: crewai
+description: A Python framework for coordinating role-based autonomous agents, tasks, and multi-step crews.
+category: agents
+tags: [agents, multi-agent, automation]
+stack: python
+stacks: [python, llm]
+platforms: [linux, macos, windows]
+projectType: library
+difficulty: intermediate
+codebaseSize: large
+repoUrl: https://github.com/crewAIInc/crewAI
+links: { github: https://github.com/crewAIInc/crewAI, website: https://crewai.com }
+bestFor: [Multi-agent workflows, Role-based automation]
+whyListed: [Clear agent abstractions, Strong ecosystem]
+caveats: [Agent reliability depends heavily on model and tool design]
+distribution: { channels: [] }
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [hot], lenses: [] }
+visibility: keep

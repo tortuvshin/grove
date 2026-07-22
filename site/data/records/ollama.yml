@@ -1,0 +1,28 @@
+kind: project
+name: Ollama
+slug: ollama
+description: Run and manage open language models locally through a small command-line and HTTP interface.
+category: local-models
+tags: [llm, local-ai, inference]
+stack: go
+stacks: [go, llm]
+platforms: [macos, linux, windows]
+projectType: tool
+difficulty: beginner
+codebaseSize: large
+repoUrl: https://github.com/ollama/ollama
+links:
+  github: https://github.com/ollama/ollama
+  website: https://ollama.com
+bestFor: [Local model inference, Private AI prototypes]
+whyListed: [Simple local workflow, Broad model library, Useful API]
+caveats: [Large models still need capable hardware]
+distribution: { channels: [] }
+source: { type: manual }
+curation:
+  reviewed: true
+  reviewedBy: grove
+  reviewedAt: "2026-07-20"
+  labels: [hot]
+  lenses: []
+visibility: keep

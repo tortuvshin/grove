@@ -1,0 +1,10 @@
+- id: local-models
+  name: Local Models
+- id: interfaces
+  name: Interfaces
+- id: agents
+  name: Agents
+- id: orchestration
+  name: Orchestration
+- id: data-tools
+  name: Data Tools

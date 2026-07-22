@@ -1,0 +1,23 @@
+name: Cleanup report
+
+on:
+  schedule:
+    - cron: "0 5 1-7 * 1"
+  workflow_dispatch:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec grove cleanup | tee cleanup-report.md
+      - run: cat cleanup-report.md >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,21 @@
+kind: project
+name: LlamaIndex
+slug: llamaindex
+description: Data framework for connecting private and public data to language-model applications and agents.
+category: data-tools
+tags: [rag, data, agents]
+stack: python
+stacks: [python, typescript, rag]
+platforms: [linux, macos, windows]
+projectType: library
+difficulty: intermediate
+codebaseSize: huge
+repoUrl: https://github.com/run-llama/llama_index
+links: { github: https://github.com/run-llama/llama_index, website: https://www.llamaindex.ai }
+bestFor: [Retrieval applications, Data-connected agents]
+whyListed: [Broad connector ecosystem, Mature RAG primitives]
+caveats: [Large API surface takes time to learn]
+distribution: { channels: [] }
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [] }
+visibility: keep
