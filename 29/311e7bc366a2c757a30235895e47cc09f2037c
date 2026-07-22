@@ -1,0 +1,41 @@
+packages/core/src/directory-search.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-422
+packages/core/src/llms.ts
+  s_01328764f9abd4::t_d83a781dfb6d4f 137
+packages/core/src/index.ts
+  s_01328764f9abd4::t_26d1df271b7b1b 78-79
+  s_01328764f9abd4::t_cbcf6f92aa8dde 142-153
+  s_01328764f9abd4::t_d83a781dfb6d4f 75,84,87,91,136
+packages/core/src/directory-taxonomy.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-26
+packages/core/src/directory-format.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-64
+packages/core/src/directory-lenses.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-220
+packages/core/src/directory-scores.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-90
+packages/core/src/prepare.ts
+  s_01328764f9abd4::t_9b6713cec44f50 110-113
+  s_01328764f9abd4::t_26d1df271b7b1b 1-5,16-48,95-109,114-120,122-129,131-137
+  s_01328764f9abd4::t_b42806c71da016 6-15,49-94,121,130
+packages/core/src/directory-display.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-111
+packages/core/src/directory-repo.ts
+  s_01328764f9abd4::t_cbcf6f92aa8dde 1-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "29311e7bc366a2c757a30235895e47cc09f2037c",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
