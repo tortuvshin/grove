@@ -1,0 +1,56 @@
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_01328764f9abd4::t_16b075d38e4109 215-216
+  s_01328764f9abd4::t_02782c2f5ec415 11,15-31,33-34,36,38,41,44,53-55,58-59,68,72,79-80,89,103,105-116,145-154,157,179,182-184,186-191,195-203,205-214,217-222,224-227,231
+  s_01328764f9abd4::t_8a7daa2eec0e3b 32
+apps/example/data/records/dify.yml
+  s_01328764f9abd4::t_bf0885d4b194dd 20
+apps/example/src/pages/[slug]/index.astro
+  s_01328764f9abd4::t_02782c2f5ec415 152,155
+  s_01328764f9abd4::t_57e366780d2440 110
+apps/example/data/records/open-webui.yml
+  s_01328764f9abd4::t_bf0885d4b194dd 20
+apps/example/data/records/flowise.yml
+  s_01328764f9abd4::t_bf0885d4b194dd 20
+apps/example/data/records/ollama.yml
+  s_01328764f9abd4::t_bf0885d4b194dd 27
+apps/example/data/records/crewai.yml
+  s_01328764f9abd4::t_bf0885d4b194dd 20
+packages/core/src/public-api.test.ts
+  s_01328764f9abd4::t_8a7daa2eec0e3b 4,17-21
+  s_01328764f9abd4::t_03769484208edd 22
+packages/core/README.md
+  s_01328764f9abd4::t_b543643d58aad3 21-26
+packages/core/package.json
+  s_01328764f9abd4::t_8a7daa2eec0e3b 34-37
+packages/core/src/directory-client.ts
+  s_01328764f9abd4::t_8a7daa2eec0e3b 1-10
+packages/astro/src/components/FilterGroupMenu.astro
+  s_01328764f9abd4::t_02782c2f5ec415 45-51
+packages/astro/src/server/models.ts
+  s_01328764f9abd4::t_663293a1deb318 92-94
+packages/astro/src/template-routes.test.ts
+  s_01328764f9abd4::t_c86d1a779c3674 94-96
+packages/core/src/directory-search.test.ts
+  s_01328764f9abd4::t_a4ed0c3321af9f 33
+  s_01328764f9abd4::t_14732448e98ad7 1-32,34-62
+apps/example/data/records/llamaindex.yml
+  s_01328764f9abd4::t_bf0885d4b194dd 20
+packages/astro/src/components/SmartLensTabs.astro
+  s_01328764f9abd4::t_02782c2f5ec415 64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "172444f92cd54c92dc03d1b580c851453735da4c",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
