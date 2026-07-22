@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Grove's six published packages (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`, `@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`) follow the same support window:
+Grove's published packages (`@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`, and `@grove-dev/starlight`) follow the same support window:
 
 | Version | Supported          |
 | ------- | ------------------ |
