@@ -78,7 +78,7 @@ export default defineConfig({
           // Integration tests are slow; give them room.
           testTimeout: 60_000,
           hookTimeout: 60_000,
-          // One worker + no isolate so the `grove new` subprocess
+          // One worker + no isolate so the `grove init` subprocess
           // never races another scaffold for the same tmpdir.
           // `isolate: false` is the Vitest 4 spelling for what was
           // `poolOptions.forks.singleFork: true` in Vitest 3.
