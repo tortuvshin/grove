@@ -1,0 +1,85 @@
+scripts/package-site.mjs
+  s_01328764f9abd4::t_4a1ea7eb754013 5
+README.md
+  s_01328764f9abd4::t_4a1ea7eb754013 21-23
+apps/docs/RELEASING.md
+  s_01328764f9abd4::t_4a1ea7eb754013 1-168
+.prettierignore
+  s_01328764f9abd4::t_824b69d9278200 27
+.github/PULL_REQUEST_TEMPLATE.md
+  s_01328764f9abd4::t_824b69d9278200 36
+.github/SUPPORT.md
+  s_01328764f9abd4::t_824b69d9278200 7
+apps/docs/PRODUCT.md
+  s_01328764f9abd4::t_824b69d9278200 1-439
+CHANGELOG.md
+  s_01328764f9abd4::t_824b69d9278200 22,38,51,93,215
+packages/cli/src/init.ts
+  s_01328764f9abd4::t_05c88438bf17dd 34
+apps/docs/src/content/docs/maintainers/release-process.md
+  s_01328764f9abd4::t_824b69d9278200 1-160
+apps/docs/README.md
+  s_01328764f9abd4::t_4a1ea7eb754013 1-87
+packages/astro/README.md
+  s_01328764f9abd4::t_4a1ea7eb754013 14,20
+scripts/release.mjs
+  s_01328764f9abd4::t_4a1ea7eb754013 158
+.github/dependabot.yml
+  s_01328764f9abd4::t_4a1ea7eb754013 6
+vitest.config.ts
+  s_01328764f9abd4::t_4a1ea7eb754013 54
+package.json
+  s_01328764f9abd4::t_4a1ea7eb754013 13-14,20
+packages/cli/README.md
+  s_01328764f9abd4::t_4a1ea7eb754013 17
+.ignite/ARCHITECTURE.md
+  s_01328764f9abd4::t_4a1ea7eb754013 12-13,28
+packages/cli/src/init.test.ts
+  s_01328764f9abd4::t_05c88438bf17dd 8-9
+apps/example/package.json
+  s_01328764f9abd4::t_4a1ea7eb754013 1-33
+apps/docs/src/content/docs/roadmap.md
+  s_01328764f9abd4::t_824b69d9278200 1-220
+packages/astro/src/theme.test.ts
+  s_01328764f9abd4::t_4a1ea7eb754013 7,14
+apps/docs/src/docs-config.test.ts
+  s_01328764f9abd4::t_4a1ea7eb754013 1-19
+apps/docs/SUPPORT.md
+  s_01328764f9abd4::t_4a1ea7eb754013 1-34
+apps/docs/public/_headers
+  s_01328764f9abd4::t_824b69d9278200 1-50
+pnpm-workspace.yaml
+  s_01328764f9abd4::t_4a1ea7eb754013 6-7
+scripts/check-starlight-sidebar.mjs
+  s_01328764f9abd4::t_4a1ea7eb754013 5-6,19-20,32,55
+apps/docs/src/home-landing.test.ts
+  s_01328764f9abd4::t_824b69d9278200 1-379
+apps/docs/src/content/docs/reference/plugin-api.md
+  s_01328764f9abd4::t_824b69d9278200 1-174
+.github/CODEOWNERS
+  s_01328764f9abd4::t_4a1ea7eb754013 56-57
+tests/integration/grove-init.test.ts
+  s_01328764f9abd4::t_05c88438bf17dd 30
+SECURITY.md
+  s_01328764f9abd4::t_4a1ea7eb754013 31
+packages/astro/src/template-routes.test.ts
+  s_01328764f9abd4::t_1c7d6415ad3200 5
+pnpm-lock.yaml
+  s_01328764f9abd4::t_b16d52ec75cb12 27,34,48-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "7bdd9a9dee6e29aeff7f940f8bc7e21a0c7b9442",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
