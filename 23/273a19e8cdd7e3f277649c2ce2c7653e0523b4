@@ -1,0 +1,84 @@
+packages/cli/src/init.test.ts
+  s_01328764f9abd4::t_8be50dcdf3317c 28
+apps/example/data/records/flowise.yml
+  s_01328764f9abd4::t_bc121588d75bf8 8
+apps/example/data/records/open-webui.yml
+  s_01328764f9abd4::t_bc121588d75bf8 8
+apps/docs/src/content/docs/reference/config.md
+  s_01328764f9abd4::t_49d8b2e7fc0516 68-96,177-193,257
+apps/example/data/records/dify.yml
+  s_01328764f9abd4::t_bc121588d75bf8 8
+apps/example/grove.config.ts
+  s_01328764f9abd4::t_50af4e967dca8c 22-66
+apps/example/src/pages/[slug]/index.astro
+  s_01328764f9abd4::t_fce1c0fb4a87f2 56-58,184,207
+  s_01328764f9abd4::t_e31c06229d901f 6
+  s_01328764f9abd4::t_fd9677b91475ab 40,133,135,138,141
+packages/astro/src/components/SubmissionClient.astro
+  s_01328764f9abd4::t_50af4e967dca8c 6,8,11,54,62,64-66,111-112
+packages/core/src/directory-search.test.ts
+  s_01328764f9abd4::t_b4755a08a0e54c 3,8,16,31,56-80
+  s_01328764f9abd4::t_33d18407564489 81
+packages/astro/src/components/RefinePanel.astro
+  s_01328764f9abd4::t_fd9677b91475ab 32,43,56,72,91,102,121
+packages/core/src/schema.ts
+  s_01328764f9abd4::t_1540c1c1039409 459-485,523-526,556-560,610-611
+packages/astro/src/layouts/Footer.astro
+  s_01328764f9abd4::t_fd9677b91475ab 33-37,82,109-117,171,174,177,192,199
+packages/core/src/build-data.ts
+  s_01328764f9abd4::t_1540c1c1039409 328-330
+apps/example/src/pages/submit.astro
+  s_01328764f9abd4::t_50af4e967dca8c 13-14,22-27,30-35,44,47,50,57,93-94,97-100,102-103,106-109,111,114,119-120,124,126,168
+  s_01328764f9abd4::t_89774ff335bf0e 112
+packages/core/src/directory-lenses.ts
+  s_01328764f9abd4::t_fce1c0fb4a87f2 5,49-50,110-111
+  s_01328764f9abd4::t_e31c06229d901f 13
+apps/example/data/records/ollama.yml
+  s_01328764f9abd4::t_bc121588d75bf8 8
+CHANGELOG.md
+  s_01328764f9abd4::t_49d8b2e7fc0516 30,41-42
+packages/core/src/directory-search.ts
+  s_01328764f9abd4::t_1540c1c1039409 15,47,77,98,116,214,282-283,326-328,400,415,426
+.ignite/ARCHITECTURE.md
+  s_01328764f9abd4::t_7295c805a589bf 26-32
+packages/astro/src/components/SmartLensTabs.astro
+  s_01328764f9abd4::t_e31c06229d901f 5-6
+  s_01328764f9abd4::t_fd9677b91475ab 60
+apps/example/data/records/llamaindex.yml
+  s_01328764f9abd4::t_bc121588d75bf8 8
+packages/astro/src/layouts/BaseLayout.astro
+  s_01328764f9abd4::t_fd9677b91475ab 47-61
+apps/example/data/records/crewai.yml
+  s_01328764f9abd4::t_bc121588d75bf8 8
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_01328764f9abd4::t_fce1c0fb4a87f2 172-173
+  s_01328764f9abd4::t_7bf600e1557e47 204,209,225,230
+  s_01328764f9abd4::t_fd9677b91475ab 122,129,205,226
+packages/astro/src/components/FilterGroupMenu.astro
+  s_01328764f9abd4::t_fd9677b91475ab 30
+apps/example/src/pages/index.astro
+  s_01328764f9abd4::t_fce1c0fb4a87f2 61,90
+packages/astro/src/server/models.ts
+  s_01328764f9abd4::t_1540c1c1039409 43-59,155-174,177,179-183,220,243-249,254-255
+  s_01328764f9abd4::t_fd9677b91475ab 110
+packages/astro/src/layouts/Header.astro
+  s_01328764f9abd4::t_fd9677b91475ab 61
+packages/core/src/build-data.test.ts
+  s_01328764f9abd4::t_b4755a08a0e54c 95-97,200-202,206-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "23273a19e8cdd7e3f277649c2ce2c7653e0523b4",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
