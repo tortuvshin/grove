@@ -4,17 +4,12 @@ All notable changes to Grove are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Grove is a monorepo of **seven** packages on npm
-(`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`,
-`@grove-dev/astro`, `@grove-dev/starlight`, `@grove-dev/nextjs`,
-`@grove-dev/svelte`).
-`@grove-dev/nextjs` and `@grove-dev/svelte` are marked `private: true` in
-the manifest and are **skeleton adapters** — published only to reserve
-their import paths. They do not scaffold a runnable project. The five
-public packages (`core`, `ui`, `cli`, `astro`, `starlight`) are the
-V1-supported surface.
+Grove publishes **four** packages on npm: `@grove-dev/core`,
+`@grove-dev/astro`, `@grove-dev/cli`, and `@grove-dev/starlight`.
+The repository also contains two private applications under `apps/`:
+the canonical example/scaffold and the Starlight documentation site.
 
-By default a version bump applies to all seven in lockstep. The release
+By default a version bump applies to all four packages in lockstep. The release
 notes below describe the user-visible change; the affected packages are
 called out in **Packages** lines.
 
@@ -28,7 +23,24 @@ For the developer workflow that produces these entries, see
 > Working buffer. Folds into a dated `## [X.Y.Z]` heading on the next
 > release.
 
-(empty)
+### Added
+
+- **`@grove-dev/core`:** adds the browser-safe `@grove-dev/core/directory` entry point for canonical filtering, sorting, facets, display labels, pagination, and curated lens URL rules.
+- **`@grove-dev/astro`:** adds reusable directory view-models and a client controller so consumer-owned pages can stay thin while keeping URL-driven discovery behavior consistent.
+
+### Changed
+
+- **`@grove-dev/cli`:** focuses the CLI on `init`, `check`, `sync`, and `cleanup`; `grove init` now copies the single working Astro example instead of selecting templates, frameworks, or blueprints.
+- **`@grove-dev/astro`:** makes generated project routes permanently consumer-owned. Grove packages own domain logic, adapters, layouts, and components without overwriting application pages during maintenance.
+- Groups the private applications under `apps/example` and `apps/docs`; the example remains the only scaffold source bundled into `@grove-dev/cli`.
+
+### Fixed
+
+- **`@grove-dev/astro` / `@grove-dev/core`:** makes search, sort, facets, active-filter chips, and all curated lenses use one canonical filter contract in static pages. Lens links now preserve unrelated query state, active UI state hydrates from the live URL, and empty demo lenses have real curated records.
+- Aligns directory search, sort, lens, and filter control sizing across desktop and mobile layouts.
+- Improves repository statistics, contributor presentation, icon fallback behavior, submission drafting, and homepage calls to action in the canonical example.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`.
 
 ---
 

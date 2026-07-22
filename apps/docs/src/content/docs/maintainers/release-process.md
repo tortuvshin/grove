@@ -30,22 +30,22 @@ That's it. The script handles the rest.
 
 `scripts/release.mjs` is the single entrypoint. It does four things, in order:
 
-1. **Bumps versions** in every `packages/*/package.json`. The default is a patch bump (`0.2.2 → 0.2.3`); `--minor` and `--major` set the kind, `--bump=2.3.4` sets an explicit version.
+1. **Bumps versions** in the four published package manifests. The default is a patch bump (`0.3.1 → 0.3.2`); `--minor` and `--major` set the kind, and `--bump=2.3.4` sets an explicit version.
 2. **Builds every package** with `pnpm -r build`. This surfaces any cross-package breakage before publish.
-3. **Publishes every package** in dependency order. The order is `core → ui → {astro, nextjs, svelte} → cli`. This is the order of the workspace dependency graph; an adapter that depends on `core` cannot be published before `core` is on the registry.
-4. **Stops on the first failure.** If `astro` fails to publish, `cli` is not published. The script exits non-zero and prints which package failed. Re-running the script after the fix is safe — packages that already published are skipped because their versions on the registry match the bumped versions locally.
+3. **Publishes every package** in dependency order: `core → astro → cli → starlight`.
+4. **Stops on the first failure.** A failed real release keeps `.release-in-progress` and the bumped files for explicit recovery instead of silently double-bumping on a retry.
 
-A `--dry-run` flag runs steps 1-2 and prints the publish commands without running them. Always run a dry-run first.
+A `--dry-run` flag builds and performs npm publish dry runs, then restores the package versions and lockfile. Always run a dry-run first.
 
 ## The version-bump model
 
-By default, the release script bumps **all six packages in lockstep** to the same version. This is the explicit decision: when a user runs `pnpm dlx @grove-dev/cli@latest`, they get the matching `@grove-dev/core`, `@grove-dev/astro`, etc. on the same release.
+By default, the release script bumps the **four published packages** in lockstep: Core, Astro, CLI, and Starlight. This keeps the CLI scaffold and its Core/Astro dependencies on one release line.
 
-The downside: a small docs change to `@grove-dev/docs` triggers a publish of every package. The mitigations:
+The private docs application is deployed separately and does not trigger a package release. For published changes:
 
-- **Bug fixes and docs-only changes** ship as a patch bump (`0.2.2 → 0.2.3`). The release notes for a patch should make clear that no public API changed.
-- **Public API changes** ship as a minor bump (`0.2.3 → 0.3.0`). The release notes for a minor call out the new API and any deprecations.
-- **Breaking changes** ship as a major bump (`0.2.3 → 1.0.0`). The release notes describe the migration.
+- **Bug fixes and package docs changes** ship as a patch bump (`0.3.1 → 0.3.2`).
+- **Public API additions** ship as a minor bump (`0.3.1 → 0.4.0`).
+- **Breaking changes** ship as a major bump (`0.3.1 → 1.0.0`) with migration notes.
 
 This is standard semver, applied to a monorepo. The user experience is "every Grove package is the same version, and the version follows semver". The complexity is hidden in the script.
 
@@ -98,19 +98,17 @@ The aim is: a downstream user reading the changelog can answer "do I need to do 
 The version-bump commit is one commit per release. The script writes the new versions to each `packages/*/package.json`; the maintainer commits them with a message like:
 
 ```
-chore(release): cut 0.3.0
+chore(release): cut 0.4.0
 
-- @grove-dev/core 0.2.3 → 0.3.0
-- @grove-dev/ui 0.2.3 → 0.3.0
-- @grove-dev/astro 0.2.3 → 0.3.0
-- @grove-dev/nextjs 0.2.3 → 0.3.0
-- @grove-dev/svelte 0.2.3 → 0.3.0
-- @grove-dev/cli 0.2.3 → 0.3.0
+- @grove-dev/core 0.3.1 → 0.4.0
+- @grove-dev/astro 0.3.1 → 0.4.0
+- @grove-dev/cli 0.3.1 → 0.4.0
+- @grove-dev/starlight 0.3.1 → 0.4.0
 
 See CHANGELOG.md for the user-visible changes.
 ```
 
-The `--follow-tags` flag on the push ensures the version tag (`v0.3.0`) is created.
+Tag the release explicitly after publishing; the script does not create Git tags.
 
 ## The GitHub release
 
@@ -147,7 +145,7 @@ A release that ships with a red main branch is a "yank it" situation. The npm re
 
 ## What goes wrong, and what to do
 
-- **A package fails to publish mid-script.** Re-run the script. Packages that succeeded are skipped (their versions on npm match). The script is idempotent.
+- **A package fails to publish mid-script.** Inspect `.release-in-progress`, the registry, and the bumped files. Revert before retrying if nothing published; otherwise manually finish the remaining packages without another bump.
 - **`pnpm publish` asks for an OTP** (one-time password for npm 2FA). The script reads `NPM_OTP` from the env or `--otp=<code>` from the CLI. Either is fine; the latter is more scriptable.
 - **The build fails on a package you didn't expect.** A cross-package change broke the build of an adapter you didn't touch. Fix the regression, commit, re-run the release from the top.
 - **A version was published to npm but the GitHub release was not created.** The release can be created after the fact — it's just metadata. Don't yank the npm version.
@@ -156,5 +154,5 @@ A release that ships with a red main branch is a "yank it" situation. The npm re
 ## What is not in the release process
 
 - **The docs site (`apps/docs/`)** is not in the lockstep release. The docs site is built and deployed separately (to grove.dev.mn) and does not have a version number tied to the `@grove-dev/*` packages. A docs change does not require a release.
-- **The example directories (`examples/`)** are not published. They are illustrative; their git history is the version history.
-- **The CLI itself** does not self-update. A user on `@grove-dev/cli@0.2.3` stays on 0.2.3 until they run `pnpm dlx @grove-dev/cli@latest` again. Self-update is a V2 feature.
+- **The example application (`apps/example/`)** is not published independently; `@grove-dev/cli` bundles it as the init scaffold.
+- **The CLI itself** does not self-update. A user stays on the installed version until they run `pnpm dlx @grove-dev/cli@latest` again.

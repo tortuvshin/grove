@@ -7,11 +7,13 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "packages/**/package.json"
+      - "apps/**/package.json"
   pull_request:
     paths:
       - "package.json"
       - "pnpm-lock.yaml"
       - "packages/**/package.json"
+      - "apps/**/package.json"
   schedule:
     # Weekly full audit, Mondays at 06:00 UTC.
     - cron: "0 6 * * 1"
@@ -28,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: Setup pnpm

@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "keywords": [
     "grove",
     "astro",
@@ -27,7 +30,12 @@
   },
   "files": [
     "dist",
-    "src",
+    "src/components",
+    "src/layouts",
+    "src/lib",
+    "src/server",
+    "src/index.ts",
+    "src/styles.css",
     "README.md"
   ],
   "exports": {
@@ -43,7 +51,7 @@
     "./server": "./src/server/index.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"No astro package tests yet\""
   },
