@@ -84,33 +84,14 @@ export function loadDirectoryContributors(root = process.cwd()): DirectoryContri
   }
 }
 
-function daysSince(iso: string | null | undefined): number {
-  if (!iso) return Infinity;
-  const value = new Date(iso).valueOf();
-  return Number.isNaN(value) ? Infinity : (Date.now() - value) / 86_400_000;
-}
-
-function projectStars(record: IndexRecord): number {
-  return record.kind === "project" ? record.github?.stars ?? 0 : 0;
-}
-
 export function getHomePageModel(site: DirectorySiteConfig) {
   const slug = site.blueprintConfig?.routeSlug ?? "projects";
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
   const plural = site.blueprintConfig?.labelPlural ?? itemLabelPlural();
   const projects = items.filter((record) => record.kind === "project");
-  const hot = projects.filter((record) =>
-    (record.curation?.labels ?? []).includes("hot") ||
-    projectStars(record) >= 1000 ||
-    daysSince(record.github?.pushedAt) <= 30
-  ).slice(0, 6);
-  const recentlyAdded = projects.filter((record) =>
-    daysSince(record.curation?.reviewedAt) <= 21 ||
-    (record.curation?.labels ?? []).includes("new")
-  ).slice(0, 6);
-  const established = projects.filter((record) =>
-    (record.curation?.labels ?? []).includes("mature") || record.health?.tier === "curated"
-  ).slice(0, 6);
+  const hot = filterRecords(projects, { labels: ["hot"] }).slice(0, 6);
+  const recentlyAdded = filterRecords(projects, { labels: ["new"] }).slice(0, 6);
+  const established = filterRecords(projects, { labels: ["mature"] }).slice(0, 6);
 
   const stackCounts = new Map<string, number>();
   const categoryCounts = new Map<string, number>();

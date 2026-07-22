@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { recordsFileSchema, resourceSchema } from "./index.js";
+import * as directory from "./directory-client.js";
 
 describe("public schema API", () => {
   it("exports the complete resource validators for consumer migrations", () => {
@@ -12,5 +13,11 @@ describe("public schema API", () => {
         name: "Example",
       }).success,
     ).toBe(true);
+  });
+
+  it("exposes a browser-safe directory discovery entry point", () => {
+    expect(directory.filterRecords).toBeTypeOf("function");
+    expect(directory.hrefForLens).toBeTypeOf("function");
+    expect(directory.sortDisplay).toBeTypeOf("function");
   });
 });
