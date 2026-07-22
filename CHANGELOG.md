@@ -4,22 +4,17 @@ All notable changes to Grove are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-Grove is a monorepo of **seven** packages on npm
-(`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`,
-`@grove-dev/astro`, `@grove-dev/starlight`, `@grove-dev/nextjs`,
-`@grove-dev/svelte`).
-`@grove-dev/nextjs` and `@grove-dev/svelte` are marked `private: true` in
-the manifest and are **skeleton adapters** — published only to reserve
-their import paths. They do not scaffold a runnable project. The five
-public packages (`core`, `ui`, `cli`, `astro`, `starlight`) are the
-V1-supported surface.
+Grove publishes **four** packages on npm: `@grove-dev/core`,
+`@grove-dev/astro`, `@grove-dev/cli`, and `@grove-dev/starlight`.
+The repository also contains two private applications under `apps/`:
+the canonical example/scaffold and the Starlight documentation site.
 
-By default a version bump applies to all seven in lockstep. The release
+By default a version bump applies to all four packages in lockstep. The release
 notes below describe the user-visible change; the affected packages are
 called out in **Packages** lines.
 
 For the developer workflow that produces these entries, see
-[`docs/src/content/docs/maintainers/release-process.md`](./docs/src/content/docs/maintainers/release-process.md).
+[`apps/docs/src/content/docs/maintainers/release-process.md`](./apps/docs/src/content/docs/maintainers/release-process.md).
 
 ---
 
@@ -28,14 +23,31 @@ For the developer workflow that produces these entries, see
 > Working buffer. Folds into a dated `## [X.Y.Z]` heading on the next
 > release.
 
-(empty)
+### Added
+
+- **`@grove-dev/core`:** adds the browser-safe `@grove-dev/core/directory` entry point for canonical filtering, sorting, facets, display labels, pagination, and curated lens URL rules.
+- **`@grove-dev/astro`:** adds reusable directory view-models and a client controller so consumer-owned pages can stay thin while keeping URL-driven discovery behavior consistent.
+
+### Changed
+
+- **`@grove-dev/cli`:** focuses the CLI on `init`, `check`, `sync`, and `cleanup`; `grove init` now copies the single working Astro example instead of selecting templates, frameworks, or blueprints.
+- **`@grove-dev/astro`:** makes generated project routes permanently consumer-owned. Grove packages own domain logic, adapters, layouts, and components without overwriting application pages during maintenance.
+- Groups the private applications under `apps/example` and `apps/docs`; the example remains the only scaffold source bundled into `@grove-dev/cli`.
+
+### Fixed
+
+- **`@grove-dev/astro` / `@grove-dev/core`:** makes search, sort, facets, active-filter chips, and all curated lenses use one canonical filter contract in static pages. Lens links now preserve unrelated query state, active UI state hydrates from the live URL, and empty demo lenses have real curated records.
+- Aligns directory search, sort, lens, and filter control sizing across desktop and mobile layouts.
+- Improves repository statistics, contributor presentation, icon fallback behavior, submission drafting, and homepage calls to action in the canonical example.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`.
 
 ---
 
 ## [0.3.1] — 2026-06-30
 
 > **Docs-only patch.** Every change since `v0.3.0` (2026-06-11) has been
-> on the documentation site (`docs/`), the production-side home page,
+> on the documentation site (`apps/docs/`), the production-side home page,
 > and transitive dev-dependency bumps. **No `@grove-dev/*` package source
 > code has changed.** Framework support, blueprints, CLI commands,
 > generated outputs, and schema are unchanged from `v0.3.0`.
@@ -48,7 +60,7 @@ For the developer workflow that produces these entries, see
   - The eight-framework logo wall is replaced with an honest "Astro today, SvelteKit / Next.js planned" status card plus the actual public package list (`@grove-dev/core`, `@grove-dev/ui`, `@grove-dev/cli`). Tailwind / Node.js / GitHub are no longer presented as framework adapters — they're tooling, not adapters.
   - The "Integrate with your favorite tools" orbital diagram is replaced with "One source, multiple outputs" (static HTML, `sitemap.xml`, `llms.txt`, `llms-full.txt`).
   - The "Why Grove" features section is reframed around the maintenance problem Grove actually solves (structure drift, stale metadata, review-as-cleanup, discovery-as-software, AI-readable fragments, maintainer-memory dependence) instead of generic capabilities.
-- **JSON-LD `SearchAction` removed.** The `WebSite` block in the home page (`docs/src/layouts/HomeLayout.astro`) and the global Starlight `head` config (`docs/astro.config.mjs`) no longer advertise a `https://grove.dev.mn/search?q=...` target. The route never existed; emitting it was invalid structured data.
+- **JSON-LD `SearchAction` removed.** The `WebSite` block in the home page (`apps/docs/src/layouts/HomeLayout.astro`) and the global Starlight `head` config (`apps/docs/astro.config.mjs`) no longer advertise a `https://grove.dev.mn/search?q=...` target. The route never existed; emitting it was invalid structured data.
 - **Roadmap page renders correctly.** The `/roadmap/` route no longer prints the raw `import { Content } from '../../../roadmap.md';` statement as visible page text. The content is now inlined as a Starlight `.md` content file, evaluated through the Starlight content layer.
 - **Wrong GitHub organisation.** All references to `grove-dev/grove` in source and content are replaced with the correct `tortuvshin/grove`. `https://github.com/grove-dev/grove/...` was returning 404.
 - **Lucode / lucas-labs user-visible branding.** The "Lucode" and "lucas-labs" strings in the docs site footer and four content files are replaced with "Grove Starlight". Internal `packages/starlight/` source may keep upstream names with `@deprecated` aliases for downstream stability.
@@ -90,7 +102,7 @@ range are intentionally not reconstructed; the git history of
 - `.github/` directory: issue templates (bug, feature, docs, question), pull request template, `FUNDING.yml`, `dependabot.yml`, `SUPPORT.md`.
 - CI workflows: `ci.yml` (build, type-check, scaffold smoke test, repo hygiene checks) and `audit.yml` (weekly `pnpm audit`).
 - Root `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `LICENSE` (MIT).
-- `docs/src/content/docs/maintainers/release-process.md` and `docs/src/content/docs/maintainers/security.md` to round out the contributor-facing documentation.
+- `apps/docs/src/content/docs/maintainers/release-process.md` and `apps/docs/src/content/docs/maintainers/security.md` to round out the contributor-facing documentation.
 - Dependabot configured to ignore `@grove-dev/*` workspace deps (the release script owns those rewrites).
 - The Astro default template ships **22 components** (`Hero`, `ItemCard`, `IndexRow`, `Pagination`, `RecordSection`, `RefinePanel`, `ScoreBars`, `SmartLensTabs`, `ExploreByCategory`, `ExploreByStack`, `WhyThisExists`, `CurationGrid`, `ContributorsGrid`, `StackGrid`, `Icon`, `MinimalAbout`, `OriginalCollection`, `DecisionRow`, `FilterGroupMenu`, `FilterOptions`, `CategoryGrid`) and **one layout** (`BaseLayout`).
 - 11 GitHub Actions workflows generated by `grove new --github public` mode (validate, build, deploy, sync-github-metadata, sync-contributors stub, cleanup-stale-records, update-records, …).
@@ -212,7 +224,7 @@ range are intentionally not reconstructed; the git history of
 
 - Repository tags use the form `vX.Y.Z` and are created **manually**
   after `scripts/release.mjs` finishes publishing. See
-  [`docs/src/content/docs/maintainers/release-process.md`](./docs/src/content/docs/maintainers/release-process.md) for the full workflow.
+  [`apps/docs/src/content/docs/maintainers/release-process.md`](./apps/docs/src/content/docs/maintainers/release-process.md) for the full workflow.
 - The `Versions` table in `SECURITY.md` describes the support window
   per release line.
 

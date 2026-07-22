@@ -2,13 +2,16 @@
   "name": "@grove-dev/astro",
   "version": "0.3.1",
   "type": "module",
-  "description": "Astro framework adapter for Grove. Components, layouts, design tokens, and a default template.",
+  "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "keywords": [
     "grove",
     "astro",
     "ui",
-    "template",
+    "directory",
     "components",
     "static-site"
   ],
@@ -27,8 +30,12 @@
   },
   "files": [
     "dist",
-    "src",
-    "templates",
+    "src/components",
+    "src/layouts",
+    "src/lib",
+    "src/server",
+    "src/index.ts",
+    "src/styles.css",
     "README.md"
   ],
   "exports": {
@@ -40,19 +47,24 @@
     "./components/*.astro": "./src/components/*.astro",
     "./components/*": "./src/components/*.astro",
     "./layouts/*.astro": "./src/layouts/*.astro",
-    "./layouts/*": "./src/layouts/*.astro"
+    "./layouts/*": "./src/layouts/*.astro",
+    "./server": "./src/server/index.ts"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"No astro package tests yet\""
   },
   "dependencies": {
     "@grove-dev/core": "workspace:*",
-    "@grove-dev/ui": "workspace:*",
-    "astro": "^7.0.7"
+    "astro": "^6.4.6",
+    "marked": "^18.0.0",
+    "sanitize-html": "^2.17.5"
   },
   "peerDependencies": {
     "astro": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.16.0"
   }
 }

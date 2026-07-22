@@ -1,0 +1,13 @@
+health:
+  - id: ollama
+    health: { status: active, maturity: mature, tier: curated, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [active-development] }
+  - id: open-webui
+    health: { status: active, maturity: mature, tier: curated, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [active-development] }
+  - id: dify
+    health: { status: active, maturity: mature, tier: curated, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [production-adoption] }
+  - id: flowise
+    health: { status: active, maturity: useful, tier: listed, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [active-development] }
+  - id: crewai
+    health: { status: active, maturity: useful, tier: listed, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [active-development] }
+  - id: llamaindex
+    health: { status: active, maturity: mature, tier: curated, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [mature-ecosystem] }

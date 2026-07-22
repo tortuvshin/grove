@@ -10,18 +10,15 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "build": "pnpm --filter './packages/**' --filter './docs' -r build",
-    "check": "pnpm --filter './packages/**' --filter './docs' -r check",
+    "build": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r build && pnpm --dir apps/example build",
+    "check": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r check && pnpm --dir apps/example check",
     "docs:check": "node scripts/check-starlight-sidebar.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:scaffold": "node scripts/test-scaffold.mjs",
-    "dev": "pnpm --filter @grove-dev/cli dev",
+    "dev": "pnpm --dir apps/example dev",
     "dev:docs": "pnpm --filter @grove-dev/docs dev",
-    "grove:run": "pnpm --filter @grove-dev/cli exec node --import tsx src/index.ts run",
-    "grove:dev": "pnpm grove:run dev",
-    "grove:build": "pnpm grove:run build",
     "release": "node scripts/release.mjs",
     "release:dry": "node scripts/release.mjs --dry-run",
     "postinstall": "pnpm --filter @grove-dev/cli... build"

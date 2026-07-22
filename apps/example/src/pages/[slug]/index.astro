@@ -1,0 +1,240 @@
+---
+/**
+ * List page — the discovery / browse page.
+ *
+ * Mirrors the openapps list structure:
+ *   - SmartLensTabs (All / Trending / Recently added / Established / Featured)
+ *   - RefinePanel  (Stack / Platform / Category / License / Sort)
+ *   - RecordSection rows (full record cards; the `ItemSection` V0
+ *     name was renamed to `RecordSection` in V1)
+ *
+ * Generic: the URL slug (e.g. `/projects/`, `/resources/`,
+ * `/entities/`) is derived from the blueprint via `getStaticPaths`,
+ * so the same page works for every blueprint without per-blueprint
+ * forks.
+ *
+ * Navigation model: full-page render. The form posts via `method="get"`
+ * so the browser navigates to `?q=...&sort=...&stack=...`, and the
+ * server re-runs `filterRecords` / `applySort` / `paginate` from
+ * those query params. No client-side filter shim, no duplicated
+ * logic. The URL stays the single source of truth for filter state.
+ */
+import siteConfig from "@grove/generated/site-config.json";
+import { getDirectoryIndexModel, itemLabel, itemLabelPlural, taxonomy } from "@grove-dev/astro/server";
+import type { IndexFilters } from "@grove-dev/astro";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
+import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
+import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
+import Pagination from "@grove-dev/astro/components/Pagination.astro";
+import DirectoryIndexClient from "@grove-dev/astro/components/DirectoryIndexClient.astro";
+import { removeFilter, searchParamsFromFilters, sortDisplay, SORT_OPTIONS } from "@grove-dev/astro";
+
+export function getStaticPaths() {
+  const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+  return [{ params: { slug: routeSlug } }];
+}
+
+const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+const { total, filters, facets, sort, sorted, pages, page, chips, clientItemsJson } =
+  getDirectoryIndexModel(Astro.url.searchParams);
+
+const title = `Browse ${slug} — ${siteConfig.name}`;
+const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
+
+function hrefForPage(target: number): string {
+  const next: IndexFilters = { ...filters, page: target };
+  const query = searchParamsFromFilters(next).toString();
+  return query ? `/${slug}?${query}` : `/${slug}`;
+}
+
+function hrefForRemove(key: keyof IndexFilters, value: string): string {
+  const params = searchParamsFromFilters(removeFilter(filters, key, value));
+  const query = params.toString();
+  return query ? `/${slug}?${query}` : `/${slug}`;
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  site={siteConfig}
+  submitHref="/submit"
+  submitLabel={`Submit ${itemLabel()}`}
+>
+  <section class="border-b border-ink-200 bg-white dark:border-ink-800 dark:bg-ink-950">
+    <div class="mx-auto w-full max-w-wide px-5 pt-10 sm:px-7 sm:pt-12">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        {slug}
+      </span>
+      <h1 class="m-0 mt-1 text-[1.875rem] sm:text-[2.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+        Browse {slug}
+      </h1>
+      <p class="m-0 mt-2 max-w-[64ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
+        Search, filter, and explore {total} {itemLabel()}{total === 1 ? "" : "s"} in this directory.
+      </p>
+
+      <form
+        method="get"
+        action={`/${slug}`}
+        id="search-form"
+        class="mt-6 flex flex-col gap-2 sm:flex-row"
+        role="search"
+      >
+        <label class="relative flex-1">
+          <span class="sr-only">{`Search ${itemLabelPlural()}`}</span>
+          <svg
+            viewBox="0 0 16 16"
+            width="16"
+            height="16"
+            aria-hidden="true"
+            class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
+            fill="currentColor"
+          >
+            <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z" />
+          </svg>
+          <input
+            id="search-input"
+            type="search"
+            name="q"
+            value={filters.q ?? ""}
+            placeholder={`Search ${itemLabelPlural()}, stacks, categories, platforms, licenses...`}
+            class="h-10 w-full rounded-md border border-ink-200 bg-white py-2 pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
+          />
+        </label>
+        <label class="relative">
+          <span class="sr-only">{`Sort ${itemLabelPlural()}`}</span>
+          <select
+            id="sort-select"
+            name="sort"
+            class="h-10 w-full cursor-pointer appearance-none rounded-md border border-ink-200 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-ink-700 transition-colors hover:border-ink-300 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 sm:w-auto dark:border-ink-800 dark:bg-ink-950 dark:text-ink-300 dark:hover:border-ink-700 dark:focus:border-ink-100 dark:focus:ring-ink-100/15"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option value={o.value} selected={o.value === sort}>{o.label}</option>
+            ))}
+          </select>
+          <svg
+            viewBox="0 0 16 16"
+            width="11"
+            height="11"
+            aria-hidden="true"
+            class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400"
+            fill="currentColor"
+          >
+            <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" />
+          </svg>
+        </label>
+        <button type="submit" class="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-4 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">Search</button>
+      </form>
+
+      <div class="mt-4">
+        <SmartLensTabs
+          currentParams={Astro.url.searchParams}
+          pathPrefix={`/${slug}`}
+          lensIds={["all", "new", "hot", "mature", "production-like", "good-to-learn"]}
+        />
+      </div>
+
+      <div class="mt-3 pb-6">
+        <RefinePanel
+          facets={facets}
+          initial={filters}
+          pathPrefix={`/${slug}`}
+          hide={["sort"]}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="py-10 sm:py-12">
+    <div class="mx-auto w-full max-w-wide px-5 sm:px-7">
+      <header class="mb-6">
+        <h2 id="results-heading" class="m-0 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {`All ${itemLabelPlural()}`}
+        </h2>
+        <p id="results-description" class="m-0 mt-1 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
+          {`Every ${itemLabel()} in the directory.`}
+        </p>
+      </header>
+      <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p class="m-0 text-2xs text-ink-500 dark:text-ink-400">
+          <span id="results-count" class="font-mono text-ink-900 dark:text-ink-100">
+            {sorted.length} {sorted.length === 1 ? itemLabel() : itemLabelPlural()}
+          </span>
+          <span id="results-sort">{` · sorted by ${sortDisplay(sort)}`}</span>
+          <span id="results-page">{pages > 1 ? ` · page ${page} of ${pages}` : ""}</span>
+        </p>
+        <div
+          id="active-filters"
+          class:list={["flex flex-wrap items-center gap-1.5", chips.length === 0 && "hidden"]}
+          aria-label="Active filters"
+        >
+          {chips.length > 0 && (
+            <>
+            {chips.map((chip) => (
+              <a
+                href={hrefForRemove(chip.key, chip.value)}
+                class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground transition-colors hover:border-ink-400"
+              >
+                {chip.label} <span aria-hidden="true">x</span>
+              </a>
+            ))}
+            <a href={`/${slug}`} class="text-2xs font-medium text-ink-500 hover:text-ink-900">
+              Clear all
+            </a>
+            </>
+          )}
+        </div>
+      </div>
+
+      <ul id="results-list" class="m-0 flex list-none flex-col gap-3 p-0">
+        {sorted.map((item, i) => (
+            <li class="m-0 p-0" data-record-slug={item.slug}>
+              <IndexRow
+                record={item as Parameters<typeof IndexRow>[0]["record"]}
+                detailHref={`/${slug}/${item.slug}`}
+                eager={i < 2}
+              />
+            </li>
+        ))}
+      </ul>
+      <div id="empty-state" class:list={["py-12 text-center", sorted.length > 0 && "hidden"]}>
+        <p class="m-0 text-sm font-medium text-ink-700 dark:text-ink-200">
+          {`No ${itemLabel()}s match these filters.`}
+        </p>
+        <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent mt-4">Clear filters</a>
+      </div>
+      <nav id="results-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
+        <Pagination current={page} total={pages} hrefFor={hrefForPage} />
+      </nav>
+    </div>
+  </section>
+
+  <section class="border-t border-ink-200 dark:border-ink-800">
+    <div class="mx-auto w-full max-w-wide px-5 sm:px-7">
+      <div class="flex flex-col items-center gap-3 py-12 text-center">
+        <h2 class="m-0 text-xl font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {`Know a real ${itemLabel()} that belongs here?`}
+        </h2>
+        <p class="m-0 max-w-2xl text-sm text-ink-500 dark:text-ink-400">
+          {`Open a pull request with a YAML file. We review every submission against the bar — no marketing, no tutorials.`}
+        </p>
+        <a
+          href="/submit"
+          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90 mt-2"
+        >
+          {`Submit ${itemLabel()}`}
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <DirectoryIndexClient
+    clientItemsJson={clientItemsJson}
+    slug={slug}
+    singular={itemLabel()}
+    plural={itemLabelPlural()}
+    taxonomy={taxonomy}
+  />
+</BaseLayout>

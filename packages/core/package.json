@@ -4,6 +4,9 @@
   "type": "module",
   "description": "Headless engine for Grove: resource schema, config, importers, validators, taxonomy, sitemap, llms.txt, and the data build pipeline.",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "keywords": [
     "grove",
     "directory",
@@ -31,6 +34,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./directory": {
+      "types": "./dist/directory-client.d.ts",
+      "import": "./dist/directory-client.js"
     }
   },
   "files": [
@@ -38,7 +45,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/core"
   },

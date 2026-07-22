@@ -1,9 +1,0 @@
-{
-  "extends": "astro/tsconfigs/base",
-  "compilerOptions": {
-    "moduleResolution": "Bundler",
-    "types": ["node"]
-  },
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
-}

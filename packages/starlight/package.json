@@ -5,6 +5,9 @@
   "description": "Grove's theme for Starlight (the Astro native documentation site generator)",
   "author": "grove-dev",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "readme": "README.md",
   "homepage": "https://grove.dev.mn/",
   "repository": {
@@ -18,6 +21,18 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "components",
+    "core",
+    "styles",
+    "global.d.ts",
+    "index.ts",
+    "schema.ts",
+    "user-components.ts",
+    "virtual.d.ts",
+    "README.md",
+    "THIRD_PARTY_LICENSES.md"
+  ],
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema.ts",

@@ -42,29 +42,15 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\"",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\" && node ../../scripts/package-site.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/cli",
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
-    "@clack/prompts": "^1.7.0",
-    "@grove-dev/astro": "workspace:*",
     "@grove-dev/core": "workspace:*",
     "commander": "^15.0.0",
     "yaml": "^2.6.0"
-  },
-  "peerDependencies": {
-    "@grove-dev/nextjs": "workspace:*",
-    "@grove-dev/svelte": "workspace:*"
-  },
-  "peerDependenciesMeta": {
-    "@grove-dev/nextjs": {
-      "optional": true
-    },
-    "@grove-dev/svelte": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "tsx": "^4.23.0"

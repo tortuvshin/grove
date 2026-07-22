@@ -1,0 +1,33 @@
+{
+  "name": "@grove-dev/example",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The canonical Grove-powered AI directory example and init scaffold.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "astro build",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@grove-dev/astro": "workspace:*",
+    "@grove-dev/cli": "workspace:*",
+    "@grove-dev/core": "workspace:*",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^6.4.4",
+    "tailwindcss": "^4.3.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2"
+  }
+}

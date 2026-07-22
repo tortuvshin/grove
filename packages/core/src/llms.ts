@@ -134,7 +134,7 @@ export function buildLlmsFullTxt(input: LlmsInput, config: GroveConfig): string 
     `# ${config.site.name} — full directory`,
     "",
     `> Generated ${input.generatedAt} from ${input.records.length} records.`,
-    `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`grove generate\`.`,
+    `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`pnpm build\`.`,
     "",
     "Each section below mirrors one record detail page.",
     "",
