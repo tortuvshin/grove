@@ -1,0 +1,33 @@
+packages/cli/README.md
+  s_01328764f9abd4::t_56468cfd80145f 3,6,11-15,17
+SECURITY.md
+  s_01328764f9abd4::t_d83a781dfb6d4f 5
+packages/core/README.md
+  s_01328764f9abd4::t_06c6002d393d49 3,5,7-13,16,19,23
+README.md
+  s_01328764f9abd4::t_56468cfd80145f 3,6-8,13,15-16,19-22,25,27-33,36-43,45-48,51,53,55,57-58,60
+  s_01328764f9abd4::t_ca359a71482b0d 11,17-18,44,56
+CONTRIBUTING.md
+  s_01328764f9abd4::t_590a4fd0674072 3,5-9,11,13,17-20,24,26,28,30,32
+packages/astro/README.md
+  s_01328764f9abd4::t_56468cfd80145f 7-9,11,20
+  s_01328764f9abd4::t_ca359a71482b0d 3,5,14,16
+.ignite/ARCHITECTURE.md
+  s_01328764f9abd4::t_ca359a71482b0d 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "70dd6472bfe99cdaaed178fb0d3ec540b54fe756",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
