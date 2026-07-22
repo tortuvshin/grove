@@ -13,7 +13,7 @@
  *   pnpm release --skip-build   # skip build step
  *   pnpm release --skip-bump    # skip version bump
  *
- * Order (dependency graph): core -> ui -> {astro,nextjs,svelte} -> cli.
+ * Order (dependency graph): core -> astro -> cli -> starlight.
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -39,18 +39,9 @@ const SKIP_BUMP = Boolean(args["skip-bump"]);
 
 const PACKAGES = [
   { name: "@grove-dev/core", dir: "packages/core" },
-  { name: "@grove-dev/ui", dir: "packages/ui" },
   { name: "@grove-dev/astro", dir: "packages/astro" },
-  { name: "@grove-dev/nextjs", dir: "packages/nextjs" },
-  { name: "@grove-dev/svelte", dir: "packages/svelte" },
   { name: "@grove-dev/cli", dir: "packages/cli" },
   { name: "@grove-dev/starlight", dir: "packages/starlight" },
-];
-
-const TEMPLATE_MANIFESTS = [
-  "packages/astro/templates/default/package.json",
-  "packages/nextjs/templates/default/package.json",
-  "packages/svelte/templates/default/package.json",
 ];
 
 function parseArgs(argv) {
@@ -96,7 +87,7 @@ Idempotency:
   previous run has been verified (committed or reverted).
 
 Order (dependency graph):
-  core -> ui -> {astro, nextjs, svelte} -> cli -> starlight
+  core -> astro -> cli -> starlight
 `,
   );
 }
