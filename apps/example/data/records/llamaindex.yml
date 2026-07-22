@@ -17,5 +17,5 @@ whyListed: [Broad connector ecosystem, Mature RAG primitives]
 caveats: [Large API surface takes time to learn]
 distribution: { channels: [] }
 source: { type: manual }
-curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [] }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [good-to-learn] }
 visibility: keep

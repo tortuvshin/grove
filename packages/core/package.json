@@ -31,6 +31,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./directory": {
+      "types": "./dist/directory-client.d.ts",
+      "import": "./dist/directory-client.js"
     }
   },
   "files": [

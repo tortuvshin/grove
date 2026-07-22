@@ -91,7 +91,9 @@ describe("default Astro route configuration", () => {
 
     expect(listClient).toContain('id="grove-index-data"');
     expect(listClient).toContain("function applyClientFilters()");
-    expect(listClient).toContain("const PAGE_SIZE = 20");
+    expect(listClient).toContain('from "@grove-dev/core/directory"');
+    expect(listClient).toContain("PAGE_SIZE,");
+    expect(listClient).toContain("filterRecords(items, filters)");
   });
 
   it("uses generated taxonomy names as display labels", async () => {
