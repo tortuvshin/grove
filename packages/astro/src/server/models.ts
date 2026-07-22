@@ -40,6 +40,23 @@ export interface DirectorySiteConfig {
   tagline?: string;
   description?: string;
   repoUrl?: string;
+  nav?: Array<{ label: string; href: string }>;
+  facets?: string[];
+  footer?: {
+    columns?: Array<{
+      heading: string;
+      items: Array<{ label: string; href: string; external?: boolean }>;
+    }>;
+    copyright?: string;
+    license?: string;
+  };
+  submission?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    good?: string[];
+    avoid?: string[];
+  };
   blueprintConfig?: {
     routeSlug?: string;
     labelSingular?: string;
@@ -90,7 +107,7 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   const plural = site.blueprintConfig?.labelPlural ?? itemLabelPlural();
   const projects = items.filter((record) => record.kind === "project");
   const hot = filterRecords(projects, { labels: ["hot"] }).slice(0, 6);
-  const recentlyAdded = filterRecords(projects, { labels: ["new"] }).slice(0, 6);
+  const recentlyAdded = applySort(projects, "recently-added").slice(0, 6);
   const established = filterRecords(projects, { labels: ["mature"] }).slice(0, 6);
 
   const stackCounts = new Map<string, number>();
@@ -135,14 +152,35 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   };
 }
 
-export function getDirectoryIndexModel(searchParams: URLSearchParams) {
+const FACET_ALIASES: Record<string, "stacks" | "platforms" | "categories" | "tags" | "licenses"> = {
+  stack: "stacks",
+  stacks: "stacks",
+  platform: "platforms",
+  platforms: "platforms",
+  category: "categories",
+  categories: "categories",
+  tag: "tags",
+  tags: "tags",
+  license: "licenses",
+  licenses: "licenses",
+};
+
+function configuredFacets(site?: DirectorySiteConfig) {
+  return new Set((site?.facets ?? ["category", "tags"])
+    .map((facet) => FACET_ALIASES[facet])
+    .filter((facet): facet is NonNullable<typeof facet> => Boolean(facet)));
+}
+
+export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: DirectorySiteConfig) {
   const filters = filtersFromSearchParams(searchParams);
   const rawFacets = buildFacets(items);
+  const enabled = configuredFacets(site);
   const facets = {
-    ...rawFacets,
-    stacks: rawFacets.stacks.map((option) => ({ ...option, label: taxonomyLabel("stacks", option.value) })),
-    platforms: rawFacets.platforms.map((option) => ({ ...option, label: taxonomyLabel("platforms", option.value) })),
-    categories: rawFacets.categories.map((option) => ({ ...option, label: taxonomyLabel("categories", option.value) })),
+    stacks: enabled.has("stacks") ? rawFacets.stacks.map((option) => ({ ...option, label: taxonomyLabel("stacks", option.value) })) : [],
+    platforms: enabled.has("platforms") ? rawFacets.platforms.map((option) => ({ ...option, label: taxonomyLabel("platforms", option.value) })) : [],
+    categories: enabled.has("categories") ? rawFacets.categories.map((option) => ({ ...option, label: taxonomyLabel("categories", option.value) })) : [],
+    tags: enabled.has("tags") ? rawFacets.tags : [],
+    licenses: enabled.has("licenses") ? rawFacets.licenses : [],
   };
   const sort = effectiveSort(filters);
   const sorted = applySort(filterRecords(items, filters), sort);
@@ -179,6 +217,7 @@ export function getContributorsPageModel(site: DirectorySiteConfig) {
 
 export function getSubmissionPageModel(site: DirectorySiteConfig) {
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
+  const enabled = configuredFacets(site);
   const values = (key: "category" | "stack") =>
     [...new Set(fullProjects.map((record) => String(record[key] ?? "")).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));
@@ -201,12 +240,19 @@ export function getSubmissionPageModel(site: DirectorySiteConfig) {
     title: `Submit ${singular} - ${site.name}`,
     description: `Submit a new ${singular} to ${site.name}.`,
     repoUrl: site.repoUrl ?? "https://github.com/tortuvshin/grove",
+    copy: site.submission ?? {},
+    fields: {
+      category: enabled.has("categories"),
+      stack: enabled.has("stacks"),
+      platforms: enabled.has("platforms"),
+      tags: enabled.has("tags"),
+    },
     categories,
     stacks,
     existingSlugs: fullProjects.map((record) => record.slug).filter(Boolean),
     existingFullNames,
-    platformOptions: site.taxonomy?.platforms?.map(({ name }) => name) ??
-      ["iOS", "Android", "Web", "macOS", "Windows", "Linux"],
+    platformOptions: site.taxonomy?.platforms?.map(({ id, name }) => ({ id, label: name })) ??
+      ["ios", "android", "web", "macos", "windows", "linux"].map((id) => ({ id, label: taxonomyLabel("platforms", id) })),
   };
 }
 

@@ -3,11 +3,12 @@ interface Props {
   existingSlugs: string[];
   existingFullNames: string[];
   repoUrl: string;
+  fields: { category: boolean; stack: boolean; platforms: boolean; tags: boolean };
 }
-const { existingSlugs, existingFullNames, repoUrl } = Astro.props;
+const { existingSlugs, existingFullNames, repoUrl, fields } = Astro.props;
 ---
 
-<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl }}>
+<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields }}>
     // @ts-nocheck
     const $ = (selector) => document.querySelector(selector);
     const inputs = {
@@ -50,7 +51,7 @@ const { existingSlugs, existingFullNames, repoUrl } = Astro.props;
       if (!repository) return "";
       const parsed = parseRepo(inputs.repo.value);
       if (!parsed) return "";
-      const tags = inputs.tags.value.split(",").map((tag) => tag.trim()).filter(Boolean);
+      const tags = String(inputs.tags?.value || "").split(",").map((tag) => tag.trim()).filter(Boolean);
       const platforms = selectedPlatforms();
       const bestFor = inputs.bestFor.value.split("\n").map((item) => item.trim()).filter(Boolean);
       return [
@@ -58,11 +59,11 @@ const { existingSlugs, existingFullNames, repoUrl } = Astro.props;
         `slug: ${slugify(inputs.slug.value || repository.name)}`,
         `name: ${quote(inputs.name.value)}`,
         `description: ${quote(inputs.description.value)}`,
-        `category: ${inputs.category.value || "other"}`,
+        ...(fields.category ? [`category: ${inputs.category?.value || "uncategorized"}`] : []),
         "projectType: real-app",
-        `stack: ${quote(inputs.stack.value)}`,
-        "platforms:", platforms.length ? lines(platforms) : "  []",
-        "tags:", tags.length ? lines(tags) : "  []",
+        ...(fields.stack && inputs.stack?.value ? [`stack: ${quote(inputs.stack.value)}`] : []),
+        ...(fields.platforms ? ["platforms:", platforms.length ? lines(platforms) : "  []"] : []),
+        ...(fields.tags ? ["tags:", tags.length ? lines(tags) : "  []"] : []),
         `repoUrl: ${repository.html_url}`,
         "links:",
         `  github: ${repository.html_url}`,
@@ -107,8 +108,8 @@ const { existingSlugs, existingFullNames, repoUrl } = Astro.props;
         inputs.name.value = repository.name || parsed.repo;
         inputs.slug.value = slugify(repository.name || parsed.repo);
         inputs.description.value = repository.description || "";
-        inputs.stack.value = inferStack(repository);
-        inputs.tags.value = (repository.topics || []).slice(0, 8).join(", ");
+        if (inputs.stack) inputs.stack.value = inferStack(repository);
+        if (inputs.tags) inputs.tags.value = (repository.topics || []).slice(0, 8).join(", ");
         inputs.website.value = repository.homepage || "";
         const duplicate = slugSet.has(inputs.slug.value);
         setStatus(duplicate ? "That slug already exists. Choose another or update the existing record." : "Draft generated. Edit any field and the YAML will refresh.", duplicate ? "warn" : "success");

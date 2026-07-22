@@ -25,7 +25,7 @@ describe("grove init", () => {
       "getHomePageModel(siteConfig)",
     );
     expect(await readFile(join(target, "src/pages/[slug]/index.astro"), "utf8")).toContain(
-      "getDirectoryIndexModel(Astro.url.searchParams)",
+      "getDirectoryIndexModel(Astro.url.searchParams, siteConfig)",
     );
     await expect(readFile(join(target, "data/generated/records.json"), "utf8")).rejects.toThrow();
   });

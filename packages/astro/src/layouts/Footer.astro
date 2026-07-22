@@ -30,6 +30,11 @@ interface Site {
   tagline?: string;
   description?: string;
   repoUrl?: string;
+  footer?: {
+    columns?: FooterColumn[];
+    copyright?: string;
+    license?: string;
+  };
   stats?: {
     totalApps?: number;
     totalCategories?: number;
@@ -74,7 +79,7 @@ const {
 } = Astro.props;
 
 const year = new Date().getFullYear();
-const holder = copyrightHolder ?? site.name;
+const holder = copyrightHolder ?? site.footer?.copyright ?? site.name;
 const gh = site.repoUrl;
 const showOwners = (stats?.totalOwners ?? 0) > 0;
 
@@ -101,6 +106,15 @@ const defaultProject: NavItem[] = gh
 const discoverItems = discover.items.length ? discover.items : defaultDiscover;
 const contributeItems = contribute.items.length ? contribute.items : defaultContribute;
 const projectItems = project.items.length ? project.items : defaultProject;
+const configuredColumns = site.footer?.columns ?? [];
+const columns = configuredColumns.length
+  ? configuredColumns
+  : [
+      { heading: discover.heading, items: discoverItems },
+      { heading: contribute.heading, items: contributeItems },
+      { heading: project.heading, items: projectItems },
+    ].filter((column) => column.items.length > 0);
+const resolvedLicenseLine = licenseLine ?? site.footer?.license;
 ---
 
 <footer
@@ -154,13 +168,13 @@ const projectItems = project.items.length ? project.items : defaultProject;
       )}
     </div>
 
-    {discoverItems.length > 0 && (
+    {columns.map((column) => (
       <div>
         <h4 class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100">
-          {discover.heading}
+          {column.heading}
         </h4>
         <ul class="m-0 flex list-none flex-col gap-2 p-0">
-          {discoverItems.map((item) => (
+          {column.items.map((item) => (
             <li>
               <a
                 href={item.href}
@@ -175,60 +189,14 @@ const projectItems = project.items.length ? project.items : defaultProject;
           ))}
         </ul>
       </div>
-    )}
-
-    {contributeItems.length > 0 && (
-      <div>
-        <h4 class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100">
-          {contribute.heading}
-        </h4>
-        <ul class="m-0 flex list-none flex-col gap-2 p-0">
-          {contributeItems.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
-                {...(item.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-
-    {projectItems.length > 0 && (
-      <div>
-        <h4 class="mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-900 dark:text-ink-100">
-          {project.heading}
-        </h4>
-        <ul class="m-0 flex list-none flex-col gap-2 p-0">
-          {projectItems.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                class="text-sm transition-colors hover:text-ink-900 dark:hover:text-ink-100"
-                {...(item.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
+    ))}
   </div>
 
   <div class="border-t border-ink-200 dark:border-ink-800">
     <div
       class="mx-auto flex w-full max-w-wide flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
     >
-      <span>© {year} {holder}{licenseLine ? `. ${licenseLine}` : "."}</span>
+      <span>© {year} {holder}{resolvedLicenseLine ? `. ${resolvedLicenseLine}` : "."}</span>
       {gh && (
         <>
           <span class="text-ink-300 dark:text-ink-700">·</span>

@@ -29,6 +29,7 @@ interface Facets {
   stacks?: FacetValue[];
   platforms?: FacetValue[];
   categories?: FacetValue[];
+  tags?: FacetValue[];
   labels?: FacetValue[];
   licenses?: FacetValue[];
 }
@@ -39,7 +40,7 @@ interface Props {
   pathPrefix?: string;
   class?: string;
   /** Hide specific facets. Default: all shown. */
-  hide?: Array<"stack" | "platform" | "category" | "license" | "sort">;
+  hide?: Array<"stack" | "platform" | "category" | "tag" | "license" | "sort">;
 }
 
 const {
@@ -52,7 +53,7 @@ const {
 
 interface FilterGroup {
   label: string;
-  filterKey: "stacks" | "platforms" | "categories" | "licenses";
+  filterKey: "stacks" | "platforms" | "categories" | "tags" | "licenses";
   options: FacetValue[];
   initial: string[];
   single?: boolean;
@@ -68,6 +69,7 @@ const baseGroups: FilterGroup[] = [
   { label: "Stack", filterKey: "stacks", options: facets.stacks ?? [], initial: initial.stacks ?? [] },
   { label: "Platform", filterKey: "platforms", options: facets.platforms ?? [], initial: initial.platforms ?? [] },
   { label: "Category", filterKey: "categories", options: facets.categories ?? [], initial: initial.categories ?? [] },
+  { label: "Tag", filterKey: "tags", options: facets.tags ?? [], initial: initial.tags ?? [] },
   { label: "License", filterKey: "licenses", options: facets.licenses ?? [], initial: initial.licenses ?? [], single: true },
 ];
 
@@ -86,7 +88,7 @@ function triggerLabel(group: FilterGroup): string {
 
 const groups: RenderedFilterGroup[] = baseGroups
   .filter((group) => {
-    const singular = group.filterKey.slice(0, -1) as "stack" | "platform" | "category" | "license";
+    const singular = group.filterKey.slice(0, -1) as "stack" | "platform" | "category" | "tag" | "license";
     return !hide.includes(singular) && group.options.length > 0;
   })
   .map((group) => ({
@@ -97,8 +99,7 @@ const groups: RenderedFilterGroup[] = baseGroups
   }));
 ---
 
-<section class={className}>
-  <div class="flex flex-wrap items-center gap-2" role="toolbar" aria-label="Filter items">
+<section class:list={["flex flex-wrap items-center gap-2", className]} role="toolbar" aria-label="Filter items">
     {groups.map((group) => <FilterGroupMenu {...group} />)}
 
     {!hide.includes("sort") && (
@@ -112,13 +113,12 @@ const groups: RenderedFilterGroup[] = baseGroups
         </svg>
       </label>
     )}
-  </div>
 </section>
 
 <script is:inline define:vars={{ pathPrefix }}>
   (() => {
     const groups = document.querySelectorAll(".grove-filter");
-    const keys = { stacks: "stack", platforms: "platform", categories: "category", licenses: "license" };
+    const keys = { stacks: "stack", platforms: "platform", categories: "category", tags: "tag", licenses: "license" };
     function closeAll(except) {
       groups.forEach((group) => {
         if (group === except) return;

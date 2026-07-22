@@ -92,6 +92,9 @@ describe("generate — filesystem round-trip", () => {
         "  paths: { recordsDir: 'data/records', generatedDir: 'data/generated', health: 'data/health.yml', decisions: 'data/decisions.yml' },",
         "  blueprint: 'project-directory',",
         "  nav: [],",
+        "  facets: ['stack', 'tags'],",
+        "  footer: { columns: [{ heading: 'Explore', items: [{ label: 'Browse', href: '/projects' }] }], license: 'CC BY 4.0' },",
+        "  submission: { title: 'Suggest a project', good: ['Public source'], avoid: ['Duplicates'] },",
         "  theme: {},",
         "  integrations: {},",
         "};",
@@ -194,9 +197,20 @@ describe("generate — filesystem round-trip", () => {
     const sitePath = join(cwd, "data", "generated", "site-config.json");
     const site = JSON.parse(await readFile(sitePath, "utf8")) as {
       stats: { totalRecords: number; totalApps: number };
+      facets: string[];
+      footer: { columns: Array<{ heading: string }>; license: string };
+      submission: { title: string; good: string[]; avoid: string[] };
     };
     expect(site.stats.totalRecords).toBe(1);
     expect(site.stats.totalApps).toBe(1);
+    expect(site.facets).toEqual(["stack", "tags"]);
+    expect(site.footer.columns[0]?.heading).toBe("Explore");
+    expect(site.footer.license).toBe("CC BY 4.0");
+    expect(site.submission).toEqual({
+      title: "Suggest a project",
+      good: ["Public source"],
+      avoid: ["Duplicates"],
+    });
   });
 
   it("keeps site repository metadata separate from directory aggregates", async () => {
