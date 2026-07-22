@@ -3,7 +3,7 @@
  * List page — the discovery / browse page.
  *
  * Mirrors the openapps list structure:
- *   - SmartLensTabs (All / Trending / Recently added / Established / Featured)
+ *   - SmartLensTabs (curated views only; sorting stays in the sort select)
  *   - RefinePanel  (Stack / Platform / Category / License / Sort)
  *   - RecordSection rows (full record cards; the `ItemSection` V0
  *     name was renamed to `RecordSection` in V1)
@@ -37,7 +37,7 @@ export function getStaticPaths() {
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
 const { total, filters, facets, sort, sorted, pages, page, chips, clientItemsJson } =
-  getDirectoryIndexModel(Astro.url.searchParams);
+  getDirectoryIndexModel(Astro.url.searchParams, siteConfig);
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
@@ -53,6 +53,9 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
   const query = params.toString();
   return query ? `/${slug}?${query}` : `/${slug}`;
 }
+
+const clearQuery = searchParamsFromFilters({ sort }).toString();
+const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
 ---
 
 <BaseLayout
@@ -127,16 +130,15 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
         <button type="submit" class="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-4 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">Search</button>
       </form>
 
-      <div class="mt-4">
+      <div class="mt-4 flex flex-wrap items-center gap-2 pb-6">
         <SmartLensTabs
+          class="contents"
           currentParams={Astro.url.searchParams}
           pathPrefix={`/${slug}`}
-          lensIds={["all", "new", "hot", "mature", "production-like", "good-to-learn"]}
+          lensIds={["all", "hot", "mature", "production-like", "good-to-learn"]}
         />
-      </div>
-
-      <div class="mt-3 pb-6">
         <RefinePanel
+          class="contents"
           facets={facets}
           initial={filters}
           pathPrefix={`/${slug}`}
@@ -179,7 +181,7 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
                 {chip.label} <span aria-hidden="true">x</span>
               </a>
             ))}
-            <a href={`/${slug}`} class="text-2xs font-medium text-ink-500 hover:text-ink-900">
+            <a href={clearFiltersHref} class="text-2xs font-medium text-ink-500 hover:text-ink-900">
               Clear all
             </a>
             </>
@@ -202,7 +204,7 @@ function hrefForRemove(key: keyof IndexFilters, value: string): string {
         <p class="m-0 text-sm font-medium text-ink-700 dark:text-ink-200">
           {`No ${itemLabel()}s match these filters.`}
         </p>
-        <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent mt-4">Clear filters</a>
+        <a href={clearFiltersHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent mt-4">Clear filters</a>
       </div>
       <nav id="results-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
         <Pagination current={page} total={pages} hrefFor={hrefForPage} />

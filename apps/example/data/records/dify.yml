@@ -5,7 +5,7 @@ description: A visual platform for building and operating LLM applications, work
 category: orchestration
 tags: [workflow, agents, rag]
 stack: python
-stacks: [python, typescript, rag]
+stacks: [python, typescript]
 platforms: [web, linux]
 projectType: real-app
 difficulty: intermediate

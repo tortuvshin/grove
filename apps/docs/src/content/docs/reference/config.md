@@ -65,7 +65,35 @@ export default defineConfig({
     { label: "Submit", href: "/submit" },
   ],
 
-  facets: ["category", "stacks", "platforms", "tags"],
+  footer: {
+    columns: [
+      {
+        heading: "Discover",
+        items: [
+          { label: "Browse", href: "/projects" },
+          { label: "About", href: "/about" },
+        ],
+      },
+      {
+        heading: "Project",
+        items: [
+          { label: "Source", href: "https://github.com/example/open-apps", external: true },
+        ],
+      },
+    ],
+    copyright: "Open Apps contributors",
+    license: "Content under CC BY-SA 4.0.",
+  },
+
+  submission: {
+    eyebrow: "Project submission",
+    title: "Suggest an open-source project",
+    description: "Generate a record, review it, and open a pull request.",
+    good: ["Public source and a clear license"],
+    avoid: ["Duplicates and marketing-only pages"],
+  },
+
+  facets: ["category", "stack", "platform", "tags"],
 
   integrations: {
     // Either a boolean (enable/disable GitHub integration)
@@ -146,8 +174,23 @@ URL).
 **Type:** `Array<string>`
 **Default:** `["category", "tags"]`
 
-Which record fields the renderer should expose as refinement
-facets. Common values: `category`, `stacks`, `platforms`, `tags`.
+Which record fields the browse and submission pages expose. Supported values
+are `category`, `stack`, `platform`, `tags`, and `license`; plural aliases are
+accepted for compatibility. Category, stack, and platform values come from
+`data/taxonomy/*.yml`. Tags come from each record and stay a separate
+many-to-many facet rather than being promoted into the taxonomy.
+
+### `footer`
+
+Configures up to three footer link columns plus the copyright and license copy.
+Each item has `label`, `href`, and optional `external: true`. When `columns` is
+empty, Grove derives useful repository links.
+
+### `submission`
+
+Customizes the default submit page without forking it. `eyebrow`, `title`, and
+`description` control the introduction; `good` and `avoid` control the review
+criteria. The form renders only taxonomy fields enabled by `facets`.
 
 ### `integrations.github`
 
@@ -211,7 +254,7 @@ you need.
 | `pagesDir` | `"content/pages"` | Reserved for V1.1+ — the V1 template ships `about.astro`, `contributors.astro`, `submit.astro` as Astro components under `src/pages/`, not as Markdown content pages. The `content/pages/` directory is currently unused by the V1 default template. |
 | `bodiesDir` | `"content/records"` | Optional Markdown body per record (referenced by `content:`) |
 | `publicDir` | `"public"` | Static assets served as-is |
-| `taxonomyDir` | `"data/taxonomy"` | Taxonomy configuration (categories, tags) |
+| `taxonomyDir` | `"data/taxonomy"` | Controlled category, stack, platform, and distribution-channel values |
 | `generatedDir` | `"data/generated"` | Auto-generated JSON; gitignored |
 | `health` | `"data/health.yml"` | Legacy health file (gitignored by default) |
 | `decisions` | `"data/decisions.yml"` | Human curation decisions |
