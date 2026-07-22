@@ -10,23 +10,23 @@ git checkout main && git pull --rebase
 git status
 
 # 2. Bump, build, publish.
-pnpm release              # patch (0.2.2 -> 0.2.3)
-pnpm release --minor      # minor (0.2.2 -> 0.3.0)
-pnpm release --major      # major (0.2.2 -> 1.0.0)
+pnpm release              # patch (0.3.1 -> 0.3.2)
+pnpm release --minor      # minor (0.3.1 -> 0.4.0)
+pnpm release --major      # major (0.3.1 -> 1.0.0)
 pnpm release --bump=2.3.4 # explicit
-pnpm release:dry          # build + bump + dry-run (no actual publish)
+pnpm release:dry --minor  # verify 0.4.0 packages without changing the tree
 ```
 
 The release script lives at `scripts/release.mjs`. It does the following in order:
 
-1. Reads the current version of `@grove-dev/core` (the root of the dep graph).
-2. Computes the new version using the bump flag (`patch` by default; honors `--bump=X.Y.Z`).
-3. Writes the new `version` field into **every** `packages/*/package.json` (and `@grove-dev/starlight` if it ships in lockstep with us).
+1. Reads the current versions of the four published packages.
+2. Computes each new version using the bump flag (`patch` by default; honors `--bump=X.Y.Z`).
+3. Writes the new `version` field into `core`, `astro`, `cli`, and `starlight`.
 4. **Skips** rewriting `workspace:*` deps — `pnpm publish` does that for us in the tarball. (See "Why we don't rewrite `workspace:*` manually" below.)
 5. Runs `pnpm install` to refresh `pnpm-lock.yaml` and the symlinks under `node_modules/`.
 6. Runs `pnpm -r build` so the `dist/` for every package matches the new version.
 7. For each package, in dependency order, runs `pnpm --filter <name> publish --no-git-checks --access public --dry-run` if `--dry-run` was passed, or the real `publish` otherwise.
-8. On success, prompts whether to commit the version bump + tag. Tag format: `vX.Y.Z` at the repo root.
+8. On a successful dry run, restores every version file and `pnpm-lock.yaml`. A real release leaves the bump ready to commit and tag manually.
 
 **Authentication** comes from `~/.npmrc`. Run `npm login` once per machine.
 
@@ -88,11 +88,12 @@ Always:
 pnpm release:dry
 ```
 
-This will:
+This will temporarily:
 
 - Bump versions in every `package.json`.
 - Reinstall and rebuild.
 - Run `pnpm publish --dry-run` for each package.
+- Restore the package versions and lockfile, leaving the working tree unchanged.
 
 If the dry run complains (missing files, unexpected `workspace:*` leaks, registry auth errors), **fix them before the real run**. Don't `--force` your way through a dry-run failure.
 
@@ -102,10 +103,10 @@ If the dry run complains (missing files, unexpected `workspace:*` leaks, registr
 pnpm release
 ```
 
-The script will print each publish attempt and the npm registry URL it landed on. If any publish fails, the script aborts — later packages won't publish with a mismatched version. You'll have to either:
+The script will print each publish attempt and the npm registry URL it landed on. If any publish fails, the script aborts, leaves `.release-in-progress`, and does not publish later packages. Inspect the registry and working tree before choosing one of these recovery paths:
 
-1. Fix and re-run (the script will re-bump, which is wasteful but safe).
-2. Manually publish the remaining packages with `pnpm --filter <name> publish --no-git-checks --access public`.
+1. If nothing published, revert the version files, remove `.release-in-progress`, fix the cause, and run again.
+2. If some packages published, keep the bumped versions and manually publish the remaining packages with `pnpm --filter <name> publish --no-git-checks --access public`.
 
 ### Tagging
 
@@ -133,8 +134,8 @@ So the rule is: **bump `version`, leave `workspace:*` alone, let publish do the 
 ## After the release
 
 - [ ] The new version appears on npm under `@grove-dev/core` (the canary — it's published first because the others depend on it).
-- [ ] The other five packages appear in dependency order: `core` → `ui` → `astro` / `nextjs` / `svelte` → `cli`.
-- [ ] Smoke-test one package in a downstream space: install it in a fresh scaffolded space (e.g. a temporary `grove new my-test-space --framework astro`) and run the framework's build / `grove build` to confirm a clean install.
+- [ ] The other three packages appear in dependency order: `core` → `astro` → `cli` → `starlight`.
+- [ ] Run `pnpm test:scaffold` and build the generated directory using the packed release artifacts.
 - [ ] Post a short note in the GitHub Discussions "Announcements" category, or open a discussion if there isn't one yet.
 - [ ] Update the [Roadmap](/roadmap/) page — close out the items that the release shipped.
 
@@ -164,5 +165,5 @@ If you genuinely shipped something that is unsafe (security), see [`SECURITY.md`
 
 - [`vision.md`](./vision.md) — why Grove exists and the broader direction.
 - The [Roadmap](/roadmap/) page on the docs site — what's queued, what shipped, what's deferred.
-- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — how the six packages fit together.
+- [`.ignite/ARCHITECTURE.md`](../../.ignite/ARCHITECTURE.md) — how the packages and private applications fit together.
 - [`CONTRIBUTING.md`](../../CONTRIBUTING.md) — what to expect from a PR.
