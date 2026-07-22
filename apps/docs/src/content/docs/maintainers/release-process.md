@@ -155,6 +155,6 @@ A release that ships with a red main branch is a "yank it" situation. The npm re
 
 ## What is not in the release process
 
-- **The docs site (`docs/`)** is not in the lockstep release. The docs site is built and deployed separately (to grove.dev.mn) and does not have a version number tied to the `@grove-dev/*` packages. A docs change does not require a release.
+- **The docs site (`apps/docs/`)** is not in the lockstep release. The docs site is built and deployed separately (to grove.dev.mn) and does not have a version number tied to the `@grove-dev/*` packages. A docs change does not require a release.
 - **The example directories (`examples/`)** are not published. They are illustrative; their git history is the version history.
 - **The CLI itself** does not self-update. A user on `@grove-dev/cli@0.2.3` stays on 0.2.3 until they run `pnpm dlx @grove-dev/cli@latest` again. Self-update is a V2 feature.

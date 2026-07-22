@@ -11,13 +11,13 @@ import grove from "@grove-dev/astro";
 export default defineConfig({ integrations: [grove()] });
 ```
 
-`grove init` copies a complete working set of home, directory list, record detail, about, contributors, submit, 404, and legacy redirect pages from the canonical `site/` scaffold. `grove.config.ts` determines the directory route and branding.
+`grove init` copies a complete working set of home, directory list, record detail, about, contributors, submit, 404, and legacy redirect pages from the canonical `apps/example/` scaffold. `grove.config.ts` determines the directory route and branding.
 
 The package exports granular components and layouts plus `@grove-dev/astro/server` view-model functions. Framework-independent filtering, sorting, lenses, scoring, formatting, and taxonomy logic live in `@grove-dev/core`.
 
 ```bash
 pnpm --filter @grove-dev/astro check
-pnpm --dir site build
+pnpm --dir apps/example build
 ```
 
 MIT

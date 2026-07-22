@@ -234,7 +234,7 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(lifecycle).toContain("event.key === 'Home'");
   });
 
-  it("serves the 8 framework logo SVGs from docs/public/logos/", async () => {
+  it("serves the 8 framework logo SVGs from apps/docs/public/logos/", async () => {
     const logosDir = resolve(docsRoot, "public/logos");
     const expected = [
       "astro.svg",

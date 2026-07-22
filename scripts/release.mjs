@@ -155,7 +155,7 @@ async function bumpAll() {
     // by inspecting grove-dev-cli-0.1.0.tgz). Rewriting them here
     // before `pnpm install` runs caused 404s because the bumped
     // version doesn't exist on the npm registry yet. See
-    // docs/RELEASING.md ("Why we don't rewrite workspace:* manually").
+    // apps/docs/RELEASING.md ("Why we don't rewrite workspace:* manually").
     await writePkg(p.dir, pkg);
     logOk(`${p.name}: ${before} → ${after}`);
   }

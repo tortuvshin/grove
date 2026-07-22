@@ -2,8 +2,8 @@
 // scripts/check-starlight-sidebar.mjs
 //
 // Smoke-test the Starlight sidebar: every `slug: 'foo/bar'` in
-// docs/astro.config.mjs must point to an existing .md or .mdx file
-// under docs/src/content/docs/. Astro's own build performs the same
+// apps/docs/astro.config.mjs must point to an existing .md or .mdx file
+// under apps/docs/src/content/docs/. Astro's own build performs the same
 // check, but this script surfaces *all* missing slugs at once and
 // exits in milliseconds, so editor loops and CI catch the issue
 // before a full `astro build`.
@@ -16,8 +16,8 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const configPath = resolve(repoRoot, "docs/astro.config.mjs");
-const docsRoot = resolve(repoRoot, "docs/src/content/docs");
+const configPath = resolve(repoRoot, "apps/docs/astro.config.mjs");
+const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
 
 const src = readFileSync(configPath, "utf8");
 
@@ -29,7 +29,7 @@ const src = readFileSync(configPath, "utf8");
 const slugRe = /\bslug:\s*['"]([^'"]+)['"]/g;
 const slugs = [...src.matchAll(slugRe)].map((m) => m[1]);
 
-// Sidebar slugs are local file paths under docs/src/content/docs/.
+// Sidebar slugs are local file paths under apps/docs/src/content/docs/.
 // External URLs (if any ever appear) are filtered out.
 const localSlugs = slugs.filter((s) => !s.startsWith("http"));
 
@@ -52,5 +52,5 @@ if (missing > 0) {
     process.exit(1);
 }
 console.log(
-    `[sidebar-check] ok — ${localSlugs.length} sidebar slug(s) verified against docs/src/content/docs/`,
+    `[sidebar-check] ok — ${localSlugs.length} sidebar slug(s) verified against apps/docs/src/content/docs/`,
 );

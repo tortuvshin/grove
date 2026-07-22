@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { initDirectory, scaffoldSource } from "./init.js";
 
 describe("grove init", () => {
-  it("uses the real Grove site as its only scaffold", () => {
-    expect(scaffoldSource()).toMatch(/\/site$/);
+  it("uses the real Grove example app as its only scaffold", () => {
+    expect(scaffoldSource()).toMatch(/\/apps\/example$/);
   });
 
   it("creates a clean standalone directory", async () => {

@@ -31,7 +31,7 @@ function requireText(path: string): string {
 
 export function scaffoldSource(): string {
   const here = dirname(fileURLToPath(import.meta.url));
-  const candidates = [resolve(here, "site"), resolve(here, "../../../site")];
+  const candidates = [resolve(here, "site"), resolve(here, "../../../apps/example")];
   const found = candidates.find((candidate) => existsSync(resolve(candidate, "package.json")));
   if (!found) throw new Error("Grove site scaffold is missing. Reinstall @grove-dev/cli.");
   return found;

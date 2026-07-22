@@ -28,7 +28,7 @@ Include, where possible:
 4. Whether the issue is exploitable from untrusted input (a forked data file, a third-party resource record, a user-submitted PR).
 5. Your contact info for follow-up questions. If you'd like to be credited in the release notes, say so.
 
-You can optionally encrypt the report with PGP — see [`docs/SUPPORT.md`](./docs/SUPPORT.md#contact) for a public key fingerprint if we publish one in the future.
+You can optionally encrypt the report with PGP — see [`apps/docs/SUPPORT.md`](./apps/docs/SUPPORT.md#contact) for a public key fingerprint if we publish one in the future.
 
 ## What to expect
 

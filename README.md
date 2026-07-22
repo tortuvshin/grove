@@ -18,8 +18,9 @@ packages/
   astro/      Astro UI, layouts, generated-data adapters, integration
   cli/        init, check, sync, cleanup
   starlight/  documentation integration
-site/         real AI directory demo and the only init scaffold source
-docs/         Starlight documentation site
+apps/
+  example/    real AI directory demo and the only init scaffold source
+  docs/       Starlight documentation site
 ```
 
 There is no template registry and no framework selection. Internal development runs the real site through pnpm workspace links:

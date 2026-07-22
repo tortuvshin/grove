@@ -3,7 +3,7 @@
 # We track pnpm workspaces. The release script rewrites `workspace:*` at
 # publish time, so the version range for `@grove-dev/*` deps in adapter
 # `package.json` is intentionally `workspace:*` — DO NOT let dependabot
-# rewrite it. See `CONTRIBUTING.md` and `docs/RELEASING.md` for context.
+# rewrite it. See `CONTRIBUTING.md` and `apps/docs/RELEASING.md` for context.
 version: 2
 updates:
   - package-ecosystem: "npm"
