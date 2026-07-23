@@ -20,6 +20,14 @@ const themeToggleMarkup = readFileSync(
   resolve(import.meta.dirname, "layouts/ThemeToggle.astro"),
   "utf8",
 );
+const baseLayoutMarkup = readFileSync(
+  resolve(import.meta.dirname, "layouts/BaseLayout.astro"),
+  "utf8",
+);
+const smartLensMarkup = readFileSync(
+  resolve(import.meta.dirname, "components/SmartLensTabs.astro"),
+  "utf8",
+);
 
 describe("Astro theme contract", () => {
   it("keeps Starlight's light and dark foundation values", () => {
@@ -86,5 +94,19 @@ describe("Astro theme contract", () => {
     expect(themeToggleMarkup).toContain("h-9 w-9");
     expect(themeToggleMarkup).toContain('width="18"');
     expect(themeToggleMarkup).toContain('height="18"');
+  });
+
+  it("uses directory-wide analytics config unless a page overrides it", () => {
+    expect(baseLayoutMarkup).toContain(
+      "gaId ?? site.analytics?.googleAnalyticsId",
+    );
+    expect(baseLayoutMarkup).toContain("effectiveGaId");
+  });
+
+  it("lets consumers name the unfiltered lens with their directory noun", () => {
+    expect(smartLensMarkup).toContain("allLabel?: string");
+    expect(smartLensMarkup).toContain(
+      'lens.id === "all" && allLabel ? allLabel : lensDisplay(lens.id)',
+    );
   });
 });

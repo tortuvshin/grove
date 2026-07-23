@@ -518,6 +518,15 @@ export const groveConfigSchema = z.object({
     repoUrl: z.string().url().optional(),
   }),
 
+  analytics: z
+    .object({
+      googleAnalyticsId: z
+        .string()
+        .regex(/^G-[A-Z0-9]+$/, "Expected a GA4 measurement ID such as G-XXXXXX")
+        .optional(),
+    })
+    .default({}),
+
   nav: z.array(navItemSchema).default([]),
 
   footer: footerSchema,

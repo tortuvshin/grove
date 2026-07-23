@@ -136,6 +136,7 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
           currentParams={Astro.url.searchParams}
           pathPrefix={`/${slug}`}
           lensIds={["all", "hot", "mature", "production-like", "good-to-learn"]}
+          allLabel={`All ${itemLabelPlural()}`}
         />
         <RefinePanel
           class="contents"

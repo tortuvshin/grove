@@ -327,6 +327,7 @@ export async function generate(
     nav: cfg.nav,
     footer: cfg.footer,
     submission: cfg.submission,
+    analytics: cfg.analytics,
     facets: cfg.facets,
     theme: cfg.theme,
     integrations: cfg.integrations,

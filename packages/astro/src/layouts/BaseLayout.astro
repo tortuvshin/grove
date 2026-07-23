@@ -11,8 +11,8 @@
  * own config (typically `data/generated/site-config.json` for the
  * showcase).
  *
- * Optional `gaId` adds a GA4 measurement snippet. Omit for
- * privacy-first deployments.
+ * GA4 can be configured once through `site.analytics.googleAnalyticsId`
+ * or overridden per page with `gaId`. Omit both for privacy-first deployments.
  */
 import "../styles.css";
 import Header from "./Header.astro";
@@ -61,6 +61,9 @@ interface Site {
   };
   repoUrl?: string;
   url?: string;
+  analytics?: {
+    googleAnalyticsId?: string;
+  };
   /** Optional directory-level stats — populated from site-config.json
    * at generate time. Components use it to render hero counts,
    * origin card stats, and footer summary lines. */
@@ -103,6 +106,7 @@ const {
 } = Astro.props;
 const directoryPath =
   searchPath ?? `/${site.blueprintConfig?.routeSlug ?? "items"}`;
+const effectiveGaId = gaId ?? site.analytics?.googleAnalyticsId;
 
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
@@ -130,14 +134,14 @@ const favicon =
       title="LLM usage guidance"
     />
 
-    {gaId && (
+    {effectiveGaId && (
       <>
         <script
           is:inline
           async
-          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          src={`https://www.googletagmanager.com/gtag/js?id=${effectiveGaId}`}
         />
-        <script is:inline define:vars={{ gaId }}>
+        <script is:inline define:vars={{ gaId: effectiveGaId }}>
           window.dataLayer = window.dataLayer || [];
           function gtag() {
             dataLayer.push(arguments);
@@ -290,8 +294,8 @@ const favicon =
 
     <slot name="body-end" />
 
-    {gaId && (
-      <script is:inline define:vars={{ gaId }}>
+    {effectiveGaId && (
+      <script is:inline define:vars={{ gaId: effectiveGaId }}>
         (function () {
           // GA4's `gtag('config', id)` call in the <head> already auto-pings
           // `page_view` on full navigations, so this block only needs to
