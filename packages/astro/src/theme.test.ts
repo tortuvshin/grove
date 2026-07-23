@@ -76,7 +76,8 @@ describe("Astro theme contract", () => {
   it("falls back to initials when a consumer has no matching icon asset", () => {
     expect(iconMarkup).toContain("data-grove-icon-fallback-initials");
     expect(iconMarkup).toContain("onerror=");
-    expect(iconMarkup).toContain("bundledIcons[category].has(resolved)");
+    expect(iconMarkup).not.toContain("bundledIcons");
+    expect(iconMarkup).toContain("availableIcons === undefined");
     expect(iconMarkup).toContain('"native-ios": "apple"');
     expect(iconMarkup).toContain('kmp: "kotlin"');
   });

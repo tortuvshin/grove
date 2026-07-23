@@ -19,6 +19,7 @@ import {
   formatStars,
   getOwnerAndRepoFromRepoUrl,
   getOwnerAvatarUrl,
+  projectStackIds,
   statusDisplay,
   totalPages,
 } from "@grove-dev/core";
@@ -283,7 +284,7 @@ export function getRecordDetailModel(
   const description = record.description ?? `${name} on ${site.name}`;
   const repoUrl = proj?.repoUrl ?? record.links?.github ?? "";
   const homepageUrl = record.links?.website ?? "";
-  const stacks = proj?.stacks ?? (proj?.stack ? [proj.stack] : []);
+  const stacks = projectStackIds(proj);
   const platforms = proj?.platforms ?? [];
   const github = proj?.github?.repository;
   const stars = github?.stargazers_count ?? 0;

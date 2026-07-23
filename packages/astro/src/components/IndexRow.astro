@@ -1,7 +1,7 @@
 ---
 import type { IndexRecord } from "@grove-dev/core";
 import Icon from "./Icon.astro";
-import { formatRelative, formatStars, getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, statusDisplay } from "@grove-dev/astro";
+import { formatRelative, formatStars, getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, projectStackIds, statusDisplay } from "@grove-dev/astro";
 
 interface Props {
   record: IndexRecord;
@@ -23,7 +23,7 @@ const repoHref = project?.repoUrl ?? item.links.github;
 const { owner, repo } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
 const avatar = project ? project.logoUrl ?? getOwnerAvatarUrl(owner, 80) : undefined;
 const initials = name.split(/\s+/).map((word) => word[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
-const stacks = project ? [project.stack, ...project.stacks].filter(Boolean) : [];
+const stacks = projectStackIds(project);
 const platforms = project?.platforms ?? [];
 const stars = project?.github?.stars;
 const updatedAt = project?.github?.pushedAt ?? (item.kind === "resource" ? item.publishedAt : null);

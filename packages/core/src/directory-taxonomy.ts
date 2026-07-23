@@ -4,6 +4,26 @@ type TaxonomyRecord = {
   stacks?: string[];
 };
 
+/**
+ * Return a project's primary and supporting stacks once, in display order.
+ *
+ * `stack` is the canonical browse dimension while `stacks` can repeat it
+ * for compatibility with older records. UI and view-model consumers should
+ * use this helper instead of concatenating both fields directly.
+ */
+export function projectStackIds(
+  project?: Pick<TaxonomyRecord, "stack" | "stacks"> | null,
+): string[] {
+  if (!project) return [];
+  return [
+    ...new Set(
+      [project.stack, ...(project.stacks ?? [])].filter(
+        (stack): stack is string => Boolean(stack),
+      ),
+    ),
+  ];
+}
+
 /** Number of items in the directory, per category name. */
 export function countByCategory(items: TaxonomyRecord[] = []): Map<string, number> {
   const m = new Map<string, number>();
@@ -18,7 +38,7 @@ export function countByCategory(items: TaxonomyRecord[] = []): Map<string, numbe
 export function countByStack(items: TaxonomyRecord[] = []): Map<string, number> {
   const m = new Map<string, number>();
   for (const a of items) {
-    const stacks = new Set([a.stack, ...(a.stacks ?? [])].filter(Boolean) as string[]);
+    const stacks = new Set(projectStackIds(a));
     if (stacks.size === 0) stacks.add("Other");
     for (const stack of stacks) m.set(stack, (m.get(stack) ?? 0) + 1);
   }
