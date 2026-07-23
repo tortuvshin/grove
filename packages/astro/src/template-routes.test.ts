@@ -43,11 +43,12 @@ describe("default Astro route configuration", () => {
     expect(listPage).toContain("siteConfig.blueprintConfig?.routeSlug");
   });
 
-  it("does not generate the legacy apps alias when apps is canonical", async () => {
-    const aliasPage = await readFile(resolve(pagesDir, "apps/[recordSlug].astro"), "utf8");
+  it("does not ship an Open Apps-specific legacy route", async () => {
+    const aliasExists = await stat(resolve(pagesDir, "apps/[recordSlug].astro"))
+      .then(() => true)
+      .catch(() => false);
 
-    expect(aliasPage).toContain('if (indexSlug() === "apps")');
-    expect(aliasPage).toContain("return []");
+    expect(aliasExists).toBe(false);
   });
 
   it("renders consumer-authored about Markdown through the default page", async () => {
