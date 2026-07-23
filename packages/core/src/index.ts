@@ -209,3 +209,19 @@ export type {
 
 // ── Robots + filter URL policy ───────────────────────────────────────
 export { buildRobotsTxt, isIndexableFilterPath } from "./robots.js";
+
+// ── Collection engine (query, ranking, editorial) ────────────────────
+export {
+  filterEntries,
+  rankEntries,
+} from "./collections.js";
+export type {
+  CollectionKind,
+  RankingPreset,
+  CollectionQuery,
+  CollectionRanking,
+  CollectionEditorial,
+  CollectionSeo,
+  Collection,
+  CollectionEntry,
+} from "./collections.js";
