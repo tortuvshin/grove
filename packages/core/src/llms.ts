@@ -146,20 +146,23 @@ export function buildLlmsFullTxt(
   input: LlmsInput | LlmsFullCatalogInput,
   config?: GroveConfig,
 ): string {
-  if (config) {
+  // Discriminate on input shape rather than `config` presence: a caller that
+  // mistakenly passes a catalog-shaped input alongside a config would otherwise
+  // be routed into the legacy path and crash on missing legacy fields.
+  if ("generatedAt" in input) {
     const legacyInput = input as LlmsInput;
-    const siteUrl = (legacyInput.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
-    const indexSlug = directorySlug(config);
+    const siteUrl = (legacyInput.siteUrl ?? config?.site.url ?? "").replace(/\/$/, "");
+    const indexSlug = config ? directorySlug(config) : "items";
     const visible = legacyInput.records.filter(
       (r) => r.visibility !== "hide" && r.visibility !== "remove",
     );
-    const plural = pluralLabel(config);
+    const plural = config ? pluralLabel(config) : "Records";
     const index = visible.map(buildIndexLine).join("\n");
     const sections = visible
       .map((record) => buildDetailSection(record, siteUrl, indexSlug))
       .join("\n\n");
     return [
-      `# ${config.site.name} — full directory`,
+      `# ${config?.site.name ?? legacyInput.siteUrl ?? "Directory"} — full directory`,
       "",
       `> Generated ${legacyInput.generatedAt} from ${legacyInput.records.length} records.`,
       `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`pnpm build\`.`,
