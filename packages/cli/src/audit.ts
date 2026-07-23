@@ -101,18 +101,31 @@ export async function loadManifest(cwd: string): Promise<{ baseUrl: string; page
   const configPath = resolve(cwd, "grove.config.ts");
   const source = await readFile(configPath, "utf8");
   const ast = ts.createSourceFile("grove.config.ts", source, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS);
+  function extractAuditFromConfigLiteral(node: ts.ObjectLiteralExpression): { baseUrl?: string; pages: PageManifestEntry[] } | undefined {
+    for (const prop of node.properties) {
+      if (ts.isPropertyAssignment(prop) && propName(prop.name) === "audit") {
+        if (ts.isObjectLiteralExpression(prop.initializer)) {
+          return parseAuditBlock(prop.initializer);
+        }
+      }
+    }
+    return undefined;
+  }
+
   let audit: { baseUrl?: string; pages: PageManifestEntry[] } | undefined;
   for (const stmt of ast.statements) {
+    // Handle bare `defineConfig({...})`.
     if (ts.isExpressionStatement(stmt) && ts.isCallExpression(stmt.expression)) {
       const arg = stmt.expression.arguments[0];
       if (arg && ts.isObjectLiteralExpression(arg)) {
-        for (const prop of arg.properties) {
-          if (ts.isPropertyAssignment(prop) && propName(prop.name) === "audit") {
-            if (ts.isObjectLiteralExpression(prop.initializer)) {
-              audit = parseAuditBlock(prop.initializer);
-            }
-          }
-        }
+        audit = extractAuditFromConfigLiteral(arg);
+      }
+    }
+    // Handle `export default defineConfig({...})`.
+    if (ts.isExportAssignment(stmt) && ts.isCallExpression(stmt.expression)) {
+      const arg = stmt.expression.arguments[0];
+      if (arg && ts.isObjectLiteralExpression(arg)) {
+        audit = extractAuditFromConfigLiteral(arg);
       }
     }
   }
