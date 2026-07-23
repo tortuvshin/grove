@@ -24,4 +24,8 @@ describe("isIndexableFilterPath", () => {
     expect(isIndexableFilterPath("/apps/")).toBe(true);
     expect(isIndexableFilterPath("/collections/top/")).toBe(true);
   });
+  it("accepts canonical paginated paths", () => {
+    expect(isIndexableFilterPath("/projects/?page=2")).toBe(true);
+    expect(isIndexableFilterPath("/posts/?sort=newest")).toBe(true);
+  });
 });

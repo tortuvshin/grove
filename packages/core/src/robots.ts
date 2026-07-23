@@ -2,7 +2,6 @@ const FILTER_PATTERNS = [
   /^\/browse\?/,
   /^\/search\?/,
   /^\/apps\?/,
-  /^\/.*\?.*(?:q|sort|page|filter)=/,
 ];
 
 export function buildRobotsTxt(input: { siteUrl: string; disallow?: string[] }): string {
