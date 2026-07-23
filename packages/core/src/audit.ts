@@ -58,6 +58,11 @@ export function evaluateBudget(
   page: PageManifestEntry,
   budget: BudgetConfig = DEFAULT_BUDGET,
 ): BudgetViolation[] {
+  // Lighthouse cannot meaningfully measure 404 responses — all scores come
+  // back as 0 and all metrics as Infinity. The audit still runs the page
+  // for completeness, but the 100×4 budget does not apply.
+  if (page.type === "404") return [];
+
   const violations: BudgetViolation[] = [];
   for (const key of SCORE_KEYS) {
     if (result.scores[key] < budget.scores[key]) {
