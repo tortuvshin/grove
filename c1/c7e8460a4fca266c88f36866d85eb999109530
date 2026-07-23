@@ -1,0 +1,25 @@
+packages/astro/src/pages/licenses/[name].astro
+  s_76d797eddf02ba::t_e8b1aad0ad66ac 36-39
+packages/astro/src/pages/collections/[slug].astro
+  s_76d797eddf02ba::t_66e0009451294e 26-28,32
+packages/astro/src/pages/categories/[name].astro
+  s_76d797eddf02ba::t_d9abcd9211f008 36-39
+packages/astro/src/pages/stacks/[name].astro
+  s_76d797eddf02ba::t_0efd5751bfc103 37-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "c1c7e8460a4fca266c88f36866d85eb999109530",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
