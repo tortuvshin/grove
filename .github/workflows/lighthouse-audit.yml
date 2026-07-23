@@ -48,7 +48,7 @@ jobs:
       - run: pnpm --filter @grove-dev/core --filter @grove-dev/cli --filter @grove-dev/astro -r build
       - run: pnpm --dir apps/example build
       - name: Run grove audit
-        run: pnpm --filter @grove-dev/cli start -- audit --runs 1 --json lighthouse-report.json --junit lighthouse-junit.xml
+        run: node ../../packages/cli/dist/index.js audit --runs 1 --json lighthouse-report.json --junit lighthouse-junit.xml
         working-directory: apps/example
       - uses: actions/upload-artifact@v5
         if: always()
