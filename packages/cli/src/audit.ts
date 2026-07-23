@@ -136,7 +136,7 @@ export async function loadManifest(cwd: string): Promise<{ baseUrl: string; page
   return { baseUrl: audit.baseUrl ?? "http://127.0.0.1:4321", pages: audit.pages };
 }
 
-function parseAuditBlock(node: ts.ObjectLiteralExpression): { baseUrl?: string; pages: PageManifestEntry[] } {
+export function parseAuditBlock(node: ts.ObjectLiteralExpression): { baseUrl?: string; pages: PageManifestEntry[] } {
   const out: { baseUrl?: string; pages: PageManifestEntry[] } = { pages: [] };
   for (const prop of node.properties) {
     if (!ts.isPropertyAssignment(prop)) continue;
@@ -151,7 +151,7 @@ function parseAuditBlock(node: ts.ObjectLiteralExpression): { baseUrl?: string; 
   return out;
 }
 
-function parsePageEntry(node: ts.ObjectLiteralExpression): PageManifestEntry {
+export function parsePageEntry(node: ts.ObjectLiteralExpression): PageManifestEntry {
   const entry: PageManifestEntry = { path: "", type: "home" as PageType, label: "" };
   for (const prop of node.properties) {
     if (!ts.isPropertyAssignment(prop)) continue;
@@ -163,7 +163,7 @@ function parsePageEntry(node: ts.ObjectLiteralExpression): PageManifestEntry {
   return entry;
 }
 
-function propName(name: ts.PropertyName): string {
+export function propName(name: ts.PropertyName): string {
   if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
     return name.text;
   }
@@ -191,7 +191,7 @@ function joinUrl(base: string, path: string): string {
   return new URL(path, base.endsWith("/") ? base : `${base}/`).toString();
 }
 
-function extractScores(lhr: LHResult): LighthouseScores {
+export function extractScores(lhr: LHResult): LighthouseScores {
   const c = lhr.categories ?? {};
   return {
     performance: c.performance?.score ?? 0,
@@ -201,7 +201,7 @@ function extractScores(lhr: LHResult): LighthouseScores {
   };
 }
 
-function extractMetrics(lhr: LHResult): LighthouseMetrics {
+export function extractMetrics(lhr: LHResult): LighthouseMetrics {
   const a = lhr.audits ?? {};
   return {
     lcp: a["largest-contentful-paint"]?.numericValue ?? Infinity,
@@ -210,7 +210,7 @@ function extractMetrics(lhr: LHResult): LighthouseMetrics {
   };
 }
 
-function aggregateRuns(
+export function aggregateRuns(
   url: string,
   type: PageType,
   profile: Profile,
