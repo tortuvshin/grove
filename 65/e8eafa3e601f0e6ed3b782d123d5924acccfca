@@ -1,0 +1,24 @@
+packages/cli/src/audit.ts
+  s_76d797eddf02ba::t_6e6de55682ed1f 64
+  s_76d797eddf02ba::t_b9bc09f9abc45d 2,4
+  s_76d797eddf02ba::t_645106b11aba05 181,191
+  s_76d797eddf02ba::t_8c5f854c9a7acd 110
+  s_76d797eddf02ba::t_e932721310c7c2 130,145,153-157
+  s_76d797eddf02ba::t_7a476c3c22a0e0 158-159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "65e8eafa3e601f0e6ed3b782d123d5924acccfca",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
