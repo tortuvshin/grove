@@ -25,7 +25,7 @@ For the developer workflow that produces these entries, see
 
 ---
 
-## [0.3.3] — 2026-07-23
+## [0.3.4] — 2026-07-23
 
 ### Added
 
