@@ -99,7 +99,7 @@ const groups: RenderedFilterGroup[] = baseGroups
   }));
 ---
 
-<section class:list={["flex flex-wrap items-center gap-2", className]} role="toolbar" aria-label="Filter items">
+<div class:list={["flex flex-wrap items-center gap-2", className]} role="toolbar" aria-label="Filter items">
     {groups.map((group) => <FilterGroupMenu {...group} />)}
 
     {!hide.includes("sort") && (
@@ -113,7 +113,7 @@ const groups: RenderedFilterGroup[] = baseGroups
         </svg>
       </label>
     )}
-</section>
+</div>
 
 <script is:inline define:vars={{ pathPrefix }}>
   (() => {
