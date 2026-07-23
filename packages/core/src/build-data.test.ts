@@ -92,6 +92,7 @@ describe("generate — filesystem round-trip", () => {
         "  paths: { recordsDir: 'data/records', generatedDir: 'data/generated', health: 'data/health.yml', decisions: 'data/decisions.yml' },",
         "  blueprint: 'project-directory',",
         "  nav: [],",
+        "  analytics: { googleAnalyticsId: 'G-TEST123' },",
         "  facets: ['stack', 'tags'],",
         "  footer: { columns: [{ heading: 'Explore', items: [{ label: 'Browse', href: '/projects' }] }], license: 'CC BY 4.0' },",
         "  submission: { title: 'Suggest a project', good: ['Public source'], avoid: ['Duplicates'] },",
@@ -200,6 +201,7 @@ describe("generate — filesystem round-trip", () => {
       facets: string[];
       footer: { columns: Array<{ heading: string }>; license: string };
       submission: { title: string; good: string[]; avoid: string[] };
+      analytics: { googleAnalyticsId: string };
     };
     expect(site.stats.totalRecords).toBe(1);
     expect(site.stats.totalApps).toBe(1);
@@ -211,6 +213,7 @@ describe("generate — filesystem round-trip", () => {
       good: ["Public source"],
       avoid: ["Duplicates"],
     });
+    expect(site.analytics.googleAnalyticsId).toBe("G-TEST123");
   });
 
   it("keeps site repository metadata separate from directory aggregates", async () => {

@@ -24,6 +24,8 @@ interface Props {
   class?: string;
   /** Override the visible lens list (defaults to LENSES). */
   lensIds?: string[];
+  /** Consumer noun for the unfiltered lens, e.g. "All apps". */
+  allLabel?: string;
 }
 
 const {
@@ -31,6 +33,7 @@ const {
   pathPrefix = "/",
   class: className = "",
   lensIds,
+  allLabel,
 } = Astro.props;
 
 // If `lensIds` is provided, filter LENSES to those ids in that order.
@@ -65,7 +68,7 @@ const lenses =
         data-event="lens_tab_click"
         data-event-source="smart_lens_tabs"
       >
-        {lensDisplay(lens.id)}
+        {lens.id === "all" && allLabel ? allLabel : lensDisplay(lens.id)}
       </a>
     );
   })}

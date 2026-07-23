@@ -43,6 +43,9 @@ export interface DirectorySiteConfig {
   repoUrl?: string;
   nav?: Array<{ label: string; href: string }>;
   facets?: string[];
+  analytics?: {
+    googleAnalyticsId?: string;
+  };
   footer?: {
     columns?: Array<{
       heading: string;
