@@ -1,0 +1,23 @@
+packages/core/src/index.ts
+  s_76d797eddf02ba::t_1df7a2d2e2604a 42
+packages/core/src/schema.ts
+  s_76d797eddf02ba::t_065f1936336df2 510-527,529-535
+  s_76d797eddf02ba::t_3e4f489b98f9e4 528
+  s_76d797eddf02ba::t_a565edd054d185 611-616
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "083dbb6fa386c8bafd196e27a3d6aeeb469ecd58",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
