@@ -33,7 +33,10 @@ const collection: Collection = {
 
 const entries: CollectionEntry[] = [];
 const result = runCollection(collection, entries);
-const canonical = new URL(`/categories/${name}/`, Astro.site ?? Astro.url);
+if (!Astro.site) {
+  throw new Error("Astro.site must be configured for collection routes. Set `site` in astro.config.");
+}
+const canonical = new URL(`/categories/${name}/`, Astro.site);
 
 const doc = {
   identity: { type: "collection" as const, canonical, language: "en" },

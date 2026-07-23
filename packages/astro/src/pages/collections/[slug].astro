@@ -23,10 +23,13 @@ const { slug } = Astro.params;
 const collections = await loadCollections(process.cwd());
 const collection = collections.find((c) => c.slug === slug);
 if (!collection) return Astro.redirect("/404");
+if (!Astro.site) {
+  throw new Error("Astro.site must be configured for collection routes. Set `site` in astro.config.");
+}
 const entries: CollectionEntry[] = [];
 const result = runCollection(collection, entries);
 const related = findRelated(collection, collections, 4);
-const canonical = new URL(`/collections/${slug}/`, Astro.site ?? Astro.url);
+const canonical = new URL(`/collections/${slug}/`, Astro.site);
 
 const doc = {
   identity: { type: "collection" as const, canonical, language: "en" },
