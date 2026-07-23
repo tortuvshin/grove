@@ -1,0 +1,33 @@
+packages/astro/src/theme.test.ts
+  s_01328764f9abd4::t_79b725499e9c81 79-80
+packages/astro/src/server/models.ts
+  s_01328764f9abd4::t_79b725499e9c81 22,287
+apps/example/public/icons/stacks/tauri.svg
+  s_01328764f9abd4::t_79b725499e9c81 1
+packages/astro/src/components/IndexRow.astro
+  s_01328764f9abd4::t_79b725499e9c81 4,26
+packages/core/src/directory-taxonomy.test.ts
+  s_01328764f9abd4::t_79b725499e9c81 1-29
+packages/astro/src/components/Icon.astro
+  s_01328764f9abd4::t_79b725499e9c81 66-67,130-131
+packages/astro/src/components/ItemCard.astro
+  s_01328764f9abd4::t_79b725499e9c81 28,129
+packages/core/src/directory-taxonomy.ts
+  s_01328764f9abd4::t_79b725499e9c81 7-26,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "39ff9ddbaebae33ca81b24e5c6884add97bdc36c",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
