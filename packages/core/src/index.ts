@@ -178,3 +178,35 @@ export type {
   BudgetConfig,
   BudgetViolation,
 } from "./audit.js";
+
+// ── PageDocument: unified page-level contract + JSON-LD registry ────
+// Every page in a Grove project declares a `PageDocument` and the
+// framework emits all SEO metadata (title, description, canonical, OG,
+// Twitter, JSON-LD) from this single source. `validateJsonLd` is the
+// build-time well-formedness check that runs over the node graph.
+export {
+  definePageDocument,
+  siteSchema,
+  collectionSchema,
+  recordSchema,
+  contentSchema,
+  buildJsonLd,
+  validateJsonLd,
+} from "./page-document.js";
+export type {
+  DocumentPageType,
+  OpenGraphMetadata,
+  TwitterMetadata,
+  PageMetadata,
+  LinkedDocument,
+  JsonLdNode,
+  PageDiscovery,
+  PageIdentity,
+  PageDocument,
+  Crumb,
+  SiteInput,
+  CollectionInput,
+  RecordInput,
+  ContentInput,
+  JsonLdValidationIssue,
+} from "./page-document.js";
