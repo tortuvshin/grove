@@ -1,0 +1,19 @@
+apps/example/data/collections/top-flutter.yml
+  s_76d797eddf02ba::t_8b080055ad6e1d 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "fbe2a46cc56c0151bd40ef1479c440abb9583cf7",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
