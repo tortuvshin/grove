@@ -73,6 +73,7 @@ export interface CollectionEntry {
   pushedAt?: string;
   curationScore?: number;
   activityScore?: number;
+  categories?: string[];
 }
 
 export function filterEntries(
@@ -86,6 +87,10 @@ export function filterEntries(
     if (query.platforms?.length) {
       const eps = entry.platform ?? [];
       if (!query.platforms.some((p) => eps.includes(p))) return false;
+    }
+    if (query.categories?.length) {
+      const cats = entry.categories ?? [];
+      if (!query.categories.some((c) => cats.includes(c))) return false;
     }
     if (query.licenses?.length && !query.licenses.includes(entry.license ?? "")) {
       return false;
