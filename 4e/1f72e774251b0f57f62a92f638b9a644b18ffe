@@ -1,0 +1,21 @@
+packages/core/src/audit.ts
+  s_76d797eddf02ba::t_7febf975642747 61-65
+packages/core/src/audit.test.ts
+  s_76d797eddf02ba::t_cbcfd954d3e61d 37-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "4e1f72e774251b0f57f62a92f638b9a644b18ffe",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
