@@ -1,7 +1,7 @@
 import * as chromeLauncher from "chrome-launcher";
-import lighthouse from "lighthouse";
+import lighthouse, { type Result as LHResult } from "lighthouse";
 import * as ts from "typescript";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
   DEFAULT_BUDGET,
@@ -61,7 +61,7 @@ export async function runAudit(opts: AuditCliOptions): Promise<number> {
               : { rttMs: 40, throughputKbps: 10240, cpuSlowdownMultiplier: 1, requestLatencyMs: 0, downloadThroughputKbps: 0, uploadThroughputKbps: 0 },
           });
           if (!result) throw new Error(`Lighthouse returned no result for ${url}`);
-          const lhr: any = result.lhr;
+          const lhr = result.lhr;
           runsFor.push({
             url, type: page.type, profile,
             scores: extractScores(lhr),
@@ -107,7 +107,7 @@ export async function loadManifest(cwd: string): Promise<{ baseUrl: string; page
       const arg = stmt.expression.arguments[0];
       if (arg && ts.isObjectLiteralExpression(arg)) {
         for (const prop of arg.properties) {
-          if (ts.isPropertyAssignment(prop) && prop.name.getText() === "audit") {
+          if (ts.isPropertyAssignment(prop) && propName(prop.name) === "audit") {
             if (ts.isObjectLiteralExpression(prop.initializer)) {
               audit = parseAuditBlock(prop.initializer);
             }
@@ -127,7 +127,7 @@ function parseAuditBlock(node: ts.ObjectLiteralExpression): { baseUrl?: string; 
   const out: { baseUrl?: string; pages: PageManifestEntry[] } = { pages: [] };
   for (const prop of node.properties) {
     if (!ts.isPropertyAssignment(prop)) continue;
-    const name = prop.name.getText();
+    const name = propName(prop.name);
     if (name === "baseUrl" && ts.isStringLiteral(prop.initializer)) out.baseUrl = prop.initializer.text;
     if (name === "pages" && ts.isArrayLiteralExpression(prop.initializer)) {
       out.pages = prop.initializer.elements
@@ -142,12 +142,19 @@ function parsePageEntry(node: ts.ObjectLiteralExpression): PageManifestEntry {
   const entry: PageManifestEntry = { path: "", type: "home" as PageType, label: "" };
   for (const prop of node.properties) {
     if (!ts.isPropertyAssignment(prop)) continue;
-    const name = prop.name.getText();
+    const name = propName(prop.name);
     if (name === "path" && ts.isStringLiteral(prop.initializer)) entry.path = prop.initializer.text;
     if (name === "type" && ts.isStringLiteral(prop.initializer)) entry.type = prop.initializer.text as PageType;
     if (name === "label" && ts.isStringLiteral(prop.initializer)) entry.label = prop.initializer.text;
   }
   return entry;
+}
+
+function propName(name: ts.PropertyName): string {
+  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
+    return name.text;
+  }
+  return name.getText();
 }
 
 function profilesFromOptions(opts: AuditCliOptions): Profile[] {
@@ -171,7 +178,7 @@ function joinUrl(base: string, path: string): string {
   return new URL(path, base.endsWith("/") ? base : `${base}/`).toString();
 }
 
-function extractScores(lhr: any): LighthouseScores {
+function extractScores(lhr: LHResult): LighthouseScores {
   const c = lhr.categories ?? {};
   return {
     performance: c.performance?.score ?? 0,
@@ -181,7 +188,7 @@ function extractScores(lhr: any): LighthouseScores {
   };
 }
 
-function extractMetrics(lhr: any): LighthouseMetrics {
+function extractMetrics(lhr: LHResult): LighthouseMetrics {
   const a = lhr.audits ?? {};
   return {
     lcp: a["largest-contentful-paint"]?.numericValue ?? Infinity,
@@ -222,12 +229,10 @@ function aggregateRuns(
 }
 
 async function writeJsonReport(path: string, results: AuditResult[], violations: BudgetViolation[]): Promise<void> {
-  const { writeFile } = await import("node:fs/promises");
   await writeFile(path, JSON.stringify({ results, violations }, null, 2), "utf8");
 }
 
 async function writeJunitReport(path: string, results: AuditResult[], violations: BudgetViolation[]): Promise<void> {
-  const { writeFile } = await import("node:fs/promises");
   const failures = new Map<string, BudgetViolation[]>();
   for (const v of violations) {
     const key = `${v.profile}:${v.page.path}`;
