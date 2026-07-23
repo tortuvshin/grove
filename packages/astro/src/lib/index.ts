@@ -24,3 +24,4 @@ export * from "./search.js";
 export * from "./scores.js";
 export * from "./taxonomy-counts.js";
 export * from "./display.js";
+export * from "./load-collections.js";

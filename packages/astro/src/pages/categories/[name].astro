@@ -1,0 +1,84 @@
+---
+import GroveDocumentHead from "../../components/GroveDocumentHead.astro";
+import { runCollection, type Collection, type CollectionEntry } from "@grove-dev/core";
+
+/**
+ * Reference taxonomy route — render `/categories/<name>/` as a
+ * generated collection filtered by `query.categories`.
+ *
+ * Slugs are enumerated by `getStaticPaths`. Update the fixed list
+ * (or replace with a directory scan) to match the taxonomy your
+ * site actually publishes.
+ */
+export function getStaticPaths() {
+  return [
+    { params: { name: "finance" } },
+    { params: { name: "productivity" } },
+    { params: { name: "communication" } },
+    { params: { name: "developer-tools" } },
+  ];
+}
+
+const { name } = Astro.params;
+
+const collection: Collection = {
+  slug: `category-${name}`,
+  kind: "generated",
+  title: `${name} apps`,
+  description: `Open source apps in the ${name} category.`,
+  query: { categories: [name], excludeStatuses: ["archived"] },
+  ranking: { preset: "quality" },
+  seo: { index: true, title: `${name} apps` },
+};
+
+const entries: CollectionEntry[] = [];
+const result = runCollection(collection, entries);
+const canonical = new URL(`/categories/${name}/`, Astro.site ?? Astro.url);
+
+const doc = {
+  identity: { type: "collection" as const, canonical, language: "en" },
+  metadata: {
+    title: collection.seo.title ?? collection.title,
+    description: collection.description,
+    robots: "index,follow",
+    openGraph: {
+      title: collection.title,
+      description: collection.description,
+      url: canonical.toString(),
+      image: new URL("/og.png", canonical).toString(),
+      type: "website" as const,
+    },
+    twitter: { card: "summary_large_image" as const },
+  },
+  structuredData: [],
+  discovery: {
+    includeInSitemap: true,
+    includeInLlms: true,
+    relatedLinks: [],
+  },
+};
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <GroveDocumentHead document={doc} />
+  </head>
+  <body>
+    <h1>{collection.title}</h1>
+    <p>{collection.description}</p>
+    {result.isEmpty ? (
+      <p>No apps in this category yet.</p>
+    ) : (
+      <ol>
+        {result.entries.map((entry) => (
+          <li>
+            <a href={entry.url}>{entry.title}</a>
+            <p>{entry.description}</p>
+          </li>
+        ))}
+      </ol>
+    )}
+  </body>
+</html>

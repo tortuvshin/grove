@@ -1,0 +1,90 @@
+---
+import GroveDocumentHead from "../../components/GroveDocumentHead.astro";
+import { runCollection, findRelated, type Collection, type CollectionEntry } from "@grove-dev/core";
+import { loadCollections } from "../../lib/load-collections.js";
+
+/**
+ * Reference collection route — copy or import in a consumer Astro
+ * project to render a curated or generated collection at
+ * `/collections/<slug>/`.
+ *
+ * The page enumerates all collection slugs from
+ * `<cwd>/data/collections/*.yml`, fetches the matching collection,
+ * runs the collection engine against an empty entry set (the
+ * framework exposes the engine; the consumer supplies the data),
+ * and emits a `PageDocument` for the head component.
+ */
+export async function getStaticPaths() {
+  const collections = await loadCollections(process.cwd());
+  return collections.map((c) => ({ params: { slug: c.slug } }));
+}
+
+const { slug } = Astro.params;
+const collections = await loadCollections(process.cwd());
+const collection = collections.find((c) => c.slug === slug);
+if (!collection) return Astro.redirect("/404");
+const entries: CollectionEntry[] = [];
+const result = runCollection(collection, entries);
+const related = findRelated(collection, collections, 4);
+const canonical = new URL(`/collections/${slug}/`, Astro.site ?? Astro.url);
+
+const doc = {
+  identity: { type: "collection" as const, canonical, language: "en" },
+  metadata: {
+    title: collection.seo.title ?? collection.title,
+    description: collection.seo.description ?? collection.description,
+    robots: collection.seo.index ? "index,follow" : "noindex,follow",
+    openGraph: {
+      title: collection.title,
+      description: collection.description,
+      url: canonical.toString(),
+      image: new URL("/og.png", canonical).toString(),
+      type: "website" as const,
+    },
+    twitter: { card: "summary_large_image" as const },
+  },
+  structuredData: [],
+  discovery: {
+    includeInSitemap: collection.seo.index,
+    includeInLlms: collection.seo.index,
+    relatedLinks: related.map((r) => ({ url: `/collections/${r.slug}/`, title: r.title })),
+  },
+};
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <GroveDocumentHead document={doc} />
+  </head>
+  <body>
+    <h1>{collection.title}</h1>
+    <p>{collection.description}</p>
+    {collection.editorial?.selectionNote && (
+      <p><strong>Selection criteria:</strong> {collection.editorial.selectionNote}</p>
+    )}
+    {result.isEmpty ? (
+      <p>This collection is currently empty.</p>
+    ) : (
+      <ol>
+        {result.entries.map((entry) => (
+          <li>
+            <a href={entry.url}>{entry.title}</a>
+            <p>{entry.description}</p>
+          </li>
+        ))}
+      </ol>
+    )}
+    {related.length > 0 && (
+      <section>
+        <h2>Related collections</h2>
+        <ul>
+          {related.map((r) => (
+            <li><a href={`/collections/${r.slug}/`}>{r.title}</a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </body>
+</html>
