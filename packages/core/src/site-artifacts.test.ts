@@ -4,9 +4,9 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { defineConfig } from "./config.js";
+import { buildRobotsTxt } from "./robots.js";
 import {
   buildOgImageSvg,
-  buildRobotsTxt,
   buildSiteArtifacts,
 } from "./site-artifacts.js";
 
@@ -29,8 +29,8 @@ describe("site artifacts", () => {
   });
 
   it("uses canonical config in robots and social metadata", () => {
-    expect(buildRobotsTxt(config)).toContain(
-      "Sitemap: https://directory.example/sitemap.xml",
+    expect(buildRobotsTxt({ siteUrl: config.site.url ?? "" })).toContain(
+      "Sitemap: https://directory.example/sitemap-index.xml",
     );
     const svg = buildOgImageSvg(config, {
       totalRecords: 149,
