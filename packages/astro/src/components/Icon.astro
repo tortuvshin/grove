@@ -63,8 +63,8 @@ interface Props {
    */
   aliases?: Record<string, string>;
   /**
-   * Asset ids supplied by a consumer in addition to Grove's bundled registry.
-   * Unknown stack/platform ids render initials without issuing a failed request.
+   * Optional complete asset registry supplied by a consumer. When omitted,
+   * Grove attempts the configured asset path and falls back on image error.
    */
   available?: string[];
   /**
@@ -124,25 +124,11 @@ function resolveName(raw: string): string {
 }
 
 const resolved = resolveName(name);
-const bundledIcons: Record<"stack" | "platform", Set<string>> = {
-  stack: new Set([
-    "android", "apple", "bun", "capacitor", "clojure", "clojurescript",
-    "dart", "deno", "django", "docker", "firebase", "flutter", "go",
-    "graphql", "ionic", "java", "javascript", "kotlin", "llm", "mongodb",
-    "node.js", "nodejs", "python", "rag", "react", "react-native", "rust",
-    "solidity", "sveltekit", "swift", "tensorflow", "typescript", "vue",
-  ]),
-  platform: new Set([
-    "android", "apple", "chrome", "chromeos", "desktop", "embedded", "ios",
-    "linux", "macos", "ubuntu", "web", "windows",
-  ]),
-};
 const availableIcons = available?.map(slugify);
 const hasAsset =
   category === "brand" ||
-  (availableIcons
-    ? availableIcons.includes(resolved)
-    : bundledIcons[category].has(resolved));
+  availableIcons === undefined ||
+  availableIcons.includes(resolved);
 const effectiveMode: IconMode = resolved === "apple" ? "auto" : mode;
 const platformStackIcons = new Set(["docker"]);
 const textOnlyPlatforms = new Set(["self-host", "self-hosted"]);
