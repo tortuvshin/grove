@@ -1,0 +1,43 @@
+packages/astro/src/theme.test.ts
+  s_01328764f9abd4::t_24a5dca8372b8c 23-30,98-111
+packages/core/src/build-data.test.ts
+  s_01328764f9abd4::t_24a5dca8372b8c 95,204,216
+apps/example/src/pages/[slug]/index.astro
+  s_01328764f9abd4::t_cf792003cba725 139
+apps/example/package.json
+  s_01328764f9abd4::t_cf792003cba725 26
+apps/example/astro.config.mjs
+  s_01328764f9abd4::t_cf792003cba725 6,9-10,14-15,17
+packages/core/src/build-data.ts
+  s_01328764f9abd4::t_cf792003cba725 330
+packages/core/src/schema.ts
+  s_01328764f9abd4::t_cf792003cba725 521-529
+packages/core/src/config.test.ts
+  s_01328764f9abd4::t_24a5dca8372b8c 1-22
+packages/astro/src/server/models.ts
+  s_01328764f9abd4::t_cf792003cba725 46-48
+packages/astro/src/components/SmartLensTabs.astro
+  s_01328764f9abd4::t_cf792003cba725 27-28,36,71
+packages/astro/package.json
+  s_01328764f9abd4::t_cf792003cba725 60,65
+packages/astro/src/layouts/BaseLayout.astro
+  s_01328764f9abd4::t_cf792003cba725 14-15,64-66,109,137,142,144,297-298
+pnpm-lock.yaml
+  s_01328764f9abd4::t_8fc5a2a08c91ed 64,66-67,85-86,4330,4335,4704
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "6dd48f082f1fa517ca0408b6ff81898950a06bb2",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
