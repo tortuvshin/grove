@@ -1,0 +1,22 @@
+packages/cli/README.md
+  s_76d797eddf02ba::t_f56e04633231c0 16,20-52
+  s_76d797eddf02ba::t_d9cd98659188d1 53
+packages/core/README.md
+  s_76d797eddf02ba::t_4be8fd7799f0fb 32-89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "a5be4b35d09d899a1a40ea0ce383ad2161aa636e",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
