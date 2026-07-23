@@ -25,6 +25,37 @@ For the developer workflow that produces these entries, see
 
 ### Added
 
+- **`@grove-dev/core` / `@grove-dev/astro`:** adds optional config-wide GA4
+  analytics and config-driven default `robots.txt` and social image artifacts.
+  Replacing a generated marker file transfers ownership to the consumer and
+  prevents Grove from overwriting custom assets.
+- **`@grove-dev/cli`:** the single Astro scaffold now includes a practical
+  consumer README and MIT license.
+
+### Changed
+
+- **`@grove-dev/astro`:** supports Astro 6 and Astro 7, reads the canonical
+  build URL directly from `grove.config.ts`, and lets directories use their own
+  noun for the unfiltered browse lens.
+- Removes dead scaffold content pages and the Open Apps-specific legacy route;
+  initialized projects contain only the working consumer-owned pages.
+
+### Fixed
+
+- **`@grove-dev/astro` / `@grove-dev/core`:** custom stack and platform SVGs
+  now load without a package-owned icon registry, and primary/supporting stacks
+  are deduplicated consistently on cards, facets, and detail pages.
+- **`@grove-dev/core`:** contributor sync paginates the GitHub API instead of
+  silently stopping after the first 100 contributors.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`.
+
+---
+
+## [0.3.2] — 2026-07-23
+
+### Added
+
 - **`@grove-dev/core`:** adds the browser-safe `@grove-dev/core/directory` entry point for canonical filtering, sorting, facets, display labels, pagination, and curated lens URL rules.
 - **`@grove-dev/astro`:** adds reusable directory view-models and a client controller so consumer-owned pages can stay thin while keeping URL-driven discovery behavior consistent.
 - **`@grove-dev/core` / `@grove-dev/astro`:** adds config-driven footer columns, submission copy, and browse/submission facets; record tags are now a first-class facet separate from controlled taxonomy.
