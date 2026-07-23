@@ -1,0 +1,24 @@
+packages/core/src/llms.test.ts
+  s_76d797eddf02ba::t_11ce28ee70a0a4 46-79
+packages/core/src/llms.ts
+  s_76d797eddf02ba::t_788a29b3dbcde7 122-149,152,154-163,165-179,181,183,186,188-189,191-197,199-207
+  s_76d797eddf02ba::t_a0780c01548fe8 164
+  s_76d797eddf02ba::t_e2342dfbe132fb 150-151,153
+  s_76d797eddf02ba::t_284bbe1518e22b 180,182,184-185,187,190,198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "afcaa1d59a324a68a707e451bc8b9319632cd233",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
