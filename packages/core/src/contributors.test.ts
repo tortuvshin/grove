@@ -86,4 +86,34 @@ describe("syncContributors", () => {
       pushedAt: "2026-07-01T00:00:00Z",
     });
   });
+
+  it("fetches every contributor page", async () => {
+    const requested: string[] = [];
+    const firstPage = Array.from({ length: 100 }, (_, index) => ({
+      login: `user-${index}`,
+      contributions: 1,
+    }));
+    const fetchImpl: typeof fetch = async (input) => {
+      const url = String(input);
+      requested.push(url);
+      if (url.endsWith("/repos/acme/community")) {
+        return new Response("{}", { status: 200 });
+      }
+      if (new URL(url).searchParams.get("page") === "1") {
+        return new Response(JSON.stringify(firstPage), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify([{ login: "page-two", contributions: 5 }]),
+        { status: 200 },
+      );
+    };
+
+    const result = await syncContributors({ cwd, fetchImpl });
+
+    expect(result.contributors).toBe(101);
+    expect(requested.filter((url) => url.includes("/contributors?"))).toEqual([
+      "https://api.github.com/repos/acme/community/contributors?per_page=100&anon=false&page=1",
+      "https://api.github.com/repos/acme/community/contributors?per_page=100&anon=false&page=2",
+    ]);
+  });
 });

@@ -71,31 +71,36 @@ export async function syncContributors(
   };
   const byUsername = new Map<string, Contributor>();
   let failed = 0;
-  const contributorsResponse = await fetchImpl(
-    `https://api.github.com/repos/${ref.owner}/${ref.repo}/contributors?per_page=100&anon=false`,
-    { headers },
-  );
-  if (!contributorsResponse.ok && contributorsResponse.status !== 204) {
-    throw new Error(
-      `GitHub contributors request failed for ${ref.owner}/${ref.repo}: ${contributorsResponse.status}`,
-    );
-  }
-  const data = contributorsResponse.status === 204
-    ? []
-    : (await contributorsResponse.json()) as Array<{
+  type GitHubContributor = {
         login?: string;
         avatar_url?: string;
         html_url?: string;
         contributions?: number;
-      }>;
-  for (const entry of data) {
-    if (!entry.login) continue;
-    byUsername.set(entry.login, {
-      username: entry.login,
-      ...(entry.avatar_url ? { avatarUrl: entry.avatar_url } : {}),
-      ...(entry.html_url ? { profileUrl: entry.html_url } : {}),
-      contributions: entry.contributions ?? 0,
-    });
+  };
+  const perPage = 100;
+  for (let page = 1; ; page += 1) {
+    const contributorsResponse = await fetchImpl(
+      `https://api.github.com/repos/${ref.owner}/${ref.repo}/contributors?per_page=${perPage}&anon=false&page=${page}`,
+      { headers },
+    );
+    if (!contributorsResponse.ok && contributorsResponse.status !== 204) {
+      throw new Error(
+        `GitHub contributors request failed for ${ref.owner}/${ref.repo} (page ${page}): ${contributorsResponse.status}`,
+      );
+    }
+    const data = contributorsResponse.status === 204
+      ? []
+      : (await contributorsResponse.json()) as GitHubContributor[];
+    for (const entry of data) {
+      if (!entry.login) continue;
+      byUsername.set(entry.login, {
+        username: entry.login,
+        ...(entry.avatar_url ? { avatarUrl: entry.avatar_url } : {}),
+        ...(entry.html_url ? { profileUrl: entry.html_url } : {}),
+        contributions: entry.contributions ?? 0,
+      });
+    }
+    if (data.length < perPage) break;
   }
 
   const repositoryResponse = await fetchImpl(
