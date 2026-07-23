@@ -1,0 +1,38 @@
+apps/example/.gitignore
+  s_01328764f9abd4::t_9fbdeda363c167 14-15
+apps/example/README.md
+  s_01328764f9abd4::t_9fbdeda363c167 1-44
+apps/example/LICENSE
+  s_01328764f9abd4::t_9fbdeda363c167 1-21
+.ignite/ARCHITECTURE.md
+  s_01328764f9abd4::t_466f7a6724c0ce 26-35
+packages/core/src/site-artifacts.ts
+  s_01328764f9abd4::t_917511d2f42a5f 1-102,111-116,118-156
+packages/core/src/site-artifacts.test.ts
+  s_01328764f9abd4::t_917511d2f42a5f 1-62
+packages/cli/src/init.ts
+  s_01328764f9abd4::t_36b19010bff432 7-13,82-86
+packages/core/src/prepare.ts
+  s_01328764f9abd4::t_917511d2f42a5f 16-19,25,141-155
+packages/cli/src/init.test.ts
+  s_01328764f9abd4::t_36b19010bff432 42-43
+  s_01328764f9abd4::t_9fbdeda363c167 30-41
+packages/core/src/index.ts
+  s_01328764f9abd4::t_917511d2f42a5f 91-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "788898de0bf22d9ddbb8421096bd4474cdb3c99e",
+  "prompts": {},
+  "sessions": {
+    "s_01328764f9abd4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f8a76-5ad1-7080-91e3-427f723e640d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
