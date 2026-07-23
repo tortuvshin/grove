@@ -162,3 +162,18 @@ export * from "./directory-repo.js";
 export * from "./directory-scores.js";
 export * from "./directory-search.js";
 export * from "./directory-taxonomy.js";
+
+export {
+  DEFAULT_BUDGET,
+  evaluateBudget,
+} from "./audit.js";
+export type {
+  PageType,
+  Profile,
+  PageManifestEntry,
+  LighthouseScores,
+  LighthouseMetrics,
+  AuditResult,
+  BudgetConfig,
+  BudgetViolation,
+} from "./audit.js";
