@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { stringify as yamlStringify } from "yaml";
 
@@ -31,6 +31,7 @@ export function buildCollectionCommand(): Command {
         seo: { index: true },
       };
       const out = resolve(process.cwd(), "data/collections", `${opts.slug}.yml`);
+      await mkdir(resolve(process.cwd(), "data/collections"), { recursive: true });
       await writeFile(out, yamlStringify(collection), "utf8");
       process.stdout.write(`Wrote ${out}\n`);
     });
