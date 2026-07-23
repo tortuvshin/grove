@@ -1,0 +1,24 @@
+packages/core/src/site-artifacts.test.ts
+  s_76d797eddf02ba::t_e8eb2e31da026d 32-33
+  s_76d797eddf02ba::t_c0b39a30095d1c 7
+packages/core/src/site-artifacts.ts
+  s_76d797eddf02ba::t_b4322d8b7b9638 4
+  s_76d797eddf02ba::t_0c3efb4221c8ee 114
+  s_76d797eddf02ba::t_514845f9c7b23c 115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "e9d95961ba4f3212c51cebbf5877380d2934316f",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
