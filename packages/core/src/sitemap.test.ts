@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildSitemap } from "./sitemap.js";
+import { buildSitemap, buildSitemapIndex } from "./sitemap.js";
 import type { GroveConfig } from "./schema.js";
 
 const roots: string[] = [];
@@ -40,5 +40,21 @@ describe("buildSitemap", () => {
     expect(xml).toContain("https://open-apps.dev.mn/apps");
     expect(xml).toContain("https://open-apps.dev.mn/apps/immich");
     expect(xml).not.toContain("/projects");
+  });
+});
+
+describe("buildSitemapIndex", () => {
+  it("includes only non-empty sections", () => {
+    const xml = buildSitemapIndex("https://example.com", {
+      pages: [],
+      records: ["https://example.com/apps/a/"],
+      collections: ["https://example.com/c/top/"],
+      taxonomies: [],
+    });
+    expect(xml).toMatch(/<sitemapindex/);
+    expect(xml).toMatch(/records\.xml/);
+    expect(xml).toMatch(/collections\.xml/);
+    expect(xml).not.toMatch(/pages\.xml/);
+    expect(xml).not.toMatch(/taxonomies\.xml/);
   });
 });

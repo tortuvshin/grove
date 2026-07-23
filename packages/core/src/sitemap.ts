@@ -109,3 +109,29 @@ export async function buildSitemap(
   await writeFile(path, xml, "utf8");
   return { path, urlCount: entries.length };
 }
+
+export interface SitemapSection {
+  pages: string[];
+  records: string[];
+  collections: string[];
+  taxonomies: string[];
+}
+
+export function buildSitemapIndex(baseUrl: string, sections: SitemapSection): string {
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const subs: Array<[string, string[]]> = [
+    ["pages", sections.pages],
+    ["records", sections.records],
+    ["collections", sections.collections],
+    ["taxonomies", sections.taxonomies],
+  ];
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const body = subs
+    .filter(([, urls]) => urls.length > 0)
+    .map(([name]) => `<sitemap><loc>${base}sitemaps/${name}.xml</loc><lastmod>${lastmod}</lastmod></sitemap>`)
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${body}
+</sitemapindex>`;
+}
