@@ -128,7 +128,7 @@ export function buildSitemapIndex(baseUrl: string, sections: SitemapSection): st
   const lastmod = new Date().toISOString().slice(0, 10);
   const body = subs
     .filter(([, urls]) => urls.length > 0)
-    .map(([name]) => `<sitemap><loc>${base}sitemaps/${name}.xml</loc><lastmod>${lastmod}</lastmod></sitemap>`)
+    .map(([name]) => `<sitemap><loc>${escapeXml(base)}sitemaps/${name}.xml</loc><lastmod>${lastmod}</lastmod></sitemap>`)
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
