@@ -39,6 +39,7 @@ export {
   githubMetadataSchema,
   githubLicenseSchema,
   blueprintKind,
+  auditSchema,
 } from "./schema.js";
 
 // ── Schema-derived types ─────────────────────────────────────────────
