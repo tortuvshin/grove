@@ -49,7 +49,10 @@
   },
   "dependencies": {
     "@grove-dev/core": "workspace:*",
+    "chrome-launcher": "^1.2.1",
     "commander": "^15.0.0",
+    "lighthouse": "^12.8.2",
+    "typescript": "^5.9.3",
     "yaml": "^2.6.0"
   },
   "devDependencies": {

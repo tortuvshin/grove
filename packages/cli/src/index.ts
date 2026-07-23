@@ -16,6 +16,7 @@ import {
   validateProject,
 } from "@grove-dev/core";
 import { parse as parseYaml } from "yaml";
+import { buildAuditCommand } from "./audit-cli.js";
 import { initDirectory, readCliVersion } from "./init.js";
 
 const program = new Command();
@@ -196,6 +197,8 @@ program
     }
     if (options.strict && report.totalCandidates > 0) process.exitCode = 1;
   });
+
+program.addCommand(buildAuditCommand());
 
 program.parseAsync().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : String(error));
