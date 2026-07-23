@@ -1,0 +1,56 @@
+name: Lighthouse Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/core/**"
+      - "packages/cli/**"
+      - "packages/astro/**"
+      - "apps/example/**"
+      - ".github/workflows/lighthouse-audit.yml"
+  pull_request:
+    paths:
+      - "packages/core/**"
+      - "packages/cli/**"
+      - "packages/astro/**"
+      - "apps/example/**"
+      - ".github/workflows/lighthouse-audit.yml"
+  schedule:
+    - cron: "37 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: lighthouse-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: grove audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: corepack enable && corepack prepare pnpm@10.12.1 --activate
+      - name: Install Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+          echo "CHROME_PATH=$(which chromium-browser)" >> $GITHUB_ENV
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @grove-dev/core --filter @grove-dev/cli --filter @grove-dev/astro -r build
+      - run: pnpm --dir apps/example build
+      - name: Run grove audit
+        run: pnpm --filter @grove-dev/cli start -- audit --runs 1 --json lighthouse-report.json --junit lighthouse-junit.xml
+        working-directory: apps/example
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: lighthouse-report
+          path: |
+            apps/example/lighthouse-report.json
+            apps/example/lighthouse-junit.xml
