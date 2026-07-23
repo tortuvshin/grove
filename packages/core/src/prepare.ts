@@ -13,11 +13,16 @@ import {
   type SitemapInput,
   type SitemapResult,
 } from "./sitemap.js";
+import {
+  buildSiteArtifacts,
+  type SiteArtifactsResult,
+} from "./site-artifacts.js";
 
 export interface PrepareDirectoryResult {
   generated: GenerateResult;
   sitemap: SitemapResult;
   llms: LlmsResult;
+  siteArtifacts: SiteArtifactsResult;
 }
 
 type GeneratedRecord = {
@@ -133,5 +138,19 @@ export async function prepareDirectory(
     config,
   );
 
-  return { generated, sitemap, llms };
+  const sitePayload = JSON.parse(
+    await readFile(
+      join(root, config.paths.generatedDir, "site-config.json"),
+      "utf8",
+    ),
+  ) as {
+    stats?: { totalRecords?: number; repositoryStars?: number };
+  };
+  const siteArtifacts = await buildSiteArtifacts(
+    root,
+    config,
+    sitePayload.stats,
+  );
+
+  return { generated, sitemap, llms, siteArtifacts };
 }
