@@ -21,6 +21,10 @@ describe("filterEntries", () => {
   it("ANDs across fields", () => {
     expect(filterEntries(entries, { stacks: ["flutter"], platforms: ["android"], excludeStatuses: ["archived"] }).map((e) => e.slug)).toEqual(["a", "c"]);
   });
+  it("filters by free-text q (case-insensitive)", () => {
+    const out = filterEntries(entries, { q: "Finance" });
+    expect(out.map((e) => e.slug)).toEqual(["c"]);
+  });
 });
 
 describe("rankEntries", () => {
