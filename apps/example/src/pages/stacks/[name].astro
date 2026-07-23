@@ -1,0 +1,11 @@
+---
+import Base from "../../layouts/Base.astro";
+export function getStaticPaths() {
+  return [{ params: { name: "flutter" } }];
+}
+const { name } = Astro.params;
+---
+<Base title={`${name} apps`} description={`Open source apps built with ${name}.`}>
+  <h1>{name} apps</h1>
+  <p>Browse open source apps built with {name}.</p>
+</Base>

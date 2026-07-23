@@ -73,4 +73,17 @@ export default defineConfig({
     density: "comfortable",
     containerWidth: "72rem",
   },
+
+  audit: {
+    baseUrl: "http://127.0.0.1:4321",
+    pages: [
+      { path: "/", type: "home", label: "Homepage" },
+      { path: "/apps/", type: "directory", label: "Directory index" },
+      { path: "/collections/top-flutter/", type: "collection", label: "Top Flutter collection" },
+      { path: "/apps/widget-app/", type: "record", label: "Record detail" },
+      { path: "/about/", type: "content", label: "About page" },
+      { path: "/empty/", type: "empty", label: "Empty state" },
+      { path: "/this-page-does-not-exist/", type: "404", label: "404 page" },
+    ],
+  },
 });

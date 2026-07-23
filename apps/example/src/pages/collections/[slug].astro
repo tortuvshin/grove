@@ -1,0 +1,15 @@
+---
+import Base from "../../layouts/Base.astro";
+export function getStaticPaths() {
+  return [{ params: { slug: "top-flutter" } }];
+}
+const { slug } = Astro.params;
+---
+<Base title={`Collection: ${slug}`} description="Curated collection fixture.">
+  <h1>Collection: {slug}</h1>
+  <p>Selection methodology: ranked by repository activity and documentation quality.</p>
+  <ul>
+    <li><a href="/apps/widget-app/">Widget App</a> — production-scale reference.</li>
+    <li><a href="/apps/demo-app/">Demo App</a> — minimal viable example.</li>
+  </ul>
+</Base>
