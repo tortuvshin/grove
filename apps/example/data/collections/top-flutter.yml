@@ -1,0 +1,12 @@
+slug: top-flutter
+kind: curated
+title: Top Open Source Flutter Apps
+description: Production-scale Flutter applications with public source code.
+query:
+  stacks: [flutter]
+  excludeStatuses: [archived]
+ranking:
+  preset: quality
+seo:
+  index: true
+  title: Top Open Source Flutter Apps in 2026
