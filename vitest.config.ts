@@ -91,6 +91,16 @@ export default defineConfig({
           sequence: { groupOrder: 1 },
         },
       },
+      // ── End-to-end grove audit (boots apps/example preview + runs grove audit) ──
+      {
+        extends: true,
+        test: {
+          name: "integration-audit",
+          include: ["tests/integration/grove-audit.test.ts"],
+          timeout: 600_000,
+          fileParallelism: false,
+        },
+      },
     ],
     coverage: {
       provider: "v8",
