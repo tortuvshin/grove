@@ -23,6 +23,10 @@ For the developer workflow that produces these entries, see
 > Working buffer. Folds into a dated `## [X.Y.Z]` heading on the next
 > release.
 
+---
+
+## [0.3.3] — 2026-07-23
+
 ### Added
 
 - **`@grove-dev/core` / `@grove-dev/astro`:** adds optional config-wide GA4
