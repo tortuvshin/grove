@@ -119,34 +119,92 @@ Use /llms-full.txt for record-level details. Prefer detail pages for citations.
 `;
 }
 
-export function buildLlmsFullTxt(input: LlmsInput, config: GroveConfig): string {
-  const siteUrl = (input.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
-  const indexSlug = directorySlug(config);
-  const visible = input.records.filter(
-    (r) => r.visibility !== "hide" && r.visibility !== "remove",
-  );
-  const plural = pluralLabel(config);
-  const index = visible.map(buildIndexLine).join("\n");
-  const sections = visible
-    .map((record) => buildDetailSection(record, siteUrl, indexSlug))
-    .join("\n\n");
-  return [
-    `# ${config.site.name} — full directory`,
-    "",
-    `> Generated ${input.generatedAt} from ${input.records.length} records.`,
-    `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`pnpm build\`.`,
-    "",
-    "Each section below mirrors one record detail page.",
-    "",
-    "## Index",
-    "",
-    index,
-    "",
-    sections ? `## ${plural}` : "",
-    "",
-    sections,
-    "",
-  ].join("\n");
+export interface LlmsFullSite {
+  name: string;
+  url: string;
+  description: string;
+}
+
+export interface LlmsFullRecord {
+  url: string;
+  title: string;
+  description: string;
+  stack?: string;
+  license?: string;
+}
+
+interface LlmsFullCatalogInput {
+  site: LlmsFullSite;
+  records: LlmsFullRecord[];
+  taxonomies: Array<{ url: string; title: string; description?: string }>;
+  updatedAt: string;
+}
+
+export function buildLlmsFullTxt(input: LlmsInput, config: GroveConfig): string;
+export function buildLlmsFullTxt(input: LlmsFullCatalogInput): string;
+export function buildLlmsFullTxt(
+  input: LlmsInput | LlmsFullCatalogInput,
+  config?: GroveConfig,
+): string {
+  if (config) {
+    const legacyInput = input as LlmsInput;
+    const siteUrl = (legacyInput.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
+    const indexSlug = directorySlug(config);
+    const visible = legacyInput.records.filter(
+      (r) => r.visibility !== "hide" && r.visibility !== "remove",
+    );
+    const plural = pluralLabel(config);
+    const index = visible.map(buildIndexLine).join("\n");
+    const sections = visible
+      .map((record) => buildDetailSection(record, siteUrl, indexSlug))
+      .join("\n\n");
+    return [
+      `# ${config.site.name} — full directory`,
+      "",
+      `> Generated ${legacyInput.generatedAt} from ${legacyInput.records.length} records.`,
+      `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`pnpm build\`.`,
+      "",
+      "Each section below mirrors one record detail page.",
+      "",
+      "## Index",
+      "",
+      index,
+      "",
+      sections ? `## ${plural}` : "",
+      "",
+      sections,
+      "",
+    ].join("\n");
+  }
+
+  const catalogInput = input as LlmsFullCatalogInput;
+  const lines: string[] = [];
+  lines.push(`# ${catalogInput.site.name} — full catalog`);
+  lines.push("");
+  lines.push(`> ${catalogInput.site.description}`);
+  lines.push(`Updated: ${catalogInput.updatedAt}`);
+  lines.push("");
+  lines.push(`Site: ${catalogInput.site.url}`);
+  lines.push("");
+  lines.push("## Taxonomies");
+  for (const taxonomy of catalogInput.taxonomies) {
+    lines.push(`### ${taxonomy.title}`);
+    lines.push("");
+    if (taxonomy.description) lines.push(taxonomy.description);
+    lines.push(`URL: ${taxonomy.url}`);
+    lines.push("");
+  }
+  lines.push("## Records");
+  for (const record of catalogInput.records) {
+    lines.push(`### ${record.title}`);
+    lines.push("");
+    lines.push(record.description);
+    if (record.stack) lines.push(`Stack: ${record.stack}`);
+    if (record.license) lines.push(`License: ${record.license}`);
+    lines.push(`URL: ${record.url}`);
+    lines.push("");
+  }
+  return lines.join("\n");
 }
 
 export async function buildLlmsFiles(
