@@ -90,11 +90,7 @@ export { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "./llms.js";
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from "./llms.js";
 
 // ── Config-driven public artifacts ──────────────────────────────────
-export {
-  buildOgImageSvg,
-  buildRobotsTxt,
-  buildSiteArtifacts,
-} from "./site-artifacts.js";
+export { buildOgImageSvg, buildSiteArtifacts } from "./site-artifacts.js";
 export type {
   SiteArtifactStats,
   SiteArtifactsResult,
@@ -210,3 +206,6 @@ export type {
   ContentInput,
   JsonLdValidationIssue,
 } from "./page-document.js";
+
+// ── Robots + filter URL policy ───────────────────────────────────────
+export { buildRobotsTxt, isIndexableFilterPath } from "./robots.js";
