@@ -138,5 +138,7 @@ function activeScore(e: CollectionEntry): number {
 }
 
 function parseTime(d: string | undefined): number {
-  return d ? Date.parse(d) : 0;
+  if (!d) return 0;
+  const t = Date.parse(d);
+  return Number.isFinite(t) ? t : 0;
 }
