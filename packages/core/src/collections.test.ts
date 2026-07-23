@@ -25,6 +25,20 @@ describe("filterEntries", () => {
     const out = filterEntries(entries, { q: "Finance" });
     expect(out.map((e) => e.slug)).toEqual(["c"]);
   });
+  it("filters by categories (OR within field, AND across fields)", () => {
+    const e2: CollectionEntry = {
+      slug: "d",
+      title: "D",
+      description: "x",
+      url: "/d/",
+      categories: ["finance", "productivity"],
+    };
+    const all = [...entries, e2];
+    expect(filterEntries(all, { categories: ["finance"] }).map((e) => e.slug)).toContain("d");
+    expect(
+      filterEntries(all, { stacks: ["flutter"], categories: ["finance"] }).map((e) => e.slug),
+    ).toEqual([]);
+  });
 });
 
 describe("rankEntries", () => {
