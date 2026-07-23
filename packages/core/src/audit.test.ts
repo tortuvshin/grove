@@ -34,6 +34,20 @@ describe("evaluateBudget", () => {
   it("returns no violations when result meets all budgets", () => {
     expect(evaluateBudget(makeResult(), page)).toEqual([]);
   });
+  it("returns no violations for 404 pages", () => {
+    const notFoundPage: PageManifestEntry = {
+      path: "/this-page-does-not-exist/",
+      type: "404",
+      label: "Not found",
+    };
+    const result = makeResult({
+      type: "404",
+      scores: { performance: 0, accessibility: 0, bestPractices: 0, seo: 0 },
+      metrics: { lcp: Infinity, cls: Infinity, tbt: Infinity },
+    });
+
+    expect(evaluateBudget(result, notFoundPage)).toEqual([]);
+  });
   it("flags a performance score below 1", () => {
     const v = evaluateBudget(makeResult({
       scores: { performance: 0.99, accessibility: 1, bestPractices: 1, seo: 1 },
