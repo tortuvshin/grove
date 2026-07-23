@@ -88,6 +88,17 @@ export { buildSitemap, buildSitemapXml } from "./sitemap.js";
 export { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "./llms.js";
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from "./llms.js";
 
+// ── Config-driven public artifacts ──────────────────────────────────
+export {
+  buildOgImageSvg,
+  buildRobotsTxt,
+  buildSiteArtifacts,
+} from "./site-artifacts.js";
+export type {
+  SiteArtifactStats,
+  SiteArtifactsResult,
+} from "./site-artifacts.js";
+
 // ── Cleanup ──────────────────────────────────────────────────────────
 export { pickCleanupCandidates, cleanupStale } from "./decisions.js";
 export type { CleanupCandidate, CleanupReport } from "./decisions.js";

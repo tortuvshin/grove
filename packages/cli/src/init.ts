@@ -4,6 +4,13 @@ import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SKIP_NAMES = new Set(["node_modules", "dist", ".astro", ".DS_Store"]);
+const GENERATED_PUBLIC_NAMES = new Set([
+  "llms.txt",
+  "llms-full.txt",
+  "sitemap.xml",
+  "robots.txt",
+  "og-image.svg",
+]);
 const GROVE_PACKAGES = ["@grove-dev/astro", "@grove-dev/cli", "@grove-dev/core"] as const;
 
 export interface InitOptions {
@@ -72,7 +79,11 @@ export async function initDirectory(
       const pathFromRoot = relative(source, sourcePath);
       const parts = pathFromRoot.split(/[\\/]/);
       if (parts.some((part) => SKIP_NAMES.has(part))) return false;
-      return !(parts[0] === "data" && parts[1] === "generated");
+      if (parts[0] === "data" && parts[1] === "generated") return false;
+      if (parts[0] === "public" && GENERATED_PUBLIC_NAMES.has(parts[1] ?? "")) {
+        return false;
+      }
+      return true;
     },
   });
 

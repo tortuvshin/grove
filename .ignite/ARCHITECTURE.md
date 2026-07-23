@@ -23,12 +23,16 @@ YAML/config -> core prepare/generate -> data/generated/*.json
 
 Pages decide section order, copy, component choice, and custom routes. View-model functions prepare reusable directory state but do not return page markup. Large browser behaviors live in reusable Astro client-controller components rather than being duplicated in pages.
 
-`grove.config.ts` owns site-level presentation choices: header navigation,
-footer columns, submission copy, and the facet dimensions exposed by browse and
-submission pages. `data/taxonomy/*.yml` owns the allowed category, stack, and
-platform values; record tags remain a separate many-to-many discovery facet.
-Core serializes these choices into `site-config.json`, so Astro components do
-not infer site taxonomy or navigation from a particular demo dataset.
+`grove.config.ts` owns site-level presentation choices: canonical URL, header
+navigation, footer columns, submission copy, analytics, theme, and the facet
+dimensions exposed by browse and submission pages. `data/taxonomy/*.yml` owns
+the allowed category, stack, and platform values; record tags remain a separate
+many-to-many discovery facet. Core serializes these choices into
+`site-config.json` and generates config-owned public artifacts such as
+`robots.txt` and the default social image. A consumer takes ownership of either
+public artifact by replacing the generated marker file with a custom file.
+Astro components do not infer site taxonomy or navigation from a particular
+demo dataset.
 
 ## Initialization and updates
 

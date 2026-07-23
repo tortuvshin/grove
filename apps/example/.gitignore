@@ -11,6 +11,8 @@ data/generated/*
 public/llms.txt
 public/llms-full.txt
 public/sitemap.xml
+public/robots.txt
+public/og-image.svg
 coverage/
 .tmp-test/
 *.log
