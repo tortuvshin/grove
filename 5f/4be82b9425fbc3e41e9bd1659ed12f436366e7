@@ -1,0 +1,33 @@
+packages/astro/src/lib/index.ts
+  s_76d797eddf02ba::t_f06eacc6a15c7e 27
+packages/astro/src/pages/stacks/[name].astro
+  s_76d797eddf02ba::t_25bc494bb0d967 1-85
+packages/astro/src/pages/categories/[name].astro
+  s_76d797eddf02ba::t_aa4d84cb86908f 1-84
+packages/astro/src/pages/licenses/[name].astro
+  s_76d797eddf02ba::t_9671390d8c11bd 1-84
+packages/astro/src/lib/load-collections.ts
+  s_76d797eddf02ba::t_6e7077354ed3c3 1-26
+packages/astro/src/pages/collections/[slug].astro
+  s_76d797eddf02ba::t_7d534b0f5cff91 1-90
+packages/astro/package.json
+  s_76d797eddf02ba::t_cf439f6ac40555 62-63
+pnpm-lock.yaml
+  s_76d797eddf02ba::t_30789f591fc136 93-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "5f4be82b9425fbc3e41e9bd1659ed12f436366e7",
+  "prompts": {},
+  "sessions": {
+    "s_76d797eddf02ba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "78e8c522-add6-4680-aa05-fa9e7661ec8c",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
