@@ -101,7 +101,7 @@ export { pickCleanupCandidates, cleanupStale } from "./decisions.js";
 export type { CleanupCandidate, CleanupReport } from "./decisions.js";
 
 // ── GitHub: parsing + REST metadata ──────────────────────────────────
-export { parseGithubRepoUrl, fetchGithubMetadata } from "./github.js";
+export { parseGithubRepoUrl, fetchGithubMetadata, buildGithubSyncPatch } from "./github.js";
 export type { GithubRepoRef } from "./github.js";
 
 // ── GitHub: HTML enrichment (token-free fallback) ────────────────────
