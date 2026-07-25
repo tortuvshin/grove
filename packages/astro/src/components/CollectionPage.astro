@@ -3,58 +3,71 @@
  * CollectionPage — renders a single curated/generated collection.
  *
  * Consumes a `CollectionPageModel` produced by `getCollectionPageModel`.
- * Renders the header (title, description, editorial notes), the
- * matched entries via `CollectionRow`, and a related-collections
+ * Renders the header via `SectionHeader` (framework consistency),
+ * the matched entries via `CollectionRow`, and a related-collections
  * section.
  *
- * Generic: no blueprint-specific copy. The `eyebrow` prop lets the
- * consumer pick a label (e.g. "Curated" or "Generated").
+ * Generic: no blueprint-specific copy. Consumers can override
+ * `eyebrow`, `title`, `description`; the `<slot name="intro">` is
+ * the natural place for editorial intros (markdown rendered with
+ * the consumer's content pipeline). `emptyLabel` matches
+ * `RecordSection`'s API for empty-state copy.
  */
 import CollectionRow from "./CollectionRow.astro";
 import Container from "../layouts/Container.astro";
+import SectionHeader from "../layouts/SectionHeader.astro";
 import type { CollectionPageModel } from "../server/collections.js";
 
 interface Props {
   model: CollectionPageModel;
+  /** Override the eyebrow text (default: derived from collection kind). */
   eyebrow?: string;
+  /** Override the title (default: collection.title). */
+  title?: string;
+  /** Override the description (default: collection.description). */
+  description?: string;
+  /** Default copy when the collection has no matching entries. */
+  emptyLabel?: string;
+  /** Section id (deep link + stable key). */
+  id?: string;
   class?: string;
 }
 
 const {
   model,
-  eyebrow = "Collection",
+  eyebrow,
+  title,
+  description,
+  emptyLabel = "This collection is currently empty.",
+  id,
   class: className = "",
 } = Astro.props;
+
+const finalTitle = title ?? model.collection.title;
+const finalDescription = description ?? model.collection.description;
+const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated collection" : "Generated collection");
 ---
 
-<section class={`py-12 sm:py-16 ${className}`}>
+<section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
-    <header class="mb-6">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        {eyebrow}
-      </span>
-      <h1 class="m-0 mt-1 text-[1.875rem] sm:text-[2.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-        {model.collection.title}
-      </h1>
-      <p class="m-0 mt-2 max-w-[64ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
-        {model.collection.description}
+    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} />
+
+    {model.collection.selectionNote && (
+      <p class="m-0 mb-6 max-w-[64ch] text-[0.875rem] font-medium text-ink-700 dark:text-ink-300">
+        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Selection criteria · </span>
+        {model.collection.selectionNote}
       </p>
-      {model.collection.introduction && (
-        <p class="m-0 mt-3 max-w-[64ch] text-[0.9375rem] text-ink-700 dark:text-ink-300">
-          {model.collection.introduction}
-        </p>
-      )}
-      {model.collection.selectionNote && (
-        <p class="m-0 mt-3 max-w-[64ch] text-[0.875rem] font-medium text-ink-700 dark:text-ink-300">
-          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Selection criteria · </span>
-          {model.collection.selectionNote}
-        </p>
-      )}
-    </header>
+    )}
+
+    <slot name="intro" />
+
+    <p class="m-0 mb-4 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+      {model.total} {model.total === 1 ? "item" : "items"}
+    </p>
 
     {model.isEmpty ? (
       <p class="rounded-md border border-dashed border-ink-200 bg-white p-6 text-sm text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
-        This collection is currently empty.
+        {emptyLabel}
       </p>
     ) : (
       <ul class="m-0 flex list-none flex-col gap-3 p-0">
@@ -68,17 +81,20 @@ const {
 
     {model.related.length > 0 && (
       <section class="mt-12 border-t border-ink-200 pt-8 dark:border-ink-800">
-        <h2 class="m-0 text-[1.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          Related collections
-        </h2>
-        <ul class="m-0 mt-3 flex list-none flex-col gap-2 p-0">
+        <SectionHeader
+          eyebrow="Related"
+          title="Related collections"
+          description="Other curated groupings of related items."
+          level={3}
+        />
+        <ul class="m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-4">
           {model.related.map((r) => (
-            <li>
+            <li class="m-0 p-0">
               <a
                 href={r.url}
-                class="text-sm text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+                class="group flex h-full flex-col gap-1 rounded-md border border-ink-200 bg-white px-3 py-2.5 no-underline transition-colors hover:border-ink-400 dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-600"
               >
-                {r.title} →
+                <span class="text-sm font-medium text-ink-900 group-hover:underline dark:text-ink-100">{r.title}</span>
               </a>
             </li>
           ))}

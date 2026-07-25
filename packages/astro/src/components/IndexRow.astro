@@ -1,6 +1,6 @@
 ---
 import type { IndexRecord } from "@grove-dev/core";
-import Icon from "./Icon.astro";
+import StackPlatformChips from "./StackPlatformChips.astro";
 import { formatRelative, formatStars, getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, projectStackIds, statusDisplay } from "@grove-dev/astro";
 
 interface Props {
@@ -75,10 +75,10 @@ const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.
   </dl>
 
   {showChips && (platforms.length > 0 || stacks.length > 0) && (
-    <div class="flex flex-col gap-1.5">
-      <div class="flex flex-wrap gap-1.5">{platforms.slice(0, 4).map((platform) => <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground"><Icon name={platform} category="platform" size={11} />{platform}</span>)}</div>
-      <div class="flex flex-wrap gap-1.5">{stacks.slice(0, 4).map((stack) => <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground"><Icon name={stack} category="stack" size={11} />{stack}</span>)}</div>
-    </div>
+    <StackPlatformChips
+      stack={stacks[0]}
+      platform={platforms}
+    />
   )}
 
   <footer class="relative z-10 mt-1 flex items-center gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">

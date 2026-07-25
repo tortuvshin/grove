@@ -25,6 +25,8 @@ interface RawRecord {
   category?: string;
   tags?: string[];
   scores?: { curation?: number; activity?: number };
+  repoUrl?: string;
+  links?: { github?: string; website?: string };
 }
 
 /**
@@ -38,6 +40,9 @@ interface RawRecord {
  * - Prefers `pushedAt`; falls back to `lastCommitAt`.
  * - Constructs `url` as `${routeSlug}/${slug}/` so the value points
  *   back to the consumer's detail page.
+ * - Populates `repoHref` (from `repoUrl` or `links.github`) and
+ *   `homepageHref` (from `links.website`) so the row component
+ *   can render "View repo" / "Visit site" footer links.
  */
 export function recordsToCollectionEntries(
   records: RawRecord[],
@@ -57,6 +62,8 @@ export function recordsToCollectionEntries(
       title: r.name ?? r.title ?? r.slug,
       description: r.description ?? "",
       url: `/${routeSlug}/${r.slug}/`,
+      repoHref: r.repoUrl ?? r.links?.github,
+      homepageHref: r.links?.website,
       stack: r.stack ?? r.stacks?.[0],
       platform: r.platforms,
       license: r.license,

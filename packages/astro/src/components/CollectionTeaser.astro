@@ -1,18 +1,23 @@
 ---
 /**
  * CollectionTeaser — homepage-friendly subset of `CollectionIndex`.
- * Renders a horizontal grid of 2-3 collection cards with a "View all"
- * link in the header. Generic: no blueprint copy.
+ *
+ * Thin wrapper that defaults `limit` to 3 and sets homepage-friendly
+ * "View all collections" link + copy. For custom card counts or
+ * different copy, use `CollectionIndex` directly with explicit
+ * `limit` and `viewAllHref` props.
  */
-import Container from "../layouts/Container.astro";
-import type { CollectionTeaserModel } from "../server/collections.js";
+import CollectionIndex from "./CollectionIndex.astro";
+import type { CollectionIndexModel } from "../server/collections.js";
 
 interface Props {
-  model: CollectionTeaserModel;
+  model: CollectionIndexModel;
   title?: string;
   description?: string;
   viewAllHref?: string;
   viewAllLabel?: string;
+  /** Cap the number of cards rendered. Default: 3. */
+  limit?: number;
   class?: string;
 }
 
@@ -22,60 +27,17 @@ const {
   description = "Hand-picked and auto-generated groupings of related items.",
   viewAllHref = "/collections/",
   viewAllLabel = "View all collections",
-  class: className = "",
+  limit = 3,
+  class: className,
 } = Astro.props;
 ---
 
-<section class={`py-12 sm:py-16 ${className}`}>
-  <Container>
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-          Collections
-        </span>
-        <h2 class="m-0 mt-1 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          {title}
-        </h2>
-        <p class="m-0 mt-2 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
-          {description}
-        </p>
-      </div>
-      {viewAllHref && (
-        <a
-          href={viewAllHref}
-          class="hidden shrink-0 pb-2 text-2xs font-medium text-ink-500 transition-colors hover:text-ink-900 sm:inline dark:text-ink-400 dark:hover:text-ink-100"
-        >
-          {viewAllLabel} →
-        </a>
-      )}
-    </div>
-
-    {model.collections.length === 0 ? (
-      <p class="m-0 text-sm text-ink-500 dark:text-ink-400">
-        No collections yet.
-      </p>
-    ) : (
-      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {model.collections.map((c) => (
-          <a
-            href={c.url}
-            class="flex flex-col gap-2 rounded-md border border-ink-200 bg-white p-5 transition-colors hover:border-ink-400 dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-600"
-          >
-            <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-              {c.kind === "curated" ? "Curated" : "Generated"}
-            </span>
-            <span class="text-[1.0625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-              {c.title}
-            </span>
-            <span class="text-[0.875rem] text-ink-500 dark:text-ink-400">
-              {c.description}
-            </span>
-            <span class="mt-auto pt-2 text-2xs font-medium text-ink-500 dark:text-ink-400">
-              {c.count} {c.count === 1 ? "item" : "items"} →
-            </span>
-          </a>
-        ))}
-      </div>
-    )}
-  </Container>
-</section>
+<CollectionIndex
+  model={model}
+  title={title}
+  description={description}
+  viewAllHref={viewAllHref}
+  viewAllLabel={viewAllLabel}
+  limit={limit}
+  class={className}
+/>
