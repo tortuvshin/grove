@@ -78,6 +78,28 @@ describe("recordsToCollectionEntries", () => {
     const entries = recordsToCollectionEntries(records as never, {});
     expect(entries[0].url).toBe("/projects/x/");
   });
+
+  it("populates repoHref from repoUrl and homepageHref from links.website", () => {
+    const records = [
+      {
+        slug: "crewai",
+        name: "CrewAI",
+        repoUrl: "https://github.com/crewAIInc/crewAI",
+        links: { github: "https://github.com/other/repo", website: "https://crewai.com" },
+      },
+    ];
+    const entries = recordsToCollectionEntries(records as never, {});
+    expect(entries[0].repoHref).toBe("https://github.com/crewAIInc/crewAI");
+    expect(entries[0].homepageHref).toBe("https://crewai.com");
+  });
+
+  it("falls back to links.github when repoUrl is missing", () => {
+    const records = [
+      { slug: "x", name: "X", links: { github: "https://github.com/foo/bar" } },
+    ];
+    const entries = recordsToCollectionEntries(records as never, {});
+    expect(entries[0].repoHref).toBe("https://github.com/foo/bar");
+  });
 });
 
 const collection: Collection = {

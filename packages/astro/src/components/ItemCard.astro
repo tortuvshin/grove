@@ -24,7 +24,7 @@
  * pattern is to pass `routeSlug` (or `href` directly).
  */
 import type { IndexRecord, Resource, ProjectRecord, IndexProjectRecord } from "@grove-dev/core";
-import Icon from "./Icon.astro";
+import StackPlatformChips from "./StackPlatformChips.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, projectStackIds } from "@grove-dev/astro";
 import { formatStars, formatRelative } from "@grove-dev/astro";
 import { statusDisplay } from "@grove-dev/astro";
@@ -279,34 +279,17 @@ const category = (item as { category?: string }).category;
     </div>
   )}
 
-  {/* Platform + stack chips, pushed to the bottom. */}
+  {/* Platform + stack chips, pushed to the bottom. Shared with
+      `IndexRow` / `CollectionRow` so the labelled-row pattern is
+      consistent across all card-shaped components. */}
   {showChips && (
-    <div class="mt-auto flex flex-col gap-1.5">
-      {visiblePlatforms.length > 0 && (
-        <div class="flex flex-wrap items-center gap-1.5">
-          {visiblePlatforms.map((p) => (
-            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground">
-              <Icon name={p} category="platform" size={11} />
-              <span>{p}</span>
-            </span>
-          ))}
-          {platformOverflow > 0 && (
-            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground text-ink-400">+{platformOverflow}</span>
-          )}
-        </div>
-      )}
-      {visibleStacks.length > 0 && (
-        <div class="flex flex-wrap items-center gap-1.5">
-          {visibleStacks.map((s) => (
-            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground">
-              <Icon name={s} category="stack" size={11} />
-              <span>{s}</span>
-            </span>
-          ))}
-          {stackOverflow > 0 && (
-            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground text-ink-400">+{stackOverflow}</span>
-          )}
-        </div>
+    <div class="mt-auto">
+      <StackPlatformChips
+        stack={visibleStacks[0]}
+        platform={visiblePlatforms}
+      />
+      {stackOverflow > 0 && (
+        <span class="text-2xs text-ink-400 dark:text-ink-600">+{stackOverflow} more stacks</span>
       )}
     </div>
   )}

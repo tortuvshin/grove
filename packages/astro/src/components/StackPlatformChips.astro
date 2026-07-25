@@ -1,0 +1,73 @@
+---
+/**
+ * StackPlatformChips — labelled Stack + Platform chip rows.
+ *
+ * Renders up to two rows: one for stack (filled pills, primary) and
+ * one for platform (outlined pills, secondary). Each row is prefixed
+ * with a `w-14` (56px) label column so the pills always start at
+ * the same horizontal position, even when the stack/label is wider
+ * than the longest platform.
+ *
+ * Used by every card-shaped component in the framework so the
+ * primary/secondary distinction is unambiguous across surfaces
+ * (homepage grid, directory index, collection rows).
+ */
+import Icon from "./Icon.astro";
+
+interface Props {
+  /** Primary technology — filled pill, one entry per item. */
+  stack?: string;
+  /** Secondary target platforms — outlined pills, multiple per item. */
+  platform?: string[];
+  /** Cap the number of platform pills rendered. Default 4. */
+  maxPlatform?: number;
+  /** Hide the row(s) entirely. Default true. */
+  show?: boolean;
+  class?: string;
+}
+
+const {
+  stack,
+  platform = [],
+  maxPlatform = 4,
+  show = true,
+  class: className = "",
+} = Astro.props;
+
+if (!show || (!stack && platform.length === 0)) {
+  return Astro.redirect ? null : null;
+}
+
+const visiblePlatform = platform.slice(0, maxPlatform);
+const platformOverflow = platform.length - visiblePlatform.length;
+---
+
+<div class={`flex flex-col gap-1 ${className}`}>
+  {stack && (
+    <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+      <span class="w-14 shrink-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Stack
+      </span>
+      <span class="inline-flex min-h-5 items-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 text-2xs font-medium leading-none text-secondary-foreground">
+        <Icon name={stack} category="stack" size={10} />
+        <span>{stack}</span>
+      </span>
+    </div>
+  )}
+  {platform.length > 0 && (
+    <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+      <span class="w-14 shrink-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        Platform
+      </span>
+      {visiblePlatform.map((p) => (
+        <span class="inline-flex min-h-5 items-center gap-1 rounded-full border border-ink-200 bg-transparent px-2 py-0.5 text-2xs font-medium leading-none text-ink-500 dark:border-ink-800 dark:text-ink-400">
+          <Icon name={p} category="platform" size={10} />
+          <span>{p}</span>
+        </span>
+      ))}
+      {platformOverflow > 0 && (
+        <span class="text-2xs text-ink-400 dark:text-ink-600">+{platformOverflow}</span>
+      )}
+    </div>
+  )}
+</div>

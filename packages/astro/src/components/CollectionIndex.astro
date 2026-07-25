@@ -5,50 +5,85 @@
  * detail page and shows the entry count.
  *
  * Consumes a `CollectionIndexModel` produced by
- * `getCollectionIndexModel`. Generic: no blueprint-specific copy.
+ * `getCollectionIndexModel`. Pass `limit` (e.g. 3) for a teaser-style
+ * subset; the framework also re-exports this component as
+ * `CollectionTeaser` for the homepage use case.
+ *
+ * API parity with `RecordSection`:
+ *  - `id`, `eyebrow`, `title`, `description`
+ *  - `viewAllHref`, `viewAllLabel` — header CTA
+ *  - `emptyLabel` — copy when there are no collections
+ *  - `<slot name="header-actions">` — custom buttons in header
+ *  - `class` — extra class on the outer <section>
  */
 import Container from "../layouts/Container.astro";
+import SectionHeader from "../layouts/SectionHeader.astro";
 import type { CollectionIndexModel } from "../server/collections.js";
 
 interface Props {
   model: CollectionIndexModel;
+  id?: string;
+  eyebrow?: string;
   title?: string;
   description?: string;
+  /** Header "View all" link. Hides when not provided. */
+  viewAllHref?: string;
+  viewAllLabel?: string;
+  emptyLabel?: string;
+  /** Cap the number of cards rendered. Omit for "all". */
+  limit?: number;
   class?: string;
 }
 
 const {
   model,
+  id,
+  eyebrow = "Collections",
   title = "Collections",
   description = "Curated and generated directories of related items.",
+  viewAllHref,
+  viewAllLabel = "View all",
+  emptyLabel = "No collections yet.",
+  limit,
   class: className = "",
 } = Astro.props;
+
+const cards = typeof limit === "number" ? model.collections.slice(0, limit) : model.collections;
+const headerActions = Astro.slots.has("header-actions");
 ---
 
-<section class={`py-12 sm:py-16 ${className}`}>
+<section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
-    <header class="mb-6">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-        Browse
-      </span>
-      <h1 class="m-0 mt-1 text-[1.875rem] sm:text-[2.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-        {title}
-      </h1>
-      <p class="m-0 mt-2 max-w-[64ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
-        {description}
-      </p>
-    </header>
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <SectionHeader eyebrow={eyebrow} title={title} description={description} />
+      {(viewAllHref || headerActions) && (
+        <div class="flex shrink-0 items-center gap-2 pb-2">
+          {viewAllHref && (
+            <a
+              href={viewAllHref}
+              class="text-2xs font-medium text-ink-500 transition-colors hover:text-ink-900 sm:inline dark:text-ink-400 dark:hover:text-ink-100"
+            >
+              {viewAllLabel} →
+            </a>
+          )}
+          <slot name="header-actions" />
+        </div>
+      )}
+    </div>
 
-    {model.collections.length === 0 ? (
+    {cards.length === 0 ? (
       <p class="rounded-md border border-dashed border-ink-200 bg-white p-6 text-sm text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
-        No collections yet.
+        {emptyLabel}
       </p>
     ) : (
       <ul class="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
-        {model.collections.map((c) => (
+        {cards.map((c) => (
           <li class="m-0 p-0">
             <a
               href={c.url}
+              data-event="collection_card_click"
+              data-event-source="collection_index"
+              data-event-item={c.slug}
               class="flex h-full flex-col gap-2 rounded-md border border-ink-200 bg-white p-5 transition-colors hover:border-ink-400 dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-600"
             >
               <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">

@@ -65,6 +65,12 @@ export interface CollectionEntry {
   title: string;
   description: string;
   url: string;
+  /** GitHub (or other source) repository URL. Used by the row
+   *  component to render a "View repo" link in the footer. */
+  repoHref?: string;
+  /** Project's own homepage URL (e.g. marketing site). Rendered
+   *  as "Visit site" when present, alongside "View repo". */
+  homepageHref?: string;
   stack?: string;
   platform?: string[];
   license?: string;
