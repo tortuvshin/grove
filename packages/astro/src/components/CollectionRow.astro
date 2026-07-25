@@ -1,0 +1,109 @@
+---
+/**
+ * CollectionRow — a single entry inside a curated/generated collection.
+ *
+ * Mirrors `IndexRow`'s visual rhythm (avatar, header, description, dl
+ * stats, footer links) but consumes the lighter `CollectionEntry`
+ * shape directly. The existing `IndexRow` is tightly coupled to
+ * `IndexRecord` (which carries `kind`, `repoUrl`, `github`, `bestFor`,
+ * etc.) — collections only have a subset of those fields, so a
+ * dedicated row keeps the contract clean.
+ *
+ * Generic: no blueprint-specific copy. Visual style mirrors IndexRow
+ * so a collection page sitting next to the directory index reads as
+ * the same site.
+ */
+import type { CollectionEntry } from "@grove-dev/core";
+import { formatStars, formatRelative } from "@grove-dev/astro";
+
+interface Props {
+  entry: CollectionEntry;
+  eager?: boolean;
+  class?: string;
+}
+
+const { entry, eager = false, class: className = "" } = Astro.props;
+
+const initials = entry.title
+  .split(/\s+/)
+  .map((word) => word[0])
+  .filter(Boolean)
+  .slice(0, 2)
+  .join("")
+  .toUpperCase();
+const stack = entry.stack ?? "—";
+const stars = entry.stars ?? null;
+const pushedAt = entry.pushedAt ?? null;
+const category = entry.categories?.[0];
+---
+
+<article
+  class={`rounded-[calc(var(--radius)+0.25rem)] border border-ink-200 bg-white shadow-none transition-colors hover:bg-secondary dark:border-ink-800 dark:bg-ink-950 dark:hover:bg-ink-900 group relative flex flex-col gap-3 p-4 ${className}`}
+>
+  <header class="flex items-start gap-3">
+    <a
+      href={entry.url}
+      class="relative z-10 flex shrink-0"
+      aria-label={`Open ${entry.title} details`}
+    >
+      <span class="flex h-11 w-11 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-sm font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">
+        {initials || "·"}
+      </span>
+    </a>
+    <div class="min-w-0 flex-1">
+      <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <h3 class="m-0 text-[1.0625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          <a href={entry.url} class="relative z-10 hover:underline">{entry.title}</a>
+        </h3>
+        {category && (
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+            {category}
+          </span>
+        )}
+      </div>
+      <div class="flex flex-wrap items-center gap-x-1.5 text-2xs text-ink-500 dark:text-ink-400">
+        <span class="font-mono">{stack}</span>
+        {entry.platform?.length ? (
+          <>
+            <span class="text-ink-300 dark:text-ink-700">·</span>
+            <span>{entry.platform.slice(0, 3).join(", ")}</span>
+          </>
+        ) : null}
+        {entry.license ? (
+          <>
+            <span class="text-ink-300 dark:text-ink-700">·</span>
+            <span>{entry.license}</span>
+          </>
+        ) : null}
+      </div>
+    </div>
+  </header>
+
+  <p class="m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-300">
+    {entry.description}
+  </p>
+
+  <dl class="grid grid-cols-3 gap-x-3 text-2xs">
+    <div class="flex items-baseline gap-1.5">
+      <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stars</dt>
+      <dd class="font-mono text-ink-700 dark:text-ink-300">{formatStars(stars) ?? "—"}</dd>
+    </div>
+    <div class="flex items-baseline gap-1.5">
+      <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Updated</dt>
+      <dd class="font-mono text-ink-700 dark:text-ink-300">{formatRelative(pushedAt) ?? "—"}</dd>
+    </div>
+    <div class="flex items-baseline gap-1.5">
+      <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">License</dt>
+      <dd class="font-mono text-ink-700 dark:text-ink-300">{entry.license ?? "—"}</dd>
+    </div>
+  </dl>
+
+  <footer class="relative z-10 mt-1 flex items-center gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
+    <a
+      href={entry.url}
+      class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent px-2 text-2xs"
+    >
+      View details →
+    </a>
+  </footer>
+</article>
