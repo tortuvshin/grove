@@ -16,6 +16,7 @@ export default defineConfig({
   nav: [
     { label: "Home", href: "/" },
     { label: "Browse", href: "/projects" },
+    { label: "Collections", href: "/collections" },
     { label: "About", href: "/about" },
   ],
 
