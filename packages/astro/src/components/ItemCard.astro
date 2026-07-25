@@ -148,13 +148,7 @@ const category = (item as { category?: string }).category;
   class={`rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group relative flex h-full flex-col gap-3 p-4 ${className}`}
 >
   {/* Top row: logo + name + (optional) status + curated mark. */}
-  <header class="relative z-10 flex items-start gap-3">
-    <a
-      href={detailHref}
-      aria-label={`Open ${name} details`}
-      class="absolute inset-0 z-0 rounded-lg"
-    ></a>
-
+  <header class="flex items-start gap-3">
     {logoUrl ? (
       <img
         src={logoUrl}
@@ -178,11 +172,10 @@ const category = (item as { category?: string }).category;
       <h3
         class="m-0 truncate text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100"
       >
-        {/* Name → detail page (not GitHub repo). Stacks above the
-            stretched link via z-index. */}
+        {/* Name → detail page (not GitHub repo). */}
         <a
           href={detailHref}
-          class="relative z-10 text-inherit no-underline"
+          class="inline-flex min-h-6 min-w-6 items-center text-inherit no-underline"
         >
           {name}
         </a>
@@ -198,7 +191,7 @@ const category = (item as { category?: string }).category;
                 data-event="external_repo_click"
                 data-event-source="card_owner"
                 data-event-item={slug}
-                class="relative z-10 font-mono text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+                class="font-mono text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
               >
                 {/* `data-event` and `data-event-*` are forwarding hooks
                     for downstream analytics. Sites wire their own
@@ -210,7 +203,7 @@ const category = (item as { category?: string }).category;
                     "detail_owner" | "detail_view_github" | "detail_homepage"
                     | "detail_distribution"), and `data-event-item` is
                     the record slug. */}
-                <span class="text-ink-400 dark:text-ink-500">@</span>{owner}{repo ? <span class="text-ink-400 dark:text-ink-500">/{repo}</span> : ""}
+                <span class="text-ink-400">@</span>{owner}{repo ? <span class="text-ink-400">/{repo}</span> : ""}
               </a>
               <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
               {category}
@@ -252,7 +245,7 @@ const category = (item as { category?: string }).category;
   {/* Description */}
   {item.description && (
     <p
-      class="relative z-10 m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400"
+      class="m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400"
     >
       {item.description}
     </p>
@@ -261,7 +254,7 @@ const category = (item as { category?: string }).category;
   {/* Metadata row: stars · updated · license — the three signals
       that answer "is this alive and usable?" at a glance. */}
   {showMeta && (
-    <div class="relative z-10 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400">
       {starsLabel !== null && (
         <span class="inline-flex items-center gap-1" title={`${stars ?? 0} stars on GitHub`}>
           <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
@@ -288,7 +281,7 @@ const category = (item as { category?: string }).category;
 
   {/* Platform + stack chips, pushed to the bottom. */}
   {showChips && (
-    <div class="relative z-10 mt-auto flex flex-col gap-1.5">
+    <div class="mt-auto flex flex-col gap-1.5">
       {visiblePlatforms.length > 0 && (
         <div class="flex flex-wrap items-center gap-1.5">
           {visiblePlatforms.map((p) => (
@@ -298,7 +291,7 @@ const category = (item as { category?: string }).category;
             </span>
           ))}
           {platformOverflow > 0 && (
-            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground text-ink-400 dark:text-ink-500">+{platformOverflow}</span>
+            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground text-ink-400">+{platformOverflow}</span>
           )}
         </div>
       )}
@@ -311,7 +304,7 @@ const category = (item as { category?: string }).category;
             </span>
           ))}
           {stackOverflow > 0 && (
-            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground text-ink-400 dark:text-ink-500">+{stackOverflow}</span>
+            <span class="inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground !bg-muted !text-muted-foreground text-ink-400">+{stackOverflow}</span>
           )}
         </div>
       )}
@@ -319,7 +312,7 @@ const category = (item as { category?: string }).category;
   )}
 
   {/* Footer row: View repo + Details links. */}
-  <footer class="relative z-10 mt-1 flex items-center justify-between gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
+  <footer class="mt-1 flex items-center justify-between gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
     {externalHref && (
       <a
         href={externalHref}
@@ -328,7 +321,7 @@ const category = (item as { category?: string }).category;
         data-event="external_repo_click"
         data-event-source="card_view_repo"
         data-event-item={slug}
-        class="relative z-10 inline-flex items-center gap-1 font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+        class="inline-flex items-center gap-1 font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
       >
         {repoHref ? "View repo" : "Visit source"}
         <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
@@ -339,7 +332,7 @@ const category = (item as { category?: string }).category;
     )}
     <a
       href={detailHref}
-      class="relative z-10 inline-flex items-center gap-1 font-medium text-ink-500 transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+      class="inline-flex items-center gap-1 font-medium text-ink-500 transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
     >
       Details →
     </a>

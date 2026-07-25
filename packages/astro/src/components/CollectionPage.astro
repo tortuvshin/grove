@@ -1,0 +1,89 @@
+---
+/**
+ * CollectionPage — renders a single curated/generated collection.
+ *
+ * Consumes a `CollectionPageModel` produced by `getCollectionPageModel`.
+ * Renders the header (title, description, editorial notes), the
+ * matched entries via `CollectionRow`, and a related-collections
+ * section.
+ *
+ * Generic: no blueprint-specific copy. The `eyebrow` prop lets the
+ * consumer pick a label (e.g. "Curated" or "Generated").
+ */
+import CollectionRow from "./CollectionRow.astro";
+import Container from "../layouts/Container.astro";
+import type { CollectionPageModel } from "../server/collections.js";
+
+interface Props {
+  model: CollectionPageModel;
+  eyebrow?: string;
+  class?: string;
+}
+
+const {
+  model,
+  eyebrow = "Collection",
+  class: className = "",
+} = Astro.props;
+---
+
+<section class={`py-12 sm:py-16 ${className}`}>
+  <Container>
+    <header class="mb-6">
+      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        {eyebrow}
+      </span>
+      <h1 class="m-0 mt-1 text-[1.875rem] sm:text-[2.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+        {model.collection.title}
+      </h1>
+      <p class="m-0 mt-2 max-w-[64ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
+        {model.collection.description}
+      </p>
+      {model.collection.introduction && (
+        <p class="m-0 mt-3 max-w-[64ch] text-[0.9375rem] text-ink-700 dark:text-ink-300">
+          {model.collection.introduction}
+        </p>
+      )}
+      {model.collection.selectionNote && (
+        <p class="m-0 mt-3 max-w-[64ch] text-[0.875rem] font-medium text-ink-700 dark:text-ink-300">
+          <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Selection criteria · </span>
+          {model.collection.selectionNote}
+        </p>
+      )}
+    </header>
+
+    {model.isEmpty ? (
+      <p class="rounded-md border border-dashed border-ink-200 bg-white p-6 text-sm text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
+        This collection is currently empty.
+      </p>
+    ) : (
+      <ul class="m-0 flex list-none flex-col gap-3 p-0">
+        {model.entries.map((entry, i) => (
+          <li class="m-0 p-0">
+            <CollectionRow entry={entry} eager={i < 2} />
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {model.related.length > 0 && (
+      <section class="mt-12 border-t border-ink-200 pt-8 dark:border-ink-800">
+        <h2 class="m-0 text-[1.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          Related collections
+        </h2>
+        <ul class="m-0 mt-3 flex list-none flex-col gap-2 p-0">
+          {model.related.map((r) => (
+            <li>
+              <a
+                href={r.url}
+                class="text-sm text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
+              >
+                {r.title} →
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </Container>
+</section>

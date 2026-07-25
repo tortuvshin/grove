@@ -27,9 +27,9 @@ const columns = [
   >
     {columns.map((column) => (
       <div class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors p-5">
-        <h3 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+        <h2 class="m-0 text-sm font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
           {column.title}
-        </h3>
+        </h2>
         <ul class="mt-3 mb-0 flex list-disc flex-col gap-1.5 pl-5">
           {column.items.map((item) => (
             <li class="text-sm text-ink-700 dark:text-ink-200">{item}</li>

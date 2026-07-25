@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 
+import { buildRobotsTxt } from "./robots.js";
 import type { GroveConfig } from "./schema.js";
 
 const ROBOTS_MARKER = "# grove-generated: edit this file to take ownership";
@@ -48,41 +49,6 @@ function wrapText(value: string, maxLength = 54): string[] {
     }
   }
   return lines.slice(0, 2);
-}
-
-export function buildRobotsTxt(config: GroveConfig): string {
-  const baseUrl = (config.site.url ?? "https://example.com").replace(/\/$/, "");
-  return `${ROBOTS_MARKER}
-# Search engines, AI crawlers, and link-preview bots are welcome.
-
-User-agent: *
-Allow: /
-Disallow: /submit
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: Applebot-Extended
-Allow: /
-
-User-agent: CCBot
-Allow: /
-
-Sitemap: ${baseUrl}/sitemap.xml
-LLM-Content: ${baseUrl}/llms.txt
-`;
 }
 
 export function buildOgImageSvg(
@@ -145,7 +111,10 @@ export async function buildSiteArtifacts(
   const robotsWritten = await writeOwnedArtifact(
     robotsPath,
     ROBOTS_MARKER,
-    buildRobotsTxt(config),
+    `${ROBOTS_MARKER}\n${buildRobotsTxt({
+      siteUrl: config.site.url ?? "",
+      disallow: ["/api/", "/internal/", "/preview/"],
+    })}`,
   );
   const ogImageWritten = await writeOwnedArtifact(
     ogImagePath,

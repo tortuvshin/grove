@@ -194,6 +194,7 @@ export const githubMetadataSchema = z.object({
   archived: z.boolean().default(false),
   disabled: z.boolean().optional(),
   private: z.boolean().optional(),
+  fork: z.boolean().optional(),
   visibility: z.string().optional(),
   pushedAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional(),
@@ -209,6 +210,8 @@ export const githubMetadataSchema = z.object({
   openPullRequests: z.number().int().nonnegative().optional(),
   description: z.string().nullable().optional(),
   homepage: z.string().nullable().optional(),
+  htmlUrl: z.string().url().optional(),
+  size: z.number().int().nonnegative().optional(),
   files: z.record(z.string(), z.boolean()).optional(),
   monthlyCommits: z
     .array(
@@ -507,6 +510,32 @@ export const componentOverrideSchema = z.object({
   DetailHeader: z.string().optional(),
 });
 
+// ──────────────────────────────────────────────────────────────────────
+// Audit manifest (consumed by `grove audit`)
+// ──────────────────────────────────────────────────────────────────────
+
+const auditPageTypeSchema = z.enum([
+  "home",
+  "directory",
+  "collection",
+  "record",
+  "content",
+  "empty",
+  "404",
+]);
+
+const auditPageManifestEntrySchema = z.object({
+  path: z.string().min(1),
+  type: auditPageTypeSchema,
+  label: z.string().min(1),
+  sample: z.record(z.string(), z.string()).optional(),
+});
+
+export const auditSchema = z.object({
+  baseUrl: z.string().url().optional(),
+  pages: z.array(auditPageManifestEntrySchema).min(1),
+});
+
 export const groveConfigSchema = z.object({
   blueprint: blueprintSchema.default("project-directory"),
 
@@ -581,6 +610,12 @@ export const groveConfigSchema = z.object({
     density: "comfortable",
     containerWidth: "72rem",
   }),
+
+  /**
+   * Optional Lighthouse audit manifest consumed by `grove audit`.
+   * Each entry is a canonical page the audit must score 100×4.
+   */
+  audit: auditSchema.optional(),
 
   components: componentOverrideSchema.default({}),
 
