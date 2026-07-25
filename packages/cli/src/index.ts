@@ -5,6 +5,7 @@ import { readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { Command } from "commander";
 import {
+  buildGithubSyncPatch,
   cleanupStale,
   enrichFromGithubHtml,
   fetchGithubMetadata,
@@ -16,6 +17,8 @@ import {
   validateProject,
 } from "@grove-dev/core";
 import { parse as parseYaml } from "yaml";
+import { buildAuditCommand } from "./audit-cli.js";
+import { buildCollectionCommand } from "./collection-cli.js";
 import { initDirectory, readCliVersion } from "./init.js";
 
 const program = new Command();
@@ -131,19 +134,12 @@ program
       try {
         const metadata = await fetchGithubMetadata(ref);
         if (metadata) {
-          patch.repository = {
-            full_name: metadata.fullName,
-            stargazers_count: metadata.stars,
-            forks_count: metadata.forks,
-            open_issues_count: metadata.openIssues,
-            language: metadata.language,
-            pushed_at: metadata.pushedAt,
-            archived: metadata.archived,
-            license: metadata.license
-              ? { spdx_id: metadata.license, name: metadata.license }
-              : null,
-            topics: metadata.topics,
-          };
+          // Merge into the existing repository block rather than
+          // replacing it wholesale. Sync only owns the fields it
+          // explicitly writes; curator-curated fields and anything
+          // outside the sync surface (manually-added metadata, etc.)
+          // survive a re-run.
+          Object.assign(patch, buildGithubSyncPatch(metadata, github));
           source = "api";
         }
       } catch {
@@ -153,11 +149,16 @@ program
         try {
           const enriched = await enrichFromGithubHtml(repoUrl);
           if (!enriched.notFound && !enriched.rateLimited && !enriched.error) {
+            // HTML fallback only fills fields the API didn't reach.
+            // `homepage` is the only field unique to the HTML path;
+            // it lives at `github.homepage` (flat, matches schema).
+            if (enriched.fields.homepage) {
+              patch.homepage = enriched.fields.homepage;
+            }
             patch.html = {
               license: enriched.fields.license,
               language: enriched.fields.language,
               topics: enriched.fields.topics,
-              homepage: enriched.fields.homepage,
             };
             source = "html";
             htmlOnly += 1;
@@ -196,6 +197,9 @@ program
     }
     if (options.strict && report.totalCandidates > 0) process.exitCode = 1;
   });
+
+program.addCommand(buildAuditCommand());
+program.addCommand(buildCollectionCommand());
 
 program.parseAsync().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : String(error));

@@ -1,0 +1,45 @@
+---
+/**
+ * Reference collection index route — copy or import in a consumer
+ * Astro project to render a grid of every collection at
+ * `/collections/`.
+ */
+import GroveDocumentHead from "../../components/GroveDocumentHead.astro";
+import CollectionIndex from "../../components/CollectionIndex.astro";
+import { loadCollections } from "../../lib/load-collections.js";
+import {
+  recordsToCollectionEntries,
+  getCollectionIndexModel,
+} from "../../server/index.js";
+import fullPayload from "@grove/generated/records.full.json";
+import siteConfigPayload from "@grove/generated/site-config.json";
+
+const collections = await loadCollections(process.cwd());
+const entries = recordsToCollectionEntries(
+  (fullPayload as { records?: unknown[] }).records ?? [],
+  siteConfigPayload,
+);
+const model = getCollectionIndexModel(collections, entries);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <GroveDocumentHead document={{
+      identity: { type: "collection" as const, canonical: Astro.site ? new URL("/collections/", Astro.site) : Astro.url, language: "en" },
+      metadata: {
+        title: "Collections",
+        description: "Curated and generated directories of related items.",
+        robots: "index,follow",
+        openGraph: { title: "Collections", description: "Curated and generated directories of related items.", url: Astro.site ? new URL("/collections/", Astro.site).toString() : Astro.url.toString(), image: Astro.site ? new URL("/og.png", Astro.site).toString() : "", type: "website" as const },
+        twitter: { card: "summary_large_image" as const },
+      },
+      structuredData: [],
+      discovery: { includeInSitemap: true, includeInLlms: true, relatedLinks: [] },
+    }} />
+  </head>
+  <body>
+    <CollectionIndex model={model} />
+  </body>
+</html>

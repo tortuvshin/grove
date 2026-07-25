@@ -10,7 +10,12 @@
  * which is offline).
  */
 import { describe, it, expect } from "vitest";
-import { parseGithubRepoUrl, type GithubRepoRef } from "./github.js";
+import {
+  buildGithubSyncPatch,
+  parseGithubRepoUrl,
+  type GithubRepoRef,
+} from "./github.js";
+import type { GithubMetadata } from "./schema.js";
 
 describe("parseGithubRepoUrl", () => {
   it("returns undefined for an empty or undefined input", () => {
@@ -76,5 +81,100 @@ describe("parseGithubRepoUrl", () => {
       owner: "Owner",
       repo: "Repo",
     });
+  });
+});
+
+describe("buildGithubSyncPatch", () => {
+  const baseMetadata: GithubMetadata = {
+    fullName: "owner/repo",
+    stars: 100,
+    forks: 10,
+    openIssues: 5,
+    watchers: 200,
+    archived: false,
+    disabled: false,
+    private: false,
+    fork: false,
+    visibility: "public",
+    pushedAt: "2026-01-15T00:00:00Z",
+    updatedAt: "2026-01-20T00:00:00Z",
+    createdAt: "2020-01-01T00:00:00Z",
+    latestReleaseAt: "2025-12-01T00:00:00Z",
+    license: "MIT",
+    topics: ["ai", "agents"],
+    language: "Python",
+    defaultBranch: "main",
+    htmlUrl: "https://github.com/owner/repo",
+    description: "GitHub's short tagline",
+    homepage: "https://example.com",
+    size: 1234,
+  };
+
+  it("writes fetched fields to the repository block", () => {
+    const patch = buildGithubSyncPatch(baseMetadata, undefined);
+    expect(patch.repository).toMatchObject({
+      full_name: "owner/repo",
+      stargazers_count: 100,
+      forks_count: 10,
+      open_issues_count: 5,
+      language: "Python",
+      pushed_at: "2026-01-15T00:00:00Z",
+      updated_at: "2026-01-20T00:00:00Z",
+      archived: false,
+      disabled: false,
+      default_branch: "main",
+      license: { spdx_id: "MIT", name: "MIT" },
+      topics: ["ai", "agents"],
+    });
+  });
+
+  it("lifts latestReleaseAt and homepage to the top level (not into repository)", () => {
+    const patch = buildGithubSyncPatch(baseMetadata, undefined);
+    expect(patch.latestReleaseAt).toBe("2025-12-01T00:00:00Z");
+    expect(patch.homepage).toBe("https://example.com");
+    expect((patch.repository as Record<string, unknown>).homepage).toBeUndefined();
+    expect((patch.repository as Record<string, unknown>).latestReleaseAt).toBeUndefined();
+  });
+
+  it("merges into existing repository block instead of replacing it", () => {
+    const existingGithub = {
+      repository: {
+        // Previously fetched, never re-refreshed:
+        id: 9999,
+        node_id: "MDEwOlJlcG9zaXRvcnkxMjM0",
+        html_url: "https://github.com/owner/repo",
+        // Curator-added manual fields:
+        description: "Curator's hand-written description",
+        custom: { internal: "value" },
+      },
+    };
+    const patch = buildGithubSyncPatch(baseMetadata, existingGithub);
+    const repo = patch.repository as Record<string, unknown>;
+    // Preserved from existing:
+    expect(repo.id).toBe(9999);
+    expect(repo.node_id).toBe("MDEwOlJlcG9zaXRvcnkxMjM0");
+    expect(repo.html_url).toBe("https://github.com/owner/repo");
+    expect(repo.description).toBe("Curator's hand-written description");
+    expect(repo.custom).toEqual({ internal: "value" });
+    // Refreshed from sync:
+    expect(repo.stargazers_count).toBe(100);
+    expect(repo.pushed_at).toBe("2026-01-15T00:00:00Z");
+  });
+
+  it("does not write latestReleaseAt or homepage when missing", () => {
+    const patch = buildGithubSyncPatch(
+      { ...baseMetadata, latestReleaseAt: null, homepage: null },
+      undefined,
+    );
+    expect("latestReleaseAt" in patch).toBe(false);
+    expect("homepage" in patch).toBe(false);
+  });
+
+  it("writes null license when metadata has no license", () => {
+    const patch = buildGithubSyncPatch(
+      { ...baseMetadata, license: null },
+      undefined,
+    );
+    expect((patch.repository as Record<string, unknown>).license).toBeNull();
   });
 });

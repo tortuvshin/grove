@@ -43,3 +43,37 @@ describe("LLM outputs", () => {
     expect(text).not.toContain("/projects");
   });
 });
+
+describe("buildLlmsFullTxt catalog export", () => {
+  it("includes full record summaries and taxonomy descriptions", () => {
+    const out = buildLlmsFullTxt({
+      site: {
+        name: "Example",
+        url: "https://example.com/",
+        description: "Full catalog",
+      },
+      records: [
+        {
+          url: "https://example.com/apps/a/",
+          title: "App A",
+          description: "Top app",
+          stack: "TypeScript",
+          license: "MIT",
+        },
+      ],
+      taxonomies: [
+        {
+          url: "https://example.com/stacks/flutter/",
+          title: "Flutter",
+          description: "Flutter stack",
+        },
+      ],
+      updatedAt: "2026-07-24T00:00:00Z",
+    });
+
+    expect(out).toContain("Updated: 2026-07-24");
+    expect(out).toContain("### Flutter");
+    expect(out).toContain("App A");
+    expect(out).toContain("License: MIT");
+  });
+});

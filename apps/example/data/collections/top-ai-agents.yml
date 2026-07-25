@@ -1,0 +1,14 @@
+slug: top-ai-agents
+kind: curated
+title: Top Open Source AI Agents
+description: Python-based agent frameworks and orchestration tools.
+query:
+  stacks: [python]
+  excludeStatuses: [archived]
+ranking:
+  preset: quality
+editorial:
+  selectionNote: Ranked by curation score and recent activity.
+seo:
+  index: true
+  title: Top Open Source AI Agents in 2026

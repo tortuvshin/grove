@@ -69,9 +69,9 @@ const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.
   <p class="m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-300">{item.description}</p>
 
   <dl class="grid grid-cols-3 gap-x-3 text-2xs">
-    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500">Stars</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{formatStars(stars) ?? "—"}</dd></div>
-    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500">Updated</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{formatRelative(updatedAt)}</dd></div>
-    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500">License</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{license ?? "—"}</dd></div>
+    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stars</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{formatStars(stars) ?? "—"}</dd></div>
+    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Updated</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{formatRelative(updatedAt)}</dd></div>
+    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">License</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{license ?? "—"}</dd></div>
   </dl>
 
   {showChips && (platforms.length > 0 || stacks.length > 0) && (

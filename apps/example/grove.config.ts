@@ -16,6 +16,7 @@ export default defineConfig({
   nav: [
     { label: "Home", href: "/" },
     { label: "Browse", href: "/projects" },
+    { label: "Collections", href: "/collections" },
     { label: "About", href: "/about" },
   ],
 
@@ -72,5 +73,18 @@ export default defineConfig({
     radius: "soft",
     density: "comfortable",
     containerWidth: "72rem",
+  },
+
+  audit: {
+    baseUrl: "http://127.0.0.1:4321",
+    pages: [
+      { path: "/", type: "home", label: "Homepage" },
+      { path: "/projects/", type: "directory", label: "Directory index" },
+      { path: "/collections/top-flutter/", type: "collection", label: "Top Flutter collection" },
+      { path: "/projects/open-webui/", type: "record", label: "Record detail" },
+      { path: "/about/", type: "content", label: "About page" },
+      { path: "/empty/", type: "empty", label: "Empty state" },
+      { path: "/this-page-does-not-exist/", type: "404", label: "404 page" },
+    ],
   },
 });

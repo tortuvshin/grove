@@ -39,6 +39,7 @@ export {
   githubMetadataSchema,
   githubLicenseSchema,
   blueprintKind,
+  auditSchema,
 } from "./schema.js";
 
 // ── Schema-derived types ─────────────────────────────────────────────
@@ -89,11 +90,7 @@ export { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "./llms.js";
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from "./llms.js";
 
 // ── Config-driven public artifacts ──────────────────────────────────
-export {
-  buildOgImageSvg,
-  buildRobotsTxt,
-  buildSiteArtifacts,
-} from "./site-artifacts.js";
+export { buildOgImageSvg, buildSiteArtifacts } from "./site-artifacts.js";
 export type {
   SiteArtifactStats,
   SiteArtifactsResult,
@@ -104,7 +101,7 @@ export { pickCleanupCandidates, cleanupStale } from "./decisions.js";
 export type { CleanupCandidate, CleanupReport } from "./decisions.js";
 
 // ── GitHub: parsing + REST metadata ──────────────────────────────────
-export { parseGithubRepoUrl, fetchGithubMetadata } from "./github.js";
+export { parseGithubRepoUrl, fetchGithubMetadata, buildGithubSyncPatch } from "./github.js";
 export type { GithubRepoRef } from "./github.js";
 
 // ── GitHub: HTML enrichment (token-free fallback) ────────────────────
@@ -162,3 +159,74 @@ export * from "./directory-repo.js";
 export * from "./directory-scores.js";
 export * from "./directory-search.js";
 export * from "./directory-taxonomy.js";
+
+export {
+  DEFAULT_BUDGET,
+  evaluateBudget,
+} from "./audit.js";
+export type {
+  PageType,
+  Profile,
+  PageManifestEntry,
+  LighthouseScores,
+  LighthouseMetrics,
+  AuditResult,
+  BudgetConfig,
+  BudgetViolation,
+} from "./audit.js";
+
+// ── PageDocument: unified page-level contract + JSON-LD registry ────
+// Every page in a Grove project declares a `PageDocument` and the
+// framework emits all SEO metadata (title, description, canonical, OG,
+// Twitter, JSON-LD) from this single source. `validateJsonLd` is the
+// build-time well-formedness check that runs over the node graph.
+export {
+  definePageDocument,
+  siteSchema,
+  collectionSchema,
+  recordSchema,
+  contentSchema,
+  buildJsonLd,
+  validateJsonLd,
+} from "./page-document.js";
+export type {
+  DocumentPageType,
+  OpenGraphMetadata,
+  TwitterMetadata,
+  PageMetadata,
+  LinkedDocument,
+  JsonLdNode,
+  PageDiscovery,
+  PageIdentity,
+  PageDocument,
+  Crumb,
+  SiteInput,
+  CollectionInput,
+  RecordInput,
+  ContentInput,
+  JsonLdValidationIssue,
+} from "./page-document.js";
+
+// ── Robots + filter URL policy ───────────────────────────────────────
+export { buildRobotsTxt, isIndexableFilterPath } from "./robots.js";
+
+// ── Collection engine (query, ranking, editorial) ────────────────────
+export {
+  filterEntries,
+  rankEntries,
+} from "./collections.js";
+export type {
+  CollectionKind,
+  RankingPreset,
+  CollectionQuery,
+  CollectionRanking,
+  CollectionEditorial,
+  CollectionSeo,
+  Collection,
+  CollectionEntry,
+} from "./collections.js";
+
+// ── Collection runner + related resolver ─────────────────────────────
+export { runCollection } from "./collector.js";
+export type { CollectionResult } from "./collector.js";
+export { findRelated } from "./related.js";
