@@ -194,6 +194,7 @@ export const githubMetadataSchema = z.object({
   archived: z.boolean().default(false),
   disabled: z.boolean().optional(),
   private: z.boolean().optional(),
+  fork: z.boolean().optional(),
   visibility: z.string().optional(),
   pushedAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional(),
@@ -209,6 +210,8 @@ export const githubMetadataSchema = z.object({
   openPullRequests: z.number().int().nonnegative().optional(),
   description: z.string().nullable().optional(),
   homepage: z.string().nullable().optional(),
+  htmlUrl: z.string().url().optional(),
+  size: z.number().int().nonnegative().optional(),
   files: z.record(z.string(), z.boolean()).optional(),
   monthlyCommits: z
     .array(
