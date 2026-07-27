@@ -50,7 +50,7 @@ jobs:
       - name: Run grove audit
         run: node ../../packages/cli/dist/index.js audit --runs 1 --json lighthouse-report.json --junit lighthouse-junit.xml
         working-directory: apps/example
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse-report
