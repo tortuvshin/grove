@@ -36,7 +36,7 @@ describe("grove init integration", () => {
     expect(pkg.name).toBe("open-apps");
     expect(pkg.scripts).toMatchObject({ dev: "astro dev", build: "astro build", check: "astro check" });
     expect(await readdir(join(target, ".github/workflows"))).toEqual([
-      "ci.yml", "cleanup.yml", "deploy.yml", "sync-contributors.yml", "sync-github.yml",
+      "ci.yml", "cleanup.yml", "deploy.yml", "readme.yml", "sync-contributors.yml", "sync-github.yml",
     ]);
     expect(await readFile(join(target, "src/pages/index.astro"), "utf8")).toContain(
       "getHomePageModel(siteConfig)",
