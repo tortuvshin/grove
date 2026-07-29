@@ -1,80 +1,64 @@
 ---
 title: Next.js
-description: Roadmap-only framework adapter. Why it exists, what's missing, and when to expect it.
+description: Status: not shipped. A Next.js adapter is a future roadmap item, not part of v0.4.0.
 ---
 
-The **Next.js** adapter (`@grove-dev/nextjs`) is reserved as a
-package boundary but is **not supported in V1**. The package
-exists so consumers can install it, but the V1 CLI refuses
-`--framework nextjs` at scaffold time.
+The **Next.js** adapter is **not shipped in v0.4.0**. There is no
+`@grove-dev/nextjs` package in the workspace, no Next.js template,
+and the `grove init` scaffolder only emits an Astro project.
 
 ## Status
 
-**Roadmap only — not in V1.** The package is published (to reserve
-the name and the import path) but the default template is
-incomplete and the build pipeline is not wired up.
+**Planned.** No code exists for this adapter today. The roadmap
+([V1.1 section](/roadmap/#next-release--v11)) lists a Next.js
+adapter only "if asked" by a real community space.
 
-## What ships today
+## Why this page exists
 
-The Next.js default template is essentially `package.json` plus
-a `README.md`. It does not include:
+The page is kept so that:
 
-- any Next.js pages or layouts
-- any `@grove-dev/nextjs` components
-- a working `grove build` chain
+- A reader who searches for "Grove Next.js" lands on a clear status
+  page rather than a 404.
+- The roadmap status of Next.js stays pinned in the docs site
+  navigation alongside the [Astro adapter](/adapters/astro/) and the
+  [SvelteKit adapter](/adapters/svelte/).
 
-The V1 CLI refuses `--framework nextjs` at scaffold time. The
-`grove build` command detects the framework from
-`<root>/package.json` and exits with a clear error if the
-`@grove-dev/nextjs` adapter is present but the build pipeline is
-not wired up.
+## What would need to ship
 
-## What you'd need to ship a V1.2 Next.js adapter
+A v1.1 Next.js adapter would have to:
 
+- Add a `@grove-dev/nextjs` package under `packages/nextjs/` with
+  Next.js-friendly page components and server helpers.
 - Port the Astro default template's home page, list page, and
   detail page to Next.js (App Router, React Server Components).
-- Reuse `@grove-dev/ui` primitives (`filterRecords`, `sortRecords`,
-  `paginateRecords`, `scoreRecords`, `format`) — no React
-  re-implementation needed.
-- Reuse `@grove-dev/core` types (`ProjectRecord`, `ResourceRecord`,
-  `EntityRecord`, `IndexRecord`) and the discriminated `Resource`
-  union.
-- Re-implement the 22 `@grove-dev/astro` components in React,
-  swapping `.astro` for `.tsx` and prop spreading. `ItemCard`,
-  `IndexRow`, `RecordSection` are the three core record-rendering
-  components to start with.
-- Add Next.js build verification to the `test:scaffold` script.
+- Reuse `@grove-dev/core` directly — the core package is
+  framework-agnostic.
+- Re-implement the Astro record components in React (`.tsx`).
+- Add Next.js build verification to the `test:scaffold` smoke
+  script.
 
-This is roughly one to two weeks of focused work for a contributor
-familiar with both Astro and Next.js.
+This is roughly 1-2 weeks of focused work for a contributor
+familiar with both Astro and Next.js. No such work is currently
+scheduled.
 
-## When to use this
+## When you need a server-rendered site today
 
-**Don't**, in V1. Use the [Astro adapter](/adapters/astro/)
-instead. The Next.js adapter is reserved as a forward-compatibility
-boundary so consumers can write code that imports
-`@grove-dev/nextjs` today, and have it work when the adapter
-ships in V1.2.
-
-If you need a server-rendered Grove site right now, the options are:
-
-- **Use Astro with the SSR adapter** (out of scope for Grove
-  V1, but supported by Astro itself).
+- **Use Astro with the SSR adapter** (out of scope for Grove v0.4.0,
+  but supported by Astro itself).
 - **Build a custom integration** on top of `@grove-dev/core`. The
-  core package (`defineConfig`, `pickCleanupCandidates`,
-  `classifyHealth`, `buildLlmsTxt`, `buildLlmsFullTxt`, `buildSitemap`,
-  etc.) is framework-agnostic. A custom Next.js integration is
-  roughly 100-200 lines of glue code that reads
-  `data/generated/records.full.json` and renders the same UI
-  primitives Astro uses.
+  core package is framework-agnostic.
+- **Wait** for the V1.1 release if the demand justifies it.
 
 ## Tracking
 
-V1.2 work for the Next.js adapter is tracked in the project
-roadmap. See [Roadmap](/roadmap/) for current status.
+Next.js adapter status is tracked in
+[Roadmap](/roadmap/#next-release--v11).
 
 ## Related docs
 
-- **[Astro adapter](/adapters/astro/)** — the V1-supported choice.
-- **[SvelteKit adapter](/adapters/svelte/)** — same roadmap status
-  as Next.js.
+- **[Astro adapter](/adapters/astro/)** — the only v0.4.0-supported
+  choice.
+- **[SvelteKit adapter](/adapters/svelte/)** — same planned status as
+  Next.js.
+- **[Frameworks status matrix](/reference/frameworks/)** — single
+  table covering all renderers.
