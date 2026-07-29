@@ -1,0 +1,39 @@
+apps/docs/src/content/docs/getting-started/deploy.md
+  s_a46967aae7000d::t_65095148974881 8-9,18-19,21-24,26-27,29-30,34,36-39,43-44,48-51,55-58,67-68,72-75
+apps/docs/src/content/docs/adapters/astro.md
+  s_a46967aae7000d::t_739ea60b5073cd 8-9,13-14,18-39,44-51,58,63-64,98,113-114,118-121,124-125,128-131,136-137,140-141,143-147,151-154,163-165,172-173,175
+apps/docs/src/content/docs/adapters/svelte.md
+  s_a46967aae7000d::t_c498c1f92c2dd8 3,6-8,12-14,16,18,20-24,26,28,30-37,39-40,42,45-46,49,53-54,58-63
+apps/docs/src/content/docs/getting-started/create-a-space.md
+  s_a46967aae7000d::t_6fa68b8fd17dae 8-11,16,22-23,31-36,42-43,51-54,56,58,61,64-73,76-79
+apps/docs/src/content/docs/getting-started/add-your-first-project.md
+  s_a46967aae7000d::t_1749af947d5626 6-7,12-23,26-28,32-47,53,56,59-65,67-68,80-81,85-88
+apps/docs/src/content/docs/maintainers/governance.md
+  s_a46967aae7000d::t_78d55bd7d453c9 6-10,12-15,19-20,22-29,31-32,36-54,58-61,80-95,101-109,111-112,118-127,129,133-135,139-145,151-163
+apps/docs/src/content/docs/maintainers/security.md
+  s_a46967aae7000d::t_07d1a693112841 6-11,15-17,19-23,25-27,35-36,42-49,51-54,58-59,67-70,72-74,76-78,84-88,92-96,102-106,110-111,113-119,121-123,127-131,135-138,142-154
+apps/docs/src/content/docs/roadmap.md
+  s_a46967aae7000d::t_586a4de8e9c7c2 3,6-7,13-15,19-22,26,28-30,34-44,48-54,58-59,61-65,69-70,72-79,82-83,87-112,118-119,121,123-125,127,129-132,134,136-140,142,144-146,148-152,158-159,163-166,170-173,177-184,188-191,197-198,205-208,214-220
+apps/docs/src/content/docs/maintainers/contributing.md
+  s_a46967aae7000d::t_3cb9476850aaef 6-7,9-12,16-22,24-25,31-53,59-74,78-79,109,113-128,132-146,150-151,153-159,163-168,170-172
+apps/docs/src/content/docs/maintainers/release-process.md
+  s_a46967aae7000d::t_6084fe909e4420 6-8,10-11,32-49,53-55,57-59,61,63-67,71-73,81,83,85,90-92,98-105,109-110,114-124,128-130,133,135-138,143-144,150-153,159-164,166-168,175-185,189-197,201-208
+apps/docs/src/content/docs/adapters/nextjs.md
+  s_a46967aae7000d::t_6c0053ee30486d 3,6-8,12-14,16,18,20-24,26,28,30-31,34-47,49-50,54-55,59-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1af5eed90ee2c73f5b34ea2ca7ff5ece22e8b659",
+  "prompts": {},
+  "sessions": {
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
