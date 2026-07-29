@@ -1,0 +1,59 @@
+apps/docs/src/content/docs/guides/maintain-health-signals.md
+  s_a46967aae7000d::t_cd9a67b7342d6f 12,16-20
+  s_a46967aae7000d::t_83ace6a9af84ea 59
+apps/docs/src/content/docs/automation/validation.md
+  s_a46967aae7000d::t_d6a1773d3520cd 9,13-14,18-32,34-35
+apps/docs/src/content/docs/automation/submissions.md
+  s_a46967aae7000d::t_cd2b4eca7938b2 6,8-15,17-21,23-24
+apps/docs/src/content/docs/build/projects.md
+  s_a46967aae7000d::t_0078601f367d61 10-13
+apps/docs/src/content/docs/guides/author-a-record.md
+  s_a46967aae7000d::t_f80450fa649296 189-191
+  s_a46967aae7000d::t_49a1ba2aaaa503 21
+apps/docs/src/content/docs/reference/plugin-api.md
+  s_a46967aae7000d::t_f7042c5c8eb545 162
+  s_a46967aae7000d::t_fea6285a7896eb 157
+apps/docs/src/content/docs/automation/github-metadata.md
+  s_a46967aae7000d::t_db52563ba3e19a 17
+apps/docs/src/content/docs/guides/sync-github-metadata.md
+  s_a46967aae7000d::t_8bc0456a0ffd06 133-134
+  s_a46967aae7000d::t_34c9afdb60644d 92
+  s_a46967aae7000d::t_e8826964e67e2d 13,16
+  s_a46967aae7000d::t_50eb8e5191bf5e 26
+  s_a46967aae7000d::t_bb102c5849eec9 104,106
+apps/docs/src/content/docs/guides/deploy.md
+  s_a46967aae7000d::t_4e981a4f558d3f 3,8,16,18-21,29-36,38-39,43-44,56-58,60-61,72,74,98,102-107,111,117-119,123-125,127-129,131-135,137,139-141,156,158-164,168-170,172-176,178-179
+apps/docs/src/content/docs/guides/customize-astro-template.md
+  s_a46967aae7000d::t_0f81cae726fa36 6-8,12-17,19-20,24-26,45,62-66,68-70,72-73,77-83,87-88,93,115-116,123-125,129-131,133-135,139-164,168,184-185,187-196,200-204,206-207,213-219,223-231,233-235,241-247,249-250
+apps/docs/src/content/docs/reference/config.md
+  s_a46967aae7000d::t_c5450b9ee6f064 36-37
+  s_a46967aae7000d::t_38f9e7425e4ac6 255
+  s_a46967aae7000d::t_7d860ad479853d 208-211
+apps/docs/src/content/docs/automation/scheduled.md
+  s_a46967aae7000d::t_500ae9787372d0 6-7,9-20,28,31-34,36-38
+apps/docs/src/content/docs/reference/record-schema.md
+  s_a46967aae7000d::t_33c9f08ac20721 291-292
+  s_a46967aae7000d::t_6f79c0221c0340 217
+  s_a46967aae7000d::t_d9720fa6765b40 3
+apps/docs/src/content/docs/concepts/philosophy.md
+  s_a46967aae7000d::t_e937277bbf1153 29,34
+  s_a46967aae7000d::t_903c91c27c9fb3 76
+  s_a46967aae7000d::t_38157a7a70661b 54
+  s_a46967aae7000d::t_69d0145a3cac28 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2f11539534f094e6f1ec938a8f15d7d32434dd66",
+  "prompts": {},
+  "sessions": {
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
