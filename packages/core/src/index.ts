@@ -40,6 +40,7 @@ export {
   githubLicenseSchema,
   blueprintKind,
   auditSchema,
+  readmeConfigSchema,
 } from "./schema.js";
 
 // ── Schema-derived types ─────────────────────────────────────────────
@@ -71,6 +72,7 @@ export type {
   Links,
   GithubMetadata,
   GithubRepository,
+  ReadmeConfig,
 } from "./schema.js";
 
 // ── Build pipeline ───────────────────────────────────────────────────
@@ -88,6 +90,26 @@ export { buildSitemap, buildSitemapXml } from "./sitemap.js";
 // ── llms.txt ─────────────────────────────────────────────────────────
 export { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "./llms.js";
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from "./llms.js";
+
+// ── Awesome-list README ──────────────────────────────────────────────
+// Generates a canonical sindresorhus/awesome-format README from the
+// same record stream used by llms.txt. The output is wrapped between
+// `<!-- grove-readme:start -->` / `<!-- grove-readme:end -->` sentinels
+// so hand-written intro/contributing sections survive regenerations.
+export {
+  AWESOME_README_END,
+  AWESOME_README_START,
+  buildAwesomeReadme,
+  injectAwesomeReadmeBlock,
+  parseAwesomeReadmeSections,
+} from "./awesome-readme.js";
+export type {
+  AwesomeReadmeCategory,
+  AwesomeReadmeInput,
+  AwesomeReadmeOptions,
+  AwesomeReadmeRecord,
+  AwesomeReadmeSections,
+} from "./awesome-readme.js";
 
 // ── Config-driven public artifacts ──────────────────────────────────
 export { buildOgImageSvg, buildSiteArtifacts } from "./site-artifacts.js";
