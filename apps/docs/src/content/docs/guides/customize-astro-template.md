@@ -3,7 +3,7 @@ title: Customize the Astro template
 description: How to add pages, swap design tokens, change the data layout, and override components — without forking the template.
 ---
 
-The Astro template shipped by `grove new` is a starting point. This guide is for site operators who need to change the look, the structure, or the data layout of their directory.
+The Astro template shipped by `grove init` is a starting point. This guide is for site operators who need to change the look, the structure, or the data layout of their directory.
 
 Most customizations fall into three buckets:
 
@@ -150,7 +150,7 @@ The override component must accept the same props as the original. Check the ori
 
 ## 4. Data layout: changing where records live
 
-If you want to split records across multiple directories (e.g., `data/records/featured/` and `data/records/community/`), edit `paths.recordsDir` — but note that the V1 reader expects a single flat directory. Multi-dir records are a V2 feature; for now, if you split the data, you'll need a custom `grove generate` step to merge them.
+If you want to split records across multiple directories (e.g., `data/records/featured/` and `data/records/community/`), edit `paths.recordsDir` — but note that the V1 reader expects a single flat directory. Multi-dir records are a V2 feature; for now, if you split the data, you'll need a custom `grove check` step to merge them.
 
 For most sites, the default `data/records/` is fine. Leave it alone unless you have a strong reason.
 
@@ -168,14 +168,14 @@ The Tailwind config is a working file, not a generated one — your edits persis
 
 - **The `health` block in record YAMLs.** It's auto-derived. See [Sync GitHub metadata](/guides/sync-github-metadata/).
 - **The `github` block in record YAMLs.** Same — derived from the GitHub API.
-- **`data/generated/records.index.json` and `data/generated/records.full.json`.** These are regenerated on every `grove generate` run. Hand edits will be overwritten.
+- **`data/generated/records.index.json` and `data/generated/records.full.json`.** These are regenerated on every `grove check` run. Hand edits will be overwritten.
 - **Anything in `node_modules/`.** It will be replaced on the next install.
 
 If a customization feels like it requires editing these, write a [decision](/guides/manage-decisions/) or open an issue — the schema might be missing a field you actually need.
 
 ## When to fork the template
 
-If you need to change something *structural* — a new page type, a different list layout, an integration with a third-party service — the right move is to copy the Astro template files into your project and edit them. The `grove new` flow gives you a fresh copy; once you've shipped your changes, treat the template as yours.
+If you need to change something *structural* — a new page type, a different list layout, an integration with a third-party service — the right move is to copy the Astro template files into your project and edit them. The `grove init` flow gives you a fresh copy; once you've shipped your changes, treat the template as yours.
 
 The `packages/astro` package is the *upstream* template. Most sites should not edit it. If you find yourself wanting to, the right next step is to copy the relevant files into your project and `import` from the local path.
 

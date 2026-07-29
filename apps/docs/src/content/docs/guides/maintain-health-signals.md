@@ -53,7 +53,7 @@ Four values, derived from stars and activity.
 - `status` is `stale`, `archived`, `inactive`, or `unavailable`, **or**
 - `status` is `unknown` and the record has no GitHub data
 
-The `grove cleanup stale` command filters by this flag and writes a report. In a public GitHub site, the `cleanup-stale-records.yml` workflow runs this on a schedule and posts the report as a workflow artifact. Pull the artifact, walk the list, write decisions for the records that need an explicit verdict.
+The `grove cleanup` command filters by this flag and writes a report. In a public GitHub site, the `cleanup-stale-records.yml` workflow runs this on a schedule and posts the report as a workflow artifact. Pull the artifact, walk the list, write decisions for the records that need an explicit verdict.
 
 ## A triage session
 
@@ -67,9 +67,9 @@ When the cleanup report lands, work through it in this order. Don't try to handl
 
 4. **For each `unknown` candidate**: usually means the project is not on GitHub. Either add the correct `repoUrl`, or write a decision noting the project lives elsewhere (e.g., a private registry, a self-hosted repo).
 
-5. **Run `grove validate` after each batch** to make sure your decisions file parses.
+5. **Run `grove check` after each batch** to make sure your decisions file parses.
 
-6. **Run `grove generate` to refresh the index**, then `pnpm dev` to spot-check that the records still render correctly. The `health.visibility` field controls the index list, so a typo here can hide 20 records at once.
+6. **Run `grove check` to refresh the index**, then `pnpm dev` to spot-check that the records still render correctly. The `health.visibility` field controls the index list, so a typo here can hide 20 records at once.
 
 ## When signals lie
 

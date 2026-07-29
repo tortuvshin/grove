@@ -15,10 +15,10 @@ pnpm build
 
 This runs (in order, from `packages/astro/templates/default/package.json`):
 
-1. `grove validate` — schema-check every record
-2. `grove generate` — produce `data/generated/records.index.json` and `records.full.json`
-3. `grove sitemap` — write `public/sitemap.xml`
-4. `grove llms` — write `public/llms.txt` and `public/llms-full.txt`
+1. `grove check` — schema-check every record
+2. `grove check` — produce `data/generated/records.index.json` and `records.full.json`
+3. `grove check` — write `public/sitemap.xml`
+4. `grove check` — write `public/llms.txt` and `public/llms-full.txt`
 5. `astro build` — render the static site to `dist/`
 
 The site is now a folder of HTML, CSS, JS, and JSON. Any static host can serve it.

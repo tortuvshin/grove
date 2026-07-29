@@ -16,9 +16,9 @@ When you sit down to add a record, answer these in order. Most contributors stop
    - `resource-hub` → `kind: resource`
    - `ecosystem-map` → `kind: entity`
 
-   Your record's `kind` must match. If it doesn't, the `grove validate` step fails. See the [Blueprints concept](/concepts/blueprints/) page for which blueprint your site should be using.
+   Your record's `kind` must match. If it doesn't, the `grove check` step fails. See the [Blueprints concept](/concepts/blueprints/) page for which blueprint your site should be using.
 
-2. **Does a record for this thing already exist?** `grep -r "repoUrl: " data/records/` or check the live site's record index. If yes, edit the existing one — don't fork. (The `grove import` command can also pull a record from an existing awesome-list entry; see below.)
+2. **Does a record for this thing already exist?** `grep -r "repoUrl: " data/records/` or check the live site's record index. If yes, edit the existing one — don't fork. (The `grove readme generate` command can also pull a record from an existing awesome-list entry; see below.)
 
 3. **What is the canonical URL?** For projects, that's the GitHub repo. Set `repoUrl`. Don't just set `links.github` — `repoUrl` is the single source of truth for stars, contributors, and the "view repo" CTA. `links.github` is the human-facing display URL on the project page.
 
@@ -130,7 +130,7 @@ These can be added to any record regardless of `kind`.
 # Long-form content (markdown body). Path is relative to content/records/.
 content: ./bodies/astro-overview.md
 
-# Source tracking — auto-filled by grove import, manual otherwise.
+# Source tracking — auto-filled by grove readme generate, manual otherwise.
 source:
   type: manual
   file: data/records/astro.yml
@@ -184,9 +184,9 @@ links:
 
 **Adding a `category` with no other records.** It's a string field, so it'll save. But until the second record joins that category, it shows up as a one-record section in the index, which reads as "the editor gave up halfway through". Add the second record in the same PR.
 
-## Using `grove import` to seed a record
+## Using `grove readme generate` to seed a record
 
-If you're starting from an existing source — a GitHub topic, an awesome-list entry, or a submission issue — `grove import` will scaffold a record for you. It writes a draft YAML to `data/records/` with `source.type` and provenance fields filled in.
+If you're starting from an existing source — a GitHub topic, an awesome-list entry, or a submission issue — `grove readme generate` will scaffold a record for you. It writes a draft YAML to `data/records/` with `source.type` and provenance fields filled in.
 
 ```bash
 # from a GitHub repo URL
@@ -196,7 +196,7 @@ pnpm dlx @grove-dev/cli@latest import https://github.com/withastro/astro
 pnpm dlx @grove-dev/cli@latest import https://raw.githubusercontent.com/sindresorhus/awesome/main/readme.md
 ```
 
-You still need to review the draft, pick the right `category`, and write a real `description`. `grove import` is a starting point, not a final answer.
+You still need to review the draft, pick the right `category`, and write a real `description`. `grove readme generate` is a starting point, not a final answer.
 
 ## After you write the record
 

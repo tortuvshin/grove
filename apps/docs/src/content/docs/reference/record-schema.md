@@ -1,6 +1,6 @@
 ---
 title: Record schema
-description: The discriminated Resource union — every kind, every field, every default. The schema grove validate and grove generate work against.
+description: The discriminated Resource union — every kind, every field, every default. The schema grove check and grove check work against.
 ---
 
 Grove V1 ships a discriminated `Resource` union with three concrete
@@ -288,5 +288,5 @@ links:
 - **[Blueprints](/concepts/blueprints/)** — which `kind` goes with
   which blueprint.
 - **[grove.config.ts](/reference/config/)** — site config.
-- **[CLI](/reference/cli/)** — `grove validate` and `grove generate`
+- **[CLI](/reference/cli/)** — `grove check` and `grove check`
   use this schema.

@@ -33,7 +33,7 @@ export default defineConfig({
 });
 ```
 
-That is enough to run `grove validate` and `grove generate`. The
+That is enough to run `grove check` and `grove check`. The
 default theme and paths are used.
 
 ## Full config
@@ -270,7 +270,7 @@ any V1 command.
 
 Use `defineConfig` from `@grove-dev/core`. It provides TypeScript
 types and Zod validation, so misspelled fields or wrong types fail
-at config-load time, not at the first `grove validate` run.
+at config-load time, not at the first `grove check` run.
 
 ```ts
 import { defineConfig } from "@grove-dev/core";
