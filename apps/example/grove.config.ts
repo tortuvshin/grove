@@ -87,4 +87,18 @@ export default defineConfig({
       { path: "/this-page-does-not-exist/", type: "404", label: "404 page" },
     ],
   },
+
+  readme: {
+    title: "Awesome Open-Source AI Tools",
+    tagline: "Hand-picked tools worth running, studying, and extending.",
+    url: "https://open-apps.dev.mn",
+    browseLabel: "Browse the catalog →",
+    intro: [
+      "## Why this list",
+      "",
+      "Each tool below is **actively maintained**, **well documented**, and",
+      "**useful in production**. Submit a new entry via `pnpm exec grove`",
+      "or by opening a pull request against `data/records/`.",
+    ].join("\n"),
+  },
 });
