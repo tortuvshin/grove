@@ -25,6 +25,51 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.4.0] — 2026-07-30
+
+### Added
+
+- **`@grove-dev/cli`:** new `grove collection promote` command — promotes a
+  filter URL (e.g. `/browse?stack=flutter&category=finance`) into a
+  curated `data/collections/<slug>.yml` file. See the
+  [CLI reference](apps/docs/src/content/docs/reference/cli.md#grove-collection-promote).
+- **`@grove-dev/cli`:** new `grove readme generate` command — renders the
+  project `README.md` between the `<!-- grove-readme:start -->` and
+  `<!-- grove-readme:end -->` sentinels as a canonical awesome-list
+  (sindresorhus/awesome format). Supports `--stdout`, `--path`, and
+  `--check` for CI.
+- **`@grove-dev/core`:** the `syncContributors` pipeline paginates the
+  GitHub API end-to-end and writes `repo-stats.json` consumed by
+  `generate()` for site stats.
+- **`@grove-dev/core`:** browser-safe `@grove-dev/core/directory`
+  subpath exposing `filterRecords`, `sortRecords`, `paginateRecords`,
+  `scoreRecords`, `hrefForLens`, and display labels without pulling
+  config loading or filesystem dependencies into the client bundle.
+
+### Changed
+
+- **`@grove-dev/cli`:** the `sync` command now takes a positional
+  `<github|contributors>` argument instead of two separate commands.
+- **`@grove-dev/astro`:** supports Astro 6 and Astro 7; reads the
+  canonical build URL directly from `grove.config.ts`; consumer-owned
+  pages are never overwritten by package maintenance.
+- All four packages are pinned at `0.4.0` in lockstep. The `pnpm release`
+  script (`scripts/release.mjs`) bumps `core → astro → cli → starlight`
+  in dependency order.
+
+### Fixed
+
+- **`@grove-dev/core`:** contributor sync no longer silently stops at
+  100 contributors; pagination handles large repos.
+- **`@grove-dev/astro`:** custom stack and platform SVGs load without a
+  package-owned icon registry; primary/supporting stacks are
+  deduplicated consistently on cards, facets, and detail pages.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`,
+`@grove-dev/starlight`.
+
+---
+
 ## [0.3.4] — 2026-07-23
 
 ### Added
@@ -266,7 +311,10 @@ range are intentionally not reconstructed; the git history of
 - The `Versions` table in `SECURITY.md` describes the support window
   per release line.
 
-[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/tortuvshin/grove/releases/tag/v0.4.0
+[0.3.4]: https://github.com/tortuvshin/grove/releases/tag/v0.3.4
+[0.3.2]: https://github.com/tortuvshin/grove/releases/tag/v0.3.2
 [0.3.1]: https://github.com/tortuvshin/grove/releases/tag/v0.3.1
 [0.3.0]: https://github.com/tortuvshin/grove/releases/tag/v0.3.0
 [0.2.2]: https://github.com/tortuvshin/grove/releases/tag/v0.2.2

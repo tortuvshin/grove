@@ -1,6 +1,10 @@
 # @grove-dev/starlight
 
-Grove Starlight is a theme plugin for Astro Starlight
+Grove Starlight is a theme plugin for Astro Starlight that powers the
+Grove documentation site (`apps/docs/`). It ships component overrides,
+a layered CSS theme, and an Expressive Code integration so that
+Starlight renders pages in the same visual language as Grove-powered
+directories.
 
 ## Features
 
@@ -29,29 +33,34 @@ Add the plugin inside the Starlight integration:
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lucode from '@grove-dev/starlight';
+import grove from '@grove-dev/starlight';
 
 export default defineConfig({
   integrations: [
     starlight({
       title: 'My Docs',
-      plugins: [lucode()],
+      plugins: [grove()],
     }),
   ],
 });
 ```
 
-The plugin automatically registers Lucode component overrides, appends the theme CSS files, and configures Expressive Code.
+The plugin registers Grove's component overrides, appends the theme
+CSS files, and configures Expressive Code.
 
 ## Attribution
 
-This theme recreates the design of the documentation site for [shadcn/ui](https://ui.shadcn.com/).
+This theme recreates the design of the documentation site for
+[shadcn/ui](https://ui.shadcn.com/).
 
-I used [adrian-ub/starlight-theme-black](https://github.com/adrian-ub/starlight-theme-black) as a base, which brought an earlier shadcn/ui-inspired design to Astro Starlight.
+It uses [adrian-ub/starlight-theme-black](https://github.com/adrian-ub/starlight-theme-black)
+as a base, which brought an earlier shadcn/ui-inspired design to Astro
+Starlight.
 
 ## Docs Schema
 
-To use Lucode's splash-page frontmatter fields with type checking, extend the Starlight docs schema:
+To use Grove's splash-page frontmatter fields with type checking,
+extend the Starlight docs schema:
 
 ```ts
 // src/content.config.ts
@@ -71,7 +80,7 @@ export const collections = {
 ## Plugin Options
 
 ```ts
-type LucodeStarlightUserConfig = {
+type GroveStarlightUserConfig = {
   navLinks?: Link[];
   footerText?: string;
 };
@@ -87,13 +96,13 @@ type Link = {
 Example:
 
 ```js
-lucode({
+grove({
   navLinks: [
-    { label: 'Docs', link: '/guides/getting-started/' },
-    { label: 'GitHub', link: 'https://github.com/lucas-labs/@grove-dev/starlight-theme' },
+    { label: 'Docs', link: '/introduction/' },
+    { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
   ],
   footerText:
-    'Built with [Lucode Starlight](https://github.com/lucas-labs/@grove-dev/starlight-theme).',
+    'Built with [Grove Starlight](https://github.com/tortuvshin/grove/tree/main/packages/starlight).',
 });
 ```
 
@@ -137,8 +146,8 @@ import { ContainerSection, Dropdown, LinkButton } from '@grove-dev/starlight/com
 
 <ContainerSection width="lg">
   <h2>Build better docs</h2>
-  <p>Use Lucode sections on splash pages and custom MDX content.</p>
-  <LinkButton href="/@grove-dev/starlight-theme/guides/getting-started/">Get started</LinkButton>
+  <p>Use Grove sections on splash pages and custom MDX content.</p>
+  <LinkButton href="/introduction/">Get started</LinkButton>
 </ContainerSection>
 
 <Dropdown.Root>

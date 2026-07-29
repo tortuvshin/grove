@@ -2,7 +2,12 @@
 
 Status legend: done / in progress / not started.
 
-> **Note on naming.** These milestones predate the V0→V1 rename (see `CHANGELOG.md` for the migration). The V0 names used below — `data/items.yml`, `curated.config.ts`, "items" as the generic term — are kept verbatim so the historical record is faithful. The V1 canonical names are `data/records/<slug>.yml`, `grove.config.ts`, and "records".
+> **Historical record.** These milestones predate the V0→V1 rename
+> and the v0.4.0 package line. The V0 names used below —
+> `data/items.yml`, `curated.config.ts`, `examples/basic`, "items"
+> as the generic term — are kept verbatim so the historical record
+> is faithful. The V1 canonical names are `data/records/<slug>.yml`,
+> `grove.config.ts`, `apps/example/`, and "records".
 
 ## Milestone 1 - Framework Foundation (done)
 
@@ -21,8 +26,9 @@ Tasks:
 
 Definition of done: `curated.config.ts` (V0 name — V1 is `grove.config.ts`) plus `data/items.yml` (V0 name — V1 is `data/records/`) can drive a static directory project.
 
-Verified: `examples/basic` builds via `pnpm build` and produces a static site
-with homepage, item pages, llms.txt, sitemap.xml.
+Verified: `examples/basic` (now `apps/example/`) builds via `pnpm build`
+and produces a static site with homepage, item pages, llms.txt,
+sitemap.xml.
 
 ## Milestone 2 - Awesome List Importer (done)
 

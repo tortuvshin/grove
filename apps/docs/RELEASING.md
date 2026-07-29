@@ -10,11 +10,11 @@ git checkout main && git pull --rebase
 git status
 
 # 2. Bump, build, publish.
-pnpm release              # patch (0.3.1 -> 0.3.2)
-pnpm release --minor      # minor (0.3.1 -> 0.4.0)
-pnpm release --major      # major (0.3.1 -> 1.0.0)
+pnpm release              # patch (0.4.0 -> 0.4.1)
+pnpm release --minor      # minor (0.4.0 -> 0.5.0)
+pnpm release --major      # major (0.4.0 -> 1.0.0)
 pnpm release --bump=2.3.4 # explicit
-pnpm release:dry --minor  # verify 0.4.0 packages without changing the tree
+pnpm release --dry-run --minor  # verify 0.5.0 packages without changing the tree
 ```
 
 The release script lives at `scripts/release.mjs`. It does the following in order:

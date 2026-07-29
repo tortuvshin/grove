@@ -16,7 +16,8 @@ The generated project is already a complete website. Its Astro pages are copied 
 packages/
   core/       config, schemas, validation, directory logic, generation
   astro/      Astro UI, layouts, generated-data adapters, integration
-  cli/        init, check, sync, cleanup
+  cli/        init, check, sync github, sync contributors, cleanup,
+              audit, collection promote, readme generate
   starlight/  documentation integration
 apps/
   example/    real AI directory demo and the only init scaffold source
@@ -37,10 +38,13 @@ pnpm test:scaffold
 ## Directory structure
 
 ```text
-.github/workflows/     five thin CI workflows
-content/pages/         optional custom Markdown pages
-data/records/          one YAML file per project
+.github/workflows/     five CI workflows (ci, cleanup, deploy,
+                       sync-contributors, sync-github)
+data/records/          one YAML file per record
 data/taxonomy/         categories, stacks, platforms, distribution
+data/collections/      curated collections
+data/decisions.yml     curator visibility overrides
+data/overrides.yml     manual record patches
 public/                icons and brand assets
 src/pages/             all site-owned routes and page composition
 src/styles/global.css  optional theme overrides

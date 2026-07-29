@@ -13,6 +13,8 @@ pnpm dlx @grove-dev/cli init my-directory
 - `grove sync github` refreshes record repository metadata.
 - `grove sync contributors` refreshes directory-community metadata.
 - `grove cleanup [--strict]` writes the human-review report.
+- `grove collection promote --from PATH --slug SLUG [--title T] [--description D]` writes a curated collection YAML from a filter URL.
+- `grove readme generate [--stdout] [--path PATH] [--check]` renders the awesome-list README block.
 - `grove audit` runs Lighthouse 100×4 across every page declared in `grove.config.ts` `audit.pages[]`.
 
 There are no framework, blueprint, template, deployment, build, or dev commands. Use Astro's normal `pnpm dev` and `pnpm build`; the integration prepares data automatically. The CLI bundles a release snapshot of the repository's real `apps/example/`, so the demo and generated project cannot drift into separate implementations.
