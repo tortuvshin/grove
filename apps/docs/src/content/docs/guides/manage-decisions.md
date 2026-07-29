@@ -35,7 +35,7 @@ If you're triaging a cleanup report for the first time, read [Maintain health si
     reviewedAt: 2025-10-15
 ```
 
-The schema is `decisionsFileSchema` in `packages/core/src/schema.ts`. The CLI validates this file on every `grove validate` run — typos in the `visibility` enum surface immediately.
+The schema is `decisionsFileSchema` in `packages/core/src/schema.ts`. The CLI validates this file on every `grove check` run — typos in the `visibility` enum surface immediately.
 
 ## The visibility enum
 
@@ -60,7 +60,7 @@ For `project` records, both exist:
 - The `health.visibility` field is auto-derived. It defaults to `keep` for active projects and `hide` for archived/inactive ones.
 - The decisions file is a separate, editor-set override.
 
-The `grove generate` step merges them: a decision in `decisions.yml` **wins** over the auto-derived `health.visibility`. So if a record has `health.visibility: hide` (because it's archived) and you add a decision with `visibility: historical`, the rendered page will be the `historical` view.
+The `grove check` step merges them: a decision in `decisions.yml` **wins** over the auto-derived `health.visibility`. So if a record has `health.visibility: hide` (because it's archived) and you add a decision with `visibility: historical`, the rendered page will be the `historical` view.
 
 For `resource` and `entity` records, there is no `health` block — the `visibility` field on the record itself is the only signal. Decisions still apply the same way: they override the record's top-level `visibility`.
 
@@ -86,9 +86,9 @@ Say the cleanup report has 30 candidates. You want to resolve them in one sittin
 
 3. **Append decisions to `data/decisions.yml` in slug order.** Keep the file sorted by `id` — diff-friendly.
 
-4. **Run `grove validate` to make sure the YAML parses.**
+4. **Run `grove check` to make sure the YAML parses.**
 
-5. **Run `grove generate` to refresh the index payload.** Spot-check `data/generated/records.index.json` — records with `visibility: hide` should not appear in the list.
+5. **Run `grove check` to refresh the index payload.** Spot-check `data/generated/records.index.json` — records with `visibility: hide` should not appear in the list.
 
 6. **Run `pnpm dev` and visit the index.** The records you hid should not be in the list. The `highlight`s should be at the top with the chip. The `historical`s should still be reachable at their detail URL but with the banner.
 

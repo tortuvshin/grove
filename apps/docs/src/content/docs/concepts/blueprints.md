@@ -112,7 +112,7 @@ export default defineConfig({
 });
 ```
 
-After changing, run `grove validate` — it will report every record
+After changing, run `grove check` — it will report every record
 whose `kind:` is now wrong.
 
 ## Related docs

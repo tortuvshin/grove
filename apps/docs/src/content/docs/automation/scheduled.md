@@ -15,7 +15,7 @@ Run any of them manually:
 ```bash
 grove sync github
 grove sync contributors
-grove cleanup stale
+grove cleanup
 ```
 
 Use the cleanup report as the agenda for a monthly triage. Use the decision file (`data/decisions.yml`) to record visibility overrides (`highlight`, `keep`, `needs_review`, `hide`, `remove`, `historical`).

@@ -1,13 +1,13 @@
 ---
 title: Validation
-description: grove validate runs on every pull request through GitHub Actions. It catches schema errors before they merge.
+description: grove check runs on every pull request through GitHub Actions. It catches schema errors before they merge.
 ---
 
 Run validation locally:
 
 ```bash
-grove validate            # check schemas, slugs, taxonomy
-grove validate --strict   # also fail on warnings
+grove check            # check schemas, slugs, taxonomy
+grove check --strict   # also fail on warnings
 ```
 
 The `validate-data.yml` workflow runs the same command on every pull request. Failed validation blocks merge.

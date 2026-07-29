@@ -52,7 +52,7 @@ Grove is for *curated* knowledge spaces. Not every entry is good. Not every cate
 This means:
 
 - **PRs are reviewed by a human.** A record submission is not auto-merged. The CLI's `submit` flow generates a record file, but the PR is reviewed by a maintainer who decides whether the record is a fit. See [Contributing](/maintainers/contributing/) for the contributor's side of this.
-- **The CI runs validation, not judgment.** `grove validate` catches typos, wrong enums, missing fields. It does not catch "this is a low-effort SEO submission". That judgment is the maintainer's.
+- **The CI runs validation, not judgment.** `grove check` catches typos, wrong enums, missing fields. It does not catch "this is a low-effort SEO submission". That judgment is the maintainer's.
 - **Decisions are visible.** When a record is hidden or removed, the decision is in `data/decisions.yml` with a reason. The reason is the maintainer's, not the framework's. A reader can see *why* a record was demoted.
 - **The submitter gets a response.** The "report broken record" issue template and the "record submission" issue template are the contract between a maintainer and the community. Both sides know what to expect.
 
