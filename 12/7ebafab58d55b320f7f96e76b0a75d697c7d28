@@ -1,0 +1,38 @@
+packages/core/src/awesome-readme.test.ts
+  s_04d14d1e1f9a4f::t_afa3e12a5843fb 1-224,330-380
+  s_04d14d1e1f9a4f::t_df8b88be0d80ca 267
+  s_04d14d1e1f9a4f::t_78187507bce3af 225-266,268-329
+packages/core/src/awesome-readme.ts
+  s_04d14d1e1f9a4f::t_05a6e0bca7eb84 17-24,48-50
+  s_04d14d1e1f9a4f::t_e0511477ba48fc 1-16,25-31,44-46,51-54,56-91,93-121,126-149,156,158,167-168,171-173,178,189-233
+  s_04d14d1e1f9a4f::t_207740ab2e095c 32-43,55
+  s_04d14d1e1f9a4f::t_a77500564695ed 47
+  s_04d14d1e1f9a4f::t_a3a68fdfb45233 92
+  s_04d14d1e1f9a4f::t_16c12c409d8555 122-125,150,153,155,157,159-166,169,174-177,179-188
+  s_04d14d1e1f9a4f::t_9b1408c6d8d475 151-152,154,170
+packages/core/src/index.ts
+  s_04d14d1e1f9a4f::t_106a5b1deebcdd 43,75
+  s_04d14d1e1f9a4f::t_d99d9f1a6d9cea 94-108,110-113
+  s_04d14d1e1f9a4f::t_275f28a4de0622 109
+packages/core/src/schema.ts
+  s_04d14d1e1f9a4f::t_5e7fb0441e5839 539-559
+  s_04d14d1e1f9a4f::t_7b82520bd70e8f 641-646,648
+  s_04d14d1e1f9a4f::t_df0d1dd9530289 704
+  s_04d14d1e1f9a4f::t_48df2344d1bd7d 647
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "127ebafab58d55b320f7f96e76b0a75d697c7d28",
+  "prompts": {},
+  "sessions": {
+    "s_04d14d1e1f9a4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a352023-6a30-49eb-b794-75104b81bd66",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
