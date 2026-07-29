@@ -143,16 +143,16 @@ describe("docs homepage (standalone Astro route)", () => {
     );
 
     expect(hero).toContain("Build community knowledge that stays useful.");
-    expect(hero).toContain("pnpm dlx @grove-dev/cli@latest new my-space");
+    expect(hero).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
     expect(hero).toContain("data/records/immich.yml");
 
     expect(features).toContain("Lists are easy to start and difficult to maintain.");
     expect(features).toContain("Structure drifts");
     expect(features).toContain("Maintenance lives in memory");
 
-    expect(getStarted).toContain("pnpm exec grove validate --strict");
+    expect(getStarted).toContain("pnpm exec grove check --strict");
     expect(getStarted).toContain("pnpm exec grove sync github");
-    expect(getStarted).toContain("pnpm exec grove cleanup stale --report");
+    expect(getStarted).toContain("pnpm exec grove cleanup --strict");
 
     expect(blueprints).toContain("Project directories");
     expect(blueprints).toContain("Resource hubs");
