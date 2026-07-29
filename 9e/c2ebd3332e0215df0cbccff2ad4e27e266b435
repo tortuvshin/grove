@@ -1,0 +1,23 @@
+packages/cli/src/readme-cli.ts
+  s_04d14d1e1f9a4f::t_caa6e1dc314e6b 48-50,58
+  s_04d14d1e1f9a4f::t_e059eceb1f107c 1-47,51-57,59-172
+packages/cli/src/index.ts
+  s_04d14d1e1f9a4f::t_c56a91148a8fc4 23
+  s_04d14d1e1f9a4f::t_8f8f2dbe4f3691 204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "9ec2ebd3332e0215df0cbccff2ad4e27e266b435",
+  "prompts": {},
+  "sessions": {
+    "s_04d14d1e1f9a4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a352023-6a30-49eb-b794-75104b81bd66",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
