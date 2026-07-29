@@ -1,0 +1,19 @@
+apps/docs/src/home-landing.test.ts
+  s_a46967aae7000d::t_ade83ace813667 146,153,155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "35b5b564a9bccf445ea588395e965b7309b8457d",
+  "prompts": {},
+  "sessions": {
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
