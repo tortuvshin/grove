@@ -1,0 +1,29 @@
+apps/docs/src/components/home/GetStarted.astro
+  s_a46967aae7000d::t_57439110d12bb0 3,5,8-9
+apps/docs/src/components/home/FinalCta.astro
+  s_a46967aae7000d::t_dcfc4d320fbab1 40
+apps/docs/src/components/home/Frameworks.astro
+  s_a46967aae7000d::t_991c2ae2be2dfe 17,19
+apps/docs/src/components/home/Hero.astro
+  s_a46967aae7000d::t_b2ecfe193b4a8e 81
+  s_a46967aae7000d::t_38ae0466533c3e 45,48-50
+apps/docs/src/layouts/HomeLayout.astro
+  s_a46967aae7000d::t_c935fe69a8664b 47,50
+  s_a46967aae7000d::t_84fa4ab694a1e4 63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "0ec5bab91e2ed421744fa35786837575e193f0ba",
+  "prompts": {},
+  "sessions": {
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
