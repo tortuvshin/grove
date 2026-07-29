@@ -36,52 +36,59 @@ apps/docs/
 │   ├── styles/             # global.css + theme overrides
 │   └── content.config.ts   # Starlight content collection config
 ├── public/                 # static files served at the site root
-├── ARCHITECTURE.md         # in-repo architecture overview
-├── RELEASING.md            # how a release happens
-├── ROADMAP.md              # what's planned
+├── MILESTONES.md           # historical V0 milestone log
+├── PRODUCT.md              # full product reference
+├── RELEASING.md            # operational release doc
 ├── SUPPORT.md              # where to ask questions
-├── VISION.md               # why Grove exists
+├── vision.md               # why Grove exists (historical)
 └── README.md               # this file
 ```
 
-The top-level files (`ARCHITECTURE.md`, `RELEASING.md`, etc.) are imported as content from `src/content/docs/` via Starlight's `autogenerate` / manual `glob` loader, so they live in two places at once: the repo root for discoverability on GitHub, and the docs site for the in-app reading experience.
+The canonical source for every page is `src/content/docs/`. The
+top-level `.md` files in this directory are mirrors maintained for
+GitHub discoverability; their content matches the corresponding
+docs-site pages but is not auto-imported.
 
 ## Editing a page
 
 1. Edit the `.md` / `.mdx` file under `src/content/docs/`.
 2. Save. The dev server hot-reloads.
-3. If you added a brand-new file, also add it to the sidebar in `astro.config.mjs` (the `sidebar` array).
+3. If you added a brand-new file, also add it to the sidebar in
+   `astro.config.mjs` (the `sidebar` array).
+4. Run `pnpm docs:check` to verify every sidebar slug resolves to a
+   real file under `src/content/docs/`.
 
-## Adding a new top-level doc
+## Sidebar lint
 
-For long-form documents that should also live at the repo root (e.g. a new `CONTRIBUTING.md`–style file), add the file at the repo root **and** an `import` entry in `src/content/docs/<route>.md`:
-
-```md
----
-title: My new doc
----
-
-import Content from '../../../../MY-NEW-DOC.md';
-
-<Content />
-```
-
-This way the doc shows up on the site _and_ on GitHub.
+The sidebar in `apps/docs/astro.config.mjs` is the only navigation
+source. `scripts/check-starlight-sidebar.mjs` (exposed as
+`pnpm docs:check`) verifies every `slug:` resolves to a real
+`.md` / `.mdx` file. CI runs it on every PR that touches
+`apps/docs/**`.
 
 ## Deploying
 
-We don't have a single canonical deploy pipeline yet — see the [Roadmap](/roadmap/) page on the docs site for the backlog entry. In the meantime, the project is happy with any of:
-
-- **GitHub Pages** — push `apps/docs/dist/` to a `gh-pages` branch (or use `actions/deploy-pages`).
-- **Netlify / Vercel / Cloudflare Pages** — point at `apps/docs/`, set the build command to `pnpm build`, the publish directory to `apps/docs/dist`.
+The site is fully static and deploys to any static host. The
+canonical host is `grove.dev.mn`. The `wrangler.toml` in this
+directory targets Cloudflare Pages; alternative hosts (Netlify,
+Vercel, GitHub Pages) work by pointing at `apps/docs/` with the
+build command `pnpm build` and the publish directory
+`apps/docs/dist`.
 
 ## Conventions
 
-- MDX is fine; you can import components from `@grove-dev/starlight` and `@grove-dev/astro`.
-- Code fences should declare a language. Use `bash` for shell, `ts` for TypeScript, `astro` for Astro component snippets.
-- Internal links use **relative paths** (`./architecture.md`), not absolute GitHub URLs. Starlight rewrites them correctly at build time.
-- Keep page titles short and noun-phrase-y — they show up in the sidebar and the page `<title>`.
+- MDX is fine; you can import components from `@grove-dev/starlight`
+  and `@grove-dev/astro`.
+- Code fences should declare a language. Use `bash` for shell,
+  `ts` for TypeScript, `astro` for Astro component snippets,
+  `yaml` for record / config YAML.
+- Internal links use **relative paths** (`./architecture.md`),
+  not absolute GitHub URLs. Starlight rewrites them correctly at
+  build time.
+- Keep page titles short and noun-phrase-y — they show up in the
+  sidebar and the page `<title>`.
 
 ## License
 
-The docs site is part of the Grove monorepo and is released under the [MIT License](../../LICENSE).
+The docs site is part of the Grove monorepo and is released under
+the [MIT License](../../LICENSE).

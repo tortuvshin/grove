@@ -22,7 +22,7 @@ Report privately by email to:
 
 Include, where possible:
 
-1. The affected package and version (e.g. `@grove-dev/cli@0.2.2`).
+1. The affected package and version (e.g. `@grove-dev/cli@0.4.0`).
 2. A minimal reproduction — the smallest `grove.config.ts` + data + command that triggers the issue.
 3. The expected behaviour and the actual behaviour.
 4. Whether the issue is exploitable from untrusted input (a forked data file, a third-party resource record, a user-submitted PR).
@@ -50,7 +50,7 @@ Out of scope (please open a regular issue):
 
 - Documentation typos and broken links.
 - Performance improvements that don't have a security angle.
-- The example spaces under `examples/` — those are illustrative and not covered by the security policy.
+- The example application at `apps/example/` — that is illustrative and not covered by the security policy.
 
 ## Safe-harbour
 
