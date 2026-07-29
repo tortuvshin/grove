@@ -1,70 +1,63 @@
 ---
 title: SvelteKit
-description: Roadmap-only framework adapter. Why it exists, what's missing, and when to expect it.
+description: Status: not shipped. A SvelteKit adapter is a future roadmap item, not part of v0.4.0.
 ---
 
-The **SvelteKit** adapter (`@grove-dev/svelte`) is reserved as a
-package boundary but is **not supported in V1**. The V1 CLI
-refuses `--framework svelte` at scaffold time. Same status as
-the [Next.js adapter](/adapters/nextjs/).
+The **SvelteKit** adapter is **not shipped in v0.4.0**. There is no
+`@grove-dev/svelte` package in the workspace, no SvelteKit template,
+and the `grove init` scaffolder only emits an Astro project.
 
 ## Status
 
-**Roadmap only — not in V1.** The package is published (to reserve
-the name and the import path) but the default template is
-incomplete and the build pipeline is not wired up.
+**Planned.** No code exists for this adapter today. The roadmap
+([V1.1 section](/roadmap/#next-release--v11)) lists a SvelteKit
+adapter only "if asked" by a real community space.
 
-## What ships today
+## Why this page exists
 
-The SvelteKit default template is essentially `package.json` plus
-a `README.md`. It does not include:
+The page is kept so that:
 
-- any SvelteKit routes or layouts
-- any `@grove-dev/svelte` components
-- a working `grove build` chain
+- A reader who searches for "Grove SvelteKit" lands on a clear
+  status page rather than a 404.
+- The roadmap status of SvelteKit stays pinned in the docs site
+  navigation alongside the [Astro adapter](/adapters/astro/) and
+  the [Next.js adapter](/adapters/nextjs/).
 
-The V1 CLI refuses `--framework svelte` at scaffold time. Same
-build-detection error as the Next.js adapter.
+## What would need to ship
 
-## What you'd need to ship a V1.1 SvelteKit adapter
+A v1.1 SvelteKit adapter would have to:
 
-The work mirrors the Next.js adapter:
+- Add a `@grove-dev/svelte` package under `packages/svelte/` with
+  SvelteKit-friendly page components and server helpers.
+- Mirror `@grove-dev/astro`'s blueprint-aware list and detail pages
+  in `+page.svelte` files under `src/routes/`.
+- Reuse `@grove-dev/core` directly — the core package is
+  framework-agnostic.
+- Add SvelteKit build verification to the `test:scaffold` smoke
+  script.
 
-- Port the Astro default template's home page, list page, and
-  detail page to SvelteKit (`+page.svelte` files in `src/routes/`).
-- Reuse `@grove-dev/ui` primitives — the same 5 modules
-  (`filterRecords`, `sortRecords`, `paginateRecords`,
-  `scoreRecords`, `format`) work in any framework.
-- Reuse `@grove-dev/core` types (`ProjectRecord`, `ResourceRecord`,
-  `EntityRecord`, `IndexRecord`) directly.
-- Re-implement the 22 `@grove-dev/astro` components as Svelte 5
-  components. `ItemCard`, `IndexRow`, `RecordSection` are the three
-  core record-rendering components to start with.
-- Add SvelteKit build verification to the `test:scaffold` script.
+This is roughly 1-2 weeks of focused work for a contributor familiar
+with both Astro and SvelteKit. No such work is currently scheduled.
 
-## When to use this
-
-**Don't**, in V1. Use the [Astro adapter](/adapters/astro/)
-instead. The SvelteKit adapter is reserved as a
-forward-compatibility boundary so consumers can write code that
-imports `@grove-dev/svelte` today, and have it work when the
-adapter ships in V1.1.
-
-If you need a Svelte-rendered Grove site right now, the options are:
+## When you need a Svelte-rendered site today
 
 - **Build a custom integration** on top of `@grove-dev/core`. The
-  core package is framework-agnostic. A custom SvelteKit
-  integration is roughly 100-200 lines of glue code that reads
+  core package is framework-agnostic. A custom SvelteKit integration
+  is roughly 100-200 lines of glue code that reads
   `data/generated/records.full.json` and renders the same UI
   primitives Astro uses.
+- **Wait** for the V1.1 release if the demand justifies it.
 
 ## Tracking
 
-V1.1 work for the SvelteKit adapter is tracked in the project
-roadmap. See [Roadmap](/roadmap/) for current status.
+SvelteKit adapter status is tracked in
+[Roadmap](/roadmap/#next-release--v11).
 
 ## Related docs
 
-- **[Astro adapter](/adapters/astro/)** — the V1-supported choice.
-- **[Next.js adapter](/adapters/nextjs/)** — same roadmap status
-  as SvelteKit.
+- **[Astro adapter](/adapters/astro/)** — the only v0.4.0-supported
+  choice.
+- **[Next.js adapter](/adapters/nextjs/)** — same planned status as
+  SvelteKit.
+- **[Frameworks status matrix](/reference/frameworks/)** — single
+  table covering all renderers.
