@@ -1,0 +1,42 @@
+CONTRIBUTING.md
+  s_a46967aae7000d::t_449211b22886aa 7-9,24,26
+apps/docs/MILESTONES.md
+  s_a46967aae7000d::t_0b7807ed2118ba 29-31
+  s_a46967aae7000d::t_6e69e577ae3911 5-10
+apps/docs/vision.md
+  s_a46967aae7000d::t_49300c27b861f4 3-9
+packages/starlight/README.md
+  s_a46967aae7000d::t_e74a6d98acdc78 149-150
+  s_a46967aae7000d::t_708c935b89df4a 3-7,36,42,48-49,53-54,56-58,62-63,83,99,101-102,105
+apps/docs/RELEASING.md
+  s_a46967aae7000d::t_14b5a44e568295 13-15,17
+apps/docs/README.md
+  s_a46967aae7000d::t_f1a324ab762edf 39-41,43,47-50,56-59,61,63-67,71-76,80-89,93-94
+SECURITY.md
+  s_a46967aae7000d::t_41f4b1e511e3f8 53
+  s_a46967aae7000d::t_cc4d3f8d4b4a7c 25
+packages/cli/README.md
+  s_a46967aae7000d::t_2d7664fadcbc6a 16-17
+CHANGELOG.md
+  s_a46967aae7000d::t_5fe6682d556dd2 28-72
+  s_a46967aae7000d::t_8acb6f6da2e06e 314-317
+README.md
+  s_a46967aae7000d::t_21099cf31cf7e3 41-43,45-47
+  s_a46967aae7000d::t_c3cb6228709153 19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cb2986f98a0c3e724f99119cee3b69f560bbb05e",
+  "prompts": {},
+  "sessions": {
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
