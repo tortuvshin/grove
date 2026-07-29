@@ -1,0 +1,46 @@
+apps/docs/src/content/docs/guides/author-a-record.md
+  s_a46967aae7000d::t_09b9880b391bca 19,21,133,187,189,199
+apps/docs/src/content/docs/guides/maintain-health-signals.md
+  s_a46967aae7000d::t_09b9880b391bca 56,70,72
+apps/docs/src/content/docs/concepts/philosophy.md
+  s_a46967aae7000d::t_09b9880b391bca 55
+apps/docs/src/content/docs/reference/config.md
+  s_a46967aae7000d::t_09b9880b391bca 36,273
+apps/docs/src/content/docs/reference/frameworks.md
+  s_a46967aae7000d::t_1d71671f9f5f35 3,7-10,12-15,17-28
+apps/docs/src/content/docs/reference/record-schema.md
+  s_a46967aae7000d::t_09b9880b391bca 3,291
+apps/docs/src/content/docs/automation/validation.md
+  s_a46967aae7000d::t_09b9880b391bca 3,9-10
+apps/docs/src/content/docs/automation/scheduled.md
+  s_a46967aae7000d::t_09b9880b391bca 18
+apps/docs/src/content/docs/build/projects.md
+  s_a46967aae7000d::t_09b9880b391bca 10
+apps/docs/src/content/docs/guides/customize-astro-template.md
+  s_a46967aae7000d::t_ba78b474724209 6,178
+  s_a46967aae7000d::t_09b9880b391bca 153,171
+apps/docs/src/content/docs/guides/manage-decisions.md
+  s_a46967aae7000d::t_09b9880b391bca 38,63,89,91
+apps/docs/src/content/docs/guides/sync-github-metadata.md
+  s_a46967aae7000d::t_09b9880b391bca 102
+apps/docs/src/content/docs/concepts/blueprints.md
+  s_a46967aae7000d::t_09b9880b391bca 115
+apps/docs/src/content/docs/guides/deploy.md
+  s_a46967aae7000d::t_09b9880b391bca 18-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a8da7ceb475e97437579ddbe71be08b824c266e2",
+  "prompts": {},
+  "sessions": {
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
