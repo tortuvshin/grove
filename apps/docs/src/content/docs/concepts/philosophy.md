@@ -26,12 +26,12 @@ Grove builds a folder of HTML, CSS, JS, and JSON. That's the entire output. Ther
 
 This means:
 
-- **Hosting is cheap.** GitHub Pages, Cloudflare Pages, Netlify, S3, a $5 VPS — anything that serves files works. The CLI lists four in `--deploy` (`vercel`, `netlify`, `cloudflare`, `github-pages`) and a `none` for self-hosting.
+- **Hosting is cheap.** GitHub Pages, Cloudflare Pages, Netlify, S3, a $5 VPS — anything that serves files works.
 - **The build is deterministic.** Same input, same output. The site you can build locally is byte-identical to the site the CI builds.
 - **The site is fast.** There's no database query, no server-side render, no cold start. The HTML is the HTML.
 - **The site is durable.** A Grove space from 2026 will still work in 2036 as long as the YAML files are intact. No service to keep alive.
 
-The cost is that anything dynamic — search-as-you-type, server-rendered facets, user comments — has to be added by the consumer. V1 ships search via Pagefind (a static, build-time index) and not much else. If you need more, see the [Customize the Astro template](/guides/customize-astro-template/) guide.
+The cost is that anything dynamic — search-as-you-type, server-rendered facets, user comments — has to be added by the consumer. The Astro integration's `DirectoryIndexClient` ships a client-side filter enhancer; richer search is the consumer's choice. If you need more, see the [Customize the Astro template](/guides/customize-astro-template/) guide.
 
 ## Health is derived, not declared
 
@@ -43,7 +43,7 @@ This means:
 - **Promotion is a function of adoption.** A new contributor's record starts at `experimental`. It climbs to `listed` at 50 stars, to `curated` at 500 stars, automatically. This is the right side of editorial fatigue.
 - **Decisions are explicit.** When the auto-derived value is wrong (a feature-complete library that hasn't shipped in two years, a transferred repo), the maintainer writes a *decision* — a separate file that says "yes, I see the auto value, and I am overriding it for this reason". The override is auditable. See [Manage decisions](/guides/manage-decisions/).
 
-The cost is that maintainers must run (or schedule) `grove sync github` to keep health current. V1 ships the workflow for this when you scaffold with `--github public`. See [Sync GitHub metadata](/guides/sync-github-metadata/).
+The cost is that maintainers must run (or schedule) `grove sync github` to keep health current. The scaffold ships a `sync-github.yml` workflow that runs the command weekly on a cron (or manually via `workflow_dispatch`). See [Sync GitHub metadata](/guides/sync-github-metadata/).
 
 ## Review is the gate, automation is the assist
 
@@ -51,7 +51,7 @@ Grove is for *curated* knowledge spaces. Not every entry is good. Not every cate
 
 This means:
 
-- **PRs are reviewed by a human.** A record submission is not auto-merged. The CLI's `submit` flow generates a record file, but the PR is reviewed by a maintainer who decides whether the record is a fit. See [Contributing](/maintainers/contributing/) for the contributor's side of this.
+- **PRs are reviewed by a human.** A record submission is not auto-merged. The Astro template's `submit.astro` page generates a YAML draft that the contributor copies into a PR; a maintainer then decides whether the record is a fit. See [Contributing](/maintainers/contributing/) for the contributor's side of this.
 - **The CI runs validation, not judgment.** `grove check` catches typos, wrong enums, missing fields. It does not catch "this is a low-effort SEO submission". That judgment is the maintainer's.
 - **Decisions are visible.** When a record is hidden or removed, the decision is in `data/decisions.yml` with a reason. The reason is the maintainer's, not the framework's. A reader can see *why* a record was demoted.
 - **The submitter gets a response.** The "report broken record" issue template and the "record submission" issue template are the contract between a maintainer and the community. Both sides know what to expect.
@@ -73,6 +73,6 @@ If any of these are dealbreakers, that's fine — use a CMS, a wiki, or a databa
 
 ## What "supported" means here
 
-This site uses the word carefully. "Supported" means: the feature works in the current release, the docs cover it, and a maintainer will accept PRs against it. "Schema-ready" means: the Zod schema exists and the CLI accepts the data, but no polished template ships. "Roadmap" means: not in the current release; tracked in the [Roadmap](/roadmap/).
+This site uses the word carefully. "Supported" means: the feature works in the current release, the docs cover it, and a maintainer will accept PRs against it. "Planned" means: not in the current release; tracked in the [Roadmap](/roadmap/). "Roadmap-only" in the adapter pages means the package does not exist in the workspace today.
 
 The homepage lists the current status. If a doc says "supported" but the code says otherwise, that's a bug — please [open an issue](https://github.com/tortuvshin/grove/issues). See the [Blueprints](/concepts/blueprints/) page for the current status of each blueprint, and the [Astro adapter](/adapters/astro/) / [Next.js adapter](/adapters/nextjs/) / [SvelteKit adapter](/adapters/svelte/) pages for the adapter status.

@@ -154,12 +154,12 @@ starlight({
   title: 'Grove',
   customCss: ['./src/styles/global.css'],
   lastUpdated: true,
-  editLink: { baseUrl: 'https://github.com/tortuvshin/grove/edit/main/docs' },
+  editLink: { baseUrl: 'https://github.com/tortuvshin/grove/edit/main/apps/docs' },
   plugins: [
     grove({
       docs: { includeAiUtilities: true },
       navLinks: [
-        { label: 'Docs', link: '/guides/getting-started/' },
+        { label: 'Docs', link: '/introduction/' },
         { label: 'Showcase', link: '/showcase/starlight-components/' },
         { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
       ],

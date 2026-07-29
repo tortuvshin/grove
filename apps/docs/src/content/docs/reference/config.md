@@ -33,8 +33,8 @@ export default defineConfig({
 });
 ```
 
-That is enough to run `grove check` and `grove check`. The
-default theme and paths are used.
+That is enough to run `grove check`. The default theme and paths
+are used.
 
 ## Full config
 
@@ -205,9 +205,10 @@ Enables the GitHub integration. Three modes:
 - `{ metadata, contributors, health }` — pick which sub-features
   to enable.
 
-In V1, only `metadata` and `health` are implemented. `contributors`
-is a stub (the CLI prints "not yet implemented in V1" if you run
-`grove sync contributors`).
+In v0.4.0, all three sub-features are implemented. `metadata`
+powers `grove sync github`; `contributors` powers
+`grove sync contributors`; `health` derives `health.status` from
+the metadata on every render.
 
 ### `theme`
 
@@ -251,7 +252,7 @@ you need.
 | `dataDir` | `"data"` | Root for all data files |
 | `contentDir` | `"content"` | Root for Markdown content |
 | `recordsDir` | `"data/records"` | Where record YAML files live |
-| `pagesDir` | `"content/pages"` | Reserved for V1.1+ — the V1 template ships `about.astro`, `contributors.astro`, `submit.astro` as Astro components under `src/pages/`, not as Markdown content pages. The `content/pages/` directory is currently unused by the V1 default template. |
+| `pagesDir` | `"content/pages"` | The scaffold ships `about.astro`, `contributors.astro`, `submit.astro`, and `404.astro` as Astro components under `src/pages/`. The `content/pages/` directory is reserved for consumer-authored Markdown content pages. |
 | `bodiesDir` | `"content/records"` | Optional Markdown body per record (referenced by `content:`) |
 | `publicDir` | `"public"` | Static assets served as-is |
 | `taxonomyDir` | `"data/taxonomy"` | Controlled category, stack, platform, and distribution-channel values |
