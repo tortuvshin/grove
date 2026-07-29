@@ -1,0 +1,25 @@
+apps/example/README.md
+  s_04d14d1e1f9a4f::t_ba115bbfaeba12 49-50,52-53,60-67
+  s_04d14d1e1f9a4f::t_8a1af69feb6455 45-46,48,68-89
+  s_04d14d1e1f9a4f::t_79fedd72a34de6 47,51,54-59
+apps/example/grove.config.ts
+  s_04d14d1e1f9a4f::t_a16a5b3a24d7a3 90-103
+apps/example/.github/workflows/readme.yml
+  s_04d14d1e1f9a4f::t_1831e738ea2ef2 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "0292870c4de340d4e68cd17aad4c912da84686b8",
+  "prompts": {},
+  "sessions": {
+    "s_04d14d1e1f9a4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a352023-6a30-49eb-b794-75104b81bd66",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
