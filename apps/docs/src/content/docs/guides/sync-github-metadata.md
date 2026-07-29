@@ -10,10 +10,10 @@ This guide is for site maintainers who run (or schedule) sync. If you're a contr
 ## The basic command
 
 ```bash
-pnpm dlx @grove-dev/cli@latest sync github
+pnpm exec grove sync github
 ```
 
-Reads every `.yml` file under `data/records/`, looks up each record's GitHub repo (from `repoUrl` or `links.github`), and writes a `github` block back into the record. Source of truth lives in `packages/cli/src/index.ts` around line 561.
+Reads every `.yml` file under `data/records/`, looks up each record's GitHub repo (from `repoUrl` or `links.github`), and writes a `github` block back into the record. Source of truth lives in `packages/cli/src/index.ts` (`command("sync")` at lines 83-186).
 
 Useful flags:
 
@@ -23,7 +23,7 @@ Useful flags:
 Example with both:
 
 ```bash
-pnpm dlx @grove-dev/cli@latest sync github --limit 5 --strict
+pnpm exec grove sync github --limit 5 --strict
 ```
 
 ## What it writes into each record
@@ -89,7 +89,7 @@ If neither is set, the sync step runs unauthenticated. That's fine for small dir
 
 For local dev, the simplest setup is to install and authenticate the `gh` CLI, then `grove sync github` picks it up automatically.
 
-For CI, set `GITHUB_TOKEN` as a workflow secret. The `sync-github-metadata.yml` workflow that ships with the `public` GitHub integration mode does this already.
+For CI, set `GITHUB_TOKEN` as a workflow secret. The `sync-github.yml` workflow that ships with the scaffold does this already.
 
 ## What "drift" looks like
 
@@ -101,9 +101,9 @@ A record has drifted when its `github.repository.pushed_at` is older than the re
 
 The cleanup step (`grove cleanup`, see [Maintain health signals](/guides/maintain-health-signals/)) flags all of these. If the report has a sudden spike in `archived` or `unavailable` candidates, check the upstream before writing decisions — sometimes it's a transfer, and the new owner is actively maintaining the project.
 
-## Scheduled sync (the public GitHub integration)
+## Scheduled sync
 
-When you scaffold with `--github public`, the `sync-github-metadata.yml` workflow is generated. It runs `grove sync github` on a schedule and commits any changes back to the repo. The exact cadence is set in the workflow file — the default is weekly.
+When you scaffold with `grove init`, the `sync-github.yml` workflow is generated. It runs `grove sync github` on a schedule and commits any changes back to the repo. The exact cadence is set in the workflow file — the default is weekly.
 
 This is the right setup for a community-maintained directory. The schedule catches new stars, archive events, and transfers automatically. The commit cadence keeps the history reviewable: one PR-sized diff per week.
 
@@ -130,5 +130,5 @@ In all cases, the records that *did* sync are still written. The CLI doesn't rol
 
 - **It does not invent metadata.** If a record has no `repoUrl` and no `links.github`, the sync step skips it. It will not guess.
 - **It does not change the `health` block directly.** The health block is computed at render time from `github.repository.pushed_at`, `archived`, and `stars`. Updating the `github` block changes the next render's health, but the `health` field on the record YAML is not touched.
-- **It does not sync contributors in V1.** `grove sync contributors` is a registered command but is a no-op for now ("contributor sync is not yet implemented in V1"). The `sync-contributors.yml` workflow that ships with `public` mode exists for V1.1.
-- **It does not write to `data/health.yml`.** That file is currently a parallel format used by other tools. If your site has one, leave it alone — the sync step manages `github.repository` on each record, which is the source of truth for the rendered health.
+- **It does not sync contributors.** `grove sync github` only touches `github.repository`, `github.html`, and `github.sync`. Contributor refresh lives in a separate command: `grove sync contributors` (see [CLI reference](/reference/cli/#grove-sync-contributors)).
+- **It does not write to `data/health.yml`.** That file is a legacy format the validator no longer parses. The sync step manages `github.repository` on each record, which is the source of truth for the rendered health block.

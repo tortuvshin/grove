@@ -9,12 +9,15 @@ This guide is for site maintainers triaging the periodic cleanup report. If you'
 
 ## Where the health data comes from
 
-There are two places health data lives:
+There is one place health data lives:
 
 1. **The record's `health` block** — auto-populated when `grove sync github` runs. Contains `status`, `maturity`, `tier`, `visibility`, `cleanupCandidate`, `staleReason`, `confidence`, and `reasons`.
-2. **`data/health.yml`** — the per-record `healthEntrySchema` form of the same data, written by the sync step. Useful for diffing across runs.
 
-The health block in the record is the source of truth at render time. Don't hand-edit it — `grove sync github` will overwrite any manual changes on its next run. If you want to *override* the auto-derived value, write a [decision](/guides/manage-decisions/).
+The health block in the record is the source of truth at render
+time. Don't hand-edit it — `grove sync github` will overwrite any
+manual changes on its next run. If you want to *override* the
+auto-derived value, write a [decision](/guides/manage-decisions/).
+(`data/health.yml` is a legacy format the validator no longer parses.)
 
 ## The status enum
 
@@ -53,7 +56,7 @@ Four values, derived from stars and activity.
 - `status` is `stale`, `archived`, `inactive`, or `unavailable`, **or**
 - `status` is `unknown` and the record has no GitHub data
 
-The `grove cleanup` command filters by this flag and writes a report. In a public GitHub site, the `cleanup-stale-records.yml` workflow runs this on a schedule and posts the report as a workflow artifact. Pull the artifact, walk the list, write decisions for the records that need an explicit verdict.
+The `grove cleanup` command filters by this flag and writes a report. The `cleanup.yml` workflow runs this on a monthly cron and posts the report as a workflow artifact. Pull the artifact, walk the list, write decisions for the records that need an explicit verdict.
 
 ## A triage session
 

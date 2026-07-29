@@ -14,7 +14,7 @@ integrations: {
 },
 ```
 
-Then run the sync manually, or let the scheduled `sync-github-metadata.yml` workflow do it.
+Then run the sync manually, or let the scheduled `sync-github.yml` workflow do it.
 
 ```bash
 grove sync github                # enrich every record with live metadata

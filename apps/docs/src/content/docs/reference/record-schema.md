@@ -1,6 +1,6 @@
 ---
 title: Record schema
-description: The discriminated Resource union — every kind, every field, every default. The schema grove check and grove check work against.
+description: The discriminated Resource union — every kind, every field, every default. The schema `grove check` validates and generates against.
 ---
 
 Grove V1 ships a discriminated `Resource` union with three concrete
@@ -214,7 +214,7 @@ can be overridden by curator decisions in `data/decisions.yml`.
 | `reasons` | `string[]` | Human-readable reasons for the current state |
 
 **Health is a review signal, not a final ranking.** The
-`cleanup-stale-records.yml` workflow surfaces records with
+`cleanup.yml` workflow surfaces records with
 `cleanupCandidate: true` for human review; the curator decides
 whether to keep, hide, mark historical, or remove.
 
@@ -288,5 +288,5 @@ links:
 - **[Blueprints](/concepts/blueprints/)** — which `kind` goes with
   which blueprint.
 - **[grove.config.ts](/reference/config/)** — site config.
-- **[CLI](/reference/cli/)** — `grove check` and `grove check`
-  use this schema.
+- **[CLI](/reference/cli/)** — `grove check` validates and
+  generates against this schema.

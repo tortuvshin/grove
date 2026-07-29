@@ -7,4 +7,7 @@ Every project in your directory is a YAML file under `data/records/`. One file p
 
 The full field reference is in **[Project record schema](/reference/record-schema/)**. Step-by-step authoring is in **[Author a record](/guides/author-a-record/)**.
 
-To import an existing awesome list instead of writing each YAML by hand, see **[grove readme generate](/reference/cli/#grove-import)**.
+To populate the on-site `README.md` between the
+`<!-- grove-readme:start -->` / `<!-- grove-readme:end -->` sentinels
+after authoring, see
+**[`grove readme generate`](/reference/cli/#grove-readme-generate)**.
