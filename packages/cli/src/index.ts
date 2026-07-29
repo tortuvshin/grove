@@ -20,6 +20,7 @@ import { parse as parseYaml } from "yaml";
 import { buildAuditCommand } from "./audit-cli.js";
 import { buildCollectionCommand } from "./collection-cli.js";
 import { initDirectory, readCliVersion } from "./init.js";
+import { buildReadmeCommand } from "./readme-cli.js";
 
 const program = new Command();
 
@@ -200,6 +201,7 @@ program
 
 program.addCommand(buildAuditCommand());
 program.addCommand(buildCollectionCommand());
+program.addCommand(buildReadmeCommand());
 
 program.parseAsync().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : String(error));
