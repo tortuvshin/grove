@@ -29,6 +29,16 @@ export default defineConfig({
                 light: './src/assets/logo-light.svg',
             },
             customCss: ['./src/styles/global.css'],
+            // Starlight's default `editLink.baseUrl` would be inferred
+            // from the GitHub repo metadata and produce a path under
+            // `docs/src/content/docs/...` — but our content actually lives
+            // at `apps/docs/src/content/docs/...`. Without this override,
+            // every "Edit this page" link in production resolves to a
+            // 404. Implementation-checklist.md #29.
+            editLink: {
+                baseUrl:
+                    'https://github.com/tortuvshin/grove/edit/main/apps/docs/src/content/docs',
+            },
             plugins: [
                 grove({
                     docs: {
