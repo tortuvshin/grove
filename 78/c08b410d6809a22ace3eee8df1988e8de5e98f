@@ -1,0 +1,19 @@
+tests/integration/grove-audit.test.ts
+  s_e6c33d81ab4c71::t_81dd8c008aefa3 25-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "78c08b410d6809a22ace3eee8df1988e8de5e98f",
+  "prompts": {},
+  "sessions": {
+    "s_e6c33d81ab4c71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6cc9068-1332-47b6-9f03-09e15ba76318",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
