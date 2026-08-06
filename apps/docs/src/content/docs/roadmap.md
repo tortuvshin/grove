@@ -11,7 +11,7 @@ description: Grove's shipping status — what v0.4.0 ships today, what is planne
 The roadmap is grouped by status, not by chronology:
 
 - **Shipped** — available in `v0.4.0` (the current published release).
-- **Next release (V1.1)** — scoped and targeted. APIs may shift
+- **Next release (v0.5.0)** — scoped and targeted. APIs may shift
   before the cut.
 - **Later** — directional. Will happen only if real spaces need it.
 - **Out of scope** — explicit non-goals we will not build.
@@ -19,7 +19,8 @@ The roadmap is grouped by status, not by chronology:
 For the per-version changelog, see
 [`CHANGELOG.md`](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md)
 at the repo root. For the historical record of how Grove got here, see
-[`apps/docs/superpowers/`](https://github.com/tortuvshin/grove/tree/main/apps/docs/superpowers).
+[`docs/superpowers/`](https://github.com/tortuvshin/grove/tree/main/docs/superpowers)
+(also mirrored inside `.audit/superpowers/` for working notes).
 
 ---
 
@@ -113,43 +114,46 @@ Every `grove check` produces:
 
 ---
 
-## Next release — V1.1
+## Next release — v0.5.0
 
-Scope is set. Dates are not — V1.1 cuts when the items below are
-ready, not before.
+Scope is set. Dates are not — v0.5.0 cuts when the items below are
+ready, not before. The four items are the V1 release-line priorities
+flagged during the v0.4.0 retrospective: internal consistency, PR-time
+quality gating, contributor ergonomics, and audit-finding close-out.
 
-### SvelteKit and Next.js adapters (if asked)
-
-`@grove-dev/svelte` and `@grove-dev/nextjs` would graduate from
-"planned" to "shipped" if a real community space needs one. Today no
-such demand exists, so no scaffolding or templates are committed.
-
-### `grove import`
+### `grove import` CLI
 
 Wrap the existing `importAwesomeList` / `writeImportedRecords` parser
 exposed by `@grove-dev/core` as a CLI command so contributors can run
 `grove import https://github.com/<owner>/awesome-<topic>` instead of
-writing a small script.
-
-### Polished `resource-hub` and `ecosystem-map` defaults
-
-Today both blueprints validate and emit JSON, but the polished list /
-detail page templates that ship with the Astro renderer are tuned for
-`project-directory`. The other two blueprints' default pages are
-exposed via the consumer-side `src/pages/` routes; V1.1 will ship a
-reference template for each.
+writing a small script. The parser and writer already ship; the CLI
+layer is what unblocks the docs and `submit` flow from re-implementing
+the import path inline.
 
 ### Lighthouse audit on every PR
 
 `.github/workflows/lighthouse-audit.yml` today runs on changes to
 `packages/{core,cli,astro}/**` or `apps/example/**` and on a weekly
-cron. V1.1 will run it on every PR.
+cron. v0.5.0 will run it on every PR that touches the audit manifest
+or `apps/example/`, posting the scorecard as a check run.
 
 ### Strict internal-link lint
 
 Today `scripts/check-starlight-sidebar.mjs` validates sidebar slugs.
-V1.1 will add a sibling script that validates every internal link in
-every `apps/docs/src/content/docs/**/*.md` resolves to a real file.
+v0.5.0 will add a sibling script that validates every internal link in
+every `apps/docs/src/content/docs/**/*.md` resolves to a real file,
+and wire it as a `pnpm docs:check` step so the docs CI fails on stale
+cross-links before they reach `main`.
+
+### Close-out of verified audit findings
+
+The internal post-launch audit catalogue (in `.audit/`) lists verified
+recommendations that the shipped surface still does not address —
+rasterising the OG image to PNG, third-party-action SHA pinning, OIDC
+trusted publishing, and so on. v0.5.0 will land as many as fit before
+the cut. Anything left over graduates to `v0.5.x` patches or v0.6.0;
+every item is enumerated either way so the catalogue shrinks on every
+release.
 
 ---
 
@@ -183,12 +187,19 @@ central write authority — each space keeps its own source of truth.
 V2 schema behind `recordsBundleSchema` so a single YAML file can
 carry a `records: [...]` array. Today this is explicitly a V2 feature.
 
-### Open remaining audit findings
+### SvelteKit and Next.js adapters (deferred from v0.5.0)
 
-The internal post-launch audit catalogue lists verified recommendations
-that the shipped surface still does not address — rasterising the OG
-image to PNG, third-party-action SHA pinning, OIDC trusted publishing,
-and so on. Each one is a candidate for a future minor or patch release.
+`@grove-dev/svelte` and `@grove-dev/nextjs` would graduate from
+"planned" to "shipped" if a real community space needs one. Today no
+such demand exists, so no scaffolding or templates are committed.
+Deferred from v0.5.0 to avoid scope creep.
+
+### Polished `resource-hub` and `ecosystem-map` defaults (deferred from v0.5.0)
+
+Today both blueprints validate and emit JSON, but the polished list /
+detail page templates that ship with the Astro renderer are tuned for
+`project-directory`. Deferred from v0.5.0; reference templates will
+ship when a consumer site needs them.
 
 ---
 

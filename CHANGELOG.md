@@ -20,8 +20,10 @@ For the developer workflow that produces these entries, see
 
 ## [Unreleased]
 
-> Working buffer. Folds into a dated `## [X.Y.Z]` heading on the next
-> release.
+> Working buffer for the next release. Folds into a dated `## [X.Y.Z]`
+> heading once v0.5.0 cuts. Targets are tracked in
+> [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
+> under "Next release — v0.5.0".
 
 ---
 
