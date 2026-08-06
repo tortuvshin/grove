@@ -19,6 +19,7 @@ import {
 import { parse as parseYaml } from "yaml";
 import { buildAuditCommand } from "./audit-cli.js";
 import { buildCollectionCommand } from "./collection-cli.js";
+import { buildImportCommand } from "./import-cli.js";
 import { initDirectory, readCliVersion } from "./init.js";
 import { buildReadmeCommand } from "./readme-cli.js";
 
@@ -201,6 +202,7 @@ program
 
 program.addCommand(buildAuditCommand());
 program.addCommand(buildCollectionCommand());
+program.addCommand(buildImportCommand());
 program.addCommand(buildReadmeCommand());
 
 program.parseAsync().catch((error: unknown) => {
