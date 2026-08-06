@@ -1,0 +1,38 @@
+.github/workflows/ci.yml
+  s_e6c33d81ab4c71::t_eec447adac5270 77-104
+  s_e6c33d81ab4c71::t_cda4144e145b6a 13-20
+packages/core/src/validate.ts
+  s_e6c33d81ab4c71::t_16cbb1f608a457 44
+  s_e6c33d81ab4c71::t_ff3b8d1f1afb25 122-126
+  s_e6c33d81ab4c71::t_990004df0a702f 329-331
+packages/core/src/io.ts
+  s_e6c33d81ab4c71::t_ab829c854dc7da 5-13,16
+packages/core/src/build-data.ts
+  s_e6c33d81ab4c71::t_bd477370b6a8d1 114
+  s_e6c33d81ab4c71::t_1b2aed891c8827 65
+  s_e6c33d81ab4c71::t_cdf3a4c378ce06 174
+packages/core/src/schema.ts
+  s_e6c33d81ab4c71::t_c1d7a0e37643ce 730-734
+.github/workflows/audit.yml
+  s_e6c33d81ab4c71::t_5a56ddb6b5b645 22-27
+apps/docs/astro.config.mjs
+  s_e6c33d81ab4c71::t_242b4352ce77c9 32-41
+packages/core/src/decisions.ts
+  s_e6c33d81ab4c71::t_57194a5cc0f29a 84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "88d8f84af387c0d9c66f0efa4986aa603a43faa6",
+  "prompts": {},
+  "sessions": {
+    "s_e6c33d81ab4c71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6cc9068-1332-47b6-9f03-09e15ba76318",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
