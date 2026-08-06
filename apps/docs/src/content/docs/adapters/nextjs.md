@@ -1,6 +1,6 @@
 ---
 title: Next.js
-description: Status: not shipped. A Next.js adapter is a future roadmap item, not part of v0.4.0.
+description: "Status: not shipped. A Next.js adapter is a future roadmap item, not part of v0.4.0."
 ---
 
 The **Next.js** adapter is **not shipped in v0.4.0**. There is no

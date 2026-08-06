@@ -1,6 +1,6 @@
 ---
 title: SvelteKit
-description: Status: not shipped. A SvelteKit adapter is a future roadmap item, not part of v0.4.0.
+description: "Status: not shipped. A SvelteKit adapter is a future roadmap item, not part of v0.4.0."
 ---
 
 The **SvelteKit** adapter is **not shipped in v0.4.0**. There is no
