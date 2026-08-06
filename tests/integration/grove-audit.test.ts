@@ -22,7 +22,13 @@ async function waitForReady(url: string, timeoutMs = 30000): Promise<void> {
 
 describe("grove audit @apps/example", () => {
   beforeAll(async () => {
-    preview = spawn("pnpm", ["preview"], {
+    // `astro preview` defaults to `localhost`, which on macOS resolves to
+    // IPv6 `[::1]` first. Without `--host 127.0.0.1` the server binds only
+    // to IPv6, and `waitForReady` below (which polls `127.0.0.1`)
+    // times out — or worse, a separate IPv4 listener on the same port
+    // silently answers and the audit tests a stranger's site. Forcing
+    // IPv4 here keeps the test self-contained on a developer's machine.
+    preview = spawn("pnpm", ["preview", "--host", "127.0.0.1"], {
       cwd: example,
       stdio: "pipe",
       env: { ...process.env, HOST: "127.0.0.1", PORT: "4321" },
