@@ -1,0 +1,24 @@
+apps/docs/src/content/docs/roadmap.md
+  s_e6c33d81ab4c71::t_9fe8560328cffb 14
+  s_e6c33d81ab4c71::t_2964b4ed4466d5 22-23
+  s_e6c33d81ab4c71::t_4bada1a3ceb430 117,119-122,124,129-131,137-138,143-156
+  s_e6c33d81ab4c71::t_f0288ccea2dd47 190,192-202
+CHANGELOG.md
+  s_e6c33d81ab4c71::t_dba963adb3babc 23-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "5811b5d31237a7d6fc1d005275afb30686465831",
+  "prompts": {},
+  "sessions": {
+    "s_e6c33d81ab4c71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6cc9068-1332-47b6-9f03-09e15ba76318",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
