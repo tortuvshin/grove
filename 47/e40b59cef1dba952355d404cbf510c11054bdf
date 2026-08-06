@@ -1,0 +1,21 @@
+apps/docs/src/content/docs/adapters/nextjs.md
+  s_e6c33d81ab4c71::t_0cd995ce69b302 3
+apps/docs/src/content/docs/adapters/svelte.md
+  s_e6c33d81ab4c71::t_372baddb46095d 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "47e40b59cef1dba952355d404cbf510c11054bdf",
+  "prompts": {},
+  "sessions": {
+    "s_e6c33d81ab4c71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6cc9068-1332-47b6-9f03-09e15ba76318",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
