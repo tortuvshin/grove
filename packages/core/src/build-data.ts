@@ -62,7 +62,7 @@ async function loadDecisionVisibility(
 ): Promise<Map<string, string>> {
   try {
     const raw = await readFile(resolve(cwd, decisionsPath), "utf8");
-    const parsed = decisionsFileSchema.parse(parseYaml(raw) ?? {});
+    const parsed = decisionsFileSchema.parse(parseYaml(raw, { schema: "core" }) ?? {});
     const decisions = unwrapDecisions(parsed);
     const out = new Map<string, string>();
     for (const d of decisions) out.set(d.id, d.decision.visibility);
@@ -111,7 +111,7 @@ async function loadTaxonomyFile(
 ): Promise<GeneratedTaxonomyItem[]> {
   try {
     const text = await readFile(resolve(cwd, taxonomyDir, filename), "utf8");
-    const raw = parseYaml(text);
+    const raw = parseYaml(text, { schema: "core" });
     if (!Array.isArray(raw)) return [];
     return raw
       .filter(
@@ -171,7 +171,7 @@ export async function generate(
     const fileSlug = basename(file, ".yml");
     try {
       const text = await readFile(join(recordsDir, file), "utf8");
-      const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
+      const raw = (parseYaml(text, { schema: "core" }) ?? {}) as Record<string, unknown>;
       if (!raw.kind) raw.kind = expectedKind;
       const normalized = recordsFileSchema.parse(raw);
       normalized.slug = fileSlug;

@@ -727,7 +727,11 @@ export function parseRecordYaml(
   text: string,
   fileSlug: string,
 ): Record<string, unknown> {
-  const raw = parse(text) ?? {};
+  // `schema: 'core'` opts out of custom-tag interpretation so a
+  // record file cannot smuggle `!!binary` / `!!js/function` / etc.
+  // into host objects. The default schema would interpret them.
+  // (Implementation-checklist.md #27.)
+  const raw = parse(text, { schema: "core" }) ?? {};
   if (typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error(`${fileSlug}: record file must contain a YAML mapping`);
   }

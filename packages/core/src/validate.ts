@@ -41,7 +41,7 @@ async function exists(path: string): Promise<boolean> {
 
 async function taxonomyIds(path: string): Promise<Set<string>> {
   try {
-    const raw = parseYaml(await readFile(path, "utf8"));
+    const raw = parseYaml(await readFile(path, "utf8"), { schema: "core" });
     if (!Array.isArray(raw)) return new Set();
     return new Set(
       raw
@@ -119,7 +119,11 @@ export async function validateProject(
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
     const text = await readFile(join(recordsDir, file), "utf8");
-    const raw = parseYaml(text) as Record<string, unknown> | null;
+    // `schema: 'core'` disables custom-tag interpretation; a malicious
+    // record with `!!binary` / `!!js/function` would otherwise be parsed
+    // into a host object by the YAML package's default schema.
+    // Implementation-checklist.md #27.
+    const raw = parseYaml(text, { schema: "core" }) as Record<string, unknown> | null;
     if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
       errors.push({
         code: "schema_error",
@@ -322,7 +326,9 @@ export async function loadRecords(
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
     const text = await readFile(join(recordsDir, file), "utf8");
-    const raw = parseYaml(text) as Record<string, unknown> | null;
+    // `schema: 'core'` disables custom-tag interpretation. Same
+    // rationale as the `readRecords` block above.
+    const raw = parseYaml(text, { schema: "core" }) as Record<string, unknown> | null;
     if (!raw || typeof raw !== "object") {
       if (onError === "throw") {
         throw new Error(`${fileSlug}: record file is empty or not a YAML mapping`);

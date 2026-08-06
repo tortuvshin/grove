@@ -81,7 +81,7 @@ export async function cleanupStale(
   for (const file of files) {
     const fileSlug = basename(file, ".yml");
     const text = await readFile(join(recordsDir, file), "utf8");
-    const raw = (parseYaml(text) ?? {}) as Record<string, unknown>;
+    const raw = (parseYaml(text, { schema: "core" }) ?? {}) as Record<string, unknown>;
     if (!raw.kind) raw.kind = expectedKind;
     try {
       const normalized = recordsFileSchema.parse(raw);

@@ -19,6 +19,12 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
+# Minimum-scope token: read repo contents, nothing else. The audit
+# job only runs `pnpm audit` and never publishes, so `contents: read`
+# is sufficient. Implementation-checklist.md #24.
+permissions:
+  contents: read
+
 jobs:
   audit:
     name: pnpm audit
