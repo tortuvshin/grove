@@ -1,5 +1,3 @@
-# Dify
-
 Dify is an open-source platform for building production LLM applications. The name is a riff on "Define + Modify" — the product is built around a visual workflow editor that turns prompt chains, retrieval pipelines, and tool calls into a node graph, plus an agent runtime that hosts the resulting application as an API and a chat UI.
 
 ## Why it matters

@@ -1,5 +1,3 @@
-# Open WebUI
-
 Open WebUI is a self-hosted ChatGPT-style interface for talking to local models (Ollama, llama.cpp) and remote APIs (OpenAI, Anthropic, Google, OpenRouter) through a single web app. It ships as a Python package plus a Docker image and is the de facto front end for an Ollama install on a home server.
 
 ## Why it matters

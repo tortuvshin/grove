@@ -46,10 +46,14 @@ describe("grove init integration", () => {
     // The example ships with a `content:` field on every record, pointing
     // at a sidecar MD body under `content/records/<slug>.md`. The scaffold
     // must copy both the YAML metadata and the MD body, so consumers can
-    // demo rich detail-page content out of the box.
+    // demo rich detail-page content out of the box. The MD file no longer
+    // opens with `# Ollama` (the page header already shows the name), so
+    // we assert on a substring from the body instead.
     expect(await readFile(join(target, "data/records/ollama.yml"), "utf8")).toContain(
       "content: ./content/records/ollama.md",
     );
-    expect(await readFile(join(target, "content/records/ollama.md"), "utf8")).toContain("# Ollama");
+    expect(await readFile(join(target, "content/records/ollama.md"), "utf8")).toContain(
+      "Ollama is a single-binary tool",
+    );
   });
 });

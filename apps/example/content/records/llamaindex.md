@@ -1,5 +1,3 @@
-# LlamaIndex
-
 LlamaIndex is a data framework for connecting custom data to large language models. The premise: an LLM is only as useful as the context it can pull, and most production applications need that context from a corpus the model never saw at training time. LlamaIndex provides the connectors, parsers, chunking strategies, retrieval modes, and query engines that turn a pile of files into a usable RAG pipeline.
 
 ## Why it matters
