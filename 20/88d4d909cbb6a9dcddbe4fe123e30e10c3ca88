@@ -1,0 +1,45 @@
+apps/example/data/records/crewai.yml
+  s_6b8be7f84f9ad4::t_6f737709a71c67 21
+apps/example/content/records/ollama.md
+  s_6b8be7f84f9ad4::t_12249c424dedfc 1-41
+apps/example/data/records/open-webui.yml
+  s_6b8be7f84f9ad4::t_2bc37e92248346 21
+apps/example/content/records/crewai.md
+  s_6b8be7f84f9ad4::t_ff6a3fef8ce696 1-46
+apps/example/data/records/flowise.yml
+  s_6b8be7f84f9ad4::t_56d4d1445740e9 21
+CHANGELOG.md
+  s_6b8be7f84f9ad4::t_bf2219a945f68d 24,26-84
+apps/example/content/records/flowise.md
+  s_6b8be7f84f9ad4::t_6cc82f76beb66b 1-40
+apps/example/content/records/llamaindex.md
+  s_6b8be7f84f9ad4::t_6030799657dbd1 1-47
+apps/example/data/records/dify.yml
+  s_6b8be7f84f9ad4::t_4b13f0a7be14ee 21
+apps/example/data/records/llamaindex.yml
+  s_6b8be7f84f9ad4::t_f87f360d733ce0 21
+apps/example/content/records/dify.md
+  s_6b8be7f84f9ad4::t_36b962013271ce 1-37
+tests/integration/grove-init.test.ts
+  s_6b8be7f84f9ad4::t_c18578e3f91c29 46-53
+apps/example/data/records/ollama.yml
+  s_6b8be7f84f9ad4::t_8b6139d5a8152f 28
+apps/example/content/records/open-webui.md
+  s_6b8be7f84f9ad4::t_409d5f52f61437 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2088d4d909cbb6a9dcddbe4fe123e30e10c3ca88",
+  "prompts": {},
+  "sessions": {
+    "s_6b8be7f84f9ad4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b89c1112-40e8-4e41-af53-cb80d7865f33",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
