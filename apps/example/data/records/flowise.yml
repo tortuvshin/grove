@@ -18,4 +18,5 @@ caveats: [Complex production flows still require careful testing]
 distribution: { channels: [] }
 source: { type: manual }
 curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [new], lenses: [production-like, good-to-learn] }
+content: ./content/records/flowise.md
 visibility: keep

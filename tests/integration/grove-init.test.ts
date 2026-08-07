@@ -43,5 +43,13 @@ describe("grove init integration", () => {
     );
     await expect(readFile(join(target, "data/generated/records.json"), "utf8")).rejects.toThrow();
     expect(await readFile(join(target, "data/records/ollama.yml"), "utf8")).toContain("name: Ollama");
+    // The example ships with a `content:` field on every record, pointing
+    // at a sidecar MD body under `content/records/<slug>.md`. The scaffold
+    // must copy both the YAML metadata and the MD body, so consumers can
+    // demo rich detail-page content out of the box.
+    expect(await readFile(join(target, "data/records/ollama.yml"), "utf8")).toContain(
+      "content: ./content/records/ollama.md",
+    );
+    expect(await readFile(join(target, "content/records/ollama.md"), "utf8")).toContain("# Ollama");
   });
 });

@@ -18,4 +18,5 @@ caveats: [Agent reliability depends heavily on model and tool design]
 distribution: { channels: [] }
 source: { type: manual }
 curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [hot], lenses: [good-to-learn] }
+content: ./content/records/crewai.md
 visibility: keep
