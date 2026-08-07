@@ -15,7 +15,7 @@
     "@grove-dev/starlight": "workspace:*",
     "@tailwindcss/vite": "^4.3.2",
     "astro": "^7.0.7",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3"
   }
 }
