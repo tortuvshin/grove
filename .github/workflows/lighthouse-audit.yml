@@ -32,6 +32,12 @@ jobs:
     name: grove audit
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # The audit job alone escalates permissions for the PR comment
+    # step at the bottom. All other jobs keep the workflow's default
+    # `contents: read`.
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -57,3 +63,66 @@ jobs:
           path: |
             apps/example/lighthouse-report.json
             apps/example/lighthouse-junit.xml
+
+      - name: Post scorecard on PR
+        # When the workflow runs on a pull_request, post / update a
+        # single scorecard comment under the PR. We tag the body with
+        # a hidden marker so subsequent runs find + update the same
+        # comment instead of stacking new ones. v0.5.0 roadmap item
+        # "Lighthouse audit on every PR".
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          LIGHTHOUSE_REPORT: apps/example/lighthouse-report.json
+        with:
+          script: |
+            const fs = require('fs');
+            const path = process.env.LIGHTHOUSE_REPORT;
+            const marker = '<!-- lighthouse-audit-marker -->';
+            if (!fs.existsSync(path)) {
+              console.log(`No ${path} — skipping PR comment.`);
+              return;
+            }
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const total = report.results ? report.results.length : 0;
+            const violations = report.violations || [];
+            const lines = [];
+            lines.push(marker);
+            lines.push(`## 📊 Lighthouse audit`);
+            lines.push('');
+            lines.push(`- Combinations audited: ${total}`);
+            lines.push(`- Budget violations: ${violations.length}`);
+            lines.push('');
+            if (violations.length === 0) {
+              lines.push('✅ Every page × profile combination passed the 100×4 budget.');
+            } else {
+              lines.push('⛔ Budget violations:');
+              for (const v of violations.slice(0, 30)) {
+                lines.push(`- [${v.profile}] ${v.page.path} ${v.category}.${v.name}: expected ${v.expected}, got ${v.actual}`);
+              }
+              if (violations.length > 30) {
+                lines.push(`- …and ${violations.length - 30} more. Full JSON in the artifact.`);
+              }
+            }
+            lines.push('');
+            lines.push('Full report: see the `lighthouse-report` artifact on this run.');
+            const body = lines.join('\n');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const existing = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 },
+              (resp) => resp.data,
+            );
+            const prior = existing.find((c) => c.body && c.body.includes(marker));
+            if (prior) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: prior.id, body,
+              });
+              console.log(`Updated existing comment id=${prior.id}`);
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number, body,
+              });
+              console.log(`Created new scorecard comment`);
+            }
