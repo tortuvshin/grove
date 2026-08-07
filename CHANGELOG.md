@@ -21,9 +21,67 @@ For the developer workflow that produces these entries, see
 ## [Unreleased]
 
 > Working buffer for the next release. Folds into a dated `## [X.Y.Z]`
-> heading once v0.5.0 cuts. Targets are tracked in
+> heading once v0.6.0 cuts. Targets are tracked in
 > [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
-> under "Next release — v0.5.0".
+> under "Next release — v0.5.0" until they ship.
+
+---
+
+## [0.5.0] — 2026-08-07
+
+### Added
+
+- **`@grove-dev/cli`:** new `grove import <url>` command — wraps the
+  existing `importAwesomeList` + `writeImportedRecords` parser from
+  `@grove-dev/core` so contributors can turn an awesome-list README
+  (URL or local path) into `data/records/<slug>.yml` files tagged
+  `source: { type: "import" }`. Implements the v0.5.0 roadmap item
+  "`grove import` CLI".
+- **CI hygiene:**
+  - `.github/workflows/ci.yml` now runs `pnpm test` as a separate
+    `unit` job, so the 22 unit tests across
+    `@grove-dev/{core,ui,astro,cli,starlight}` gate every PR.
+    Previously only the scaffold smoke test ran on PRs.
+  - `ci.yml` and `audit.yml` declare `permissions: { contents: read }`
+    so the GitHub Actions token cannot accidentally write. The
+    Lighthouse audit job alone escalates to `pull-requests: write`
+    for its PR-comment step.
+- **Docs lint:**
+  - New `scripts/check-starlight-internal-links.mjs` walks every
+    Markdown / MDX file under `apps/docs/src/content/docs/`,
+    extracts markdown links, reference-style links, and HTML
+    anchors, and asserts each `/path/to/page/` target resolves
+    to an existing `.md` / `.mdx` file under that root.
+  - `pnpm docs:check` now runs both sidebar and link checks;
+    `ci.yml` invokes it on PRs.
+- **Lighthouse PR feedback:** `.github/workflows/lighthouse-audit.yml`
+  posts a Markdown scorecard (budget violations) as a single
+  update-in-place comment on the PR. Previously only the artifact
+  was visible.
+
+### Changed
+
+- **Docs edit links:** `apps/docs/astro.config.mjs` Starlight config
+  now sets `editLink.baseUrl` explicitly to
+  `https://github.com/tortuvshin/grove/edit/main/apps/docs/src/content/docs`,
+  so the "Edit this page" link on every docs page resolves to the
+  real source path (was previously inferring the wrong default).
+- **YAML loader hardened:** every `parse(text)` call in
+  `@grove-dev/core` (io.ts readYamlFile, validate.ts, build-data.ts,
+  decisions.ts, schema.ts parseRecordYaml) now passes
+  `{ schema: "core" }` so the `yaml` package does not interpret
+  custom tags (`!!binary`, `!!js/function`, anchor expansion, etc.)
+  from untrusted input. The default schema is YAML 1.2 + extras;
+  `core` is the safer 1.2-only baseline.
+
+### Fixed
+
+- **Test:** `tests/integration/grove-audit.test.ts` now passes
+  `--host 127.0.0.1` to `astro preview` so the audit previews bind
+  on the IPv4 interface the test then polls. The previous default
+  (`localhost` → IPv6 `[::1]`) silently produced timeouts on macOS,
+  or worse, connected to a different project's IPv4 listener on
+  the same port.
 
 ---
 

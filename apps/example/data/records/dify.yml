@@ -18,4 +18,5 @@ caveats: [Operational footprint is larger than a library]
 distribution: { channels: [] }
 source: { type: manual }
 curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [production-like] }
+content: ./content/records/dify.md
 visibility: keep

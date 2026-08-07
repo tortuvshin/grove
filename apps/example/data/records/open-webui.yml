@@ -18,4 +18,5 @@ caveats: []
 distribution: { channels: [] }
 source: { type: manual }
 curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [hot], lenses: [production-like] }
+content: ./content/records/open-webui.md
 visibility: keep

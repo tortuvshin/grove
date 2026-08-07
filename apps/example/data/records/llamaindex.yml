@@ -18,4 +18,5 @@ caveats: [Large API surface takes time to learn]
 distribution: { channels: [] }
 source: { type: manual }
 curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [good-to-learn] }
+content: ./content/records/llamaindex.md
 visibility: keep

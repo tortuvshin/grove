@@ -25,4 +25,5 @@ curation:
   reviewedAt: "2026-07-20"
   labels: [hot]
   lenses: [production-like, good-to-learn]
+content: ./content/records/ollama.md
 visibility: keep
