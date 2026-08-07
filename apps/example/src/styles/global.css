@@ -31,3 +31,154 @@
 
   }
 }
+
+/*
+ * `.record-body` is the rendered body of a record's sidecar Markdown.
+ * The framework sanitizes the source through sanitize-html with a
+ * tight allowlist (h1–h4, p, br, hr, ul/ol/li, strong/em/b/i/u/s/del,
+ * a, code, pre, blockquote) so this stylesheet can assume those
+ * elements without a defensive `>` reset.
+ *
+ * Why CSS variables instead of `var(--color-ink-700, #...)`:
+ * Tailwind v4's class scanner doesn't recognize `text-ink-700` in a
+ * `.astro` file's `<style>` block (it scans the consumer app's
+ * source tree, and the @grove-dev/astro package's tokens live in
+ * a different file). Reading from CSS variables that the package's
+ * styles.css already defines sidesteps the issue and keeps the
+ * package as the single source of truth for the color scale.
+ */
+@layer components {
+  .record-body {
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 68ch;
+    color: var(--color-ink-700, #3a3a3a);
+  }
+  .dark .record-body {
+    color: var(--color-ink-200, #d4d4d4);
+  }
+  .record-body > :first-child { margin-top: 0; }
+  .record-body > :last-child { margin-bottom: 0; }
+  .record-body h1,
+  .record-body h2,
+  .record-body h3,
+  .record-body h4 {
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--color-ink-900, #1a1a1a);
+  }
+  .dark .record-body h1,
+  .dark .record-body h2,
+  .dark .record-body h3,
+  .dark .record-body h4 {
+    color: var(--color-ink-100, #f0f0f0);
+  }
+  /* The body often opens with a `# <Project name>` heading that
+     duplicates the page title. Hide the first heading so the body
+     flows from a top-level paragraph straight into sections. */
+  .record-body > h1:first-child { display: none; }
+  .record-body h2 {
+    font-size: 1.35rem;
+    margin-top: 2.25rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--color-ink-200, #e5e5e5);
+  }
+  .dark .record-body h2 {
+    border-bottom-color: var(--color-ink-800, #2a2a2a);
+  }
+  .record-body h3 {
+    font-size: 1.1rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .record-body h4 {
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+  .record-body p {
+    margin: 0 0 1rem 0;
+  }
+  .record-body ul,
+  .record-body ol {
+    margin: 0 0 1rem 0;
+    padding-left: 1.5rem;
+  }
+  .record-body ul { list-style: disc; }
+  .record-body ol { list-style: decimal; }
+  .record-body li { margin-bottom: 0.35rem; padding-left: 0.25rem; }
+  .record-body li > ul,
+  .record-body li > ol { margin-top: 0.35rem; margin-bottom: 0; }
+  .record-body strong {
+    font-weight: 600;
+    color: var(--color-ink-900, #1a1a1a);
+  }
+  .dark .record-body strong {
+    color: var(--color-ink-100, #f0f0f0);
+  }
+  .record-body a {
+    color: var(--color-ink-900, #1a1a1a);
+    text-decoration: underline;
+    text-decoration-color: var(--color-ink-300, #c0c0c0);
+    text-underline-offset: 2px;
+  }
+  .record-body a:hover {
+    text-decoration-color: currentColor;
+  }
+  .dark .record-body a {
+    color: var(--color-ink-100, #f0f0f0);
+    text-decoration-color: var(--color-ink-700, #4a4a4a);
+  }
+  .record-body code {
+    @apply font-mono text-[0.875em];
+    background-color: var(--color-ink-100, #f0f0f0);
+    color: var(--color-ink-900, #1a1a1a);
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+  }
+  .dark .record-body code {
+    background-color: var(--color-ink-900, #1a1a1a);
+    color: var(--color-ink-100, #f0f0f0);
+  }
+  .record-body pre {
+    background-color: var(--color-ink-100, #f0f0f0);
+    color: var(--color-ink-900, #1a1a1a);
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 0 0 1rem 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .dark .record-body pre {
+    background-color: var(--color-ink-900, #1a1a1a);
+    color: var(--color-ink-100, #f0f0f0);
+  }
+  .record-body pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+  .record-body blockquote {
+    margin: 0 0 1rem 0;
+    padding: 0.5rem 1rem;
+    border-left: 3px solid var(--color-ink-300, #c0c0c0);
+    color: var(--color-ink-500, #6a6a6a);
+    font-style: italic;
+  }
+  .dark .record-body blockquote {
+    border-left-color: var(--color-ink-700, #4a4a4a);
+    color: var(--color-ink-400, #8a8a8a);
+  }
+  .record-body hr {
+    border: 0;
+    border-top: 1px solid var(--color-ink-200, #e5e5e5);
+    margin: 2rem 0;
+  }
+  .dark .record-body hr {
+    border-top-color: var(--color-ink-800, #2a2a2a);
+  }
+}

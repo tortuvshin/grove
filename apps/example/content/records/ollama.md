@@ -1,5 +1,3 @@
-# Ollama
-
 Ollama is a single-binary tool that pulls, runs, and serves open-weights language models on a developer laptop. It exposes a small REST API and a familiar `ollama run <model>` CLI, so swapping between Llama, Mistral, Qwen, Phi, Gemma, or a custom GGUF takes one command.
 
 ## Why it matters

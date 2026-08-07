@@ -1,5 +1,3 @@
-# Flowise
-
 Flowise is a drag-and-drop UI for building LLM applications on top of LangChain. Each "node" in the canvas is a LangChain component — a prompt template, a model, a retriever, a chain, a tool — and the edges between them define the data flow. The result exports to a LangChain Python file, an API endpoint, or an embeddable chat widget.
 
 ## Why it matters

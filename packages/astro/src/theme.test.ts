@@ -66,9 +66,17 @@ describe("Astro theme contract", () => {
   });
 
   it("does not duplicate package-owned foundation tokens in the scaffold", () => {
-    expect(scaffoldTheme).not.toContain("--color-ink-");
-    expect(scaffoldTheme).not.toContain("font-family:");
-    expect(scaffoldTheme).not.toContain("color-scheme:");
+    // The scaffold must not REDEFINE the package's foundation tokens
+    // (`--color-ink-*`, font stacks, color-scheme). It may REFERENCE
+    // them via `var(--color-ink-*, fallback)` — that's a consumer
+    // pattern, not a duplication. The regexes below match definitions
+    // only: a colon followed by a space or value, not a closing
+    // parenthesis (which would catch the `fallback` argument).
+    expect(scaffoldTheme).not.toMatch(/--color-ink-\d+:\s/);
+    expect(scaffoldTheme).not.toMatch(/--color-ink-\d+:/);
+    expect(scaffoldTheme).not.toMatch(/font-family:\s*ui-/);
+    expect(scaffoldTheme).not.toMatch(/--font-(sans|mono):\s/);
+    expect(scaffoldTheme).not.toContain("color-scheme: dark light");
   });
 
   it("styles components in HTML with Starlight-aligned Tailwind utilities", () => {

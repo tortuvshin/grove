@@ -1,5 +1,3 @@
-# CrewAI
-
 CrewAI is a Python framework for orchestrating role-playing AI agents. You define agents with a role, a goal, and a backstory, give them tools, then declare a "crew" with a sequential or hierarchical process. CrewAI handles the message-passing loop and (with the underlying LiteLLM integration) lets each agent call any model the team can afford.
 
 ## Why it matters

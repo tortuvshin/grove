@@ -1,0 +1,110 @@
+---
+/**
+ * RecordBody.astro
+ *
+ * Standalone Markdown body renderer for a Grove record.
+ *
+ * The component reads the .md file at `path` (resolved relative to
+ * `process.cwd()`, which is the consumer app root when `astro build`
+ * or `astro dev` runs from that directory) at build time, parses it
+ * with `marked`, sanitizes the result with a tight `sanitize-html`
+ * allowlist, and renders the body as styled prose using Tailwind
+ * utilities.
+ *
+ * Why a standalone component (not the package's `getContentHtml`):
+ * - The package helper returns pre-rendered HTML plus a global
+ *   `.grove-prose` CSS class. Consumers can't replace one without
+ *   the other — design and rendering are coupled.
+ * - Pulling the pipeline into the consumer app makes the design
+ *   choices (allowlist, typography, frontmatter handling, dark-mode
+ *   colors) visible and replaceable. Drop in a different
+ *   `RecordBody.astro` and the rest of the page doesn't notice.
+ *
+ * Why a sanitization allowlist and not `set:html` straight up:
+ * - The MD file ships from the curator or from `grove import`. The
+ *   pipeline between hand-authored YAML and a rendered detail page
+ *   is not a trust boundary the framework owns, but it is a
+ *   boundary the consumer may want to harden. The allowlist here is
+ *   the explicit hardening: no `<script>`, no `<iframe>`, no
+ *   inline event handlers, no `javascript:` URLs. Anchors are
+ *   rewritten to `rel="noopener noreferrer" target="_blank"`.
+ *
+ * Tailwind v4 note: arbitrary variants (`[&_h2]`) work but the
+ * class string becomes unmaintainable. We use a `<style>` block
+ * with `@apply` and `is:global` so the dynamic `set:html` content
+ * is reachable from the descendant selectors.
+ */
+import { readFileSync, existsSync } from "node:fs";
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
+import { resolve } from "node:path";
+
+interface Props {
+  /** Path to a Markdown file, relative to the consumer app root. */
+  path?: string;
+}
+
+const { path } = Astro.props;
+
+// Resolve the path against the consumer app root (`process.cwd()`
+// when `astro build` is run from that directory). Try a handful of
+// candidates so a relative `./content/...` and a bare
+// `content/...` both work, matching the conventions the existing
+// `getContentHtml` accepts.
+let body: string | null = null;
+if (path) {
+  const candidates = [
+    resolve(path),
+    resolve(process.cwd(), path),
+    resolve(process.cwd(), "apps", "example", path),
+  ];
+  const found = candidates.find((p) => existsSync(p));
+  if (found) {
+    try {
+      body = readFileSync(found, "utf8");
+    } catch {
+      body = null;
+    }
+  }
+}
+
+if (body === null) {
+  // No body — the page renders nothing. The detail page template
+  // can decide whether to omit a section header or show an
+  // empty-state message; this component just stays silent.
+  return Astro.render("");
+}
+
+const rawHtml = marked.parse(body, { async: false }) as string;
+const safeHtml = sanitizeHtml(rawHtml, {
+  allowedTags: [
+    "h1", "h2", "h3", "h4",
+    "p", "br", "hr",
+    "ul", "ol", "li",
+    "strong", "em", "b", "i", "u", "s", "del",
+    "a", "code", "pre", "blockquote",
+  ],
+  allowedAttributes: { a: ["href", "title", "rel", "target"] },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemesByTag: { a: ["http", "https", "mailto", "tel"] },
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", {
+      rel: "noopener noreferrer",
+      target: "_blank",
+    }, true),
+  },
+  disallowedTagsMode: "discard",
+});
+---
+
+<div class="record-body" set:html={safeHtml} />
+
+{/*
+  Prose styles live in the consumer's `global.css` under
+  `.record-body` (Tailwind v4 doesn't have a way for a component's
+  scoped style block to reach the ink-* tokens that the
+  @grove-dev/astro package defines inside its own stylesheet, and
+  a relative `@reference` to the package's source file is blocked
+  by the example app's bundler root). Keeping the styles in
+  global.css also makes them easy to override per theme.
+*/}
