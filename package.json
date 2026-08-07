@@ -12,7 +12,7 @@
   "scripts": {
     "build": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r build && pnpm --dir apps/example build",
     "check": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r check && pnpm --dir apps/example check",
-    "docs:check": "node scripts/check-starlight-sidebar.mjs",
+    "docs:check": "node scripts/check-starlight-sidebar.mjs && node scripts/check-starlight-internal-links.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
