@@ -1,0 +1,20 @@
+.github/workflows/lighthouse-audit.yml
+  s_e6c33d81ab4c71::t_a89de38326228a 35-40
+  s_e6c33d81ab4c71::t_fc4c6bb9c73056 66-128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "a64ac393aa3dc4e6296cd1554b5546b2ff923ca1",
+  "prompts": {},
+  "sessions": {
+    "s_e6c33d81ab4c71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6cc9068-1332-47b6-9f03-09e15ba76318",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
