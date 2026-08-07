@@ -1,0 +1,25 @@
+.github/workflows/ci.yml
+  s_e6c33d81ab4c71::t_827d0073fbe4bf 126-132
+scripts/check-starlight-internal-links.mjs
+  s_e6c33d81ab4c71::t_0e851ff9ab5b19 96-99,107
+  s_e6c33d81ab4c71::t_910194b1ffed9a 1-48,50-52,58-95,100-106,108-149
+  s_e6c33d81ab4c71::t_bf094ef4616545 49,53-57
+package.json
+  s_e6c33d81ab4c71::t_b07c831bdfe880 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "1ac2fe72421de931af822b9074091a8370c8e2bc",
+  "prompts": {},
+  "sessions": {
+    "s_e6c33d81ab4c71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e6cc9068-1332-47b6-9f03-09e15ba76318",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
