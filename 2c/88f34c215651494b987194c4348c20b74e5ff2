@@ -1,0 +1,33 @@
+apps/example/src/pages/[slug]/[recordSlug].astro
+  s_6b8be7f84f9ad4::t_9cb230b8f93ff7 7-17,31,54-57,60-66,68-70,82,84,92-94,116-117,124-125,129,133,138,166,170-185,201,206-219,224-228,230-239,242,244-251,253,260,262-263
+packages/astro/src/theme.test.ts
+  s_6b8be7f84f9ad4::t_3297c0857cb1f5 69-79
+apps/example/package.json
+  s_6b8be7f84f9ad4::t_8ce770921d5af1 28-29
+apps/example/src/styles/global.css
+  s_6b8be7f84f9ad4::t_585e794ac78a5e 34-134,136-184
+  s_6b8be7f84f9ad4::t_e823710bb198b5 135
+apps/example/src/components/RecordBody.astro
+  s_6b8be7f84f9ad4::t_4d07fcd3f490c3 102-110
+  s_6b8be7f84f9ad4::t_7683107ab845ed 1-101
+tests/integration/grove-init.test.ts
+  s_6b8be7f84f9ad4::t_3cfc7e058bf82a 49-51,55-57
+pnpm-lock.yaml
+  s_6b8be7f84f9ad4::t_164464b578031a 68-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2c88f34c215651494b987194c4348c20b74e5ff2",
+  "prompts": {},
+  "sessions": {
+    "s_6b8be7f84f9ad4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b89c1112-40e8-4e41-af53-cb80d7865f33",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
