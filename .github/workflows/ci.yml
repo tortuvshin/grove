@@ -123,3 +123,10 @@ jobs:
         run: |
           ! grep -rEn '"workspace:\*"' packages/*/package.json package.json \
             | grep -v 'peerDependencies\|peerDependenciesMeta\|workspace:'
+
+      - name: Docs slugs + internal links
+        # Catches broken /guides/... cross-links that would otherwise ship
+        # to production (the Starlight build only surfaces them per-page).
+        # Sibling to `scripts/check-starlight-sidebar.mjs`; together they
+        # implement the v0.5.0 "Strict internal-link lint" roadmap item.
+        run: pnpm docs:check
