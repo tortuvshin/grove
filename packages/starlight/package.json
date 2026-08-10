@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
-    "marked": "^18.0.2"
+    "marked": "^18.0.9"
   },
   "scripts": {
     "test": "cd ../.. && pnpm exec vitest run --project starlight"
