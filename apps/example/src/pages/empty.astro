@@ -1,7 +1,8 @@
 ---
-import Base from "../layouts/Base.astro";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import siteConfig from "@grove/generated/site-config.json";
 ---
-<Base title="No results" description="Empty state fixture.">
+<BaseLayout title="No results" description="Empty state fixture." site={siteConfig}>
   <h1>No results</h1>
   <p>There are no items to show right now.</p>
-</Base>
+</BaseLayout>

@@ -1,73 +1,32 @@
 ---
 /**
- *  Detail page — one record at a time.
- *
- *  Layout (top to bottom):
- *   1. Breadcrumb                    — back to the directory index
- *   2. Header                        — logo + name + owner + description + CTAs
- *                                     + inline metadata strip (stars / lang /
- *                                     license / last-push / category / tags)
- *   3. Curation pills                — BestFor / Caveats as compact lists
- *                                     (only when the record has them)
- *   4. Body (Markdown)               — the sidecar `<slug>.md` rendered by
- *                                     <RecordBody />. The component owns
- *                                     the marked + sanitize-html pipeline
- *                                     and the prose typography.
- *   5. JSON-LD                       — for SEO + AI crawlers (rendered by
- *                                     the layout from `getRecordDetailModel`)
- *
- *  Generic across the 3 record kinds (project / resource / entity) —
- *  non-project fields simply render nothing. The URL is dynamic on
- *  both `[slug]` (blueprint route, e.g. `projects`/`resources`/
- *  `entities`) and `[recordSlug]` (the record slug), so a single page
- *  file serves every blueprint and every record.
+ * Detail page — thin consumer wiring up the package's
+ * RecordHeader, EditorialSummary, TableOfContents, MarkdownBody,
+ * and RecordSidebar components. All rendering logic, prose
+ * styling, sidebar visibility, and activity-badge rules live in
+ * `@grove-dev/astro`; this file only composes them.
  */
-import siteConfig from "@grove/generated/site-config.json";
-import {
-  fullRecords,
-  getRecordDetailModel,
-} from "@grove-dev/astro/server";
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import RecordBody from "../../components/RecordBody.astro";
+import siteConfig from '@grove/generated/site-config.json';
+import { getRecordDetailModel, recordDetailPaths } from '@grove-dev/astro/server';
+import BaseLayout from '@grove-dev/astro/layouts/BaseLayout.astro';
+import RecordHeader from '@grove-dev/astro/components/RecordHeader.astro';
+import EditorialSummary from '@grove-dev/astro/components/EditorialSummary.astro';
+import TableOfContents from '@grove-dev/astro/components/TableOfContents.astro';
+import MarkdownBody from '@grove-dev/astro/components/MarkdownBody.astro';
+import RecordSidebar from '@grove-dev/astro/components/RecordSidebar.astro';
 
 export function getStaticPaths() {
-  // Walk every record and emit a path for it. The directory slug
-  // is read from the static site-config import at the top of this
-  // file (Vite resolves the JSON at build time). This template
-  // ships with the `project-directory` blueprint, so the slug is
-  // always `projects`; swapping in a different blueprint means
-  // changing the blueprint config that drives this value.
-  const dirSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
-  return fullRecords.map((record) => ({
-    params: { slug: dirSlug, recordSlug: record.slug },
-  }));
+  return recordDetailPaths(siteConfig);
 }
 
-const recordSlug = Astro.params.recordSlug ?? "";
+const dirSlug = siteConfig.blueprintConfig?.routeSlug ?? 'projects';
 const detail = getRecordDetailModel(
-  recordSlug,
+  Astro.params.recordSlug ?? '',
   siteConfig,
-  Astro.params.slug ?? siteConfig.blueprintConfig?.routeSlug ?? "projects",
+  Astro.params.slug ?? dirSlug,
 );
-if (!detail) return Astro.redirect(`/${siteConfig.blueprintConfig?.routeSlug ?? "projects"}`);
-const {
-  slug, record, name, title, description, itemSingular,
-  repoUrl, homepageUrl, github, starsLabel, language, licenseSpdx,
-  pushedLabel, ownerRepo, avatarSrc, initials, bestFor, caveats,
-  curationLabels, tags, contentHtml, jsonLd,
-} = detail;
-
-// Build the inline metadata strip. Each entry is conditional so
-// records with sparse data still render without holes.
-const metaItems: { label: string; value: string }[] = [];
-if (starsLabel) metaItems.push({ label: "Stars", value: starsLabel });
-if (language) metaItems.push({ label: "Language", value: language });
-if (licenseSpdx) metaItems.push({ label: "License", value: licenseSpdx });
-if (pushedLabel) metaItems.push({ label: "Updated", value: pushedLabel });
-
-// Has curation? If either BestFor or Caveats is present we render
-// the compact pills row.
-const hasCuration = bestFor.length > 0 || caveats.length > 0;
+if (!detail) return Astro.redirect(`/${dirSlug}`);
+const { record, name, title, description, itemSingular, jsonLd } = detail;
 ---
 
 <BaseLayout
@@ -80,189 +39,22 @@ const hasCuration = bestFor.length > 0 || caveats.length > 0;
   submitLabel={`Submit ${itemSingular}`}
 >
   <article class="py-10 sm:py-14">
-    <div class="mx-auto w-full max-w-wide px-5 sm:px-7">
-      <nav class="mb-5 text-2xs text-ink-500 dark:text-ink-400" aria-label="Breadcrumb">
-        <a href={`/${slug}`} class="hover:text-ink-900 dark:hover:text-ink-100 capitalize">
-          {slug}
-        </a>
-        <span class="mx-1.5 text-ink-300 dark:text-ink-700">/</span>
-        <span class="text-ink-700 dark:text-ink-300">{name}</span>
-      </nav>
+    <div class="mx-auto w-full max-w-[1240px] px-5 sm:px-7">
+      <RecordHeader detail={detail} />
 
-      {/* ── Header ──────────────────────────────────────────── */}
-      <header class="rounded-[calc(var(--radius)+0.25rem)] bg-muted p-6 sm:p-8 flex flex-col gap-5 sm:flex-row sm:items-start">
-        <div class="shrink-0">
-          {avatarSrc ? (
-            <img
-              src={avatarSrc}
-              alt=""
-              width="64"
-              height="64"
-              loading="lazy"
-              decoding="async"
-              class="h-16 w-16 rounded-lg border border-ink-200 object-contain bg-white p-1 dark:border-ink-800 dark:bg-ink-950"
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              class="inline-flex h-16 w-16 items-center justify-center rounded-lg border border-ink-200 bg-ink-50 text-2xl font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200"
-            >
-              {initials || "·"}
-            </span>
-          )}
+      <div
+        class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_340px]"
+      >
+        <div class="min-w-0">
+          <EditorialSummary bestFor={detail.bestFor} caveats={detail.caveats} />
+          <TableOfContents items={detail.toc} />
+          <MarkdownBody
+            recordSlug={record.slug}
+            fallback={record.content ? "This record doesn't have notes yet." : undefined}
+          />
         </div>
-
-        <div class="min-w-0 flex-1">
-          {/* Pills row — category, curation, review. Kept tight. */}
-          <div class="flex flex-wrap items-center gap-1.5">
-            {record.category && (
-              <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
-                {record.category}
-              </span>
-            )}
-            {curationLabels.map((l) => (
-              <span class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground">
-                {l}
-              </span>
-            ))}
-            {record.curation?.reviewed && (
-              <span class="inline-flex items-center gap-1 rounded border border-emerald-300/60 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300">
-                <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
-                  <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.41 5.09a.75.75 0 0 0-1.06 0L6.75 8.69 5.65 7.59a.75.75 0 1 0-1.06 1.06l1.65 1.65a.75.75 0 0 0 1.06 0l4.11-4.11a.75.75 0 0 0 0-1.06Z" />
-                </svg>
-                Curated
-              </span>
-            )}
-          </div>
-
-          <h1 class="m-0 mt-3 text-[1.75rem] sm:text-[2.125rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-            {name}
-          </h1>
-
-          {ownerRepo && (
-            <p class="m-0 mt-1 text-sm text-ink-500 dark:text-ink-400">
-              <a
-                href={`https://github.com/${ownerRepo.owner}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
-              >
-                @{ownerRepo.owner}
-              </a>
-              <span class="mx-1 text-ink-300 dark:text-ink-700">/</span>
-              <a
-                href={repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
-              >
-                {ownerRepo.repo}
-              </a>
-            </p>
-          )}
-
-          {record.description && (
-            <p class="m-0 mt-3 max-w-[68ch] text-base leading-relaxed text-ink-700 dark:text-ink-200">
-              {description}
-            </p>
-          )}
-
-          {/* Inline metadata strip — Stars / Language / License / Updated. */}
-          {metaItems.length > 0 && (
-            <dl class="m-0 mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-2xs">
-              {metaItems.map((m) => (
-                <div class="flex items-baseline gap-1.5">
-                  <dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                    {m.label}
-                  </dt>
-                  <dd class="font-mono text-ink-700 dark:text-ink-200">{m.value}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-
-          {/* CTAs + tags on the same row. */}
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            {repoUrl && (
-              <a
-                href={repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                View on GitHub →
-              </a>
-            )}
-            {homepageUrl && (
-              <a
-                href={homepageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-border bg-secondary px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 text-foreground hover:bg-accent"
-              >
-                Homepage
-              </a>
-            )}
-            {tags.length > 0 && (
-              <ul class="m-0 flex list-none flex-wrap items-center gap-1.5 p-0">
-                {tags.map((t) => (
-                  <li>
-                    <a
-                      href={`/${slug}?q=${encodeURIComponent(t)}`}
-                      class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground no-underline"
-                    >
-                      {t}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* ── Curation pills ──────────────────────────────────── */}
-      {hasCuration && (
-        <section class="mt-6" aria-label="Curation">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {bestFor.length > 0 && (
-              <div>
-                <h2 class="m-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                  Best for
-                </h2>
-                <ul class="mt-2 m-0 flex list-none flex-wrap gap-1.5 p-0">
-                  {bestFor.map((b) => (
-                    <li class="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {caveats.length > 0 && (
-              <div>
-                <h2 class="m-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                  Caveats
-                </h2>
-                <ul class="mt-2 m-0 flex list-none flex-col gap-1 p-0">
-                  {caveats.map((c) => (
-                    <li class="text-sm text-ink-700 dark:text-ink-200">
-                      {c}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* ── Markdown body ───────────────────────────────────── */}
-      {contentHtml && (
-        <section class="mt-8" aria-label="Notes">
-          <RecordBody path={typeof record.content === "string" ? record.content : undefined} />
-        </section>
-      )}
+        <RecordSidebar detail={detail} />
+      </div>
     </div>
   </article>
 </BaseLayout>
