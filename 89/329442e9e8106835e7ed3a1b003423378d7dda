@@ -1,0 +1,22 @@
+pnpm-workspace.yaml
+  s_8bc14b90cf73af::t_c3aa33b058281b 30
+  s_8bc14b90cf73af::t_247db896a68aa8 16
+pnpm-lock.yaml
+  s_8bc14b90cf73af::t_8182834803463a 12,26,2483-2484,3883,3894,4047,4082,5537,6395
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "89329442e9e8106835e7ed3a1b003423378d7dda",
+  "prompts": {},
+  "sessions": {
+    "s_8bc14b90cf73af": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c151d7dc-b1df-4cc1-ad05-234585d299dc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
