@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_8bc14b90cf73af::t_1d84ccd1d6f071 113-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "bcb084fad0ff11dd0a467fd1c84e77bd940ec9ca",
+  "prompts": {},
+  "sessions": {
+    "s_8bc14b90cf73af": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c151d7dc-b1df-4cc1-ad05-234585d299dc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
