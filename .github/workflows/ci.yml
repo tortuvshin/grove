@@ -114,9 +114,12 @@ jobs:
       # grove-audit integration tests boot a dev server against
       # apps/example's build output. Both need the example built first;
       # `needs: build` only serializes the *jobs*, not their filesystem
-      # state, since each job runs on a fresh runner.
-      - name: Build apps/example
-        run: pnpm --dir apps/example build
+      # state, since each job runs on a fresh runner. apps/example's
+      # Astro config imports `@grove-dev/astro`, which is a workspace
+      # package with no built dist on a fresh runner, so the full
+      # recursive build is required (matches the `test` job).
+      - name: Build all workspaces
+        run: pnpm -r build
 
       - name: Run unit tests
         run: pnpm test
