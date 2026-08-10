@@ -315,106 +315,532 @@
 
 /* ──────────────────────────────────────────────────────────────────
  * Rendered record Markdown
+ *
+ * The `.grove-prose` class wraps any rendered Markdown body (record
+ * sidecar or consumer-authored page). Sizing follows the editorial
+ * recipe:
+ *   body  17px / 1.75
+ *   h2    28px   h3   21px   h4   17px   h5/h6  smaller, uppercase tracker
+ * The parent column owns the measure (≈760–820px on lg+), so the
+ * `.grove-prose` wrapper intentionally omits a `max-width`.
+ *
+ * Colors come from the package's `ink-*` scale via CSS variables so
+ * every consumer gets the same baseline regardless of brand overrides.
  * ────────────────────────────────────────────────────────────────── */
 .grove-prose {
-  max-width: 72ch;
-  color: var(--color-ink-800);
-  font-size: 15px;
+  font-size: 1.0625rem; /* 17px */
   line-height: 1.75;
+  color: var(--color-ink-700, #3a3a3a);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
+.dark .grove-prose { color: var(--color-ink-200, #d4d4d4); }
+.grove-prose > :first-child { margin-top: 0; }
+.grove-prose > :last-child  { margin-bottom: 0; }
 
-.dark .grove-prose {
-  color: var(--color-ink-300);
-}
-
-.grove-prose :where(h1, h2, h3, h4) {
-  margin: 1.75em 0 0.65em;
-  color: var(--color-ink-900);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-}
-
-.dark .grove-prose :where(h1, h2, h3, h4) {
-  color: var(--color-ink-100);
-}
-
-.grove-prose h1 {
-  font-size: 1.875rem;
+/* Headings — full depth. */
+.grove-prose :where(h1, h2, h3, h4, h5, h6) {
   font-weight: 600;
-  line-height: 2.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--color-ink-900, #1a1a1a);
+  scroll-margin-top: 5rem;
 }
-
+.dark .grove-prose :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-ink-100, #f0f0f0);
+}
+/* Page bodies open with a `# <Page name>` heading that duplicates
+   the page title. Hide the first heading so the body flows from a
+   top-level paragraph into sections. */
+.grove-prose > h1:first-child { display: none; }
+.grove-prose h1:not(:first-child) {
+  font-size: 2.5rem;        /* 40px */
+  margin-top: 2.5rem; margin-bottom: 1rem;
+}
 .grove-prose h2 {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
+  font-size: 1.75rem;       /* 28px */
+  margin-top: 2.5rem; margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-ink-200, #e5e5e5);
 }
-
+.dark .grove-prose h2 { border-bottom-color: var(--color-ink-800, #2a2a2a); }
 .grove-prose h3 {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+  font-size: 1.3125rem;     /* 21px */
+  margin-top: 2rem; margin-bottom: 0.5rem;
 }
-
 .grove-prose h4 {
-  font-size: 1rem;
-  line-height: 1.5rem;
+  font-size: 1.0625rem;     /* 17px */
+  margin-top: 1.5rem; margin-bottom: 0.4rem;
 }
-
-.grove-prose :where(p, ul, ol, pre, blockquote) {
-  margin: 1em 0;
+.grove-prose h5 {
+  font-size: 0.9375rem;     /* 15px */
+  margin-top: 1.25rem; margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-600, #555555);
 }
+.grove-prose h6 {
+  font-size: 0.875rem;      /* 14px */
+  margin-top: 1rem; margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-500, #6a6a6a);
+}
+.dark .grove-prose h5 { color: var(--color-ink-400, #8a8a8a); }
+.dark .grove-prose h6 { color: var(--color-ink-500, #6a6a6a); }
 
+/* Paragraphs + lists. */
+.grove-prose p { margin: 0 0 1rem 0; }
 .grove-prose :where(ul, ol) {
+  margin: 0 0 1rem 0;
   padding-left: 1.5rem;
 }
+.grove-prose ul { list-style: disc; }
+.grove-prose ol { list-style: decimal; }
+.grove-prose li { margin-bottom: 0.35rem; padding-left: 0.25rem; }
+.grove-prose li > :where(ul, ol) {
+  margin-top: 0.35rem; margin-bottom: 0;
+}
 
-.grove-prose a {
-  color: var(--color-ink-900);
-  font-weight: 500;
+/* Definition lists. */
+.grove-prose dl { margin: 0 0 1rem 0; }
+.grove-prose dt {
+  font-weight: 600;
+  color: var(--color-ink-900, #1a1a1a);
+  margin-top: 0.5rem;
+}
+.grove-prose dd {
+  margin-left: 1.5rem; margin-bottom: 0.5rem;
+  color: var(--color-ink-700, #3a3a3a);
+}
+.dark .grove-prose dt { color: var(--color-ink-100, #f0f0f0); }
+.dark .grove-prose dd { color: var(--color-ink-200, #d4d4d4); }
+
+/* Inline emphasis. */
+.grove-prose strong { font-weight: 600; color: var(--color-ink-900, #1a1a1a); }
+.grove-prose em     { font-style: italic; }
+.grove-prose u      { text-decoration: underline; text-underline-offset: 2px; }
+.grove-prose :where(s, del) {
+  text-decoration: line-through;
+  color: var(--color-ink-500, #6a6a6a);
+}
+.grove-prose ins {
   text-decoration: underline;
-  text-underline-offset: 0.18em;
-  text-decoration-color: var(--color-ink-500);
+  text-decoration-style: double;
+  text-underline-offset: 2px;
 }
-
-.dark .grove-prose a {
-  color: var(--color-ink-50);
-  text-decoration-color: var(--color-ink-400);
+.grove-prose small {
+  font-size: 0.85em;
+  color: var(--color-ink-500, #6a6a6a);
 }
+.dark .grove-prose strong { color: var(--color-ink-100, #f0f0f0); }
+.dark .grove-prose small  { color: var(--color-ink-400, #8a8a8a); }
 
-.grove-prose :where(code, pre) {
+/* Inline marks / keys / abbreviations. */
+.grove-prose mark {
+  background-color: oklch(95% 0.05 90);
+  color: var(--color-ink-900, #1a1a1a);
+  padding: 0.05em 0.25em;
+  border-radius: 0.2rem;
+}
+.dark .grove-prose mark {
+  background-color: oklch(35% 0.08 80);
+  color: var(--color-ink-50, #fafafa);
+}
+.grove-prose kbd {
   font-family: var(--font-mono);
+  font-size: 0.8em;
+  background-color: var(--color-ink-100, #f0f0f0);
+  color: var(--color-ink-900, #1a1a1a);
+  border: 1px solid var(--color-ink-300, #c0c0c0);
+  border-bottom-width: 2px;
+  border-radius: 0.3rem;
+  padding: 0.05em 0.4em;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: baseline;
+  box-shadow: 0 1px 0 var(--color-ink-300, #c0c0c0);
+}
+.dark .grove-prose kbd {
+  background-color: var(--color-ink-900, #1a1a1a);
+  color: var(--color-ink-100, #f0f0f0);
+  border-color: var(--color-ink-700, #4a4a4a);
+  box-shadow: 0 1px 0 var(--color-ink-700, #4a4a4a);
+}
+.grove-prose abbr[title] {
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+}
+.grove-prose :where(sub, sup) {
+  font-size: 0.75em; line-height: 1;
+  position: relative; vertical-align: baseline;
+}
+.grove-prose sub { bottom: -0.25em; }
+.grove-prose sup { top: -0.5em; }
+.grove-prose time { font-variant-numeric: tabular-nums; }
+
+/* Links. */
+.grove-prose a {
+  color: var(--color-ink-900, #1a1a1a);
+  text-decoration: underline;
+  text-decoration-color: var(--color-ink-300, #c0c0c0);
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 120ms ease;
+}
+.grove-prose a:hover {
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+.dark .grove-prose a {
+  color: var(--color-ink-100, #f0f0f0);
+  text-decoration-color: var(--color-ink-700, #4a4a4a);
 }
 
+/* Inline code. */
 .grove-prose code {
-  border-radius: 0.25rem;
-  background: var(--color-ink-100);
-  padding: 0.1em 0.3em;
+  font-family: var(--font-mono);
   font-size: 0.875em;
+  background-color: var(--color-ink-100, #f0f0f0);
+  color: var(--color-ink-900, #1a1a1a);
+  padding: 0.15em 0.4em;
+  border-radius: 0.3rem;
+  word-break: break-word;
 }
-
 .dark .grove-prose code {
-  background: var(--color-ink-800);
+  background-color: var(--color-ink-900, #1a1a1a);
+  color: var(--color-ink-100, #f0f0f0);
 }
 
+/* Code blocks — full column width, internal scroll on overflow. */
 .grove-prose pre {
+  background-color: var(--color-ink-100, #f0f0f0);
+  color: var(--color-ink-900, #1a1a1a);
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
   overflow-x: auto;
-  border: 1px solid var(--color-ink-200);
-  border-radius: var(--radius-lg);
-  background: var(--color-ink-50);
-  padding: 1rem;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  border: 1px solid var(--color-ink-200, #e5e5e5);
+  max-width: 100%;
 }
-
 .dark .grove-prose pre {
-  border-color: var(--color-ink-800);
-  background: var(--color-ink-900);
+  background-color: var(--color-ink-900, #1a1a1a);
+  color: var(--color-ink-100, #f0f0f0);
+  border-color: var(--color-ink-800, #2a2a2a);
 }
-
 .grove-prose pre code {
   background: transparent;
   padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  word-break: normal;
+  white-space: pre;
 }
 
-.grove-prose blockquote {
-  border-left: 3px solid var(--color-ink-300);
-  padding-left: 1rem;
-  color: var(--color-ink-500);
+/* Shiki-themed code blocks. Shiki emits `<pre class="shiki …">`
+   with per-token `<span style="--shiki-light: …; --shiki-dark: …">`
+   when configured with `defaultColor: false`. Our job is to:
+     1. Give the block a slightly different background to read as
+        "code" (lighter than the prose surface in light mode,
+        darker in dark mode).
+     2. Make the foreground colour resolve through the dual
+        variables so the same HTML is themed correctly when
+        `.dark` toggles on `<html>`. */
+.grove-prose pre.shiki {
+  background-color: var(--color-ink-50, #fafafa) !important;
+  color: var(--shiki-light, var(--color-ink-900, #1a1a1a));
+  border-color: var(--color-ink-200, #e5e5e5);
 }
+.dark .grove-prose pre.shiki {
+  background-color: var(--color-ink-950, #0a0a0a) !important;
+  color: var(--shiki-dark, var(--color-ink-100, #f0f0f0));
+  border-color: var(--color-ink-800, #2a2a2a);
+}
+.grove-prose pre.shiki code { color: inherit; }
+.grove-prose pre.shiki span { color: var(--shiki-light); }
+.dark .grove-prose pre.shiki span { color: var(--shiki-dark); }
+
+/* Blockquotes — italic + left border + background tint. */
+.grove-prose blockquote {
+  margin: 0 0 1rem 0;
+  padding: 0.65rem 1rem 0.65rem 1.1rem;
+  border-left: 3px solid var(--color-ink-300, #c0c0c0);
+  color: var(--color-ink-500, #6a6a6a);
+  font-style: italic;
+  background-color: var(--color-ink-50, #fafafa);
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+.grove-prose blockquote > :first-child { margin-top: 0; }
+.grove-prose blockquote > :last-child  { margin-bottom: 0; }
+.grove-prose blockquote p { margin: 0 0 0.5rem 0; }
+.grove-prose blockquote blockquote {
+  margin: 0.5rem 0;
+  border-left-width: 2px;
+}
+.dark .grove-prose blockquote {
+  border-left-color: var(--color-ink-700, #4a4a4a);
+  color: var(--color-ink-400, #8a8a8a);
+  background-color: var(--color-ink-900, #1a1a1a);
+}
+
+/* Horizontal rules. */
+.grove-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-ink-200, #e5e5e5);
+  margin: 2.25rem 0;
+}
+.dark .grove-prose hr { border-top-color: var(--color-ink-800, #2a2a2a); }
+
+/* Images — rounded border, full column width. */
+.grove-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-ink-200, #e5e5e5);
+  display: block;
+  margin: 1.25rem 0;
+}
+.dark .grove-prose img { border-color: var(--color-ink-800, #2a2a2a); }
+
+/* Figures + captions. */
+.grove-prose figure { margin: 1.25rem 0; padding: 0; }
+.grove-prose figure > img { margin: 0 0 0.5rem 0; }
+.grove-prose figcaption {
+  font-size: 0.85rem;
+  color: var(--color-ink-500, #6a6a6a);
+  text-align: center;
+  margin-top: 0.4rem;
+}
+.dark .grove-prose figcaption { color: var(--color-ink-400, #8a8a8a); }
+
+/* GFM tables — the renderer wraps them in `.grove-prose-table-wrap`
+   so the column-width overflow is contained. */
+.grove-prose-table-wrap {
+  margin: 0 0 1.5rem 0;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-ink-200, #e5e5e5);
+  background-color: var(--grove-background, #ffffff);
+}
+.dark .grove-prose-table-wrap { border-color: var(--color-ink-800, #2a2a2a); }
+.grove-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.grove-prose table caption {
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--color-ink-500, #6a6a6a);
+  padding: 0.5rem 1rem;
+  caption-side: bottom;
+}
+.grove-prose thead {
+  background-color: var(--color-ink-50, #fafafa);
+  border-bottom: 2px solid var(--color-ink-200, #e5e5e5);
+}
+.dark .grove-prose thead {
+  background-color: var(--color-ink-900, #1a1a1a);
+  border-bottom-color: var(--color-ink-700, #4a4a4a);
+}
+.grove-prose th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  color: var(--color-ink-900, #1a1a1a);
+  border-bottom: 1px solid var(--color-ink-200, #e5e5e5);
+}
+.grove-prose td {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--color-ink-100, #f0f0f0);
+  color: var(--color-ink-700, #3a3a3a);
+  vertical-align: top;
+}
+.grove-prose th[align="center"], .grove-prose td[align="center"] { text-align: center; }
+.grove-prose th[align="right"],  .grove-prose td[align="right"]  { text-align: right; }
+.grove-prose tbody tr:last-child td { border-bottom: 0; }
+.grove-prose tbody tr:hover { background-color: var(--color-ink-50, #fafafa); }
+.dark .grove-prose th { color: var(--color-ink-100, #f0f0f0); border-bottom-color: var(--color-ink-700, #4a4a4a); }
+.dark .grove-prose td { color: var(--color-ink-200, #d4d4d4); border-bottom-color: var(--color-ink-800, #2a2a2a); }
+.dark .grove-prose tbody tr:hover { background-color: var(--color-ink-900, #1a1a1a); }
+
+/* GFM task-list checkboxes — read-only at runtime. */
+.grove-prose input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1em; height: 1em;
+  border: 1.5px solid var(--color-ink-400, #999999);
+  border-radius: 0.25rem;
+  margin-right: 0.45rem;
+  margin-top: 0.15rem;
+  vertical-align: middle;
+  position: relative; top: -0.05em;
+  background-color: var(--grove-background, #ffffff);
+  cursor: default;
+  flex-shrink: 0;
+}
+.grove-prose input[type="checkbox"]:checked {
+  background-color: var(--color-ink-900, #1a1a1a);
+  border-color: var(--color-ink-900, #1a1a1a);
+}
+.grove-prose input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 4px; height: 8px;
+  border: solid var(--grove-background, #ffffff);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.grove-prose input[type="checkbox"]:disabled { opacity: 0.7; }
+.dark .grove-prose input[type="checkbox"] {
+  border-color: var(--color-ink-600, #555555);
+  background-color: var(--grove-background, #1a1a1a);
+}
+.dark .grove-prose input[type="checkbox"]:checked {
+  background-color: var(--color-ink-100, #f0f0f0);
+  border-color: var(--color-ink-100, #f0f0f0);
+}
+.dark .grove-prose input[type="checkbox"]:checked::after {
+  border-color: var(--grove-background, #1a1a1a);
+}
+.grove-prose li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.25rem;
+  display: flex; align-items: flex-start;
+  gap: 0.15rem;
+}
+.grove-prose li:has(> input[type="checkbox"]) > input[type="checkbox"] {
+  margin-right: 0.55rem; margin-left: 0.15rem;
+}
+
+/* Collapsibles (details / summary). */
+.grove-prose details {
+  margin: 0 0 1rem 0;
+  border: 1px solid var(--color-ink-200, #e5e5e5);
+  border-radius: 0.5rem;
+  background-color: var(--color-ink-50, #fafafa);
+  overflow: hidden;
+}
+.grove-prose details[open] { background-color: var(--grove-background, #ffffff); }
+.grove-prose details + details { margin-top: -0.5rem; }
+.dark .grove-prose details {
+  border-color: var(--color-ink-800, #2a2a2a);
+  background-color: var(--color-ink-900, #1a1a1a);
+}
+.dark .grove-prose details[open] { background-color: var(--grove-background, #1a1a1a); }
+.grove-prose summary {
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--color-ink-900, #1a1a1a);
+  list-style: none;
+  user-select: none;
+  display: flex; align-items: center; gap: 0.5rem;
+  transition: background-color 120ms ease;
+}
+.grove-prose summary::-webkit-details-marker { display: none; }
+.grove-prose summary::before {
+  content: "";
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0.35rem 0 0.35rem 0.55rem;
+  border-color: transparent transparent transparent var(--color-ink-500, #6a6a6a);
+  transition: transform 120ms ease;
+  flex-shrink: 0;
+}
+.grove-prose details[open] > summary::before { transform: rotate(90deg); }
+.grove-prose summary:hover { background-color: var(--color-ink-100, #f0f0f0); }
+.grove-prose summary strong { font-weight: inherit; }
+.dark .grove-prose summary { color: var(--color-ink-100, #f0f0f0); }
+.dark .grove-prose summary:hover { background-color: var(--color-ink-800, #2a2a2a); }
+.grove-prose details > :not(summary) { padding: 0 1rem 1rem 1rem; }
+.grove-prose details > :not(summary):first-of-type { padding-top: 0; }
+
+/* ──────────────────────────────────────────────────────────────────
+ * On-page TOC component (`.grove-toc-*`)
+ * Selectors are static so Tailwind purges nothing. The active state
+ * is set imperatively by the TableOfContents script via
+ * `[data-toc-active]` on the matching anchor.
+ * ────────────────────────────────────────────────────────────────── */
+.grove-toc summary { color: inherit; }
+.grove-toc[open] .grove-toc-chevron,
+.grove-toc > summary:hover .grove-toc-chevron { transform: rotate(90deg); }
+.grove-toc-item { padding: 0; }
+.grove-toc-link[data-toc-active] {
+  background-color: var(--color-ink-100, #f0f0f0);
+  color: var(--color-ink-900, #1a1a1a);
+  font-weight: 600;
+  border-radius: 0.375rem;
+}
+.dark .grove-toc-link[data-toc-active] {
+  background-color: var(--color-ink-800, #2a2a2a);
+  color: var(--color-ink-100, #f0f0f0);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Activity-badge tone classes.
+ *
+ * Tone is set via `data-activity-tone` on the element. The rules
+ * below are static strings, so Tailwind's content scanner can see
+ * them at build time and ship the CSS. Avoid rebuilding tone
+ * strings from variables — Tailwind purges anything it can't see.
+ * ────────────────────────────────────────────────────────────────── */
+.grove-pill--activity {
+  border-color: var(--color-ink-300, #c0c0c0);
+  background-color: var(--color-ink-100, #f0f0f0);
+  color: var(--color-ink-700, #3a3a3a);
+}
+[data-activity-tone="fresh"] {
+  border-color: oklch(87% 0.15 154);
+  background-color: oklch(98% 0.018 156);
+  color: oklch(40% 0.12 152);
+}
+[data-activity-tone="ok"] {
+  border-color: oklch(83% 0.11 230);
+  background-color: oklch(97% 0.014 255);
+  color: oklch(40% 0.16 255);
+}
+[data-activity-tone="low"] {
+  border-color: oklch(90% 0.08 70);
+  background-color: oklch(98% 0.016 74);
+  color: oklch(40% 0.13 60);
+}
+[data-activity-tone="dead"] {
+  border-color: oklch(90% 0.08 40);
+  background-color: oklch(98% 0.016 38);
+  color: oklch(40% 0.13 40);
+}
+.dark [data-activity-tone="fresh"] {
+  border-color: oklch(35% 0.10 154);
+  background-color: oklch(20% 0.05 156);
+  color: oklch(85% 0.15 154);
+}
+.dark [data-activity-tone="ok"] {
+  border-color: oklch(30% 0.10 230);
+  background-color: oklch(20% 0.05 255);
+  color: oklch(80% 0.13 230);
+}
+.dark [data-activity-tone="low"] {
+  border-color: oklch(35% 0.10 60);
+  background-color: oklch(20% 0.05 74);
+  color: oklch(85% 0.13 70);
+}
+.dark [data-activity-tone="dead"] {
+  border-color: oklch(35% 0.10 40);
+  background-color: oklch(20% 0.05 40);
+  color: oklch(85% 0.13 40);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Sidebar key-value rows.
+ * Static selector (no dynamic class concatenation) — Tailwind ships
+ * the CSS because the class string appears literally here.
+ * ────────────────────────────────────────────────────────────────── */
+.grove-kv div { line-height: 1.4; }
+.grove-card-title { letter-spacing: 0.04em; }
+.grove-card--muted { background-color: color-mix(in oklab, var(--grove-background) 60%, transparent); }

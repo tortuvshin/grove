@@ -38,7 +38,13 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
+import { createHighlighter } from "shiki";
 import { prettySlug } from "../lib/display.js";
+import {
+  readContentFile,
+  stripFrontmatter,
+  uniqueSlug,
+} from "@grove-dev/core";
 import type {
   ProjectRecord,
   ResourceRecord,
@@ -287,13 +293,291 @@ export const fullProjects: ProjectRecord[] = fullRecords.filter(
 // missing. No page module needs to import `node:fs` anymore.
 
 const here = dirname(fileURLToPath(import.meta.url));
-function resolveContentPath(contentPath: string): string {
-  const candidates = [
-    resolve(here, "..", "..", contentPath),
-    resolve(here, "..", "..", "..", contentPath),
-    resolve(process.cwd(), contentPath),
-  ];
-  return candidates.find((p) => existsSync(p)) ?? "";
+
+// ── Markdown rendering ────────────────────────────────────────────────
+//
+// Record bodies and consumer-authored pages both go through the
+// same pipeline:
+//
+//   body  →  marked.parse(body)  →  sanitizeHtml(html, allowlist)
+//
+// The differences are:
+//   - record bodies use the wide `RECORD_BODY_ALLOWLIST` (tables,
+//     images, task-list inputs, details/summary, kbd/mark/sub/sup,
+//     …) so a curated `.md` sidecar can use the full surface.
+//   - page bodies use the narrower `PAGE_BODY_ALLOWLIST` so a
+//     page-author's `.md` stays in a conservative prose-only space.
+//
+// Both paths run at module load so `getContentHtml(slug)` and
+// `getPageContentHtml(name)` return pre-sanitized HTML with no
+// per-request work.
+
+/** Wide allowlist used for `ProjectRecord.content` Markdown bodies. */
+const RECORD_BODY_ALLOWLIST = [
+  // Headings — full depth.
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  // Block-level content.
+  "p", "br", "hr", "div", "blockquote",
+  // Lists.
+  "ul", "ol", "li",
+  // Definition lists.
+  "dl", "dt", "dd",
+  // Tables (GFM).
+  "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+  "caption", "colgroup", "col",
+  // Inline formatting.
+  "strong", "em", "b", "i", "u", "s", "del", "ins",
+  "mark", "small", "sub", "sup", "kbd", "abbr",
+  // `<span>` is only here for Shiki's per-token wrappers inside
+  // highlighted code blocks. Sanitize-html's default is to strip
+  // any tag not in this list, so without `span` here the syntax
+  // highlights silently disappear from fenced code.
+  "span",
+  // Links + images.
+  "a", "img",
+  // Code.
+  "code", "pre",
+  // Forms (task-list checkboxes only).
+  "input", "label",
+  // Collapsibles and semantic blocks.
+  "details", "summary",
+  "figure", "figcaption",
+  "time",
+];
+
+/** Narrow allowlist used for `content/pages/<page>.md`. */
+const PAGE_BODY_ALLOWLIST = [
+  "h1", "h2", "h3", "h4",
+  "p", "br", "hr",
+  "ul", "ol", "li",
+  "strong", "em", "b", "i", "u", "s", "del",
+  "a", "code", "pre", "blockquote", "img",
+];
+
+/**
+ * Attributes the sanitizer keeps per tag. The shared `* → ["id", "class"]`
+ * rule preserves the heading anchors the renderer adds and the
+ * Shiki syntax-highlighting classes (`shiki`, `language-bash`,
+ * …) on `<pre>` and `<code>` blocks. Image `loading/decoding`
+ * get forced to lazy/async to keep page weight down; `<input>`
+ * becomes a hardened disabled checkbox for GFM task lists.
+ */
+const COMMON_BODY_ATTRIBUTES = {
+  a: ["href", "title", "rel", "target"],
+  img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
+  th: ["scope", "colspan", "rowspan", "align"],
+  td: ["colspan", "rowspan", "align"],
+  col: ["span", "align"],
+  input: ["type", "checked", "disabled"],
+  label: ["for"],
+  abbr: ["title"],
+  time: ["datetime"],
+  details: ["open"],
+  div: ["class"], // table-wrap div the renderer injects
+  span: ["style"], // Shiki emits inline `--shiki-light` / `--shiki-dark` CSS variables
+  pre: ["class", "style"], // Shiki also tags the outer `<pre>` with theme classes
+  code: ["class"],
+  "*": ["id"],
+};
+
+/** `<a>` tag normalization — open in a new tab, no opener. */
+const ANCHOR_TRANSFORM = sanitizeHtml.simpleTransform(
+  "a",
+  { rel: "noopener noreferrer", target: "_blank" },
+  true,
+);
+
+/** Hardens `<img>` to lazy-load + async-decode. */
+const IMG_TRANSFORM = (
+  tagName: string,
+  attribs: Record<string, string>,
+) => ({
+  tagName,
+  attribs: {
+    ...attribs,
+    loading: attribs.loading ?? "lazy",
+    decoding: attribs.decoding ?? "async",
+  },
+});
+
+/** Forces `<input type="checkbox">` to be disabled so task lists
+ *  render read-only at runtime (no on-page state to persist). */
+const INPUT_TRANSFORM = (
+  tagName: string,
+  attribs: Record<string, string>,
+) => ({
+  tagName,
+  attribs: {
+    ...attribs,
+    type: "checkbox",
+    disabled: "",
+    ...(attribs.checked !== undefined ? { checked: "" } : {}),
+  },
+});
+
+/**
+ * GitHub-style slug for a heading. Matches `core/extractToc` so the
+ * IDs the renderer emits line up with the IDs a TOC consumer reads
+ * out of the same body — keeping deep links in lockstep.
+ */
+function headingSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[‘’]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-+$/g, "");
+}
+
+/**
+ * Render a Markdown string to sanitized HTML. The renderer is
+ * configured once (heading IDs + table wrap) and reused for both
+ * record and page bodies.
+ *
+ * Why pass `body` rather than a slug: this is a pure transform; the
+ * caller owns where the body came from (file, in-memory cache, …).
+ * `getContentHtml(slug)` is the per-record wrapper that reads the
+ * file and calls this.
+ */
+export function renderMarkdownToSafeHtml(
+  body: string,
+  options: { allowlist?: string[] } = {},
+): string {
+  const allowlist = options.allowlist ?? RECORD_BODY_ALLOWLIST;
+  // Configure marked. GFM is on by default in v18 but set explicitly
+  // so the intent is visible; `breaks: false` keeps single newlines
+  // from becoming `<br>` per CommonMark.
+  //
+  // We register a small extension that:
+  //   1. Adds a stable `id` to every h2–h6 so the TOC sidebar can
+  //      deep-link into the rendered body.
+  //   2. Wraps GFM tables in `<div class="grove-prose-table-wrap">`
+  //      so the column-width overflow is contained inside a rounded
+  //      border instead of breaking the layout.
+  marked.use({
+    gfm: true,
+    breaks: false,
+    renderer: {
+      heading({ tokens, depth }) {
+        const inline = this.parser.parseInline(tokens);
+        const plain = tokens
+          .map((t: { text?: string; raw?: string }) => t.text ?? t.raw ?? "")
+          .join("");
+        const id = depth === 1 ? "" : ` id="${uniqueSlug(headingSlug(plain) || "section", headingIds)}"`;
+        return `<h${depth}${id}>${inline}</h${depth}>\n`;
+      },
+      table(token: {
+        header: Array<{ tokens: unknown[] }>;
+        rows: Array<Array<{ tokens: unknown[] }>>;
+      }) {
+        const head = token.header
+          .map((cell) => `<th>${this.parser.parseInline(cell.tokens)}</th>`)
+          .join("");
+        const body = token.rows
+          .map((row) =>
+            `<tr>${row
+              .map((cell) => `<td>${this.parser.parseInline(cell.tokens)}</td>`)
+              .join("")}</tr>`,
+          )
+          .join("");
+        return `<div class="grove-prose-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>\n`;
+      },
+      // Fenced code blocks: route through Shiki instead of marked's
+      // default `<pre><code class="language-…">…</code></pre>`. The
+      // returned HTML already wraps in `<pre>` and `<code>`; we
+      // hand it to the sanitizer unchanged (Shiki's output is
+      // safe by construction — no script / event handlers).
+      code({ text, lang }) {
+        return highlightCode(text, lang ?? "") + "\n";
+      },
+    },
+  });
+
+  const rawHtml = marked.parse(body, { async: false }) as string;
+  return sanitizeHtml(rawHtml, {
+    allowedTags: allowlist,
+    allowedAttributes: COMMON_BODY_ATTRIBUTES,
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowedSchemesByTag: {
+      a: ["http", "https", "mailto", "tel"],
+      img: ["http", "https", "data"],
+    },
+    allowedSchemesAppliedToAttributes: ["href", "src"],
+    transformTags: {
+      a: ANCHOR_TRANSFORM,
+      img: IMG_TRANSFORM,
+      input: INPUT_TRANSFORM,
+    },
+    disallowedTagsMode: "discard",
+  });
+}
+
+/** Per-render counter so heading IDs don't collide within a body. */
+const headingIds = new Map<string, number>();
+
+// ── Shiki syntax highlighter ─────────────────────────────────────────
+//
+// Build-time tokenisation for fenced code blocks. Shiki returns a
+// string of HTML — `<pre class="shiki …"><code>…</code></pre>` —
+// and we drop it straight into the marked output where the code
+// block would otherwise be a flat `<pre><code class="language-…">`.
+//
+// Two themes (light + dark) are loaded; the `defaultColor: false`
+// flag asks Shiki to emit CSS variables (`--shiki-light`,
+// `--shiki-dark`) instead of inline `color:` declarations. The
+// selectors in `styles.css` then swap which set of variables wins
+// when the consumer toggles `.dark` on `<html>`. Net effect:
+// the same HTML is themed correctly in both modes without us
+// re-rendering at runtime.
+//
+// `getSingletonHighlighter()` lazily loads the engine on first use
+// and caches it for every subsequent call — Shiki's WASM/grammar
+// load takes a few hundred ms, so we want to amortise across all
+// records in a build. The list of supported languages is curated
+// (not `ALL`) so the build doesn't pull Shiki's full grammar pack.
+const SUPPORTED_LANGS = [
+  "bash", "sh", "shell", "console",
+  "python", "py",
+  "javascript", "js", "jsx", "typescript", "ts", "tsx",
+  "json", "jsonc", "yaml", "yml", "toml",
+  "markdown", "md", "mdx",
+  "html", "css", "scss", "sass",
+  "sql", "graphql",
+  "dockerfile", "diff",
+  "rust", "go", "java", "kotlin", "swift", "ruby", "php",
+  "c", "cpp", "csharp", "objective-c",
+  "xml", "ini", "properties",
+];
+const highlighter = await createHighlighter({
+  themes: ["github-light", "github-dark"],
+  langs: SUPPORTED_LANGS,
+});
+
+/**
+ * Highlight a fenced code block with Shiki. Returns the Shiki HTML
+ * wrapped in our `<pre>`-equivalent class so the existing
+ * `.grove-prose pre` rules continue to apply (padding, border,
+ * scroll behaviour).
+ */
+function highlightCode(text: string, lang: string): string {
+  const normalized = lang?.toLowerCase() ?? "";
+  const safeLang = highlighter.getLoadedLanguages().includes(normalized)
+    ? normalized
+    : "text";
+  const html = highlighter.codeToHtml(text, {
+    lang: safeLang,
+    themes: { light: "github-light", dark: "github-dark" },
+    defaultColor: false,
+  });
+  // Strip the outer `<pre>`'s inline `background-color` so it doesn't
+  // fight our package's prose background. The per-token `<span>`
+  // `style="--shiki-light: …; --shiki-dark: …"` declarations must
+  // survive — they're what makes dual-theme work.
+  return html.replace(
+    /(<pre[^>]*?)\s+style="[^"]*"/g,
+    "$1",
+  );
 }
 
 const contentHtmlBySlug = new Map<string, string>();
@@ -301,36 +585,15 @@ for (const r of fullRecords) {
   if (r.kind !== "project") continue;
   const projectRecord = r as ProjectRecord;
   if (!projectRecord.content) continue;
-  const path = resolveContentPath(projectRecord.content);
-  if (!path) continue;
+  const read = readContentFile(projectRecord.content);
+  if (!read) continue;
+  // Each render needs a fresh headingIds map so the per-body
+  // collision counter starts at zero. Otherwise the second record
+  // in the loop would inherit the first record's counters and
+  // duplicate-heading IDs would collide across records.
+  headingIds.clear();
   try {
-    const text = readFileSync(path, "utf8");
-    // `async: false` keeps the call synchronous so we can populate
-    // the map at module-load time. (marked v18 defaults to
-    // Promise-returning; v9-17 also support this flag.)
-    const rawHtml = marked.parse(text, { async: false }) as string;
-    const safeHtml = sanitizeHtml(rawHtml, {
-      allowedTags: [
-        "h1", "h2", "h3", "h4",
-        "p", "br", "hr",
-        "ul", "ol", "li",
-        "strong", "em", "b", "i", "u", "s", "del",
-        "a", "code", "pre", "blockquote",
-      ],
-      allowedAttributes: {
-        a: ["href", "title", "rel", "target"],
-      },
-      allowedSchemes: ["http", "https", "mailto", "tel"],
-      allowedSchemesByTag: { a: ["http", "https", "mailto", "tel"] },
-      transformTags: {
-        a: sanitizeHtml.simpleTransform("a", {
-          rel: "noopener noreferrer",
-          target: "_blank",
-        }, true),
-      },
-      disallowedTagsMode: "discard",
-    });
-    contentHtmlBySlug.set(r.slug, safeHtml);
+    contentHtmlBySlug.set(r.slug, renderMarkdownToSafeHtml(read.body));
   } catch {
     // Missing / unreadable / parse-failed content: skip the record
     // rather than render broken HTML. The page treats `null` as
@@ -364,35 +627,10 @@ export function getPageContentHtml(page: string): string | null {
   if (!path) return null;
 
   try {
-    const markdown = readFileSync(path, "utf8").replace(
-      /^---\r?\n[\s\S]*?\r?\n---\r?\n?/,
-      "",
-    );
-    const rawHtml = marked.parse(markdown, { async: false }) as string;
-    return sanitizeHtml(rawHtml, {
-      allowedTags: [
-        "h1", "h2", "h3", "h4",
-        "p", "br", "hr",
-        "ul", "ol", "li",
-        "strong", "em", "b", "i", "u", "s", "del",
-        "a", "code", "pre", "blockquote", "img",
-      ],
-      allowedAttributes: {
-        a: ["href", "title", "rel", "target"],
-        img: ["src", "alt", "title", "width", "height", "loading"],
-      },
-      allowedSchemes: ["http", "https", "mailto", "tel"],
-      allowedSchemesByTag: {
-        a: ["http", "https", "mailto", "tel"],
-        img: ["http", "https"],
-      },
-      transformTags: {
-        a: sanitizeHtml.simpleTransform("a", {
-          rel: "noopener noreferrer",
-          target: "_blank",
-        }, true),
-      },
-      disallowedTagsMode: "discard",
+    const markdown = stripFrontmatter(readFileSync(path, "utf8"));
+    headingIds.clear();
+    return renderMarkdownToSafeHtml(markdown, {
+      allowlist: PAGE_BODY_ALLOWLIST,
     });
   } catch {
     return null;

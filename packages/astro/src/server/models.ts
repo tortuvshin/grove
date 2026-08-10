@@ -6,13 +6,20 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { IndexFilters, IndexRecord, ProjectRecord } from "@grove-dev/core";
+import type {
+  IndexFilters,
+  IndexRecord,
+  ProjectRecord,
+  ReadingMetrics,
+  TocEntry,
+} from "@grove-dev/core";
 import {
   activeFilterChips,
   applySort,
   buildFacets,
   effectivePage,
   effectiveSort,
+  extractToc,
   filterRecords,
   filtersFromSearchParams,
   formatRelative,
@@ -20,6 +27,8 @@ import {
   getOwnerAndRepoFromRepoUrl,
   getOwnerAvatarUrl,
   projectStackIds,
+  readingMetrics,
+  readContentFile,
   statusDisplay,
   totalPages,
 } from "@grove-dev/core";
@@ -295,6 +304,8 @@ export function getRecordDetailModel(
   const language = github?.language ?? null;
   const licenseSpdx = github?.license?.spdx_id ?? null;
   const pushedAt = github?.pushed_at ?? null;
+  const isArchived = !!github?.archived;
+  const isDisabled = !!github?.disabled;
   const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
   const avatarSrc = proj?.logoUrl ?? (ownerRepo ? getOwnerAvatarUrl(ownerRepo.owner, 80) : null);
   const rawScores = proj?.scores;
@@ -322,6 +333,9 @@ export function getRecordDetailModel(
   const languages = extras.github?.languages
     ? Object.entries(extras.github.languages).sort((a, b) => b[1] - a[1]).slice(0, 5)
     : [];
+const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+const tags = record.tags ?? [];
+const tocBody = readContentFile(typeof record.content === "string" ? record.content : "");
 
   let jsonLd: Record<string, unknown>;
   if (isProject && proj) {
@@ -416,16 +430,154 @@ export function getRecordDetailModel(
     distribution: proj?.distribution?.channels ?? [],
     scores,
     curationLabels: record.curation?.labels ?? [],
-    tags: record.tags ?? [],
-    healthLabel: healthStatus ? statusDisplay(healthStatus) : null,
+    tags,
+    healthLabel,
     contentHtml: isProject ? getContentHtml(recordSlug) : null,
     monthlyCommits,
     maxMonthlyCommits: Math.max(1, ...monthlyCommits.map((item) => item.commits)),
     contributionSignals,
     languages,
     totalLanguageBytes: Math.max(1, languages.reduce((sum, [, bytes]) => sum + bytes, 0)),
+    // ── Sidebar-shape fields ────────────────────────────────
+    // Read once at model-build time so pages don't repeat the
+    // "is there data for this card?" logic.
+    activityBadge: computeActivityBadge({
+      pushedAt,
+      monthlyCommits,
+      isArchived,
+      isDisabled,
+    }),
+    sidebar: computeSidebarVisibility({
+      language,
+      licenseSpdx,
+      repo: github,
+      pushedAt,
+      isArchived,
+      healthLabel,
+      stacks,
+      platforms,
+      tags,
+      category: record.category,
+      contributionSignals,
+      reviewedAt: record.curation?.reviewedAt,
+    }),
+    // ── Body-derived fields ──────────────────────────────────
+    // Both depend on the sidecar Markdown; the body is re-read
+    // here even though it's also read for `contentHtml` upstream
+    // because the TOC + reading-time want the *body* (frontmatter
+    // stripped), not the HTML. Re-reading is cheap and keeps the
+    // pipeline self-documenting.
+    toc: tocBody ? extractToc(tocBody.body, { maxDepth: 2 }) : [],
+    readingMetrics: tocBody ? readingMetrics(tocBody.body) : { wordCount: 0, minutes: 1 },
     jsonLd,
   };
+}
+
+// ── Sidebar predicates ────────────────────────────────────────────
+
+/**
+ * Tone + label for the activity badge that appears in the header.
+ *
+ * Rules (intentionally explicit so a reader can predict the badge
+ * without consulting a weighting formula):
+ *
+ *   - Archived or disabled repo → "Archived"
+ *   - Recent monthly-commit total ≥ 50 → "Very active"
+ *   - ≥ 10 recent commits, or last push < 30d ago → "Active"
+ *   - ≥ 1 commit, or last push < 180d ago → "Maintained"
+ *   - last push 180d–365d → "Low activity"
+ *   - last push > 365d → "Stale"
+ *   - no push data and no commit data → null
+ *
+ * Returns `null` when neither GitHub push nor monthly commits are
+ * present (e.g. an un-synced record), so the badge simply doesn't
+ * render.
+ */
+export function computeActivityBadge(input: {
+  pushedAt: string | null;
+  monthlyCommits: Array<{ month: string; commits: number }>;
+  isArchived: boolean;
+  isDisabled: boolean;
+}): { label: string; tone: "fresh" | "ok" | "low" | "dead" } | null {
+  if (input.isArchived || input.isDisabled) {
+    return { label: "Archived", tone: "dead" };
+  }
+  const recentCommits = (input.monthlyCommits ?? [])
+    .slice(-3)
+    .reduce((sum, c) => sum + (c.commits ?? 0), 0);
+  if (recentCommits >= 50) return { label: "Very active", tone: "fresh" };
+  if (recentCommits >= 10) return { label: "Active", tone: "ok" };
+  if (recentCommits > 0) return { label: "Maintained", tone: "ok" };
+  if (input.pushedAt) {
+    const days =
+      (Date.now() - new Date(input.pushedAt).getTime()) / 86_400_000;
+    if (days < 30) return { label: "Active", tone: "ok" };
+    if (days < 180) return { label: "Maintained", tone: "ok" };
+    if (days < 365) return { label: "Low activity", tone: "low" };
+    return { label: "Stale", tone: "low" };
+  }
+  return null;
+}
+
+/**
+ * Visibility booleans for each sidebar card. Cards with no data
+ * suppress themselves entirely so the sidebar never shows "—" or
+ * "0" placeholders that confuse "we haven't fetched yet" with
+ * "the value is genuinely zero".
+ */
+export function computeSidebarVisibility(input: {
+  language: string | null;
+  licenseSpdx: string | null;
+  repo: Record<string, unknown> | null | undefined;
+  pushedAt: string | null;
+  isArchived: boolean;
+  healthLabel: string | null;
+  stacks: string[];
+  platforms: string[];
+  tags: string[];
+  category: string | undefined;
+  contributionSignals: Array<{ key: string; label: string; ok: boolean }>;
+  reviewedAt: string | undefined;
+}): {
+  showActivity: boolean;
+  showFreshness: boolean;
+  showEcosystem: boolean;
+  showSource: boolean;
+} {
+  const repoFields = input.repo ?? {};
+  const hasRepo =
+    typeof input.repo === "object" &&
+    input.repo !== null &&
+    Object.keys(repoFields).length > 0;
+  return {
+    showActivity:
+      hasRepo ||
+      !!input.language ||
+      !!input.licenseSpdx,
+    showFreshness:
+      hasRepo ||
+      !!input.pushedAt ||
+      !!input.healthLabel ||
+      input.isArchived,
+    showEcosystem:
+      input.stacks.length > 0 ||
+      input.platforms.length > 0 ||
+      input.tags.length > 0 ||
+      !!input.category ||
+      input.contributionSignals.length > 0,
+    showSource: !!input.reviewedAt,
+  };
+}
+
+/**
+ * `getStaticPaths()` body for the consumer's detail page. Centralized
+ * here so the CLI's scaffold and the example app share one definition.
+ */
+export function recordDetailPaths(site: DirectorySiteConfig) {
+  const dirSlug = site.blueprintConfig?.routeSlug ?? "items";
+  return fullItems.map((record) => ({
+    params: { slug: dirSlug, recordSlug: record.slug },
+  }));
 }
 
 export type DirectoryIndexModel = ReturnType<typeof getDirectoryIndexModel>;
