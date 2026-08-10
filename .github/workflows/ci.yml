@@ -110,6 +110,14 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # The page-parity test reads apps/example/dist/**.html and the
+      # grove-audit integration tests boot a dev server against
+      # apps/example's build output. Both need the example built first;
+      # `needs: build` only serializes the *jobs*, not their filesystem
+      # state, since each job runs on a fresh runner.
+      - name: Build apps/example
+        run: pnpm --dir apps/example build
+
       - name: Run unit tests
         run: pnpm test
 
