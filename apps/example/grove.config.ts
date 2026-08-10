@@ -80,7 +80,7 @@ export default defineConfig({
     pages: [
       { path: "/", type: "home", label: "Homepage" },
       { path: "/projects/", type: "directory", label: "Directory index" },
-      { path: "/collections/top-flutter/", type: "collection", label: "Top Flutter collection" },
+      { path: "/collections/top-ai-agents/", type: "collection", label: "Top AI Agents collection" },
       { path: "/projects/open-webui/", type: "record", label: "Record detail" },
       { path: "/about/", type: "content", label: "About page" },
       { path: "/empty/", type: "empty", label: "Empty state" },

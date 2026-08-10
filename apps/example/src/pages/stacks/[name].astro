@@ -1,12 +1,70 @@
 ---
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import { filterRecords } from "@grove-dev/core";
+import indexPayload from "@grove/generated/records.index.json";
 import siteConfig from "@grove/generated/site-config.json";
+
 export function getStaticPaths() {
-  return [{ params: { name: "flutter" } }];
+  const stacks = siteConfig.taxonomy?.stacks ?? [];
+  return stacks.map(({ id, name }) => ({ params: { name: id }, props: { displayName: name } }));
 }
+
 const { name } = Astro.params;
+const { displayName } = Astro.props;
+const indexRecords = (indexPayload as { records: unknown[] }).records as never;
+const stackRecords = filterRecords(indexRecords, { stacks: [name] });
 ---
-<BaseLayout title={`${name} apps`} description={`Open source apps built with ${name}.`} site={siteConfig}>
-  <h1>{name} apps</h1>
-  <p>Browse open source apps built with {name}.</p>
+<BaseLayout
+  title={`${displayName} projects`}
+  description={`Open-source projects built with ${displayName}.`}
+  site={siteConfig}
+>
+  <section class="mx-auto max-w-5xl px-6 py-16">
+    <p class="text-xs font-semibold uppercase tracking-widest text-subtle">Stack</p>
+    <h1 class="mt-3 text-3xl font-bold tracking-tight text-fg sm:text-4xl">
+      {displayName} projects
+    </h1>
+    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+      Browse open-source projects in this directory built with {displayName}.
+    </p>
+
+    <div class="mt-10">
+      <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+        {stackRecords.length} {stackRecords.length === 1 ? "project" : "projects"}
+      </p>
+
+      {stackRecords.length === 0 ? (
+        <p class="mt-4 text-sm text-muted">No records yet for this stack.</p>
+      ) : (
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+          {stackRecords.map((record: { slug: string; name?: string; title?: string; description?: string; repoUrl?: string }) => (
+            <li class="rounded-lg border border-border bg-card p-5">
+              <h2 class="m-0 text-base font-semibold text-fg">
+                <a href={`/projects/${record.slug}`} class="text-inherit no-underline hover:underline">
+                  {record.name ?? record.title ?? record.slug}
+                </a>
+              </h2>
+              {record.description && (
+                <p class="mt-2 text-sm leading-relaxed text-muted">{record.description}</p>
+              )}
+              {record.repoUrl && (
+                <a
+                  href={record.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-3 inline-flex text-xs font-mono text-accent-cyan no-underline hover:underline"
+                >
+                  {record.repoUrl.replace(/^https?:\/\//, "")}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+    <p class="mt-12 text-xs text-subtle">
+      <a href="/projects" class="text-inherit no-underline hover:underline">← Back to all projects</a>
+    </p>
+  </section>
 </BaseLayout>

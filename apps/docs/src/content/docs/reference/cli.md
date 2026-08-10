@@ -15,68 +15,61 @@ This page documents every command, every option, and the files each
 command reads and writes. Commands are organized by lifecycle: set
 up a space, work with records, ship the site.
 
-## `grove new`
+## `grove init`
 
-Scaffold a new Grove space from a framework template.
+Scaffold a new Grove space from the Astro template.
 
-**Syntax:** `grove new [<name>] [options]`
+**Syntax:** `grove init [<directory>] [options]`
 
 **Arguments:**
 
 | Argument | Description | Default |
 |---|---|---|
-| `<name>` | Project directory name. Omit to scaffold in the current directory. | `.` |
+| `<directory>` | Project directory name. Omit to scaffold in the current directory (must be empty). | `.` |
 
 **Options:**
 
 | Option | Description | Default |
 |---|---|---|
-| `-b, --blueprint <name>` | `project-directory` \| `resource-hub` \| `ecosystem-map` | prompts |
-| `-f, --framework <name>` | `astro` \| `nextjs` \| `svelte` (V1 supports `astro` only) | prompts |
-| `-t, --template <name>` | Template name within the framework | `default` |
-| `-d, --deploy <provider>` | `vercel` \| `netlify` \| `cloudflare` \| `github-pages` \| `none` | prompts |
-| `-g, --github <mode>` | `none` (private/local) \| `public` (community site with sync workflows) | prompts |
-| `--no-git` | Skip `git init` after scaffolding | git init runs |
 | `--no-install` | Skip `pnpm install` after scaffolding | install runs |
-| `-y, --yes` | Accept defaults for every prompt (CI / scripted use) | prompts |
+| `--no-git` | Skip `git init` after scaffolding | git init runs |
 
 **Reads:** nothing (creates a new directory).
 
 **Writes:**
 
-- `<name>/grove.config.ts`
-- `<name>/README.md`
-- `<name>/.gitignore`
-- `<name>/LICENSE`
-- `<name>/data/decisions.yml` (empty `decisions: []`)
-- `<name>/content/pages/` (V1 template ships `about.astro`, `contributors.astro`, `submit.astro` as Astro components under `src/pages/`, not as Markdown content pages; the `content/pages/` directory is reserved for V1.1+)
-- `<name>/.github/workflows/validate-data.yml`
-- `<name>/.github/workflows/build.yml`
-- `<name>/.github/ISSUE_TEMPLATE/{record_submission,bug_report,feature_request}.md`
-- In `--github public` mode, additionally:
-  `<name>/.github/workflows/{sync-github-metadata,sync-contributors,cleanup-stale-records,update-records}.yml`,
-  `<name>/.github/ISSUE_TEMPLATE/report-broken-record.md`,
-  `<name>/.github/pull_request_template.md`
+- `<directory>/grove.config.ts`
+- `<directory>/astro.config.mjs`
+- `<directory>/package.json`
+- `<directory>/tsconfig.json`
+- `<directory>/data/records/` (example YAML records)
+- `<directory>/data/taxonomy/` (categories, stacks, platforms)
+- `<directory>/data/collections/` (example curated collections)
+- `<directory>/data/decisions.yml` (empty `decisions: []`)
+- `<directory>/public/` (robots.txt, og-image.svg)
+- `<directory>/src/pages/` (home, browse, [slug], about, submit, 404)
+- `<directory>/src/styles/global.css`
+- `<directory>/.github/workflows/{ci,cleanup,deploy,readme,sync-contributors,sync-github}.yml`
+- `<directory>/.github/ISSUE_TEMPLATE/`
+
+The scaffolder does not ask prompts in v0.4.0 — blueprint and
+integrations are chosen by editing `grove.config.ts` after scaffold.
 
 **Example:**
 
 ```bash
-pnpm dlx @grove-dev/cli@latest new my-space \
-  --blueprint project-directory \
-  --framework astro \
-  --github public \
-  --deploy github-pages \
-  --yes
+pnpm dlx @grove-dev/cli@latest init my-space
+cd my-space
+pnpm install
+pnpm dev
 ```
 
 **Common errors:**
 
-- `Unknown blueprint: <x>` — must be one of the three V1 blueprints.
-- `Unknown framework: <x>` — V1 supports `astro` only; `nextjs` and
-  `svelte` are accepted by the flag but their templates are bare
-  `package.json` and `grove build` will refuse to run them.
 - `Install failed` — the scaffold itself completed; run `pnpm install`
-  inside `<name>/` to retry.
+  inside `<directory>/` to retry.
+- `Directory not empty` — when omitting `<directory>`, the current
+  directory must be empty.
 
 ## `grove import`
 
@@ -130,119 +123,54 @@ grove import ./inbox/README.md
 - Network errors fetching the URL — `import` does not retry; re-run
   once the network is up.
 
-## `grove validate`
+## `grove check`
 
-Check records, taxonomy, health, and decisions against the
-configured blueprint's schema.
+Validate data, generate artifacts, and run Astro checks. This is the
+V1 single-command entry point — it covers validation, generation,
+sitemap, `llms.txt`, `robots.txt`, and `og-image.svg`.
 
-**Syntax:** `grove validate [--strict]`
+**Syntax:** `grove check [--strict]`
 
 **Options:**
 
 | Option | Description |
 |---|---|
-| `--strict` | Fail the run (exit 1) on warnings as well as errors |
+| `--strict` | Treat Grove warnings as errors |
 
 **Reads:**
 
 - `grove.config.ts`
 - `data/records/*.yml` (every record file)
 - `data/decisions.yml`
-- `data/health.yml` (legacy compatibility shape)
 - `data/overrides.yml`
 
-**Writes:** nothing. Exits 0 on success, 1 on errors.
+**Writes:**
+
+- `data/generated/records.full.json` — every record, every field.
+- `data/generated/records.index.json` — slim projection for list pages.
+- `data/generated/records.json` — alias for `records.full.json`.
+- `data/generated/site-config.json` — site name, tagline, nav, theme.
+- `public/sitemap.xml` — sitemap of every visible record.
+- `public/llms.txt` — one-line-per-record LLM index.
+- `public/llms-full.txt` — full record bodies concatenated.
+- `public/robots.txt` — robots policy with filter-URL guard.
+- `public/og-image.svg` — brand-coloured OG card.
 
 **Output:**
 
 ```
-✖ <code>: <file>: <message>
-⚠ <code>: <file>: <message>
-Validation passed.
-Validation passed with N warning(s).
-Validation failed with N error(s) and M warning(s).
+[check] <N> records prepared; sitemap and llms files updated.
 ```
 
 **Example:**
 
 ```bash
-grove validate
-grove validate --strict
+grove check
+grove check --strict
 ```
 
-**Use this in CI.** The `validate-data.yml` workflow the CLI
-generates runs `grove validate` on every PR.
-
-## `grove generate`
-
-Build the data files the renderer reads.
-
-**Syntax:** `grove generate`
-
-**Reads:**
-
-- `grove.config.ts`
-- `data/records/*.yml`
-- `data/decisions.yml`
-- `data/health.yml` (legacy)
-
-**Writes:**
-
-- `data/generated/records.full.json` — every record, every field.
-- `data/generated/records.index.json` — slim projection with only
-  the fields the list/detail pages need.
-- `data/generated/records.json` — alias for `records.full.json`,
-  for tools that expect a stable filename.
-- `data/generated/site-config.json` — site name, tagline, nav, theme.
-
-**Output:**
-
-```
-[generate] 42 total, 38 visible
-  full:  data/generated/records.full.json
-  index: data/generated/records.index.json
-  alias: data/generated/records.json
-```
-
-`visible` is the count of records whose effective visibility is
-`keep` or `highlight` after `decisions.yml` overrides are applied.
-
-## `grove sitemap`
-
-Write `public/sitemap.xml` from the generated records.
-
-**Syntax:** `grove sitemap`
-
-**Reads:**
-
-- `grove.config.ts`
-- `data/generated/records.full.json`
-
-**Writes:**
-
-- `public/sitemap.xml`
-
-**Output:** `[sitemap] wrote 38 URLs → public/sitemap.xml`
-
-## `grove llms`
-
-Write the LLM-friendly index files (`llms.txt` and
-`llms-full.txt`).
-
-**Syntax:** `grove llms`
-
-**Reads:**
-
-- `grove.config.ts`
-- `data/generated/records.full.json`
-
-**Writes:**
-
-- `public/llms.txt` — one-line-per-record index, suitable for
-  LLM ingestion.
-- `public/llms-full.txt` — full record bodies concatenated.
-
-**Output:** `[llms] 38 indexed → public/llms.txt + public/llms-full.txt`
+**Use this in CI.** The `ci.yml` workflow the scaffolder generates
+runs `grove check` on every PR.
 
 ## `grove sync github`
 
@@ -292,27 +220,44 @@ commit, license, language, topics).
 
 ## `grove sync contributors`
 
-**Status: stub in V1.**
+Refresh the local contributors aggregation from GitHub.
 
 **Syntax:** `grove sync contributors`
 
-**Behavior:** prints `[sync contributors] contributor sync is not yet
-implemented in V1.` and exits 0. The full contributor-sync
-workflow is generated by `grove new --github public` but the
-implementation is a V1.1 feature.
+**Reads:**
 
-## `grove cleanup stale`
+- `grove.config.ts` (for `site.repoUrl`)
+- GitHub API (uses `GH_TOKEN` env or `secrets.GITHUB_TOKEN` in Actions)
 
-List records that need human curation.
+**Writes:**
 
-**Syntax:** `grove cleanup stale [--report] [--strict]`
+- `data/generated/contributors.json` — list of contributor handles + counts.
+- `data/generated/repo-stats.json` — repo aggregate stats.
+
+**Output:**
+
+```
+[sync contributors] N contributors from M repositories → data/generated/contributors.json
+```
+
+**Behavior:**
+
+- The scaffolder writes `.github/workflows/sync-contributors.yml`,
+  which runs this on a weekly cron (Sun 04:00 UTC) and on manual
+  `workflow_dispatch`. The workflow auto-commits the generated
+  files back to the repo.
+
+## `grove cleanup`
+
+Write a report of records that need human review.
+
+**Syntax:** `grove cleanup [--strict]`
 
 **Options:**
 
 | Option | Description |
 |---|---|
-| `--report` | Produce a report (default behavior in V1) |
-| `--strict` | Fail the run (exit 1) if any candidates need curation |
+| `--strict` | Fail the run (exit 1) when review candidates exist |
 
 **Reads:**
 
@@ -327,75 +272,21 @@ List records that need human curation.
 **Output:**
 
 ```
-[cleanup stale] 5 candidate(s) → data/generated/cleanup-report.json
+[cleanup] 5 candidate(s) → data/generated/cleanup-report.json
   - old-tool (inactive, 12★)
   - abandoned-app (archived, 304★)
   - ...
 ```
 
-**Behavior:** `cleanup-stale-records.yml` workflow runs this on a
-weekly cron and opens a PR with the report. The CLI does not
-delete or hide records — that is a curator's call, made via
-`decisions.yml`.
-
-## `grove workflows sync`
-
-Re-emit the GitHub workflow files. Useful when you upgrade the CLI
-and want the new workflow files, or when you change
-`integrations.github` mode.
-
-**Syntax:** `grove workflows sync [--force]`
-
-**Options:**
-
-| Option | Description |
-|---|---|
-| `--force` | Overwrite existing workflow files |
-
-**Reads:**
-
-- `grove.config.ts` (for the GitHub integration mode)
-
-**Writes:**
-
-- `.github/workflows/validate-data.yml`
-- `.github/workflows/build.yml`
-- In `public` mode, also:
-  `.github/workflows/{sync-github-metadata,sync-contributors,cleanup-stale-records,update-records}.yml`,
-  `.github/ISSUE_TEMPLATE/report-broken-record.md`,
-  `.github/pull_request_template.md`.
-
-By default, existing files are **not** overwritten. Use `--force`
-to replace them with the current templates.
-
-## `grove build`
-
-Build the static site. Detects the framework from `package.json`
-and delegates to the framework's own build command.
-
-**Syntax:** `grove build`
-
-**Behavior:**
-
-- Reads `<root>/package.json` to detect `@grove-dev/astro`,
-  `@grove-dev/nextjs`, or `@grove-dev/svelte`.
-- Runs `astro build`, `next build`, or `vite build` accordingly.
-- **V1 only Astro is fully supported.** Next.js and SvelteKit
-  scaffolds will pass `grove new` but `grove build` will exit 1
-  with "Next.js and SvelteKit are roadmap-only in V1."
-
-## `grove dev`
-
-Start the framework dev server.
-
-**Syntax:** `grove dev`
-
-Same framework detection as `grove build`. V1 only Astro is
-supported.
+**Behavior:** The `cleanup.yml` workflow runs this on a monthly
+cron and opens a PR with the report. The CLI does not delete or
+hide records — that is a curator's call, made via `decisions.yml`.
 
 ## Related docs
 
 - **[grove.config.ts reference](/reference/config/)** — every
   config field, every default.
 - **[Record schema](/reference/record-schema/)** — the schema
-  `grove validate` and `grove generate` work against.
+  `grove check` validates against.
+- **[Scheduled sync](/automation/scheduled/)** — the GitHub Actions
+  workflows generated by `grove init`.
