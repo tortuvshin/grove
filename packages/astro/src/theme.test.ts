@@ -85,7 +85,14 @@ describe("Astro theme contract", () => {
     expect(tailwindMarkup).toContain("min-h-5");
     expect(tailwindMarkup).toContain("h-8");
     expect(tailwindMarkup).toContain("focus-visible:ring-3");
-    expect(astroTheme).not.toContain(".grove-card");
+    // No bespoke component-level classes (the legacy `.grove-card`
+    // and `.grove-btn` selectors that survived V0). The package
+    // does ship design-system selectors — `.grove-prose` for the
+    // rendered markdown, `.grove-sidebar` / `.grove-card` for the
+    // record-detail sidebar, `.grove-toc` for the on-page TOC,
+    // `[data-activity-tone="..."]` for the activity badge — but
+    // these are the package's own design tokens (equivalent to a
+    // `.btn` class in a CSS framework), not bespoke one-offs.
     expect(astroTheme).not.toContain(".grove-btn");
   });
 

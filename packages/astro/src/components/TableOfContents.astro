@@ -1,0 +1,115 @@
+---
+/**
+ * TableOfContents.astro
+ *
+ * Collapsible on-page nav for a record's Markdown body.
+ *
+ * Behavior:
+ *   - Mobile (<lg): rendered as a closed `<details>` dropdown.
+ *   - Desktop (lg+): forced open via `lg:!open` so the nav stays
+ *     visible while the user scrolls.
+ *   - Heading IDs come from the markdown renderer; the TOC entries
+ *     are pre-computed by `extractToc` and passed in.
+ *
+ * The scroll-spy + smooth-scroll logic lives in an inline script
+ * that finds every `data-toc-link` on the page and highlights the
+ * link whose target is closest to the top of the viewport (rAF-
+ * throttled). Active styling comes from the `data-toc-active`
+ * attribute toggled in the script + CSS rules in `styles.css`.
+ */
+import type { TocEntry } from "@grove-dev/core";
+
+interface Props {
+  /** Heading entries from `extractToc`. */
+  items: TocEntry[];
+  /** Optional accessible label override. */
+  label?: string;
+}
+
+const { items, label = "On this page" } = Astro.props;
+const hasItems = items.length > 1;
+---
+
+{hasItems && (
+  <details class="grove-toc mb-8 rounded-[var(--radius-lg)] border border-ink-200 bg-background open:bg-background dark:border-ink-800 lg:!open">
+    <summary class="cursor-pointer list-none px-4 py-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:cursor-default lg:pointer-events-none">
+      <span class="inline-flex items-center gap-1.5">
+        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="grove-toc-chevron transition-transform lg:hidden">
+          <path d="M6 4l4 4-4 4V4z" />
+        </svg>
+        {label}
+        <span class="ml-1 rounded-full bg-ink-100 px-1.5 py-0.5 text-[10px] font-medium text-ink-500 dark:bg-ink-800 dark:text-ink-300">
+          {items.length}
+        </span>
+      </span>
+    </summary>
+    <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:border-t-0 lg:p-0">
+      {items.map((entry) => (
+        <li class="grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5">
+          <a
+            href={`#${entry.id}`}
+            class="grove-toc-link block truncate px-3 py-2 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:px-2 lg:py-1"
+            data-toc-link={entry.id}
+          >
+            {entry.text}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </details>
+)}
+
+{hasItems && (
+  <script is:inline define:vars={{ tocIds: items.map((i) => i.id) }}>
+    (function () {
+      // Smooth scroll + history-replace on TOC link clicks.
+      function onClick(e) {
+        var link = e.target.closest("a[data-toc-link]");
+        if (!link) return;
+        e.preventDefault();
+        var id = link.getAttribute("data-toc-link");
+        var target = document.getElementById(id);
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        history.replaceState(null, "", "#" + id);
+      }
+      document.addEventListener("click", onClick);
+
+      // Scroll-spy: rAF-throttled, toggles `data-toc-active` on the
+      // link whose heading is closest to the top of the viewport.
+      // CSS handles the active styling — no dynamic Tailwind classes.
+      var headings = tocIds
+        .map(function (id) { return document.getElementById(id); })
+        .filter(function (el) { return !!el; });
+      if (!headings.length) return;
+      var links = new Map();
+      document.querySelectorAll("a[data-toc-link]").forEach(function (a) {
+        links.set(a.getAttribute("data-toc-link"), a);
+      });
+      var active = null;
+      var ticking = false;
+      function update() {
+        ticking = false;
+        var top = window.scrollY + 140;
+        var current = headings[0].id;
+        for (var i = 0; i < headings.length; i++) {
+          if (headings[i].offsetTop <= top) current = headings[i].id;
+          else break;
+        }
+        if (current === active) return;
+        active = current;
+        links.forEach(function (a, id) {
+          if (id === current) a.setAttribute("data-toc-active", "");
+          else a.removeAttribute("data-toc-active");
+        });
+      }
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      update();
+    })();
+  </script>
+)}
