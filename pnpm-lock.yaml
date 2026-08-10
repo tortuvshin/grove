@@ -9,7 +9,7 @@ overrides:
   esbuild@>=0.27.3 <0.28.1: '>=0.28.1'
   '@opentelemetry/core@<2.8.0': '>=2.8.0'
   astro@>=2.9.0 <=7.0.9: '>=7.1.0'
-  js-yaml@>=4.0.0 <4.3.0: '>=4.3.0'
+  js-yaml@>=4.0.0 <4.3.0: '>=4.3.0 <5'
   astro@<7.0.6: '>=7.0.6'
   astro@>=3.10.0 <7.0.4: '>=7.0.4'
   svgo@>=4.0.0 <4.0.2: '>=4.0.2'
@@ -23,7 +23,7 @@ overrides:
   ip-address@>=10.1.1 <=10.2.1: '>=10.2.2'
   ip-address@>=10.1.1 <=10.2.0: '>=10.2.1'
   brace-expansion@>=2.0.0 <2.1.4: '>=2.1.4'
-  js-yaml@>=4.0.0 <4.3.1: '>=4.3.1'
+  js-yaml@>=4.0.0 <4.3.1: '>=4.3.1 <5'
   fast-uri@>=3.0.0 <3.1.3: '>=3.1.3'
   nanoid@<3.3.16: '>=3.3.16'
   nanoid@<3.3.17: '>=3.3.17'
@@ -2480,8 +2480,8 @@ packages:
   js-tokens@10.0.0:
     resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
 
-  js-yaml@5.2.3:
-    resolution: {integrity: sha512-n+mUVyUX5bVv7G/G2zyIHOhdxfuU1dY2NOFzTQUWiMUbFss8b57NFlgCCaggU78wSw5KVS9cllzeLyzyR+n5nw==}
+  js-yaml@4.3.1:
+    resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
 
   json-schema-traverse@1.0.0:
@@ -3880,7 +3880,7 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
-      js-yaml: 5.2.3
+      js-yaml: 4.3.1
       picomatch: 4.0.5
       retext-smartypants: 6.2.0
       shiki: 4.2.0
@@ -3891,7 +3891,7 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
-      js-yaml: 5.2.3
+      js-yaml: 4.3.1
       picomatch: 4.0.5
       retext-smartypants: 6.2.0
       shiki: 4.2.0
@@ -4044,7 +4044,7 @@ snapshots:
       hast-util-to-string: 3.0.1
       hastscript: 9.0.1
       i18next: 26.3.1(typescript@6.0.3)
-      js-yaml: 5.2.3
+      js-yaml: 4.3.1
       klona: 2.0.6
       magic-string: 0.30.21
       mdast-util-directive: 3.1.0
@@ -4079,7 +4079,7 @@ snapshots:
       hast-util-to-string: 3.0.1
       hastscript: 9.0.1
       i18next: 26.3.1(typescript@6.0.3)
-      js-yaml: 5.2.3
+      js-yaml: 4.3.1
       klona: 2.0.6
       magic-string: 0.30.21
       mdast-util-directive: 3.1.0
@@ -5534,7 +5534,7 @@ snapshots:
       github-slugger: 2.0.0
       html-escaper: 3.0.3
       http-cache-semantics: 4.2.0
-      js-yaml: 5.2.3
+      js-yaml: 4.3.1
       jsonc-parser: 3.3.1
       magic-string: 0.30.21
       magicast: 0.5.3
@@ -6392,7 +6392,7 @@ snapshots:
 
   js-tokens@10.0.0: {}
 
-  js-yaml@5.2.3:
+  js-yaml@4.3.1:
     dependencies:
       argparse: 2.0.1
 
