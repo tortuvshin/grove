@@ -144,7 +144,7 @@ describe("docs homepage (standalone Astro route)", () => {
 
     expect(hero).toContain("Build community knowledge that stays useful.");
     expect(hero).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
-    expect(hero).toContain("data/records/immich.yml");
+    expect(hero).toContain("data/records/crewai.yml");
 
     expect(features).toContain("Lists are easy to start and difficult to maintain.");
     expect(features).toContain("Structure drifts");
@@ -190,20 +190,34 @@ describe("docs homepage (standalone Astro route)", () => {
       "utf8",
     );
 
-    for (const [name, src] of [
-      ["Hero", hero],
-      ["Features", features],
-      ["GetStarted", getStarted],
-      ["Blueprints", blueprints],
-      ["Integrations", integrations],
-      ["FinalCta", finalCta],
-    ] as const) {
-      expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
-      // Hero uses <h1> (the page title); every other section uses <h2>.
-      const headingPattern =
-        name === "Hero" ? /<h1[^>]+id=/ : /<h2[^>]+id=/;
-      expect(src, name).toMatch(headingPattern);
-    }
+    // Sections that delegate the heading to <SectionHeader> don't
+// have an `<h2 id>` in their source — the heading lives in the
+// shared component. We read SectionHeader.astro separately and
+// check its h2 pattern satisfies the test once.
+const sectionHeader = await readFile(
+  resolve(docsRoot, "src/components/home/SectionHeader.astro"),
+  "utf8",
+);
+
+for (const [name, src] of [
+  ["Hero", hero],
+  ["Features", features],
+  ["GetStarted", getStarted],
+  ["Blueprints", blueprints],
+  ["Integrations", integrations],
+  ["FinalCta", finalCta],
+] as const) {
+  expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
+  // Hero uses <h1> (the page title); every other section uses <h2>.
+  // Sections that delegate the heading to <SectionHeader> don't have
+  // the `<h2 id>` in their own source, but they import the
+  // component, which does. Either path satisfies the pattern.
+  const usesSharedHeader = src.includes("SectionHeader");
+  const sourceToCheck = usesSharedHeader ? sectionHeader : src;
+  const headingPattern =
+    name === "Hero" ? /<h1[^>]+id=/ : /<h2[^>]+id=/;
+  expect(sourceToCheck, name).toMatch(headingPattern);
+}
 
     // Hero links should point at real destinations, not placeholder "#"
     expect(hero).toContain('href="/introduction/"');
