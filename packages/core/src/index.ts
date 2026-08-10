@@ -12,6 +12,12 @@ export { defineConfig, loadConfig } from "./config.js";
 export type { GroveConfig, GroveConfigInput } from "./schema.js";
 
 // ── Schemas (Zod) ─────────────────────────────────────────────────────
+// ── Slug helpers ───────────────────────────────────────────────────
+// Public because the markdown renderer in @grove-dev/astro imports
+// `uniqueSlug` to give heading anchors a collision-counter that
+// matches the IDs `extractToc` produces from the same body.
+export { slugify, uniqueSlug } from "./slug.js";
+
 export {
   blueprintSchema,
   resourceKindSchema,
@@ -181,6 +187,26 @@ export * from "./directory-repo.js";
 export * from "./directory-scores.js";
 export * from "./directory-search.js";
 export * from "./directory-taxonomy.js";
+
+// ── Content body ───────────────────────────────────────────────────
+// Pure helpers for reading and shaping the Markdown sidecar that
+// accompanies each record. No I/O of their own beyond `node:fs` for
+// the optional `readContentFile`; safe to import from server-only
+// contexts (Astro `getStaticPaths`, build scripts).
+export {
+  extractToc,
+  readContentFile,
+  readingMetrics,
+  resolveContentPath,
+  stripFrontmatter,
+} from "./content-body.js";
+export type {
+  ExtractTocOptions,
+  ReadContentFileResult,
+  ReadingMetrics,
+  ReadingMetricsOptions,
+  TocEntry,
+} from "./content-body.js";
 
 export {
   DEFAULT_BUDGET,

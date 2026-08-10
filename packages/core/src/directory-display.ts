@@ -109,3 +109,61 @@ export const STATUS_OPTIONS: string[] = [
   "unavailable",
   "unknown",
 ];
+
+// ── GitHub linguist palette ─────────────────────────────────────────
+// Color hex values mirror the GitHub Linguist language palette so a
+// record's "code composition" bar matches what readers see on the
+// project's GitHub page. Anything not in the map falls back to a
+// neutral ink grey. Used by the record-detail sidebar.
+export const LANG_COLORS: Record<string, string> = {
+  TypeScript: "#3178c6",
+  JavaScript: "#f1e05a",
+  Python: "#3572A5",
+  Go: "#00ADD8",
+  Rust: "#dea584",
+  Ruby: "#701516",
+  Java: "#b07219",
+  Kotlin: "#A97BFF",
+  Swift: "#F05138",
+  C: "#555555",
+  "C++": "#f34b7d",
+  "C#": "#178600",
+  PHP: "#4F5D95",
+  Shell: "#89e051",
+  Bash: "#89e051",
+  HTML: "#e34c26",
+  CSS: "#563d7c",
+  SCSS: "#c6538c",
+  Sass: "#a53b88",
+  Less: "#1d365d",
+  Vue: "#41b883",
+  Svelte: "#ff3e00",
+  Dart: "#00B4AB",
+  Lua: "#000080",
+  Elixir: "#6e4a7e",
+  Haskell: "#5e5086",
+  Scala: "#c22d40",
+  R: "#198CE7",
+  MATLAB: "#e16737",
+  "Jupyter Notebook": "#DA5B0B",
+  MDX: "#fcb32c",
+  Dockerfile: "#384d54",
+  Makefile: "#427819",
+  Perl: "#0298c3",
+  Zig: "#ec915c",
+  Nim: "#ffc200",
+  Erlang: "#B83998",
+  Elm: "#60B5CC",
+  OCaml: "#3be133",
+  "F#": "#b845fc",
+};
+
+/**
+ * Resolve a GitHub Linguist color for a language name. Returns a
+ * neutral ink grey for languages not in the palette so an unknown
+ * language still renders a visible bar segment.
+ */
+export function langColor(name: string | null | undefined): string {
+  if (!name) return "#9ca3af";
+  return LANG_COLORS[name] ?? "#9ca3af";
+}
