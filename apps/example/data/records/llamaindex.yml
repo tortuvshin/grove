@@ -7,6 +7,7 @@ tags: [rag, data, agents]
 stack: python
 stacks: [python, typescript]
 platforms: [linux, macos, windows]
+licenses: [mit]
 projectType: library
 difficulty: intermediate
 codebaseSize: huge

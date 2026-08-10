@@ -287,8 +287,16 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
 
     if (licenses) {
       if (a.kind !== "project") return false;
-      const license = a.github?.license;
-      if (!license || !licenses.has(license)) return false;
+      // Curated `licenses` array takes precedence; fall back to the
+      // GitHub sync's `github.license.spdx_id` (recorded as the
+      // raw spdx_id string by `directory-repo.ts`).
+      const curated = (a.licenses ?? []) as string[];
+      const synced = a.github?.license ?? "";
+      const candidates = new Set<string>(
+        curated.length ? curated : synced ? [synced] : [],
+      );
+      if (candidates.size === 0) return false;
+      if (![...candidates].some((l) => licenses.has(l))) return false;
     }
 
     if (statuses) {

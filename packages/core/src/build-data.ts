@@ -314,6 +314,7 @@ export async function generate(
       cfg.paths.taxonomyDir,
       "distribution-channels.yml",
     ),
+    licenses: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, "licenses.yml"),
   };
 
   const siteConfigPayload = {

@@ -1,0 +1,24 @@
+- id: mit
+  name: MIT License
+  family: permissive
+  url: https://spdx.org/licenses/MIT.html
+- id: apache-2.0
+  name: Apache License 2.0
+  family: permissive
+  url: https://spdx.org/licenses/Apache-2.0.html
+- id: bsd-3-clause
+  name: BSD 3-Clause License
+  family: permissive
+  url: https://spdx.org/licenses/BSD-3-Clause.html
+- id: gpl-3.0
+  name: GNU GPL v3.0
+  family: copyleft
+  url: https://spdx.org/licenses/GPL-3.0-or-later.html
+- id: apache
+  name: Apache License
+  family: permissive
+  url: https://spdx.org/licenses/Apache-2.0.html
+- id: bsd
+  name: BSD License
+  family: permissive
+  url: https://spdx.org/licenses/BSD-3-Clause.html

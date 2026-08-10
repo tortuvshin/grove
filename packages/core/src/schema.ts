@@ -339,6 +339,10 @@ export const projectRecordSchema = resourceBaseSchema.extend({
   stack: z.string().optional(),
   stacks: z.array(z.string()).default([]),
   platforms: z.array(z.string()).default([]),
+  // SPDX license identifiers (e.g. ["mit"], ["apache-2.0"]). Hand-
+  // authored when a record is curated; otherwise derived from the
+  // GitHub sync's `license.spdx_id` field at build time.
+  licenses: z.array(z.string()).default([]),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   codebaseSize: z.enum(["small", "medium", "large", "huge"]).optional(),
   // Canonical repo URL. Distinct from `links.github`, which is the
@@ -781,6 +785,7 @@ export interface IndexBase {
   description: string;
   content?: string | undefined;
   curation: ProjectRecord["curation"];
+  licenses: string[];
 }
 
 export interface IndexGithubSummary {
@@ -801,6 +806,7 @@ export interface IndexProjectRecord extends IndexBase {
   stack: ProjectRecord["stack"];
   stacks: string[];
   platforms: string[];
+  licenses: string[];
   projectType: ProjectRecord["projectType"];
   repoUrl: ProjectRecord["repoUrl"];
   logoUrl: ProjectRecord["logoUrl"];
@@ -876,6 +882,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
     description: record.description,
     content: record.content,
     curation: record.curation,
+    licenses: record.kind === "project" ? record.licenses ?? [] : [],
   };
 
   if (record.kind === "project") {

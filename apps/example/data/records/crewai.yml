@@ -7,6 +7,7 @@ tags: [agents, multi-agent, automation]
 stack: python
 stacks: [python]
 platforms: [linux, macos, windows]
+licenses: [mit]
 projectType: library
 difficulty: intermediate
 codebaseSize: large
