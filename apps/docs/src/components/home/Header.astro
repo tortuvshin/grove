@@ -46,15 +46,71 @@ const navLinks = [
       >
         Get started
       </a>
-      <details class="relative md:hidden">
-        <summary class="flex size-11 cursor-pointer list-none items-center justify-center rounded-lg border border-border text-muted" aria-label="Open navigation menu">
+      <div class="relative md:hidden">
+        <button
+          id="mobile-nav-toggle"
+          type="button"
+          aria-label="Open navigation menu"
+          aria-controls="mobile-nav-panel"
+          aria-expanded="false"
+          class="flex size-11 cursor-pointer items-center justify-center rounded-lg border border-border text-muted transition-colors hover:text-fg"
+        >
           <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </summary>
-        <nav class="absolute right-0 top-12 w-60 rounded-xl border border-border-strong bg-card p-2 shadow-2xl" aria-label="Mobile navigation">
-          {navLinks.map((link) => <a href={link.href} class="block rounded-lg px-4 py-3 text-sm text-muted hover:bg-card-hover hover:text-fg">{link.label}</a>)}
+        </button>
+        <nav
+          id="mobile-nav-panel"
+          hidden
+          class="absolute right-0 top-12 w-60 rounded-xl border border-border-strong bg-card p-2 shadow-2xl"
+          aria-label="Mobile navigation"
+        >
+          {navLinks.map((link) => (
+            <a href={link.href} class="block rounded-lg px-4 py-3 text-sm text-muted hover:bg-card-hover hover:text-fg">
+              {link.label}
+            </a>
+          ))}
           <a href="/getting-started/create-a-space/" class="mt-1 block rounded-lg bg-fg px-4 py-3 text-center text-sm font-semibold text-bg">Get started</a>
         </nav>
-      </details>
+      </div>
+      <script is:inline>
+        (() => {
+          const toggle = document.getElementById('mobile-nav-toggle');
+          const panel = document.getElementById('mobile-nav-panel');
+          if (!toggle || !panel) return;
+          const close = () => {
+            panel.hidden = true;
+            toggle.setAttribute('aria-expanded', 'false');
+          };
+          const open = () => {
+            panel.hidden = false;
+            toggle.setAttribute('aria-expanded', 'true');
+          };
+          toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (panel.hidden) open();
+            else close();
+          });
+          panel.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target instanceof Element && target.closest('a')) close();
+          });
+          document.addEventListener('click', (e) => {
+            if (panel.hidden) return;
+            const target = e.target;
+            if (target instanceof Node && !panel.contains(target) && target !== toggle && !toggle.contains(target)) {
+              close();
+            }
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !panel.hidden) {
+              close();
+              toggle.focus();
+            }
+          });
+          window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768 && !panel.hidden) close();
+          });
+        })();
+      </script>
       <a
         href="https://github.com/tortuvshin/grove"
         class="flex size-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-card hover:text-fg"

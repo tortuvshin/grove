@@ -1,0 +1,52 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  titleId?: string;
+  lede?: string;
+  align?: 'left' | 'center';
+  maxWidth?: 'narrow' | 'normal' | 'wide';
+}
+
+const {
+  eyebrow,
+  title,
+  titleId,
+  lede,
+  align = 'left',
+  maxWidth = 'normal',
+} = Astro.props;
+
+const alignClass = align === 'center' ? 'mx-auto text-center' : '';
+const widthClass =
+  maxWidth === 'narrow' ? 'max-w-2xl' : maxWidth === 'wide' ? 'max-w-4xl' : 'max-w-3xl';
+---
+
+<header class:list={[alignClass]}>
+  <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+    {eyebrow}
+  </p>
+  <h2
+    id={titleId}
+    class:list={[
+      'mt-5 text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl',
+      widthClass,
+      alignClass,
+    ]}
+  >
+    {title}
+  </h2>
+  {
+    lede && (
+      <p
+        class:list={[
+          'mt-5 text-base leading-relaxed text-muted',
+          maxWidth === 'narrow' ? 'max-w-2xl' : 'max-w-2xl',
+          alignClass,
+        ]}
+      >
+        {lede}
+      </p>
+    )
+  }
+</header>
