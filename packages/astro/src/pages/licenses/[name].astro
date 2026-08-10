@@ -1,7 +1,4 @@
 ---
-import GroveDocumentHead from "../../components/GroveDocumentHead.astro";
-import { runCollection, type Collection, type CollectionEntry } from "@grove-dev/core";
-
 /**
  * Reference taxonomy route — render `/licenses/<name>/` as a
  * generated collection filtered by `query.licenses`.
@@ -10,6 +7,10 @@ import { runCollection, type Collection, type CollectionEntry } from "@grove-dev
  * (or replace with a directory scan) to match the license values
  * your site actually publishes.
  */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { runCollection, type Collection, type CollectionEntry } from "@grove-dev/core";
+import siteConfig from "@grove/generated/site-config.json";
+
 export function getStaticPaths() {
   return [
     { params: { name: "mit" } },
@@ -33,55 +34,25 @@ const collection: Collection = {
 
 const entries: CollectionEntry[] = [];
 const result = runCollection(collection, entries);
-if (!Astro.site) {
-  throw new Error("Astro.site must be configured for collection routes. Set `site` in astro.config.");
-}
-const canonical = new URL(`/licenses/${name}/`, Astro.site);
-
-const doc = {
-  identity: { type: "collection" as const, canonical, language: "en" },
-  metadata: {
-    title: collection.seo.title ?? collection.title,
-    description: collection.description,
-    robots: "index,follow",
-    openGraph: {
-      title: collection.title,
-      description: collection.description,
-      url: canonical.toString(),
-      image: new URL("/og.png", canonical).toString(),
-      type: "website" as const,
-    },
-    twitter: { card: "summary_large_image" as const },
-  },
-  structuredData: [],
-  discovery: {
-    includeInSitemap: true,
-    includeInLlms: true,
-    relatedLinks: [],
-  },
-};
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <GroveDocumentHead document={doc} />
-  </head>
-  <body>
-    <h1>{collection.title}</h1>
-    <p>{collection.description}</p>
-    {result.isEmpty ? (
-      <p>No apps under this license yet.</p>
-    ) : (
-      <ol>
-        {result.entries.map((entry) => (
-          <li>
-            <a href={entry.url}>{entry.title}</a>
-            <p>{entry.description}</p>
-          </li>
-        ))}
-      </ol>
-    )}
-  </body>
-</html>
+
+<BaseLayout
+  title={collection.seo.title ?? collection.title}
+  description={collection.description}
+  site={siteConfig}
+>
+  <h1>{collection.title}</h1>
+  <p>{collection.description}</p>
+  {result.isEmpty ? (
+    <p>No apps under this license yet.</p>
+  ) : (
+    <ol>
+      {result.entries.map((entry) => (
+        <li>
+          <a href={entry.url}>{entry.title}</a>
+          <p>{entry.description}</p>
+        </li>
+      ))}
+    </ol>
+  )}
+</BaseLayout>
