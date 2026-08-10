@@ -1,4 +1,6 @@
 ---
+import SectionHeader from './SectionHeader.astro';
+
 const features = [
   {
     title: 'Structure drifts',
@@ -15,13 +17,13 @@ const features = [
   {
     title: 'Review becomes cleanup',
     desc: 'Maintainers normalize every submission before they can judge its value.',
-    color: 'text-accent-cyan',
+    color: 'text-accent-blue',
     icon: 'upload',
   },
   {
     title: 'Discovery becomes software',
     desc: 'Search, filters, routes, metadata, and sitemaps become another app to maintain.',
-    color: 'text-accent-blue',
+    color: 'text-accent-purple',
     icon: 'search',
   },
   {
@@ -40,18 +42,12 @@ const features = [
 ---
 
 <section class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="features-title">
-  <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
-    The maintenance problem
-  </p>
-  <h2
-    id="features-title"
-    class="mt-5 max-w-3xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
-  >
-    Lists are easy to start and difficult to maintain.
-  </h2>
-  <p class="mt-5 max-w-2xl text-base leading-relaxed text-muted">
-    A README or small static site works until the collection becomes shared infrastructure. Growth turns publishing into recurring maintenance work.
-  </p>
+  <SectionHeader
+    eyebrow="The maintenance problem"
+    title="Lists are easy to start and difficult to maintain."
+    titleId="features-title"
+    lede="A README or small static site works until the collection becomes shared infrastructure. Growth turns publishing into recurring maintenance work."
+  />
 
   <div class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {

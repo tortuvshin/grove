@@ -17,10 +17,22 @@ const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
   </p>
 
   <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-    <a href="/introduction/" class="rounded-lg bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">
-      Read the docs
+    <a
+      href="/getting-started/create-a-space/"
+      class="inline-flex items-center gap-2 rounded-lg bg-accent-green px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90"
+    >
+      Get started
+      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 12h14"></path>
+        <path d="m12 5 7 7-7 7"></path>
+      </svg>
     </a>
-    <a href="https://open-apps.dev.mn" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover">
+    <a
+      href="https://open-apps.dev.mn"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="rounded-lg border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover"
+    >
       Explore Open Apps
     </a>
   </div>
@@ -28,17 +40,29 @@ const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
   <div class="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-subtle">
     <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>Astro renderer available</span>
     <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>MIT licensed</span>
-    <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-orange"></span>Active development</span>
+    <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>Active development</span>
   </div>
+
+  <div class="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4" aria-label="Lighthouse scores">
+    {scores.map((score) => (
+      <div class="bg-surface px-3 py-3 text-left sm:text-center">
+        <strong class="font-mono text-sm text-accent-green">100</strong>
+        <span class="ml-2 text-[11px] text-muted sm:ml-1">{score}</span>
+      </div>
+    ))}
+  </div>
+  <p class="mx-auto mt-3 max-w-3xl text-[11px] leading-relaxed text-subtle">
+    Measured on the production landing build. <a href="/introduction/" class="text-inherit underline decoration-dotted decoration-subtle underline-offset-2 hover:text-muted">See methodology</a>.
+  </p>
 
   <div class="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-xl border border-border-strong bg-card text-left shadow-2xl shadow-black/20 lg:grid-cols-[1fr_0.78fr_1fr]" aria-label="A Grove source record becoming published outputs">
     <div class="border-b border-border p-5 lg:border-b-0 lg:border-r">
-      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-cyan">●</span>data/records/immich.yml</p>
+      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-cyan">●</span>data/records/crewai.yml</p>
       <pre class="mt-4 overflow-x-auto font-mono text-[12px] leading-6"><code><span class="text-accent-blue">kind:</span> <span class="text-muted">project</span>
-<span class="text-accent-blue">name:</span> <span class="text-muted">Immich</span>
-<span class="text-accent-blue">category:</span> <span class="text-muted">media</span>
+<span class="text-accent-blue">name:</span> <span class="text-muted">CrewAI</span>
+<span class="text-accent-blue">category:</span> <span class="text-muted">agents</span>
 <span class="text-accent-blue">repoUrl:</span>
-  <span class="text-muted">https://github.com/immich-app/immich</span></code></pre>
+  <span class="text-muted">https://github.com/crewAIInc/crewAI</span></code></pre>
     </div>
 
     <div class="border-b border-border p-5 lg:border-b-0 lg:border-r">
@@ -54,7 +78,7 @@ const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
     <div class="p-5">
       <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-orange">●</span>Generated output</p>
       <div class="mt-4 grid grid-cols-2 gap-2 font-mono text-[11px] text-muted">
-        <span class="rounded-md border border-border bg-surface px-3 py-3">/projects/immich</span>
+        <span class="rounded-md border border-border bg-surface px-3 py-3">/projects/crewai</span>
         <span class="rounded-md border border-border bg-surface px-3 py-3">records.index.json</span>
         <span class="rounded-md border border-border bg-surface px-3 py-3">sitemap.xml</span>
         <span class="rounded-md border border-border bg-surface px-3 py-3">llms-full.txt</span>
@@ -62,18 +86,6 @@ const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
       <p class="mt-4 text-xs leading-relaxed text-subtle">One reviewed record, ready for people, search engines, and AI systems.</p>
     </div>
   </div>
-
-  <div class="mx-auto mt-4 grid max-w-5xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4" aria-label="Lighthouse scores">
-    {scores.map((score) => (
-      <div class="bg-surface px-3 py-3 text-left sm:text-center">
-        <strong class="font-mono text-sm text-accent-green">100</strong>
-        <span class="ml-2 text-[11px] text-muted sm:ml-1">{score}</span>
-      </div>
-    ))}
-  </div>
-  <p class="mx-auto mt-3 max-w-3xl text-[11px] leading-relaxed text-subtle">
-    Measured on this landing page’s production build. Custom content and third-party integrations can affect individual scores.
-  </p>
 
   <div class="mt-10 flex items-center justify-center">
     <div class="flex max-w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-2.5 font-mono text-sm">

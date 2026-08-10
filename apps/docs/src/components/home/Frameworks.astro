@@ -1,4 +1,6 @@
 ---
+import SectionHeader from './SectionHeader.astro';
+
 // Honest framework support matrix.
 // Audit finding (public-claim-matrix.md §A): the previous version displayed
 // 8 framework logos at the same status. Reality: only Astro is supported
@@ -21,18 +23,12 @@ const packages = [
 ---
 
 <section id="architecture" class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="frameworks-title">
-  <p class="text-center text-xs font-semibold uppercase tracking-widest text-subtle">
-    Architecture and status
-  </p>
-  <h2
-    id="frameworks-title"
-    class="mt-3 text-balance text-center text-2xl font-bold tracking-tight text-fg sm:text-3xl"
-  >
-    Headless lifecycle. Replaceable frontend.
-  </h2>
-  <p class="mx-auto mt-3 max-w-2xl text-center text-sm text-muted">
-    Core owns the source model and generated data. UI owns framework-neutral primitives. An adapter renders the site. Your repository keeps the content, brand, and editorial rules.
-  </p>
+  <SectionHeader
+    eyebrow="Architecture and status"
+    title="Headless lifecycle. Replaceable frontend."
+    titleId="frameworks-title"
+    lede="Core owns the source model and generated data. UI owns framework-neutral primitives. An adapter renders the site. Your repository keeps the content, brand, and editorial rules."
+  />
 
   <div class="mt-12 grid gap-6 md:grid-cols-3">
     <div class="rounded-xl border border-border bg-card p-6">

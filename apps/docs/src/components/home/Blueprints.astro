@@ -1,4 +1,12 @@
 ---
+import SectionHeader from './SectionHeader.astro';
+
+const tagStyles: Record<string, string> = {
+  'Available today': 'border-accent-green/40 bg-accent-green/10 text-accent-green',
+  'Schema available': 'border-accent-blue/40 bg-accent-blue/10 text-accent-blue',
+  'Import path': 'border-accent-orange/40 bg-accent-orange/10 text-accent-orange',
+};
+
 const blueprints = [
   {
     name: 'Project directories',
@@ -32,18 +40,13 @@ const blueprints = [
 ---
 
 <section class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="blueprints-title">
-  <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
-    What Grove can power
-  </p>
-  <h2
-    id="blueprints-title"
-    class="mt-5 max-w-2xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
-  >
-    For collections that need to stay useful.
-  </h2>
-  <p class="mt-5 max-w-2xl text-base leading-relaxed text-muted">
-    Grove is not only a directory template. Its record model supports three typed blueprints; the polished default frontend is available for project directories today.
-  </p>
+  <SectionHeader
+    eyebrow="What Grove can power"
+    title="For collections that need to stay useful."
+    titleId="blueprints-title"
+    lede="Grove is not only a directory template. Its record model supports three typed blueprints; the polished default frontend is available for project directories today."
+    maxWidth="narrow"
+  />
 
   <div class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {
@@ -78,7 +81,7 @@ const blueprints = [
               )}
             </svg>
           </div>
-          <span class="mt-5 text-xs font-medium uppercase tracking-wide text-subtle">
+          <span class={`mt-5 inline-flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium uppercase tracking-wide ${tagStyles[b.tag] ?? 'border-border bg-surface text-subtle'}`}>
             {b.tag}
           </span>
           <h3 class="mt-1.5 text-base font-semibold text-fg">{b.name}</h3>

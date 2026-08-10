@@ -1,4 +1,6 @@
 ---
+import SectionHeader from './SectionHeader.astro';
+
 const outputs = [
   { label: 'Website', note: 'Static pages', class: 'left-1/2 top-0 -translate-x-1/2', color: 'text-accent-cyan' },
   { label: 'Search', note: 'sitemap.xml', class: 'left-[3%] top-[42%]', color: 'text-accent-green' },
@@ -12,13 +14,13 @@ const outputs = [
 
   <div class="relative mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-20">
     <div>
-      <p class="text-xs font-semibold uppercase tracking-widest text-subtle">One source, multiple outputs</p>
-      <h2 id="integrations-title" class="mt-5 max-w-xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl">
-        Maintain one record. Serve people and machines.
-      </h2>
-      <p class="mt-5 max-w-xl text-base leading-relaxed text-muted">
-        Grove generates a website for people, crawlable pages and a sitemap for search engines, structured JSON for other tools, and predictable context files for AI systems.
-      </p>
+      <SectionHeader
+        eyebrow="One source, multiple outputs"
+        title="Maintain one record. Serve people and machines."
+        titleId="integrations-title"
+        lede="Grove generates a website for people, crawlable pages and a sitemap for search engines, structured JSON for other tools, and predictable context files for AI systems."
+        maxWidth="narrow"
+      />
       <p class="mt-5 max-w-xl text-sm leading-relaxed text-subtle">
         It does not promise rankings or AI visibility. It produces stable, inspectable formats from the same reviewed source.
       </p>
