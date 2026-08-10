@@ -6,8 +6,8 @@ import siteConfig from "@grove/generated/site-config.json";
 import TaxonomyList from "../../components/TaxonomyList.astro";
 
 export function getStaticPaths() {
-  const stacks = siteConfig.taxonomy?.stacks ?? [];
-  return stacks.map(({ id, name }) => ({
+  const categories = siteConfig.taxonomy?.categories ?? [];
+  return categories.map(({ id, name }) => ({
     params: { name: id },
     props: { displayName: name },
   }));
@@ -16,7 +16,9 @@ export function getStaticPaths() {
 const { displayName } = Astro.props;
 const name = Astro.params.name;
 const indexRecords = (indexPayload as { records: unknown[] }).records as never;
-const stackRecords = filterRecords(indexRecords, { stacks: [name] }) as Array<{
+const categoryRecords = filterRecords(indexRecords, {
+  categories: [name],
+}) as Array<{
   slug: string;
   name?: string;
   title?: string;
@@ -27,14 +29,14 @@ const stackRecords = filterRecords(indexRecords, { stacks: [name] }) as Array<{
 
 <BaseLayout
   title={`${displayName} projects`}
-  description={`Open-source projects built with ${displayName}.`}
+  description={`Open-source projects in the ${displayName} category.`}
   site={siteConfig}
 >
   <TaxonomyList
     name={name}
-    eyebrow="Stack"
+    eyebrow="Category"
     displayName={displayName}
-    lede={`Browse open-source projects in this directory built with ${displayName}.`}
-    records={stackRecords}
+    lede={`Browse open-source projects in this directory in the ${displayName} category.`}
+    records={categoryRecords}
   />
 </BaseLayout>
