@@ -186,7 +186,9 @@ function configuredFacets(site?: DirectorySiteConfig) {
 
 export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: DirectorySiteConfig) {
   const filters = filtersFromSearchParams(searchParams);
-  const rawFacets = buildFacets(items);
+  const rawFacets = buildFacets(items, {
+    curatedTagIds: site.taxonomy?.topics?.map((t) => t.id),
+  });
   const enabled = configuredFacets(site);
   const facets = {
     stacks: enabled.has("stacks") ? rawFacets.stacks.map((option) => ({ ...option, label: taxonomyLabel("stacks", option.value) })) : [],

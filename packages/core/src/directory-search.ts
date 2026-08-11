@@ -400,7 +400,13 @@ export function removeFilter(
  * Build the full list of facet values from the items array, preserving
  * a sensible order (frequency desc, then alphabetical for ties).
  */
-export function buildFacets(items: IndexRecord[]) {
+export function buildFacets(
+  items: IndexRecord[],
+  options?: { curatedTagIds?: string[] },
+) {
+  const curatedTagIds = options?.curatedTagIds;
+  const allowTag = (tag: string) =>
+    !curatedTagIds || curatedTagIds.length === 0 || curatedTagIds.includes(tag);
   const counts = {
     stack: new Map<string, number>(),
     platform: new Map<string, number>(),
@@ -420,7 +426,9 @@ export function buildFacets(items: IndexRecord[]) {
       if (license) counts.license.set(license, (counts.license.get(license) ?? 0) + 1);
     }
     counts.category.set(a.category, (counts.category.get(a.category) ?? 0) + 1);
-    for (const tag of a.tags) counts.tag.set(tag, (counts.tag.get(tag) ?? 0) + 1);
+    for (const tag of a.tags) {
+      if (allowTag(tag)) counts.tag.set(tag, (counts.tag.get(tag) ?? 0) + 1);
+    }
     for (const l of a.curation?.labels ?? []) counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
   }
   const sortByCountThenName = (m: Map<string, number>) =>
