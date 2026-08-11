@@ -2,26 +2,19 @@
 /**
  * Home page — generic.
  *
- * Layout (top to bottom):
- *   - LandingHero — centered headline + BETA tag + search bar +
- *     stats line + primary CTA.
- *   - Featured cards — large-format ProjectCards in the
- *     "Trending now", "Recently added", and "Established" lenses
- *     (2-column grid).
- *   - Stack grid — chips per stack with counts.
- *   - Category grid — links to category list pages.
- *   - Collection teaser.
- *   - Contributors + final CTA.
+ * Mirrors the openapps structure: Hero → WhyThisExists → three
+ * lens sections (hot / new / mature) → StackGrid → CategoryGrid →
+ * ContributorsGrid → OriginalCollection.
  *
  * All data derives from `data/generated/records.{index,full}.json`
  * and `data/generated/site-config.json`. Nothing here is hardcoded
- * to a specific blueprint — section copy uses singular/plural labels
- * from `itemLabel()`/`itemLabelPlural()`.
+ * to a specific blueprint — section copy uses singular/plural
+ * labels from `itemLabel()`/`itemLabelPlural()`.
  */
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import LandingHero from "@grove-dev/astro/components/LandingHero.astro";
-import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
+import Hero from "@grove-dev/astro/components/Hero.astro";
 import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
+import RecordSection from "@grove-dev/astro/components/RecordSection.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
 import ContributorsGrid from "@grove-dev/astro/components/ContributorsGrid.astro";
@@ -32,7 +25,6 @@ import CollectionTeaser from "@grove-dev/astro/components/CollectionTeaser.astro
 import {
   getHomePageModel,
   getCollectionTeaserModel,
-  getCollectionIndexModel,
   recordsToCollectionEntries,
   loadCollections,
 } from "@grove-dev/astro/server";
@@ -42,139 +34,89 @@ import siteConfig from "@grove/generated/site-config.json";
 const home = getHomePageModel(siteConfig);
 const { slug, itemSingular, itemPlural } = home;
 
-// Featured lens slices — top 2 per lens for the large-format grid.
-const hotList = home.hot.slice(0, 2);
-const newList = home.recentlyAdded.slice(0, 2);
-const matureList = home.established.slice(0, 2);
+// ── Lens sectioning (Hot / New / Mature) ────────────────────────
+const hotList = home.hot;
+const newList = home.recentlyAdded;
+const matureList = home.established;
 
 const { stacks, categories } = home;
 
 const { contributors, stats, title, description } = home;
 
-// Featured collections teaser — exclude empty collections (count 0)
-// so the homepage never surfaces a "0 items" card that looks broken.
+// ── Featured collections teaser ─────────────────────────────────
 const allCollections = await loadCollections(process.cwd());
 const teaserEntries = recordsToCollectionEntries(
   (records as { records: unknown[] }).records as never,
   siteConfig,
 );
-const allTeased = getCollectionIndexModel(allCollections, teaserEntries);
-const nonEmptyCollections = allTeased.collections.filter((c) => c.count > 0);
-const collectionTeaser = getCollectionTeaserModel(
-  allCollections.filter((c) =>
-    nonEmptyCollections.some((nc) => nc.slug === c.slug),
-  ),
-  teaserEntries,
-  3,
-);
-
-const hrefFor = (r: { slug: string }) => `/${slug}/${r.slug}`;
-
-// Trust-stats row in the hero.
-const statsLine = [
-  { value: stats.apps.toLocaleString("en-US"), label: `${itemPlural} indexed` },
-  { value: stats.categories.toLocaleString("en-US"), label: "categories" },
-  { value: stats.stacks.toLocaleString("en-US"), label: "stacks" },
-  {
-    value:
-      stats.stars >= 1_000_000
-        ? `${(stats.stars / 1_000_000).toFixed(1)}M`
-        : stats.stars >= 1_000
-          ? `${(stats.stars / 1_000).toFixed(stats.stars >= 10_000 ? 0 : 1)}k`
-          : stats.stars.toLocaleString("en-US"),
-    label: "stars",
-  },
-];
+const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries, 3);
 ---
 
 <BaseLayout title={title} description={description} site={siteConfig}>
-  <LandingHero
+  <Hero
+    name={`Find ${itemPlural} you can actually`}
+    tagline="run, study, and contribute to."
+    description={description}
     eyebrow={`A directory of real curated ${itemPlural}`}
     eyebrowBadge="Beta"
-    headline={`Find ${itemPlural} you can actually run, study, and contribute to.`}
-    lede="A searchable directory of real open-source applications, organized by stack, category, platform, activity, and maturity."
-    searchHref={`/${slug}`}
-    searchPlaceholder={`Search ${itemPlural}, stacks, categories, or platforms…`}
-    stats={statsLine}
-    primaryCta={{
-      label: `Browse ${itemPlural}`,
-      href: `/${slug}`,
+    stats={{
+      totalApps: stats.apps,
+      totalCategories: stats.categories,
+      totalStacks: stats.stacks,
+      totalOwners: stats.owners,
+      totalStars: stats.stars,
+      originalRepo: stats.originalRepo,
     }}
+    itemsLabel={itemPlural}
+    itemLabel={itemSingular}
+    searchHref={`/${slug}`}
+    searchPlaceholder={`Search ${itemPlural}, stacks, or categories...`}
+    quickFilters={[
+      { label: `Trending ${itemPlural}`, href: `/${slug}?label=hot` },
+      { label: "Recently added", href: `/${slug}?sort=recently-added` },
+      { label: "Established", href: `/${slug}?label=mature` },
+    ]}
+    ctas={[
+      { label: `Browse ${itemPlural}`, href: `/${slug}`, variant: "primary" },
+      { label: `Submit ${itemSingular}`, href: "/submit", variant: "outline" },
+    ]}
   />
 
-  {hotList.length > 0 && (
-    <section class="mx-auto max-w-5xl px-6 py-12 sm:py-16" aria-labelledby="trending-title">
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-subtle">Trending</p>
-          <h2 id="trending-title" class="mt-2 text-2xl font-bold tracking-tight text-fg sm:text-3xl">
-            Trending now
-          </h2>
-        </div>
-        <a
-          href={`/${slug}?label=hot`}
-          class="shrink-0 text-sm font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
-        >
-          View all trending →
-        </a>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2">
-        {hotList.map((record) => (
-          <ProjectCard record={record} href={hrefFor(record)} />
-        ))}
-      </div>
-    </section>
-  )}
-
-  {newList.length > 0 && (
-    <section class="mx-auto max-w-5xl px-6 py-12 sm:py-16" aria-labelledby="new-title">
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-subtle">New</p>
-          <h2 id="new-title" class="mt-2 text-2xl font-bold tracking-tight text-fg sm:text-3xl">
-            Recently added
-          </h2>
-        </div>
-        <a
-          href={`/${slug}?sort=recently-added`}
-          class="shrink-0 text-sm font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
-        >
-          View all recently added →
-        </a>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2">
-        {newList.map((record) => (
-          <ProjectCard record={record} href={hrefFor(record)} />
-        ))}
-      </div>
-    </section>
-  )}
-
-  {matureList.length > 0 && (
-    <section class="mx-auto max-w-5xl px-6 py-12 sm:py-16" aria-labelledby="mature-title">
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-widest text-subtle">Established</p>
-          <h2 id="mature-title" class="mt-2 text-2xl font-bold tracking-tight text-fg sm:text-3xl">
-            Established
-          </h2>
-        </div>
-        <a
-          href={`/${slug}?label=mature`}
-          class="shrink-0 text-sm font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
-        >
-          View all established →
-        </a>
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2">
-        {matureList.map((record) => (
-          <ProjectCard record={record} href={hrefFor(record)} />
-        ))}
-      </div>
-    </section>
-  )}
-
   <WhyThisExists />
+
+  <RecordSection
+    id="hot"
+    title="Trending now"
+    description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} gaining stars, activity, or attention recently.`}
+    eyebrow="Hot"
+    items={hotList}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
+    viewAllHref={`/${slug}?label=hot`}
+    viewAllLabel={`View all trending ${itemPlural}`}
+  />
+
+  <RecordSection
+    id="new"
+    title="Recently added"
+    description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} added to the directory in the last few weeks.`}
+    eyebrow="New"
+    items={newList}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
+    viewAllHref={`/${slug}?sort=recently-added`}
+    viewAllLabel={`View all recently added`}
+  />
+
+  <RecordSection
+    id="mature"
+    title="Established"
+    description={`Long-running curated ${itemPlural} with strong history, active maintainers, and real-world usage.`}
+    eyebrow="Mature"
+    items={matureList}
+    hrefFor={(r) => `/${slug}/${r.slug}`}
+    viewAllHref={`/${slug}?label=mature`}
+    viewAllLabel={`View all established`}
+  />
+
   <StackGrid stacks={stacks} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
   <CollectionTeaser model={collectionTeaser} />
   <CategoryGrid categories={categories} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
@@ -182,7 +124,7 @@ const statsLine = [
   <ContributorsGrid
     contributors={contributors}
     total={contributors.length || undefined}
-    viewAllHref="/contributors"
+    viewAllHref={`/contributors`}
     viewAllLabel="Meet the community"
   />
 
