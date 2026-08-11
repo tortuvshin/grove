@@ -4,11 +4,17 @@ interface Props {
   existingFullNames: string[];
   repoUrl: string;
   fields: { category: boolean; stack: boolean; platforms: boolean; tags: boolean };
+  /** Taxonomy ids for client-side validation. */
+  taxonomy?: {
+    categoryIds?: string[];
+    stackIds?: string[];
+    platformIds?: string[];
+  };
 }
-const { existingSlugs, existingFullNames, repoUrl, fields } = Astro.props;
+const { existingSlugs, existingFullNames, repoUrl, fields, taxonomy } = Astro.props;
 ---
 
-<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields }}>
+<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields, taxonomy }}>
     // @ts-nocheck
     const $ = (selector) => document.querySelector(selector);
     const inputs = {
@@ -24,6 +30,9 @@ const { existingSlugs, existingFullNames, repoUrl, fields } = Astro.props;
     const openPrLink = $("#open-pr-link");
     const slugSet = new Set(existingSlugs);
     const repoSet = new Set(existingFullNames);
+    const categoryIds = new Set(taxonomy?.categoryIds ?? []);
+    const stackIds = new Set(taxonomy?.stackIds ?? []);
+    const platformIds = new Set(taxonomy?.platformIds ?? []);
     let repository = null;
 
     const slugify = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -80,10 +89,45 @@ const { existingSlugs, existingFullNames, repoUrl, fields } = Astro.props;
         "",
       ].join("\n");
     };
+    const validationIssues = () => {
+      const issues = [];
+      if (slugSet.has(slugify(inputs.slug.value))) {
+        issues.push("A record with that slug already exists — update the existing one instead of opening a duplicate PR.");
+      }
+      if (inputs.description.value.trim().length < 40) {
+        issues.push("Description must be at least 40 characters.");
+      }
+      if (fields.category && (!inputs.category.value || inputs.category.value === "uncategorized" || (categoryIds.size > 0 && !categoryIds.has(inputs.category.value)))) {
+        issues.push("Choose a category from the taxonomy.");
+      }
+      if (fields.stack && (!inputs.stack.value || (stackIds.size > 0 && !stackIds.has(inputs.stack.value)))) {
+        issues.push("Choose a primary stack from the taxonomy.");
+      }
+      if (fields.platforms && selectedPlatforms().length === 0) {
+        issues.push("Select at least one platform.");
+      } else if (fields.platforms && platformIds.size > 0) {
+        const bad = selectedPlatforms().find((p) => !platformIds.has(p));
+        if (bad) issues.push(`Platform "${bad}" is not in the taxonomy.`);
+      }
+      return issues;
+    };
     const refresh = () => {
       const yaml = generateYaml();
       preview.textContent = yaml || "Paste a GitHub URL to generate a draft.";
-      if (!yaml) return;
+      if (!yaml) {
+        openPrLink.classList.add("pointer-events-none", "opacity-50");
+        copyButton.disabled = true;
+        copyButton.classList.add("pointer-events-none", "opacity-50");
+        return;
+      }
+      const issues = validationIssues();
+      if (issues.length > 0) {
+        setStatus(issues[0], "error");
+        openPrLink.classList.add("pointer-events-none", "opacity-50");
+        copyButton.disabled = true;
+        copyButton.classList.add("pointer-events-none", "opacity-50");
+        return;
+      }
       const params = new URLSearchParams({ filename: `data/records/${slugify(inputs.slug.value)}.yml`, value: yaml });
       openPrLink.href = `${repoUrl}/new/main?${params}`;
       openPrLink.classList.remove("pointer-events-none", "opacity-50");
