@@ -439,6 +439,11 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     tags,
     healthLabel,
     contentHtml: isProject ? getContentHtml(recordSlug) : null,
+    // Curated summary (Open Apps-written) takes priority over the
+    // raw `description` (typically copied from GitHub). Fall back to
+    // `description` when the curator has not written a summary yet.
+    summary: (record.summary && record.summary.trim()) || record.description || "",
+    sourceDescription: record.sourceDescription ?? record.description ?? "",
     monthlyCommits,
     maxMonthlyCommits: Math.max(1, ...monthlyCommits.map((item) => item.commits)),
     contributionSignals,

@@ -36,6 +36,8 @@ const {
   initials,
   curationLabels,
   activityBadge,
+  summary,
+  sourceDescription,
   category,
   description,
   name,
@@ -123,9 +125,15 @@ const {
       </p>
     )}
 
-    {description && (
+    {summary && (
       <p class="m-0 mt-3 max-w-[68ch] text-base leading-relaxed text-ink-700 dark:text-ink-200">
-        {description}
+        {summary}
+      </p>
+    )}
+    {sourceDescription && sourceDescription !== summary && (
+      <p class="m-0 mt-2 max-w-[68ch] text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+        <span class="text-2xs font-semibold uppercase tracking-wider">From the project's README: </span>
+        {sourceDescription}
       </p>
     )}
 

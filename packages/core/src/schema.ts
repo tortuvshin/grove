@@ -300,6 +300,21 @@ const curationBlockSchema = z
 const resourceBaseSchema = z.object({
   slug: z.string().min(1),
   description: z.string().default(""),
+  /**
+   * Open Apps-written summary, surfaced as the lead paragraph on the
+   * detail page above the original (GitHub-sourced) description.
+   * Optional so existing records that only carry `description` keep
+   * rendering. When present, the detail page renders `summary` first
+   * and `description` as the secondary "From the project's README"
+   * block.
+   */
+  summary: z.string().optional(),
+  /**
+   * The original (GitHub-sourced) project description, preserved
+   * separately so curators can write their own `summary` without
+   * overwriting what GitHub says the project is.
+   */
+  sourceDescription: z.string().optional(),
   category: z.string().min(1).default("uncategorized"),
   tags: z.array(z.string()).default([]),
   links: linksSchema,
@@ -783,6 +798,12 @@ export interface IndexBase {
   tags: string[];
   links: Links;
   description: string;
+  /** Open Apps-written summary, surfaced as the lead paragraph on the
+   *  detail page above the original (GitHub-sourced) description. */
+  summary?: string | undefined;
+  /** The original GitHub description, preserved separately so curators
+   *  can write their own `summary` without overwriting it. */
+  sourceDescription?: string | undefined;
   content?: string | undefined;
   curation: ProjectRecord["curation"];
   licenses: string[];
@@ -883,6 +904,8 @@ export function toIndexRecord(record: Resource): IndexRecord {
     content: record.content,
     curation: record.curation,
     licenses: record.kind === "project" ? record.licenses ?? [] : [],
+    summary: record.summary,
+    sourceDescription: record.sourceDescription,
   };
 
   if (record.kind === "project") {
