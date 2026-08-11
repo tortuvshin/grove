@@ -38,7 +38,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
-import { createHighlighter } from "shiki";
+import { getSingletonHighlighter } from "shiki";
 import { prettySlug } from "../lib/display.js";
 import {
   readContentFile,
@@ -544,6 +544,16 @@ const headingIds = new Map<string, number>();
 // load takes a few hundred ms, so we want to amortise across all
 // records in a build. The list of supported languages is curated
 // (not `ALL`) so the build doesn't pull Shiki's full grammar pack.
+//
+// We additionally stash the in-flight promise on `globalThis` under
+// a `Symbol.for` key so Vite HMR — which re-evaluates this module
+// on every dev-server save — does not throw away the cached
+// highlighter and trigger Shiki's "X instances have been created"
+// warning. The shared promise is safe to await from any caller; once
+// it resolves it stays resolved. The previous engine is released
+// exactly once per HMR boundary via `import.meta.hot.dispose`.
+const SHIKI_HIGHLIGHTER = Symbol.for("grove.shiki.highlighter");
+type GlobalWithShiki = typeof globalThis & { [SHIKI_HIGHLIGHTER]?: Promise<Awaited<ReturnType<typeof getSingletonHighlighter>>> };
 const SUPPORTED_LANGS = [
   "bash", "sh", "shell", "console",
   "python", "py",
@@ -557,10 +567,20 @@ const SUPPORTED_LANGS = [
   "c", "cpp", "csharp", "objective-c",
   "xml", "ini", "properties",
 ];
-const highlighter = await createHighlighter({
+const globalAny = globalThis as GlobalWithShiki;
+const highlighter = await (globalAny[SHIKI_HIGHLIGHTER] ??= getSingletonHighlighter({
   themes: ["github-light", "github-dark-default"],
   langs: SUPPORTED_LANGS,
-});
+}));
+
+// Release the previous engine's WASM heap on HMR. Without this the
+// old engine is unreachable but not disposed, which is the leak
+// the Shiki warning was originally hinting at.
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    globalAny[SHIKI_HIGHLIGHTER]?.then((h) => h.dispose()).catch(() => {});
+  });
+}
 
 /**
  * Highlight a fenced code block with Shiki. Returns the Shiki HTML

@@ -215,4 +215,21 @@ describe("SEO + page-structure parity", () => {
       });
     }
   });
+
+  // Regression guard for the Shiki highlighter. /projects/open-webui/
+  // contains a `bash` fenced code block; the rendered HTML must
+  // contain Shiki's dual-theme marker (`shiki-themes`). If
+  // `highlighter` is ever left as a Promise (no `await`) the
+  // render loop throws inside a try/catch and the block silently
+  // disappears — the Lighthouse audit test still passes because
+  // it checks accessibility scores, not content presence. This
+  // assertion catches the regression at the unit-test level.
+  describe("record detail pages render Shiki dual-theme code blocks", () => {
+    it("open-webui emits shiki-themes spans", () => {
+      const html = readFileSync(resolve(dist, "projects/open-webui/index.html"), "utf8");
+      expect(html).toContain("shiki-themes");
+      expect(html).toMatch(/--shiki-light:#[0-9A-F]{6}/);
+      expect(html).toMatch(/--shiki-dark:#[0-9A-F]{6}/);
+    });
+  });
 });
