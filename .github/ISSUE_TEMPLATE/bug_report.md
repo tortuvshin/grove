@@ -18,7 +18,7 @@ If you're reporting a security issue, see SECURITY.md instead.
 
 ```bash
 # Smallest possible command(s) that hit the bug.
-grove new my-space --framework astro
+grove init my-space --framework astro
 cd my-space
 # ...whatever you ran after
 ```

@@ -77,7 +77,12 @@ export interface CollectionEntry {
   homepageHref?: string;
   stack?: string;
   platform?: string[];
+  /** Legacy single-value license (GitHub-synced SPDX id). Kept for
+   *  backward compatibility with v0.4 records that only exposed one
+   *  license. Prefer `licenses` for new code paths. */
   license?: string;
+  /** Full license array (curated SPDX ids + GitHub fallback). */
+  licenses?: string[];
   status?: string;
   stars?: number;
   forks?: number;
@@ -103,8 +108,16 @@ export function filterEntries(
       const cats = entry.categories ?? [];
       if (!query.categories.some((c) => cats.includes(c))) return false;
     }
-    if (query.licenses?.length && !query.licenses.includes(entry.license ?? "")) {
-      return false;
+    if (query.licenses?.length) {
+      // Combine the legacy `entry.license` and the new `entry.licenses`
+      // array into a single normalized set, so a curated record (whose
+      // SPDX id lives in `licenses`) and a GitHub-only record (whose
+      // id lives in `license`) both match the same query.
+      const wanted = query.licenses.map((l) => l.toLowerCase());
+      const candidates = new Set<string>();
+      if (entry.license) candidates.add(entry.license.toLowerCase());
+      for (const l of entry.licenses ?? []) candidates.add(l.toLowerCase());
+      if (!wanted.some((w) => candidates.has(w))) return false;
     }
     if (query.kinds?.length && !query.kinds.includes(entry.status ?? "")) {
       return false;

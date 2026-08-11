@@ -1,0 +1,168 @@
+---
+/**
+ * LandingHero — the canonical directory-landing hero.
+ *
+ * Layout (top to bottom):
+ *   - Eyebrow with optional badge (e.g. "BETA")
+ *   - Headline (one or two lines, large)
+ *   - Lede paragraph
+ *   - Search bar with a "Search" submit button
+ *   - Trust-stats row (counts separated by `·`)
+ *   - Primary CTA
+ *
+ * Uses the package's design-system tokens plus the standard `dark:`
+ * variant so the hero honors the user's theme preference and
+ * matches the rest of the page automatically.
+ */
+import Container from "../layouts/Container.astro";
+
+interface Stat {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  /** Eyebrow text rendered above the title. */
+  eyebrow?: string;
+  /** Optional badge rendered next to the eyebrow (e.g. "BETA"). */
+  eyebrowBadge?: string;
+  /** Headline — one or two lines. Rendered as a single `<h1>`. */
+  headline: string;
+  /** Lede paragraph under the headline. */
+  lede?: string;
+  /** Search form target — typically the directory list page. */
+  searchHref?: string;
+  /** Search input placeholder. */
+  searchPlaceholder?: string;
+  /** Trust stats shown under the search bar. */
+  stats?: Stat[];
+  /** Primary CTA. */
+  primaryCta?: { label: string; href: string; external?: boolean };
+}
+
+const {
+  eyebrow = "A directory of real curated apps",
+  eyebrowBadge,
+  headline,
+  lede,
+  searchHref = "/",
+  searchPlaceholder = "Search apps, stacks, categories, or platforms...",
+  stats = [],
+  primaryCta,
+} = Astro.props;
+
+const normalisedStats: Stat[] = stats.filter((s) => s.value);
+---
+
+<section
+  class="border-b border-ink-200 bg-background py-16 text-ink-900 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100 sm:py-24"
+>
+  <Container>
+    <div class="mx-auto max-w-4xl text-center">
+      <p class="m-0 flex items-center justify-center gap-2 text-sm text-ink-500 dark:text-ink-400">
+        {eyebrow && (
+          <span aria-hidden="true" class="inline-block size-1.5 rounded-full bg-ink-400 dark:bg-ink-500"></span>
+        )}
+        <span>{eyebrow}</span>
+        {eyebrowBadge && (
+          <span
+            class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300"
+            aria-label={eyebrowBadge}
+          >
+            {eyebrowBadge}
+          </span>
+        )}
+      </p>
+
+      <h1 class="m-0 mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-ink-900 dark:text-ink-100 sm:text-6xl md:text-7xl">
+        {headline}
+      </h1>
+
+      {lede && (
+        <p class="m-0 mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-ink-500 dark:text-ink-400">
+          {lede}
+        </p>
+      )}
+
+      {searchHref && (
+        <form
+          class="mx-auto mt-10 flex max-w-3xl items-center gap-2 rounded-full border border-ink-200 bg-background px-2 py-2 transition-colors focus-within:border-ink-400 focus-within:bg-ink-50 dark:border-ink-800 dark:bg-ink-900 dark:focus-within:border-ink-700 dark:focus-within:bg-ink-800"
+          role="search"
+          action={searchHref}
+          method="get"
+        >
+          <label class="flex flex-1 items-center gap-2 pl-3">
+            <span class="sr-only">Search the directory</span>
+            <svg
+              viewBox="0 0 16 16"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              class="shrink-0 text-ink-400 dark:text-ink-500"
+              fill="currentColor"
+            >
+              <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
+            </svg>
+            <input
+              type="search"
+              name="q"
+              placeholder={searchPlaceholder}
+              class="h-10 w-full bg-transparent text-base text-ink-900 outline-none placeholder:text-ink-400 dark:text-ink-100 dark:placeholder:text-ink-500"
+            />
+          </label>
+          <button
+            type="submit"
+            class="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-ink-900 px-5 text-sm font-medium text-white transition-colors hover:bg-ink-800 dark:bg-white dark:text-ink-900 dark:hover:bg-ink-100"
+          >
+            Search
+          </button>
+        </form>
+      )}
+
+      {normalisedStats.length > 0 && (
+        <p
+          class="m-0 mt-6 text-sm text-ink-500 dark:text-ink-400"
+          aria-label="Directory at a glance"
+        >
+          {normalisedStats.map((s, i) => (
+            <>
+              <span>
+                <span class="font-semibold text-ink-700 dark:text-ink-200">{s.value}</span>
+                {s.label && <span> {s.label}</span>}
+              </span>
+              {i < normalisedStats.length - 1 && (
+                <span aria-hidden="true" class="mx-2 opacity-60">·</span>
+              )}
+            </>
+          ))}
+        </p>
+      )}
+
+      {primaryCta && (
+        <div class="mt-10 flex items-center justify-center">
+          <a
+            href={primaryCta.href}
+            class="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink-900 px-6 text-base font-medium text-white transition-colors hover:bg-ink-800 dark:bg-white dark:text-ink-900 dark:hover:bg-ink-100"
+            {...(primaryCta.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            {primaryCta.label}
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      )}
+    </div>
+  </Container>
+</section>

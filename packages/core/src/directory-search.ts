@@ -213,7 +213,12 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
   const categories = f.categories?.length ? new Set(f.categories) : null;
   const tags = f.tags?.length ? new Set(f.tags) : null;
   const labels = f.labels?.length ? new Set(f.labels) : null;
-  const licenses = f.licenses?.length ? new Set(f.licenses) : null;
+  // License ids are case-insensitive (GitHub emits `MIT`, curated ids
+  // are lowercase). Normalize the filter side too so `?license=MIT`
+  // and `?license=mit` are equivalent.
+  const licenses = f.licenses?.length
+    ? new Set(f.licenses.map((l) => l.toLowerCase()))
+    : null;
   const statuses = f.statuses?.length ? new Set(f.statuses) : null;
 
   return items.filter((a) => {
@@ -290,11 +295,24 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
       // Curated `licenses` array takes precedence; fall back to the
       // GitHub sync's `github.license.spdx_id` (recorded as the
       // raw spdx_id string by `directory-repo.ts`).
+      //
+      // SPDX normalization: GitHub emits `MIT`, curated ids are
+      // lowercase (`mit`). Both sides are folded to lowercase before
+      // comparison so the filter matches regardless of casing.
+      //
+      // Curated-empty vs curated-undefined: an explicit `licenses: []`
+      // is treated as a curator opt-out (no GitHub fallback), while
+      // a missing field falls back to GitHub. This matches the
+      // `[]`-suppresses-fallback semantic tested below.
       const curated = (a.licenses ?? []) as string[];
-      const synced = a.github?.license ?? "";
-      const candidates = new Set<string>(
-        curated.length ? curated : synced ? [synced] : [],
-      );
+      const hasCurated = Array.isArray(a.licenses);
+      const synced = (a.github?.license ?? "").toLowerCase();
+      const candidates = new Set<string>();
+      if (hasCurated) {
+        for (const l of curated) candidates.add(l.toLowerCase());
+      } else if (synced) {
+        candidates.add(synced);
+      }
       if (candidates.size === 0) return false;
       if (![...candidates].some((l) => licenses.has(l))) return false;
     }
@@ -479,8 +497,18 @@ export function buildFacets(
   }
   for (const a of licenseScoped) {
     if (a.kind === "project") {
-      const license = a.github?.license;
-      if (license) counts.license.set(license, (counts.license.get(license) ?? 0) + 1);
+      // Consult the curated `licenses` array first (lowercased for
+      // facet-key consistency), then fall back to the GitHub-synced
+      // SPDX id. Mirrors the filterRecords branch so facet counts
+      // and filter results can never disagree.
+      const curated = ((a.licenses ?? []) as string[])
+        .map((l) => l.toLowerCase())
+        .filter(Boolean);
+      const synced = (a.github?.license ?? "").toLowerCase();
+      const ids = curated.length ? curated : synced ? [synced] : [];
+      for (const id of ids) {
+        counts.license.set(id, (counts.license.get(id) ?? 0) + 1);
+      }
     }
   }
   // Labels don't have a UI facet yet; keep global counts so the

@@ -67,9 +67,22 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
             .map((record) => record.slug),
         );
 
-        for (const record of filtered) {
-          const node = nodes.get(record.slug) as HTMLElement | undefined;
-          if (node) list.append(node);
+        // Re-append only when the visible order has changed. On every
+        // keystroke / filter change this would otherwise thrash the
+        // DOM order even when the sort + filter result is identical
+        // to the previous run.
+        const currentOrder = [...list.querySelectorAll("[data-record-slug]")].map(
+          (node) => (node as HTMLElement).dataset.recordSlug,
+        );
+        const nextOrder = filtered.map((record) => record.slug);
+        const orderChanged =
+          currentOrder.length !== nextOrder.length ||
+          currentOrder.some((slug, index) => slug !== nextOrder[index]);
+        if (orderChanged) {
+          for (const record of filtered) {
+            const node = nodes.get(record.slug) as HTMLElement | undefined;
+            if (node) list.append(node);
+          }
         }
         for (const [recordSlug, node] of nodes) {
           (node as HTMLElement).hidden = !visible.has(recordSlug);

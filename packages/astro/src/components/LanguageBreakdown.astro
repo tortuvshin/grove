@@ -38,7 +38,11 @@ const segments = languages.slice(0, maxSegments).map(([name, bytes]) => {
     <h3 class="m-0 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
       Code composition
     </h3>
-    <div class="grove-langbreak-bar mt-2 flex h-2 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800">
+    <div
+      class="grove-langbreak-bar mt-2 flex h-2 w-full overflow-hidden rounded-full bg-ink-100 dark:bg-ink-800"
+      role="img"
+      aria-label={`Code composition: ${segments.map((s) => `${s.name} ${s.pct}%`).join(', ')}`}
+    >
       {segments.map((s) => (
         <span
           class="grove-langbreak-seg h-full"

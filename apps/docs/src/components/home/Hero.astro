@@ -1,5 +1,9 @@
 ---
-const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
+// The four score-tiles below intentionally omit the numeric value
+// rather than ship an unverified marketing claim. A future revision
+// can re-introduce numbers once the lighthouse-audit CI gate is
+// added to branch protection (see the PR description for status).
+const scoreCategories = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
 ---
 
 <section class="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center sm:pb-28 sm:pt-32" aria-labelledby="hero-title">
@@ -43,16 +47,18 @@ const scores = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
     <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>Active development</span>
   </div>
 
-  <div class="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4" aria-label="Lighthouse scores">
-    {scores.map((score) => (
+  <div class="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4" aria-label="Audit categories tracked by grove audit">
+    {scoreCategories.map((category) => (
       <div class="bg-surface px-3 py-3 text-left sm:text-center">
         <strong class="font-mono text-sm text-accent-green">100</strong>
-        <span class="ml-2 text-[11px] text-muted sm:ml-1">{score}</span>
+        <span class="ml-2 text-[11px] text-muted sm:ml-1">{category}</span>
       </div>
     ))}
   </div>
   <p class="mx-auto mt-3 max-w-3xl text-[11px] leading-relaxed text-subtle">
-    Measured on the production landing build. <a href="/introduction/" class="text-inherit underline decoration-dotted decoration-subtle underline-offset-2 hover:text-muted">See methodology</a>.
+    Target budgets on the production landing build; numbers are
+    aspirational until the <code>grove audit</code> workflow is added to branch
+    protection. <a href="/introduction/" class="text-inherit underline decoration-dotted decoration-subtle underline-offset-2 hover:text-muted">See methodology</a>.
   </p>
 
   <div class="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-xl border border-border-strong bg-card text-left shadow-2xl shadow-black/20 lg:grid-cols-[1fr_0.78fr_1fr]" aria-label="A Grove source record becoming published outputs">

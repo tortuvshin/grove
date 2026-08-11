@@ -18,6 +18,7 @@ interface RawRecord {
   stacks?: string[];
   platforms?: string[];
   license?: string;
+  licenses?: string[];
   visibility?: string;
   /** GitHub stargazers count. Stored on `github.repository.stargazers_count`
    *  in the full payload; read explicitly because the index payload
@@ -81,6 +82,16 @@ export function recordsToCollectionEntries(
       stack: r.stack ?? r.stacks?.[0],
       platform: r.platforms,
       license: r.license,
+      // Pass through the curated `licenses` array so the collection
+      // engine can match both curated SPDX ids and the GitHub fallback.
+      // If only `license` (singular, GitHub-synced) is present, mirror
+      // it into the array so the filter still matches it.
+      licenses:
+        r.licenses && r.licenses.length > 0
+          ? r.licenses
+          : r.license
+            ? [r.license]
+            : undefined,
       status: r.visibility,
       stars: r.stars ?? r.github?.repository?.stargazers_count,
       forks: r.forks ?? r.github?.repository?.forks_count,

@@ -25,11 +25,14 @@ const { name } = Astro.params;
 const collection: Collection = {
   slug: `license-${name}`,
   kind: "generated",
-  title: `${name} licensed apps`,
-  description: `Open source apps released under the ${name} license.`,
-  query: { licenses: [name], excludeStatuses: ["archived"] },
+  title: `${name.toUpperCase()} apps`,
+  description: `Open source apps released under the ${name.toUpperCase()} license.`,
+  // `query.licenses` is matched by `filterEntries` against both the
+  // legacy `entry.license` (GitHub-synced SPDX id, uppercase) and the
+  // curated `entry.licenses` array. The match is case-insensitive.
+  query: { licenses: [name.toLowerCase()], excludeStatuses: ["archived"] },
   ranking: { preset: "quality" },
-  seo: { index: true, title: `${name} licensed apps` },
+  seo: { index: true, title: `${name.toUpperCase()} apps` },
 };
 
 const entries: CollectionEntry[] = [];
@@ -41,18 +44,44 @@ const result = runCollection(collection, entries);
   description={collection.description}
   site={siteConfig}
 >
-  <h1>{collection.title}</h1>
-  <p>{collection.description}</p>
-  {result.isEmpty ? (
-    <p>No apps under this license yet.</p>
-  ) : (
-    <ol>
-      {result.entries.map((entry) => (
-        <li>
-          <a href={entry.url}>{entry.title}</a>
-          <p>{entry.description}</p>
-        </li>
-      ))}
-    </ol>
-  )}
+  <section class="mx-auto max-w-5xl px-6 py-16" aria-labelledby="license-title">
+    <p class="text-xs font-semibold uppercase tracking-widest text-subtle">License</p>
+    <h1
+      id="license-title"
+      class="mt-3 text-3xl font-bold tracking-tight text-fg sm:text-4xl"
+    >
+      {name.toUpperCase()} apps
+    </h1>
+    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+      {collection.description}
+    </p>
+
+    <div class="mt-10">
+      <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+        {result.entries.length}
+        {result.entries.length === 1 ? " app" : " apps"}
+      </p>
+
+      {result.isEmpty ? (
+        <p class="mt-4 text-sm text-muted">No apps under this license yet.</p>
+      ) : (
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+          {result.entries.map((entry) => (
+            <li class="rounded-lg border border-border bg-card p-5">
+              <h2 class="m-0 text-base font-semibold text-fg">
+                <a href={entry.url} class="text-inherit no-underline hover:underline">
+                  {entry.title}
+                </a>
+              </h2>
+              {entry.description && (
+                <p class="mt-2 text-sm leading-relaxed text-muted">
+                  {entry.description}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
 </BaseLayout>

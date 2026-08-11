@@ -14,11 +14,3 @@
   name: GNU GPL v3.0
   family: copyleft
   url: https://spdx.org/licenses/GPL-3.0-or-later.html
-- id: apache
-  name: Apache License
-  family: permissive
-  url: https://spdx.org/licenses/Apache-2.0.html
-- id: bsd
-  name: BSD License
-  family: permissive
-  url: https://spdx.org/licenses/BSD-3-Clause.html

@@ -40,7 +40,7 @@ import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { getSingletonHighlighter } from 'shiki';
 import { prettySlug } from '../lib/display.js';
-import { readContentFile, stripFrontmatter, uniqueSlug } from '@grove-dev/core';
+import { headingSlug, readContentFile, stripFrontmatter, uniqueSlug } from '@grove-dev/core';
 import type {
   ProjectRecord,
   ResourceRecord,
@@ -417,6 +417,29 @@ const COMMON_BODY_ATTRIBUTES = {
   '*': ['id'],
 };
 
+/**
+ * CSS *value* patterns allowed per property in markdown authors' inline
+ * `style="…"` attributes. Without this filter, sanitize-html leaves
+ * the entire `style` string in place, which means a markdown author
+ * could smuggle CSS expressions (e.g. `background:url(javascript:…)`)
+ * into the rendered output even though no `<script>` tag is allowed.
+ *
+ * The regex is tested against the *value* part of each CSS declaration
+ * (`prop:value` → value), per sanitize-html's `allowedStyles` contract
+ * (it uses a CSS parser and matches `regularExpression.test(value)`).
+ *
+ * Allowed surface:
+ *   - `--shiki-*` custom properties accept any value (Shiki's
+ *     `--shiki-light` / `--shiki-dark` carry the per-token colors).
+ *   - `color:` / `background-color:` accept only safe color values:
+ *     hex (#rgb / #rrggbb / #rrggbbaa), rgb() / rgba(), hsl() / hsla().
+ *
+ * Anything else (positioning, layout, animation, expression(), url(),
+ * …) is stripped by sanitize-html because no pattern matches.
+ */
+const SHIKI_VALUE = /.+/;
+const COLOR_VALUE = /^(?:#[0-9a-f]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\))$/i;
+
 /** `<a>` tag normalization — open in a new tab, no opener. */
 const ANCHOR_TRANSFORM = sanitizeHtml.simpleTransform(
   'a',
@@ -447,21 +470,6 @@ const INPUT_TRANSFORM = (tagName: string, attribs: Record<string, string>) => ({
 });
 
 /**
- * GitHub-style slug for a heading. Matches `core/extractToc` so the
- * IDs the renderer emits line up with the IDs a TOC consumer reads
- * out of the same body — keeping deep links in lockstep.
- */
-function headingSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[‘’]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-+$/g, '');
-}
-
-/**
  * Render a Markdown string to sanitized HTML. The renderer is
  * configured once (heading IDs + table wrap) and reused for both
  * record and page bodies.
@@ -470,67 +478,38 @@ function headingSlug(text: string): string {
  * caller owns where the body came from (file, in-memory cache, …).
  * `getContentHtml(slug)` is the per-record wrapper that reads the
  * file and calls this.
+ *
+ * The heading-ID counter is allocated per call (not module-level) so
+ * concurrent renders — or any future worker-thread path — can never
+ * observe each other's counters.
  */
 export function renderMarkdownToSafeHtml(
   body: string,
   options: { allowlist?: string[] } = {},
 ): string {
   const allowlist = options.allowlist ?? RECORD_BODY_ALLOWLIST;
-  // Configure marked. GFM is on by default in v18 but set explicitly
-  // so the intent is visible; `breaks: false` keeps single newlines
-  // from becoming `<br>` per CommonMark.
-  //
-  // We register a small extension that:
-  //   1. Adds a stable `id` to every h2–h6 so the TOC sidebar can
-  //      deep-link into the rendered body.
-  //   2. Wraps GFM tables in `<div class="grove-prose-table-wrap">`
-  //      so the column-width overflow is contained inside a rounded
-  //      border instead of breaking the layout.
-  marked.use({
-    gfm: true,
-    breaks: false,
-    renderer: {
-      heading({ tokens, depth }) {
-        const inline = this.parser.parseInline(tokens);
-        const plain = tokens
-          .map((t: { text?: string; raw?: string }) => t.text ?? t.raw ?? '')
-          .join('');
-        const id =
-          depth === 1 ? '' : ` id="${uniqueSlug(headingSlug(plain) || 'section', headingIds)}"`;
-        return `<h${depth}${id}>${inline}</h${depth}>\n`;
-      },
-      table(token: {
-        header: Array<{ tokens: unknown[] }>;
-        rows: Array<Array<{ tokens: unknown[] }>>;
-      }) {
-        const head = token.header
-          .map((cell) => `<th>${this.parser.parseInline(cell.tokens)}</th>`)
-          .join('');
-        const body = token.rows
-          .map(
-            (row) =>
-              `<tr>${row
-                .map((cell) => `<td>${this.parser.parseInline(cell.tokens)}</td>`)
-                .join('')}</tr>`,
-          )
-          .join('');
-        return `<div class="grove-prose-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>\n`;
-      },
-      // Fenced code blocks: route through Shiki instead of marked's
-      // default `<pre><code class="language-…">…</code></pre>`. The
-      // returned HTML already wraps in `<pre>` and `<code>`; we
-      // hand it to the sanitizer unchanged (Shiki's output is
-      // safe by construction — no script / event handlers).
-      code({ text, lang }) {
-        return highlightCode(text, lang ?? '') + '\n';
-      },
-    },
-  });
-
+  // Reset the heading-ID collision counter for this body so IDs are
+  // stable per render and never leak between records.
+  headingIds.clear();
   const rawHtml = marked.parse(body, { async: false }) as string;
   return sanitizeHtml(rawHtml, {
     allowedTags: allowlist,
     allowedAttributes: COMMON_BODY_ATTRIBUTES,
+    // `allowedStyles` is required because the `span` and `pre` tags
+    // accept `style` (for Shiki's CSS variables) — without it
+    // sanitize-html would pass any `style` content through, including
+    // CSS expressions and `url(javascript:…)` payloads.
+    allowedStyles: {
+      '*': {
+        // All `--shiki-*` custom properties (Shiki's CSS-variable
+        // output for code-block tokenization).
+        '--shiki-light': [SHIKI_VALUE],
+        '--shiki-dark': [SHIKI_VALUE],
+        // Hex / rgb() / rgba() / hsl() / hsla() colors only.
+        color: [COLOR_VALUE],
+        'background-color': [COLOR_VALUE],
+      },
+    },
     allowedSchemes: ['http', 'https', 'mailto', 'tel'],
     allowedSchemesByTag: {
       a: ['http', 'https', 'mailto', 'tel'],
@@ -546,7 +525,67 @@ export function renderMarkdownToSafeHtml(
   });
 }
 
-/** Per-render counter so heading IDs don't collide within a body. */
+// ── marked configuration (hoisted, runs once at module load) ────────
+//
+// `marked.use({...})` registers a renderer that:
+//   1. Adds a stable `id` to every h2–h6 so the TOC sidebar can
+//      deep-link into the rendered body.
+//   2. Wraps GFM tables in `<div class="grove-prose-table-wrap">`
+//      so the column-width overflow is contained inside a rounded
+//      border instead of breaking the layout.
+//   3. Routes fenced code blocks through Shiki (see below).
+//
+// Heading-ID collision counter is allocated *per render* below and
+// reset before each `marked.parse(...)` call so concurrent renders
+// can never observe each other's counters in the same module instance.
+marked.use({
+  gfm: true,
+  breaks: false,
+  renderer: {
+    heading({ tokens, depth }) {
+      const inline = this.parser.parseInline(tokens);
+      const plain = tokens
+        .map((t: { text?: string; raw?: string }) => t.text ?? t.raw ?? '')
+        .join('');
+      const id =
+        depth === 1 ? '' : ` id="${uniqueSlug(headingSlug(plain) || 'section', headingIds)}"`;
+      return `<h${depth}${id}>${inline}</h${depth}>\n`;
+    },
+    table(token: {
+      header: Array<{ tokens: unknown[] }>;
+      rows: Array<Array<{ tokens: unknown[] }>>;
+    }) {
+      const head = token.header
+        .map((cell) => `<th>${this.parser.parseInline(cell.tokens)}</th>`)
+        .join('');
+      const body = token.rows
+        .map(
+          (row) =>
+            `<tr>${row
+              .map((cell) => `<td>${this.parser.parseInline(cell.tokens)}</td>`)
+              .join('')}</tr>`,
+        )
+        .join('');
+      return `<div class="grove-prose-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>\n`;
+    },
+    // Fenced code blocks: route through Shiki instead of marked's
+    // default `<pre><code class="language-…">…</code></pre>`. The
+    // returned HTML already wraps in `<pre>` and `<code>`; we
+    // hand it to the sanitizer unchanged (Shiki's output is
+    // safe by construction — no script / event handlers).
+    code({ text, lang }) {
+      return highlightCode(text, lang ?? '') + '\n';
+    },
+  },
+});
+
+/**
+ * Heading-ID collision counter. Reset at the start of every
+ * `renderMarkdownToSafeHtml` call so heading IDs stay stable per
+ * body. Module-level state is acceptable because Node is single-
+ * threaded per process; the synchronous `marked.parse(body, {async:false})`
+ * returns before any other caller can observe the counter.
+ */
 const headingIds = new Map<string, number>();
 
 // ── Shiki syntax highlighter ─────────────────────────────────────────
@@ -677,10 +716,10 @@ for (const r of fullRecords) {
   const read = readContentFile(projectRecord.content);
   if (!read) continue;
   // Each render needs a fresh headingIds map so the per-body
-  // collision counter starts at zero. Otherwise the second record
-  // in the loop would inherit the first record's counters and
-  // duplicate-heading IDs would collide across records.
-  headingIds.clear();
+  // collision counter starts at zero (cleared inside
+  // `renderMarkdownToSafeHtml`); otherwise the second record in the
+  // loop would inherit the first record's counters and duplicate-
+  // heading IDs would collide across records.
   try {
     contentHtmlBySlug.set(r.slug, renderMarkdownToSafeHtml(read.body));
   } catch {
@@ -717,7 +756,6 @@ export function getPageContentHtml(page: string): string | null {
 
   try {
     const markdown = stripFrontmatter(readFileSync(path, 'utf8'));
-    headingIds.clear();
     return renderMarkdownToSafeHtml(markdown, {
       allowlist: PAGE_BODY_ALLOWLIST,
     });

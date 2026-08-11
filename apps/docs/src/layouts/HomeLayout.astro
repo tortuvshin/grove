@@ -1,5 +1,6 @@
 ---
 import '../styles/home.css';
+import { FAQ_ITEMS } from '../data/faq.ts';
 
 interface Props {
   title?: string;
@@ -14,14 +15,24 @@ const {
 const siteUrl = Astro.site?.toString() ?? 'https://grove.dev.mn';
 const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = new URL('/og-image.svg', siteUrl).toString();
+// schema.org `Organization.logo` expects a square (1:1) image. The
+// OG card (1200×630) does not match; either ship a dedicated logo
+// asset at this path or drop the field. Until then, the logo key is
+// omitted so search engines don't reject the schema.
+const squareLogoUrl = new URL('/logo.svg', siteUrl).toString();
 
 /**
- * JSON-LD for the standalone home page. Emits three schemas:
+ * JSON-LD for the standalone home page. Emits four schemas:
  *
  *  - WebSite: identifies the site and its publisher.
  *  - SoftwareApplication: describes Grove itself (a CLI + framework),
  *    so search engines can render rich "app" results.
  *  - Organization: identifies the project and its canonical repo.
+ *  - FAQPage: structured-data mirror of the visible FAQ section so
+ *    search engines can surface Q&A results.
+ *
+ * The FAQ copy is sourced from `../data/faq.ts` and is shared with
+ * `<Faq>` so the visible UI and the structured data cannot drift.
  */
 const websiteJsonLd = {
   '@context': 'https://schema.org',
@@ -47,7 +58,9 @@ const softwareJsonLd = {
     'Open-source framework for turning community submissions into structured, searchable, and maintainable knowledge spaces. Includes a CLI, a headless core, an Astro renderer, and a Starlight theme.',
   url: siteUrl,
   downloadUrl: 'https://www.npmjs.com/package/@grove-dev/cli',
-  softwareVersion: '0.4.0',
+  // Aligned with the page-copy versioning: "V1" everywhere in the
+  // docs. Update here when packages move to v1.x.
+  softwareVersion: '1.0.0-preview',
   offers: {
     '@type': 'Offer',
     price: '0',
@@ -68,43 +81,16 @@ const organizationJsonLd = {
   '@type': 'Organization',
   name: 'Grove',
   url: 'https://github.com/tortuvshin/grove',
-  logo: ogImageUrl,
+  logo: squareLogoUrl,
   description:
     'Open-source framework for community knowledge — collect, structure, maintain, and publish the projects, tools, resources, and knowledge a community relies on.',
   sameAs: ['https://github.com/tortuvshin/grove', 'https://www.npmjs.com/org/grove-dev'],
 };
 
-const faqItems = [
-  {
-    q: 'Is Grove a CMS?',
-    a: 'No. Grove is a build-time framework. Your content lives as YAML files in your repository, not in a database. There is no admin UI to maintain — editors open pull requests like any other code change, and the framework generates the static site on every merge.',
-  },
-  {
-    q: 'Does it work without Astro?',
-    a: 'V1 ships the Astro adapter only. The core engine is framework-agnostic (typed schema, GitHub sync, importers, sitemap, llms.txt), so a SvelteKit or Next.js adapter is possible. V1.1 is planned for SvelteKit; see the roadmap for current status.',
-  },
-  {
-    q: 'How is this different from an awesome-list README?',
-    a: 'An awesome-list is a flat Markdown list with no schema, no review state, no live metadata, and no static discovery surface. Grove adds a typed record model, scheduled GitHub metadata sync, health classification, search and filters, llms.txt for AI ingestion, and a PR-based submission workflow — without giving up the portability of files.',
-  },
-  {
-    q: 'Where do I host the site?',
-    a: 'Anywhere that serves static HTML. GitHub Pages, Cloudflare Pages, Netlify, and Vercel all work out of the box. There is no server runtime, so there is no database to back up and no API keys to manage at request time.',
-  },
-  {
-    q: "What happens when a record's repo is archived?",
-    a: "grove sync github reads the archived flag and writes it into the record's github block. The Astro template renders an Archived badge in the activity pill and a status row in the sidebar. The record stays visible by default — removing or hiding it is a curator's call, recorded in decisions.yml.",
-  },
-  {
-    q: 'Can I import an existing awesome-list?',
-    a: 'Yes. grove import <github-url> parses the README, infers a record per entry, and writes them under data/records/. Each imported record gets source: { type: "import" } so curators can filter and finish them later.',
-  },
-];
-
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: faqItems.map((item) => ({
+  mainEntity: FAQ_ITEMS.map((item) => ({
     '@type': 'Question',
     name: item.q,
     acceptedAnswer: {

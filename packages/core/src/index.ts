@@ -195,6 +195,7 @@ export * from "./directory-taxonomy.js";
 // contexts (Astro `getStaticPaths`, build scripts).
 export {
   extractToc,
+  headingSlug,
   readContentFile,
   readingMetrics,
   resolveContentPath,

@@ -19,7 +19,7 @@
  * scrolls the body. Cards are individually rendered so the
  * sticky container's height is bounded by the actual content.
  */
-import { formatStars, compact, licenseDisplay } from "@grove-dev/core";
+import { licenseDisplay } from "@grove-dev/core";
 import type { RecordDetailModel } from "../server/models.js";
 import LanguageBreakdown from "./LanguageBreakdown.astro";
 
@@ -35,10 +35,8 @@ const {
   forks,
   language,
   licenseSpdx,
-  pushedAt,
   pushedLabel,
   repoUrl,
-  homepageUrl,
   ownerRepo,
   healthLabel,
   activityBadge,
@@ -71,16 +69,22 @@ function row(label: string, value: unknown) {
 }
 ---
 
-<aside class="grove-sidebar flex flex-col gap-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" aria-label="Project data">
+<aside class="grove-sidebar flex flex-col gap-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" aria-label="Record metadata sidebar">
 
   {/* ── Activity card ──────────────────────────────────────── */}
   {sidebar.showActivity && (
-    <section class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800" aria-label="Activity">
-      <h2 class="grove-card-title m-0 mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+    <section
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800"
+      aria-labelledby="sidebar-activity-title"
+    >
+      <h2
+        id="sidebar-activity-title"
+        class="grove-card-title m-0 mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+      >
         Activity
       </h2>
       <dl class="grove-kv m-0 flex flex-col gap-2.5 text-sm">
-        {row("Stars", starsNumber !== null ? formatStars(starsNumber) ?? compact(starsNumber) : null) && (
+        {row("Stars", starsNumber !== null ? starsNumber : null) && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">Stars</dt>
             <dd class="font-mono tabular-nums text-ink-900 dark:text-ink-100">{starsNumber!.toLocaleString()}</dd>
@@ -159,8 +163,14 @@ function row(label: string, value: unknown) {
 
   {/* ── Freshness card ─────────────────────────────────────── */}
   {sidebar.showFreshness && (
-    <section class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800" aria-label="Freshness">
-      <h2 class="grove-card-title m-0 mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+    <section
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800"
+      aria-labelledby="sidebar-freshness-title"
+    >
+      <h2
+        id="sidebar-freshness-title"
+        class="grove-card-title m-0 mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+      >
         Freshness
       </h2>
       <dl class="grove-kv m-0 flex flex-col gap-2.5 text-sm">
@@ -226,8 +236,14 @@ function row(label: string, value: unknown) {
 
   {/* ── Ecosystem card ─────────────────────────────────────── */}
   {sidebar.showEcosystem && (
-    <section class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800" aria-label="Ecosystem">
-      <h2 class="grove-card-title m-0 mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+    <section
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800"
+      aria-labelledby="sidebar-ecosystem-title"
+    >
+      <h2
+        id="sidebar-ecosystem-title"
+        class="grove-card-title m-0 mb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+      >
         Ecosystem
       </h2>
 
@@ -309,8 +325,14 @@ function row(label: string, value: unknown) {
 
   {/* ── Source card (small) ────────────────────────────────── */}
   {sidebar.showSource && (
-    <section class="grove-card grove-card--muted rounded-[var(--radius-lg)] border border-dashed border-ink-200 bg-background/50 p-4 text-2xs text-ink-500 dark:border-ink-800 dark:text-ink-400" aria-label="Sources">
-      <h2 class="grove-card-title m-0 mb-1.5 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+    <section
+      class="grove-card grove-card--muted rounded-[var(--radius-lg)] border border-dashed border-ink-200 bg-background/50 p-4 text-2xs text-ink-500 dark:border-ink-800 dark:text-ink-400"
+      aria-labelledby="sidebar-source-title"
+    >
+      <h2
+        id="sidebar-source-title"
+        class="grove-card-title m-0 mb-1.5 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400"
+      >
         Source
       </h2>
       <p class="m-0 leading-relaxed">

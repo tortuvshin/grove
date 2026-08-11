@@ -19,6 +19,13 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
+# Cancel superseded runs on the same ref so a force-push doesn't pile
+# up weekly audit jobs. Matches the pattern in ci.yml and
+# lighthouse-audit.yml.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Minimum-scope token: read repo contents, nothing else. The audit
 # job only runs `pnpm audit` and never publishes, so `contents: read`
 # is sufficient. Implementation-checklist.md #24.

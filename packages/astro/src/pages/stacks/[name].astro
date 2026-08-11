@@ -9,7 +9,7 @@
  * site actually publishes.
  *
  * Demonstrates the engine-driven path (`runCollection` + hand-rolled
- * inline `<ol>`) for consumers who want the collection engine's
+ * card grid) for consumers who want the collection engine's
  * ranking + dedup + curation logic. The example app uses a simpler
  * `filterRecords` + custom grid pattern; both are valid.
  */
@@ -40,6 +40,11 @@ const collection: Collection = {
 
 const entries: CollectionEntry[] = [];
 const result = runCollection(collection, entries);
+const displayName = name
+  .split(/[-_]+/)
+  .filter(Boolean)
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
 ---
 
 <BaseLayout
@@ -47,18 +52,44 @@ const result = runCollection(collection, entries);
   description={collection.description}
   site={siteConfig}
 >
-  <h1>{collection.title}</h1>
-  <p>{collection.description}</p>
-  {result.isEmpty ? (
-    <p>No apps in this stack yet.</p>
-  ) : (
-    <ol>
-      {result.entries.map((entry) => (
-        <li>
-          <a href={entry.url}>{entry.title}</a>
-          <p>{entry.description}</p>
-        </li>
-      ))}
-    </ol>
-  )}
+  <section class="mx-auto max-w-5xl px-6 py-16" aria-labelledby="stack-title">
+    <p class="text-xs font-semibold uppercase tracking-widest text-subtle">Stack</p>
+    <h1
+      id="stack-title"
+      class="mt-3 text-3xl font-bold tracking-tight text-fg sm:text-4xl"
+    >
+      {displayName} apps
+    </h1>
+    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
+      {collection.description}
+    </p>
+
+    <div class="mt-10">
+      <p class="text-xs font-semibold uppercase tracking-widest text-subtle">
+        {result.entries.length}
+        {result.entries.length === 1 ? " app" : " apps"}
+      </p>
+
+      {result.isEmpty ? (
+        <p class="mt-4 text-sm text-muted">No apps in this stack yet.</p>
+      ) : (
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+          {result.entries.map((entry) => (
+            <li class="rounded-lg border border-border bg-card p-5">
+              <h2 class="m-0 text-base font-semibold text-fg">
+                <a href={entry.url} class="text-inherit no-underline hover:underline">
+                  {entry.title}
+                </a>
+              </h2>
+              {entry.description && (
+                <p class="mt-2 text-sm leading-relaxed text-muted">
+                  {entry.description}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
 </BaseLayout>

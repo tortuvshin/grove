@@ -464,6 +464,10 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     curationLabels: record.curation?.labels ?? [],
     tags,
     healthLabel,
+    // Top-level `category` so the package's RecordHeader / RecordSidebar
+    // components can render the category pill without each consumer
+    // having to destructure `record.category` themselves.
+    category: record.category,
     contentHtml: isProject ? getContentHtml(recordSlug) : null,
     // Curated summary (Open Apps-written) takes priority over the
     // raw `description` (typically copied from GitHub). Fall back to

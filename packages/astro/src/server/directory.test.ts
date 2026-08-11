@@ -122,4 +122,56 @@ describe('renderMarkdownToSafeHtml', () => {
     });
     expect(html).not.toContain('<details');
   });
+
+  it('strips raw iframe tags', () => {
+    const html = renderMarkdownToSafeHtml(
+      'Text.\n\n<iframe src="https://evil.example"></iframe>\n\nMore.',
+    );
+    expect(html).not.toContain('<iframe');
+    expect(html).not.toContain('evil.example');
+  });
+
+  it('strips raw svg tags (including script-bearing svgs)', () => {
+    const html = renderMarkdownToSafeHtml(
+      'Text.\n\n<svg><script>alert("xss")</script></svg>\n\nMore.',
+    );
+    expect(html).not.toContain('<svg');
+    expect(html).not.toContain('<script');
+  });
+
+  it('strips raw object and embed tags', () => {
+    const html = renderMarkdownToSafeHtml(
+      '<object data="https://evil.example/x.swf"></object>\n<embed src="x">',
+    );
+    expect(html).not.toContain('<object');
+    expect(html).not.toContain('<embed');
+  });
+
+  it('filters malicious CSS from <span style> (closes the url(javascript:) bypass)', () => {
+    const html = renderMarkdownToSafeHtml(
+      '<span style="background:url(javascript:alert(1));color:red">x</span>',
+    );
+    expect(html).not.toContain('javascript:');
+    // The color: declaration is also stripped because it doesn't pass
+    // the allowStyles regex (no semicolon-terminated hex / rgb / hsl).
+    expect(html).not.toMatch(/<span[^>]*style=/);
+  });
+
+  it('preserves Shiki-emitted CSS variable declarations on <span>', () => {
+    const html = renderMarkdownToSafeHtml(
+      '<span style="--shiki-light:#fff;--shiki-dark:#000;color:#fff">x</span>',
+    );
+    expect(html).toMatch(/--shiki-light/);
+    expect(html).toMatch(/--shiki-dark/);
+  });
+
+  it('rejects data: URLs on <a> but allows them on <img>', () => {
+    const html = renderMarkdownToSafeHtml(
+      '[evil](data:text/html,<script>alert(1)</script>)\n\n![ok](data:image/png;base64,iVBORw0KG)',
+    );
+    // The malicious <a> URL must be removed; the inline <img> data: URL
+    // (a base64 PNG) is allowed by the per-tag scheme rule.
+    expect(html).not.toMatch(/<a[^>]*href="data:/);
+    expect(html).toMatch(/<img[^>]*src="data:image\/png/);
+  });
 });

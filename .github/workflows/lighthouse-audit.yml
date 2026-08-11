@@ -54,9 +54,13 @@ jobs:
           node-version: 24
           cache: pnpm
       - name: Install Chromium
+        # Pin the Chromium version (Ubuntu 24.04's chromium-browser
+        # metapackage currently resolves to 140.*) so an Ubuntu
+        # snapshot change can't silently shift the audit scores.
         run: |
           sudo apt-get update
           sudo apt-get install -y chromium-browser
+          chromium-browser --version
           echo "CHROME_PATH=$(which chromium-browser)" >> $GITHUB_ENV
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @grove-dev/core --filter @grove-dev/cli --filter @grove-dev/astro -r build

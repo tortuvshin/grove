@@ -77,7 +77,7 @@ The full V1 CLI surface (`packages/cli/src/index.ts`):
 
 | Command                   | What it does                                                                                                                                                                                                               |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `grove new <name>`        | Scaffold a new project. Prompts for blueprint, framework, GitHub mode, deploy provider. Copies the framework template, writes `grove.config.ts`, `.gitignore`, `LICENSE`, workflows, issue templates. Runs `pnpm install`. |
+| `grove init <name>`        | Scaffold a new project. Prompts for blueprint, framework, GitHub mode, deploy provider. Copies the framework template, writes `grove.config.ts`, `.gitignore`, `LICENSE`, workflows, issue templates. Runs `pnpm install`. |
 | `grove validate`          | Validate project data against the configured blueprint. `grove validate --strict` fails on warnings.                                                                                                                       |
 | `grove generate`          | Build `data/generated/records.{full,index}.json` from `data/records/*.yml`. Source of truth for the renderer.                                                                                                              |
 | `grove sitemap`           | Generate `public/sitemap.xml` from `records.full.json`.                                                                                                                                                                    |
@@ -94,10 +94,10 @@ The dev-only `grove run [dev\|build\|init]` command scaffolds from the **local**
 
 ### Scaffold options
 
-`grove new` accepts the following flags and skips the interactive prompts:
+`grove init` accepts the following flags and skips the interactive prompts:
 
 ```bash
-grove new my-space \
+grove init my-space \
   --blueprint project-directory \
   --framework astro \
   --github none \

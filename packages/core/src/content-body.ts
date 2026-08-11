@@ -161,8 +161,13 @@ export function readContentFile(
  * The collision counter (via `uniqueSlug`) gives `foo`, `foo-2`, …
  * so two headings labelled "Examples" in the same document anchor
  * to distinct IDs.
+ *
+ * Exported because the markdown renderer in `@grove-dev/astro` uses
+ * this same slug rule so the IDs it emits on `<h2 id="…">` line up
+ * with the IDs `extractToc` produces from the same body. Duplicating
+ * the rule is the documented failure mode this comment warns against.
  */
-function headingSlug(text: string): string {
+export function headingSlug(text: string): string {
   return text
     .toLowerCase()
     .replace(/[‘’]/g, "")
