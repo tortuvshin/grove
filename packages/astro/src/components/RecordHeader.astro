@@ -38,6 +38,7 @@ const {
   activityBadge,
   summary,
   sourceDescription,
+  screenshots,
   category,
   description,
   name,
@@ -161,4 +162,26 @@ const {
       )}
     </div>
   </div>
+  {screenshots && screenshots.length > 0 && (
+    <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Screenshots">
+      {screenshots.map((shot) => (
+        <figure class="m-0 overflow-hidden rounded-[var(--radius-lg)] border border-ink-200 bg-muted dark:border-ink-800">
+          <img
+            src={shot.src}
+            alt={shot.alt}
+            loading="lazy"
+            decoding="async"
+            width={shot.width}
+            height={shot.height}
+            class="block h-auto w-full object-cover"
+          />
+          {shot.source && (
+            <figcaption class="px-3 py-1.5 text-2xs text-ink-500 dark:text-ink-400">
+              Source: <a href={shot.source} target="_blank" rel="noopener noreferrer" class="text-inherit no-underline hover:underline">{shot.source.replace(/^https?:\/\//, "")}</a>
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  )}
 </header>

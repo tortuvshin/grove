@@ -448,6 +448,9 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     // after calling `findCollectionsFor`. Defaulting to [] keeps the
     // model safe when the consumer doesn't wire it.
     collectionMembership: [],
+    // Curated screenshots array. Defaulting to [] keeps the renderer
+    // safe; RecordHeader shows a gallery strip when non-empty.
+    screenshots: proj?.screenshots ?? [],
     monthlyCommits,
     maxMonthlyCommits: Math.max(1, ...monthlyCommits.map((item) => item.commits)),
     contributionSignals,

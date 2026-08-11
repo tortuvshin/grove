@@ -368,6 +368,24 @@ export const projectRecordSchema = resourceBaseSchema.extend({
   // owner avatar (when `repoUrl` is a github.com URL) or to the
   // first-2-letters initials placeholder.
   logoUrl: z.string().url().optional(),
+  /**
+   * Curated screenshots for the record detail page. Each entry is
+   * an image URL plus an alt text and optional source attribution.
+   * When the array is non-empty, RecordHeader renders a screenshot
+   * gallery strip below the page lead. Schema-only addition in this
+   * commit; populated by curators in follow-ups.
+   */
+  screenshots: z
+    .array(
+      z.object({
+        src: z.string().url(),
+        alt: z.string().min(1),
+        source: z.string().url().optional(),
+        width: z.number().int().positive().optional(),
+        height: z.number().int().positive().optional(),
+      }),
+    )
+    .default([]),
   bestFor: z.array(z.string()).default([]),
   whyListed: z.array(z.string()).default([]),
   caveats: z.array(z.string()).default([]),
@@ -831,6 +849,7 @@ export interface IndexProjectRecord extends IndexBase {
   projectType: ProjectRecord["projectType"];
   repoUrl: ProjectRecord["repoUrl"];
   logoUrl: ProjectRecord["logoUrl"];
+  screenshots: ProjectRecord["screenshots"];
   difficulty: ProjectRecord["difficulty"];
   codebaseSize: ProjectRecord["codebaseSize"];
   bestFor: string[];
@@ -920,6 +939,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
       projectType: r.projectType,
       repoUrl: r.repoUrl,
       logoUrl: r.logoUrl,
+      screenshots: r.screenshots ?? [],
       difficulty: r.difficulty,
       codebaseSize: r.codebaseSize,
       bestFor: r.bestFor,
