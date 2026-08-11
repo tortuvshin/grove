@@ -215,7 +215,13 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
 
 export function getContributorsPageModel(site: DirectorySiteConfig) {
   const contributors = loadDirectoryContributors();
-  const sorted = [...contributors].sort((a, b) =>
+  // Render-time guard: even if a stale `data/generated/contributors.json`
+  // was produced before the sync-time filter was added, never surface
+  // bot accounts (login ends with `[bot]`) on the public contributors
+  // page. The ContributorsGrid uses the same total for its heading, so
+  // the headline count always agrees with the rendered grid.
+  const human = contributors.filter((c) => !c.username.endsWith("[bot]"));
+  const sorted = [...human].sort((a, b) =>
     (b.contributions ?? 0) - (a.contributions ?? 0) || a.username.localeCompare(b.username)
   );
   const repo = site.repoUrl?.replace(/\/$/, "");

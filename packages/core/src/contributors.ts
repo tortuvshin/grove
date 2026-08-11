@@ -93,6 +93,14 @@ export async function syncContributors(
       : (await contributorsResponse.json()) as GitHubContributor[];
     for (const entry of data) {
       if (!entry.login) continue;
+      // GitHub's contributors endpoint returns bot accounts (any
+      // login ending with `[bot]`, e.g. `github-actions[bot]`,
+      // `dependabot[bot]`) alongside human contributors. They
+      // inflate the public "community contributors" count on
+      // consumer sites and visually present as project members.
+      // Filter them here so the cached `data/generated/contributors.json`
+      // never lists automation as humans.
+      if (entry.login.endsWith("[bot]")) continue;
       byUsername.set(entry.login, {
         username: entry.login,
         ...(entry.avatar_url ? { avatarUrl: entry.avatar_url } : {}),
