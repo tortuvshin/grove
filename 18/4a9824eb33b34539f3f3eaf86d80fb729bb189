@@ -1,0 +1,113 @@
+packages/astro/src/server/models.ts
+  s_aa1ad5cb7d49ec::t_e5bcb4fcd45527 467-470
+apps/docs/src/components/home/Hero.astro
+  s_aa1ad5cb7d49ec::t_429a63e6d010e1 2-6
+  s_aa1ad5cb7d49ec::t_91801139cfd932 50-51,54,59-61
+packages/astro/src/components/EditorialSummary.astro
+  s_aa1ad5cb7d49ec::t_cf6c6ace264153 24,28,33,43,48
+packages/core/src/index.ts
+  s_aa1ad5cb7d49ec::t_d3dc43d8c82871 198
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_aa1ad5cb7d49ec::t_c0386d5849a23a 70-85
+packages/astro/src/pages/categories/[name].astro
+  s_aa1ad5cb7d49ec::t_c7324a80e2edbb 37-41,49-89
+packages/astro/src/server/collections.ts
+  s_aa1ad5cb7d49ec::t_f7537477c9dd2a 85-94
+  s_aa1ad5cb7d49ec::t_ddbfc9d0e5e8e3 21
+apps/docs/src/data/faq.ts
+  s_aa1ad5cb7d49ec::t_d77b38ee2db342 1-43
+packages/astro/src/components/RecordSidebar.astro
+  s_aa1ad5cb7d49ec::t_a2b058de4a8ac3 328-335
+  s_aa1ad5cb7d49ec::t_29a911a933e995 76-83
+  s_aa1ad5cb7d49ec::t_c9e9562f551b17 166-173
+  s_aa1ad5cb7d49ec::t_881c7d5101d9dc 22
+  s_aa1ad5cb7d49ec::t_bab645cea39994 239-246
+  s_aa1ad5cb7d49ec::t_ea8cb3c344070a 72
+  s_aa1ad5cb7d49ec::t_48654b319e430a 87
+packages/astro/src/components/ProjectCard.astro
+  s_6c8a0ef6df22dc::t_884b7e30d1fa82 1-220
+apps/example/public/logo.svg
+  s_aa1ad5cb7d49ec::t_06d90a1efa4ece 1-16
+apps/docs/src/home-landing.test.ts
+  s_aa1ad5cb7d49ec::t_341859b34bfbe7 410-411,413,415-419,421-422,427
+  s_aa1ad5cb7d49ec::t_9a92e3b436b192 397-409,412,414,423-426,428-449
+  s_aa1ad5cb7d49ec::t_c82ea108bf935b 420
+  s_aa1ad5cb7d49ec::t_f8a0cd32c7effd 251-255,257,261-268
+  s_aa1ad5cb7d49ec::t_755518de7d0217 269
+.github/workflows/lighthouse-audit.yml
+  s_aa1ad5cb7d49ec::t_0727285225f583 57-59,63
+packages/astro/src/pages/stacks/[name].astro
+  s_aa1ad5cb7d49ec::t_e298e39e41515b 12,43-47,55-95
+packages/astro/src/components/LandingHero.astro
+  s_6c8a0ef6df22dc::t_adb0f842d6435e 1-168
+.github/ISSUE_TEMPLATE/bug_report.md
+  s_aa1ad5cb7d49ec::t_1b2f89dad1ab19 21
+apps/docs/PRODUCT.md
+  s_aa1ad5cb7d49ec::t_67a250d87c5a52 97,100
+  s_aa1ad5cb7d49ec::t_df750ebec715d0 80
+packages/astro/src/components/LanguageBreakdown.astro
+  s_aa1ad5cb7d49ec::t_efbd5ed1b66b46 41-45
+.github/workflows/audit.yml
+  s_aa1ad5cb7d49ec::t_0ed6796f87c567 22-28
+packages/astro/src/pages/licenses/[name].astro
+  s_aa1ad5cb7d49ec::t_60c12d506ecc93 28-33,35,47-87
+packages/astro/src/server/directory.ts
+  s_aa1ad5cb7d49ec::t_71a15eb177f36f 421,427-429,431-432,434-435,440-441
+  s_aa1ad5cb7d49ec::t_86c7248874278d 430,433,436-438
+  s_aa1ad5cb7d49ec::t_72561137a891a0 504-510
+  s_aa1ad5cb7d49ec::t_2d6b6058d5cd37 528-537,541-550,552-582,588
+  s_aa1ad5cb7d49ec::t_fe02ae60ae6434 43
+  s_aa1ad5cb7d49ec::t_102a411f59b318 481-484
+  s_aa1ad5cb7d49ec::t_99d52aea39ff5d 491-493
+  s_aa1ad5cb7d49ec::t_957935071219ab 498-503,511-512
+  s_aa1ad5cb7d49ec::t_edebe7b5bb32f7 719-722
+  s_aa1ad5cb7d49ec::t_5839e38abe3be4 420,422-426,439,442
+  s_aa1ad5cb7d49ec::t_673749ade75b2a 538-540,551,583-587
+apps/docs/src/components/home/Faq.astro
+  s_aa1ad5cb7d49ec::t_b46972526f9f26 3,5
+packages/core/src/collections.ts
+  s_aa1ad5cb7d49ec::t_4d8caa3d7828c4 111-120
+  s_aa1ad5cb7d49ec::t_ad80678b884bc6 80-82,84-85
+packages/astro/src/server/directory.test.ts
+  s_aa1ad5cb7d49ec::t_e78a462d769f0b 125-176
+packages/core/src/directory-search.test.ts
+  s_aa1ad5cb7d49ec::t_6a83aed1b5c723 90-103,112,125-182,186-187
+  s_aa1ad5cb7d49ec::t_585aed955c21c9 104-111,113-124
+  s_aa1ad5cb7d49ec::t_8973a30b95e05c 183-185
+apps/docs/src/components/home/Header.astro
+  s_aa1ad5cb7d49ec::t_40f3a584df80b0 56
+packages/core/src/content-body.ts
+  s_aa1ad5cb7d49ec::t_b480faafe8746d 164-168
+  s_aa1ad5cb7d49ec::t_7a9eb0c5f50321 170
+packages/core/src/directory-search.ts
+  s_aa1ad5cb7d49ec::t_95b5c44ced67c6 500-511
+  s_aa1ad5cb7d49ec::t_c9a52dc185f186 298-301,309
+  s_aa1ad5cb7d49ec::t_c07f64c1984016 216-221
+  s_aa1ad5cb7d49ec::t_6e8139af62f1e8 302-306,308,310-315
+apps/docs/src/layouts/HomeLayout.astro
+  s_aa1ad5cb7d49ec::t_fd602d59df54db 3,18-22,25,31-35,61-63,84,93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "184a9824eb33b34539f3f3eaf86d80fb729bb189",
+  "prompts": {},
+  "sessions": {
+    "s_6c8a0ef6df22dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "14af7e0e-e3db-4a1e-a625-e0c3beb589c3",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_aa1ad5cb7d49ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fb5a706b-497b-48dc-b08a-0e08161b13d2",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
