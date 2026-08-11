@@ -62,6 +62,11 @@ jobs:
       - run: pnpm --filter @grove-dev/core --filter @grove-dev/cli --filter @grove-dev/astro -r build
       - run: pnpm --dir apps/example build
       - name: Run grove audit
+        # The CLI exits non-zero on any budget violation. Pin the audit job's
+        # success on that exit code so a Lighthouse regression blocks merges
+        # once this workflow is added to the repo's branch-protection
+        # required-checks (Settings → Branches → Branch protection rules →
+        # "Require status checks to pass before merging").
         run: node ../../packages/cli/dist/index.js audit --runs 1 --json lighthouse-report.json --junit lighthouse-junit.xml
         working-directory: apps/example
       - uses: actions/upload-artifact@v5

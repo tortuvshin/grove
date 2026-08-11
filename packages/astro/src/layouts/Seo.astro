@@ -31,7 +31,7 @@ interface Props {
   /** Open Graph / Twitter image. Default: /og-image.svg. Should be absolute or root-relative. */
   image?: string;
   /** og:type. Default: "website". Use "article" for blog posts / changelog. */
-  type?: "website" | "article" | "profile";
+  type?: 'website' | 'article' | 'profile';
   /** Set true to add noindex,nofollow. */
   noindex?: boolean;
   /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on item pages. */
@@ -42,21 +42,32 @@ const {
   title,
   description,
   site: siteConfig,
-  searchPath = "/items",
-  image = "/og-image.svg",
-  type = "website",
+  searchPath = '/items',
+  image = '/og-image.svg',
+  type = 'website',
   noindex = false,
   jsonLd,
 } = Astro.props;
 
-const siteUrl = Astro.site ?? new URL("https://example.com");
+// `Astro.site` is required for canonical / OG / Twitter / JSON-LD URLs to
+// resolve to the consumer's domain. Failing the build (rather than silently
+// emitting `https://example.com/...`) is the right call: every canonical,
+// OG, and JSON-LD URL would otherwise leak to a domain the consumer doesn't
+// own, which search engines either ignore or treat as canonical to the
+// wrong host.
+if (!Astro.site) {
+  throw new Error(
+    "Seo: `site` is not set on the Astro config. Add `site: 'https://your-domain'` to astro.config.mjs so canonical / Open Graph / Twitter / JSON-LD URLs resolve correctly.",
+  );
+}
+const siteUrl = Astro.site;
 const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImage = new URL(image, siteUrl).toString();
 
 // Truncate description for OG/Twitter where longer is worse (160–200 chars).
 function truncate(s: string, max: number): string {
   if (s.length <= max) return s;
-  return s.slice(0, max - 1).trimEnd() + "\u2026";
+  return s.slice(0, max - 1).trimEnd() + '\u2026';
 }
 const shortDescription = truncate(description, 200);
 
@@ -64,25 +75,25 @@ const shortDescription = truncate(description, 200);
 // that should appear on every page (Google uses them for site links
 // and the knowledge panel).
 const websiteLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
   name: siteConfig.name,
   description: siteConfig.description ?? description,
-  url: siteUrl.toString().replace(/\/$/, ""),
-  inLanguage: "en",
+  url: siteUrl.toString().replace(/\/$/, ''),
+  inLanguage: 'en',
   potentialAction: {
-    "@type": "SearchAction",
-    target: `${siteUrl.toString().replace(/\/$/, "")}${searchPath}?q={search_term_string}`,
-    "query-input": "required name=search_term_string",
+    '@type': 'SearchAction',
+    target: `${siteUrl.toString().replace(/\/$/, '')}${searchPath}?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
   },
 };
 
 const organizationLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
   name: siteConfig.name,
-  url: siteUrl.toString().replace(/\/$/, ""),
-  logo: new URL("/og-image.svg", siteUrl).toString(),
+  url: siteUrl.toString().replace(/\/$/, ''),
+  logo: new URL('/og-image.svg', siteUrl).toString(),
   ...(siteConfig.repoUrl ? { sameAs: [siteConfig.repoUrl] } : {}),
 };
 

@@ -30,21 +30,17 @@
  *  resolution error, which is the correct signal — a build that
  *  silently renders an empty directory hides real config mistakes.
  */
-import fullPayload from "@grove/generated/records.full.json";
-import indexPayload from "@grove/generated/records.index.json";
-import siteConfigPayload from "@grove/generated/site-config.json";
-import { existsSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
-import { marked } from "marked";
-import sanitizeHtml from "sanitize-html";
-import { getSingletonHighlighter } from "shiki";
-import { prettySlug } from "../lib/display.js";
-import {
-  readContentFile,
-  stripFrontmatter,
-  uniqueSlug,
-} from "@grove-dev/core";
+import fullPayload from '@grove/generated/records.full.json';
+import indexPayload from '@grove/generated/records.index.json';
+import siteConfigPayload from '@grove/generated/site-config.json';
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
+import { getSingletonHighlighter } from 'shiki';
+import { prettySlug } from '../lib/display.js';
+import { readContentFile, stripFrontmatter, uniqueSlug } from '@grove-dev/core';
 import type {
   ProjectRecord,
   ResourceRecord,
@@ -54,7 +50,7 @@ import type {
   IndexProjectRecord,
   IndexResourceRecord,
   IndexEntityRecord,
-} from "@grove-dev/core";
+} from '@grove-dev/core';
 
 interface FullPayload {
   schemaVersion?: number;
@@ -77,7 +73,7 @@ interface SiteConfigPayload {
   blueprint?: string;
   blueprintConfig?: {
     id?: string;
-    kind?: "project" | "resource" | "entity";
+    kind?: 'project' | 'resource' | 'entity';
     routeSlug?: string;
     itemSlug?: string;
     /** V1 canonical field name for the record detail slug
@@ -88,17 +84,15 @@ interface SiteConfigPayload {
   };
   taxonomy?: Partial<
     Record<
-      "categories" | "stacks" | "platforms" | "distributionChannels",
+      'categories' | 'stacks' | 'platforms' | 'distributionChannels',
       Array<{ id: string; name: string }>
     >
   >;
   name?: string;
 }
 
-const fullRecordsRaw: Resource[] =
-  (fullPayload as unknown as FullPayload).records ?? [];
-const indexRecordsRaw: IndexRecord[] =
-  (indexPayload as unknown as IndexPayload).records ?? [];
+const fullRecordsRaw: Resource[] = (fullPayload as unknown as FullPayload).records ?? [];
+const indexRecordsRaw: IndexRecord[] = (indexPayload as unknown as IndexPayload).records ?? [];
 const siteConfigRaw: SiteConfigPayload = siteConfigPayload as SiteConfigPayload;
 const taxonomyMaps = Object.fromEntries(
   Object.entries(siteConfigRaw.taxonomy ?? {}).map(([kind, entries]) => [
@@ -106,15 +100,12 @@ const taxonomyMaps = Object.fromEntries(
     new Map((entries ?? []).map((entry) => [entry.id, entry.name])),
   ]),
 ) as Partial<
-  Record<
-    "categories" | "stacks" | "platforms" | "distributionChannels",
-    Map<string, string>
-  >
+  Record<'categories' | 'stacks' | 'platforms' | 'distributionChannels', Map<string, string>>
 >;
 export const taxonomy = siteConfigRaw.taxonomy ?? {};
 
 export function taxonomyLabel(
-  kind: "categories" | "stacks" | "platforms" | "distributionChannels",
+  kind: 'categories' | 'stacks' | 'platforms' | 'distributionChannels',
   id: string,
 ): string {
   return taxonomyMaps[kind]?.get(id) ?? prettySlug(id);
@@ -132,18 +123,12 @@ export const records: IndexRecord[] = indexRecordsRaw;
 
 /** Resource-kind records — slim shape. */
 /** Project-kind records — slim shape, ready for list pages. */
-export const projects = records.filter(
-  (r): r is IndexProjectRecord => r.kind === "project",
-);
+export const projects = records.filter((r): r is IndexProjectRecord => r.kind === 'project');
 
-export const resources = records.filter(
-  (r): r is IndexResourceRecord => r.kind === "resource",
-);
+export const resources = records.filter((r): r is IndexResourceRecord => r.kind === 'resource');
 
 /** Entity-kind records — slim shape. */
-export const entities = records.filter(
-  (r): r is IndexEntityRecord => r.kind === "entity",
-);
+export const entities = records.filter((r): r is IndexEntityRecord => r.kind === 'entity');
 
 const bySlug = new Map(fullRecords.map((r) => [r.slug, r]));
 
@@ -161,17 +146,17 @@ export function findRecord(slug: string): Resource | undefined {
 
 export function projectBySlug(slug: string): ProjectRecord | undefined {
   const r = bySlug.get(slug);
-  return r && r.kind === "project" ? r : undefined;
+  return r && r.kind === 'project' ? r : undefined;
 }
 
 export function resourceBySlug(slug: string): ResourceRecord | undefined {
   const r = bySlug.get(slug);
-  return r && r.kind === "resource" ? r : undefined;
+  return r && r.kind === 'resource' ? r : undefined;
 }
 
 export function entityBySlug(slug: string): EntityRecord | undefined {
   const r = bySlug.get(slug);
-  return r && r.kind === "entity" ? r : undefined;
+  return r && r.kind === 'entity' ? r : undefined;
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -189,14 +174,11 @@ export function entityBySlug(slug: string): EntityRecord | undefined {
 // the JSON instead of a switch statement.
 
 const blueprintConfig = siteConfigRaw.blueprintConfig ?? {};
-const blueprintKind = (blueprintConfig.kind ?? "project") as
-  | "project"
-  | "resource"
-  | "entity";
-const blueprintId = (blueprintConfig.id ?? "project-directory") as
-  | "project-directory"
-  | "resource-hub"
-  | "ecosystem-map";
+const blueprintKind = (blueprintConfig.kind ?? 'project') as 'project' | 'resource' | 'entity';
+const blueprintId = (blueprintConfig.id ?? 'project-directory') as
+  | 'project-directory'
+  | 'resource-hub'
+  | 'ecosystem-map';
 
 /**
  * URL slug for the directory index page (e.g. `/projects/`,
@@ -205,24 +187,24 @@ const blueprintId = (blueprintConfig.id ?? "project-directory") as
  * time.
  */
 export function indexSlug(): string {
-  return blueprintConfig.routeSlug ?? "projects";
+  return blueprintConfig.routeSlug ?? 'projects';
 }
 
 /** URL slug for a single record detail page (the dynamic
  * `[recordSlug]` segment). Default "project" for backwards-compat
  * with V0-published configs that exposed the field as `itemSlug`. */
 export function recordSlugConfig(): string {
-  return blueprintConfig.recordSlug ?? blueprintConfig.itemSlug ?? "project";
+  return blueprintConfig.recordSlug ?? blueprintConfig.itemSlug ?? 'project';
 }
 
 /** Singular human label, e.g. "project", "resource", "entity". */
 export function itemLabel(): string {
-  return blueprintConfig.labelSingular ?? "project";
+  return blueprintConfig.labelSingular ?? 'project';
 }
 
 /** Plural human label, e.g. "projects", "resources", "entities". */
 export function itemLabelPlural(): string {
-  return blueprintConfig.labelPlural ?? "projects";
+  return blueprintConfig.labelPlural ?? 'projects';
 }
 
 /** Active blueprint id. */
@@ -231,7 +213,7 @@ export function blueprintIdFn(): string {
 }
 
 /** Active record kind discriminator. */
-export function activeKind(): "project" | "resource" | "entity" {
+export function activeKind(): 'project' | 'resource' | 'entity' {
   return blueprintKind;
 }
 
@@ -243,11 +225,11 @@ export function activeKind(): "project" | "resource" | "entity" {
  */
 export const items: IndexRecord[] = (() => {
   switch (blueprintKind) {
-    case "resource":
+    case 'resource':
       return resources;
-    case "entity":
+    case 'entity':
       return entities;
-    case "project":
+    case 'project':
     default:
       return projects;
   }
@@ -259,7 +241,7 @@ export const fullItems: Resource[] = (() => {
 })();
 
 export const fullProjects: ProjectRecord[] = fullRecords.filter(
-  (record): record is ProjectRecord => record.kind === "project",
+  (record): record is ProjectRecord => record.kind === 'project',
 );
 
 // ──────────────────────────────────────────────────────────────────────
@@ -315,43 +297,98 @@ const here = dirname(fileURLToPath(import.meta.url));
 /** Wide allowlist used for `ProjectRecord.content` Markdown bodies. */
 const RECORD_BODY_ALLOWLIST = [
   // Headings — full depth.
-  "h1", "h2", "h3", "h4", "h5", "h6",
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
   // Block-level content.
-  "p", "br", "hr", "div", "blockquote",
+  'p',
+  'br',
+  'hr',
+  'div',
+  'blockquote',
   // Lists.
-  "ul", "ol", "li",
+  'ul',
+  'ol',
+  'li',
   // Definition lists.
-  "dl", "dt", "dd",
+  'dl',
+  'dt',
+  'dd',
   // Tables (GFM).
-  "table", "thead", "tbody", "tfoot", "tr", "th", "td",
-  "caption", "colgroup", "col",
+  'table',
+  'thead',
+  'tbody',
+  'tfoot',
+  'tr',
+  'th',
+  'td',
+  'caption',
+  'colgroup',
+  'col',
   // Inline formatting.
-  "strong", "em", "b", "i", "u", "s", "del", "ins",
-  "mark", "small", "sub", "sup", "kbd", "abbr",
+  'strong',
+  'em',
+  'b',
+  'i',
+  'u',
+  's',
+  'del',
+  'ins',
+  'mark',
+  'small',
+  'sub',
+  'sup',
+  'kbd',
+  'abbr',
   // `<span>` is only here for Shiki's per-token wrappers inside
   // highlighted code blocks. Sanitize-html's default is to strip
   // any tag not in this list, so without `span` here the syntax
   // highlights silently disappear from fenced code.
-  "span",
+  'span',
   // Links + images.
-  "a", "img",
+  'a',
+  'img',
   // Code.
-  "code", "pre",
+  'code',
+  'pre',
   // Forms (task-list checkboxes only).
-  "input", "label",
+  'input',
+  'label',
   // Collapsibles and semantic blocks.
-  "details", "summary",
-  "figure", "figcaption",
-  "time",
+  'details',
+  'summary',
+  'figure',
+  'figcaption',
+  'time',
 ];
 
 /** Narrow allowlist used for `content/pages/<page>.md`. */
 const PAGE_BODY_ALLOWLIST = [
-  "h1", "h2", "h3", "h4",
-  "p", "br", "hr",
-  "ul", "ol", "li",
-  "strong", "em", "b", "i", "u", "s", "del",
-  "a", "code", "pre", "blockquote", "img",
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'p',
+  'br',
+  'hr',
+  'ul',
+  'ol',
+  'li',
+  'strong',
+  'em',
+  'b',
+  'i',
+  'u',
+  's',
+  'del',
+  'a',
+  'code',
+  'pre',
+  'blockquote',
+  'img',
 ];
 
 /**
@@ -363,55 +400,49 @@ const PAGE_BODY_ALLOWLIST = [
  * becomes a hardened disabled checkbox for GFM task lists.
  */
 const COMMON_BODY_ATTRIBUTES = {
-  a: ["href", "title", "rel", "target"],
-  img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
-  th: ["scope", "colspan", "rowspan", "align"],
-  td: ["colspan", "rowspan", "align"],
-  col: ["span", "align"],
-  input: ["type", "checked", "disabled"],
-  label: ["for"],
-  abbr: ["title"],
-  time: ["datetime"],
-  details: ["open"],
-  div: ["class"], // table-wrap div the renderer injects
-  span: ["style"], // Shiki emits inline `--shiki-light` / `--shiki-dark` CSS variables
-  pre: ["class", "style"], // Shiki also tags the outer `<pre>` with theme classes
-  code: ["class"],
-  "*": ["id"],
+  a: ['href', 'title', 'rel', 'target'],
+  img: ['src', 'alt', 'title', 'width', 'height', 'loading', 'decoding'],
+  th: ['scope', 'colspan', 'rowspan', 'align'],
+  td: ['colspan', 'rowspan', 'align'],
+  col: ['span', 'align'],
+  input: ['type', 'checked', 'disabled'],
+  label: ['for'],
+  abbr: ['title'],
+  time: ['datetime'],
+  details: ['open'],
+  div: ['class'], // table-wrap div the renderer injects
+  span: ['style'], // Shiki emits inline `--shiki-light` / `--shiki-dark` CSS variables
+  pre: ['class', 'style'], // Shiki also tags the outer `<pre>` with theme classes
+  code: ['class'],
+  '*': ['id'],
 };
 
 /** `<a>` tag normalization — open in a new tab, no opener. */
 const ANCHOR_TRANSFORM = sanitizeHtml.simpleTransform(
-  "a",
-  { rel: "noopener noreferrer", target: "_blank" },
+  'a',
+  { rel: 'noopener noreferrer', target: '_blank' },
   true,
 );
 
 /** Hardens `<img>` to lazy-load + async-decode. */
-const IMG_TRANSFORM = (
-  tagName: string,
-  attribs: Record<string, string>,
-) => ({
+const IMG_TRANSFORM = (tagName: string, attribs: Record<string, string>) => ({
   tagName,
   attribs: {
     ...attribs,
-    loading: attribs.loading ?? "lazy",
-    decoding: attribs.decoding ?? "async",
+    loading: attribs.loading ?? 'lazy',
+    decoding: attribs.decoding ?? 'async',
   },
 });
 
 /** Forces `<input type="checkbox">` to be disabled so task lists
  *  render read-only at runtime (no on-page state to persist). */
-const INPUT_TRANSFORM = (
-  tagName: string,
-  attribs: Record<string, string>,
-) => ({
+const INPUT_TRANSFORM = (tagName: string, attribs: Record<string, string>) => ({
   tagName,
   attribs: {
     ...attribs,
-    type: "checkbox",
-    disabled: "",
-    ...(attribs.checked !== undefined ? { checked: "" } : {}),
+    type: 'checkbox',
+    disabled: '',
+    ...(attribs.checked !== undefined ? { checked: '' } : {}),
   },
 });
 
@@ -423,11 +454,11 @@ const INPUT_TRANSFORM = (
 function headingSlug(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[‘’]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-+$/g, "");
+    .replace(/[‘’]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-+$/g, '');
 }
 
 /**
@@ -462,9 +493,10 @@ export function renderMarkdownToSafeHtml(
       heading({ tokens, depth }) {
         const inline = this.parser.parseInline(tokens);
         const plain = tokens
-          .map((t: { text?: string; raw?: string }) => t.text ?? t.raw ?? "")
-          .join("");
-        const id = depth === 1 ? "" : ` id="${uniqueSlug(headingSlug(plain) || "section", headingIds)}"`;
+          .map((t: { text?: string; raw?: string }) => t.text ?? t.raw ?? '')
+          .join('');
+        const id =
+          depth === 1 ? '' : ` id="${uniqueSlug(headingSlug(plain) || 'section', headingIds)}"`;
         return `<h${depth}${id}>${inline}</h${depth}>\n`;
       },
       table(token: {
@@ -473,14 +505,15 @@ export function renderMarkdownToSafeHtml(
       }) {
         const head = token.header
           .map((cell) => `<th>${this.parser.parseInline(cell.tokens)}</th>`)
-          .join("");
+          .join('');
         const body = token.rows
-          .map((row) =>
-            `<tr>${row
-              .map((cell) => `<td>${this.parser.parseInline(cell.tokens)}</td>`)
-              .join("")}</tr>`,
+          .map(
+            (row) =>
+              `<tr>${row
+                .map((cell) => `<td>${this.parser.parseInline(cell.tokens)}</td>`)
+                .join('')}</tr>`,
           )
-          .join("");
+          .join('');
         return `<div class="grove-prose-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>\n`;
       },
       // Fenced code blocks: route through Shiki instead of marked's
@@ -489,7 +522,7 @@ export function renderMarkdownToSafeHtml(
       // hand it to the sanitizer unchanged (Shiki's output is
       // safe by construction — no script / event handlers).
       code({ text, lang }) {
-        return highlightCode(text, lang ?? "") + "\n";
+        return highlightCode(text, lang ?? '') + '\n';
       },
     },
   });
@@ -498,18 +531,18 @@ export function renderMarkdownToSafeHtml(
   return sanitizeHtml(rawHtml, {
     allowedTags: allowlist,
     allowedAttributes: COMMON_BODY_ATTRIBUTES,
-    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
     allowedSchemesByTag: {
-      a: ["http", "https", "mailto", "tel"],
-      img: ["http", "https", "data"],
+      a: ['http', 'https', 'mailto', 'tel'],
+      img: ['http', 'https', 'data'],
     },
-    allowedSchemesAppliedToAttributes: ["href", "src"],
+    allowedSchemesAppliedToAttributes: ['href', 'src'],
     transformTags: {
       a: ANCHOR_TRANSFORM,
       img: IMG_TRANSFORM,
       input: INPUT_TRANSFORM,
     },
-    disallowedTagsMode: "discard",
+    disallowedTagsMode: 'discard',
   });
 }
 
@@ -552,24 +585,57 @@ const headingIds = new Map<string, number>();
 // warning. The shared promise is safe to await from any caller; once
 // it resolves it stays resolved. The previous engine is released
 // exactly once per HMR boundary via `import.meta.hot.dispose`.
-const SHIKI_HIGHLIGHTER = Symbol.for("grove.shiki.highlighter");
-type GlobalWithShiki = typeof globalThis & { [SHIKI_HIGHLIGHTER]?: Promise<Awaited<ReturnType<typeof getSingletonHighlighter>>> };
+const SHIKI_HIGHLIGHTER = Symbol.for('grove.shiki.highlighter');
+type GlobalWithShiki = typeof globalThis & {
+  [SHIKI_HIGHLIGHTER]?: Promise<Awaited<ReturnType<typeof getSingletonHighlighter>>>;
+};
 const SUPPORTED_LANGS = [
-  "bash", "sh", "shell", "console",
-  "python", "py",
-  "javascript", "js", "jsx", "typescript", "ts", "tsx",
-  "json", "jsonc", "yaml", "yml", "toml",
-  "markdown", "md", "mdx",
-  "html", "css", "scss", "sass",
-  "sql", "graphql",
-  "dockerfile", "diff",
-  "rust", "go", "java", "kotlin", "swift", "ruby", "php",
-  "c", "cpp", "csharp", "objective-c",
-  "xml", "ini", "properties",
+  'bash',
+  'sh',
+  'shell',
+  'console',
+  'python',
+  'py',
+  'javascript',
+  'js',
+  'jsx',
+  'typescript',
+  'ts',
+  'tsx',
+  'json',
+  'jsonc',
+  'yaml',
+  'yml',
+  'toml',
+  'markdown',
+  'md',
+  'mdx',
+  'html',
+  'css',
+  'scss',
+  'sass',
+  'sql',
+  'graphql',
+  'dockerfile',
+  'diff',
+  'rust',
+  'go',
+  'java',
+  'kotlin',
+  'swift',
+  'ruby',
+  'php',
+  'c',
+  'cpp',
+  'csharp',
+  'objective-c',
+  'xml',
+  'ini',
+  'properties',
 ];
 const globalAny = globalThis as GlobalWithShiki;
 const highlighter = await (globalAny[SHIKI_HIGHLIGHTER] ??= getSingletonHighlighter({
-  themes: ["github-light", "github-dark-default"],
+  themes: ['github-light', 'github-dark-default'],
   langs: SUPPORTED_LANGS,
 }));
 
@@ -589,28 +655,23 @@ if (import.meta.hot) {
  * scroll behaviour).
  */
 function highlightCode(text: string, lang: string): string {
-  const normalized = lang?.toLowerCase() ?? "";
-  const safeLang = highlighter.getLoadedLanguages().includes(normalized)
-    ? normalized
-    : "text";
+  const normalized = lang?.toLowerCase() ?? '';
+  const safeLang = highlighter.getLoadedLanguages().includes(normalized) ? normalized : 'text';
   const html = highlighter.codeToHtml(text, {
     lang: safeLang,
-    themes: { light: "github-light", dark: "github-dark-default" },
+    themes: { light: 'github-light', dark: 'github-dark-default' },
     defaultColor: false,
   });
   // Strip the outer `<pre>`'s inline `background-color` so it doesn't
   // fight our package's prose background. The per-token `<span>`
   // `style="--shiki-light: …; --shiki-dark: …"` declarations must
   // survive — they're what makes dual-theme work.
-  return html.replace(
-    /(<pre[^>]*?)\s+style="[^"]*"/g,
-    "$1",
-  );
+  return html.replace(/(<pre[^>]*?)\s+style="[^"]*"/g, '$1');
 }
 
 const contentHtmlBySlug = new Map<string, string>();
 for (const r of fullRecords) {
-  if (r.kind !== "project") continue;
+  if (r.kind !== 'project') continue;
   const projectRecord = r as ProjectRecord;
   if (!projectRecord.content) continue;
   const read = readContentFile(projectRecord.content);
@@ -647,15 +708,15 @@ export function getContentHtml(slug: string): string | null {
  */
 export function getPageContentHtml(page: string): string | null {
   const candidates = [
-    resolve(here, "..", "..", "content", "pages", `${page}.md`),
-    resolve(here, "..", "..", "..", "content", "pages", `${page}.md`),
-    resolve(process.cwd(), "content", "pages", `${page}.md`),
+    resolve(here, '..', '..', 'content', 'pages', `${page}.md`),
+    resolve(here, '..', '..', '..', 'content', 'pages', `${page}.md`),
+    resolve(process.cwd(), 'content', 'pages', `${page}.md`),
   ];
   const path = candidates.find((candidate) => existsSync(candidate));
   if (!path) return null;
 
   try {
-    const markdown = stripFrontmatter(readFileSync(path, "utf8"));
+    const markdown = stripFrontmatter(readFileSync(path, 'utf8'));
     headingIds.clear();
     return renderMarkdownToSafeHtml(markdown, {
       allowlist: PAGE_BODY_ALLOWLIST,

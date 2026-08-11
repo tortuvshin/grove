@@ -1,8 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
-import { stringify as stringifyYaml } from "yaml";
-import { blueprintKind, type Blueprint, type ProjectRecord } from "./schema.js";
-import { uniqueSlug } from "./slug.js";
+import { mkdir, writeFile } from 'node:fs/promises';
+import { basename, join, resolve } from 'node:path';
+import { stringify as stringifyYaml } from 'yaml';
+import { blueprintKind, type Blueprint, type ProjectRecord } from './schema.js';
+import { uniqueSlug } from './slug.js';
 
 export interface ImportedRecord {
   slug: string;
@@ -29,26 +29,26 @@ export interface ImportResult {
 const markdownLinkPattern = /\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
 const TOC_TITLES = new Set([
-  "contents",
-  "table of contents",
-  "contributing",
-  "contribution",
-  "license",
-  "contributors",
+  'contents',
+  'table of contents',
+  'contributing',
+  'contribution',
+  'license',
+  'contributors',
 ]);
 
 const EMOJIS = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
 
 function stripAnchor(name: string): string {
   return name
-    .replace(/<a\s+name="[^"]+"><\/a>/gi, "")
-    .replace(/🔗/g, "")
-    .replace(EMOJIS, "")
-    .replace(/\s+/g, " ")
+    .replace(/<a\s+name="[^"]+"><\/a>/gi, '')
+    .replace(/🔗/g, '')
+    .replace(EMOJIS, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
-const REPO_RESERVED = new Set(["issues", "pulls", "stargazers", "network"]);
+const REPO_RESERVED = new Set(['issues', 'pulls', 'stargazers', 'network']);
 
 export function detectGithubRepo(url: string): string | undefined {
   const match = url.match(/^https?:\/\/github\.com\/([^/\s]+)\/([^/#?\s]+)(?:[/?#].*)?$/i);
@@ -56,13 +56,13 @@ export function detectGithubRepo(url: string): string | undefined {
   const owner = match[1];
   const repoName = match[2];
   if (!owner || !repoName) return undefined;
-  const repo = repoName.replace(/\.git$/, "");
+  const repo = repoName.replace(/\.git$/, '');
   if (!repo || REPO_RESERVED.has(repo)) return undefined;
   return `https://github.com/${owner}/${repo}`;
 }
 
 function isAnchorLink(url: string): boolean {
-  return url.startsWith("#") || url.startsWith("./#") || url.startsWith("../#");
+  return url.startsWith('#') || url.startsWith('./#') || url.startsWith('../#');
 }
 
 function isExternalUrl(url: string): boolean {
@@ -80,12 +80,12 @@ const MALFORMED_BARE_BRACKET = /\[[^\]\n]{1,80}\]/g;
 
 function extractDescription(body: string): string {
   return body
-    .replace(markdownLinkPattern, "")
-    .replace(MALFORMED_OPEN_LINK, "")
-    .replace(MALFORMED_BARE_BRACKET, "")
+    .replace(markdownLinkPattern, '')
+    .replace(MALFORMED_OPEN_LINK, '')
+    .replace(MALFORMED_BARE_BRACKET, '')
     .trim()
-    .replace(/^[-:—–]\s*/, "")
-    .replace(/\s+/g, " ")
+    .replace(/^[-:—–]\s*/, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -95,7 +95,7 @@ function headingDepth(line: string): number | undefined {
 }
 
 function headingText(line: string): string | undefined {
-  return stripAnchor(line.match(/^#{2,6}\s+(.+?)\s*$/)?.[1]?.trim() ?? "");
+  return stripAnchor(line.match(/^#{2,6}\s+(.+?)\s*$/)?.[1]?.trim() ?? '');
 }
 
 function slugify(label: string, seen: Map<string, number>): string {
@@ -121,7 +121,7 @@ export function parseAwesomeMarkdown(
   const seen = new Map<string, number>();
   const categories = new Set<string>();
   const records: ImportedRecord[] = [];
-  let currentCategory = "uncategorized";
+  let currentCategory = 'uncategorized';
   let skipped = 0;
   let duplicateSlugs = 0;
   let tocSkipped = 0;
@@ -129,10 +129,10 @@ export function parseAwesomeMarkdown(
   let inTocBlock = false;
 
   for (let index = 0; index < lines.length; index++) {
-    const line = lines[index] ?? "";
+    const line = lines[index] ?? '';
     const depth = headingDepth(line);
     if (depth) {
-      const title = headingText(line) ?? "";
+      const title = headingText(line) ?? '';
       inTocBlock = TOC_TITLES.has(title.toLowerCase());
       if (title && !inTocBlock) {
         currentCategory = title;
@@ -152,10 +152,10 @@ export function parseAwesomeMarkdown(
 
     if (!/^\s*[-*+]\s+/.test(line)) continue;
 
-    const body = line.replace(/^\s*[-*+]\s+/, "").trim();
+    const body = line.replace(/^\s*[-*+]\s+/, '').trim();
     const parsedLinks = [...body.matchAll(markdownLinkPattern)].map((match) => ({
-      label: (match[1] ?? "").trim(),
-      url: (match[2] ?? "").trim(),
+      label: (match[1] ?? '').trim(),
+      url: (match[2] ?? '').trim(),
     }));
     if (parsedLinks.length === 0) {
       skipped++;
@@ -191,12 +191,12 @@ export function parseAwesomeMarkdown(
     const lowerSlug =
       primaryExternal.label
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .slice(0, 80) || "item";
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80) || 'item';
     if (id !== lowerSlug) duplicateSlugs++;
     const description = extractDescription(body);
-    const links: ImportedRecord["links"] = {
+    const links: ImportedRecord['links'] = {
       ...(github ? { github } : {}),
       ...(!github ? { website: primaryExternal.url } : {}),
       ...(options.sourceUrl ? { source: options.sourceUrl } : {}),
@@ -215,7 +215,7 @@ export function parseAwesomeMarkdown(
     report: {
       imported: records.length,
       skipped,
-      categories: [...categories].filter((c) => c && c !== "uncategorized"),
+      categories: [...categories].filter((c) => c && c !== 'uncategorized'),
       duplicateSlugs,
       tocSkipped,
       anchorLinksSkipped,
@@ -224,25 +224,22 @@ export function parseAwesomeMarkdown(
 }
 
 export async function importAwesomeList(input: string): Promise<ImportResult> {
-  const remote =
-    githubReadmeUrl(input) ?? (/^https?:\/\//.test(input) ? input : undefined);
+  const remote = githubReadmeUrl(input) ?? (/^https?:\/\//.test(input) ? input : undefined);
   let text: string;
   let file: string | undefined;
   let sourceUrl: string | undefined;
   if (remote) {
     const response = await fetch(remote);
     if (!response.ok) {
-      throw new Error(
-        `Could not fetch ${remote}: ${response.status} ${response.statusText}`,
-      );
+      throw new Error(`Could not fetch ${remote}: ${response.status} ${response.statusText}`);
     }
     text = await response.text();
-    file = "sources/README.md";
+    file = 'sources/README.md';
     sourceUrl = input;
   } else {
     const path = resolve(input);
-    const { readFile } = await import("node:fs/promises");
-    text = await readFile(path, "utf8");
+    const { readFile } = await import('node:fs/promises');
+    text = await readFile(path, 'utf8');
     file = basename(path);
   }
   return parseAwesomeMarkdown(text, sourceUrl !== undefined ? { file, sourceUrl } : { file });
@@ -256,35 +253,31 @@ export async function importAwesomeList(input: string): Promise<ImportResult> {
 export async function writeImportedRecords(
   result: ImportResult,
   cwd = process.cwd(),
-  blueprint: Blueprint = "project-directory",
+  blueprint: Blueprint = 'project-directory',
 ): Promise<{ written: number; dir: string }> {
   const expectedKind = blueprintKind[blueprint];
-  const dir = resolve(cwd, "data", "records");
+  const dir = resolve(cwd, 'data', 'records');
   await mkdir(dir, { recursive: true });
   let written = 0;
   for (const record of result.records) {
     let yamlObj: Record<string, unknown>;
-    if (expectedKind === "project") {
+    if (expectedKind === 'project') {
       const project: Partial<ProjectRecord> = {
-        kind: "project",
+        kind: 'project',
         slug: record.slug,
         name: record.name,
         description: record.description,
         category: record.category,
         tags: [],
         links: record.links,
-        source: { type: "import" },
+        source: { type: 'import' },
       };
       yamlObj = project as Record<string, unknown>;
     } else {
       yamlObj = { ...record, kind: expectedKind };
     }
     const path = join(dir, `${record.slug}.yml`);
-    await writeFile(
-      path,
-      stringifyYaml(yamlObj, { lineWidth: 100 }),
-      "utf8",
-    );
+    await writeFile(path, stringifyYaml(yamlObj, { lineWidth: 100 }), 'utf8');
     written++;
   }
   return { written, dir };

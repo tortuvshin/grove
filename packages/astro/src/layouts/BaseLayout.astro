@@ -14,10 +14,10 @@
  * GA4 can be configured once through `site.analytics.googleAnalyticsId`
  * or overridden per page with `gaId`. Omit both for privacy-first deployments.
  */
-import "../styles.css";
-import Header from "./Header.astro";
-import Footer from "./Footer.astro";
-import Seo from "./Seo.astro";
+import '../styles.css';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import Seo from './Seo.astro';
 
 interface NavItem {
   label: string;
@@ -79,7 +79,7 @@ interface Props {
   title: string;
   description: string;
   site: Site;
-  type?: "website" | "article" | "profile";
+  type?: 'website' | 'article' | 'profile';
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** Optional Google Analytics 4 Measurement ID (e.g. "G-XXXXXX"). */
@@ -104,8 +104,7 @@ const {
   submitLabel,
   submitHref,
 } = Astro.props;
-const directoryPath =
-  searchPath ?? `/${site.blueprintConfig?.routeSlug ?? "items"}`;
+const directoryPath = searchPath ?? `/${site.blueprintConfig?.routeSlug ?? 'items'}`;
 const effectiveGaId = gaId ?? site.analytics?.googleAnalyticsId;
 
 const favicon =

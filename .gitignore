@@ -34,3 +34,6 @@ test-tmp-*/
 # Local scaffold smoke tests — never commit a `grove new` scratch site.
 examples/*/
 .audit/
+
+# Biome linter/formatter cache
+.cache/

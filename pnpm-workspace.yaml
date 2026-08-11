@@ -8,28 +8,15 @@ packages:
 
 linkWorkspacePackages: true
 
+# Targeted overrides for known transitive-dep CVEs. Keep this list small —
+# if a dep upgrade closes a vulnerability, drop the override on the next
+# audit. Each entry references its advisory.
 overrides:
-  yaml@>=2.0.0 <2.8.3: '>=2.8.3'
-  esbuild@>=0.27.3 <0.28.1: '>=0.28.1'
+  # GHSA-f88m-g3jw-g9cj — sharp < 0.35.0
+  'sharp@<0.35.0': '>=0.35.0'
+  # GHSA-48c2-rrv3-qjmp — yaml >= 2.0.0 < 2.8.3
+  'yaml@>=2.0.0 <2.8.3': '>=2.8.3'
+  # GHSA-8988-4f7v-96qf — @opentelemetry/core < 2.8.0
   '@opentelemetry/core@<2.8.0': '>=2.8.0'
-  astro@>=2.9.0 <=7.0.9: '>=7.1.0'
-  js-yaml@>=4.0.0 <4.3.0: '>=4.3.0 <5'
-  astro@<7.0.6: '>=7.0.6'
-  astro@>=3.10.0 <7.0.4: '>=7.0.4'
-  svgo@>=4.0.0 <4.0.2: '>=4.0.2'
-  fast-uri@>=3.0.0 <=3.1.3: '>=3.1.4'
-  sharp@<0.35.0: '>=0.35.0'
-  postcss@<=8.5.17: '>=8.5.18'
-  brace-expansion@>=2.0.0 <2.1.3: '>=2.1.3'
-  postcss@<=8.5.22: '>=8.5.23'
-  fast-uri@>=3.0.0 <3.1.5: '>=3.1.5'
-  ip-address@<=10.3.0: '>=10.3.1'
-  ip-address@>=10.1.1 <=10.2.1: '>=10.2.2'
-  ip-address@>=10.1.1 <=10.2.0: '>=10.2.1'
-  brace-expansion@>=2.0.0 <2.1.4: '>=2.1.4'
-  js-yaml@>=4.0.0 <4.3.1: '>=4.3.1 <5'
-  fast-uri@>=3.0.0 <3.1.3: '>=3.1.3'
-  nanoid@<3.3.16: '>=3.3.16'
-  nanoid@<3.3.17: '>=3.3.17'
 
 preferWorkspacePackages: true

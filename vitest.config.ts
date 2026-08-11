@@ -28,11 +28,11 @@
  * projects are scanned (the integration scope is too slow to be in
  * the default coverage run).
  */
-import { defineConfig } from "vitest/config";
-import { mkdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { defineConfig } from 'vitest/config';
+import { mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const TMPDIR = resolve("./.tmp-test");
+const TMPDIR = resolve('./.tmp-test');
 mkdirSync(TMPDIR, { recursive: true });
 
 export default defineConfig({
@@ -46,12 +46,12 @@ export default defineConfig({
           // `name` makes the project show up in the vitest
           // run list (`pnpm test --project unit`) and groups
           // its output under a single banner.
-          name: "unit",
+          name: 'unit',
           // Each package's `src/` is the unit-test home. The
           // brief calls for "include the packages/* directories";
           // the `{test,spec}.ts` suffix keeps `.d.ts` and the
           // test files co-located in the same directory.
-          include: ["packages/*/src/**/*.{test,spec}.ts", "apps/docs/src/**/*.{test,spec}.ts"],
+          include: ['packages/*/src/**/*.{test,spec}.ts', 'apps/docs/src/**/*.{test,spec}.ts'],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its
@@ -63,18 +63,18 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          name: "starlight",
-          root: "./packages/starlight",
-          include: ["tests/**/*.{test,spec}.ts"],
+          name: 'starlight',
+          root: './packages/starlight',
+          include: ['tests/**/*.{test,spec}.ts'],
         },
       },
       // ── Integration smoke ──
       {
         extends: true,
         test: {
-          name: "integration",
-          root: "./tests/integration",
-          include: ["**/*.{test,spec}.ts"],
+          name: 'integration',
+          root: './tests/integration',
+          include: ['**/*.{test,spec}.ts'],
           // Integration tests are slow; give them room.
           testTimeout: 60_000,
           hookTimeout: 60_000,
@@ -82,7 +82,7 @@ export default defineConfig({
           // never races another scaffold for the same tmpdir.
           // `isolate: false` is the Vitest 4 spelling for what was
           // `poolOptions.forks.singleFork: true` in Vitest 3.
-          pool: "forks",
+          pool: 'forks',
           maxWorkers: 1,
           isolate: false,
           // Vitest 4 requires distinct sequence.groupOrder for
@@ -95,19 +95,43 @@ export default defineConfig({
       {
         extends: true,
         test: {
-          name: "integration-audit",
-          include: ["tests/integration/grove-audit.test.ts"],
+          name: 'integration-audit',
+          include: ['tests/integration/grove-audit.test.ts'],
           timeout: 600_000,
           fileParallelism: false,
         },
       },
     ],
     coverage: {
-      provider: "v8",
-      reporter: ["text", "html", "json-summary"],
-      reportsDirectory: "./coverage",
-      include: ["packages/*/src/**", "packages/starlight/core/**", "packages/starlight/index.ts", "packages/starlight/schema.ts", "packages/starlight/user-components.ts"],
-      exclude: ["**/node_modules/**", "**/dist/**", "**/*.test.ts", "**/index.ts", "**/coverage/**"],
+      provider: 'v8',
+      reporter: ['text', 'html', 'json-summary'],
+      reportsDirectory: './coverage',
+      include: [
+        'packages/*/src/**',
+        'packages/starlight/core/**',
+        'packages/starlight/index.ts',
+        'packages/starlight/schema.ts',
+        'packages/starlight/user-components.ts',
+      ],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/*.test.ts',
+        '**/index.ts',
+        '**/coverage/**',
+      ],
+      // Thresholds measured against the v0.5.0 unit-test baseline
+      // (statements 60.07, branches 44.38, functions 56.95, lines 62.89).
+      // Set just below baseline so the gate catches real regressions
+      // without failing on organic noise. Files with 0% coverage
+      // (e.g. prepare.ts, parseReadme.ts) are covered only by the
+      // integration suite, which is intentionally not in this run.
+      thresholds: {
+        statements: 58,
+        branches: 42,
+        functions: 54,
+        lines: 60,
+      },
     },
     // Sandbox TMPDIR so tests that create real temp files
     // (`os.tmpdir()` + chdir) don't collide with the
@@ -117,7 +141,7 @@ export default defineConfig({
     // vitest/vite SSR loader wouldn't be looking for stale
     // module-resolution temp files from a previous run.
     env: {
-      TMPDIR: TMPDIR + "/",
+      TMPDIR: TMPDIR + '/',
     },
   },
 });

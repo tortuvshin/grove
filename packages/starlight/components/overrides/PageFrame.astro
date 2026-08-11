@@ -1,9 +1,14 @@
 ---
-import { marked } from 'marked';
 import userConfig from 'virtual:lucode-starlight-config';
 import Drawer from './parts/Drawer.astro';
 
 const { hasSidebar } = Astro.locals.starlightRoute;
+
+// `footerText` is a plain string from the consumer's `astro.config.mjs`.
+// Astro auto-escapes interpolated text, so emitting it directly is safe
+// and avoids the XSS sink that `marked.parseInline` + `set:html` would
+// create. Consumers who want rich formatting should render Markdown in
+// their own component instead of leaning on this slot.
 ---
 
 <div data-slot="layout">
@@ -34,7 +39,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     </main>
 
     <footer>
-        <div data-slot="footer-text" set:html={marked.parseInline(userConfig.footerText)} />
+        <div data-slot="footer-text">{userConfig.footerText}</div>
     </footer>
 </div>
 

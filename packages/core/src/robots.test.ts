@@ -5,7 +5,7 @@ describe("buildRobotsTxt", () => {
   it("emits default policy", () => {
     const out = buildRobotsTxt({ siteUrl: "https://example.com/" });
     expect(out).toMatch(/User-agent: \*/);
-    expect(out).toMatch(/Sitemap: https:\/\/example\.com\/sitemap-index\.xml/);
+    expect(out).toMatch(/Sitemap: https:\/\/example\.com\/sitemap\.xml/);
   });
   it("adds Disallow rules", () => {
     const out = buildRobotsTxt({ siteUrl: "https://example.com/", disallow: ["/api/"] });

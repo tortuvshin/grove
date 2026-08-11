@@ -10,14 +10,14 @@ const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline: heroTagline, image, actions = [] } = data.hero || {};
 const heroLayout = ((data.hero as any)?.layout as HeroLayout) ?? 'centered';
 const announcement =
-    ((data.hero as any)?.announcement as { text: string; link: string }) ?? undefined;
+  ((data.hero as any)?.announcement as { text: string; link: string }) ?? undefined;
 const hasImage = !!image;
 const tagline = heroTagline || data.description;
 
 const imageAttrs = {
-    loading: 'eager' as const,
-    decoding: 'async' as const,
-    alt: image?.alt || '',
+  loading: 'eager' as const,
+  decoding: 'async' as const,
+  alt: image?.alt || '',
 };
 
 let darkImage: ImageMetadata | undefined;
@@ -25,14 +25,14 @@ let lightImage: ImageMetadata | undefined;
 let rawHtml: string | undefined;
 
 if (image) {
-    if ('file' in image) {
-        darkImage = image.file;
-    } else if ('dark' in image) {
-        darkImage = image.dark;
-        lightImage = image.light;
-    } else {
-        rawHtml = image.html;
-    }
+  if ('file' in image) {
+    darkImage = image.file;
+  } else if ('dark' in image) {
+    darkImage = image.dark;
+    lightImage = image.light;
+  } else {
+    rawHtml = image.html;
+  }
 }
 ---
 
@@ -67,11 +67,11 @@ if (image) {
                     )
                 }
 
-                <h1 id={PAGE_TITLE_ID} data-page-title set:html={title} />
+                <h1 id={PAGE_TITLE_ID} data-page-title>{title}</h1>
             </div>
 
             <div class="hero-content-container">
-                {tagline && <div class="tagline" set:html={tagline} />}
+                {tagline && <div class="tagline">{tagline}</div>}
 
                 {
                     actions.length > 0 && (

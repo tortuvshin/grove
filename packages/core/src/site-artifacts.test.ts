@@ -30,7 +30,7 @@ describe("site artifacts", () => {
 
   it("uses canonical config in robots and social metadata", () => {
     expect(buildRobotsTxt({ siteUrl: config.site.url ?? "" })).toContain(
-      "Sitemap: https://directory.example/sitemap-index.xml",
+      "Sitemap: https://directory.example/sitemap.xml",
     );
     const svg = buildOgImageSvg(config, {
       totalRecords: 149,
