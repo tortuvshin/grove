@@ -19,7 +19,7 @@
  * scrolls the body. Cards are individually rendered so the
  * sticky container's height is bounded by the actual content.
  */
-import { formatStars, compact } from "@grove-dev/core";
+import { formatStars, compact, licenseDisplay } from "@grove-dev/core";
 import type { RecordDetailModel } from "../server/models.js";
 import LanguageBreakdown from "./LanguageBreakdown.astro";
 
@@ -119,7 +119,7 @@ function row(label: string, value: unknown) {
         {row("License", licenseSpdx) && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">License</dt>
-            <dd class="font-mono text-ink-900 dark:text-ink-100">{licenseSpdx}</dd>
+            <dd class="font-mono text-ink-900 dark:text-ink-100">{licenseDisplay(licenseSpdx)}</dd>
           </div>
         )}
         {row("Default branch", repo?.default_branch) && (

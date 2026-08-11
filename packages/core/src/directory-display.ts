@@ -167,3 +167,33 @@ export function langColor(name: string | null | undefined): string {
   if (!name) return "#9ca3af";
   return LANG_COLORS[name] ?? "#9ca3af";
 }
+
+// ── SPDX license id → human-readable label ──────────────────────────
+// GitHub emits a literal `NOASSERTION` (and the related `OTHER`
+// placeholder) on repositories where the license couldn't be
+// auto-detected. Surfacing the API enum to readers looks like a
+// bug; this helper swaps the placeholder for a plain-English string.
+const LICENSE_PLACEHOLDER_IDS = new Set([
+  "NOASSERTION",
+  "OTHER",
+  "NONE",
+  "UNLICENSED",
+  "",
+]);
+
+export const LICENSE_NOT_DETECTED = "License not detected";
+export const LICENSE_OTHER = "Other";
+
+/**
+ * Resolve a SPDX id (or GitHub-flavored placeholder) to a
+ * user-facing string. The placeholder ids are collapsed to a
+ * short, neutral phrase; known SPDX ids pass through untouched so
+ * downstream consumers can still match on them.
+ */
+export function licenseDisplay(spdxId: string | null | undefined): string {
+  if (!spdxId) return LICENSE_NOT_DETECTED;
+  if (LICENSE_PLACEHOLDER_IDS.has(spdxId.toUpperCase())) {
+    return spdxId.toUpperCase() === "OTHER" ? LICENSE_OTHER : LICENSE_NOT_DETECTED;
+  }
+  return spdxId;
+}
