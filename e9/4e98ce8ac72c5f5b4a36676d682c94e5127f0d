@@ -1,0 +1,34 @@
+packages/astro/src/server/models.ts
+  s_09317cc066a818::t_cfb547b222edd1 127-144
+packages/astro/src/components/ProjectCard.astro
+  s_09317cc066a818::t_b0739209d17424 199
+  s_09317cc066a818::t_22726c01ea6382 116
+  s_09317cc066a818::t_e821103b7a82e6 191
+  s_09317cc066a818::t_aca21ca8e4f2e3 1-115,117-190,192-198,200-247
+packages/astro/src/components/RecordSection.astro
+  s_09317cc066a818::t_48d47173b26721 112
+  s_09317cc066a818::t_df79779a6d4dbb 99
+  s_09317cc066a818::t_1c2e6ab95ee07b 27
+  s_09317cc066a818::t_49eb334bf8e34f 6-8
+  s_09317cc066a818::t_c1bc6e11d6781b 50-51
+  s_09317cc066a818::t_c32b13014c2e33 66,69
+packages/astro/src/components/Hero.astro
+  s_09317cc066a818::t_51cb852bbd809c 120,123-124,128-133,135-136,138,141,143-155,157-158,161-163,165-166,171-174,180,185,192,196-197,203-210,212,215-217,219-223,225-229
+  s_09317cc066a818::t_9f330e6459134e 86-90,92-93,95-96,99,102,105-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e94e98ce8ac72c5f5b4a36676d682c94e5127f0d",
+  "prompts": {},
+  "sessions": {
+    "s_09317cc066a818": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e948492-9c61-4885-b006-4ee4b5cda153",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
