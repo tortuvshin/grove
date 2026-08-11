@@ -112,6 +112,10 @@ export interface CollectionPageModel {
   total: number;
   isEmpty: boolean;
   entries: CollectionEntry[];
+  /** ItemList JSON-LD block. Pass to BaseLayout as the `jsonLd` prop
+   *  so it ships in the document head and is indexable by search
+   *  engines as a list of `SoftwareApplication` items. */
+  jsonLd?: unknown;
   related: Array<{ slug: string; title: string; url: string }>;
 }
 
@@ -136,6 +140,7 @@ export function getCollectionPageModel(
   collection: Collection,
   entries: CollectionEntry[],
   allCollections: Collection[],
+  site?: { name?: string; url?: string },
 ): CollectionPageModel {
   const result = runCollection(collection, entries);
   const related = findRelated(collection, allCollections, 4).map((c) => ({
@@ -143,6 +148,29 @@ export function getCollectionPageModel(
     title: c.title,
     url: `/collections/${c.slug}/`,
   }));
+  // ItemList JSON-LD. Search engines can use this to surface
+  // individual entries directly from the collection URL.
+  // Cap at 50 entries to keep the JSON-LD payload bounded;
+  // search engines don't index beyond that anyway.
+  const itemListElement = result.entries.slice(0, 50).map((entry, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "SoftwareApplication",
+      name: entry.title,
+      url: entry.url,
+      description: entry.description,
+    },
+  }));
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: collection.title,
+    description: collection.description,
+    url: site?.url ? `${site.url.replace(/\/$/, "")}/collections/${collection.slug}/` : undefined,
+    numberOfItems: result.entries.length,
+    itemListElement,
+  };
   return {
     collection: {
       slug: collection.slug,
@@ -156,6 +184,7 @@ export function getCollectionPageModel(
     isEmpty: result.isEmpty,
     entries: result.entries,
     related,
+    jsonLd,
   };
 }
 
