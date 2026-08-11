@@ -444,6 +444,10 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     // `description` when the curator has not written a summary yet.
     summary: (record.summary && record.summary.trim()) || record.description || "",
     sourceDescription: record.sourceDescription ?? record.description ?? "",
+    // Collection membership is populated by the consumer detail page
+    // after calling `findCollectionsFor`. Defaulting to [] keeps the
+    // model safe when the consumer doesn't wire it.
+    collectionMembership: [],
     monthlyCommits,
     maxMonthlyCommits: Math.max(1, ...monthlyCommits.map((item) => item.commits)),
     contributionSignals,

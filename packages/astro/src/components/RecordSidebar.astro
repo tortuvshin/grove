@@ -319,6 +319,16 @@ function row(label: string, value: unknown) {
           {record.curation?.reviewedAt ? new Date(String(record.curation.reviewedAt)).toLocaleDateString() : "—"}
         </time>.
       </p>
+      {detail.collectionMembership && detail.collectionMembership.length > 0 && (
+        <p class="m-0 mt-1.5 leading-relaxed">
+          <span class="font-semibold">Also in: </span>
+          {detail.collectionMembership.map((c, i) => (
+            <>
+              <a href={c.url} class="text-inherit no-underline hover:underline">{c.title}</a>{i < detail.collectionMembership.length - 1 ? ", " : ""}
+            </>
+          ))}
+        </p>
+      )}
       {readingMetrics.wordCount > 0 && (
         <p class="m-0 mt-1 leading-relaxed">
           Notes: {readingMetrics.wordCount.toLocaleString()} words · {readingMetrics.minutes} min read.

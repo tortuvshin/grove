@@ -217,3 +217,35 @@ export async function loadCollections(cwd: string): Promise<Collection[]> {
   }
   return out;
 }
+
+/**
+ * Reverse lookup — given a record, return the slugs of every
+ * curated collection that includes it. Walks each collection's
+ * query + ranking once, applies the same filter the collection
+ * page uses, and returns the collection slugs that contain the
+ * target record. Used by the detail page's sidebar to show
+ * "Also in" / "Collection membership" links.
+ *
+ * The returned array includes `{slug, title}` pairs so the
+ * sidebar can render both the link target and a user-facing
+ * label without re-loading the collection YAML.
+ */
+export function findCollectionsFor(
+  target: { slug?: string; stack?: string; stacks?: string[]; platforms?: string[]; licenses?: string[]; category?: string; visibility?: string; status?: string },
+  collections: Collection[],
+  entries: CollectionEntry[],
+): { slug: string; title: string; url: string }[] {
+  if (!target.slug) return [];
+  const result: { slug: string; title: string; url: string }[] = [];
+  for (const collection of collections) {
+    const filtered = runCollection(collection, entries).entries;
+    if (filtered.some((entry) => entry.slug === target.slug)) {
+      result.push({
+        slug: collection.slug,
+        title: collection.title,
+        url: `/collections/${collection.slug}/`,
+      });
+    }
+  }
+  return result;
+}
