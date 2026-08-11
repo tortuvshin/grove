@@ -3,9 +3,9 @@
  * RecordSection — generic lens-style section wrapper for the
  * home page.
  *
- * Renders a SectionHeader + a 3-column grid of `ItemCard`s (a
- * record card; kept as `ItemCard` for V1 published API stability),
- * optional "View all" link in the header. Generic: takes any
+ * Renders a SectionHeader + a 3-column grid of `ProjectCard`s
+ * (the v0.5.0 refined card), plus an optional "View all" link
+ * in the header. Generic: takes any
  * `IndexRecord[]` (the slim list-page shape, discriminated union
  * over `kind`).
  *
@@ -24,7 +24,7 @@
  * homepage never collapses to a blank section.
  */
 import type { IndexRecord } from "@grove-dev/core";
-import ItemCard from "./ItemCard.astro";
+import ProjectCard from "./ProjectCard.astro";
 import Container from "../layouts/Container.astro";
 import SectionHeader from "../layouts/SectionHeader.astro";
 
@@ -47,6 +47,8 @@ interface Props {
   emptyLabel?: string;
   /** Extra class on the outer <section>. */
   class?: string;
+  /** How many records to render. Default 3 — the refined grid shows one row. */
+  limit?: number;
 }
 
 const {
@@ -61,9 +63,10 @@ const {
   eyebrow,
   emptyLabel = "No records yet.",
   class: className = "",
+  limit = 3,
 } = Astro.props;
 
-const visible = items.slice(0, 6);
+const visible = items.slice(0, limit);
 ---
 
 <section
@@ -93,7 +96,7 @@ const visible = items.slice(0, 6);
       </p>
     ) : (
       <div
-        class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        class="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3"
       >
         {visible.map((item) => {
           // Resolve href: caller-supplied `hrefFor` callback wins;
@@ -106,7 +109,7 @@ const visible = items.slice(0, 6);
           const finalHref =
             typeof hrefFor === "function" ? hrefFor(item) : fallbackHref;
           return (
-            <ItemCard record={item} href={finalHref} />
+            <ProjectCard record={item} href={finalHref} />
           );
         })}
       </div>

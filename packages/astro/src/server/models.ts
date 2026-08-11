@@ -124,7 +124,24 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   // alphabetical — so the homepage's "Trending now" panel ends up
   // showing the same 6 items as the "Established" panel (because
   // ~95% of mature items also carry the "hot" label).
-  const hot = applySort(filterRecords(projects, { labels: ["hot"] }), "most-starred").slice(0, 6);
+  //
+  // Top-up guard: when fewer than MIN_HOT records carry the "hot"
+  // label, fill the remainder from the most-starred remaining
+  // projects so the first lens panel can always render a full
+  // three-column grid. Topped-up records are still excluded from the
+  // "Recently added" / "Established" panels below.
+  const MIN_HOT = 3;
+  const hotLabelled = applySort(filterRecords(projects, { labels: ["hot"] }), "most-starred").slice(0, 6);
+  const labelledSlugs = new Set(hotLabelled.map((r) => r.slug));
+  const hot =
+    hotLabelled.length >= MIN_HOT
+      ? hotLabelled
+      : [
+          ...hotLabelled,
+          ...applySort(projects, "most-starred")
+            .filter((r) => !labelledSlugs.has(r.slug))
+            .slice(0, MIN_HOT - hotLabelled.length),
+        ];
   // Recently added: most recently reviewed items. We exclude items
   // already shown in the hot panel so the three lens sections on the
   // homepage never echo the same record card.

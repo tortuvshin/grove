@@ -83,25 +83,32 @@ const {
 // items label so "apps" → "app" without an extra prop.
 const singular = (itemLabel ?? itemsLabel.replace(/s$/, "")).toLowerCase();
 
-const githubUrl = stats.originalRepo;
-
-const trustStats: { value: string; label: string }[] = [
-  ...(stats.totalApps !== undefined
-    ? [{ value: compact(stats.totalApps) ?? "0", label: `${itemsLabel} indexed` }]
+// One compact stats line: "6 projects indexed · 5 categories · 3 stacks".
+// Every entry is guarded so a fresh directory never renders a zero-value.
+const statParts: string[] = [
+  ...(stats.totalApps !== undefined && stats.totalApps > 0
+    ? [`${compact(stats.totalApps)} ${itemsLabel} indexed`]
     : []),
-  ...(stats.totalCategories !== undefined
-    ? [{ value: String(stats.totalCategories), label: "categories" }]
+  ...(stats.totalCategories !== undefined && stats.totalCategories > 0
+    ? [`${stats.totalCategories} categories`]
     : []),
-  ...(stats.totalStacks !== undefined
-    ? [{ value: String(stats.totalStacks), label: "stacks" }]
+  ...(stats.totalStacks !== undefined && stats.totalStacks > 0
+    ? [`${stats.totalStacks} stacks`]
     : []),
   ...(stats.totalOwners !== undefined && stats.totalOwners > 0
-    ? [{ value: compact(stats.totalOwners) ?? "0", label: "project owners" }]
+    ? [`${compact(stats.totalOwners)} owners`]
     : []),
   ...(stats.totalStars !== undefined && stats.totalStars > 0
-    ? [{ value: compact(stats.totalStars) ?? "0", label: "stars across projects" }]
+    ? [`${compact(stats.totalStars)} stars`]
     : []),
 ];
+
+// One primary CTA only — Submit already lives in the navbar
+// (BaseLayout → Header submitHref), so the hero never duplicates it.
+const primaryCta: CTA | undefined =
+  ctas.find((c) => c.variant === "primary") ??
+  ctas[0] ??
+  { label: `Browse ${itemsLabel}`, href: searchHref, variant: "primary" };
 ---
 
 <section
@@ -110,181 +117,116 @@ const trustStats: { value: string; label: string }[] = [
     className,
   ]}
 >
+  {/* Dark mode only: a barely-there radial lift behind the headline. */}
   <div
     aria-hidden="true"
-    class="pointer-events-none absolute inset-0"
-    style="
-      background: linear-gradient(
-        180deg,
-        color-mix(in oklab, var(--color-ink-200) 30%, transparent) 0%,
-        transparent 70%
-      );
-    "
+    class="pointer-events-none absolute inset-0 hidden dark:block"
+    style="background: radial-gradient(60% 55% at 50% 0%, color-mix(in oklab, var(--grove-foreground) 5%, transparent) 0%, transparent 70%);"
   ></div>
 
   <Container>
-    <div class="relative py-12 sm:py-16">
-      <div class="max-w-3xl">
-        <span
-          class="inline-flex animate-fade-in items-center gap-2 text-2xs font-medium text-ink-500 dark:text-ink-400"
-        >
+    <div class="relative mx-auto flex max-w-[900px] flex-col items-center py-[88px] text-center lg:py-[104px]">
+      {/* Eyebrow */}
+      <span class="inline-flex animate-fade-in items-center gap-2 text-[13px] font-medium text-ink-500 dark:text-ink-400">
+        <span aria-hidden="true" class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"></span>
+        {eyebrow}
+        {eyebrowBadge && (
           <span
-            aria-hidden="true"
-            class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"
-          ></span>
-          {eyebrow}
-          {eyebrowBadge && (
-            <span
-              class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300"
-              aria-label={eyebrowBadge}
-            >
-              {eyebrowBadge}
-            </span>
-          )}
-        </span>
-
-        <h1
-          class="mt-3 animate-fade-in-up text-[2.25rem] sm:text-[2.75rem] md:text-[3rem] font-semibold tracking-[-0.02em] leading-[1.05] text-ink-900 dark:text-ink-100 m-0"
-          style="animation-delay: 0.05s;"
-        >
-          {name}<br class="hidden sm:block" />
-          <span
-            class="bg-gradient-to-r from-ink-700 via-ink-900 to-ink-700 bg-clip-text text-transparent dark:from-ink-300 dark:via-ink-100 dark:to-ink-300"
-            style="background-size: 200% 200%; animation: fade-in-up 0.7s ease-out 0.1s both, gradient-shift 8s ease-in-out 1s infinite;"
+            class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300"
+            aria-label={eyebrowBadge}
           >
-            {tagline}
+            {eyebrowBadge}
           </span>
-        </h1>
-
-        {description && (
-          <p
-            class="mt-4 animate-fade-in-up text-[0.9375rem] sm:text-[1rem] leading-relaxed text-ink-500 dark:text-ink-400 m-0 max-w-[64ch]"
-            style="animation-delay: 0.15s;"
-          >
-            {description}
-          </p>
         )}
-      </div>
+      </span>
 
-      {/* Trust stats row */}
-      {trustStats.length > 0 && (
-        <dl
-          class:list={[
-            "mt-7 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-3",
-            trustStats.length === 2 && "sm:grid-cols-2",
-            trustStats.length === 3 && "grid-cols-3",
-            trustStats.length === 4 && "sm:grid-cols-4",
-            trustStats.length >= 5 && "sm:grid-cols-5",
-          ]}
-          aria-label="Directory at a glance"
+      {/* Headline */}
+      <h1
+        class="m-0 mt-5 max-w-[820px] animate-fade-in-up text-balance text-[clamp(44px,5vw,64px)] font-[650] leading-[1.08] tracking-[-0.035em] text-ink-900 dark:text-ink-100"
+        style="animation-delay: 0.05s;"
+      >
+        <span class="block">{name}</span>
+        <span class="block">{tagline}</span>
+      </h1>
+
+      {description && (
+        <p
+          class="m-0 mt-5 max-w-[640px] animate-fade-in-up text-[16px] leading-[1.6] text-ink-500 dark:text-ink-400"
+          style="animation-delay: 0.1s;"
         >
-          {trustStats.map((s) => (
-            <div class="flex flex-col gap-0.5">
-              <dt class="sr-only">{s.label}</dt>
-              <dd class="m-0 font-mono text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-                {s.value}
-              </dd>
-              <dd class="m-0 text-2xs uppercase tracking-wider text-ink-500 dark:text-ink-400">
-                {s.label}
-              </dd>
-            </div>
-          ))}
-        </dl>
+          {description}
+        </p>
       )}
 
-      {/* Search */}
+      {/* Search — primary interaction. Border lives on the FORM, not the input:
+          styles.css forces border-radius/border-color/background-color !important
+          on input[type=search], so a bordered input cannot be 12px-rounded. */}
       <form
-        class="mt-7 flex max-w-4xl flex-col gap-2 sm:flex-row sm:items-stretch"
+        class="mt-8 flex h-[58px] w-full max-w-[840px] animate-fade-in-up items-center gap-3 rounded-xl border border-ink-200 bg-background p-1.5 pl-4 transition-colors focus-within:border-ink-400 dark:border-ink-800 dark:focus-within:border-ink-600"
+        style="animation-delay: 0.15s;"
         role="search"
         action={searchHref}
         method="get"
       >
-        <label class="relative flex-1">
-          <span class="sr-only">Search {itemsLabel}, stacks, categories, licenses</span>
-          <svg
-            viewBox="0 0 16 16"
-            width="16"
-            height="16"
-            aria-hidden="true"
-            class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400"
-            fill="currentColor"
-          >
-            <path
-              d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"
-            ></path>
+        <label class="flex min-w-0 flex-1 items-center gap-3">
+          <span class="sr-only">Search {itemsLabel}, stacks, and categories</span>
+          <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" class="shrink-0 text-ink-400 dark:text-ink-500" fill="currentColor">
+            <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
           </svg>
           <input
             type="search"
             name="q"
             placeholder={searchPlaceholder}
-            class="h-10 w-full rounded-md border border-ink-200 bg-white pl-10 pr-3 text-[0.9375rem] text-ink-900 placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100 dark:placeholder:text-ink-500 dark:focus:border-ink-100 dark:focus:ring-ink-100/15"
+            class="h-full w-full min-w-0 border-0 bg-transparent px-0 text-[16px] text-ink-900 outline-none placeholder:text-ink-400 dark:text-ink-100 dark:placeholder:text-ink-500"
           />
         </label>
         <button
           type="submit"
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 sm:px-5"
+          class="inline-flex h-[46px] shrink-0 cursor-pointer items-center justify-center rounded-lg border border-transparent bg-primary px-5 text-[15px] font-medium leading-none text-primary-foreground outline-none transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
         >
           Search
         </button>
       </form>
 
       {quickFilters.length > 0 && (
-        <p
-          class="mt-2 text-2xs text-ink-500 dark:text-ink-400 m-0"
-        >
+        <p class="m-0 mt-4 text-[13px] text-ink-500 dark:text-ink-400">
           Try{" "}
           {quickFilters.map((f, i) => (
             <>
-              <a
-                href={f.href}
-                class="font-mono text-ink-700 underline-offset-2 hover:underline dark:text-ink-300"
-              >
-                {f.label}
-              </a>
-              {i < quickFilters.length - 1 && <span class="mx-1">·</span>}
+              <a href={f.href} class="font-mono text-ink-700 underline-offset-2 hover:underline dark:text-ink-300">{f.label}</a>
+              {i < quickFilters.length - 1 && <span aria-hidden="true" class="mx-1">·</span>}
             </>
           ))}
         </p>
       )}
 
-      {ctas.length > 0 && (
-        <div class="mt-5 flex flex-wrap items-center gap-2">
-          {ctas.map((cta) => (
-            <a
-              href={cta.href}
-              class:list={[
-                "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35",
-                cta.variant === "primary"
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : cta.variant === "ghost"
-                    ? "bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
-                    : "border-border bg-secondary text-foreground hover:bg-accent",
-              ]}
-              {...(cta.external
-                ? { target: "_blank", rel: "noopener noreferrer" }
-                : {})}
-              data-event="hero_cta_click"
-              data-event-source="hero"
-            >
-              {cta.label}
-            </a>
+      {/* Inline stats — single compact line, middle-dot separators */}
+      {statParts.length > 0 && (
+        <p class="m-0 mt-5 text-[13px] text-ink-500 dark:text-ink-400">
+          {statParts.map((part, i) => (
+            <>
+              {i > 0 && <span aria-hidden="true" class="mx-2 opacity-60">·</span>}
+              <span>{part}</span>
+            </>
           ))}
-        </div>
+        </p>
       )}
 
-      {/* Help debug the type system when callers forget to pass ctas. */}
-      {ctas.length === 0 && githubUrl && (
-        <div class="mt-5 flex flex-wrap items-center gap-2">
-          <a href={searchHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">
-            Browse {itemsLabel}
-          </a>
+      {/* Primary CTA only */}
+      {primaryCta && (
+        <div class="mt-8">
           <a
-            href={`${githubUrl}/blob/main/CONTRIBUTING.md`}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent"
+            href={primaryCta.href}
+            class="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[var(--radius)] border border-transparent bg-primary px-5 text-[15px] font-medium leading-none text-primary-foreground outline-none transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
+            {...(primaryCta.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            data-event="hero_cta_click"
+            data-event-source="hero"
           >
-            Submit via GitHub
+            {primaryCta.label}
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
           </a>
         </div>
       )}
