@@ -26,8 +26,6 @@ import {
   formatStars,
   getOwnerAndRepoFromRepoUrl,
   getOwnerAvatarUrl,
-  PAGE_SIZE,
-  paginate,
   projectStackIds,
   readingMetrics,
   readContentFile,
@@ -204,19 +202,13 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
   const sorted = applySort(filterRecords(items, filters), sort);
   const pageCount = totalPages(sorted.length);
   const page = Math.min(effectivePage(filters), pageCount);
-  // Slice `sorted` down to the current page so the SSR HTML only
-  // ships the visible records. The full set stays in `items` for
-  // the client overlay (which still needs to re-sort on filter /
-  // lens changes). The audit measured ~1.2 MB for the unpaginated
-  // page; this commit takes it to ~30 KB on page 1.
-  const paged = paginate(sorted, page, PAGE_SIZE);
   return {
     items,
-    total: sorted.length,
+    total: items.length,
     filters,
     facets,
     sort,
-    sorted: paged,
+    sorted,
     pages: pageCount,
     page,
     chips: activeFilterChips(filters),
