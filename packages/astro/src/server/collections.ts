@@ -19,7 +19,12 @@ interface RawRecord {
   platforms?: string[];
   license?: string;
   visibility?: string;
+  /** GitHub stargazers count. Stored on `github.repository.stargazers_count`
+   *  in the full payload; read explicitly because the index payload
+   *  does not flatten it. */
   stars?: number;
+  /** GitHub fork count. Stored on `github.repository.forks_count`. */
+  forks?: number;
   pushedAt?: string;
   lastCommitAt?: string;
   category?: string;
@@ -27,6 +32,15 @@ interface RawRecord {
   scores?: { curation?: number; activity?: number };
   repoUrl?: string;
   links?: { github?: string; website?: string };
+  /** GitHub metadata block on the full record. The star / fork counts
+   *  are read from `github.repository.stargazers_count` /
+   *  `github.repository.forks_count` here. */
+  github?: {
+    repository?: {
+      stargazers_count?: number;
+      forks_count?: number;
+    };
+  };
 }
 
 /**
@@ -68,7 +82,8 @@ export function recordsToCollectionEntries(
       platform: r.platforms,
       license: r.license,
       status: r.visibility,
-      stars: r.stars,
+      stars: r.stars ?? r.github?.repository?.stargazers_count,
+      forks: r.forks ?? r.github?.repository?.forks_count,
       pushedAt: r.pushedAt ?? r.lastCommitAt,
       curationScore: r.scores?.curation,
       activityScore: r.scores?.activity,

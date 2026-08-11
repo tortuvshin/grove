@@ -29,6 +29,10 @@ export interface CollectionQuery {
   licenses?: string[];
   kinds?: string[];
   excludeStatuses?: string[];
+  /** Minimum GitHub star count. Entries below this are excluded. */
+  minStars?: number;
+  /** Minimum GitHub fork count. Entries below this are excluded. */
+  minForks?: number;
   q?: string;
 }
 
@@ -76,6 +80,7 @@ export interface CollectionEntry {
   license?: string;
   status?: string;
   stars?: number;
+  forks?: number;
   pushedAt?: string;
   curationScore?: number;
   activityScore?: number;
@@ -108,6 +113,12 @@ export function filterEntries(
       query.excludeStatuses?.length &&
       query.excludeStatuses.includes(entry.status ?? "")
     ) {
+      return false;
+    }
+    if (query.minStars != null && (entry.stars ?? 0) < query.minStars) {
+      return false;
+    }
+    if (query.minForks != null && (entry.forks ?? 0) < query.minForks) {
       return false;
     }
     if (query.q) {
