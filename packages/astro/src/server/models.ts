@@ -188,6 +188,7 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
   const filters = filtersFromSearchParams(searchParams);
   const rawFacets = buildFacets(items, {
     curatedTagIds: site.taxonomy?.topics?.map((t) => t.id),
+    filters, // Intersection counts: each facet reflects all OTHER filters.
   });
   const enabled = configuredFacets(site);
   const facets = {
