@@ -119,9 +119,28 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
   const plural = site.blueprintConfig?.labelPlural ?? itemLabelPlural();
   const projects = items.filter((record) => record.kind === "project");
-  const hot = filterRecords(projects, { labels: ["hot"] }).slice(0, 6);
-  const recentlyAdded = applySort(projects, "recently-added").slice(0, 6);
-  const established = filterRecords(projects, { labels: ["mature"] }).slice(0, 6);
+  // Hot: most-starred items carrying the "hot" lens label. Without an
+  // explicit sort, the filter preserves the index order, which is
+  // alphabetical — so the homepage's "Trending now" panel ends up
+  // showing the same 6 items as the "Established" panel (because
+  // ~95% of mature items also carry the "hot" label).
+  const hot = applySort(filterRecords(projects, { labels: ["hot"] }), "most-starred").slice(0, 6);
+  // Recently added: most recently reviewed items. We exclude items
+  // already shown in the hot panel so the three lens sections on the
+  // homepage never echo the same record card.
+  const hotSlugs = new Set(hot.map((r) => r.slug));
+  const recentlyAdded = applySort(
+    projects.filter((r) => !hotSlugs.has(r.slug)),
+    "recently-added",
+  ).slice(0, 6);
+  // Established: longest-running mature items, again excluding any
+  // record already surfaced in the hot or recently-added panel so the
+  // three sections read as distinct perspectives.
+  const recentSlugs = new Set([...hotSlugs, ...recentlyAdded.map((r) => r.slug)]);
+  const established = applySort(
+    filterRecords(projects, { labels: ["mature"] }).filter((r) => !recentSlugs.has(r.slug)),
+    "most-starred",
+  ).slice(0, 6);
 
   const stackCounts = new Map<string, number>();
   const categoryCounts = new Map<string, number>();
@@ -234,6 +253,10 @@ export function getContributorsPageModel(site: DirectorySiteConfig) {
     title: `Community — ${site.name}`,
     description: `The people who have contributed to ${site.name} through code, curation, and review.`,
     contributorsGraphHref: repo ? `${repo}/graphs/contributors` : null,
+    // Surface the consumer's per-user contribution-count preference to
+    // the consumer page so it can render quieter cards when the
+    // directory does not curate contributor activity.
+    showContributionCount: site.contributors?.showContributionCount ?? true,
   };
 }
 

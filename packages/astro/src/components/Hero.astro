@@ -112,12 +112,13 @@ const trustStats: { value: string; label: string }[] = [
 >
   <div
     aria-hidden="true"
-    class="pointer-events-none absolute inset-0 opacity-60 dark:opacity-40"
+    class="pointer-events-none absolute inset-0"
     style="
-      background-image:
-        radial-gradient(60% 50% at 15% 20%, color-mix(in oklab, var(--color-ink-300) 34%, transparent), transparent 60%),
-        radial-gradient(50% 40% at 85% 10%, color-mix(in oklab, var(--color-ink-200) 28%, transparent), transparent 60%),
-        radial-gradient(40% 40% at 50% 90%, color-mix(in oklab, var(--color-ink-400) 18%, transparent), transparent 60%);
+      background: linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--color-ink-200) 30%, transparent) 0%,
+        transparent 70%
+      );
     "
   ></div>
 
@@ -148,7 +149,7 @@ const trustStats: { value: string; label: string }[] = [
         >
           {name}<br class="hidden sm:block" />
           <span
-            class="bg-gradient-to-r from-ink-900 via-ink-700 to-ink-900 bg-clip-text text-transparent dark:from-ink-100 dark:via-ink-300 dark:to-ink-100"
+            class="bg-gradient-to-r from-ink-700 via-ink-900 to-ink-700 bg-clip-text text-transparent dark:from-ink-300 dark:via-ink-100 dark:to-ink-300"
             style="background-size: 200% 200%; animation: fade-in-up 0.7s ease-out 0.1s both, gradient-shift 8s ease-in-out 1s infinite;"
           >
             {tagline}

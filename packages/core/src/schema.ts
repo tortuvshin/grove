@@ -670,6 +670,20 @@ export const groveConfigSchema = z.object({
   }),
 
   /**
+   * Contributors page affordances. `showContributionCount` controls
+   * whether each contributor tile shows the per-user commit/PR count
+   * (e.g. "12 contributions"). The default is `true` to preserve the
+   * V1 published behaviour; consumers that want a quieter card — e.g.
+   * a directory that doesn't curate contributor activity — can opt
+   * out without forking the template.
+   */
+  contributors: z
+    .object({
+      showContributionCount: z.boolean().default(true),
+    })
+    .default({ showContributionCount: true }),
+
+  /**
    * Optional Lighthouse audit manifest consumed by `grove audit`.
    * Each entry is a canonical page the audit must score 100×4.
    */
