@@ -19,7 +19,12 @@ interface RawRecord {
   platforms?: string[];
   license?: string;
   visibility?: string;
+  /** GitHub stargazers count. Stored on `github.repository.stargazers_count`
+   *  in the full payload; read explicitly because the index payload
+   *  does not flatten it. */
   stars?: number;
+  /** GitHub fork count. Stored on `github.repository.forks_count`. */
+  forks?: number;
   pushedAt?: string;
   lastCommitAt?: string;
   category?: string;
@@ -27,6 +32,15 @@ interface RawRecord {
   scores?: { curation?: number; activity?: number };
   repoUrl?: string;
   links?: { github?: string; website?: string };
+  /** GitHub metadata block on the full record. The star / fork counts
+   *  are read from `github.repository.stargazers_count` /
+   *  `github.repository.forks_count` here. */
+  github?: {
+    repository?: {
+      stargazers_count?: number;
+      forks_count?: number;
+    };
+  };
 }
 
 /**
@@ -68,7 +82,8 @@ export function recordsToCollectionEntries(
       platform: r.platforms,
       license: r.license,
       status: r.visibility,
-      stars: r.stars,
+      stars: r.stars ?? r.github?.repository?.stargazers_count,
+      forks: r.forks ?? r.github?.repository?.forks_count,
       pushedAt: r.pushedAt ?? r.lastCommitAt,
       curationScore: r.scores?.curation,
       activityScore: r.scores?.activity,
@@ -97,6 +112,10 @@ export interface CollectionPageModel {
   total: number;
   isEmpty: boolean;
   entries: CollectionEntry[];
+  /** ItemList JSON-LD block. Pass to BaseLayout as the `jsonLd` prop
+   *  so it ships in the document head and is indexable by search
+   *  engines as a list of `SoftwareApplication` items. */
+  jsonLd?: unknown;
   related: Array<{ slug: string; title: string; url: string }>;
 }
 
@@ -121,6 +140,7 @@ export function getCollectionPageModel(
   collection: Collection,
   entries: CollectionEntry[],
   allCollections: Collection[],
+  site?: { name?: string; url?: string },
 ): CollectionPageModel {
   const result = runCollection(collection, entries);
   const related = findRelated(collection, allCollections, 4).map((c) => ({
@@ -128,6 +148,29 @@ export function getCollectionPageModel(
     title: c.title,
     url: `/collections/${c.slug}/`,
   }));
+  // ItemList JSON-LD. Search engines can use this to surface
+  // individual entries directly from the collection URL.
+  // Cap at 50 entries to keep the JSON-LD payload bounded;
+  // search engines don't index beyond that anyway.
+  const itemListElement = result.entries.slice(0, 50).map((entry, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "SoftwareApplication",
+      name: entry.title,
+      url: entry.url,
+      description: entry.description,
+    },
+  }));
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: collection.title,
+    description: collection.description,
+    url: site?.url ? `${site.url.replace(/\/$/, "")}/collections/${collection.slug}/` : undefined,
+    numberOfItems: result.entries.length,
+    itemListElement,
+  };
   return {
     collection: {
       slug: collection.slug,
@@ -141,6 +184,7 @@ export function getCollectionPageModel(
     isEmpty: result.isEmpty,
     entries: result.entries,
     related,
+    jsonLd,
   };
 }
 
@@ -201,4 +245,36 @@ export async function loadCollections(cwd: string): Promise<Collection[]> {
     out.push(raw as Collection);
   }
   return out;
+}
+
+/**
+ * Reverse lookup — given a record, return the slugs of every
+ * curated collection that includes it. Walks each collection's
+ * query + ranking once, applies the same filter the collection
+ * page uses, and returns the collection slugs that contain the
+ * target record. Used by the detail page's sidebar to show
+ * "Also in" / "Collection membership" links.
+ *
+ * The returned array includes `{slug, title}` pairs so the
+ * sidebar can render both the link target and a user-facing
+ * label without re-loading the collection YAML.
+ */
+export function findCollectionsFor(
+  target: { slug?: string; stack?: string; stacks?: string[]; platforms?: string[]; licenses?: string[]; category?: string; visibility?: string; status?: string },
+  collections: Collection[],
+  entries: CollectionEntry[],
+): { slug: string; title: string; url: string }[] {
+  if (!target.slug) return [];
+  const result: { slug: string; title: string; url: string }[] = [];
+  for (const collection of collections) {
+    const filtered = runCollection(collection, entries).entries;
+    if (filtered.some((entry) => entry.slug === target.slug)) {
+      result.push({
+        slug: collection.slug,
+        title: collection.title,
+        url: `/collections/${collection.slug}/`,
+      });
+    }
+  }
+  return result;
 }

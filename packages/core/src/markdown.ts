@@ -69,9 +69,20 @@ function isExternalUrl(url: string): boolean {
   return /^https?:\/\//.test(url) || /^[a-z][a-z0-9+.-]*:/i.test(url);
 }
 
+// Malformed-link cleanup. Some upstream awesome-lists produce
+// fragments like `[Naser Elziadna](` (no closing paren, no URL)
+// or `[@handle]` (no parens at all). The primary
+// `markdownLinkPattern` only strips well-formed links, so these
+// fragments survive into the description and render as raw
+// Markdown. This pass deletes them.
+const MALFORMED_OPEN_LINK = /\[[^\]\n]+\]\s*(?=$|\n)/g;
+const MALFORMED_BARE_BRACKET = /\[[^\]\n]{1,80}\]/g;
+
 function extractDescription(body: string): string {
   return body
     .replace(markdownLinkPattern, "")
+    .replace(MALFORMED_OPEN_LINK, "")
+    .replace(MALFORMED_BARE_BRACKET, "")
     .trim()
     .replace(/^[-:—–]\s*/, "")
     .replace(/\s+/g, " ")

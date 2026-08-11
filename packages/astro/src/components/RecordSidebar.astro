@@ -19,7 +19,7 @@
  * scrolls the body. Cards are individually rendered so the
  * sticky container's height is bounded by the actual content.
  */
-import { formatStars, compact } from "@grove-dev/core";
+import { formatStars, compact, licenseDisplay } from "@grove-dev/core";
 import type { RecordDetailModel } from "../server/models.js";
 import LanguageBreakdown from "./LanguageBreakdown.astro";
 
@@ -119,7 +119,7 @@ function row(label: string, value: unknown) {
         {row("License", licenseSpdx) && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">License</dt>
-            <dd class="font-mono text-ink-900 dark:text-ink-100">{licenseSpdx}</dd>
+            <dd class="font-mono text-ink-900 dark:text-ink-100">{licenseDisplay(licenseSpdx)}</dd>
           </div>
         )}
         {row("Default branch", repo?.default_branch) && (
@@ -274,7 +274,7 @@ function row(label: string, value: unknown) {
           <ul class="m-0 flex list-none flex-wrap gap-1.5 p-0">
             {tags.map((t) => (
               <li>
-                <a href={`/${detail.slug}?q=${encodeURIComponent(t)}`} class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 no-underline dark:border-ink-800 dark:text-ink-300">
+                <a href={`/${detail.slug}?tag=${encodeURIComponent(t)}`} class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 no-underline dark:border-ink-800 dark:text-ink-300">
                   {t}
                 </a>
               </li>
@@ -319,6 +319,16 @@ function row(label: string, value: unknown) {
           {record.curation?.reviewedAt ? new Date(String(record.curation.reviewedAt)).toLocaleDateString() : "—"}
         </time>.
       </p>
+      {detail.collectionMembership && detail.collectionMembership.length > 0 && (
+        <p class="m-0 mt-1.5 leading-relaxed">
+          <span class="font-semibold">Also in: </span>
+          {detail.collectionMembership.map((c, i) => (
+            <>
+              <a href={c.url} class="text-inherit no-underline hover:underline">{c.title}</a>{i < detail.collectionMembership.length - 1 ? ", " : ""}
+            </>
+          ))}
+        </p>
+      )}
       {readingMetrics.wordCount > 0 && (
         <p class="m-0 mt-1 leading-relaxed">
           Notes: {readingMetrics.wordCount.toLocaleString()} words · {readingMetrics.minutes} min read.

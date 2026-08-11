@@ -309,6 +309,15 @@ export async function generate(
       cfg.paths.taxonomyDir,
       "platforms.yml",
     ),
+    // Curated tag vocabulary (data/taxonomy/topics.yml). Optional —
+    // older sites without the file simply get an empty list. The
+    // browse dropdown filters its Tag facet against this list so
+    // arbitrary GitHub topics don't pollute the dropdown.
+    topics: await loadTaxonomyFile(
+      cwd,
+      cfg.paths.taxonomyDir,
+      "topics.yml",
+    ),
     distributionChannels: await loadTaxonomyFile(
       cwd,
       cfg.paths.taxonomyDir,

@@ -400,7 +400,48 @@ export function removeFilter(
  * Build the full list of facet values from the items array, preserving
  * a sensible order (frequency desc, then alphabetical for ties).
  */
-export function buildFacets(items: IndexRecord[]) {
+export function buildFacets(
+  items: IndexRecord[],
+  options?: {
+    curatedTagIds?: string[];
+    /**
+     * When set, facet counts reflect records that satisfy all
+     * current filters *except* the facet being computed. This is the
+     * "intersection count" UX — Platform after Flutter should show
+     * Flutter+Platform counts, not the global Platform count.
+     *
+     * Set to `null` (or omit) to keep the legacy global-count
+     * behavior. The browse page opts in by passing the current
+     * `IndexFilters` minus each facet's filter.
+     */
+    filters?: IndexFilters | null;
+  },
+) {
+  const curatedTagIds = options?.curatedTagIds;
+  const filters = options?.filters;
+  const allowTag = (tag: string) =>
+    !curatedTagIds || curatedTagIds.length === 0 || curatedTagIds.includes(tag);
+
+  // For each facet, build a sub-filter that excludes that facet's
+  // current value. So when computing stack counts, we still apply
+  // platform / category / license filters, but we ignore the
+  // currently selected stacks. This is the "intersection count"
+  // UX the audit asked for.
+  const subFiltersFor = (facet: "stacks" | "platforms" | "categories" | "tags" | "licenses") => {
+    if (!filters) return null;
+    const next = { ...filters };
+    if (facet === "stacks") delete next.stacks;
+    if (facet === "platforms") delete next.platforms;
+    if (facet === "categories") delete next.categories;
+    if (facet === "tags") delete next.tags;
+    if (facet === "licenses") delete next.licenses;
+    return next;
+  };
+  const itemsForFacet = (facet: "stacks" | "platforms" | "categories" | "tags" | "licenses") => {
+    const sub = subFiltersFor(facet);
+    return sub ? filterRecords(items, sub) : items;
+  };
+
   const counts = {
     stack: new Map<string, number>(),
     platform: new Map<string, number>(),
@@ -409,18 +450,42 @@ export function buildFacets(items: IndexRecord[]) {
     label: new Map<string, number>(),
     license: new Map<string, number>(),
   };
-  for (const a of items) {
+  const stackScoped = itemsForFacet("stacks");
+  const platformScoped = itemsForFacet("platforms");
+  const categoryScoped = itemsForFacet("categories");
+  const tagScoped = itemsForFacet("tags");
+  const licenseScoped = itemsForFacet("licenses");
+
+  for (const a of stackScoped) {
     if (a.kind === "project") {
       const allStacks = new Set(
         [a.stack, ...a.stacks].filter((stack): stack is string => Boolean(stack)),
       );
       for (const s of allStacks) counts.stack.set(s, (counts.stack.get(s) ?? 0) + 1);
+    }
+  }
+  for (const a of platformScoped) {
+    if (a.kind === "project") {
       for (const p of a.platforms) counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);
+    }
+  }
+  for (const a of categoryScoped) {
+    counts.category.set(a.category, (counts.category.get(a.category) ?? 0) + 1);
+  }
+  for (const a of tagScoped) {
+    for (const tag of a.tags) {
+      if (allowTag(tag)) counts.tag.set(tag, (counts.tag.get(tag) ?? 0) + 1);
+    }
+  }
+  for (const a of licenseScoped) {
+    if (a.kind === "project") {
       const license = a.github?.license;
       if (license) counts.license.set(license, (counts.license.get(license) ?? 0) + 1);
     }
-    counts.category.set(a.category, (counts.category.get(a.category) ?? 0) + 1);
-    for (const tag of a.tags) counts.tag.set(tag, (counts.tag.get(tag) ?? 0) + 1);
+  }
+  // Labels don't have a UI facet yet; keep global counts so the
+  // existing badge logic doesn't drift.
+  for (const a of items) {
     for (const l of a.curation?.labels ?? []) counts.label.set(l, (counts.label.get(l) ?? 0) + 1);
   }
   const sortByCountThenName = (m: Map<string, number>) =>

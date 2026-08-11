@@ -186,7 +186,10 @@ function configuredFacets(site?: DirectorySiteConfig) {
 
 export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: DirectorySiteConfig) {
   const filters = filtersFromSearchParams(searchParams);
-  const rawFacets = buildFacets(items);
+  const rawFacets = buildFacets(items, {
+    curatedTagIds: site.taxonomy?.topics?.map((t) => t.id),
+    filters, // Intersection counts: each facet reflects all OTHER filters.
+  });
   const enabled = configuredFacets(site);
   const facets = {
     stacks: enabled.has("stacks") ? rawFacets.stacks.map((option) => ({ ...option, label: taxonomyLabel("stacks", option.value) })) : [],
@@ -215,7 +218,13 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
 
 export function getContributorsPageModel(site: DirectorySiteConfig) {
   const contributors = loadDirectoryContributors();
-  const sorted = [...contributors].sort((a, b) =>
+  // Render-time guard: even if a stale `data/generated/contributors.json`
+  // was produced before the sync-time filter was added, never surface
+  // bot accounts (login ends with `[bot]`) on the public contributors
+  // page. The ContributorsGrid uses the same total for its heading, so
+  // the headline count always agrees with the rendered grid.
+  const human = contributors.filter((c) => !c.username.endsWith("[bot]"));
+  const sorted = [...human].sort((a, b) =>
     (b.contributions ?? 0) - (a.contributions ?? 0) || a.username.localeCompare(b.username)
   );
   const repo = site.repoUrl?.replace(/\/$/, "");
@@ -433,6 +442,18 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     tags,
     healthLabel,
     contentHtml: isProject ? getContentHtml(recordSlug) : null,
+    // Curated summary (Open Apps-written) takes priority over the
+    // raw `description` (typically copied from GitHub). Fall back to
+    // `description` when the curator has not written a summary yet.
+    summary: (record.summary && record.summary.trim()) || record.description || "",
+    sourceDescription: record.sourceDescription ?? record.description ?? "",
+    // Collection membership is populated by the consumer detail page
+    // after calling `findCollectionsFor`. Defaulting to [] keeps the
+    // model safe when the consumer doesn't wire it.
+    collectionMembership: [],
+    // Curated screenshots array. Defaulting to [] keeps the renderer
+    // safe; RecordHeader shows a gallery strip when non-empty.
+    screenshots: proj?.screenshots ?? [],
     monthlyCommits,
     maxMonthlyCommits: Math.max(1, ...monthlyCommits.map((item) => item.commits)),
     contributionSignals,

@@ -28,6 +28,7 @@ import StackPlatformChips from "./StackPlatformChips.astro";
 import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, projectStackIds } from "@grove-dev/astro";
 import { formatStars, formatRelative } from "@grove-dev/astro";
 import { statusDisplay } from "@grove-dev/astro";
+import { licenseDisplay } from "@grove-dev/astro";
 
 type CardRecord = IndexRecord | Resource | ProjectRecord | IndexProjectRecord;
 
@@ -273,7 +274,7 @@ const category = (item as { category?: string }).category;
       )}
       {license && (
         <span class="inline-flex items-center gap-1" title={`License: ${license}`}>
-          <span class="font-mono uppercase tracking-wide text-[10px]">{license}</span>
+          <span class="font-mono uppercase tracking-wide text-[10px]">{licenseDisplay(license)}</span>
         </span>
       )}
     </div>
