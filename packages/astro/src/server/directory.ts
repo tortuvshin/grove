@@ -531,6 +531,14 @@ const headingIds = new Map<string, number>();
 // the same HTML is themed correctly in both modes without us
 // re-rendering at runtime.
 //
+// We use `github-dark-default` rather than `github-dark` for the
+// dark side: `github-dark` paints comments at `#6A737D`, which
+// fails WCAG AA contrast (3.72:1) against our `--color-ink-950`
+// `#171717` code-block background and trips the Lighthouse
+// accessibility audit on any record that contains a `# …` shell
+// comment. `github-dark-default` shifts comments to `#8B949E`,
+// which clears 4.5:1 against the same background (~6.3:1).
+//
 // `getSingletonHighlighter()` lazily loads the engine on first use
 // and caches it for every subsequent call — Shiki's WASM/grammar
 // load takes a few hundred ms, so we want to amortise across all
@@ -550,7 +558,7 @@ const SUPPORTED_LANGS = [
   "xml", "ini", "properties",
 ];
 const highlighter = await createHighlighter({
-  themes: ["github-light", "github-dark"],
+  themes: ["github-light", "github-dark-default"],
   langs: SUPPORTED_LANGS,
 });
 
@@ -567,7 +575,7 @@ function highlightCode(text: string, lang: string): string {
     : "text";
   const html = highlighter.codeToHtml(text, {
     lang: safeLang,
-    themes: { light: "github-light", dark: "github-dark" },
+    themes: { light: "github-light", dark: "github-dark-default" },
     defaultColor: false,
   });
   // Strip the outer `<pre>`'s inline `background-color` so it doesn't
