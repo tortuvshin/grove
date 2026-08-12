@@ -1,16 +1,16 @@
 ---
 title: Next.js
-description: "Status: not shipped. A Next.js adapter is a future roadmap item, not part of v0.4.0."
+description: "Status: not shipped. A Next.js adapter is a future roadmap item, not part of `0.5.0-next.2`."
 ---
 
-The **Next.js** adapter is **not shipped in v0.4.0**. There is no
+The **Next.js** adapter is **not shipped in `0.5.0-next.2`**. There is no
 `@grove-dev/nextjs` package in the workspace, no Next.js template,
 and the `grove init` scaffolder only emits an Astro project.
 
 ## Status
 
 **Planned.** No code exists for this adapter today. The roadmap
-([V1.1 section](/roadmap/#next-release--v11)) lists a Next.js
+([Later — directional](/roadmap/#later--directional)) lists a Next.js
 adapter only "if asked" by a real community space.
 
 ## Why this page exists
@@ -27,7 +27,7 @@ The page is kept so that:
 
 A v1.1 Next.js adapter would have to:
 
-- Add a `@grove-dev/nextjs` package under `packages/nextjs/` with
+- Add a `@grove-dev/nextjs` package to the workspace with
   Next.js-friendly page components and server helpers.
 - Port the Astro default template's home page, list page, and
   detail page to Next.js (App Router, React Server Components).
@@ -43,7 +43,7 @@ scheduled.
 
 ## When you need a server-rendered site today
 
-- **Use Astro with the SSR adapter** (out of scope for Grove v0.4.0,
+- **Use Astro with the SSR adapter** (out of scope for Grove `0.5.0-next.2`,
   but supported by Astro itself).
 - **Build a custom integration** on top of `@grove-dev/core`. The
   core package is framework-agnostic.
@@ -52,11 +52,11 @@ scheduled.
 ## Tracking
 
 Next.js adapter status is tracked in
-[Roadmap](/roadmap/#next-release--v11).
+[Roadmap → Later — directional](/roadmap/#later--directional).
 
 ## Related docs
 
-- **[Astro adapter](/adapters/astro/)** — the only v0.4.0-supported
+- **[Astro adapter](/adapters/astro/)** — the only `0.5.0-next.2`-supported
   choice.
 - **[SvelteKit adapter](/adapters/svelte/)** — same planned status as
   Next.js.

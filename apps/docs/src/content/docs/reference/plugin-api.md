@@ -51,7 +51,7 @@ type Link = {
 ```js
 grove({
   navLinks: [
-    { label: 'Docs', link: '/guides/getting-started/' },
+    { label: 'Docs', link: '/introduction/' },
     { label: 'API', link: '/reference/plugin-api/' },
     {
       label: 'GitHub',

@@ -205,7 +205,7 @@ Enables the GitHub integration. Three modes:
 - `{ metadata, contributors, health }` — pick which sub-features
   to enable.
 
-In v0.4.0, all three sub-features are implemented. `metadata`
+In `0.5.0-next.2`, all three sub-features are implemented. `metadata`
 powers `grove sync github`; `contributors` powers
 `grove sync contributors`; `health` derives `health.status` from
 the metadata on every render.

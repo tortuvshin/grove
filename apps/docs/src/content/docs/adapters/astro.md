@@ -64,7 +64,7 @@ Use the Astro adapter when:
 - You want Grove's full design-token theming (primary color, radius,
   density) out of the box.
 
-SvelteKit and Next.js adapters are **not** shipped in v0.4.0. See
+SvelteKit and Next.js adapters are **not** shipped in `0.5.0-next.2`. See
 the [Frameworks status matrix](/reference/frameworks/).
 
 ## Customization
@@ -119,7 +119,7 @@ the `/<blueprint-slug>/` index (e.g. `/projects/`).
 
 ## Build pipeline
 
-The template's `pnpm build` script chains the full pipeline. In v0.4.0
+The template's `pnpm build` script chains the full pipeline. In `0.5.0-next.2`
 the entire data pipeline (validation, generation, sitemap, llms,
 robots, og-image) runs through `grove check`, which the Astro
 integration invokes at `astro:config:setup`:

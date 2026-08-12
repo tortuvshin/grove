@@ -22,9 +22,10 @@ window:
 | Previous minor   | Critical fixes only, for 30 days after a new minor |
 | Older            | No fixes — please upgrade                          |
 
-In practice this means: if you're on `0.4.0` and `0.5.0` ships, you
-have 30 days of critical-only support on `0.4.0` before you should
-upgrade. After 30 days, you're on your own.
+In practice this means: if you're on `0.5.0-next.2` and a new stable
+release ships, you have 30 days of critical-only support on
+`0.5.0-next.2` before you should upgrade. After 30 days, you're on
+your own.
 
 To check which version your space is on:
 
@@ -64,7 +65,7 @@ Report privately by email to:
 
 Include, where possible:
 
-1. The affected package and version (e.g., `@grove-dev/cli@0.4.0`).
+1. The affected package and version (e.g., `@grove-dev/cli@0.5.0-next.2`).
 2. A minimal reproduction — the smallest `grove.config.ts` + data +
    command that triggers the issue. A failing test case is even
    better.
@@ -134,7 +135,7 @@ confirm a vulnerability.
 
 Public security advisories are listed at
 [GitHub Security Advisories for this repo](https://github.com/tortuvshin/grove/security/advisories).
-The list is empty in v0.4.0; it is the right place to look if you
+The list is empty in `0.5.0-next.2`; it is the right place to look if you
 want to confirm a CVE.
 
 ## For directory maintainers

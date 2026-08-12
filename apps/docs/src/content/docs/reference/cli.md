@@ -52,7 +52,7 @@ Scaffold a new Grove space from the Astro template.
 - `<directory>/.github/workflows/{ci,cleanup,deploy,readme,sync-contributors,sync-github}.yml`
 - `<directory>/.github/ISSUE_TEMPLATE/`
 
-The scaffolder does not ask prompts in v0.4.0 — blueprint and
+The scaffolder does not ask prompts in `0.5.0-next.2` — blueprint and
 integrations are chosen by editing `grove.config.ts` after scaffold.
 
 **Example:**

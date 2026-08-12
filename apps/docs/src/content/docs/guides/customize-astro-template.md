@@ -234,7 +234,7 @@ local to your repo, so it survives `pnpm install`.
 
 The override component must accept the same props as the original.
 Check the original component for the prop list — the contract is not
-formally versioned in v0.4.0.
+formally versioned in `0.5.0-next.2`.
 
 ### Option B: edit the consumer-owned file
 
@@ -247,7 +247,7 @@ simpler than wiring a `components:` override.
 
 If you want to split records across multiple directories (e.g.,
 `data/records/featured/` and `data/records/community/`), edit
-`paths.recordsDir` — but note that the v0.4.0 reader expects a single
+`paths.recordsDir` — but note that the `0.5.0-next.2` reader expects a single
 flat directory. Multi-dir records are a V2 feature; for now, if you
 split the data, you'll need a custom step to merge them.
 

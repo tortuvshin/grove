@@ -3,7 +3,7 @@ title: Philosophy
 description: Why Grove is built around files, static output, and reviewable data — and what we are not.
 ---
 
-Grove is an opinionated framework. The opinions are not arbitrary — they're the result of watching a lot of community knowledge spaces grow, age, and break. This page is the short version of the longer position; the long version lives in [`vision.md`](https://github.com/tortuvshin/grove/blob/main/vision.md) in the repo.
+Grove is an opinionated framework. The opinions are not arbitrary — they're the result of watching a lot of community knowledge spaces grow, age, and break. This page is the short version of the longer position; the long version lives in [`apps/docs/vision.md`](https://github.com/tortuvshin/grove/blob/main/apps/docs/vision.md) in the repo.
 
 If you read one page on this site, read this one. It explains why the rest of the docs are shaped the way they are.
 
