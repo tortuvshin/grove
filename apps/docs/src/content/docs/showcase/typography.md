@@ -38,7 +38,7 @@ and compact examples work well there.
 ## Inline Elements
 
 This paragraph includes **bold text**, _italic text_, `inline code`, and a
-[link to the theme configuration guide](guides/configuration/). It also
+[link to the theme configuration guide](build/configure/). It also
 includes a keyboard hint: press <kbd>Ctrl</kbd> + <kbd>K</kbd> to open search.
 
 Use inline code for file names like `astro.config.mjs`, package names like `@grove-dev/starlight`, and

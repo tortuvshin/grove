@@ -22,7 +22,7 @@ export const FAQ_ITEMS: ReadonlyArray<FaqItem> = [
   },
   {
     q: 'Does it work without Astro?',
-    a: 'V1 ships the Astro adapter only. The core engine is framework-agnostic (typed schema, GitHub sync, importers, sitemap, llms.txt), so a SvelteKit or Next.js adapter is possible. V1.1 is planned for SvelteKit; see the roadmap for current status.',
+    a: 'V1 ships the Astro adapter only. The core engine is framework-agnostic (typed schema, GitHub sync, importers, sitemap, llms.txt), so a SvelteKit or Next.js adapter is possible. A SvelteKit adapter lands in V1.1 if a real community space asks for it; see the [SvelteKit adapter status](/adapters/svelte/) and the roadmap for current status.',
   },
   {
     q: 'How is this different from an awesome-list README?',

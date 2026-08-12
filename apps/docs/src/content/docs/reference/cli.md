@@ -282,6 +282,225 @@ Write a report of records that need human review.
 cron and opens a PR with the report. The CLI does not delete or
 hide records — that is a curator's call, made via `decisions.yml`.
 
+## `grove audit`
+
+Run Lighthouse against every page declared in `grove.config.ts`'s
+`audit.pages[]` manifest and enforce the default 100×4 score budget.
+Implemented in `packages/cli/src/audit-cli.ts`; the runtime in
+`packages/cli/src/audit.ts`.
+
+**Syntax:** `grove audit [options]`
+
+**Options:**
+
+| Option | Description | Default |
+|---|---|---|
+| `--base-url <url>` | Override `audit.baseUrl` from `grove.config.ts` | from config; falls back to `http://127.0.0.1:4321` |
+| `--mobile` | Run only the mobile profile | both mobile and desktop |
+| `--desktop` | Run only the desktop profile | both mobile and desktop |
+| `--runs <count>` | Runs per page (default 3, max 5) | `3` |
+| `--page <path>` | Audit only this page path (repeatable) | all pages in `audit.pages[]` |
+| `--json <path>` | Write a JSON report | unset |
+| `--junit <path>` | Write a JUnit XML report | unset |
+
+**Profile selection:** `--mobile` only → mobile; `--desktop` only →
+desktop; both or neither → both.
+
+**Reads:** `grove.config.ts` (parsed via the TypeScript AST — both
+bare `defineConfig({...})` and `export default defineConfig({...})`
+are accepted; requires `audit.pages[]`).
+
+**Default budget** (`packages/core/src/audit.ts::DEFAULT_BUDGET`):
+
+| Category | Metric / score | Threshold |
+|---|---|---|
+| scores | performance, accessibility, bestPractices, seo | `≥ 1.00` each |
+| metrics | LCP | `≤ 1800 ms` |
+| metrics | CLS | `≤ 0.05` |
+| metrics | TBT | `≤ 100 ms` |
+
+404 pages are scored but skipped from the budget — Lighthouse cannot
+meaningfully measure a 404 (all scores come back as 0, all metrics as
+Infinity).
+
+**Writes:** `--json <path>` writes `{ results, violations }`.
+`--junit <path>` writes an XML test suite `grove-audit` with one
+`<testcase>` per result; `<failure>` elements annotate each violation
+with category, name, expected, and actual values. XML special
+characters (`<`, `>`, `&`, `'`, `"`) are escaped.
+
+**Environment variables:** `CHROME_PATH` overrides the Chrome binary
+path. On Linux, `--no-sandbox` is added automatically. `--headless=new
+--disable-gpu --disable-dev-shm-usage` are always set.
+
+**Output (per page):**
+
+```
+✓ mobile  /
+✓ mobile  /projects/
+✓ desktop /
+✗ 1 budget violation(s)
+  [mobile] /projects/coolify/ score.performance: expected 1, got 0.92
+```
+
+**Final line:** `✓ N page/profile combinations passed 100×4` or `✗ N
+budget violation(s)` with a list of each violation. Exit code is 1
+when any violation is found, otherwise 0.
+
+**Example:**
+
+```bash
+grove audit                       # full audit, mobile + desktop
+grove audit --desktop --runs 5    # desktop only, 5 runs per page
+grove audit --page /projects/     # one specific page
+grove audit --json out.json --junit out.xml
+```
+
+## `grove collection promote`
+
+Promote a filter URL into a curated `data/collections/<slug>.yml`
+file. Implementation in `packages/cli/src/collection-cli.ts`.
+
+**Syntax:** `grove collection promote [options]`
+
+**Options:**
+
+| Option | Description | Default |
+|---|---|---|
+| `--from <path>` **(required)** | Source filter path, e.g. `/browse?stack=flutter&category=finance` | — |
+| `--slug <slug>` **(required)** | Slug for the new collection file | — |
+| `--title <title>` | Collection title | humanised slug (e.g. `My Slug`) |
+| `--description <description>` | Collection description | `Curated collection built from <from>.` |
+
+**Query parsing** uses `URLSearchParams` on the substring after the
+first `?`. Recognised keys:
+
+| URL key | Maps to |
+|---|---|
+| `stack` | `query.stacks: [<stack>]` |
+| `category` | `query.categories: [<category>]` |
+| `platform` | `query.platforms: [<platform>]` |
+
+Unknown keys are ignored. Values containing `&`, `=`, `+`, or percent-
+encoded characters round-trip correctly.
+
+**Writes** `data/collections/<slug>.yml` (the directory is created
+with `mkdir { recursive: true }` if it doesn't exist). The emitted
+shape:
+
+```yaml
+slug: <slug>
+kind: curated
+title: <title>
+description: <description>
+query:
+  stacks: [<stack>]            # only if --from had stack=…
+  categories: [<category>]     # only if --from had category=…
+  platforms: [<platform>]      # only if --from had platform=…
+  excludeStatuses: [archived]
+ranking:
+  preset: quality
+seo:
+  index: true
+```
+
+**Output:**
+
+```
+Wrote /<abs>/data/collections/<slug>.yml
+```
+
+Exit code is always 0 on success. The CLI does not run a follow-up
+`grove check`; do that yourself to make sure the new collection
+loads.
+
+**Example:**
+
+```bash
+grove collection promote \
+  --from "/browse?stack=flutter&category=finance" \
+  --slug top-finance-flutter \
+  --title "Top Flutter finance apps" \
+  --description "Flutter apps for personal finance, payments, and budgeting."
+```
+
+## `grove readme generate`
+
+Render an awesome-list-formatted README between the
+`<!-- grove-readme:start -->` and `<!-- grove-readme:end -->` sentinels
+and write it to `README.md` (or `--path`). Implementation in
+`packages/cli/src/readme-cli.ts`; the renderer in
+`packages/core/src/awesome-readme.ts`.
+
+**Syntax:** `grove readme generate [options]`
+
+**Options:**
+
+| Option | Description | Default |
+|---|---|---|
+| `--stdout` | Print to stdout instead of writing to `README.md` (for CI dry-runs) | off |
+| `--path <path>` | README path relative to cwd | `README.md` |
+| `--check` | Exit with code 1 when the rendered block differs from the existing README; for CI gating | off |
+
+**Reads:**
+
+- `grove.config.ts` — `site.name`, `site.tagline?`, `site.description?`,
+  `site.url?`, `site.repoUrl?`, and the `readme` block (title, tagline,
+  intro, etc.).
+- `data/records/*.{yml,yaml}` — every record file. For each, the CLI
+  reads `slug`, `name`, `description`, `category`, `repoUrl` (falls
+  back to `links.github`), `homepageUrl` (falls back to `links.website`),
+  `visibility`, `stars` (from `github.stars` or `github.repository.stargazers_count`),
+  `license` (from `github.license`).
+- `data/taxonomy/categories.yml` — parsed array of `{ id, name }`.
+
+Records with `visibility: hide` or `visibility: remove` are dropped.
+
+**Writes** the README at `--path` with the awesome-list block
+replaced between the sentinels. Hand-written content outside the
+sentinels (intro, contributing notes, license) is preserved. If the
+file does not exist yet, it is created with the rendered block
+appended.
+
+**Output (default mode):**
+
+```
+[grove readme] wrote README.md (6 records, 5 categories)
+```
+
+**`--check` mode** — exits 1 when the rendered block differs from the
+existing README, otherwise:
+
+```
+[grove readme] README.md is up to date.
+```
+
+**`--stdout` mode** — prints the full rendered markdown to stdout
+and exits 0. No file changes.
+
+**Sentinel format:**
+
+```markdown
+<!-- grove-readme:start -->
+... rendered block ...
+<!-- grove-readme:end -->
+```
+
+`AWESOME_README_START` and `AWESOME_README_END` are exported from
+`@grove-dev/core` for downstream tooling that needs to detect the
+same sentinels.
+
+**Example:**
+
+```bash
+grove readme generate            # write README.md
+grove readme generate --check    # CI gate
+grove readme generate --stdout   # preview in the terminal
+grove readme generate --path docs/README.md
+```
+
+---
+
 ## Related docs
 
 - **[grove.config.ts reference](/reference/config/)** — every

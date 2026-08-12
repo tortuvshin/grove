@@ -1,16 +1,16 @@
 ---
 title: SvelteKit
-description: "Status: not shipped. A SvelteKit adapter is a future roadmap item, not part of v0.4.0."
+description: "Status: not shipped. A SvelteKit adapter is a future roadmap item, not part of `0.5.0-next.2`."
 ---
 
-The **SvelteKit** adapter is **not shipped in v0.4.0**. There is no
+The **SvelteKit** adapter is **not shipped in `0.5.0-next.2`**. There is no
 `@grove-dev/svelte` package in the workspace, no SvelteKit template,
 and the `grove init` scaffolder only emits an Astro project.
 
 ## Status
 
 **Planned.** No code exists for this adapter today. The roadmap
-([V1.1 section](/roadmap/#next-release--v11)) lists a SvelteKit
+([Later — directional](/roadmap/#later--directional)) lists a SvelteKit
 adapter only "if asked" by a real community space.
 
 ## Why this page exists
@@ -25,9 +25,9 @@ The page is kept so that:
 
 ## What would need to ship
 
-A v1.1 SvelteKit adapter would have to:
+A V1.1 SvelteKit adapter would have to:
 
-- Add a `@grove-dev/svelte` package under `packages/svelte/` with
+- Add a `@grove-dev/svelte` package to the workspace with
   SvelteKit-friendly page components and server helpers.
 - Mirror `@grove-dev/astro`'s blueprint-aware list and detail pages
   in `+page.svelte` files under `src/routes/`.
@@ -51,11 +51,11 @@ with both Astro and SvelteKit. No such work is currently scheduled.
 ## Tracking
 
 SvelteKit adapter status is tracked in
-[Roadmap](/roadmap/#next-release--v11).
+[Roadmap → Later — directional](/roadmap/#later--directional).
 
 ## Related docs
 
-- **[Astro adapter](/adapters/astro/)** — the only v0.4.0-supported
+- **[Astro adapter](/adapters/astro/)** — the only `0.5.0-next.2`-supported
   choice.
 - **[Next.js adapter](/adapters/nextjs/)** — same planned status as
   SvelteKit.
