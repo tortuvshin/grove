@@ -145,6 +145,17 @@ const pillClass = {
       <div class="hgw-wrap">
         <!-- Canvas: four stacked scenes; 1–3 only exist in scrub mode. -->
         <div id="hgw-canvas" class="hgw-canvas relative">
+          <!-- Scrub-mode caption: identifies the active step above the canvas. -->
+          <div
+            id="hgw-caption"
+            class="absolute left-1/2 top-4 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-border bg-card/80 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-widest text-subtle backdrop-blur"
+            aria-hidden="true"
+          >
+            <span id="hgw-caption-index">Step 01</span>
+            <span class="mx-2 text-border-strong">/</span>
+            <span id="hgw-caption-label" class="text-brand-light">Initialize</span>
+          </div>
+
           <div class="hgw-gridbg" aria-hidden="true"></div>
 
           <!-- Scene 1 · Initialize: terminal types `grove init my-space` -->
@@ -250,7 +261,46 @@ const pillClass = {
                   {n.label}
                 </span>
               ))}
+
+              <!-- Output path leaving the discovery model toward the live site -->
+              <svg
+                class="pointer-events-none absolute inset-0 h-full w-full"
+                viewBox="0 0 100 75"
+                fill="none"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path
+                  id="hgw-out-path"
+                  d="M 58 37.5 C 70 37.5, 80 50, 92 60"
+                  stroke="#646cff"
+                  stroke-width="1.2"
+                  vector-effect="non-scaling-stroke"
+                  pathLength="1"
+                  stroke-dasharray="1"
+                  stroke-dashoffset="1"
+                  opacity="0.7"
+                ></path>
+                <polygon
+                  id="hgw-out-arrow"
+                  points="0,-3 6,0 0,3"
+                  fill="#646cff"
+                  opacity="0"
+                  transform="translate(92 60)"
+                ></polygon>
+              </svg>
             </div>
+          </div>
+
+          <!-- Scene 3 → 4 bridge: a chip that fades in to lead into the live site -->
+          <div
+            id="hgw-bridge"
+            class="hgw-scene pointer-events-none flex items-center justify-center"
+            aria-hidden="true"
+          >
+            <span class="rounded-full border border-brand/30 bg-card/80 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-widest text-brand-light backdrop-blur">
+              grove build →
+            </span>
           </div>
 
           <!-- Scenes 4–6 · Publish / Generate / Maintain: the live demo window
@@ -323,8 +373,16 @@ const pillClass = {
                   </div>
                 </div>
               </div>
+              <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-subtle">
+                Step 04 · Publish
+              </p>
 
               <div id="hgw-extras">
+                <div class="hgw-extra-caption mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-subtle">
+                  <span class="text-brand-light">Step 05</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Generate</span>
+                </div>
                 <div id="hgw-outputs" class="rounded-xl border border-border bg-card/95 p-4 shadow-xl shadow-black/30 backdrop-blur">
                   <span class="mb-2.5 block font-mono text-[10px] uppercase tracking-widest text-subtle">Generated outputs</span>
                   <div class="grid grid-cols-2 gap-1.5">
@@ -337,6 +395,11 @@ const pillClass = {
                   </div>
                 </div>
 
+                <div class="hgw-extra-caption mt-4 mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-subtle sm:mt-0">
+                  <span class="text-brand-light">Step 06</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Maintain</span>
+                </div>
                 <div id="hgw-health" class="rounded-xl border border-border bg-card/95 p-4 shadow-2xl shadow-black/50 backdrop-blur">
                   <div class="mb-3 flex items-center gap-2">
                     <svg id="hgw-health-spin" class="size-3.5 text-brand-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -357,6 +420,9 @@ const pillClass = {
                       </div>
                     ))}
                   </div>
+                  <p class="mt-3 border-t border-border pt-2.5 font-mono text-[10px] leading-relaxed text-subtle">
+                    Records with no release in 183+ days earn a review.
+                  </p>
                 </div>
               </div>
             </div>
@@ -371,6 +437,11 @@ const pillClass = {
                 <span class="hgw-step-index font-mono text-xs text-subtle">0{i + 1}</span>
                 <span class="hgw-step-line" aria-hidden="true"></span>
                 <span class="hgw-step-label text-sm font-medium text-fg">{step.label}</span>
+                <span class="hgw-step-check ml-auto text-brand-light opacity-0 transition-opacity" aria-hidden="true">
+                  <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
               </div>
               <div class="hgw-step-body">
                 <h3 class="text-balance text-lg font-semibold leading-snug text-fg">{step.heading}</h3>
@@ -545,6 +616,21 @@ const pillClass = {
     opacity: 0;
   }
 
+  /* Scene 3 → 4 bridge chip: fades in mid-canvas to lead into the live site. */
+  #hgw-bridge {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  /* Scrub-mode caption: identifies the active step above the canvas. Hidden
+     in static layout (where the step cards above already carry the labels). */
+  #hgw-caption { display: none; }
+  #hgw.is-scrub #hgw-caption { display: block; }
+
+  /* Static-mode captions: bind outputs and health to steps 5 and 6. The rail
+     names the steps in scrub mode, so these become noise and are hidden. */
+  #hgw.is-scrub .hgw-extra-caption { display: none; }
+
   /* Step nav becomes a vertical progress rail. */
   #hgw.is-scrub #hgw-stepnav {
     order: 0;
@@ -564,6 +650,11 @@ const pillClass = {
 
   #hgw.is-scrub .hgw-step.is-done { opacity: 0.55; }
   #hgw.is-scrub .hgw-step.is-active { opacity: 1; }
+
+  /* Completed steps show a check mark; the active step hides it because
+     its body is already expanded underneath. */
+  #hgw.is-scrub .hgw-step.is-done .hgw-step-check { opacity: 0.7; }
+  #hgw.is-scrub .hgw-step.is-active .hgw-step-check { opacity: 0; }
 
   #hgw.is-scrub .hgw-step-line {
     display: block;
@@ -693,13 +784,20 @@ const pillClass = {
     const healthRows = [...healthPanel.querySelectorAll('[data-health]')];
     const steps = [...track.querySelectorAll('.hgw-step')];
 
+    const bridge = $('hgw-bridge');
+    const outPath = $('hgw-out-path');
+    const outArrow = $('hgw-out-arrow');
+    const capIndexEl = $('hgw-caption-index');
+    const capLabelEl = $('hgw-caption-label');
+
     const COMMAND = 'grove init my-space';
 
     // Tree nodes keep an inline padding-left for indentation, so teardown
     // must only clear what render() touched instead of the style attribute.
     const styled = [
       term, cursor, line1, line2, files, system, core, site, win, outputs,
-      healthPanel, spin, ...inPaths, ...capPaths, ...inChips,
+      healthPanel, spin, bridge, outPath, outArrow,
+      ...inPaths, ...capPaths, ...inChips,
       ...capChips, ...records, ...outItems, ...healthRows,
     ].filter(Boolean);
 
@@ -765,6 +863,18 @@ const pillClass = {
         chip.style.transform = `translate(-50%,-50%) translateX(${lerp(12, 0, r)}px)`;
       });
 
+      // 03 → 04 bridge: output path draws out, chip fades in mid-canvas.
+      const bridgeO = band(p, 0.46, 0.5, 0.55, 0.58);
+      if (bridge) {
+        bridge.style.opacity = bridgeO;
+        bridge.style.visibility = bridgeO > 0.001 ? 'visible' : 'hidden';
+      }
+      const drawOut = ramp(p, 0.46, 0.54);
+      if (outPath) outPath.style.strokeDashoffset = 1 - drawOut;
+      if (outArrow) {
+        outArrow.style.opacity = drawOut * (1 - ramp(p, 0.56, 0.6));
+      }
+
       // 04–06 · Publish / Generate / Maintain — the live site takes over.
       const siteO = ramp(p, 0.47, 0.55);
       const appear = ramp(p, 0.47, 0.57);
@@ -802,6 +912,13 @@ const pillClass = {
         step.classList.toggle('is-active', i === active);
         step.classList.toggle('is-done', i < active);
       });
+
+      // Top-of-canvas caption mirrors the active step (scrub mode only).
+      if (capIndexEl && capLabelEl) {
+        const labelEl = steps[active]?.querySelector('.hgw-step-label');
+        capIndexEl.textContent = `Step 0${active + 1}`;
+        capLabelEl.textContent = labelEl?.textContent ?? '';
+      }
     };
 
     const onScroll = () => {
