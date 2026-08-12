@@ -9,6 +9,7 @@ data/.cache/
 coverage/
 .mavis
 .claude/settings.local.json
+.claude/settings.local.json.tmp
 .tmp-test/
 .codex/
 .opencode/
