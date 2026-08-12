@@ -931,11 +931,32 @@ const pillClass = {
         row.style.transform = `translateX(${lerp(-12, 0, r)}px)`;
       });
 
-      // Step rail.
-      const active = Math.min(steps.length - 1, Math.floor(p * steps.length));
+      // Step rail — smooth, continuous opacity across the boundary instead of
+      // snapping at Math.floor boundaries. The active step still drives the
+      // highlight (line color, check mark) via classes, but opacity is driven
+      // by the fractional position so the eye glides between steps.
+      const totalSteps = steps.length;
+      const continuous = p * totalSteps;
+      const active = Math.min(totalSteps - 1, Math.floor(continuous));
+      const blend = continuous - active;
       steps.forEach((step, i) => {
         step.classList.toggle('is-active', i === active);
         step.classList.toggle('is-done', i < active);
+
+        let op;
+        if (i < active) {
+          op = 0.55;
+        } else if (i === active) {
+          // Active step: fade 0.55 → 1.0 across the first half of its window.
+          op = 0.55 + 0.45 * Math.min(1, blend * 2);
+        } else if (i === active + 1) {
+          // Next step: pre-fade 0.35 → 0.55 in the second half, so the next
+          // step begins to lift out of the dim background before the snap.
+          op = 0.35 + 0.2 * Math.max(0, blend - 0.5) * 2;
+        } else {
+          op = 0.35;
+        }
+        step.style.opacity = String(op);
       });
 
       // Top-of-canvas caption mirrors the active step (scrub mode only).
