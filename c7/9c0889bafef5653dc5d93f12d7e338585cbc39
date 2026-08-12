@@ -1,0 +1,50 @@
+apps/docs/src/components/Header.astro
+  s_780bf3194ecbc2::t_c9d223bed3039f 20
+apps/docs/src/content/docs/getting-started/create-a-space.md
+  s_780bf3194ecbc2::t_fa0058fda0e93d 70
+apps/docs/src/content/docs/reference/frameworks.md
+  s_780bf3194ecbc2::t_acacf4bbeb31fd 8
+  s_780bf3194ecbc2::t_1203f7d9a2ccf1 12
+  s_780bf3194ecbc2::t_e53efa3e1ba524 26
+apps/docs/src/content/docs/reference/components.mdx
+  s_780bf3194ecbc2::t_ae70312fa5cc40 181
+apps/docs/src/content/docs/maintainers/security.md
+  s_780bf3194ecbc2::t_27abb05980aad0 68
+  s_780bf3194ecbc2::t_fbb6e368664c5a 138
+  s_780bf3194ecbc2::t_c5ae666599f8b2 25-28
+apps/docs/src/content/docs/reference/plugin-api.md
+  s_780bf3194ecbc2::t_4da691edba7593 54
+apps/docs/src/content/docs/adapters/astro.md
+  s_780bf3194ecbc2::t_1dcf326da62528 67
+  s_780bf3194ecbc2::t_e1ac05f159e620 122
+apps/docs/src/content/docs/reference/cli.md
+  s_780bf3194ecbc2::t_6bf2f2fd1fe02c 55
+apps/docs/src/content/docs/adapters/nextjs.md
+  s_780bf3194ecbc2::t_356bb023575ca7 55,59
+  s_780bf3194ecbc2::t_fdd1c3cf88fcd3 3,6,13
+  s_780bf3194ecbc2::t_42261ae7f7e6cd 46
+  s_780bf3194ecbc2::t_d958f5a66cf04d 30
+apps/docs/src/content/docs/concepts/philosophy.md
+  s_780bf3194ecbc2::t_7edc55f122ab10 6
+apps/docs/src/content/docs/reference/config.md
+  s_780bf3194ecbc2::t_a583e8f7f8c2be 208
+apps/docs/src/content/docs/guides/customize-astro-template.md
+  s_780bf3194ecbc2::t_4362148d584b60 237
+  s_780bf3194ecbc2::t_8d8e353a4e9b83 250
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c79c0889bafef5653dc5d93f12d7e338585cbc39",
+  "prompts": {},
+  "sessions": {
+    "s_780bf3194ecbc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca830e3c-b541-4299-89c5-edea418f793d",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
