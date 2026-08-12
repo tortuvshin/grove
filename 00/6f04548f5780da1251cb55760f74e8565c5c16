@@ -1,0 +1,27 @@
+apps/docs/src/content/docs/adapters/astro.md
+  s_780bf3194ecbc2::t_042d5bf3d303d9 145,150
+  s_780bf3194ecbc2::t_4f18a921493a62 54-55
+  s_780bf3194ecbc2::t_bada21048b4fc8 39,48
+apps/docs/src/content/docs/guides/maintain-health-signals.md
+  s_780bf3194ecbc2::t_6e77811a2e18c6 24-39,43,45-48
+apps/docs/src/content/docs/guides/customize-astro-template.md
+  s_780bf3194ecbc2::t_ef377610124386 139,142-194,197-214
+apps/docs/src/content/docs/reference/record-schema.md
+  s_780bf3194ecbc2::t_34e2784107f1b7 207-214
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "006f04548f5780da1251cb55760f74e8565c5c16",
+  "prompts": {},
+  "sessions": {
+    "s_780bf3194ecbc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca830e3c-b541-4299-89c5-edea418f793d",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
