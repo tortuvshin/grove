@@ -8,7 +8,7 @@ interface Props {
 }
 
 const {
-  title = 'Grove — Build community knowledge that stays useful',
+  title = 'Grove — Grow useful community knowledge',
   description = 'Grove is an open-source, GitHub-native framework for turning community submissions into structured, searchable, and maintainable knowledge spaces.',
 } = Astro.props;
 
@@ -124,13 +124,13 @@ const faqJsonLd = {
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Grove — Build community knowledge that stays useful" />
+    <meta property="og:image:alt" content="Grove — Grow useful community knowledge" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
-    <meta name="twitter:image:alt" content="Grove — Build community knowledge that stays useful" />
+    <meta name="twitter:image:alt" content="Grove — Grow useful community knowledge" />
 
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />
