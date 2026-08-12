@@ -21,31 +21,31 @@ auto-derived value, write a [decision](/guides/manage-decisions/).
 
 ## The status enum
 
-Ten values, mapped from a small set of signals. `packages/core/src/health.ts: classifyHealth` is the implementation.
+Ten enum values; six are derived from GitHub metadata, four are editor-only. The implementation is `packages/core/src/health.ts::classifyHealth` (the single source of truth).
 
-| Status | When | Action |
-|---|---|---|
-| `active` | Repo pushed within the last 6 months | Leave alone |
-| `mature` | Active + ≥500 stars + license or recent release | Promote to `featured` if not already |
-| `stale` | No commits in 6-18 months | Decide: still relevant? |
-| `inactive` | No commits in 24+ months | Add a `historical` or `remove` decision |
-| `archived` | GitHub repo is archived | Add a `hide` or `historical` decision |
-| `unavailable` | GitHub repo is disabled or 404'd | Add a `remove` decision |
-| `unknown` | No GitHub metadata at all (e.g., the project is not on GitHub) | Add metadata or write a decision explaining why we list it |
-| `historical` | Editor-set; record is kept for reference, not promotion | This value isn't derived — it can only be set via a decision |
-| `needs_review` | Editor-set; human review pending | Same — decisions.yml only |
-| `quiet` | Editor-set; "watch this one" | Same — decisions.yml only |
+| Status | When | Source | Action |
+|---|---|---|---|
+| `active` | Repo pushed within the last 183 days | derived | Leave alone |
+| `mature` | `active` + ≥ 500 stars + recent release or clear license | derived | Promote to `featured` via curation labels if not already |
+| `stale` | Last commit 184–548 days ago (6–18 months) | derived | Decide: still relevant? |
+| `inactive` | Last commit > 730 days ago (24+ months) | derived | Add a `historical` or `remove` decision |
+| `archived` | GitHub repo is archived | derived | Add a `hide` or `historical` decision |
+| `unknown` | No GitHub metadata at all (e.g., the project is not on GitHub) | derived (no-data fallback) | Add metadata or write a decision explaining why we list it |
+| `historical` | Editor-set; record is kept for reference, not promotion | decision-only | — |
+| `needs_review` | Editor-set; human review pending | decision-only | — |
+| `quiet` | Editor-set; "watch this one" | decision-only | — |
+| `unavailable` | Editor-set; the upstream record could not be refreshed (404 / rate-limit / private) | decision-only | Treat like `archived` for visibility |
 
-The last three (`historical`, `needs_review`, `quiet`) are **decision-only**. They are not produced by `grove sync github`. If you see them in a record's `health.status` field, it means someone wrote a decision that set it. See [Manage decisions](/guides/manage-decisions/).
+The four decision-only values (`historical`, `needs_review`, `quiet`, `unavailable`) are not produced by `grove sync github`. If you see them in a record's `health.status`, it means someone wrote a `decisions.yml` entry that set it. See [Manage decisions](/guides/manage-decisions/).
 
 ## The tier enum
 
-Four values, derived from stars and activity.
+Four values, derived from stars and `status`.
 
-- `curated` — ≥500 stars *or* ≥4 active months in the commit history. Goes to the top of the index.
-- `listed` — ≥50 stars. The default tier for established projects.
-- `experimental` — <50 stars and few commits. Not a punishment — it means "we don't have enough data to vouch for this yet".
-- `hidden` — archived or inactive. The record is still in the data, but the index does not list it.
+- `curated` — ≥ 500 stars. The record goes to the top of the index. The only signal that triggers `curated` is star count — there is no "active months" rule in the code.
+- `listed` — ≥ 50 stars. The default tier for established projects.
+- `experimental` — fewer than 50 stars. Not a punishment — it means "we don't have enough data to vouch for this yet".
+- `hidden` — status is `archived` or `inactive`. The record is still in the data, but the index does not list it. (Not `archived/unavailable` — `unavailable` is an editor-only status and does not drive `hidden` on its own.)
 
 `curated` vs `listed` is purely a function of stars. Promotion isn't an editor decision; it's a function of the project's adoption. If you want to *override* the tier, use a decision.
 

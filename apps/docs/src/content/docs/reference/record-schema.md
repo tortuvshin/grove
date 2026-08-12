@@ -204,14 +204,14 @@ can be overridden by curator decisions in `data/decisions.yml`.
 
 | Field | Type | Description |
 |---|---|---|
-| `status` | enum | `active` (commit ≤ 180d), `quiet` (≤ 365d), `stale` (≤ 730d), `inactive` (> 730d), `archived`, `unavailable`, `unknown`, `historical`, `needs_review` |
-| `maturity` | enum | `experimental`, `useful`, `mature`, `unknown` |
-| `tier` | enum | `curated` (≥ 500★ or ≥ 4 active months), `listed` (≥ 50★), `experimental` (else), `hidden` (archived/unavailable) |
-| `visibility` | enum | `keep` (tier=curated/listed/experimental), `hide` (tier=hidden) — overridden by `decisions.yml` |
-| `cleanupCandidate` | `boolean` | `true` for `stale`, `archived`, `inactive`, `unavailable` |
-| `staleReason` | `string \| null` | Machine-readable reason: `no_commits_365_days`, `no_commits_24_months`, `github_archived`, `github_unavailable` |
-| `confidence` | enum | `low`, `medium`, `high` — curator confidence in the signal |
-| `reasons` | `string[]` | Human-readable reasons for the current state |
+| `status` | enum | `active` (commit ≤ 183d), `stale` (184–548d), `inactive` (> 730d), `archived`, `unknown` — plus editor-only `mature` / `quiet` / `historical` / `needs_review` / `unavailable` set via `decisions.yml`. Implementation in `packages/core/src/health.ts: classifyHealth`. |
+| `maturity` | enum | `experimental`, `useful`, `mature`, `unknown` — `mature` is auto-set when `active` + ≥ 500★ + maintained signals (recent release or clear license). |
+| `tier` | enum | `curated` (≥ 500★), `listed` (≥ 50★), `experimental` (else), `hidden` (status is `archived` or `inactive`). The record is still in the data; `hidden` only excludes it from the index. |
+| `visibility` | enum | `keep` (tier=curated/listed/experimental), `hide` (tier=hidden) — overridden by `decisions.yml`. |
+| `cleanupCandidate` | `boolean` | `true` when `status` is `stale`, `archived`, or `inactive`. Drives `grove cleanup`. |
+| `staleReason` | `string \| null` | Machine-readable reason: `no_commits_365_days` (stale), `no_commits_24_months` (inactive), `github_archived`. |
+| `confidence` | enum | `low`, `medium`, `high` — `high` when GitHub metadata is complete; `low` when no GitHub data exists at all. |
+| `reasons` | `string[]` | Human-readable reasons explaining the current state (e.g. "Recent repository activity", "Repository is archived on GitHub"). |
 
 **Health is a review signal, not a final ranking.** The
 `cleanup.yml` workflow surfaces records with
