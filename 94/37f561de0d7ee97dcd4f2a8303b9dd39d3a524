@@ -1,0 +1,48 @@
+apps/docs/src/content/docs/showcase/splash/split-right.mdx
+  s_780bf3194ecbc2::t_050a308466f396 14
+apps/docs/src/components/home/Hero.astro
+  s_780bf3194ecbc2::t_3e041b9ee7a9d8 18
+apps/docs/src/content/docs/showcase/splash/banner.mdx
+  s_780bf3194ecbc2::t_f94c700e30236a 14
+apps/docs/src/content/docs/reference/cli.md
+  s_780bf3194ecbc2::t_19a9a655e1c799 285-503
+apps/docs/src/content/docs/showcase/starlight-components.mdx
+  s_780bf3194ecbc2::t_8e7d20ab82fecb 57,131
+  s_780bf3194ecbc2::t_73f27613276525 52,130
+apps/docs/src/content/docs/reference/components.mdx
+  s_780bf3194ecbc2::t_b698d74a5eac66 28,95,116
+  s_780bf3194ecbc2::t_6d68c8b1d1caeb 25,40,92,113
+apps/docs/src/components/home/ProofBar.astro
+  s_780bf3194ecbc2::t_177d4ead8046dd 8
+apps/docs/src/data/faq.ts
+  s_780bf3194ecbc2::t_f9649dfa780942 25
+apps/docs/src/content/docs/showcase/typography.md
+  s_780bf3194ecbc2::t_864e35eba5cffd 41
+apps/docs/src/content/docs/showcase/splash/centered-top.mdx
+  s_780bf3194ecbc2::t_ea977a537126c9 17
+apps/docs/src/content/docs/adapters/svelte.md
+  s_780bf3194ecbc2::t_606f9cee348f61 3,6,13,28,30,54,58
+apps/docs/src/content/docs/showcase/splash-pages.mdx
+  s_780bf3194ecbc2::t_86ac49d2080aa3 57,62
+  s_780bf3194ecbc2::t_7b5f34718ee2ab 65
+apps/docs/src/content/docs/showcase/splash/split-left.mdx
+  s_780bf3194ecbc2::t_177206938796ef 14
+apps/docs/src/content/docs/showcase/splash/centered.mdx
+  s_780bf3194ecbc2::t_79c7d0d8c4b0e7 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9437f561de0d7ee97dcd4f2a8303b9dd39d3a524",
+  "prompts": {},
+  "sessions": {
+    "s_780bf3194ecbc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca830e3c-b541-4299-89c5-edea418f793d",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
