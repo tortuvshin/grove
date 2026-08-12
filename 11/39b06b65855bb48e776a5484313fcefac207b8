@@ -1,0 +1,35 @@
+apps/docs/src/components/home/Build.astro
+  s_5ecb0cc1ea5216::t_7318a7d55d70a4 1-125
+apps/docs/src/components/home/ProofBar.astro
+  s_5ecb0cc1ea5216::t_ba765df0740113 1-25
+apps/docs/src/components/home/Hero.astro
+  s_5ecb0cc1ea5216::t_8e5976f44a57d8 48
+apps/docs/src/home-landing.test.ts
+  s_5ecb0cc1ea5216::t_d2747cec729942 8-10,12-457
+apps/docs/src/components/home/Problem.astro
+  s_5ecb0cc1ea5216::t_0895b56b7883ce 20
+  s_5ecb0cc1ea5216::t_a334b5bc0f306c 29
+  s_5ecb0cc1ea5216::t_7a17d5c2a305b4 45
+  s_5ecb0cc1ea5216::t_3b31dfcf4ac00f 11
+  s_5ecb0cc1ea5216::t_4b2adaf266eb6f 1-10,12-19,21-28,30-44,46-79
+apps/docs/src/layouts/HomeLayout.astro
+  s_5ecb0cc1ea5216::t_40eb04e9b667a7 11,127,133
+apps/docs/src/components/home/HowItWorks.astro
+  s_5ecb0cc1ea5216::t_66c07d19d1fd00 1-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1139b06b65855bb48e776a5484313fcefac207b8",
+  "prompts": {},
+  "sessions": {
+    "s_5ecb0cc1ea5216": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c27a2637-0325-45d0-86a0-6671fdcddd3b",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
