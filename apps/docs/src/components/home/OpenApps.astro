@@ -1,11 +1,18 @@
 ---
 import SectionHeader from './SectionHeader.astro';
 
+// Same status language as the collection-health panel in the "How Grove
+// works" story, so the production reference reads as that model, deployed.
 const records = [
   { name: 'Immich', category: 'Media', stack: 'TypeScript', status: 'active' },
   { name: 'Joplin', category: 'Productivity', stack: 'TypeScript', status: 'mature' },
   { name: 'Linkwarden', category: 'Knowledge', stack: 'Next.js', status: 'active' },
 ];
+
+const statusPill = {
+  active: 'border-accent-green/40 bg-accent-green/10 text-accent-green',
+  mature: 'border-brand/40 bg-brand/10 text-brand-light',
+};
 ---
 
 <section id="open-apps" class="mx-auto max-w-7xl px-6 py-24" aria-labelledby="open-apps-title">
@@ -15,7 +22,7 @@ const records = [
         eyebrow="Production reference"
         title="Grove grew out of maintaining Open Apps."
         titleId="open-apps-title"
-        lede="Open Apps is a live directory with file-backed records, repository refresh, search, filters, detail pages, a sitemap, and AI-readable outputs. Grove turns that operating model into a reusable framework."
+        lede="Every step you just scrolled through runs in production at Open Apps: file-backed records, repository refresh, search, filters, detail pages, a sitemap, and AI-readable outputs. Grove turns that operating model into a reusable framework."
         maxWidth="narrow"
       />
       <p class="mt-5 max-w-xl border-l-2 border-accent-orange/50 pl-4 text-sm leading-relaxed text-subtle">
@@ -29,22 +36,24 @@ const records = [
 
     <div class="relative">
     <div class="grove-glow" aria-hidden="true"></div>
-    <div class="overflow-hidden rounded-xl border border-border-strong bg-bg shadow-2xl shadow-black/20" aria-label="Open Apps product preview">
+    <div class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(100_108_255_/_0.25)] backdrop-blur" aria-label="Open Apps product preview">
       <div class="flex items-center gap-2 border-b border-border px-4 py-3">
         <span class="size-3 rounded-full bg-[#ff5f57]"></span><span class="size-3 rounded-full bg-[#febc2e]"></span><span class="size-3 rounded-full bg-[#28c840]"></span>
-        <span class="mx-auto rounded-md border border-border bg-surface px-8 py-1 font-mono text-[10px] text-subtle">open-apps.dev.mn/apps</span>
+        <span class="mx-auto rounded-full border border-border bg-surface px-6 py-1 font-mono text-[11px] text-subtle">open-apps.dev.mn/apps</span>
+        <span class="size-3" aria-hidden="true"></span>
       </div>
       <div class="p-5 sm:p-6">
         <div class="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div><span class="font-mono text-[10px] uppercase tracking-widest text-accent-green">Open Apps</span><h3 class="mt-2 text-xl font-semibold text-fg">Explore real open-source apps</h3></div>
-          <div class="flex gap-2 font-mono text-[10px] text-muted"><span class="rounded-md border border-border px-3 py-2">Search</span><span class="rounded-md border border-border px-3 py-2">Filter</span></div>
+          <div><span class="font-mono text-[10px] uppercase tracking-widest text-brand-light">Open Apps</span><h3 class="mt-2 text-xl font-semibold text-fg">Explore real open-source apps</h3></div>
+          <div class="flex gap-1.5 font-mono text-[10px] text-muted"><span class="rounded-full border border-border px-3.5 py-1.5">Search</span><span class="rounded-full border border-border px-3.5 py-1.5">Filter</span></div>
         </div>
-        <div class="mt-4 space-y-2">
+        <div class="mt-4 space-y-1.5">
           {records.map((record) => (
-            <div class="grid grid-cols-[1fr_auto] gap-4 rounded-lg border border-border bg-card p-4 sm:grid-cols-[1fr_0.7fr_auto] sm:items-center">
-              <div><strong class="text-sm font-semibold text-fg">{record.name}</strong><span class="mt-1 block text-xs text-subtle">{record.category}</span></div>
-              <span class="hidden font-mono text-xs text-muted sm:block">{record.stack}</span>
-              <span class="font-mono text-[10px] text-accent-green">{record.status}</span>
+            <div class="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+              <span class="size-1.5 shrink-0 rounded-full bg-accent-green" aria-hidden="true"></span>
+              <div class="min-w-0"><strong class="block truncate text-sm font-semibold text-fg">{record.name}</strong><span class="block text-xs text-subtle">{record.category}</span></div>
+              <span class="ml-auto hidden font-mono text-xs text-muted sm:block">{record.stack}</span>
+              <span class:list={['shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-medium', statusPill[record.status]]}>{record.status}</span>
             </div>
           ))}
         </div>

@@ -8,8 +8,8 @@ interface Props {
 }
 
 const {
-  title = 'Grove — Grow useful community knowledge',
-  description = 'Grove is an open-source, GitHub-native framework for turning community submissions into structured, searchable, and maintainable knowledge spaces.',
+  title = 'Grove — Build curated directories that stay useful',
+  description = 'Grove is an open-source framework for curated directories and knowledge sites: structured records and Markdown in Git, published as a fast, searchable static site with collections, lenses, automated metadata, and a built-in review workflow.',
 } = Astro.props;
 
 const siteUrl = Astro.site?.toString() ?? 'https://grove.dev.mn';
@@ -55,7 +55,7 @@ const softwareJsonLd = {
   applicationCategory: 'DeveloperApplication',
   operatingSystem: 'Any',
   description:
-    'Open-source framework for turning community submissions into structured, searchable, and maintainable knowledge spaces. Includes a CLI, a headless core, an Astro renderer, and a Starlight theme.',
+    'Open-source framework for building curated directories and knowledge sites that stay useful over time. Includes a CLI, a headless core, an Astro renderer, and a Starlight theme.',
   url: siteUrl,
   downloadUrl: 'https://www.npmjs.com/package/@grove-dev/cli',
   // Aligned with the page-copy versioning: "V1" everywhere in the
@@ -107,7 +107,7 @@ const faqJsonLd = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0a0d0b" />
+    <meta name="theme-color" content="#101010" />
     <meta name="color-scheme" content="dark light" />
     <meta name="generator" content={Astro.generator} />
 
@@ -124,13 +124,13 @@ const faqJsonLd = {
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Grove — Grow useful community knowledge" />
+    <meta property="og:image:alt" content="Grove — Build curated directories that stay useful" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
-    <meta name="twitter:image:alt" content="Grove — Grow useful community knowledge" />
+    <meta name="twitter:image:alt" content="Grove — Build curated directories that stay useful" />
 
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />
@@ -175,9 +175,9 @@ const faqJsonLd = {
     left: 0.5rem;
     z-index: 100;
     padding: 0.5rem 0.875rem;
-    background: var(--color-bg, #0a0d0b);
-    color: var(--color-fg, #f5f7f5);
-    border: 1px solid var(--color-border-strong, #2a352c);
+    background: var(--color-bg, #101010);
+    color: var(--color-fg, #f6f6f7);
+    border: 1px solid var(--color-border-strong, #3f3f46);
     border-radius: 0.5rem;
     font-family: var(--font-sans);
     font-size: 0.875rem;
@@ -190,7 +190,7 @@ const faqJsonLd = {
   .skip-to-content:focus,
   .skip-to-content:focus-visible {
     transform: translateY(0);
-    outline: 2px solid var(--color-accent-blue, #60a5fa);
+    outline: 2px solid var(--color-brand, #646cff);
     outline-offset: 2px;
   }
 

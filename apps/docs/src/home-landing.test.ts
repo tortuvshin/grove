@@ -15,17 +15,14 @@ describe("docs homepage (standalone Astro route)", () => {
 
 		const indexAstro = await readFile(indexAstroPath, "utf8");
 
-		// Imports the home layout and all 12 section components from src/components/home/
+		// Imports the home layout and all 10 section components from src/components/home/
 		expect(indexAstro).toContain("import Layout from '../layouts/HomeLayout.astro'");
 		for (const name of [
 			"Header",
 			"Hero",
 			"ProofBar",
-			"Problem",
-			"HowItWorks",
-			"Health",
-			"Integrations",
-			"Build",
+			"Features",
+			"Demo",
 			"OpenApps",
 			"Faq",
 			"FinalCta",
@@ -36,15 +33,28 @@ describe("docs homepage (standalone Astro route)", () => {
 			);
 		}
 
-		// Renders every section in the flagship order: hero → proof → problem →
-		// how it works → differentiator → outputs → blueprints → production
-		// story → FAQ → final CTA.
+		// Renders every section in the vite.dev-style order: hero → proof bar →
+		// feature grid → live demo → production story → FAQ → gradient CTA band.
 		expect(indexAstro).toMatch(
-			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<ProofBar\s*\/>\s*<Problem\s*\/>\s*<HowItWorks\s*\/>\s*<Health\s*\/>\s*<Integrations\s*\/>\s*<Build\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
+			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<ProofBar\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
 		);
 
-		// The superseded sections must stay deleted.
-		for (const name of ["Features", "GetStarted", "Blueprints", "Frameworks"]) {
+		// Superseded sections from earlier iterations must stay deleted.
+		for (const name of [
+			"GetStarted",
+			"Blueprints",
+			"Frameworks",
+			"Problem",
+			"HowItWorks",
+			"Health",
+			"WhyGrove",
+			"Decay",
+			"Lifecycle",
+			"Discovery",
+			"Records",
+			"Integrations",
+			"Build",
+		]) {
 			expect(
 				existsSync(resolve(docsRoot, `src/components/home/${name}.astro`)),
 				name,
@@ -71,23 +81,33 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(layoutSource).toMatch(/class="min-h-screen bg-bg text-fg antialiased"/);
 	});
 
-	it("ships the home stylesheet with @theme tokens instead of Starlight variables", async () => {
+	it("ships the home stylesheet with the vite.dev-style palette and no webfonts", async () => {
 		const homeCss = await readFile(resolve(docsRoot, "src/styles/home.css"), "utf8");
 
 		expect(homeCss).toMatch(/@import\s+['"]tailwindcss['"]/);
 		expect(homeCss).toMatch(/@theme\s*\{/);
 
-		// Standalone Grove tokens — "grove at night" canvas + self-hosted display serif
-		expect(homeCss).toMatch(/--color-bg:\s*#0a0d0b/);
-		expect(homeCss).toMatch(/--color-fg:\s*#f5f7f5/);
-		expect(homeCss).toMatch(/--color-accent-green:\s*oklch\(78% 0\.19 152\)/);
+		// Neutral dark canvas + indigo brand + cyan→purple signature gradient.
+		expect(homeCss).toMatch(/--color-bg:\s*#101010/);
+		expect(homeCss).toMatch(/--color-fg:\s*#f6f6f7/);
+		expect(homeCss).toMatch(/--color-brand:\s*#646cff/);
+		expect(homeCss).toMatch(/--color-accent-cyan:\s*#41d1ff/);
+		expect(homeCss).toMatch(/--color-accent-purple:\s*#bd34fe/);
+		expect(homeCss).toContain("linear-gradient(120deg, #41d1ff 10%, #bd34fe)");
+
+		// Same font story as the docs (Starlight defaults): the system stack,
+		// no webfont imports.
 		expect(homeCss).toContain("--font-sans: ui-sans-serif");
 		expect(homeCss).toContain("--font-mono: ui-monospace");
-		expect(homeCss).toContain("@fontsource/fraunces");
-		expect(homeCss).toContain("--font-display: 'Fraunces'");
+		expect(homeCss).not.toMatch(/@fontsource|fraunces|@font-face/i);
 
 		// No Starlight tokens leak in
 		expect(homeCss).not.toContain("--sl-");
+	});
+
+	it("keeps the webfont out of the docs package dependencies", async () => {
+		const pkg = await readFile(resolve(docsRoot, "package.json"), "utf8");
+		expect(pkg).not.toContain("@fontsource/fraunces");
 	});
 
 	it("wires @tailwindcss/vite into astro.config.mjs alongside Starlight", async () => {
@@ -127,39 +147,37 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(homeLayout).not.toContain("https://grove.dev'");
 	});
 
-	it("renders the canonical brand line and truthful hero artifacts", async () => {
+	it("renders a centered, plain-language hero with the glowing mark and pill buttons", async () => {
 		const hero = await readComponent("Hero");
 
-		// H1 is the canonical brand line from vision.md, with the closing
-		// phrase in a gradient span — asserted in two contiguous halves.
-		expect(hero).toContain("Grow useful");
-		expect(hero).toContain("community knowledge.");
+		// Positioning line, closing phrase in the signature gradient.
+		expect(hero).toContain("Build directories");
+		expect(hero).toContain("that stay useful.");
 		expect(hero).toContain("text-gradient");
+
+		// The paragraph explains the product in user terms, not CLI terms.
 		expect(hero).toContain(
-			"Grove turns community submissions into structured, searchable, and maintainable knowledge spaces",
+			"open-source framework for curated directories, resource hubs, and knowledge sites",
 		);
 
-		// Copy-paste install command + copy-to-clipboard affordance
-		expect(hero).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
-		expect(hero).toContain('id="hero-copy-command"');
-		expect(hero).toContain("navigator.clipboard.writeText");
+		// vite.dev-style hero: no terminals or install commands here.
+		expect(hero).not.toContain("pnpm dlx");
+		expect(hero).not.toContain("<pre");
 
-		// The pipeline mockup shows a real record and the REAL `grove check`
-		// summary line from packages/cli/src/index.ts — not invented output.
-		expect(hero).toContain("data/records/crewai.yml");
-		expect(hero).toContain(
-			"[grove] 6 records prepared; sitemap and llms files updated.",
-		);
-
-		// Interactive treatments degrade gracefully.
-		expect(hero).toContain("prefers-reduced-motion");
-		expect(hero).toContain("grove-aurora");
-
-		// Hero links point at real destinations, not placeholder "#".
-		expect(hero).toContain('href="/roadmap/"');
+		// Buttons point at real destinations.
 		expect(hero).toContain('href="/getting-started/create-a-space/"');
-		expect(hero).toContain('href="https://open-apps.dev.mn"');
+		expect(hero).toContain('href="/introduction/"');
+		expect(hero).toContain('href="https://github.com/tortuvshin/grove"');
 		expect(hero).toContain('target="_blank"');
+		expect(hero).toContain('href="/roadmap/"');
+
+		// Glowing floating mark + beam field degrade gracefully.
+		expect(hero).toContain("hero-beams");
+		expect(hero).toContain("hero-mark-glow");
+		expect(hero).toContain("prefers-reduced-motion");
+
+		// Honesty strip.
+		expect(hero).toContain("No database · No CMS · MIT licensed");
 	});
 
 	it("shows only verifiable project numbers in the proof bar", async () => {
@@ -170,6 +188,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		// components, the vitest unit project, Lighthouse budget in
 		// packages/cli/src/audit.ts). If the codebase changes, update the
 		// landing page and this test together.
+		expect(proofBar).toContain("Built in the open");
 		expect(proofBar).toContain("npm packages");
 		expect(proofBar).toContain("CLI commands");
 		expect(proofBar).toContain("Astro components");
@@ -179,121 +198,130 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(proofBar).toContain("MIT");
 	});
 
-	it("frames the problem as three problem→solution pairs", async () => {
-		const problem = await readComponent("Problem");
+	it("explains the product with an eight-card, plain-language feature grid", async () => {
+		const features = await readComponent("Features");
 
-		expect(problem).toContain("Community lists rot.");
-		expect(problem).toContain("Structure drifts");
-		expect(problem).toContain("Metadata goes stale");
-		expect(problem).toContain("Curation is unauditable");
-		// Every pain is answered by a concrete Grove mechanism.
-		expect(problem).toContain("grove check");
-		expect(problem).toContain("grove sync github");
-		expect(problem).toContain("decisions.yml");
-	});
+		expect(features).toContain('id="features"');
+		expect(features).toContain("Redefining");
+		expect(features).toContain("directory maintenance.");
 
-	it("walks Plant → Grow → Prune with real CLI output", async () => {
-		const how = await readComponent("HowItWorks");
-
-		// Header nav's "How it works" anchor target lives here now.
-		expect(how).toContain('id="how-it-works"');
-		expect(how).toContain("Plant. Grow. Prune.");
-
-		// Real command surface…
-		expect(how).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
-		expect(how).toContain("pnpm exec grove check");
-		expect(how).toContain("pnpm exec grove sync github");
-		expect(how).toContain("pnpm exec grove cleanup --strict");
-		// …and the real output strings from packages/cli.
-		expect(how).toContain(
-			"[grove] 6 records prepared; sitemap and llms files updated.",
-		);
-		expect(how).toContain("[sync github] 5 updated (1 HTML fallback), 0 failed");
-		expect(how).toContain(
-			"[cleanup] 2 candidate(s) → data/generated/cleanup-report.json",
-		);
-
-		// The editorial-judgment boundary stays explicit.
-		expect(how).toContain("editorial judgment stays human");
-	});
-
-	it("renders the derived-health section with the real classifyHealth rules and the human override layer", async () => {
-		const health = await readComponent("Health");
-
-		expect(health).toContain("Health is derived, not declared.");
-		// Threshold copy must mirror classifyHealth() in packages/core/src/health.ts
-		expect(health).toContain("Pushed within 183 days");
-		expect(health).toContain("50 stars");
-		expect(health).toContain("500 stars + maintained signals");
-		// Both layers of the model: derived data and reasoned human override
-		expect(health).toContain("data/health.yml");
-		expect(health).toContain("decisions.yml");
-		expect(health).toContain("reason:");
-		expect(health).toMatch(/<section[^>]+aria-labelledby="health-title"/);
-	});
-
-	it("keeps the blueprint cards and the honest renderer matrix in the Build section", async () => {
-		const build = await readComponent("Build");
-
-		expect(build).toContain("Project directories");
-		expect(build).toContain("Resource hubs");
-		expect(build).toContain("Ecosystem maps");
-		expect(build).toContain("Maintained awesome lists");
-		expect(build).toContain("Available today");
-		expect(build).toContain("Schema available");
-
-		// Honesty framing: only Astro ships today (audit finding: the old
-		// 8-logo equal-status matrix overstated support).
-		expect(build).toContain("Supported today");
-		expect(build).toContain("Planned V1.1");
-		expect(build).toContain("--framework");
-		expect(build).toMatch(/<img[^>]+alt=/);
-		expect(build).toMatch(/<img[^>]+width="24"/);
-		expect(build).toContain('loading="lazy"');
-	});
-
-	it("serves the renderer logo SVGs actually referenced by Build.astro", async () => {
-		const logosDir = resolve(docsRoot, "public/logos");
-		const expected = ["astro.svg", "svelte.svg", "nextdotjs.svg"];
-		for (const name of expected) {
-			expect(existsSync(resolve(logosDir, name))).toBe(true);
+		// Eight benefit-first cards; each maps to shipped behavior.
+		for (const title of [
+			"Ready in a minute",
+			"Search & lenses",
+			"Curated collections",
+			"Rich detail pages",
+			"Self-updating metadata",
+			"Stays healthy",
+			"One source, many outputs",
+			"Yours to own",
+		]) {
+			expect(features, title).toContain(title);
 		}
-		const build = await readComponent("Build");
-		for (const name of expected) {
-			expect(build).toContain(`/logos/${name}`);
-		}
+
+		// User-language claims that map to real mechanisms.
+		expect(features).toContain("review queue");
+		expect(features).toContain("llms.txt");
+		expect(features).toContain("No database, no CMS");
+
+		// No terminal output in the feature grid — it speaks user, not CLI.
+		expect(features).not.toContain("<pre");
 	});
 
-	it("keeps the Open Apps production story and the Integrations output map", async () => {
+	it("tells the How Grove works story as a scroll scrub that ends in the live demo", async () => {
+		const demo = await readComponent("Demo");
+
+		expect(demo).toContain('id="demo"');
+		expect(demo).toContain("How Grove works");
+		expect(demo).toContain("living directory.");
+
+		// Six-step narrative ported from the transformation concept.
+		for (const label of [
+			"Initialize",
+			"Add content",
+			"Structure",
+			"Publish",
+			"Generate",
+			"Maintain",
+		]) {
+			expect(demo, label).toContain(label);
+		}
+
+		// Scene 1 types the real CLI command; scene 2 mirrors the real
+		// `grove init` scaffold (packages/cli/src/init.ts copies apps/example).
+		expect(demo).toContain("grove init my-space");
+		for (const path of ["data/", "records/", "collections/", "taxonomy/", "grove.config.ts"]) {
+			expect(demo, path).toContain(path);
+		}
+
+		// Scenes 5–6 stay truthful: generated files come from
+		// GENERATED_PUBLIC_NAMES and staleness uses the 183-day threshold.
+		expect(demo).toContain("Generated outputs");
+		expect(demo).toContain("llms.txt");
+		expect(demo).toContain("sitemap.xml");
+		expect(demo).toContain("Collection health");
+		expect(demo).toContain("183");
+
+		// The scrub is a progressive enhancement only: it gates on viewport
+		// width and reduced motion, and tears down cleanly.
+		expect(demo).toContain('id="hgw"');
+		expect(demo).toContain("prefers-reduced-motion");
+		expect(demo).toContain("min-width: 1024px");
+	});
+
+	it("ships a live, filterable directory demo wired to the real lens definitions", async () => {
+		const demo = await readComponent("Demo");
+
+		expect(demo).toContain('id="demo-directory"');
+		expect(demo).toContain('id="demo-directory-search"');
+
+		// Lens labels are the real PRIMARY_LENSES from
+		// packages/core/src/directory-lenses.ts, and each tab writes the same
+		// URL params as toParams().
+		for (const label of ["All items", "Trending", "Established", "Production-like", "Good to learn"]) {
+			expect(demo, label).toContain(label);
+		}
+		expect(demo).toContain("label=hot");
+		expect(demo).toContain("label=mature");
+		expect(demo).toContain("lens=production-like");
+		expect(demo).toContain("lens=good-to-learn");
+		expect(demo).toContain("data-lenses");
+		expect(demo).toContain('aria-live="polite"');
+	});
+
+	it("keeps the Open Apps production story", async () => {
 		const openApps = await readComponent("OpenApps");
-		const integrations = await readComponent("Integrations");
 
 		expect(openApps).toContain("Grove grew out of maintaining Open Apps.");
 		expect(openApps).toContain('id="open-apps"');
 		expect(openApps).toContain("https://open-apps.dev.mn");
+	});
 
-		expect(integrations).toContain("One source, multiple outputs");
-		expect(integrations).toContain("llms-full.txt");
-		expect(integrations).toContain("record.yml");
+	it("closes with a full-bleed gradient CTA band", async () => {
+		const finalCta = await readComponent("FinalCta");
+
+		expect(finalCta).toContain("Start growing with Grove.");
+		expect(finalCta).toContain("cta-gradient");
+		expect(finalCta).toContain('href="/getting-started/create-a-space/"');
+		expect(finalCta).toContain('href="https://github.com/tortuvshin/grove"');
+		expect(finalCta).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
 	});
 
 	it("wires each section to its heading via aria-labelledby for assistive tech", async () => {
+		// Both shared heading components own an identifiable <h2 id>.
 		const sectionHeader = await readComponent("SectionHeader");
-		// SectionHeader owns the shared <h2 id> used by most sections.
 		expect(sectionHeader).toMatch(/<h2[^>]+id=/);
+		const statement = await readComponent("Statement");
+		expect(statement).toMatch(/<h2[^>]+id=/);
 
 		const hero = await readComponent("Hero");
 		expect(hero).toMatch(/<section[^>]+aria-labelledby=/);
 		expect(hero).toMatch(/<h1[^>]+id=/);
 
-		for (const name of ["Problem", "HowItWorks", "Health", "Integrations", "Build", "OpenApps", "Faq", "FinalCta"]) {
+		for (const name of ["Features", "Demo", "OpenApps", "Faq", "FinalCta"]) {
 			const src = await readComponent(name);
 			expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
 		}
-
-		const finalCta = await readComponent("FinalCta");
-		expect(finalCta).toContain('href="/getting-started/create-a-space/"');
-		expect(finalCta).toContain('href="https://github.com/tortuvshin/grove"');
 	});
 
 	it("exposes robots.txt, an OG image, and a PWA manifest under public/", async () => {
@@ -307,7 +335,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		);
 		expect(manifest.name).toBe("Grove");
 		expect(manifest.start_url).toBe("/");
-		expect(manifest.theme_color).toBe("#0a0d0b");
+		expect(manifest.theme_color).toBe("#101010");
 		expect(manifest.icons?.[0]?.src).toBe("/favicon.svg");
 
 		expect(existsSync(resolve(docsRoot, "public/og-image.svg"))).toBe(true);
@@ -355,11 +383,11 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(home).toContain('name="twitter:card"');
 		expect(home).toContain('content="summary_large_image"');
 		expect(home).toContain('name="theme-color"');
-		expect(home).toContain('content="#0a0d0b"');
+		expect(home).toContain('content="#101010"');
 		expect(home).toContain('rel="manifest"');
 		expect(home).toContain('rel="apple-touch-icon"');
-		// Social alt text follows the canonical brand line.
-		expect(home).toContain("Grove — Grow useful community knowledge");
+		// Social alt text follows the positioning brand line.
+		expect(home).toContain("Grove — Build curated directories that stay useful");
 
 		// Starlight head config wires the same metadata via object literals so
 		// Starlight content pages render the same preview cards. We only assert
@@ -380,7 +408,8 @@ describe("docs homepage (standalone Astro route)", () => {
 	it("serves focused navigation with a mobile menu", async () => {
 		const header = await readComponent("Header");
 
-		expect(header).toContain("#how-it-works");
+		expect(header).toContain("#features");
+		expect(header).toContain("#demo");
 		expect(header).toContain("#open-apps");
 		expect(header).toContain("/introduction/");
 		expect(header).toContain("/roadmap/");

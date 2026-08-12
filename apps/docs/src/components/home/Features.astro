@@ -1,0 +1,88 @@
+---
+// VitePress-style feature grid: emoji tile, short title, one plain-language
+// sentence. Every claim maps to shipped behavior (schema validation, GitHub
+// sync, classifyHealth(), collections/lenses in @grove-dev/core, generated
+// README/sitemap/llms outputs, replaceable Astro pages).
+const features = [
+  {
+    icon: '⚡',
+    title: 'Ready in a minute',
+    body: 'One command creates a complete, deployable site — records, pages, search, and workflows included.',
+  },
+  {
+    icon: '🔍',
+    title: 'Search & lenses',
+    body: 'Readers browse by question — Trending, Production-like, Good to learn — and every view is a shareable link.',
+  },
+  {
+    icon: '📚',
+    title: 'Curated collections',
+    body: 'Editorial picks with a written why — high-value landing pages, not auto-generated category lists.',
+  },
+  {
+    icon: '📝',
+    title: 'Rich detail pages',
+    body: 'Structured data plus Markdown, so each item reads like a real page: overview, trade-offs, alternatives.',
+  },
+  {
+    icon: '🔄',
+    title: 'Self-updating metadata',
+    body: 'Stars, licenses, and activity refresh from GitHub on a schedule — as changes you review, not silent edits.',
+  },
+  {
+    icon: '🌿',
+    title: 'Stays healthy',
+    body: 'Stale or archived projects surface in a review queue. You decide — keep, hide, or remove, with reasons on file.',
+  },
+  {
+    icon: '📤',
+    title: 'One source, many outputs',
+    body: 'The same records publish your website, a GitHub README, a sitemap, and AI-readable llms.txt files.',
+  },
+  {
+    icon: '🧩',
+    title: 'Yours to own',
+    body: 'Plain files in your Git repo, pages in your code. No database, no CMS, no lock-in — MIT licensed.',
+  },
+];
+---
+
+<section id="features" class="relative" aria-labelledby="features-title">
+  <div class="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+    <header class="mx-auto max-w-2xl text-center">
+      <h2 id="features-title" class="text-balance text-4xl font-bold tracking-tight text-fg sm:text-5xl">
+        Redefining <span class="text-gradient">directory maintenance.</span>
+      </h2>
+      <p class="mt-5 text-pretty text-lg leading-relaxed text-muted">
+        Machines keep the facts fresh. Humans keep the judgment. Grove is the system that keeps both honest — for years, not weeks.
+      </p>
+    </header>
+
+    <div class="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {features.map((feature) => (
+        <article class="feature-card group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-colors duration-300 hover:border-border-strong">
+          <div class="feature-card-glow" aria-hidden="true"></div>
+          <div class="relative flex size-12 items-center justify-center rounded-lg bg-surface text-2xl" aria-hidden="true">
+            {feature.icon}
+          </div>
+          <h3 class="relative mt-5 text-base font-semibold text-fg">{feature.title}</h3>
+          <p class="relative mt-2 text-sm leading-relaxed text-muted">{feature.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature-card-glow {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(220px circle at 30% 0%, rgb(100 108 255 / 0.14), transparent 70%);
+  }
+
+  .feature-card:hover .feature-card-glow {
+    opacity: 1;
+  }
+</style>

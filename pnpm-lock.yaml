@@ -37,9 +37,6 @@ importers:
       '@astrojs/starlight':
         specifier: ^0.41.3
         version: 0.41.4(@astrojs/markdown-remark@7.2.1)(astro@7.1.3(@astrojs/markdown-remark@7.2.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@25.9.2)(jiti@2.7.0)(rollup@4.61.1)(tsx@4.23.1)(yaml@2.9.0))(typescript@6.0.3)
-      '@fontsource/fraunces':
-        specifier: ^5.3.0
-        version: 5.3.0
       '@grove-dev/starlight':
         specifier: workspace:*
         version: link:../../packages/starlight
@@ -659,9 +656,6 @@ packages:
 
   '@expressive-code/plugin-text-markers@0.44.1':
     resolution: {integrity: sha512-B3BsJoJ8CFMlcIX9f+X9tcI3C4zPDO601+YuLi9GheSTNro7ZfqSjLptMQKBHOWZvxnAtY5zvIX7iO/qtBhNBg==}
-
-  '@fontsource/fraunces@5.3.0':
-    resolution: {integrity: sha512-LEHTOBiZufQzAvnAe2rZ8ZknbDS28Q9kzwb0L+gZJEmjLGr8hhZ/5NuHXwDuHBWhVXYoiGGXmrb0H6Ko/RrHTg==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -4417,8 +4411,6 @@ snapshots:
   '@expressive-code/plugin-text-markers@0.44.1':
     dependencies:
       '@expressive-code/core': 0.44.1
-
-  '@fontsource/fraunces@5.3.0': {}
 
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:

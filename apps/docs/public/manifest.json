@@ -4,8 +4,8 @@
   "description": "The framework for community knowledge — structured files into static, searchable, contributor-friendly knowledge spaces.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0d0b",
-  "theme_color": "#0a0d0b",
+  "background_color": "#101010",
+  "theme_color": "#101010",
   "icons": [
     {
       "src": "/favicon.svg",

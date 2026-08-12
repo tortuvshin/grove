@@ -1,26 +1,22 @@
 ---
 ---
 
-<section class="mx-auto max-w-7xl px-6 py-24" aria-labelledby="final-cta-title">
-  <div
-    class="relative overflow-hidden rounded-2xl border border-border-strong bg-card px-6 py-16 text-center sm:px-12"
-  >
-    <div class="grove-glow" aria-hidden="true"></div>
+<section class="relative overflow-hidden border-t border-border/60" aria-labelledby="final-cta-title">
+  <div class="cta-gradient absolute inset-0" aria-hidden="true"></div>
+  <div class="relative mx-auto max-w-3xl px-6 py-24 text-center sm:py-28">
     <h2
       id="final-cta-title"
-      class="mx-auto max-w-2xl font-display text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
+      class="mx-auto max-w-2xl text-balance text-4xl font-bold leading-[1.06] tracking-tight text-fg sm:text-5xl"
     >
-      Start with the Astro implementation.
+      Start growing with Grove.
     </h2>
     <p class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted">
-      Inspect the example, read the architecture, and build a space from plain files. No CMS or runtime database required.
+      Turn structured files and Markdown into a curated, searchable site that stays useful — with the maintenance on rails. No CMS or runtime database required.
     </p>
-    <div
-      class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
-    >
+    <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
       <a
         href="/getting-started/create-a-space/"
-        class="inline-flex w-full items-center justify-center rounded-md bg-accent-green px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:w-auto"
+        class="inline-flex w-full items-center justify-center rounded-lg bg-fg px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:w-auto"
       >
         Read the quick start
       </a>
@@ -28,17 +24,26 @@
         href="https://github.com/tortuvshin/grove"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex w-full items-center justify-center rounded-md border border-border-strong bg-surface px-6 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover sm:w-auto"
+        class="inline-flex w-full items-center justify-center rounded-lg border border-border-strong bg-bg/40 px-6 py-2.5 text-sm font-semibold text-fg backdrop-blur transition-colors hover:bg-bg/60 sm:w-auto"
       >
         View on GitHub
       </a>
     </div>
 
-    <div
-      class="mt-10 inline-flex items-center gap-2 rounded-md border border-border bg-bg px-4 py-2.5 font-mono text-[13px]"
-    >
+    <div class="mt-10 inline-flex items-center gap-2 rounded-lg border border-border-strong bg-bg/70 px-4 py-2.5 font-mono text-[13px] backdrop-blur">
       <span class="text-subtle">$</span>
       <span class="text-fg">pnpm dlx @grove-dev/cli@latest init my-space</span>
     </div>
   </div>
 </section>
+
+<style>
+  /* Full-bleed brand-gradient band, vite.dev style — saturated at the bottom,
+     fading up into the page canvas so the section reads as a finale. */
+  .cta-gradient {
+    background:
+      radial-gradient(90% 120% at 50% 115%, rgb(100 108 255 / 0.5), transparent 70%),
+      radial-gradient(60% 80% at 20% 110%, rgb(65 209 255 / 0.28), transparent 70%),
+      radial-gradient(60% 80% at 80% 110%, rgb(189 52 254 / 0.32), transparent 70%);
+  }
+</style>

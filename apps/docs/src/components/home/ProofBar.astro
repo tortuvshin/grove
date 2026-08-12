@@ -13,13 +13,18 @@ const proofs = [
 ];
 ---
 
-<section class="border-y border-border/60 bg-surface/40" aria-label="Project scale, verified against the repository">
-  <ul class="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-6 py-5">
-    {proofs.map((proof) => (
-      <li class="flex items-baseline gap-2 font-mono text-xs text-subtle">
-        <span class="text-sm font-semibold text-accent-green">{proof.value}</span>
-        {proof.label}
-      </li>
-    ))}
-  </ul>
+<section class="border-b border-border/60 bg-surface/40" aria-label="Project scale, verified against the repository">
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <p class="text-center text-xs font-medium uppercase tracking-widest text-subtle">
+      Built in the open — every number checked against the source
+    </p>
+    <ul class="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+      {proofs.map((proof) => (
+        <li class="flex items-baseline gap-2 font-mono text-xs text-subtle">
+          <span class="text-base font-semibold text-fg">{proof.value}</span>
+          {proof.label}
+        </li>
+      ))}
+    </ul>
+  </div>
 </section>
