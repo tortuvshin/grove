@@ -156,6 +156,20 @@ const pillClass = {
             <span id="hgw-caption-label" class="text-brand-light">Initialize</span>
           </div>
 
+          <!-- Continuous progress bar (scrub mode only). Gives a smooth sense
+               of overall progress across all six steps without snapping. -->
+          <div
+            id="hgw-progress"
+            class="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-border/40"
+            aria-hidden="true"
+          >
+            <div
+              id="hgw-progress-fill"
+              class="h-full w-0 bg-brand"
+              style="transform-origin: left center; will-change: width;"
+            ></div>
+          </div>
+
           <div class="hgw-gridbg" aria-hidden="true"></div>
 
           <!-- Scene 1 · Initialize: terminal types `grove init my-space` -->
@@ -627,6 +641,12 @@ const pillClass = {
   #hgw-caption { display: none; }
   #hgw.is-scrub #hgw-caption { display: block; }
 
+  /* Continuous progress bar: hidden in static mode where step cards already
+     convey the journey. */
+  #hgw-progress { display: none; }
+  #hgw.is-scrub #hgw-progress { display: block; }
+  #hgw-progress-fill { transition: width 0.12s linear; }
+
   /* Static-mode captions: bind outputs and health to steps 5 and 6. The rail
      names the steps in scrub mode, so these become noise and are hidden. */
   #hgw.is-scrub .hgw-extra-caption { display: none; }
@@ -789,6 +809,7 @@ const pillClass = {
     const outArrow = $('hgw-out-arrow');
     const capIndexEl = $('hgw-caption-index');
     const capLabelEl = $('hgw-caption-label');
+    const progressFill = $('hgw-progress-fill');
 
     const COMMAND = 'grove init my-space';
 
@@ -796,7 +817,7 @@ const pillClass = {
     // must only clear what render() touched instead of the style attribute.
     const styled = [
       term, cursor, line1, line2, files, system, core, site, win, outputs,
-      healthPanel, spin, bridge, outPath, outArrow,
+      healthPanel, spin, bridge, outPath, outArrow, progressFill,
       ...inPaths, ...capPaths, ...inChips,
       ...capChips, ...records, ...outItems, ...healthRows,
     ].filter(Boolean);
@@ -810,6 +831,10 @@ const pillClass = {
       const total = track.offsetHeight - window.innerHeight;
       if (total <= 0) return;
       const p = clamp(Math.min(Math.max(-rect.top, 0), total) / total);
+
+      // Continuous progress bar fills smoothly across all six steps so the
+      // viewer gets a constant sense of where they are in the journey.
+      if (progressFill) progressFill.style.width = `${(p * 100).toFixed(2)}%`;
 
       // 01 · Initialize — terminal types, prints, then hands off upward.
       const termO = band(p, 0, 0.02, 0.13, 0.19);
