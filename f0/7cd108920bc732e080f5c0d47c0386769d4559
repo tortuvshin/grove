@@ -1,0 +1,19 @@
+apps/docs/src/components/home/Demo.astro
+  s_b3738b8eec04c1::t_d3a7de783cef19 934-941,945-959
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f07cd108920bc732e080f5c0d47c0386769d4559",
+  "prompts": {},
+  "sessions": {
+    "s_b3738b8eec04c1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f466bb0-6c81-4169-a4e0-6b80e1bfabcc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
