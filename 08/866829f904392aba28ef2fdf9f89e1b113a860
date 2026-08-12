@@ -1,0 +1,76 @@
+apps/docs/src/components/home/Features.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 55
+packages/starlight/styles/theme.css
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 19
+apps/docs/src/components/home/SectionHeader.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 32
+apps/docs/public/og-image.svg
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 4-5,10
+apps/docs/src/components/home/FinalCta.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 8,11,23,43-61
+apps/docs/src/components/home/Frameworks.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 34,61,92
+apps/docs/src/components/home/GetStarted.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 15,41,98
+apps/docs/src/layouts/HomeLayout.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 110,145-167,178-180
+apps/docs/src/components/home/Faq.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 19
+apps/docs/src/styles/home.css
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 2,7,9-20,22-35,58,66-144
+  s_5ecb0cc1ea5216::t_b38a4d4a69d497 145
+apps/docs/src/components/home/Footer.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 60
+apps/docs/src/components/home/Hero.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 2-14,17-43,46,48,57,75-93,99-105,113-117,124,127-130,142-233
+apps/docs/src/home-landing.test.ts
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 15,21,34-36,70-73,76-77,152-155,158-159,179-213,270,330,384
+apps/docs/src/components/home/Header.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 45,71
+apps/docs/src/components/home/Integrations.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 36-38,40-42,58-94
+apps/docs/src/content/docs/introduction.md
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 33
+apps/docs/src/pages/index.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 8,24
+  s_5ecb0cc1ea5216::t_38246005059a60 5-7,10,21-23,26-27
+apps/docs/src/components/home/OpenApps.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 30-32
+  s_5ecb0cc1ea5216::t_c34005767fcaea 54
+apps/docs/package.json
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 15
+apps/docs/public/manifest.json
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 7-8
+apps/docs/src/components/home/Blueprints.astro
+  s_5ecb0cc1ea5216::t_128c6223e14fc2 54
+.claude/settings.local.json.tmp
+  s_a46967aae7000d::t_ce6ed88d5e1515 1-48
+pnpm-lock.yaml
+  s_5ecb0cc1ea5216::t_4f4badec175e0a 40-42,663-665,4421-4422
+apps/docs/src/components/home/Health.astro
+  s_5ecb0cc1ea5216::t_3b15571f4e577a 1-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "08866829f904392aba28ef2fdf9f89e1b113a860",
+  "prompts": {},
+  "sessions": {
+    "s_5ecb0cc1ea5216": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c27a2637-0325-45d0-86a0-6671fdcddd3b",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_a46967aae7000d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "084a7916-d5eb-4582-ad68-d58a92aaeafc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
