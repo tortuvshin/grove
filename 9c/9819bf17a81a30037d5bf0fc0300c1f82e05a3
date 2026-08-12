@@ -1,0 +1,44 @@
+apps/docs/src/components/home/Features.astro
+  s_b3738b8eec04c1::t_916054fb94959d 84-94
+  s_b3738b8eec04c1::t_ecaf69fccf4dfd 2-6,9,14,19,24,29,34,39,44,49-66
+apps/docs/src/components/home/Demo.astro
+  s_b3738b8eec04c1::t_f220f5355157d5 148-158
+  s_b3738b8eec04c1::t_2b9939d5c92c92 619-624
+  s_b3738b8eec04c1::t_499cab37f938e4 295-305
+  s_b3738b8eec04c1::t_852ecfb1afb9a3 787-792,799-800
+  s_b3738b8eec04c1::t_11664bd2106e41 630-633
+  s_b3738b8eec04c1::t_c3252544255b39 440-444
+  s_b3738b8eec04c1::t_74c01ff3042aa0 381-385
+  s_780bf3194ecbc2::t_715f768b21b578 654-658
+  s_b3738b8eec04c1::t_03beddfb1fcf6c 264-291
+  s_b3738b8eec04c1::t_b38580663e0ebb 376-378
+  s_b3738b8eec04c1::t_13db8782597abb 398-402
+  s_b3738b8eec04c1::t_3f936b2035d8e1 423-425
+  s_b3738b8eec04c1::t_e41f34dfd555a6 625-629
+  s_b3738b8eec04c1::t_a9a9e9964cc4e6 866-877
+  s_b3738b8eec04c1::t_8b97e6f76b4490 915-921
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9c9819bf17a81a30037d5bf0fc0300c1f82e05a3",
+  "prompts": {},
+  "sessions": {
+    "s_780bf3194ecbc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca830e3c-b541-4299-89c5-edea418f793d",
+        "model": "MiniMax-M3"
+      },
+      "human_author": null
+    },
+    "s_b3738b8eec04c1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f466bb0-6c81-4169-a4e0-6b80e1bfabcc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
