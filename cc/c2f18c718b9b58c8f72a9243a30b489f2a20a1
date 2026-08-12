@@ -1,0 +1,29 @@
+apps/docs/src/components/home/Demo.astro
+  s_b3738b8eec04c1::t_b8ce7e3bb2a013 844,851-852,855-857,865-866,869-870,873
+apps/docs/src/content/docs/roadmap.md
+  s_780bf3194ecbc2::t_c7e2d163d797ec 3,13-18,23,27,29-30,35,39-44,69,79,81,116-138,140,142,144-146,152-153,157-162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ccc2f18c718b9b58c8f72a9243a30b489f2a20a1",
+  "prompts": {},
+  "sessions": {
+    "s_780bf3194ecbc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca830e3c-b541-4299-89c5-edea418f793d",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_b3738b8eec04c1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f466bb0-6c81-4169-a4e0-6b80e1bfabcc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
