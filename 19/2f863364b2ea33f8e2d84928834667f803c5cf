@@ -1,0 +1,93 @@
+apps/docs/src/components/home/Features.astro
+  s_e3d5e6b2e3246c::t_99d49eb900723d 2-5,8-10,13-15,18-20,23-25,28-40,43-45,50-57,59,61,63,65-66,68,82
+  s_e3d5e6b2e3246c::t_5e825015955cba 6-7,11-12,16-17,21-22,26-27,41-42,46,62,64,69-70,77-81,85-86
+apps/docs/src/layouts/HomeLayout.astro
+  s_e3d5e6b2e3246c::t_310d5345fcc105 127,133
+  s_e3d5e6b2e3246c::t_3ace27961fc614 11-12
+  s_e3d5e6b2e3246c::t_ec572c59f9de8c 178-180
+  s_e3d5e6b2e3246c::t_8bda0eb90867f4 110
+  s_e3d5e6b2e3246c::t_e387302998e255 58
+  s_e3d5e6b2e3246c::t_f2466233dd3c00 193
+apps/docs/src/pages/index.astro
+  s_e3d5e6b2e3246c::t_c2a8ae557f3e8c 6,19
+  s_e3d5e6b2e3246c::t_46f5969e3c3e43 7,20
+apps/docs/src/components/home/Header.astro
+  s_e3d5e6b2e3246c::t_a38f6795d648fb 3
+  s_d3a414b3b5e64f::t_d9acf529c6cf50 4
+  s_e3d5e6b2e3246c::t_46a3f3f3e3c533 46,72
+apps/docs/package.json
+  s_e3d5e6b2e3246c::t_f8df38fb4fe8c9 15
+apps/docs/src/styles/home.css
+  s_e3d5e6b2e3246c::t_77fe32d51ee0ae 4-30,58,73,76-78,86,89,91-94,97-99,102,104
+apps/docs/src/home-landing.test.ts
+  s_e3d5e6b2e3246c::t_8bd7ce4fb17636 18,24-25,36-37,39,51-56,84,90-99,102,108-112,150,153-154,158,160,163-165,167,169,172-180,201-217,219,222-225,227-228,232-234,275-282,284-289,292,321,338,386,411-412
+  s_d3a414b3b5e64f::t_437878571c02e8 231,235-248,250-269,272-274
+  s_e3d5e6b2e3246c::t_42b3f5d8b73cf7 50,155,218,220,389-390
+  s_5ecb0cc1ea5216::t_fabef3e213a6e9 42-49,57,170,191,298,300-307,311,314-315
+apps/docs/src/components/home/FinalCta.astro
+  s_e3d5e6b2e3246c::t_b717dbe9c0c24f 45-47
+  s_e3d5e6b2e3246c::t_35c4ab3e84feda 14
+  s_e3d5e6b2e3246c::t_ebb65931f2b8ea 9
+  s_5ecb0cc1ea5216::t_abbe9343809e06 4-6,11,16,19,27,33,39-44,48-49
+apps/docs/src/components/home/ProofBar.astro
+  s_e3d5e6b2e3246c::t_46a3f3f3e3c533 24
+  s_5ecb0cc1ea5216::t_8187aee79c1b68 16-23,25-29
+apps/docs/src/components/home/Faq.astro
+  s_e3d5e6b2e3246c::t_46a3f3f3e3c533 19
+apps/docs/src/components/home/Statement.astro
+  s_5ecb0cc1ea5216::t_cfa55ef9001c55 1,5-13,16-17,19-23,25-27
+  s_e3d5e6b2e3246c::t_9f994dd43c6d97 2-4,14-15,18,24
+apps/docs/src/components/home/Footer.astro
+  s_e3d5e6b2e3246c::t_9b84e514260fab 54
+  s_e3d5e6b2e3246c::t_46a3f3f3e3c533 60
+apps/docs/src/components/home/SectionHeader.astro
+  s_e3d5e6b2e3246c::t_ebb65931f2b8ea 32
+apps/docs/public/manifest.json
+  s_e3d5e6b2e3246c::t_f8df38fb4fe8c9 7-8
+apps/docs/src/components/home/Demo.astro
+  s_d3a414b3b5e64f::t_adc259105367f8 4-84,107-117,119-131,136,138,140,143-148,150-168,171-363,365-381,388-545,548-554,556-599,653-697,700-701,703-824,829-839
+  s_e3d5e6b2e3246c::t_115a7500e2391d 602-604
+  s_d3a414b3b5e64f::t_e675bb92469da4 825-828
+  s_e3d5e6b2e3246c::t_027d89188308f9 1-3,85-106,118,132-135,137,139,141-142,149,169-170,364,382-387,546-547,555,600-601,605-652,840-841
+  s_d3a414b3b5e64f::t_4e0b03393c73b3 698-699,702
+apps/docs/src/components/home/OpenApps.astro
+  s_d3a414b3b5e64f::t_77664a0c1554e9 4-5,11-15,25,39,42-43,48,50,52-56
+  s_e3d5e6b2e3246c::t_ebb65931f2b8ea 47
+apps/docs/src/components/home/Hero.astro
+  s_5ecb0cc1ea5216::t_b9c4a9544da78f 48,51,59,65,96,102
+  s_e3d5e6b2e3246c::t_5d826b6c246121 15,20,37-38,40,42,45-46,49,52,60-63,69-70
+  s_e3d5e6b2e3246c::t_d12442549ff742 2-3,8,11,13,16,18-19,26-34,39,41,43-44,47,50,53-58,64,66-68,73,78-79,82-84,87-90,93-95,99-101,108
+  s_e3d5e6b2e3246c::t_980e2b248bf1d9 91-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "192f863364b2ea33f8e2d84928834667f803c5cf",
+  "prompts": {},
+  "sessions": {
+    "s_5ecb0cc1ea5216": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c27a2637-0325-45d0-86a0-6671fdcddd3b",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_d3a414b3b5e64f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b895d87f-55e3-4370-9af2-117a565708ad",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_e3d5e6b2e3246c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a572b384-66e4-4440-a0db-ea0a08bdc865",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
