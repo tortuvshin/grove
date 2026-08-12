@@ -5,9 +5,10 @@
   <div
     class="relative overflow-hidden rounded-2xl border border-border-strong bg-card px-6 py-16 text-center sm:px-12"
   >
+    <div class="grove-glow" aria-hidden="true"></div>
     <h2
       id="final-cta-title"
-      class="mx-auto max-w-2xl text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
+      class="mx-auto max-w-2xl font-display text-balance text-4xl font-bold leading-[1.1] tracking-tight text-fg sm:text-5xl"
     >
       Start with the Astro implementation.
     </h2>
@@ -19,7 +20,7 @@
     >
       <a
         href="/getting-started/create-a-space/"
-        class="inline-flex w-full items-center justify-center rounded-md bg-fg px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:w-auto"
+        class="inline-flex w-full items-center justify-center rounded-md bg-accent-green px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:w-auto"
       >
         Read the quick start
       </a>
@@ -39,5 +40,24 @@
       <span class="text-subtle">$</span>
       <span class="text-fg">pnpm dlx @grove-dev/cli@latest init my-space</span>
     </div>
+
+    <dl class="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border text-center sm:grid-cols-4" aria-label="Project scale, verified against the repository">
+      <div class="flex flex-col bg-surface px-3 py-4">
+        <dt class="order-last mt-1 text-[11px] text-muted">CLI commands</dt>
+        <dd class="m-0 font-mono text-lg font-semibold text-accent-green">8</dd>
+      </div>
+      <div class="flex flex-col bg-surface px-3 py-4">
+        <dt class="order-last mt-1 text-[11px] text-muted">Astro components</dt>
+        <dd class="m-0 font-mono text-lg font-semibold text-accent-green">37</dd>
+      </div>
+      <div class="flex flex-col bg-surface px-3 py-4">
+        <dt class="order-last mt-1 text-[11px] text-muted">Unit tests</dt>
+        <dd class="m-0 font-mono text-lg font-semibold text-accent-green">400+</dd>
+      </div>
+      <div class="flex flex-col bg-surface px-3 py-4">
+        <dt class="order-last mt-1 text-[11px] text-muted">Lighthouse CI gate</dt>
+        <dd class="m-0 font-mono text-lg font-semibold text-accent-green">100×4</dd>
+      </div>
+    </dl>
   </div>
 </section>

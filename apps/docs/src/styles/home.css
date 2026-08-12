@@ -1,25 +1,38 @@
 @import 'tailwindcss';
+@import '@fontsource/fraunces/600.css';
 
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 
-  --color-bg: #08090a;
-  --color-surface: #0e0f11;
-  --color-card: #131517;
-  --color-card-hover: #17191c;
-  --color-border: #1e2024;
-  --color-border-strong: #2a2d31;
-  --color-fg: #ffffff;
-  --color-muted: #a1a1aa;
-  --color-subtle: #92929d;
+  /* Neutrals: "grove at night" — every step carries a faint green undertone
+     instead of a pure gray-black, so the page reads organic even before any
+     accent color appears. */
+  --color-bg: #0a0d0b;
+  --color-surface: #0e1310;
+  --color-card: #131a15;
+  --color-card-hover: #182019;
+  --color-border: #1e2620;
+  --color-border-strong: #2a352c;
+  --color-fg: #f5f7f5;
+  --color-muted: #a3ada4;
+  --color-subtle: #7c887e;
 
-  --color-accent-cyan: #22d3ee;
-  --color-accent-teal: #2dd4bf;
-  --color-accent-blue: #60a5fa;
-  --color-accent-green: #4ade80;
-  --color-accent-orange: #fb923c;
-  --color-accent-purple: #a78bfa;
+  /* Accents: OKLCH for perceptually even glows/gradients. --color-accent-green
+     shares hue 152 with the lucode --green token in packages/starlight, so the
+     home page and docs pages carry one brand green. */
+  --color-accent-green: oklch(78% 0.19 152);
+  --color-accent-cyan: oklch(80% 0.12 200);
+  --color-accent-teal: oklch(74% 0.09 175);
+  --color-accent-blue: oklch(72% 0.12 235);
+  --color-accent-orange: oklch(78% 0.13 70);
+  --color-accent-purple: oklch(74% 0.14 300);
+
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
 }
 
 html {
@@ -42,12 +55,92 @@ body {
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible {
-  outline: 2px solid var(--color-accent-cyan);
+  outline: 2px solid var(--color-accent-green);
   outline-offset: 3px;
 }
 
 summary::-webkit-details-marker {
   display: none;
+}
+
+/* Local ambient glow used behind hero-scale moments only; never a full-bleed
+   background wash. Parent needs position: relative. */
+.grove-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(600px circle at 50% 0%, oklch(78% 0.19 152 / 0.14), transparent 65%);
+}
+
+/* Hero aurora: layered canopy glows that follow the pointer (--mx/--my are set
+   by the hero script; static center fallback without JS or on touch). */
+.grove-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.grove-aurora::before {
+  content: '';
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(42% 36% at var(--mx, 50%) var(--my, 18%), oklch(78% 0.19 152 / 0.16), transparent 70%),
+    radial-gradient(30% 30% at 16% 32%, oklch(74% 0.09 175 / 0.1), transparent 70%),
+    radial-gradient(26% 28% at 84% 24%, oklch(80% 0.12 200 / 0.09), transparent 70%);
+  animation: grove-aurora-breathe 9s ease-in-out infinite alternate;
+}
+
+@keyframes grove-aurora-breathe {
+  from { opacity: 0.8; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+/* Drifting spores in the hero canopy. Position/size/timing come from inline
+   custom properties on each element. */
+.grove-spore {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s, 4px);
+  height: var(--s, 4px);
+  border-radius: 9999px;
+  background: oklch(78% 0.19 152 / 0.45);
+  filter: blur(0.5px);
+  animation: grove-drift var(--dur, 14s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+@keyframes grove-drift {
+  from { transform: translate3d(0, 0, 0); opacity: 0.15; }
+  50% { opacity: 0.7; }
+  to { transform: translate3d(14px, -46px, 0); opacity: 0.2; }
+}
+
+/* Brand gradient for a single emphasized phrase in display headings. */
+.text-gradient {
+  background: linear-gradient(92deg, oklch(78% 0.19 152), oklch(74% 0.09 175) 55%, oklch(80% 0.12 200));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Scroll-reveal: the layout script tags sections with .reveal-init only when
+   JS + IntersectionObserver are available and motion is allowed, so content is
+   never hidden without JS. */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.6, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.reveal-init.reveal-in {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

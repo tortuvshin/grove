@@ -12,12 +12,13 @@ describe("docs homepage (standalone Astro route)", () => {
 
     const indexAstro = await readFile(indexAstroPath, "utf8");
 
-    // Imports the home layout and all 9 section components from src/components/home/
+    // Imports the home layout and all 12 section components from src/components/home/
     expect(indexAstro).toContain("import Layout from '../layouts/HomeLayout.astro'");
     expect(indexAstro).toContain("import Header from '../components/home/Header.astro'");
     expect(indexAstro).toContain("import Hero from '../components/home/Hero.astro'");
     expect(indexAstro).toContain("import Features from '../components/home/Features.astro'");
     expect(indexAstro).toContain("import GetStarted from '../components/home/GetStarted.astro'");
+    expect(indexAstro).toContain("import Health from '../components/home/Health.astro'");
     expect(indexAstro).toContain("import Blueprints from '../components/home/Blueprints.astro'");
     expect(indexAstro).toContain("import Frameworks from '../components/home/Frameworks.astro'");
     expect(indexAstro).toContain("import Integrations from '../components/home/Integrations.astro'");
@@ -30,6 +31,9 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(indexAstro).toMatch(/<Hero\s*\/>/);
     expect(indexAstro).toMatch(/<Features\s*\/>/);
     expect(indexAstro).toMatch(/<GetStarted\s*\/>/);
+    expect(indexAstro).toMatch(/<Health\s*\/>/);
+    // Health renders directly after the lifecycle section, before Integrations
+    expect(indexAstro).toMatch(/<GetStarted\s*\/>\s*<Health\s*\/>\s*<Integrations\s*\/>/);
     expect(indexAstro).toMatch(/<Blueprints\s*\/>/);
     expect(indexAstro).toMatch(/<Frameworks\s*\/>/);
     expect(indexAstro).toMatch(/<Integrations\s*\/>/);
@@ -63,11 +67,14 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(homeCss).toMatch(/@import\s+['"]tailwindcss['"]/);
     expect(homeCss).toMatch(/@theme\s*\{/);
 
-    // Standalone Grove tokens — dark canvas + Geist typography
-    expect(homeCss).toMatch(/--color-bg:\s*#08090a/);
-    expect(homeCss).toMatch(/--color-fg:\s*#ffffff/);
+    // Standalone Grove tokens — "grove at night" canvas + self-hosted display serif
+    expect(homeCss).toMatch(/--color-bg:\s*#0a0d0b/);
+    expect(homeCss).toMatch(/--color-fg:\s*#f5f7f5/);
+    expect(homeCss).toMatch(/--color-accent-green:\s*oklch\(78% 0\.19 152\)/);
     expect(homeCss).toContain("--font-sans: ui-sans-serif");
     expect(homeCss).toContain("--font-mono: ui-monospace");
+    expect(homeCss).toContain("@fontsource/fraunces");
+    expect(homeCss).toContain("--font-display: 'Fraunces'");
 
     // No Starlight tokens leak in
     expect(homeCss).not.toContain("--sl-");
@@ -142,9 +149,14 @@ describe("docs homepage (standalone Astro route)", () => {
       "utf8",
     );
 
-    expect(hero).toContain("Build community knowledge that stays useful.");
+    // The headline is one sentence with the closing phrase wrapped in a
+    // gradient span, so it is asserted in two contiguous halves.
+    expect(hero).toContain("Build community knowledge that");
+    expect(hero).toContain("stays useful.");
     expect(hero).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
     expect(hero).toContain("data/records/crewai.yml");
+    // Real `grove check` summary line (packages/cli/src/index.ts), not invented output
+    expect(hero).toContain("[grove] 6 records prepared; sitemap and llms files updated.");
 
     expect(features).toContain("Lists are easy to start and difficult to maintain.");
     expect(features).toContain("Structure drifts");
@@ -162,6 +174,41 @@ describe("docs homepage (standalone Astro route)", () => {
     expect(integrations).toContain("llms-full.txt");
 
     expect(finalCta).toContain("Start with the Astro implementation.");
+  });
+
+  it("renders the derived-health section with the real classifyHealth rules and the human override layer", async () => {
+    const health = await readFile(
+      resolve(docsRoot, "src/components/home/Health.astro"),
+      "utf8",
+    );
+
+    expect(health).toContain("Health is derived, not declared.");
+    // Threshold copy must mirror classifyHealth() in packages/core/src/health.ts
+    expect(health).toContain("Pushed within 183 days");
+    expect(health).toContain("50 stars");
+    expect(health).toContain("500 stars + maintained signals");
+    // Both layers of the model: derived data and reasoned human override
+    expect(health).toContain("data/health.yml");
+    expect(health).toContain("decisions.yml");
+    expect(health).toContain("reason:");
+    expect(health).toMatch(/<section[^>]+aria-labelledby="health-title"/);
+  });
+
+  it("shows only verifiable project numbers in the final CTA stat row", async () => {
+    const finalCta = await readFile(
+      resolve(docsRoot, "src/components/home/FinalCta.astro"),
+      "utf8",
+    );
+
+    // These figures were verified against the repo (CLI commands in
+    // packages/cli/src/index.ts, components in packages/astro/src/components,
+    // vitest unit-test count, Lighthouse budget in packages/cli/src/audit.ts).
+    // If the codebase changes, update the landing page and this test together.
+    expect(finalCta).toContain("CLI commands");
+    expect(finalCta).toContain("Astro components");
+    expect(finalCta).toContain("Unit tests");
+    expect(finalCta).toContain("Lighthouse CI gate");
+    expect(finalCta).toContain("100×4");
   });
 
   it("wires each section to its heading via aria-labelledby for assistive tech", async () => {
@@ -220,7 +267,7 @@ for (const [name, src] of [
 }
 
     // Hero links should point at real destinations, not placeholder "#"
-    expect(hero).toContain('href="/introduction/"');
+    expect(hero).toContain('href="/roadmap/"');
     expect(hero).toContain('href="https://open-apps.dev.mn"');
     expect(hero).toContain('target="_blank"');
     expect(finalCta).toContain('href="/getting-started/create-a-space/"');
@@ -280,7 +327,7 @@ for (const [name, src] of [
     );
     expect(manifest.name).toBe("Grove");
     expect(manifest.start_url).toBe("/");
-    expect(manifest.theme_color).toBe("#08090a");
+    expect(manifest.theme_color).toBe("#0a0d0b");
     expect(manifest.icons?.[0]?.src).toBe("/favicon.svg");
 
     expect(existsSync(resolve(docsRoot, "public/og-image.svg"))).toBe(true);
@@ -334,7 +381,7 @@ for (const [name, src] of [
     expect(home).toContain('name="twitter:card"');
     expect(home).toContain('content="summary_large_image"');
     expect(home).toContain('name="theme-color"');
-    expect(home).toContain('content="#08090a"');
+    expect(home).toContain('content="#0a0d0b"');
     expect(home).toContain('rel="manifest"');
     expect(home).toContain('rel="apple-touch-icon"');
 

@@ -52,7 +52,7 @@ const features = [
   <div class="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {
       features.map((f) => (
-        <article class="group flex flex-col rounded-xl border border-border bg-card p-6 transition-colors hover:bg-card-hover">
+        <article class="group flex flex-col rounded-xl border border-border bg-card p-6 transition-[transform,background-color,border-color] hover:-translate-y-0.5 hover:border-border-strong hover:bg-card-hover">
           <div class={`flex size-10 items-center justify-center rounded-lg border border-border-strong bg-surface ${f.color}`}>
             <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               {f.icon === 'file' && (

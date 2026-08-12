@@ -30,7 +30,7 @@ Examples:
 
 ## How it works
 
-You start with `pnpm create grove my-directory` and answer four prompts (blueprint, framework, GitHub mode, deploy target). The CLI copies the Astro template, writes `grove.config.ts`, generates GitHub Actions for validation and deployment, and installs dependencies. The dev server starts at `http://localhost:4321`.
+You start with `pnpm dlx @grove-dev/cli@latest init my-directory`. There are no prompts: the CLI copies the complete Astro example space — records, taxonomy, `grove.config.ts`, and GitHub Actions for validation, sync, and deployment — and renames it to your project. Run `pnpm install && pnpm dev` and the dev server starts at `http://localhost:4321`.
 
 You add records as YAML files under `data/records/`. You push a pull request. `validate-data.yml` checks the schema. Merge. `build.yml` deploys.
 

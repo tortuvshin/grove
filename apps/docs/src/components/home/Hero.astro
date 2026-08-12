@@ -1,20 +1,51 @@
 ---
-// The four score-tiles below intentionally omit the numeric value
-// rather than ship an unverified marketing claim. A future revision
-// can re-introduce numbers once the lighthouse-audit CI gate is
-// added to branch protection (see the PR description for status).
-const scoreCategories = ['Performance', 'Accessibility', 'Best Practices', 'SEO'];
+// Spore positions are fixed (not random) so builds stay deterministic and the
+// canopy reads as composed rather than noisy.
+const spores = [
+  { x: '6%', y: '24%', s: '4px', dur: '15s', delay: '0s' },
+  { x: '14%', y: '58%', s: '3px', dur: '19s', delay: '2.2s' },
+  { x: '23%', y: '18%', s: '5px', dur: '13s', delay: '1.1s' },
+  { x: '38%', y: '70%', s: '3px', dur: '17s', delay: '3.4s' },
+  { x: '55%', y: '12%', s: '4px', dur: '16s', delay: '0.7s' },
+  { x: '68%', y: '64%', s: '3px', dur: '20s', delay: '2.9s' },
+  { x: '79%', y: '26%', s: '5px', dur: '14s', delay: '1.8s' },
+  { x: '88%', y: '52%', s: '4px', dur: '18s', delay: '4.1s' },
+  { x: '94%', y: '16%', s: '3px', dur: '15s', delay: '0.4s' },
+];
 ---
 
-<section class="mx-auto max-w-7xl px-6 pb-20 pt-24 text-center sm:pb-28 sm:pt-32" aria-labelledby="hero-title">
-  <p class="text-xs font-semibold uppercase tracking-widest text-accent-cyan">
-    Open-source framework for maintained knowledge spaces
-  </p>
+<section
+  id="hero-section"
+  class="relative mx-auto max-w-7xl overflow-hidden px-6 pb-20 pt-24 text-center sm:pb-28 sm:pt-32"
+  aria-labelledby="hero-title"
+>
+  <div class="grove-aurora" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+    {spores.map((spore) => (
+      <span
+        class="grove-spore"
+        style={`--x:${spore.x};--y:${spore.y};--s:${spore.s};--dur:${spore.dur};--delay:${spore.delay}`}
+      ></span>
+    ))}
+  </div>
+
+  <a
+    href="/roadmap/"
+    class="inline-flex items-center gap-2 rounded-full border border-accent-green/30 bg-accent-green/10 py-1.5 pl-3 pr-4 text-xs font-medium text-accent-green transition-colors hover:border-accent-green/50 hover:bg-accent-green/15"
+  >
+    <span class="size-1.5 rounded-full bg-accent-green" aria-hidden="true"></span>
+    v0.5.0 · grove import turns awesome lists into records
+    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M5 12h14"></path>
+      <path d="m12 5 7 7-7 7"></path>
+    </svg>
+  </a>
+
   <h1
     id="hero-title"
-    class="mx-auto mt-6 max-w-5xl text-balance text-5xl font-bold leading-[1.02] tracking-tight text-fg sm:text-6xl md:text-7xl"
+    class="mx-auto mt-8 max-w-5xl font-display text-balance text-5xl font-bold leading-[1.04] tracking-tight text-fg sm:text-6xl md:text-7xl"
   >
-    Build community knowledge that stays useful.
+    Build community knowledge that <span class="text-gradient">stays useful.</span>
   </h1>
   <p class="mx-auto mt-7 max-w-2xl text-pretty text-lg leading-relaxed text-muted">
     Grove turns community submissions into structured, searchable, and maintainable knowledge spaces—using portable files, Git-based review, and static publishing.
@@ -23,7 +54,7 @@ const scoreCategories = ['Performance', 'Accessibility', 'Best Practices', 'SEO'
   <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
     <a
       href="/getting-started/create-a-space/"
-      class="inline-flex items-center gap-2 rounded-lg bg-accent-green px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90"
+      class="inline-flex items-center gap-2 rounded-lg bg-accent-green px-5 py-2.5 text-sm font-semibold text-bg shadow-[0_0_28px_-6px_oklch(78%_0.19_152_/_0.6)] transition-[opacity,box-shadow] hover:opacity-90 hover:shadow-[0_0_36px_-4px_oklch(78%_0.19_152_/_0.7)]"
     >
       Get started
       <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -41,29 +72,37 @@ const scoreCategories = ['Performance', 'Accessibility', 'Best Practices', 'SEO'
     </a>
   </div>
 
-  <div class="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-subtle">
+  <div class="mt-8 flex items-center justify-center">
+    <div class="flex max-w-full items-center gap-3 rounded-lg border border-border bg-surface/80 px-4 py-2.5 font-mono text-sm backdrop-blur">
+      <span class="text-subtle">$</span>
+      <code id="hero-install-command" class="overflow-x-auto whitespace-nowrap text-muted">pnpm dlx @grove-dev/cli@latest init my-space</code>
+      <button
+        id="hero-copy-command"
+        type="button"
+        class="flex size-8 shrink-0 items-center justify-center rounded-md border border-border text-subtle transition-colors hover:border-border-strong hover:text-fg"
+        aria-label="Copy install command"
+      >
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="14" height="14" x="8" y="8" rx="2"></rect>
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-subtle">
     <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>Astro renderer available</span>
     <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>MIT licensed</span>
     <span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent-green"></span>Active development</span>
   </div>
 
-  <div class="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4" aria-label="Audit categories tracked by grove audit">
-    {scoreCategories.map((category) => (
-      <div class="bg-surface px-3 py-3 text-left sm:text-center">
-        <strong class="font-mono text-sm text-accent-green">100</strong>
-        <span class="ml-2 text-[11px] text-muted sm:ml-1">{category}</span>
-      </div>
-    ))}
-  </div>
-  <p class="mx-auto mt-3 max-w-3xl text-[11px] leading-relaxed text-subtle">
-    Target budgets on the production landing build; numbers are
-    aspirational until the <code>grove audit</code> workflow is added to branch
-    protection. <a href="/introduction/" class="text-inherit underline decoration-dotted decoration-subtle underline-offset-2 hover:text-muted">See methodology</a>.
-  </p>
-
-  <div class="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-xl border border-border-strong bg-card text-left shadow-2xl shadow-black/20 lg:grid-cols-[1fr_0.78fr_1fr]" aria-label="A Grove source record becoming published outputs">
-    <div class="border-b border-border p-5 lg:border-b-0 lg:border-r">
-      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-cyan">●</span>data/records/crewai.yml</p>
+  <div
+    id="hero-pipeline"
+    class="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-xl border border-border-strong bg-card/90 text-left shadow-[0_40px_100px_-30px_oklch(78%_0.19_152_/_0.25)] backdrop-blur lg:grid-cols-[1fr_0.78fr_1fr]"
+    aria-label="A Grove source record becoming published outputs"
+  >
+    <div class="pipeline-col border-b border-l-2 border-border border-l-accent-green/40 p-5 lg:border-b-0 lg:border-r" data-pipeline-col>
+      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-green">●</span>data/records/crewai.yml</p>
       <pre class="mt-4 overflow-x-auto font-mono text-[12px] leading-6"><code><span class="text-accent-blue">kind:</span> <span class="text-muted">project</span>
 <span class="text-accent-blue">name:</span> <span class="text-muted">CrewAI</span>
 <span class="text-accent-blue">category:</span> <span class="text-muted">agents</span>
@@ -71,17 +110,24 @@ const scoreCategories = ['Performance', 'Accessibility', 'Best Practices', 'SEO'
   <span class="text-muted">https://github.com/crewAIInc/crewAI</span></code></pre>
     </div>
 
-    <div class="border-b border-border p-5 lg:border-b-0 lg:border-r">
-      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-green">●</span>grove check</p>
+    <div class="pipeline-col relative border-b border-l-2 border-border border-l-accent-teal/40 p-5 lg:border-b-0 lg:border-r" data-pipeline-col>
+      <span class="absolute -left-3 top-1/2 hidden size-6 -translate-y-1/2 items-center justify-center rounded-full border border-border-strong bg-card text-subtle lg:flex" aria-hidden="true">
+        <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+      </span>
+      <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-teal">●</span>grove check</p>
       <ol class="mt-4 space-y-2 font-mono text-[11px] text-muted">
         <li class="rounded-md border border-border bg-surface px-3 py-2">01 Validate</li>
         <li class="rounded-md border border-border bg-surface px-3 py-2">02 Generate</li>
         <li class="rounded-md border border-border bg-surface px-3 py-3">03 Sitemap · llms.txt · robots</li>
         <li class="rounded-md border border-border bg-surface px-3 py-3">04 astro check</li>
       </ol>
+      <p class="mt-3 font-mono text-[10px] leading-relaxed text-accent-green/80">[grove] 6 records prepared; sitemap and llms files updated.</p>
     </div>
 
-    <div class="p-5">
+    <div class="pipeline-col relative border-l-2 border-l-accent-orange/40 p-5" data-pipeline-col>
+      <span class="absolute -left-3 top-1/2 hidden size-6 -translate-y-1/2 items-center justify-center rounded-full border border-border-strong bg-card text-subtle lg:flex" aria-hidden="true">
+        <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+      </span>
       <p class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-orange">●</span>Generated output</p>
       <div class="mt-4 grid grid-cols-2 gap-2 font-mono text-[11px] text-muted">
         <span class="rounded-md border border-border bg-surface px-3 py-3">/projects/crewai</span>
@@ -92,11 +138,96 @@ const scoreCategories = ['Performance', 'Accessibility', 'Best Practices', 'SEO'
       <p class="mt-4 text-xs leading-relaxed text-subtle">One reviewed record, ready for people, search engines, and AI systems.</p>
     </div>
   </div>
-
-  <div class="mt-10 flex items-center justify-center">
-    <div class="flex max-w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-2.5 font-mono text-sm">
-      <span class="text-subtle">$</span>
-      <code class="overflow-x-auto whitespace-nowrap text-muted">pnpm dlx @grove-dev/cli@latest init my-space</code>
-    </div>
-  </div>
 </section>
+
+<style>
+  .pipeline-col {
+    opacity: 0.72;
+    transition:
+      opacity 0.5s ease,
+      border-left-color 0.5s ease;
+  }
+
+  .pipeline-col.is-active {
+    opacity: 1;
+  }
+
+  .pipeline-col.is-active:nth-child(1) { border-left-color: var(--color-accent-green); }
+  .pipeline-col.is-active:nth-child(2) { border-left-color: var(--color-accent-teal); }
+  .pipeline-col.is-active:nth-child(3) { border-left-color: var(--color-accent-orange); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pipeline-col { opacity: 1; }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const button = document.getElementById('hero-copy-command');
+    const command = document.getElementById('hero-install-command');
+    if (!button || !command) return;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(command.textContent ?? '');
+        button.setAttribute('aria-label', 'Copied');
+        button.classList.add('text-accent-green');
+        setTimeout(() => {
+          button.setAttribute('aria-label', 'Copy install command');
+          button.classList.remove('text-accent-green');
+        }, 2000);
+      } catch {
+        /* Clipboard unavailable (permissions/insecure context) — leave the command selectable. */
+      }
+    });
+  })();
+
+  (() => {
+    // Pipeline walkthrough: highlight record -> check -> output in sequence.
+    // Hovering or focusing the panel lights everything up and pauses the loop.
+    const frame = document.getElementById('hero-pipeline');
+    if (!frame) return;
+    const cols = [...frame.querySelectorAll('[data-pipeline-col]')];
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for (const col of cols) col.classList.add('is-active');
+      return;
+    }
+    let index = 0;
+    let timer = null;
+    const step = () => {
+      cols.forEach((col, i) => col.classList.toggle('is-active', i === index));
+      index = (index + 1) % cols.length;
+    };
+    const start = () => {
+      if (timer !== null) return;
+      step();
+      timer = setInterval(step, 2400);
+    };
+    const pause = () => {
+      if (timer !== null) clearInterval(timer);
+      timer = null;
+      for (const col of cols) col.classList.add('is-active');
+    };
+    const resume = () => {
+      for (const col of cols) col.classList.remove('is-active');
+      start();
+    };
+    frame.addEventListener('mouseenter', pause);
+    frame.addEventListener('mouseleave', resume);
+    frame.addEventListener('focusin', pause);
+    frame.addEventListener('focusout', resume);
+    start();
+  })();
+
+  (() => {
+    // Aurora follows the pointer, desktop only.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    const hero = document.getElementById('hero-section');
+    if (!hero) return;
+    hero.addEventListener('pointermove', (event) => {
+      const rect = hero.getBoundingClientRect();
+      hero.style.setProperty('--mx', `${(((event.clientX - rect.left) / rect.width) * 100).toFixed(1)}%`);
+      hero.style.setProperty('--my', `${(((event.clientY - rect.top) / rect.height) * 100).toFixed(1)}%`);
+    });
+  })();
+</script>

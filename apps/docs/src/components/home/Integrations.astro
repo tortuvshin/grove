@@ -33,13 +33,13 @@ const outputs = [
     </div>
 
     <div class="relative mx-auto aspect-square w-full max-w-lg" aria-label="One YAML record generating four portable outputs">
-      <div class="absolute left-1/2 top-1/2 size-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10"></div>
-      <div class="absolute left-1/2 top-1/2 size-[82%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.07]"></div>
-      <div class="absolute left-1/2 top-1/2 size-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.04]"></div>
+      <div class="orbit-ring orbit-ring--fast absolute left-1/2 top-1/2 size-[54%] rounded-full border border-dashed border-accent-green/25"></div>
+      <div class="orbit-ring orbit-ring--medium absolute left-1/2 top-1/2 size-[82%] rounded-full border border-dashed border-accent-green/[0.14]"></div>
+      <div class="orbit-ring orbit-ring--slow absolute left-1/2 top-1/2 size-full rounded-full border border-dashed border-accent-green/[0.08]"></div>
 
-      <div class="absolute left-1/2 top-1/2 z-10 w-48 -translate-x-1/2 -translate-y-1/2 rounded-xl border border-accent-blue/30 bg-surface p-4 shadow-[0_0_50px_-12px_rgba(96,165,250,0.5)]">
-        <p class="font-mono text-[10px] text-accent-blue">record.yml</p>
-        <div class="mt-3 space-y-1.5 font-mono text-[10px] text-muted"><p><span class="text-accent-cyan">name:</span> Immich</p><p><span class="text-accent-cyan">kind:</span> project</p><p><span class="text-accent-cyan">category:</span> media</p></div>
+      <div class="orbit-center absolute left-1/2 top-1/2 z-10 w-48 rounded-xl border border-accent-green/30 bg-surface p-4 shadow-[0_0_50px_-12px_oklch(78%_0.19_152_/_0.5)]">
+        <p class="font-mono text-[10px] text-accent-green">record.yml</p>
+        <div class="mt-3 space-y-1.5 font-mono text-[10px] text-muted"><p><span class="text-accent-green">name:</span> Immich</p><p><span class="text-accent-green">kind:</span> project</p><p><span class="text-accent-green">category:</span> media</p></div>
       </div>
 
       {outputs.map((output) => (
@@ -55,6 +55,43 @@ const outputs = [
 </section>
 
 <style>
+  /* Rings and the center node carry their centering translate inside the
+     animation so the rotation/float doesn't undo the -50% offsets. */
+  .orbit-ring,
+  .orbit-center {
+    transform: translate(-50%, -50%);
+  }
+
+  .orbit-ring {
+    animation: orbit-spin 80s linear infinite;
+  }
+
+  .orbit-ring--fast { animation-duration: 50s; }
+  .orbit-ring--medium { animation-duration: 90s; animation-direction: reverse; }
+  .orbit-ring--slow { animation-duration: 140s; }
+
+  @keyframes orbit-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  .orbit-center {
+    animation: orbit-float 7s ease-in-out infinite alternate;
+  }
+
+  @keyframes orbit-float {
+    from { transform: translate(-50%, -51.5%); }
+    to { transform: translate(-50%, -48.5%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-ring,
+    .orbit-center {
+      animation: none;
+      transform: translate(-50%, -50%);
+    }
+  }
+
   .stars {
     background-image:
       radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.5) 50%, transparent),

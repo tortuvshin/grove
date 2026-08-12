@@ -1,0 +1,64 @@
+---
+import SectionHeader from './SectionHeader.astro';
+
+// Thresholds shown here mirror classifyHealth() in packages/core/src/health.ts.
+// If those rules change, this section must change with them.
+const rules = [
+  { signal: 'Pushed within 183 days', outcome: 'status: active', color: 'text-accent-green' },
+  { signal: '50 stars', outcome: 'tier: listed', color: 'text-accent-teal' },
+  { signal: '500 stars + maintained signals', outcome: 'tier: curated', color: 'text-accent-green' },
+  { signal: 'Archived or inactive', outcome: 'tier: hidden · cleanup candidate', color: 'text-accent-orange' },
+];
+---
+
+<section class="mx-auto max-w-7xl px-6 py-20" aria-labelledby="health-title">
+  <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
+    <div>
+      <SectionHeader
+        eyebrow="Health-derived visibility"
+        title="Health is derived, not declared."
+        titleId="health-title"
+        lede="A record's status, tier, and visibility are recomputed from repository signals on every sync — never typed from memory. A project that went quiet stops surfacing on its own."
+        maxWidth="narrow"
+      />
+      <p class="mt-5 max-w-xl text-sm leading-relaxed text-subtle">
+        When a maintainer disagrees with the derived result, the override lives in
+        <code class="font-mono text-[12px] text-muted">decisions.yml</code> with a written reason.
+        Curation stays reviewable — a reader can see why a record was demoted.
+      </p>
+      <ul class="mt-7 flex flex-col gap-2 font-mono text-[12px]" aria-label="Derivation rules">
+        {rules.map((rule) => (
+          <li class="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-muted">
+            <span>{rule.signal}</span>
+            <svg class="size-3.5 shrink-0 text-subtle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            <span class={rule.color}>{rule.outcome}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="overflow-hidden rounded-xl border border-border-strong bg-bg" aria-label="Derived health entry example">
+        <div class="flex items-center gap-2 border-b border-border px-4 py-3">
+          <span class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-green">●</span>data/health.yml — written by grove sync github</span>
+        </div>
+        <pre class="m-0 overflow-x-auto p-5 font-mono text-[12px] leading-6"><code><span class="text-accent-green">- id:</span> <span class="text-muted">immich</span>
+  <span class="text-accent-green">health:</span>
+    <span class="text-accent-green">status:</span> <span class="text-fg">active</span>      <span class="text-subtle"># pushed 12 days ago</span>
+    <span class="text-accent-green">tier:</span> <span class="text-fg">curated</span>       <span class="text-subtle"># 500+ stars, recent release</span>
+    <span class="text-accent-green">visibility:</span> <span class="text-fg">keep</span>
+    <span class="text-accent-green">cleanupCandidate:</span> <span class="text-fg">false</span></code></pre>
+      </div>
+
+      <div class="overflow-hidden rounded-xl border border-border bg-card" aria-label="Maintainer override example">
+        <div class="flex items-center gap-2 border-b border-border px-4 py-3">
+          <span class="font-mono text-[11px] text-subtle"><span class="mr-2 text-accent-orange">●</span>data/decisions.yml — the human layer</span>
+        </div>
+        <pre class="m-0 overflow-x-auto p-5 font-mono text-[12px] leading-6"><code><span class="text-accent-orange">- id:</span> <span class="text-muted">legacy-tool</span>
+  <span class="text-accent-orange">decision:</span>
+    <span class="text-accent-orange">visibility:</span> <span class="text-fg">hide</span>
+    <span class="text-accent-orange">reason:</span> <span class="text-muted">Superseded by a maintained fork</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
