@@ -1,6 +1,6 @@
 ---
 title: Roadmap
-description: Grove's shipping status — what v0.4.0 ships today, what is planned, and what is out of scope.
+description: Grove's shipping status — what `0.5.0-next.2` ships today, what is planned, and what is out of scope.
 ---
 
 > Grove ships in waves. Each wave ends with something a community can
@@ -10,39 +10,38 @@ description: Grove's shipping status — what v0.4.0 ships today, what is planne
 
 The roadmap is grouped by status, not by chronology:
 
-- **Shipped** — available in `v0.4.0` (the current published release).
-- **Next release (v0.5.0)** — scoped and targeted. APIs may shift
-  before the cut.
-- **Later** — directional. Will happen only if real spaces need it.
+- **Shipped — `0.5.0-next.2`** — available in the current pre-release.
+  The four published packages are pinned at `0.5.0-next.2`; nine CLI
+  commands and 37 Astro components are live.
+- **Closing for v0.5.0** — the items below that still need to land
+  before the stable cut. Dates are not set.
+- **Later — directional** — will happen only if real spaces need it.
 - **Out of scope** — explicit non-goals we will not build.
 
 For the per-version changelog, see
 [`CHANGELOG.md`](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md)
-at the repo root. For the historical record of how Grove got here, see
-[`docs/superpowers/`](https://github.com/tortuvshin/grove/tree/main/docs/superpowers)
-(also mirrored inside `.audit/superpowers/` for working notes).
+at the repo root.
 
 ---
 
-## Shipped — v0.4.0
+## Shipped — `0.5.0-next.2`
 
-The current published release. `v0.4.0` aligns the four published
-packages on a single version line and ships the
-`grove collection promote` command for the first time.
+The current pre-release. The four published packages are pinned at
+`0.5.0-next.2`; nine CLI commands and 37 Astro components ship.
 
 ### Packages
 
 Four packages on npm under the `@grove-dev/*` scope. **All four are
-public** and pinned at `0.4.0`. `@grove-dev/ui`, `@grove-dev/svelte`,
+public** and pinned at `0.5.0-next.2`. `@grove-dev/ui`, `@grove-dev/svelte`,
 and `@grove-dev/nextjs` do **not** exist in the workspace and have
 never been published.
 
-| Package                | Version | Role                                                                          |
-| ---------------------- | ------- | ----------------------------------------------------------------------------- |
-| `@grove-dev/core`      | `0.4.0` | Schema, config, importers, validators, taxonomy, sync, build pipeline        |
-| `@grove-dev/cli`       | `0.4.0` | `init`, `check`, `sync`, `cleanup`, `audit`, `collection promote`             |
-| `@grove-dev/astro`     | `0.4.0` | The V1 renderer — 31 components, layouts, server view-models                  |
-| `@grove-dev/starlight` | `0.4.0` | Documentation site plugin (this site)                                         |
+| Package                | Version          | Role                                                                                                            |
+| ---------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| `@grove-dev/core`      | `0.5.0-next.2`   | Schema, config, importers, validators, taxonomy, sync, build pipeline, awesome-list README generator, audit     |
+| `@grove-dev/cli`       | `0.5.0-next.2`   | `init`, `check`, `sync github`, `sync contributors`, `cleanup`, `audit`, `import`, `collection promote`, `readme generate` |
+| `@grove-dev/astro`     | `0.5.0-next.2`   | The V1 renderer — 37 components, 7 layouts, server view-models                                                  |
+| `@grove-dev/starlight` | `0.5.0-next.2`   | Documentation site plugin (this site)                                                                           |
 
 ### Frameworks
 
@@ -67,7 +66,7 @@ filters a space exposes. Records are a discriminated `Resource` union.
 
 ### CLI commands
 
-The complete V1 surface, six top-level commands plus one sub-command:
+The complete `0.5.0-next.2` surface — nine top-level + sub commands:
 
 ```
 grove init [directory] [--no-install] [--no-git]
@@ -77,7 +76,9 @@ grove sync contributors
 grove cleanup [--strict]
 grove audit [--base-url URL] [--mobile|--desktop] [--runs N]
             [--page PATH]… [--json FILE] [--junit FILE]
+grove import <source>           # GitHub URL, raw README URL, or local path
 grove collection promote --from PATH --slug SLUG [--title T] [--description D]
+grove readme generate [--stdout] [--path PATH] [--check]
 ```
 
 See the [CLI reference](/reference/cli/) for the full options, reads,
@@ -112,47 +113,53 @@ Every `grove check` produces:
   `packages/core/src/index.ts` re-exports; everything else
   (`IndexRecord`, `loadRecords`, `unwrap*`, etc.) is internal.
 
+### What `0.5.0-next.2` already includes
+
+The following items are already in the codebase; the stable `0.5.0`
+cut is the version line where they ship together.
+
+- **`grove import`** — wraps the `importAwesomeList` +
+  `writeImportedRecords` parser as a CLI command so contributors can
+  run `grove import https://github.com/<owner>/awesome-<topic>` and
+  land `data/records/<slug>.yml` files tagged `source: { type: "import" }`.
+- **`grove collection promote`** — promotes a filter URL
+  (e.g. `/browse?stack=flutter&category=finance`) into a curated
+  `data/collections/<slug>.yml` with `kind: curated`,
+  `ranking.preset: quality`, and `excludeStatuses: [archived]`.
+- **`grove readme generate`** — renders the awesome-list README
+  block between `<!-- grove-readme:start -->` /
+  `<!-- grove-readme:end -->` sentinels; supports `--stdout`,
+  `--path`, and `--check` for CI.
+- **`grove audit`** — runs Lighthouse against the `audit.pages[]`
+  manifest in `grove.config.ts` and enforces a 100×4 score budget.
+- **Internal-link lint** — `scripts/check-starlight-internal-links.mjs`
+  walks every Markdown / MDX file under `apps/docs/src/content/docs/`
+  and asserts each `/path/` target resolves to a real file; wired
+  into `pnpm docs:check`.
+
 ---
 
-## Next release — v0.5.0
+## Closing for v0.5.0
 
-Scope is set. Dates are not — v0.5.0 cuts when the items below are
-ready, not before. The four items are the V1 release-line priorities
-flagged during the v0.4.0 retrospective: internal consistency, PR-time
-quality gating, contributor ergonomics, and audit-finding close-out.
-
-### `grove import` CLI
-
-Wrap the existing `importAwesomeList` / `writeImportedRecords` parser
-exposed by `@grove-dev/core` as a CLI command so contributors can run
-`grove import https://github.com/<owner>/awesome-<topic>` instead of
-writing a small script. The parser and writer already ship; the CLI
-layer is what unblocks the docs and `submit` flow from re-implementing
-the import path inline.
+A short list of items still to land before the stable cut. Everything
+in this section is scoped; the stable `0.5.0` ships when the list is
+empty.
 
 ### Lighthouse audit on every PR
 
 `.github/workflows/lighthouse-audit.yml` today runs on changes to
 `packages/{core,cli,astro}/**` or `apps/example/**` and on a weekly
-cron. v0.5.0 will run it on every PR that touches the audit manifest
-or `apps/example/`, posting the scorecard as a check run.
-
-### Strict internal-link lint
-
-Today `scripts/check-starlight-sidebar.mjs` validates sidebar slugs.
-v0.5.0 will add a sibling script that validates every internal link in
-every `apps/docs/src/content/docs/**/*.md` resolves to a real file,
-and wire it as a `pnpm docs:check` step so the docs CI fails on stale
-cross-links before they reach `main`.
+cron. `v0.5.0` will run it on every PR that touches the audit
+manifest or `apps/example/`, posting the scorecard as a check run.
 
 ### Close-out of verified audit findings
 
-The internal post-launch audit catalogue (in `.audit/`) lists verified
-recommendations that the shipped surface still does not address —
-rasterising the OG image to PNG, third-party-action SHA pinning, OIDC
-trusted publishing, and so on. v0.5.0 will land as many as fit before
-the cut. Anything left over graduates to `v0.5.x` patches or v0.6.0;
-every item is enumerated either way so the catalogue shrinks on every
+The internal post-launch audit catalogue lists verified recommendations
+that the shipped surface still does not address — rasterising the OG
+image to PNG, third-party-action SHA pinning, OIDC trusted publishing,
+and so on. `v0.5.0` will land as many as fit before the cut.
+Anything left over graduates to `v0.5.x` patches or `v0.6.0`; every
+item is enumerated either way so the catalogue shrinks on every
 release.
 
 ---
