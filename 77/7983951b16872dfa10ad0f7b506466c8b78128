@@ -1,0 +1,24 @@
+.gitignore
+  s_648308ecafeab6::t_abd7c68513cd22 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "777983951b16872dfa10ad0f7b506466c8b78128",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_648308ecafeab6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "936c240c-0798-41ec-bca2-988418f4e4f9",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
