@@ -36,16 +36,15 @@ template (sourced from `apps/example/`) generates:
 - **`llms.txt` and `llms-full.txt`** generated at build time as part
   of `grove check`.
 - **`sitemap.xml`** generated at build time as part of `grove check`.
-- **37 Astro components** under `packages/astro/src/components/`
-  (Hero, ItemCard, IndexRow, Pagination, RecordSection, RecordHeader,
-  EditorialSummary, TableOfContents, MarkdownBody, RecordSidebar,
-  LanguageBreakdown, RefinePanel, ScoreBars, SmartLensTabs,
-  ExploreByCategory, ExploreByStack, WhyThisExists, CurationGrid,
-  ContributorsGrid, StackGrid, StackPlatformChips, Icon, MinimalAbout,
-  OriginalCollection, DecisionRow, FilterGroupMenu, FilterOptions,
-  CategoryGrid, DirectoryIndexClient, SubmissionClient, CollectionRow,
-  CollectionIndex, CollectionPage, CollectionTeaser, FinalCta,
-  GroveDocumentHead, ProjectCard).
+- **32 Astro components** under `packages/astro/src/components/`
+  (Hero, ProjectCard, CardGrid, CardIcon, IndexRow, Pagination,
+  RecordSection, RecordHeader, EditorialSummary, TableOfContents,
+  MarkdownBody, RecordSidebar, LanguageBreakdown, RefinePanel,
+  SmartLensTabs, WhyThisExists, ContributorsGrid, StackGrid,
+  StackPlatformChips, Icon, OriginalCollection, FilterGroupMenu,
+  FilterOptions, CategoryGrid, DirectoryIndexClient, SubmissionClient,
+  CollectionCard, CollectionRow, CollectionIndex, CollectionPage,
+  CollectionTeaser, FinalCta).
 - **Layouts** under `packages/astro/src/layouts/` (`BaseLayout`,
   `Header`, `Footer`, `Seo`, `Container`, `SectionHeader`,
   `ThemeToggle`).
@@ -71,19 +70,19 @@ the [Frameworks status matrix](/reference/frameworks/).
 
 The Astro template is meant to be edited. Common customizations:
 
-**Override a component.** Add a `components:` block to
-`grove.config.ts`:
+**Override a component.** Pages are plain Astro files in your
+project, so swap the import:
 
-```ts
-export default defineConfig({
-  // ...
-  components: {
-    ItemCard: "./src/components/MyItemCard.astro",
-  },
-});
+```astro
+---
+// src/pages/[slug]/index.astro
+// import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
+import ProjectCard from "../../components/MyProjectCard.astro";
+---
 ```
 
-The custom path replaces the default `@grove-dev/astro` component.
+Your component replaces the default `@grove-dev/astro` component on
+that page; the data models keep working unchanged.
 
 **Change the theme.** Edit `theme` in `grove.config.ts`:
 

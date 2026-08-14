@@ -15,7 +15,7 @@ import siteConfig from "@grove/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import { getContributorsPageModel } from "@grove-dev/astro/server";
 
-const { contributors: sorted, total, title, description, contributorsGraphHref } =
+const { contributors: sorted, total, title, description, contributorsGraphHref, showContributionCount } =
   getContributorsPageModel(siteConfig);
 ---
 
@@ -97,7 +97,7 @@ const { contributors: sorted, total, title, description, contributorsGraphHref }
                   <span class="text-2xs text-ink-500 dark:text-ink-400">
                     @{c.username}
                   </span>
-                  {typeof c.contributions === "number" && (
+                  {showContributionCount && typeof c.contributions === "number" && (
                     <span class="font-mono text-2xs text-ink-400">
                       {c.contributions.toLocaleString()} contributions
                     </span>

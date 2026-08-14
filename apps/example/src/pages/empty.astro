@@ -1,8 +1,29 @@
 ---
+/**
+ * Empty-state fixture (`audit.pages` type "empty") — styled like the
+ * browse page's real `#empty-state` so the audit sample represents
+ * what visitors actually see when a directory has nothing to show.
+ */
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import siteConfig from "@grove/generated/site-config.json";
+
+const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
 ---
 <BaseLayout title="No results" description="Empty state fixture." site={siteConfig}>
-  <h1>No results</h1>
-  <p>There are no items to show right now.</p>
+  <section class="py-16 sm:py-24">
+    <div class="mx-auto w-full max-w-wide px-5 text-center sm:px-7">
+      <h1 class="m-0 text-[1.5rem] font-semibold tracking-tight text-ink-900 sm:text-[1.75rem] dark:text-ink-100">
+        No results
+      </h1>
+      <p class="m-0 mt-2 text-sm text-ink-500 dark:text-ink-400">
+        There are no items to show right now.
+      </p>
+      <a
+        href={`/${slug}`}
+        class="mt-6 inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90"
+      >
+        Browse {slug}
+      </a>
+    </div>
+  </section>
 </BaseLayout>

@@ -23,6 +23,7 @@ import siteConfig from "@grove/generated/site-config.json";
 import { getDirectoryIndexModel, itemLabel, itemLabelPlural, taxonomy } from "@grove-dev/astro/server";
 import type { IndexFilters } from "@grove-dev/astro";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import CardGrid from "@grove-dev/astro/components/CardGrid.astro";
 import SmartLensTabs from "@grove-dev/astro/components/SmartLensTabs.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
 import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
@@ -190,26 +191,29 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
         </div>
       </div>
 
-      <ul id="results-list" class="m-0 flex list-none flex-col gap-3 p-0">
+      <CardGrid id="results-list">
         {sorted.map((item, i) => (
             <li class="m-0 p-0" data-record-slug={item.slug}>
               <IndexRow
                 record={item as Parameters<typeof IndexRow>[0]["record"]}
                 detailHref={`/${slug}/${item.slug}`}
-                eager={i < 2}
+                eager={i < 3}
               />
             </li>
         ))}
-      </ul>
+      </CardGrid>
       <div id="empty-state" class:list={["py-12 text-center", sorted.length > 0 && "hidden"]}>
         <p class="m-0 text-sm font-medium text-ink-700 dark:text-ink-200">
           {`No ${itemLabel()}s match these filters.`}
         </p>
         <a href={clearFiltersHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent mt-4">Clear filters</a>
       </div>
-      <nav id="results-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
+      {/* Plain div wrapper — Pagination renders its own
+          <nav aria-label="Pagination">, so a nav here would nest two
+          identical landmarks. */}
+      <div id="results-pagination" class="mt-8 flex flex-wrap items-center justify-center gap-1.5">
         <Pagination current={page} total={pages} hrefFor={hrefForPage} />
-      </nav>
+      </div>
     </div>
   </section>
 

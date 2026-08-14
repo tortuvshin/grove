@@ -66,7 +66,9 @@ export default defineConfig({
 
   facets: ["category", "stack", "platform", "tags"],
 
-  integrations: { github: false },
+  // The scheduled sync workflows (.github/workflows/sync-*.yml) honor
+  // these flags — disable a sub-feature here to turn its sync into a no-op.
+  integrations: { github: { metadata: true, contributors: true, health: true } },
 
   theme: {
     primaryColor: "#1f6feb",

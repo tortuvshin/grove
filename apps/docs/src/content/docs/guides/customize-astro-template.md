@@ -145,13 +145,10 @@ context. The full list, grouped by purpose:
 
 - `Hero` — home page banner (trust stats, headline, search, CTAs).
 - `WhyThisExists` — "What is this site for?" section (three short opinionated points).
-- `MinimalAbout` — three-point about section, sibling of `WhyThisExists`.
 - `FinalCta` — bottom-of-page "Know an app that belongs here?" CTA.
 - `OriginalCollection` — legacy lineage card linking to the project's origin repo.
 - `StackGrid` — browse-by-stack grid on the home page (cards with icons + status pills).
 - `CategoryGrid` — browse-by-category grid on the home page.
-- `ExploreByStack` — compact, count-only browse-by-stack row (pill links).
-- `ExploreByCategory` — compact, count-only browse-by-category row (pill links).
 - `ContributorsGrid` — avatar grid of contributors for the home page.
 - `StackPlatformChips` — labelled Stack + Platform chip rows.
 
@@ -161,17 +158,16 @@ context. The full list, grouped by purpose:
 - `RecordSection` — lens-style section wrapper for the home page (SectionHeader + 3-col grid).
 - `RecordSidebar` — sticky right column on a record detail page (Activity / Freshness / Ecosystem / Source).
 - `EditorialSummary` — curator's "Best for / Consider before using" card at the top of a record body.
-- `CurationGrid` — 3-column grid of "Best for / Why listed / Caveats" notes.
 - `LanguageBreakdown` — GitHub-Linguist-style code-composition bar + legend.
-- `ScoreBars` — four-bar score visualization (activity / maturity / learning / contribution / docs).
 - `MarkdownBody` — renders the pre-sanitized Markdown body inside `.grove-prose`.
 - `TableOfContents` — collapsible on-page nav for a record's Markdown body.
 
 **List and discovery**
 
-- `ItemCard` — compact card for one record on the home page / 3-column grid.
-- `ProjectCard` — three-column-grid card for one directory record (the v0.5.0 design).
-- `IndexRow` — directory list row used by list / detail UIs.
+- `ProjectCard` — the canonical card for one directory record (whole-card link or article + secondary links).
+- `CardGrid` — the shared responsive 3-column grid host every listing surface uses.
+- `CardIcon` — shared metadata glyphs (star, clock, curated check, arrow, external).
+- `IndexRow` — browse-page adapter that maps an `IndexRecord` onto `ProjectCard`.
 - `Pagination` — pagination navigation with numeric pages + ellipsis.
 - `RefinePanel` — multi-select facet dropdowns + Sort dropdown (server-render only).
 - `SmartLensTabs` — curated single-select lens tabs (All / Hot / Mature / Production-like / Good to learn).
@@ -181,67 +177,37 @@ context. The full list, grouped by purpose:
 
 **Collections and submission**
 
+- `CollectionCard` — card for one collection (kind, title, description, entry count).
 - `CollectionIndex` — grid of every collection defined in `data/collections/*.yml`.
 - `CollectionPage` — single curated/generated collection detail page.
-- `CollectionRow` — card-shaped row for one entry inside a collection.
+- `CollectionRow` — collection-entry adapter that maps a `CollectionEntry` onto `ProjectCard`.
 - `CollectionTeaser` — homepage-friendly subset of `CollectionIndex` (defaults `limit: 3`).
 - `SubmissionClient` — client-side submission form (GitHub repo lookup + validation).
 
-**Curation admin and meta**
+**Meta**
 
-- `DecisionRow` — single row of the curation decision admin table.
 - `DirectoryIndexClient` — client-side directory index (embeds JSON + script for search/lens interactions).
-- `GroveDocumentHead` — `<head>` element with OG / Twitter / JSON-LD from the `PageDocument` model.
 
-The published override surface (the `components:` block in
-`grove.config.ts`) currently accepts **only five slots**. The schema
-is `componentOverrideSchema` in `packages/core/src/schema.ts`:
+### Overriding a component
 
-| `components.*` field | Default target | Notes |
-| --- | --- | --- |
-| `Header` | `layouts/Header.astro` | sticky brand + nav + theme toggle |
-| `Footer` | `layouts/Footer.astro` | 4-column grid footer + bottom bar |
-| `Hero` | `components/Hero.astro` | home page banner |
-| `ItemCard` | `components/ItemCard.astro` | record card on home / list views |
-| `DetailHeader` | `components/RecordHeader.astro` | top of record detail page (note: schema key is `DetailHeader`, file is `RecordHeader.astro`) |
+Because `grove init` copies the canonical `apps/example/` site into
+your project, the Astro pages, layouts, and styles in `src/` are
+yours to edit. Every component is reachable by importing from
+`@grove-dev/astro/components/<Name>.astro` in your own consumer
+pages — the Astro integration wires these as Vite aliases — so an
+override is a plain import swap:
 
-Anything else requires editing the consumer-owned file under
-`apps/example/src/` (which `grove init` copies into your project) or
-forking the package. The 32 non-overridable components are reachable
-by importing from `@grove-dev/astro/components/<Name>.astro` in your
-own consumer pages — the Astro integration wires these as Vite aliases.
-
-Two ways to override the five slots:
-
-### Option A: register an override in `grove.config.ts`
-
-```ts
-// grove.config.ts
-import MyHeader from "./src/components/MyHeader.astro";
-import MyItemCard from "./src/components/MyItemCard.astro";
-
-export default defineConfig({
-  // ...
-  components: {
-    Header: "./src/components/MyHeader.astro",
-    ItemCard: "./src/components/MyItemCard.astro",
-  },
-});
+```astro
+---
+// src/pages/[slug]/index.astro
+// import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
+import ProjectCard from "../../components/MyProjectCard.astro";
+---
 ```
-
-The Astro adapter resolves the path at build time. The override is
-local to your repo, so it survives `pnpm install`.
 
 The override component must accept the same props as the original.
 Check the original component for the prop list — the contract is not
 formally versioned in `0.5.0-next.2`.
-
-### Option B: edit the consumer-owned file
-
-Because `grove init` copies the canonical `apps/example/` site into
-your project, the Astro pages, layouts, and styles in `src/` are
-yours to edit. For a one-off tweak, editing the local file is
-simpler than wiring a `components:` override.
 
 ## 4. Data layout: changing where records live
 

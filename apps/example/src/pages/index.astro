@@ -125,6 +125,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     total={contributors.length || undefined}
     viewAllHref={`/contributors`}
     viewAllLabel="Meet the community"
+    showContributionCount={siteConfig.contributors?.showContributionCount ?? true}
   />
 
   {siteConfig.stats?.originalRepo && (

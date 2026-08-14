@@ -112,15 +112,6 @@ export default defineConfig({
     containerWidth: "72rem",
   },
 
-  components: {
-    // Override default Astro components with custom ones.
-    Header: "./src/components/MyHeader.astro",
-    Footer: undefined,
-    Hero: undefined,
-    ItemCard: undefined,
-    DetailHeader: undefined,
-  },
-
   paths: {
     dataDir: "data",
     contentDir: "content",
@@ -220,25 +211,6 @@ the metadata on every render.
 | `radius` | `"none" \| "soft" \| "round"` | `"soft"` | Border-radius scale. `none` = sharp, `soft` = subtle, `round` = pill. |
 | `density` | `"compact" \| "comfortable" \| "spacious"` | `"comfortable"` | Vertical spacing density. |
 | `containerWidth` | `string` (CSS length) | `"72rem"` | Max width of the content container. |
-
-### `components`
-
-**Type:** `object`
-
-Override the default Astro components for the site chrome and
-record cards. Each value is a path to a `.astro` file (relative to
-the project root).
-
-| Field | Default component | What it renders |
-|---|---|---|
-| `Header` | `@grove-dev/astro`'s default | Top nav and site name |
-| `Footer` | default | Footer with repo link, build info |
-| `Hero` | default | The home-page hero (with tagline, CTAs) |
-| `ItemCard` | default | A single record card in list views |
-| `DetailHeader` | default | The header at the top of a record detail page |
-
-Set a field to `undefined` (or omit it) to use the default.
-Setting it to a path replaces the default with your component.
 
 ### `paths`
 
