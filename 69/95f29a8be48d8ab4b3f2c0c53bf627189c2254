@@ -1,0 +1,16 @@
+AGENTS.md
+  h_62cffde5d182b0 1-87
+CLAUDE.md
+  h_62cffde5d182b0 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6995f29a8be48d8ab4b3f2c0c53bf627189c2254",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
