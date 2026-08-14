@@ -1,0 +1,19 @@
+changelogs/v0.4.0.md
+  s_5d28874895d5f2::t_655de426bcee7c 137,139-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "de2dad7de3898558a36cbf9fa86b3b3e7e5d5924",
+  "prompts": {},
+  "sessions": {
+    "s_5d28874895d5f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c0624e6-2089-425a-abc2-c444adaa93be",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
