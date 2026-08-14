@@ -1,0 +1,46 @@
+apps/example/public/icons/platforms/ios.svg
+  s_5ae21821884968::t_90e5082ef70079 1
+packages/astro/src/components/TableOfContents.astro
+  s_5ae21821884968::t_3e2d37f7bd44f8 35
+apps/example/public/icons/platforms/android.svg
+  s_5ae21821884968::t_34e27b2cde2af3 1
+apps/example/public/icons/stacks/python.svg
+  s_5ae21821884968::t_dc03f06ed7bad6 1
+packages/astro/src/components/CollectionCard.astro
+  s_5ae21821884968::t_68156a2752232f 33
+packages/astro/src/styles.css
+  s_5ae21821884968::t_bbf15a32294f62 213
+  s_5ae21821884968::t_77f2c0f9646236 243
+packages/astro/src/components/ProjectCard.astro
+  s_5ae21821884968::t_e1db7c6b62d7e5 224
+  s_5ae21821884968::t_19d7008bcdb51a 247
+apps/example/public/icons/platforms/ubuntu.svg
+  s_5ae21821884968::t_99a1cf556da427 1
+packages/astro/src/components/EditorialSummary.astro
+  s_5ae21821884968::t_7e300780e962f5 23
+apps/example/public/icons/platforms/chrome.svg
+  s_5ae21821884968::t_37f243e2c5bb73 1
+packages/astro/src/components/RecordSidebar.astro
+  s_5ae21821884968::t_7c97b8b4228554 329
+  s_5ae21821884968::t_bd814590369a21 77,167,240
+apps/example/public/icons/platforms/web.svg
+  s_5ae21821884968::t_8d345fab03fe1c 1
+apps/example/public/logo.svg
+  s_5ae21821884968::t_c4027158f2b18d 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "eb7f56130c4e73da5ec93af577ed5fb7869fb2d6",
+  "prompts": {},
+  "sessions": {
+    "s_5ae21821884968": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "25e06ef7-ac5a-496c-a158-dba95c4341dc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
