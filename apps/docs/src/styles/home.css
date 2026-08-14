@@ -7,27 +7,26 @@
   --font-mono: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
   --font-display: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* vite.dev-style neutral dark canvas. */
-  --color-bg: #101010;
-  --color-surface: #161618;
-  --color-card: #1b1b1f;
-  --color-card-hover: #202127;
-  --color-border: #27272a;
-  --color-border-strong: #3f3f46;
-  --color-fg: #f6f6f7;
-  --color-muted: #a1a1aa;
-  --color-subtle: #71717a;
+  /* Grove blue + teal: an ink-dark technical canvas with restrained color. */
+  --color-bg: #091116;
+  --color-surface: #111d25;
+  --color-card: #13212a;
+  --color-card-hover: #172a34;
+  --color-border: #243b48;
+  --color-border-strong: #365666;
+  --color-fg: #e3f3f5;
+  --color-muted: #89a8b3;
+  --color-subtle: #718b95;
 
-  /* vite.dev accents: indigo brand, cyan→purple signature gradient. */
-  --color-brand: #646cff;
-  --color-brand-light: #747bff;
-  --color-accent-cyan: #41d1ff;
-  --color-accent-purple: #bd34fe;
-  --color-accent-yellow: #ffc517;
+  /* Teal is reserved for emphasis, active states, and connected motion. */
+  --color-brand: #27b7c8;
+  --color-brand-light: #7dd3d8;
+  --color-accent-cyan: #4cc9d8;
+  --color-accent-yellow: #e6c56a;
 
   /* Status colors (record health dots, warnings). */
-  --color-accent-green: #3fb950;
-  --color-accent-orange: #d29922;
+  --color-accent-green: #4ac987;
+  --color-accent-orange: #e5a55d;
 
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
@@ -70,11 +69,11 @@ summary::-webkit-details-marker {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(600px circle at 50% 0%, rgb(100 108 255 / 0.12), transparent 65%);
+  background: radial-gradient(600px circle at 50% 0%, rgb(39 183 200 / 0.12), transparent 65%);
 }
 
-/* Hero beams: the vite.dev-style cyan/purple glow field. --mx/--my are set
-   by the hero script (static center fallback without JS or on touch). */
+/* Restrained teal light field. --mx/--my are set by the hero script, with a
+   static center fallback when JS, fine pointers, or motion are unavailable. */
 .hero-beams {
   position: absolute;
   inset: 0;
@@ -88,9 +87,9 @@ summary::-webkit-details-marker {
   position: absolute;
   inset: -20%;
   background:
-    radial-gradient(38% 42% at var(--mx, 38%) var(--my, 30%), rgb(189 52 254 / 0.16), transparent 70%),
-    radial-gradient(34% 38% at 68% 24%, rgb(65 209 255 / 0.14), transparent 70%),
-    radial-gradient(30% 34% at 50% 78%, rgb(100 108 255 / 0.1), transparent 70%);
+    radial-gradient(34% 38% at var(--mx, 38%) var(--my, 30%), rgb(39 183 200 / 0.14), transparent 72%),
+    radial-gradient(30% 34% at 70% 24%, rgb(125 211 216 / 0.09), transparent 72%),
+    radial-gradient(28% 30% at 50% 78%, rgb(39 183 200 / 0.06), transparent 74%);
   animation: hero-beams-breathe 10s ease-in-out infinite alternate;
 }
 
@@ -99,9 +98,9 @@ summary::-webkit-details-marker {
   to { opacity: 1; transform: scale(1.05); }
 }
 
-/* The vite.dev signature gradient for emphasized phrases. */
+/* A quiet, single-family signature gradient for emphasized phrases. */
 .text-gradient {
-  background: linear-gradient(120deg, #41d1ff 10%, #bd34fe);
+  background: linear-gradient(120deg, #7dd3d8 8%, #27b7c8 92%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

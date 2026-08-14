@@ -81,19 +81,21 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(layoutSource).toMatch(/class="min-h-screen bg-bg text-fg antialiased"/);
 	});
 
-	it("ships the home stylesheet with the vite.dev-style palette and no webfonts", async () => {
+	it("ships the home stylesheet with the Grove blue + teal palette and no webfonts", async () => {
 		const homeCss = await readFile(resolve(docsRoot, "src/styles/home.css"), "utf8");
 
 		expect(homeCss).toMatch(/@import\s+['"]tailwindcss['"]/);
 		expect(homeCss).toMatch(/@theme\s*\{/);
 
-		// Neutral dark canvas + indigo brand + cyan→purple signature gradient.
-		expect(homeCss).toMatch(/--color-bg:\s*#101010/);
-		expect(homeCss).toMatch(/--color-fg:\s*#f6f6f7/);
-		expect(homeCss).toMatch(/--color-brand:\s*#646cff/);
-		expect(homeCss).toMatch(/--color-accent-cyan:\s*#41d1ff/);
-		expect(homeCss).toMatch(/--color-accent-purple:\s*#bd34fe/);
-		expect(homeCss).toContain("linear-gradient(120deg, #41d1ff 10%, #bd34fe)");
+		// Ink-dark canvas + teal emphasis; the old indigo/purple palette is gone.
+		expect(homeCss).toMatch(/--color-bg:\s*#091116/);
+		expect(homeCss).toMatch(/--color-surface:\s*#111d25/);
+		expect(homeCss).toMatch(/--color-fg:\s*#e3f3f5/);
+		expect(homeCss).toMatch(/--color-muted:\s*#89a8b3/);
+		expect(homeCss).toMatch(/--color-brand:\s*#27b7c8/);
+		expect(homeCss).toMatch(/--color-brand-light:\s*#7dd3d8/);
+		expect(homeCss).toContain("linear-gradient(120deg, #7dd3d8 8%, #27b7c8 92%)");
+		expect(homeCss).not.toMatch(/#646cff|#41d1ff|#bd34fe/i);
 
 		// Same font story as the docs (Starlight defaults): the system stack,
 		// no webfont imports.
@@ -265,6 +267,10 @@ describe("docs homepage (standalone Astro route)", () => {
 		// The scrub is a progressive enhancement only: it gates on viewport
 		// width and reduced motion, and tears down cleanly.
 		expect(demo).toContain('id="hgw"');
+		expect(demo).toContain("height: 440vh");
+		expect(demo).toContain("const stepStarts = [0, 0.18, 0.38, 0.58, 0.74, 0.86]");
+		expect(demo).toContain("scroll-snap-type: inline mandatory");
+		expect(demo).toContain("Swipe to explore all six steps");
 		expect(demo).toContain("prefers-reduced-motion");
 		expect(demo).toContain("min-width: 1024px");
 	});
@@ -274,6 +280,9 @@ describe("docs homepage (standalone Astro route)", () => {
 
 		expect(demo).toContain('id="demo-directory"');
 		expect(demo).toContain('id="demo-directory-search"');
+		expect(demo).toContain("Tools worth knowing");
+		expect(demo).toContain("sm:grid-cols-3");
+		expect(demo).not.toContain('id="hgw-bridge"');
 
 		// Lens labels are the real PRIMARY_LENSES from
 		// packages/core/src/directory-lenses.ts, and each tab writes the same
@@ -335,7 +344,8 @@ describe("docs homepage (standalone Astro route)", () => {
 		);
 		expect(manifest.name).toBe("Grove");
 		expect(manifest.start_url).toBe("/");
-		expect(manifest.theme_color).toBe("#101010");
+		expect(manifest.background_color).toBe("#091116");
+		expect(manifest.theme_color).toBe("#091116");
 		expect(manifest.icons?.[0]?.src).toBe("/favicon.svg");
 
 		expect(existsSync(resolve(docsRoot, "public/og-image.svg"))).toBe(true);
@@ -383,7 +393,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(home).toContain('name="twitter:card"');
 		expect(home).toContain('content="summary_large_image"');
 		expect(home).toContain('name="theme-color"');
-		expect(home).toContain('content="#101010"');
+		expect(home).toContain('content="#091116"');
 		expect(home).toContain('rel="manifest"');
 		expect(home).toContain('rel="apple-touch-icon"');
 		// Social alt text follows the positioning brand line.

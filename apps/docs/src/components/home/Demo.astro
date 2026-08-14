@@ -45,19 +45,19 @@ const steps = [
 // taxonomy, content/records, grove.config.ts). `at` is the scroll progress
 // where each row reveals.
 const tree = [
-  { depth: 0, label: 'my-space/', kind: 'folder', at: 0.13 },
-  { depth: 1, label: 'data/', kind: 'folder', at: 0.15 },
-  { depth: 2, label: 'records/', kind: 'folder', at: 0.165 },
-  { depth: 3, label: 'immich.yml', kind: 'yml', at: 0.18 },
-  { depth: 3, label: 'joplin.yml', kind: 'yml', at: 0.195 },
-  { depth: 3, label: 'excalidraw.yml', kind: 'yml', at: 0.21 },
-  { depth: 2, label: 'collections/', kind: 'folder', at: 0.225 },
+  { depth: 0, label: 'my-space/', kind: 'folder', at: 0.17 },
+  { depth: 1, label: 'data/', kind: 'folder', at: 0.18 },
+  { depth: 2, label: 'records/', kind: 'folder', at: 0.19 },
+  { depth: 3, label: 'immich.yml', kind: 'yml', at: 0.2 },
+  { depth: 3, label: 'joplin.yml', kind: 'yml', at: 0.21 },
+  { depth: 3, label: 'excalidraw.yml', kind: 'yml', at: 0.22 },
+  { depth: 2, label: 'collections/', kind: 'folder', at: 0.23 },
   { depth: 3, label: 'starter-picks.yml', kind: 'yml', at: 0.24 },
-  { depth: 2, label: 'taxonomy/', kind: 'folder', at: 0.255 },
-  { depth: 3, label: 'categories.yml', kind: 'yml', at: 0.27 },
-  { depth: 1, label: 'content/records/', kind: 'folder', at: 0.285 },
-  { depth: 2, label: 'immich.md', kind: 'md', at: 0.3 },
-  { depth: 0, label: 'grove.config.ts', kind: 'ts', at: 0.315 },
+  { depth: 2, label: 'taxonomy/', kind: 'folder', at: 0.25 },
+  { depth: 3, label: 'categories.yml', kind: 'yml', at: 0.26 },
+  { depth: 1, label: 'content/records/', kind: 'folder', at: 0.27 },
+  { depth: 2, label: 'immich.md', kind: 'md', at: 0.28 },
+  { depth: 0, label: 'grove.config.ts', kind: 'ts', at: 0.29 },
 ];
 
 const treeColor = {
@@ -94,16 +94,16 @@ const lenses = [
   { id: 'good-to-learn', label: 'Good to learn', param: 'lens=good-to-learn' },
 ];
 
-// Sample records — real open-source projects, shown with category/stack only
-// (no live figures that could drift).
+// Sample records — real open-source projects. The short descriptions and
+// category/stack labels make the live preview read like a useful directory,
+// without relying on figures that could drift.
 const records = [
-  { name: 'Immich', category: 'Media', stack: 'TypeScript', lenses: 'hot production-like' },
-  { name: 'Joplin', category: 'Productivity', stack: 'TypeScript', lenses: 'mature production-like' },
-  { name: 'Excalidraw', category: 'Design', stack: 'TypeScript', lenses: 'hot mature production-like' },
-  { name: 'Bruno', category: 'DevTools', stack: 'JavaScript', lenses: 'good-to-learn' },
-  { name: 'LocalSend', category: 'Sharing', stack: 'Flutter', lenses: 'hot good-to-learn' },
-  { name: 'Linkwarden', category: 'Knowledge', stack: 'Next.js', lenses: 'production-like' },
-  { name: 'Outline', category: 'Knowledge', stack: 'React', lenses: 'mature production-like' },
+  { name: 'Immich', initials: 'IM', description: 'A self-hosted home for your photos and videos.', category: 'Media', stack: 'TypeScript', lenses: 'hot production-like' },
+  { name: 'Joplin', initials: 'JO', description: 'Private notes that sync across all your devices.', category: 'Productivity', stack: 'TypeScript', lenses: 'mature production-like' },
+  { name: 'Excalidraw', initials: 'EX', description: 'A collaborative canvas for sketching ideas.', category: 'Design', stack: 'TypeScript', lenses: 'hot mature production-like' },
+  { name: 'Bruno', initials: 'BR', description: 'A fast, Git-friendly client for testing APIs.', category: 'DevTools', stack: 'JavaScript', lenses: 'good-to-learn' },
+  { name: 'LocalSend', initials: 'LS', description: 'Share files securely across nearby devices.', category: 'Sharing', stack: 'Flutter', lenses: 'hot good-to-learn' },
+  { name: 'Linkwarden', initials: 'LW', description: 'Collect and preserve the links worth keeping.', category: 'Knowledge', stack: 'Next.js', lenses: 'production-like' },
 ];
 
 // Scene 5 rail: files grove actually generates (packages/cli/src/init.ts
@@ -223,7 +223,7 @@ const pillClass = {
                   <path
                     class="hgw-in-path"
                     d={`M ${n.x + 9} ${n.y * 0.75} C 34 ${n.y * 0.75}, 38 37.5, 46 37.5`}
-                    stroke="#3f3f46"
+                    stroke="var(--color-border-strong)"
                     stroke-width="1"
                     vector-effect="non-scaling-stroke"
                     pathLength="1"
@@ -236,7 +236,7 @@ const pillClass = {
                   <path
                     class="hgw-cap-path"
                     d={`M 54 37.5 C 62 37.5, 66 ${n.y * 0.75}, ${n.x - 11} ${n.y * 0.75}`}
-                    stroke="#646cff"
+                    stroke="var(--color-brand)"
                     stroke-width="1"
                     vector-effect="non-scaling-stroke"
                     pathLength="1"
@@ -259,7 +259,7 @@ const pillClass = {
               ))}
 
               <div id="hgw-core" class="absolute" style="left: 50%; top: 50%;">
-                <div class="flex flex-col items-center gap-1 rounded-2xl border border-brand/40 bg-brand/10 px-7 py-5 shadow-[0_0_40px_-8px_rgb(100_108_255/0.9)] backdrop-blur-sm">
+                <div class="flex flex-col items-center gap-1 rounded-2xl border border-brand/40 bg-brand/10 px-7 py-5 shadow-[0_0_40px_-8px_rgb(39_183_200/0.65)] backdrop-blur-sm">
                   <span class="text-2xl font-semibold tracking-tight text-brand-light">Grove</span>
                   <span class="font-mono text-[10px] uppercase tracking-widest text-subtle">discovery model</span>
                 </div>
@@ -287,7 +287,7 @@ const pillClass = {
                 <path
                   id="hgw-out-path"
                   d="M 58 37.5 C 70 37.5, 80 50, 92 60"
-                  stroke="#646cff"
+                  stroke="var(--color-brand)"
                   stroke-width="1.2"
                   vector-effect="non-scaling-stroke"
                   pathLength="1"
@@ -298,23 +298,12 @@ const pillClass = {
                 <polygon
                   id="hgw-out-arrow"
                   points="0,-3 6,0 0,3"
-                  fill="#646cff"
+                  fill="var(--color-brand)"
                   opacity="0"
                   transform="translate(92 60)"
                 ></polygon>
               </svg>
             </div>
-          </div>
-
-          <!-- Scene 3 → 4 bridge: a chip that fades in to lead into the live site -->
-          <div
-            id="hgw-bridge"
-            class="hgw-scene pointer-events-none flex items-center justify-center"
-            aria-hidden="true"
-          >
-            <span class="rounded-full border border-brand/30 bg-card/80 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-widest text-brand-light backdrop-blur">
-              grove build →
-            </span>
           </div>
 
           <!-- Scenes 4–6 · Publish / Generate / Maintain: the live demo window
@@ -323,7 +312,7 @@ const pillClass = {
             <div id="hgw-site-inner" class="relative">
               <div id="demo-directory" class="relative">
                 <div class="grove-glow" aria-hidden="true"></div>
-                <div id="hgw-window" class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(100_108_255_/_0.35)] backdrop-blur">
+                <div id="hgw-window" class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(39_183_200_/_0.25)] backdrop-blur">
                   <div class="flex items-center gap-2 border-b border-border px-4 py-3">
                     <span class="size-3 rounded-full bg-[#ff5f57]"></span>
                     <span class="size-3 rounded-full bg-[#febc2e]"></span>
@@ -332,8 +321,29 @@ const pillClass = {
                     <span class="size-3" aria-hidden="true"></span>
                   </div>
 
-                  <div class="p-5 sm:p-6">
-                    <label class="flex items-center gap-2.5 rounded-full border border-border bg-surface px-4 py-2.5 transition-colors focus-within:border-brand/60">
+                  <div class="border-b border-border/70 px-5 py-4 sm:px-6">
+                    <div class="flex items-center justify-between gap-4">
+                      <div class="flex items-center gap-2.5">
+                        <span class="grid size-8 place-items-center rounded-lg border border-brand/30 bg-brand/10 text-sm font-semibold text-brand-light">G</span>
+                        <div>
+                          <p class="text-sm font-semibold leading-none text-fg">Open Collection</p>
+                          <p class="mt-1 font-mono text-[9px] uppercase tracking-widest text-subtle">Curated with Grove</p>
+                        </div>
+                      </div>
+                      <span class="hidden rounded-full border border-accent-green/30 bg-accent-green/10 px-2.5 py-1 font-mono text-[9px] text-accent-green sm:inline-flex">6 projects</span>
+                    </div>
+                  </div>
+
+                  <div class="p-4 sm:p-5">
+                    <div class="mb-3 flex items-end justify-between gap-4">
+                      <div>
+                        <p class="text-[10px] font-medium uppercase tracking-[0.18em] text-brand-light">Discover</p>
+                        <h3 class="mt-1 text-lg font-semibold tracking-tight text-fg">Tools worth knowing</h3>
+                      </div>
+                      <span class="hidden text-[10px] text-subtle sm:block">Independent · Open source</span>
+                    </div>
+
+                    <label class="flex items-center gap-2.5 rounded-xl border border-border bg-surface px-3.5 py-2 transition-colors focus-within:border-brand/60">
                       <svg class="size-4 shrink-0 text-subtle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.3-4.3"></path>
@@ -343,16 +353,16 @@ const pillClass = {
                         type="search"
                         placeholder="Search records…"
                         autocomplete="off"
-                        class="w-full border-0 bg-transparent p-0 font-sans text-sm text-fg outline-none placeholder:text-subtle"
+                        class="w-full border-0 bg-transparent p-0 font-sans text-xs text-fg outline-none placeholder:text-subtle"
                         aria-label="Search the demo directory"
                       />
                     </label>
 
-                    <div class="mt-3.5 flex flex-wrap gap-1.5" role="group" aria-label="Browse by lens">
+                    <div class="mt-2.5 flex gap-1.5 overflow-x-auto pb-0.5" role="group" aria-label="Browse by lens">
                       {lenses.map((lens, i) => (
                         <button
                           type="button"
-                          class="lens-tab rounded-full border border-border px-3.5 py-1.5 text-xs font-medium text-muted transition-colors hover:border-border-strong hover:text-fg"
+                          class="lens-tab shrink-0 rounded-full border border-border px-3 py-1 text-[10px] font-medium text-muted transition-colors hover:border-border-strong hover:text-fg"
                           data-lens={lens.id}
                           data-param={lens.param}
                           aria-pressed={i === 0 ? 'true' : 'false'}
@@ -362,32 +372,45 @@ const pillClass = {
                       ))}
                     </div>
 
-                    <ul class="mt-4 flex flex-col gap-1.5" aria-label="Demo directory records">
+                    <ul class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3" aria-label="Demo directory records">
                       {records.map((record) => (
                         <li
                           data-record
                           data-lenses={record.lenses}
                           data-search={`${record.name} ${record.category} ${record.stack}`.toLowerCase()}
-                          class="demo-record flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-2.5"
+                          class="demo-record group relative min-h-[88px] overflow-hidden rounded-xl border border-border bg-card p-3 transition-colors hover:border-brand/40"
                         >
-                          <span class="size-1.5 shrink-0 rounded-full bg-accent-green" aria-hidden="true"></span>
-                          <span class="text-sm font-medium text-fg">{record.name}</span>
-                          <span class="ml-auto font-mono text-[10px] text-subtle">{record.category} · {record.stack}</span>
+                          <span class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true"></span>
+                          <div class="flex items-start gap-2.5">
+                            <span class="grid size-8 shrink-0 place-items-center rounded-lg border border-brand/25 bg-brand/10 font-mono text-[10px] font-semibold text-brand-light">{record.initials}</span>
+                            <div class="min-w-0 flex-1">
+                              <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-semibold text-fg">{record.name}</span>
+                                <svg class="size-3 text-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-brand-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+                              </div>
+                              <p class="mt-1 line-clamp-2 text-[10px] leading-relaxed text-muted">{record.description}</p>
+                            </div>
+                          </div>
+                          <div class="mt-2 flex items-center gap-1.5 border-t border-border/60 pt-2 font-mono text-[8px] text-subtle">
+                            <span class="rounded bg-surface px-1.5 py-0.5 text-brand-light">{record.category}</span>
+                            <span>{record.stack}</span>
+                            <span class="ml-auto size-1.5 rounded-full bg-accent-green" title="Active" aria-label="Active project"></span>
+                          </div>
                         </li>
                       ))}
-                      <li id="demo-directory-empty" hidden class="rounded-xl border border-dashed border-border px-4 py-4 text-center text-xs text-subtle">
+                      <li id="demo-directory-empty" hidden class="col-span-full rounded-xl border border-dashed border-border px-4 py-4 text-center text-xs text-subtle">
                         No records match — clear the search or switch lens.
                       </li>
                     </ul>
 
-                    <p class="mt-3.5 flex items-center justify-between font-mono text-[10px] text-subtle">
-                      <span id="demo-directory-count" aria-live="polite">7 of 7 records</span>
+                    <p class="mt-3 flex items-center justify-between border-t border-border/70 pt-2.5 font-mono text-[9px] text-subtle">
+                      <span id="demo-directory-count" aria-live="polite">6 of 6 records</span>
                       <span>search · filters · lenses</span>
                     </p>
                   </div>
                 </div>
               </div>
-              <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-subtle">
+              <p class="hgw-site-caption mt-3 text-center font-mono text-[10px] uppercase tracking-widest text-subtle">
                 Step 04 · Publish
               </p>
 
@@ -444,7 +467,10 @@ const pillClass = {
         </div>
 
         <!-- Step nav: cards in static mode, a progress rail while scrubbing. -->
-        <ol id="hgw-stepnav" aria-label="How Grove works, step by step">
+        <p class="hgw-swipe-hint font-mono text-[10px] uppercase tracking-widest text-subtle">
+          Swipe to explore all six steps →
+        </p>
+        <ol id="hgw-stepnav" tabindex="0" aria-label="How Grove works, step by step">
           {steps.map((step, i) => (
             <li class="hgw-step" data-step={i}>
               <div class="hgw-step-head">
@@ -482,18 +508,43 @@ const pillClass = {
   #hgw-stepnav {
     order: -1;
     display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(82%, 1fr);
     gap: 0.75rem;
     margin: 0 0 2.5rem;
-    padding: 0;
+    padding: 0 0 0.75rem;
     list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline mandatory;
+    scrollbar-color: var(--color-border-strong) transparent;
+    scrollbar-width: thin;
+  }
+
+  .hgw-swipe-hint {
+    order: -2;
+    margin: 0 0 0.75rem;
+  }
+
+  #hgw-stepnav:focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 0.25rem;
   }
 
   @media (min-width: 640px) {
-    #hgw-stepnav { grid-template-columns: repeat(2, 1fr); }
+    #hgw-stepnav { grid-auto-columns: minmax(46%, 1fr); }
   }
 
   @media (min-width: 1024px) {
-    #hgw-stepnav { grid-template-columns: repeat(3, 1fr); }
+    #hgw-stepnav {
+      grid-auto-flow: row;
+      grid-auto-columns: auto;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: visible;
+      scroll-snap-type: none;
+    }
+
+    .hgw-swipe-hint { display: none; }
   }
 
   .hgw-step {
@@ -501,6 +552,7 @@ const pillClass = {
     border-radius: var(--radius-lg);
     background: var(--color-card);
     padding: 1rem 1.125rem;
+    scroll-snap-align: start;
   }
 
   .hgw-step-head {
@@ -558,7 +610,7 @@ const pillClass = {
     overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    background: rgb(22 22 24 / 0.55);
+    background: rgb(17 29 37 / 0.62);
   }
 
   #hgw.is-scrub .hgw-gridbg {
@@ -567,8 +619,8 @@ const pillClass = {
     inset: 0;
     opacity: 0.5;
     background-image:
-      linear-gradient(to right, rgb(63 63 70 / 0.35) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(63 63 70 / 0.35) 1px, transparent 1px);
+      linear-gradient(to right, rgb(54 86 102 / 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(54 86 102 / 0.3) 1px, transparent 1px);
     background-size: 44px 44px;
   }
 
@@ -591,9 +643,9 @@ const pillClass = {
     padding: 0 1.5rem;
   }
 
-  #hgw.is-scrub #hgw-site-inner { max-width: 36rem; }
+  #hgw.is-scrub #hgw-site-inner { max-width: 40rem; }
 
-  #hgw.is-scrub #hgw-window { transform-origin: left center; }
+  #hgw.is-scrub #hgw-window { transform-origin: center center; }
 
   #hgw.is-scrub #hgw-extras {
     display: contents;
@@ -630,12 +682,6 @@ const pillClass = {
     opacity: 0;
   }
 
-  /* Scene 3 → 4 bridge chip: fades in mid-canvas to lead into the live site. */
-  #hgw-bridge {
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-
   /* Scrub-mode caption: identifies the active step above the canvas. Hidden
      in static layout (where the step cards above already carry the labels). */
   #hgw-caption { display: none; }
@@ -650,6 +696,7 @@ const pillClass = {
   /* Static-mode captions: bind outputs and health to steps 5 and 6. The rail
      names the steps in scrub mode, so these become noise and are hidden. */
   #hgw.is-scrub .hgw-extra-caption { display: none; }
+  #hgw.is-scrub .hgw-site-caption { display: none; }
 
   /* Step nav becomes a vertical progress rail. */
   #hgw.is-scrub #hgw-stepnav {
@@ -658,7 +705,12 @@ const pillClass = {
     flex-direction: column;
     gap: 0.25rem;
     margin: 0;
+    padding: 0;
+    overflow: visible;
+    scroll-snap-type: none;
   }
+
+  #hgw.is-scrub .hgw-swipe-hint { display: none; }
 
   #hgw.is-scrub .hgw-step {
     border: 0;
@@ -710,7 +762,7 @@ const pillClass = {
   .demo-record.is-hidden { display: none; }
 
   .lens-tab[aria-pressed='true'] {
-    color: #fff;
+    color: var(--color-bg);
     background: var(--color-brand);
     border-color: var(--color-brand);
   }
@@ -804,9 +856,9 @@ const pillClass = {
     const healthRows = [...healthPanel.querySelectorAll('[data-health]')];
     const steps = [...track.querySelectorAll('.hgw-step')];
 
-    const bridge = $('hgw-bridge');
     const outPath = $('hgw-out-path');
     const outArrow = $('hgw-out-arrow');
+    const canvasCaption = $('hgw-caption');
     const capIndexEl = $('hgw-caption-index');
     const capLabelEl = $('hgw-caption-label');
     const progressFill = $('hgw-progress-fill');
@@ -817,7 +869,7 @@ const pillClass = {
     // must only clear what render() touched instead of the style attribute.
     const styled = [
       term, cursor, line1, line2, files, system, core, site, win, outputs,
-      healthPanel, spin, bridge, outPath, outArrow, progressFill,
+      healthPanel, spin, outPath, outArrow, canvasCaption, progressFill,
       ...inPaths, ...capPaths, ...inChips,
       ...capChips, ...records, ...outItems, ...healthRows,
     ].filter(Boolean);
@@ -836,24 +888,25 @@ const pillClass = {
       // viewer gets a constant sense of where they are in the journey.
       if (progressFill) progressFill.style.width = `${(p * 100).toFixed(2)}%`;
 
-      // 01 · Initialize — terminal types, prints, then hands off upward.
-      const termO = band(p, 0, 0.02, 0.13, 0.19);
-      const exitTerm = ramp(p, 0.13, 0.19);
+      // 01 · Initialize — the frame is present at section entry, then types,
+      // prints, and hands off upward without a blank first canvas.
+      const termO = 1 - ramp(p, 0.16, 0.2);
+      const exitTerm = ramp(p, 0.16, 0.2);
       term.style.opacity = termO;
       term.style.visibility = termO > 0.001 ? 'visible' : 'hidden';
       term.style.transform = `translateY(${lerp(0, -28, exitTerm)}px) scale(${lerp(1, 0.94, exitTerm)})`;
-      const chars = Math.round(ramp(p, 0.02, 0.08) * COMMAND.length);
+      const chars = Math.round(ramp(p, 0.01, 0.07) * COMMAND.length);
       typed.textContent = COMMAND.slice(0, chars);
-      cursor.style.opacity = chars < COMMAND.length || p < 0.13 ? '1' : '0';
-      line1.style.opacity = ramp(p, 0.085, 0.1);
-      line2.style.opacity = ramp(p, 0.1, 0.12);
+      cursor.style.opacity = chars < COMMAND.length || p < 0.15 ? '1' : '0';
+      line1.style.opacity = ramp(p, 0.075, 0.095);
+      line2.style.opacity = ramp(p, 0.095, 0.12);
 
       // 02 · Add content — file tree slides in from the right, hands off left.
-      const filesO = band(p, 0.1, 0.16, 0.32, 0.4);
+      const filesO = band(p, 0.15, 0.19, 0.35, 0.4);
       files.style.opacity = filesO;
       files.style.visibility = filesO > 0.001 ? 'visible' : 'hidden';
-      const filesIn = ramp(p, 0.1, 0.17);
-      const filesOut = ramp(p, 0.3, 0.4);
+      const filesIn = ramp(p, 0.15, 0.2);
+      const filesOut = ramp(p, 0.35, 0.4);
       files.style.transform = `translateX(${lerp(36, 0, filesIn) + lerp(0, -28, filesOut)}px) scale(${lerp(1, 0.92, filesOut)})`;
       for (const node of treeNodes) {
         const at = Number(node.dataset.at);
@@ -863,66 +916,65 @@ const pillClass = {
       }
 
       // 03 · Structure — diagram slides in from the right, hands off left.
-      const sysO = band(p, 0.28, 0.36, 0.5, 0.58);
+      const sysO = band(p, 0.35, 0.4, 0.56, 0.61);
       system.style.opacity = sysO;
       system.style.visibility = sysO > 0.001 ? 'visible' : 'hidden';
-      const sysIn = ramp(p, 0.28, 0.36);
-      const sysOut = ramp(p, 0.48, 0.58);
+      const sysIn = ramp(p, 0.35, 0.4);
+      const sysOut = ramp(p, 0.56, 0.61);
       const stage = system.firstElementChild;
       if (stage) {
-        stage.style.transform = `translateX(${lerp(36, 0, sysIn) + lerp(0, -28, sysOut)}px) scale(${lerp(0.96, 1, ramp(p, 0.3, 0.4)) * lerp(1, 1.04, ramp(p, 0.5, 0.55))})`;
+        stage.style.transform = `translateX(${lerp(36, 0, sysIn) + lerp(0, -28, sysOut)}px) scale(${lerp(0.96, 1, ramp(p, 0.36, 0.42)) * lerp(1, 1.04, ramp(p, 0.55, 0.59))})`;
       }
-      const inFlow = ramp(p, 0.34, 0.42);
-      const capsFlow = ramp(p, 0.42, 0.5);
+      const inFlow = ramp(p, 0.39, 0.45);
+      const capsFlow = ramp(p, 0.44, 0.51);
       for (const path of inPaths) path.style.strokeDashoffset = 1 - inFlow;
       for (const path of capPaths) path.style.strokeDashoffset = 1 - capsFlow;
-      const nodeIn = ramp(p, 0.36, 0.43);
+      const nodeIn = ramp(p, 0.39, 0.46);
       if (core) {
         core.style.opacity = nodeIn;
         core.style.transform = `translate(-50%,-50%) scale(${lerp(0.7, 1, nodeIn)})`;
       }
       inChips.forEach((chip, i) => {
-        const r = ramp(p, 0.33 + i * 0.01, 0.4 + i * 0.01);
+        const r = ramp(p, 0.38 + i * 0.008, 0.44 + i * 0.008);
         chip.style.opacity = r;
         chip.style.transform = `translate(-50%,-50%) translateX(${lerp(-12, 0, r)}px)`;
       });
       capChips.forEach((chip, i) => {
-        const r = ramp(p, 0.43 + i * 0.012, 0.5 + i * 0.012);
+        const r = ramp(p, 0.43 + i * 0.008, 0.485 + i * 0.008);
         chip.style.opacity = r;
         chip.style.transform = `translate(-50%,-50%) translateX(${lerp(12, 0, r)}px)`;
       });
 
-      // 03 → 04 bridge: output path draws out, chip fades in mid-canvas.
-      const bridgeO = band(p, 0.46, 0.5, 0.55, 0.58);
-      if (bridge) {
-        bridge.style.opacity = bridgeO;
-        bridge.style.visibility = bridgeO > 0.001 ? 'visible' : 'hidden';
-      }
-      const drawOut = ramp(p, 0.46, 0.54);
+      // 03 → 04 bridge: the output path itself leads into the live site. A
+      // centered label used to overlap the Grove core at this exact handoff.
+      const drawOut = ramp(p, 0.51, 0.58);
       if (outPath) outPath.style.strokeDashoffset = 1 - drawOut;
       if (outArrow) {
-        outArrow.style.opacity = drawOut * (1 - ramp(p, 0.56, 0.6));
+        outArrow.style.opacity = drawOut * (1 - ramp(p, 0.6, 0.63));
       }
 
       // 04–06 · Publish / Generate / Maintain — the live site takes over.
-      const siteO = ramp(p, 0.47, 0.55);
-      const appear = ramp(p, 0.47, 0.57);
-      const gen = ramp(p, 0.62, 0.72);
-      const maint = ramp(p, 0.82, 0.9);
+      const siteO = ramp(p, 0.56, 0.62);
+      const appear = ramp(p, 0.56, 0.63);
+      const gen = ramp(p, 0.72, 0.79);
+      const maint = ramp(p, 0.84, 0.92);
       const side = Math.max(gen, maint);
       site.style.opacity = siteO;
       site.style.visibility = siteO > 0.001 ? 'visible' : 'hidden';
-      site.style.pointerEvents = p > 0.5 ? 'auto' : 'none';
-      win.style.transform = `translateY(${lerp(28, 0, appear)}px) scale(${lerp(0.93, 1, appear) * lerp(1, 0.8, side)})`;
+      site.style.pointerEvents = p > 0.6 ? 'auto' : 'none';
+      if (canvasCaption) canvasCaption.style.opacity = 1 - ramp(p, 0.54, 0.58);
+      // The directory is intentionally scaled as a complete browser viewport,
+      // so its header and card grid stay visible inside shorter laptop screens.
+      win.style.transform = `translateY(${lerp(28, 0, appear)}px) scale(${lerp(0.78, 0.82, appear) * lerp(1, 0.88, side)})`;
       records.forEach((record, i) => {
-        const r = ramp(p, 0.5 + i * 0.012, 0.6 + i * 0.012);
+        const r = ramp(p, 0.59 + i * 0.002, 0.625 + i * 0.002);
         record.style.opacity = r;
         record.style.transform = `translateY(${lerp(14, 0, r)}px)`;
       });
       outputs.style.opacity = gen * lerp(1, 0.6, maint);
       outputs.style.transform = `translateY(-50%) translateX(${lerp(24, 0, gen)}px)`;
       outItems.forEach((item, i) => {
-        const r = ramp(p, 0.66 + i * 0.012, 0.72 + i * 0.012);
+        const r = ramp(p, 0.75 + i * 0.007, 0.8 + i * 0.007);
         item.style.opacity = r;
         item.style.transform = `scale(${lerp(0.9, 1, r)})`;
       });
@@ -930,19 +982,22 @@ const pillClass = {
       healthPanel.style.transform = `translateY(${lerp(20, 0, maint)}px)`;
       if (spin) spin.style.transform = `rotate(${maint * 180}deg)`;
       healthRows.forEach((row, i) => {
-        const r = ramp(p, 0.85 + i * 0.02, 0.91 + i * 0.02);
+        const r = ramp(p, 0.88 + i * 0.015, 0.94 + i * 0.015);
         row.style.opacity = r;
         row.style.transform = `translateX(${lerp(-12, 0, r)}px)`;
       });
 
-      // Step rail — smooth, continuous opacity across the boundary instead of
-      // snapping at Math.floor boundaries. The active step still drives the
-      // highlight (line color, check mark) via classes, but opacity is driven
-      // by the fractional position so the eye glides between steps.
+      // Step rail follows the scene-specific holds instead of dividing scroll
+      // into equal slices. Copy now changes only when its visual has arrived.
       const totalSteps = steps.length;
-      const continuous = p * totalSteps;
-      const active = Math.min(totalSteps - 1, Math.floor(continuous));
-      const blend = continuous - active;
+      const stepStarts = [0, 0.18, 0.38, 0.58, 0.74, 0.86];
+      let active = 0;
+      for (let i = 1; i < stepStarts.length; i += 1) {
+        if (p >= stepStarts[i]) active = i;
+      }
+      const activeStart = stepStarts[active];
+      const activeEnd = stepStarts[active + 1] ?? 1;
+      const blend = ramp(p, activeStart, activeEnd);
       steps.forEach((step, i) => {
         step.classList.toggle('is-active', i === active);
         step.classList.toggle('is-done', i < active);
@@ -951,12 +1006,11 @@ const pillClass = {
         if (i < active) {
           op = 0.55;
         } else if (i === active) {
-          // Active step: fade 0.55 → 1.0 across the first half of its window.
-          op = 0.55 + 0.45 * Math.min(1, blend * 2);
+          // Active copy reaches full contrast early, then holds with its scene.
+          op = 0.55 + 0.45 * Math.min(1, blend * 3);
         } else if (i === active + 1) {
-          // Next step: pre-fade 0.35 → 0.55 in the second half, so the next
-          // step begins to lift out of the dim background before the snap.
-          op = 0.35 + 0.2 * Math.max(0, blend - 0.5) * 2;
+          // Lift the next label only near the handoff, not during the hold.
+          op = 0.35 + 0.2 * Math.max(0, blend - 0.75) * 4;
         } else {
           op = 0.35;
         }
