@@ -84,5 +84,5 @@ merges. Grove rebuilds the site and deploys.
 
 - **[Deploy your site →](/getting-started/deploy/)** — push to GitHub
   and ship it.
-- **[Configure your space →](/build/configure/)** — branding, theme,
+- **[Configure your space →](/getting-started/configure/)** — branding, theme,
   taxonomy.

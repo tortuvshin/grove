@@ -137,7 +137,7 @@ export default defineConfig({
 
 Which blueprint this space follows. Determines the record kind
 (`project` / `resource` / `entity`) and the schema. See
-[Blueprints](/concepts/blueprints/).
+[Blueprints](/blueprints/project-directory/).
 
 ### `site`
 
@@ -263,5 +263,5 @@ type safety.
   and writes to the paths declared here.
 - **[Record schema](/reference/record-schema/)** — what the
   records in `recordsDir` look like.
-- **[Blueprints](/concepts/blueprints/)** — which `blueprint`
+- **[Blueprints](/blueprints/project-directory/)** — which `blueprint`
   value to pick.

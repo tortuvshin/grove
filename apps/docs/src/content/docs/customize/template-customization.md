@@ -1,29 +1,19 @@
 ---
-title: Customize the Astro template
-description: How to add pages, swap design tokens, change the data layout, and override components — without forking the template.
+title: Template customization
+description: How to change look, structure, or data layout without forking the template.
 ---
 
-The Astro template shipped by `grove init` is a starting point. This
-guide is for site operators who need to change the look, the
-structure, or the data layout of their directory.
+Most customizations fall into three buckets, in increasing order of effort:
 
-Most customizations fall into three buckets:
+1. **Config** — change `grove.config.ts` (theme, facets, integrations).
+2. **Content** — add a page, add a body to a record, edit copy.
+3. **Components** — override a header, footer, hero, or card with your own.
 
-1. **Configuration** — change `grove.config.ts` to swap themes,
-   facets, or integration modes.
-2. **Content** — add a new page, add a body to a record, or change
-   a copy block.
-3. **Components** — override a header, footer, hero, or item card
-   with your own.
+Start with config. Only move to components if config can't do it.
 
-Each is a different kind of edit, with a different blast radius.
-Start with config; only move to components if config can't do it.
+## 1. Configuration
 
-## 1. Configuration: `grove.config.ts`
-
-The single file at the repo root. The schema is `groveConfigSchema`
-in `packages/core/src/schema.ts`. The fields you will change most
-often:
+The single file at the repo root. Schema is `groveConfigSchema` in `packages/core/src/schema.ts`. Fields you change most:
 
 ```ts
 import { defineConfig } from "@grove-dev/core";
@@ -40,52 +30,27 @@ export default defineConfig({
     { label: "Home", href: "/" },
     { label: "Browse", href: "/projects" },
     { label: "About", href: "/about" },
-    { label: "Submit", href: "/submit" },
   ],
   facets: ["category", "stack", "platform", "tags"],
   theme: {
-    primaryColor: "#0ea5e9",   // any CSS color
-    radius: "soft",            // "none" | "soft" | "round"
-    density: "comfortable",    // "compact" | "comfortable" | "spacious"
+    primaryColor: "#0ea5e9",
+    radius: "soft",
+    density: "comfortable",
     containerWidth: "80rem",
   },
-  integrations: {
-    github: true,              // enables sync + cleanup workflows
-  },
-  paths: {
-    recordsDir: "data/records",
-    // ...defaults shown in reference/config
-  },
+  integrations: { github: true },
 });
 ```
 
-`theme.primaryColor` is consumed by the Astro template's CSS
-tokens. `theme.radius` is a small, medium, or large border-radius
-scale. `theme.density` is the vertical rhythm — `compact` packs
-more rows into the index, `spacious` gives cards more breathing
-room.
+After editing `grove.config.ts`, restart `pnpm dev` (config is read at boot, not hot-reloaded). `astro build` reads it at build time.
 
-After editing `grove.config.ts`, restart `pnpm dev` (the config is
-read at boot, not hot-reloaded). For a production build, no restart
-— `astro build` reads it at build time.
+See the [config reference](/reference/config/) for the full field list.
 
-See the [grove.config.ts reference](/reference/config/) for the
-full field list and defaults.
+## 2. Content
 
-## 2. Content: pages, bodies, copy
+### Adding a page
 
-The template ships with the V1 page set: `index.astro` (home),
-`[slug]/index.astro` (blueprint-aware list — the same file renders
-`/projects/`, `/resources/`, `/entities/`),
-`[slug]/[recordSlug].astro` (blueprint-aware detail),
-`about.astro`, `contributors.astro`, `submit.astro`, and `404.astro`.
-The default `astro.config.mjs` produces a static `dist/` with one
-HTML file per route.
-
-### Adding a new page
-
-Create a new file under `src/pages/`. Astro file-based routing
-applies. A "Changelog" page, for example:
+Create `src/pages/<page>.astro`. Astro file-based routing applies:
 
 ```astro
 ---
@@ -98,167 +63,67 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 ```
 
-Then add a nav link:
-
-```ts
-// grove.config.ts
-nav: [
-  // ...
-  { label: "Changelog", href: "/changelog" },
-],
-```
-
-That's it. The page will be built and linked from the header.
+Add a nav link in `grove.config.ts`. See [Custom pages](/customize/pages/) for Markdown-page patterns and structured data.
 
 ### Adding a body to a record
 
-Records can have a long-form markdown body. Add a `content` path to
-the record's YAML:
+Add a `content` path to the record's YAML:
 
 ```yaml
 # data/records/astro.yml
 content: ./bodies/astro.md
 ```
 
-The path is relative to the template's `contentDir` (default
-`content/records/`). Write the body in markdown — the detail page
-renders it below the curated fields.
+Path is relative to `paths.contentDir` (default `content/records/`). Write the body in Markdown; the detail page renders it below the curated fields.
 
 ### Editing copy
 
-Static copy in the template lives in the layout and page files
-under `src/pages/` and `src/layouts/`. Edit them directly. They are
-template files, not generated.
+Static copy lives in `src/pages/` and `src/layouts/`. Edit them directly — they're template files, not generated. `site.name` and `site.tagline` flow into the header automatically.
 
-The `site.name` and `site.tagline` flow into the header and home
-page automatically, so most operators don't need to touch the chrome
-files.
+## 3. Components
 
-## 3. Components: overriding the defaults
-
-`@grove-dev/astro` ships **37 components** under
-`packages/astro/src/components/`. Components are imported by path
-(not through a barrel) so `astro check` validates them in their own
-context. The full list, grouped by purpose:
-
-**Chrome and home page**
-
-- `Hero` — home page banner (trust stats, headline, search, CTAs).
-- `WhyThisExists` — "What is this site for?" section (three short opinionated points).
-- `FinalCta` — bottom-of-page "Know an app that belongs here?" CTA.
-- `OriginalCollection` — legacy lineage card linking to the project's origin repo.
-- `StackGrid` — browse-by-stack grid on the home page (cards with icons + status pills).
-- `CategoryGrid` — browse-by-category grid on the home page.
-- `ContributorsGrid` — avatar grid of contributors for the home page.
-- `StackPlatformChips` — labelled Stack + Platform chip rows.
-
-**Record detail**
-
-- `RecordHeader` — compact project-identity header at the top of a record detail page.
-- `RecordSection` — lens-style section wrapper for the home page (SectionHeader + 3-col grid).
-- `RecordSidebar` — sticky right column on a record detail page (Activity / Freshness / Ecosystem / Source).
-- `EditorialSummary` — curator's "Best for / Consider before using" card at the top of a record body.
-- `LanguageBreakdown` — GitHub-Linguist-style code-composition bar + legend.
-- `MarkdownBody` — renders the pre-sanitized Markdown body inside `.grove-prose`.
-- `TableOfContents` — collapsible on-page nav for a record's Markdown body.
-
-**List and discovery**
-
-- `ProjectCard` — the canonical card for one directory record (whole-card link or article + secondary links).
-- `CardGrid` — the shared responsive 3-column grid host every listing surface uses.
-- `CardIcon` — shared metadata glyphs (star, clock, curated check, arrow, external).
-- `IndexRow` — browse-page adapter that maps an `IndexRecord` onto `ProjectCard`.
-- `Pagination` — pagination navigation with numeric pages + ellipsis.
-- `RefinePanel` — multi-select facet dropdowns + Sort dropdown (server-render only).
-- `SmartLensTabs` — curated single-select lens tabs (All / Hot / Mature / Production-like / Good to learn).
-- `FilterGroupMenu` — multi-select facet dropdown trigger + popover wrapper.
-- `FilterOptions` — facet options list (rendered inside `FilterGroupMenu`).
-- `Icon` — brand icon registry (`/icons/{stacks,platforms,brands}/{name}.svg`).
-
-**Collections and submission**
-
-- `CollectionCard` — card for one collection (kind, title, description, entry count).
-- `CollectionIndex` — grid of every collection defined in `data/collections/*.yml`.
-- `CollectionPage` — single curated/generated collection detail page.
-- `CollectionRow` — collection-entry adapter that maps a `CollectionEntry` onto `ProjectCard`.
-- `CollectionTeaser` — homepage-friendly subset of `CollectionIndex` (defaults `limit: 3`).
-- `SubmissionClient` — client-side submission form (GitHub repo lookup + validation).
-
-**Meta**
-
-- `DirectoryIndexClient` — client-side directory index (embeds JSON + script for search/lens interactions).
-
-### Overriding a component
-
-Because `grove init` copies the canonical `apps/example/` site into
-your project, the Astro pages, layouts, and styles in `src/` are
-yours to edit. Every component is reachable by importing from
-`@grove-dev/astro/components/<Name>.astro` in your own consumer
-pages — the Astro integration wires these as Vite aliases — so an
-override is a plain import swap:
+`@grove-dev/astro` ships ~37 components. The full list with props is in [Astro components](/reference/components/). Override by replacing the import in your page:
 
 ```astro
 ---
-// src/pages/[slug]/index.astro
 // import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
-import ProjectCard from "../../components/MyProjectCard.astro";
+import ProjectCard from "../components/MyProjectCard.astro";
 ---
 ```
 
-The override component must accept the same props as the original.
-Check the original component for the prop list — the contract is not
-formally versioned in `0.5.0-next.2`.
+The override component must accept the same props as the original. See [Components](/customize/components/) for the data contract.
 
-## 4. Data layout: changing where records live
+## 4. Styling
 
-If you want to split records across multiple directories (e.g.,
-`data/records/featured/` and `data/records/community/`), edit
-`paths.recordsDir` — but note that the `0.5.0-next.2` reader expects a single
-flat directory. Multi-dir records are a V2 feature; for now, if you
-split the data, you'll need a custom step to merge them.
+Three layers, increasing effort:
 
-For most sites, the default `data/records/` is fine. Leave it alone
-unless you have a strong reason.
+1. **`grove.config.ts` `theme` block** — primary color, radius, density, container width.
+2. **`src/styles/global.css`** — design tokens (`--grove-*`) and custom utilities.
+3. **Tailwind** (opt-in) — install per Astro docs, import from `global.css`.
 
-## 5. Styling: changing the look
+## What NOT to customize
 
-Three layers, in increasing order of effort:
+- **`health` block in record YAMLs** — auto-derived from `grove sync github`.
+- **`github` block in record YAMLs** — same, derived from the API.
+- **`data/generated/*.json`** — regenerated by `grove check`; hand edits are overwritten.
+- **Anything in `node_modules/`** — replaced on the next install.
 
-1. **`grove.config.ts` `theme` block** — primary color, radius
-   scale, density, container width. No code changes.
-2. **`src/styles/global.css`** — design tokens and custom utilities.
-   The scaffold ships a small set of `--grove-*` tokens; add your
-   own.
-3. **Tailwind** (opt-in) — if you want utility classes, install
-   Tailwind per the Astro docs and import it from `global.css`.
+If a customization requires editing these, open an issue — the schema might be missing a field you actually need.
 
-## What you should *not* customize
+## Verifying changes
 
-- **The `health` block in record YAMLs.** It's auto-derived. See
-  [Sync GitHub metadata](/guides/sync-github-metadata/).
-- **The `github` block in record YAMLs.** Same — derived from the
-  GitHub API.
-- **`data/generated/records.index.json` and
-  `data/generated/records.full.json`.** These are regenerated on
-  every `grove check` run. Hand edits will be overwritten.
-- **Anything in `node_modules/`.** It will be replaced on the next
-  install.
+After any non-trivial change:
 
-If a customization feels like it requires editing these, write a
-[decision](/guides/manage-decisions/) or open an issue — the schema
-might be missing a field you actually need.
-
-## Verifying your customizations
-
-After any non-trivial change, run through this checklist:
-
-1. `pnpm exec grove check` — schema check, generation, sitemap,
-   llms, robots, og-image, and `astro check`.
-2. `pnpm dev` — manual smoke test. Browse the home page, the
-   index, a few detail pages.
+1. `pnpm exec grove check` — schema check, generation, sitemap, llms, og-image, `astro check`.
+2. `pnpm dev` — manual smoke test. Browse home, index, a few detail pages.
 3. `pnpm build` — full build.
-4. Open `dist/` in a static server (`npx serve dist`) and check the
-   production output.
+4. `npx serve dist` — check the production output.
 
-If any of those fail, the error is usually in the same place you
-last edited. The build doesn't mask issues; it surfaces them.
+If any step fails, the error is usually in the same place you last edited.
+
+## Related
+
+- [Branding](/customize/branding/) — site identity
+- [Theme](/customize/theme/) — colour tokens
+- [Components](/customize/components/) — override pattern
+- [Custom pages](/customize/pages/) — adding new pages

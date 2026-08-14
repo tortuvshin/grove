@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Grove monorepo — an open-source framework for growing useful community knowledge.",
+  "description": "Grove monorepo — a file-first publishing system for structured knowledge. Sources in files, outputs to web, llms.txt, JSON-LD, OG images, JSON datasets.",
   "license": "MIT",
   "packageManager": "pnpm@10.12.1",
   "engines": {
