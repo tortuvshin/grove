@@ -71,7 +71,6 @@ export default defineConfig({
   integrations: { github: { metadata: true, contributors: true, health: true } },
 
   theme: {
-    primaryColor: "#1f6feb",
     radius: "soft",
     density: "comfortable",
     containerWidth: "72rem",

@@ -30,7 +30,7 @@ const { collection: c, eventSource = "collection_index", class: className = "" }
   data-event="collection_card_click"
   data-event-source={eventSource}
   data-event-item={c.slug}
-  class={`group relative flex h-full min-w-0 flex-col gap-2 rounded-xl border border-ink-200 bg-background p-5 no-underline outline-none transition-[border-color,background-color,transform] duration-150 hover:-translate-y-0.5 hover:border-ink-300 hover:bg-ink-50 focus-visible:border-ink-500 focus-visible:ring-2 focus-visible:ring-ink-900/15 dark:border-ink-800 dark:hover:border-ink-700 dark:hover:bg-ink-900 dark:focus-visible:border-ink-500 dark:focus-visible:ring-ink-100/15 ${className}`}
+  class={`group relative flex h-full min-w-0 flex-col gap-2 rounded-xl border border-ink-200 bg-card p-5 no-underline outline-none transition-[border-color,background-color,transform] duration-150 hover:-translate-y-0.5 hover:border-ink-300 hover:bg-ink-50 focus-visible:border-ink-500 focus-visible:ring-2 focus-visible:ring-ink-900/15 dark:border-ink-800 dark:hover:border-ink-700 dark:hover:bg-ink-900 dark:focus-visible:border-ink-500 dark:focus-visible:ring-ink-100/15 ${className}`}
 >
   <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
     {c.kind === "curated" ? "Curated" : "Generated"}

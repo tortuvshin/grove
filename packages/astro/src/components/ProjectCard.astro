@@ -221,7 +221,7 @@ const platformIcons: Record<string, { label: string; svg: string }> = {
   },
   web: {
     label: "Web",
-    svg: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+    svg: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#E34F26" d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75-.232-2.718 10.059.003.071-.757.49-5.625H5.745l1.265 14.326 4.961 1.403 4.998-1.39.553-6.214h-5.176l.113 1.262 3.232.917-3.279 1.007-3.337-.984-.219-2.421h-2.064l-.232 2.718zm10.005-2.054.215 2.466 3.918-.957-.252 2.957-3.092.789-3.041-.854-.188-2.41h2.602z"/></svg>',
   },
   windows: {
     label: "Windows",
@@ -244,7 +244,7 @@ const hasPlatforms = visiblePlatforms.some((p) => platformIcons[p.toLowerCase()]
 
 <Root
   {...rootAttrs}
-  class={`groove-project-card group relative flex h-full min-w-0 flex-col gap-3 rounded-xl border border-ink-200 bg-background p-5 outline-none transition-[border-color,background-color,transform] duration-150 hover:-translate-y-0.5 hover:border-ink-300 hover:bg-ink-50 focus-visible:border-ink-500 focus-visible:ring-2 focus-visible:ring-ink-900/15 dark:border-ink-800 dark:hover:border-ink-700 dark:hover:bg-ink-900 dark:focus-visible:border-ink-500 dark:focus-visible:ring-ink-100/15 ${className}`}
+  class={`groove-project-card group relative flex h-full min-w-0 flex-col gap-3 rounded-xl border border-ink-200 bg-card p-5 outline-none transition-[border-color,background-color,transform] duration-150 hover:-translate-y-0.5 hover:border-ink-300 hover:bg-ink-50 focus-visible:border-ink-500 focus-visible:ring-2 focus-visible:ring-ink-900/15 dark:border-ink-800 dark:hover:border-ink-700 dark:hover:bg-ink-900 dark:focus-visible:border-ink-500 dark:focus-visible:ring-ink-100/15 ${className}`}
   data-record-slug={slug}
   data-event={event}
   data-event-source={eventSource}

@@ -210,7 +210,7 @@
     --grove-border: var(--grove-gray-6);
     --grove-input: var(--grove-gray-6);
     --grove-ring: var(--grove-gray-4);
-    --grove-card: var(--grove-background);
+    --grove-card: #141516;
     --grove-card-foreground: var(--grove-foreground);
     --grove-popover: var(--grove-background);
     --grove-popover-foreground: var(--grove-foreground);
@@ -240,7 +240,7 @@
     --grove-border: var(--grove-gray-6);
     --grove-input: var(--grove-gray-5);
     --grove-ring: var(--grove-gray-4);
-    --grove-card: var(--grove-background);
+    --grove-card: #141516;
     --grove-card-foreground: var(--grove-foreground);
     --grove-popover: var(--grove-gray-7);
     --grove-popover-foreground: var(--grove-foreground);
