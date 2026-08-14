@@ -1,0 +1,46 @@
+changelogs/v0.2.x.md
+  s_5d28874895d5f2::t_99bfbd52c18ec8 178-188
+packages/astro/src/components/ProjectCard.astro
+  s_5ae21821884968::t_81b3f912c7d1b9 196-198
+  s_5ae21821884968::t_d3ccb619c93510 302-309
+  s_5ae21821884968::t_1de16fa54bdaa4 46
+changelogs/v0.1.x.md
+  s_5d28874895d5f2::t_635ec917772b10 69,71-79
+changelogs/v0.4.0.md
+  s_5d28874895d5f2::t_15d3c3003db394 127
+  s_5d28874895d5f2::t_69a8d3de82cc1b 150,153
+  s_5d28874895d5f2::t_868b448298d983 20
+  s_5d28874895d5f2::t_db2c7af9dada4a 41
+  s_5d28874895d5f2::t_4e07fbf083db90 138,143
+  s_5d28874895d5f2::t_93afdf3c5f89d3 82,84,92
+  s_5d28874895d5f2::t_a74bd136f496c5 135
+  s_5d28874895d5f2::t_b462b97306aeff 116,118
+changelogs/v0.5.0-next.md
+  s_5d28874895d5f2::t_e992a7d2b442c1 156,158-161,163
+changelogs/v0.3.x.md
+  s_5d28874895d5f2::t_4ff4c379a724f9 172,174-180,182
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1a138b306095fc26c3e4bdd19c2fc2303c2afdc7",
+  "prompts": {},
+  "sessions": {
+    "s_5ae21821884968": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "25e06ef7-ac5a-496c-a158-dba95c4341dc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_5d28874895d5f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c0624e6-2089-425a-abc2-c444adaa93be",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
