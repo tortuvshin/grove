@@ -15,14 +15,14 @@ describe("docs homepage (standalone Astro route)", () => {
 
 		const indexAstro = await readFile(indexAstroPath, "utf8");
 
-		// Imports the home layout and all 10 section components from src/components/home/
+		// Imports the home layout and all 9 section components from src/components/home/
 		expect(indexAstro).toContain("import Layout from '../layouts/HomeLayout.astro'");
 		for (const name of [
 			"Header",
 			"Hero",
-			"ProofBar",
 			"Features",
 			"Demo",
+			"Pipeline",
 			"OpenApps",
 			"Faq",
 			"FinalCta",
@@ -33,15 +33,17 @@ describe("docs homepage (standalone Astro route)", () => {
 			);
 		}
 
-		// Renders every section in the vite.dev-style order: hero → proof bar →
-		// feature grid → live demo → production story → FAQ → gradient CTA band.
+		// Renders every section in the vite.dev-style order: hero → feature
+		// grid → live demo → transformation diagram → production story → FAQ →
+		// gradient CTA band.
 		expect(indexAstro).toMatch(
-			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<ProofBar\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
+			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<Pipeline\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
 		);
 
 		// Superseded sections from earlier iterations must stay deleted.
 		for (const name of [
 			"GetStarted",
+			"ProofBar",
 			"Blueprints",
 			"Frameworks",
 			"Problem",
@@ -102,6 +104,11 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(homeCss).toContain("--font-sans: ui-sans-serif");
 		expect(homeCss).toContain("--font-mono: ui-monospace");
 		expect(homeCss).not.toMatch(/@fontsource|fraunces|@font-face/i);
+
+		// Radius ladder matches the docs standard
+		// (packages/starlight/styles/base.css, --radius: 0.625rem).
+		expect(homeCss).toMatch(/--radius-lg:\s*0\.625rem/);
+		expect(homeCss).toMatch(/--radius-2xl:\s*0\.875rem/);
 
 		// No Starlight tokens leak in
 		expect(homeCss).not.toContain("--sl-");
@@ -182,24 +189,6 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toContain("No database · No CMS · MIT licensed");
 	});
 
-	it("shows only verifiable project numbers in the proof bar", async () => {
-		const proofBar = await readComponent("ProofBar");
-
-		// These figures were verified against the repo (packages/, CLI commands
-		// in packages/cli/src/index.ts, components in packages/astro/src/
-		// components, the vitest unit project, Lighthouse budget in
-		// packages/cli/src/audit.ts). If the codebase changes, update the
-		// landing page and this test together.
-		expect(proofBar).toContain("Built in the open");
-		expect(proofBar).toContain("npm packages");
-		expect(proofBar).toContain("CLI commands");
-		expect(proofBar).toContain("Astro components");
-		expect(proofBar).toContain("unit tests");
-		expect(proofBar).toContain("Lighthouse CI gate");
-		expect(proofBar).toContain("100×4");
-		expect(proofBar).toContain("MIT");
-	});
-
 	it("explains the product with an eight-card, plain-language feature grid", async () => {
 		const features = await readComponent("Features");
 
@@ -237,17 +226,18 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(demo).toContain("How Grove works");
 		expect(demo).toContain("living directory.");
 
-		// Six-step narrative ported from the transformation concept.
+		// Five-step narrative: strictly sequential scenes, no cross-fades.
+		// (The transformation diagram lives in its own Pipeline section now.)
 		for (const label of [
 			"Initialize",
 			"Add content",
-			"Structure",
 			"Publish",
 			"Generate",
 			"Maintain",
 		]) {
 			expect(demo, label).toContain(label);
 		}
+		expect(demo).not.toContain('id="hgw-system"');
 
 		// Scene 1 types the real CLI command; scene 2 mirrors the real
 		// `grove init` scaffold (packages/cli/src/init.ts copies apps/example).
@@ -256,7 +246,7 @@ describe("docs homepage (standalone Astro route)", () => {
 			expect(demo, path).toContain(path);
 		}
 
-		// Scenes 5–6 stay truthful: generated files come from
+		// Scenes 4–5 stay truthful: generated files come from
 		// GENERATED_PUBLIC_NAMES and staleness uses the 183-day threshold.
 		expect(demo).toContain("Generated outputs");
 		expect(demo).toContain("llms.txt");
@@ -267,12 +257,17 @@ describe("docs homepage (standalone Astro route)", () => {
 		// The scrub is a progressive enhancement only: it gates on viewport
 		// width and reduced motion, and tears down cleanly.
 		expect(demo).toContain('id="hgw"');
-		expect(demo).toContain("height: 440vh");
-		expect(demo).toContain("const stepStarts = [0, 0.18, 0.38, 0.58, 0.74, 0.86]");
+		expect(demo).toContain("height: 400vh");
+		expect(demo).toContain("const stepStarts = [0, 0.21, 0.47, 0.65, 0.84]");
 		expect(demo).toContain("scroll-snap-type: inline mandatory");
-		expect(demo).toContain("Swipe to explore all six steps");
+		expect(demo).toContain("Swipe to explore all five steps");
 		expect(demo).toContain("prefers-reduced-motion");
 		expect(demo).toContain("min-width: 1024px");
+
+		// The window and side rail live in one composition that is fitted with
+		// a single resize-computed scale — scroll never changes its size.
+		expect(demo).toContain('id="hgw-composition"');
+		expect(demo).toContain("const fit = ()");
 	});
 
 	it("ships a live, filterable directory demo wired to the real lens definitions", async () => {
@@ -298,22 +293,71 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(demo).toContain('aria-live="polite"');
 	});
 
-	it("keeps the Open Apps production story", async () => {
+	it("presents the transformation diagram in the standalone Pipeline section", async () => {
+		const pipeline = await readComponent("Pipeline");
+
+		expect(pipeline).toContain('id="pipeline"');
+		expect(pipeline).toMatch(/<section[^>]+aria-labelledby=/);
+
+		// Inputs are the files users actually write.
+		for (const input of ["YAML records", "Markdown", "Collections", "Taxonomy"]) {
+			expect(pipeline, input).toContain(input);
+		}
+
+		// Outputs map to shipped behavior: site capabilities, SEO files,
+		// AI indexes, and repo artifacts.
+		for (const output of [
+			"Search",
+			"Filters",
+			"Lenses",
+			"Detail pages",
+			"sitemap.xml",
+			"robots.txt",
+			"llms.txt",
+			"llms-full.txt",
+			"README.md",
+		]) {
+			expect(pipeline, output).toContain(output);
+		}
+
+		// Enhancement only: reveal/paths gate on reduced motion and the
+		// stacked mobile layout draws no connectors.
+		expect(pipeline).toContain("prefers-reduced-motion");
+		expect(pipeline).toContain("IntersectionObserver");
+		expect(pipeline).toContain("min-width: 768px");
+	});
+
+	it("keeps the Open Apps production story with a real product screenshot", async () => {
 		const openApps = await readComponent("OpenApps");
 
 		expect(openApps).toContain("Grove grew out of maintaining Open Apps.");
 		expect(openApps).toContain('id="open-apps"');
 		expect(openApps).toContain("https://open-apps.dev.mn");
+
+		// A real screenshot (astro:assets) replaced the hand-built mock; the
+		// honesty caveat about the pending package migration stays.
+		expect(openApps).toContain("astro:assets");
+		expect(openApps).toContain("open-apps-home.png");
+		expect(openApps).toContain("published Grove packages");
 	});
 
-	it("closes with a full-bleed gradient CTA band", async () => {
+	it("closes with a full-bleed gradient CTA band and a package-manager tabbed install command", async () => {
 		const finalCta = await readComponent("FinalCta");
 
 		expect(finalCta).toContain("Start growing with Grove.");
 		expect(finalCta).toContain("cta-gradient");
 		expect(finalCta).toContain('href="/getting-started/create-a-space/"');
 		expect(finalCta).toContain('href="https://github.com/tortuvshin/grove"');
+
+		// One command, four runners; pnpm (the scaffold's own manager) is the
+		// no-JS default panel.
+		expect(finalCta).toContain("npx @grove-dev/cli@latest init my-space");
 		expect(finalCta).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
+		expect(finalCta).toContain("yarn dlx @grove-dev/cli@latest init my-space");
+		expect(finalCta).toContain("bunx @grove-dev/cli@latest init my-space");
+		expect(finalCta).toContain('role="tablist"');
+		expect(finalCta).toContain('aria-live="polite"');
+		expect(finalCta).toContain("navigator.clipboard");
 	});
 
 	it("wires each section to its heading via aria-labelledby for assistive tech", async () => {
@@ -327,7 +371,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toMatch(/<section[^>]+aria-labelledby=/);
 		expect(hero).toMatch(/<h1[^>]+id=/);
 
-		for (const name of ["Features", "Demo", "OpenApps", "Faq", "FinalCta"]) {
+		for (const name of ["Features", "Demo", "Pipeline", "OpenApps", "Faq", "FinalCta"]) {
 			const src = await readComponent(name);
 			expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
 		}

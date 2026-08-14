@@ -1,18 +1,9 @@
 ---
+import { Image } from 'astro:assets';
 import SectionHeader from './SectionHeader.astro';
-
-// Same status language as the collection-health panel in the "How Grove
-// works" story, so the production reference reads as that model, deployed.
-const records = [
-  { name: 'Immich', category: 'Media', stack: 'TypeScript', status: 'active' },
-  { name: 'Joplin', category: 'Productivity', stack: 'TypeScript', status: 'mature' },
-  { name: 'Linkwarden', category: 'Knowledge', stack: 'Next.js', status: 'active' },
-];
-
-const statusPill = {
-  active: 'border-accent-green/40 bg-accent-green/10 text-accent-green',
-  mature: 'border-brand/40 bg-brand/10 text-brand-light',
-};
+// Real product screenshot; replacing src/assets/open-apps-home.png swaps the
+// preview without touching this component.
+import openAppsShot from '../../assets/open-apps-home.png';
 ---
 
 <section id="open-apps" class="mx-auto max-w-7xl px-6 py-24" aria-labelledby="open-apps-title">
@@ -29,8 +20,8 @@ const statusPill = {
         The live repository still carries local versions of this logic. Migration to the published Grove packages is the next reference-space milestone.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="https://open-apps.dev.mn" target="_blank" rel="noopener noreferrer" class="rounded-lg bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">Explore the live space</a>
-        <a href="https://github.com/tortuvshin/open-apps" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover">Inspect the source</a>
+        <a href="https://open-apps.dev.mn" target="_blank" rel="noopener noreferrer" class="rounded-full bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">Explore the live space</a>
+        <a href="https://github.com/tortuvshin/open-apps" target="_blank" rel="noopener noreferrer" class="rounded-full border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover">Inspect the source</a>
       </div>
     </div>
 
@@ -42,23 +33,15 @@ const statusPill = {
         <span class="mx-auto rounded-full border border-border bg-surface px-6 py-1 font-mono text-[11px] text-subtle">open-apps.dev.mn/apps</span>
         <span class="size-3" aria-hidden="true"></span>
       </div>
-      <div class="p-5 sm:p-6">
-        <div class="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div><span class="font-mono text-[10px] uppercase tracking-widest text-brand-light">Open Apps</span><h3 class="mt-2 text-xl font-semibold text-fg">Explore real open-source apps</h3></div>
-          <div class="flex gap-1.5 font-mono text-[10px] text-muted"><span class="rounded-full border border-border px-3.5 py-1.5">Search</span><span class="rounded-full border border-border px-3.5 py-1.5">Filter</span></div>
-        </div>
-        <div class="mt-4 space-y-1.5">
-          {records.map((record) => (
-            <div class="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
-              <span class="size-1.5 shrink-0 rounded-full bg-accent-green" aria-hidden="true"></span>
-              <div class="min-w-0"><strong class="block truncate text-sm font-semibold text-fg">{record.name}</strong><span class="block text-xs text-subtle">{record.category}</span></div>
-              <span class="ml-auto hidden font-mono text-xs text-muted sm:block">{record.stack}</span>
-              <span class:list={['shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] font-medium', statusPill[record.status]]}>{record.status}</span>
-            </div>
-          ))}
-        </div>
-        <div class="mt-4 grid grid-cols-3 gap-2 text-center font-mono text-[10px] text-subtle"><span class="rounded-md border border-border py-2">taxonomy</span><span class="rounded-md border border-border py-2">sitemap</span><span class="rounded-md border border-border py-2">llms.txt</span></div>
-      </div>
+      <Image
+        src={openAppsShot}
+        alt="Open Apps directory home page — a searchable, filterable grid of curated open-source applications"
+        widths={[640, 960, 1280]}
+        sizes="(min-width: 1024px) 640px, 100vw"
+        format="webp"
+        loading="lazy"
+        class="block w-full"
+      />
     </div>
     </div>
   </div>

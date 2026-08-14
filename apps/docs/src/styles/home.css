@@ -28,10 +28,13 @@
   --color-accent-green: #4ac987;
   --color-accent-orange: #e5a55d;
 
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 1.75rem;
+  /* Radius ladder mirrors the docs standard
+     (packages/starlight/styles/base.css, --radius: 0.625rem). */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 0.875rem;
 }
 
 html {
