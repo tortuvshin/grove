@@ -232,8 +232,8 @@ describe("docs homepage (standalone Astro route)", () => {
 			"Initialize",
 			"Add content",
 			"Publish",
-			"Generate",
-			"Maintain",
+			"Deploy",
+			"Automate",
 		]) {
 			expect(demo, label).toContain(label);
 		}
@@ -246,19 +246,22 @@ describe("docs homepage (standalone Astro route)", () => {
 			expect(demo, path).toContain(path);
 		}
 
-		// Scenes 4–5 stay truthful: generated files come from
-		// GENERATED_PUBLIC_NAMES and staleness uses the 183-day threshold.
-		expect(demo).toContain("Generated outputs");
-		expect(demo).toContain("llms.txt");
-		expect(demo).toContain("sitemap.xml");
+		// Scene 4 shows real deploy targets for the static output; scene 5
+		// stays truthful to the 183-day staleness threshold and closes on
+		// the Grove mark.
+		expect(demo).toContain("Deploy anywhere");
+		for (const host of ["Vercel", "Netlify", "Cloudflare", "GitHub Pages"]) {
+			expect(demo, host).toContain(host);
+		}
 		expect(demo).toContain("Collection health");
 		expect(demo).toContain("183");
+		expect(demo).toContain('id="hgw-finale"');
 
 		// The scrub is a progressive enhancement only: it gates on viewport
 		// width and reduced motion, and tears down cleanly.
 		expect(demo).toContain('id="hgw"');
-		expect(demo).toContain("height: 400vh");
-		expect(demo).toContain("const stepStarts = [0, 0.21, 0.47, 0.65, 0.84]");
+		expect(demo).toContain("height: 440vh");
+		expect(demo).toContain("const stepStarts = [0, 0.21, 0.47, 0.675, 0.835]");
 		expect(demo).toContain("scroll-snap-type: inline mandatory");
 		expect(demo).toContain("Swipe to explore all five steps");
 		expect(demo).toContain("prefers-reduced-motion");

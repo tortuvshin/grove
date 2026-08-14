@@ -2,12 +2,13 @@
 import Statement from './Statement.astro';
 
 // "How Grove works" — a scroll-driven story: one pinned canvas morphs
-// terminal → file tree → live website while a five-step nav tracks progress.
-// Scenes are strictly sequential: each one fully exits before the next
-// enters, with a short dead zone in between, so no two scenes are ever
-// visible at once. On mobile, without JS, or with reduced motion the section
-// renders statically: step cards followed by the live demo window, so no
-// content ever depends on the animation.
+// terminal → file tree → live website → deploy targets → automation, and
+// closes on the Grove mark, while a five-step nav tracks progress. Scenes
+// are strictly sequential: each one fully exits before the next enters,
+// with a short dead zone in between, so no two scenes are ever visible at
+// once. On mobile, without JS, or with reduced motion the section renders
+// statically: step cards followed by the live demo window and the deploy /
+// health panels, so no content ever depends on the animation.
 
 const steps = [
   {
@@ -26,14 +27,14 @@ const steps = [
     copy: 'A fast, searchable directory with lenses, filters, and rich detail pages. The window here is live — try it.',
   },
   {
-    label: 'Generate',
-    heading: 'The site is only one output.',
-    copy: 'Grove also writes the README, sitemap, robots.txt, and AI-readable files like llms.txt.',
+    label: 'Deploy',
+    heading: 'Ship it anywhere.',
+    copy: 'The output is a fast static site. Deploy it to Vercel, Netlify, Cloudflare, or GitHub Pages — no servers to run.',
   },
   {
-    label: 'Maintain',
-    heading: 'Your collection changes. Grove keeps up.',
-    copy: 'Sync refreshes metadata and flags stale records — 183 days without a release earns a review.',
+    label: 'Automate',
+    heading: 'Fully automated. Never outdated.',
+    copy: 'Scheduled syncs refresh metadata and flag stale or archived records — 183 days without a release earns a review.',
   },
 ];
 
@@ -88,18 +89,25 @@ const records = [
   { name: 'Linkwarden', initials: 'LW', description: 'Collect and preserve the links worth keeping.', category: 'Knowledge', stack: 'Next.js', lenses: 'production-like' },
 ];
 
-// Scene 5 rail: files grove actually generates (packages/cli/src/init.ts
-// GENERATED_PUBLIC_NAMES + the README command).
-const outputs = [
-  { file: 'README.md', tag: 'Docs' },
-  { file: 'sitemap.xml', tag: 'SEO' },
-  { file: 'robots.txt', tag: 'Crawlers' },
-  { file: 'llms.txt', tag: 'AI index' },
-  { file: 'llms-full.txt', tag: 'AI full text' },
-  { file: 'og-image.svg', tag: 'Social' },
+// Scene 4 deploy targets — the static output runs on any of these. Brand
+// marks are the Simple Icons paths (24×24 viewBox).
+const hosts = [
+  { name: 'Vercel', path: 'm12 1.608 12 20.784H0Z' },
+  {
+    name: 'Netlify',
+    path: 'M6.49 19.04h-.23L5.13 17.9v-.23l1.73-1.71h1.2l.15.15v1.2L6.5 19.04ZM5.13 6.31V6.1l1.13-1.13h.23L8.2 6.68v1.2l-.15.15h-1.2L5.13 6.31Zm9.96 9.09h-1.65l-.14-.13v-3.83c0-.68-.27-1.2-1.1-1.23-.42 0-.9 0-1.43.02l-.07.08v4.96l-.14.14H8.9l-.13-.14V8.73l.13-.14h3.7a2.6 2.6 0 0 1 2.61 2.6v4.08l-.13.14Zm-8.37-2.44H.14L0 12.82v-1.64l.14-.14h6.58l.14.14v1.64l-.14.14Zm17.14 0h-6.58l-.14-.14v-1.64l.14-.14h6.58l.14.14v1.64l-.14.14ZM11.05 6.55V1.64l.14-.14h1.65l.14.14v4.9l-.14.14h-1.65l-.14-.13Zm0 15.81v-4.9l.14-.14h1.65l.14.13v4.91l-.14.14h-1.65l-.14-.14Z',
+  },
+  {
+    name: 'Cloudflare',
+    path: 'M16.5088 16.8447c.1475-.5068.0908-.9707-.1553-1.3154-.2246-.3164-.6045-.499-1.0615-.5205l-8.6592-.1123a.1559.1559 0 0 1-.1333-.0713c-.0283-.042-.0351-.0986-.021-.1553.0278-.084.1123-.1484.2036-.1562l8.7359-.1123c1.0351-.0489 2.1601-.8868 2.5537-1.9136l.499-1.3013c.0215-.0561.0293-.1128.0147-.168-.5625-2.5463-2.835-4.4453-5.5499-4.4453-2.5039 0-4.6284 1.6177-5.3876 3.8614-.4927-.3658-1.1187-.5625-1.794-.499-1.2026.119-2.1665 1.083-2.2861 2.2856-.0283.31-.0069.6128.0635.894C1.5683 13.171 0 14.7754 0 16.752c0 .1748.0142.3515.0352.5273.0141.083.0844.1475.1689.1475h15.9814c.0909 0 .1758-.0645.2032-.1553l.12-.4268zm2.7568-5.5634c-.0771 0-.1611 0-.2383.0112-.0566 0-.1054.0415-.127.0976l-.3378 1.1744c-.1475.5068-.0918.9707.1543 1.3164.2256.3164.6055.498 1.0625.5195l1.8437.1133c.0557 0 .1055.0263.1329.0703.0283.043.0351.1074.0214.1562-.0283.084-.1132.1485-.204.1553l-1.921.1123c-1.041.0488-2.1582.8867-2.5527 1.914l-.1406.3585c-.0283.0713.0215.1416.0986.1416h6.5977c.0771 0 .1474-.0489.169-.126.1122-.4082.1757-.837.1757-1.2803 0-2.6025-2.125-4.727-4.7344-4.727',
+  },
+  {
+    name: 'GitHub Pages',
+    path: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12',
+  },
 ];
 
-// Scene 6 health rows — statuses use the real 183-day staleness threshold.
+// Scene 5 health rows — statuses use the real 183-day staleness threshold.
 const health = [
   { name: 'immich', meta: 'Release 3 days ago', status: 'synced', pill: 'Synced' },
   { name: 'old-dashboard', meta: 'No release in 183+ days', status: 'review', pill: 'Needs review' },
@@ -125,7 +133,8 @@ const pillClass = {
   <div id="hgw" class="hgw">
     <div class="hgw-sticky">
       <div class="hgw-wrap">
-        <!-- Canvas: three stacked scenes; 1–2 only exist in scrub mode. -->
+        <!-- Canvas: stacked sequential scenes; the terminal, file tree, and
+             finale only exist in scrub mode. -->
         <div id="hgw-canvas" class="hgw-canvas relative">
           <!-- Scrub-mode caption: identifies the active step above the canvas. -->
           <div
@@ -307,30 +316,50 @@ const pillClass = {
                   Step 03 · Publish
                 </p>
               </div>
+            </div>
+          </div>
 
-              <div id="hgw-extras">
-                <div class="hgw-extra-caption mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-subtle">
-                  <span class="text-brand-light">Step 04</span>
-                  <span aria-hidden="true">·</span>
-                  <span>Generate</span>
+          <!-- Deploy + health panels: a grid below the window in static mode,
+               two full sequential scenes while scrubbing. -->
+          <div id="hgw-extras">
+            <div>
+              <div class="hgw-extra-caption mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-subtle">
+                <span class="text-brand-light">Step 04</span>
+                <span aria-hidden="true">·</span>
+                <span>Deploy</span>
+              </div>
+              <div id="hgw-deploy" class="rounded-xl border border-border bg-card/95 p-4 shadow-2xl shadow-black/40 backdrop-blur">
+                <div class="mb-3 flex items-center gap-2">
+                  <svg class="size-3.5 text-brand-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                    <path d="M2 12h20"></path>
+                  </svg>
+                  <span class="text-xs font-semibold text-fg">Deploy anywhere</span>
+                  <span class="ml-auto font-mono text-[10px] text-subtle">static output</span>
                 </div>
-                <div id="hgw-outputs" class="rounded-xl border border-border bg-card/95 p-4 shadow-xl shadow-black/30 backdrop-blur">
-                  <span class="mb-2.5 block font-mono text-[10px] uppercase tracking-widest text-subtle">Generated outputs</span>
-                  <div class="grid grid-cols-2 gap-1.5">
-                    {outputs.map((out) => (
-                      <div data-out class="flex flex-col rounded-md border border-border bg-surface px-2 py-1.5">
-                        <span class="font-mono text-[10px] text-fg">{out.file}</span>
-                        <span class="text-[9px] text-brand-light">{out.tag}</span>
-                      </div>
-                    ))}
-                  </div>
+                <div class="grid grid-cols-2 gap-2">
+                  {hosts.map((host) => (
+                    <div data-host class="flex items-center gap-2.5 rounded-md border border-border bg-surface px-3.5 py-3">
+                      <svg class="size-[18px] shrink-0 text-fg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d={host.path}></path>
+                      </svg>
+                      <span class="truncate text-xs font-medium text-fg">{host.name}</span>
+                    </div>
+                  ))}
                 </div>
+                <p class="mt-3 border-t border-border pt-2.5 font-mono text-[10px] leading-relaxed text-subtle">
+                  One static build — host it on any CDN.
+                </p>
+              </div>
+            </div>
 
-                <div class="hgw-extra-caption mt-4 mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-subtle sm:mt-0">
-                  <span class="text-brand-light">Step 05</span>
-                  <span aria-hidden="true">·</span>
-                  <span>Maintain</span>
-                </div>
+            <div>
+              <div class="hgw-extra-caption mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-subtle">
+                <span class="text-brand-light">Step 05</span>
+                <span aria-hidden="true">·</span>
+                <span>Automate</span>
+              </div>
                 <div id="hgw-health" class="rounded-xl border border-border bg-card/95 p-4 shadow-2xl shadow-black/50 backdrop-blur">
                   <div class="mb-3 flex items-center gap-2">
                     <svg id="hgw-health-spin" class="size-3.5 text-brand-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -355,7 +384,24 @@ const pillClass = {
                     Records with no release in 183+ days earn a review.
                   </p>
                 </div>
+            </div>
+          </div>
+
+          <!-- Finale (scrub only): the story closes on the Grove mark. -->
+          <div id="hgw-finale" class="hgw-scene" aria-hidden="true">
+            <div class="flex flex-col items-center gap-3">
+              <div class="relative">
+                <div class="hgw-finale-glow absolute left-1/2 top-1/2 size-44 -translate-x-1/2 -translate-y-1/2" aria-hidden="true"></div>
+                <svg class="relative size-20 text-fg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <path d="M16 28V13" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                  <path d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor"></path>
+                  <path d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7"></path>
+                  <path d="M16 18C16 18 16.2 21 19.5 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                  <path d="M16 21C16 21 15.8 24 12.5 25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                </svg>
               </div>
+              <span class="text-3xl font-semibold tracking-tight text-fg">Grove</span>
+              <span class="font-mono text-[10px] uppercase tracking-widest text-subtle">Directories that stay useful</span>
             </div>
           </div>
         </div>
@@ -471,16 +517,19 @@ const pillClass = {
 
   #hgw-extras {
     margin-top: 0.75rem;
+    margin-inline: auto;
+    max-width: 42rem;
+    width: 100%;
     display: grid;
     gap: 0.75rem;
   }
 
   @media (min-width: 640px) {
-    #hgw-extras { grid-template-columns: repeat(2, 1fr); }
+    #hgw-extras { grid-template-columns: repeat(2, 1fr); align-items: start; }
   }
 
   /* ---- Scrub mode: enabled by JS on desktop when motion is allowed. ---- */
-  #hgw.is-scrub { height: 400vh; }
+  #hgw.is-scrub { height: 440vh; }
 
   #hgw.is-scrub .hgw-sticky {
     position: sticky;
@@ -541,15 +590,11 @@ const pillClass = {
     will-change: transform, opacity;
   }
 
-  /* The composition is a fixed design box: the live window plus a
-     fixed-width side rail. JS fits it into the canvas with one uniform
-     scale computed on enable/resize — scroll never changes its size, so
-     the window keeps its proportions through every phase. */
+  /* The composition is a fixed design box for the live window. JS fits it
+     into the canvas with one uniform scale computed on enable/resize —
+     scroll never changes its size, so the window keeps its proportions. */
   #hgw.is-scrub #hgw-composition {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    width: 55rem;
+    width: 40rem;
     max-width: none;
     margin-inline: 0;
     flex: none;
@@ -557,32 +602,29 @@ const pillClass = {
     will-change: transform;
   }
 
-  #hgw.is-scrub #hgw-main {
-    flex: 1;
-    min-width: 0;
+  /* Deploy and health become full sequential scenes: absolutely centered
+     in the canvas (below the reserved caption strip), driven by JS with
+     disjoint visibility windows, so nothing ever overlaps. */
+  #hgw.is-scrub #hgw-extras,
+  #hgw.is-scrub #hgw-extras > div {
+    display: contents;
   }
 
-  /* Side rail: layout space is reserved, so the outputs and health panels
-     can never overlap the window. Their visibility windows are disjoint —
-     they take turns in the same slot. */
-  #hgw.is-scrub #hgw-extras {
-    position: relative;
-    flex: none;
-    width: 17rem;
-    align-self: stretch;
-    margin-top: 0;
-    display: block;
-  }
-
-  #hgw.is-scrub #hgw-outputs,
+  #hgw.is-scrub #hgw-deploy,
   #hgw.is-scrub #hgw-health {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    left: 50%;
+    top: calc(50% + 1.75rem);
+    width: min(30rem, calc(100% - 3rem));
+    transform: translate(-50%, -50%);
     pointer-events: none;
     opacity: 0;
+    will-change: transform, opacity, filter;
+  }
+
+  .hgw-finale-glow {
+    background: radial-gradient(circle, rgb(39 183 200 / 0.32), transparent 68%);
+    filter: blur(2px);
   }
 
   /* Scrub-mode caption: identifies the active step above the canvas. Hidden
@@ -743,14 +785,15 @@ const pillClass = {
     const composition = $('hgw-composition');
     const canvas = $('hgw-canvas');
     const win = $('hgw-window');
-    const outputs = $('hgw-outputs');
+    const deploy = $('hgw-deploy');
     const healthPanel = $('hgw-health');
+    const finale = $('hgw-finale');
     const spin = $('hgw-health-spin');
-    if (!term || !files || !site || !composition || !canvas || !win || !outputs || !healthPanel) return;
+    if (!term || !files || !site || !composition || !canvas || !win || !deploy || !healthPanel || !finale) return;
 
     const treeNodes = [...files.querySelectorAll('[data-at]')];
     const records = [...site.querySelectorAll('[data-record]')];
-    const outItems = [...outputs.querySelectorAll('[data-out]')];
+    const hostItems = [...deploy.querySelectorAll('[data-host]')];
     const healthRows = [...healthPanel.querySelectorAll('[data-health]')];
     const steps = [...track.querySelectorAll('.hgw-step')];
 
@@ -760,16 +803,12 @@ const pillClass = {
 
     const COMMAND = 'grove init my-space';
 
-    // Side-rail geometry mirrors the scrub CSS (#hgw-extras width + gap).
-    const RAIL_W = 272;
-    const RAIL_GAP = 16;
-
     // Tree nodes keep an inline padding-left for indentation, so teardown
     // must only clear what render() touched instead of the style attribute.
     const styled = [
-      term, cursor, line1, line2, files, site, composition, win, outputs,
-      healthPanel, spin, progressFill,
-      ...records, ...outItems, ...healthRows,
+      term, cursor, line1, line2, files, site, composition, win, deploy,
+      healthPanel, finale, spin, progressFill,
+      ...records, ...hostItems, ...healthRows,
     ].filter(Boolean);
 
     let raf = 0;
@@ -834,46 +873,64 @@ const pillClass = {
         node.style.transform = `translateX(${lerp(-10, 0, r)}px)`;
       }
 
-      // 03–05 · Publish / Generate / Maintain — the live site enters at 0.47
-      // at its final size and stays. The side rail's two panels take turns.
+      // 03 · Publish — the live site enters at 0.47 at its final size,
+      // holds while it is interactive, then fully exits by 0.665.
       const appear = smooth(ramp(p, 0.47, 0.53));
-      const side = smooth(ramp(p, 0.6, 0.65));
-      const gen = smooth(ramp(p, 0.65, 0.7));
-      const outExit = smooth(ramp(p, 0.79, 0.825));
-      const maint = smooth(ramp(p, 0.84, 0.89));
-      site.style.opacity = appear;
-      site.style.visibility = appear > 0.001 ? 'visible' : 'hidden';
-      site.style.pointerEvents = p > 0.53 ? 'auto' : 'none';
-      site.style.transform = `translate3d(${lerp(42, 0, appear)}%, ${lerp(6, 0, appear)}px, 0)`;
-      // While the side rail is empty the composition sits shifted right so
-      // the window reads centered; it eases back as the rail fills. Scale is
-      // the resize-computed fit — scroll never changes it.
-      const railShift = ((RAIL_W + RAIL_GAP) / 2) * fitScale;
-      composition.style.transform = `translateX(${lerp(railShift, 0, side)}px) scale(${fitScale})`;
+      const siteOut = smooth(ramp(p, 0.62, 0.665));
+      const siteO = appear * (1 - siteOut);
+      site.style.opacity = siteO;
+      site.style.visibility = siteO > 0.001 ? 'visible' : 'hidden';
+      site.style.pointerEvents = p > 0.53 && p < 0.6 ? 'auto' : 'none';
+      site.style.transform = `translate3d(${lerp(42, 0, appear) + lerp(0, -42, siteOut)}%, ${lerp(6, 0, appear) + lerp(0, -6, siteOut)}px, 0)`;
+      site.style.filter = `blur(${lerp(0.8, 0, appear) + lerp(0, 0.8, siteOut)}px)`;
+      // Scale is the resize-computed fit — scroll never changes it.
+      composition.style.transform = `scale(${fitScale})`;
       records.forEach((record, i) => {
         const r = ramp(p, 0.5 + i * 0.004, 0.545 + i * 0.004);
         record.style.opacity = r;
         record.style.transform = `translateY(${lerp(14, 0, r)}px)`;
       });
-      outputs.style.opacity = gen * (1 - outExit);
-      outputs.style.transform = `translate3d(${lerp(24, 0, gen) + lerp(0, 24, outExit)}px, calc(-50% - ${lerp(0, 16, outExit)}px), 0)`;
-      outItems.forEach((item, i) => {
-        const r = ramp(p, 0.68 + i * 0.01, 0.73 + i * 0.01);
+
+      // 04 · Deploy — hosting targets enter at 0.675 (site fully gone),
+      // stagger in, hold, and exit by 0.82.
+      const depIn = smooth(ramp(p, 0.675, 0.72));
+      const depOut = smooth(ramp(p, 0.78, 0.82));
+      const depO = depIn * (1 - depOut);
+      deploy.style.opacity = depO;
+      deploy.style.visibility = depO > 0.001 ? 'visible' : 'hidden';
+      deploy.style.transform = `translate(calc(-50% + ${lerp(60, 0, depIn) + lerp(0, -60, depOut)}px), -50%) scale(${lerp(0.96, 1, depIn) * lerp(1, 0.96, depOut)})`;
+      deploy.style.filter = `blur(${lerp(0.8, 0, depIn) + lerp(0, 0.8, depOut)}px)`;
+      hostItems.forEach((item, i) => {
+        const r = ramp(p, 0.705 + i * 0.012, 0.745 + i * 0.012);
         item.style.opacity = r;
-        item.style.transform = `scale(${lerp(0.9, 1, r)})`;
+        item.style.transform = `scale(${lerp(0.92, 1, r)})`;
       });
-      healthPanel.style.opacity = maint;
-      healthPanel.style.transform = `translate3d(${lerp(24, 0, maint)}px, -50%, 0)`;
-      if (spin) spin.style.transform = `rotate(${maint * 180}deg)`;
+
+      // 05 · Automate — collection health enters at 0.835, rows resolve to
+      // fresh / stale / archived, then it hands off to the finale by 0.965.
+      const autoIn = smooth(ramp(p, 0.835, 0.875));
+      const autoOut = smooth(ramp(p, 0.945, 0.965));
+      const autoO = autoIn * (1 - autoOut);
+      healthPanel.style.opacity = autoO;
+      healthPanel.style.visibility = autoO > 0.001 ? 'visible' : 'hidden';
+      healthPanel.style.transform = `translate(calc(-50% + ${lerp(60, 0, autoIn) + lerp(0, -60, autoOut)}px), -50%) scale(${lerp(0.96, 1, autoIn) * lerp(1, 0.96, autoOut)})`;
+      healthPanel.style.filter = `blur(${lerp(0.8, 0, autoIn) + lerp(0, 0.8, autoOut)}px)`;
+      if (spin) spin.style.transform = `rotate(${ramp(p, 0.84, 0.95) * 360}deg)`;
       healthRows.forEach((row, i) => {
-        const r = ramp(p, 0.88 + i * 0.015, 0.94 + i * 0.015);
+        const r = ramp(p, 0.865 + i * 0.015, 0.9 + i * 0.015);
         row.style.opacity = r;
         row.style.transform = `translateX(${lerp(-12, 0, r)}px)`;
       });
 
+      // Finale — the Grove mark rises out of the last scene and holds.
+      const fin = smooth(ramp(p, 0.97, 0.995));
+      finale.style.opacity = fin;
+      finale.style.visibility = fin > 0.001 ? 'visible' : 'hidden';
+      finale.style.transform = `scale(${lerp(0.92, 1, fin)})`;
+
       // Step rail follows the scene-specific holds instead of dividing scroll
       // into equal slices. Copy now changes only when its visual has arrived.
-      const stepStarts = [0, 0.21, 0.47, 0.65, 0.84];
+      const stepStarts = [0, 0.21, 0.47, 0.675, 0.835];
       let active = 0;
       for (let i = 1; i < stepStarts.length; i += 1) {
         if (p >= stepStarts[i]) active = i;
