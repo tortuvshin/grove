@@ -207,7 +207,24 @@ export function extractToc(
   const lines = body.split(/\r?\n/);
   const seen = new Map<string, number>();
   const out: TocEntry[] = [];
+  // Track fenced-code-block state so `## foo` inside a ``` fence never
+  // becomes a phantom TOC entry — the markdown renderer won't emit a
+  // heading (or an id) for it, which would leave a dead anchor link.
+  let inFence = false;
+  let fenceMarker = "";
   for (const line of lines) {
+    const fence = line.match(/^\s*(```+|~~~+)/);
+    if (fence?.[1]) {
+      const marker = fence[1][0] === "`" ? "```" : "~~~";
+      if (!inFence) {
+        inFence = true;
+        fenceMarker = marker;
+      } else if (marker === fenceMarker) {
+        inFence = false;
+      }
+      continue;
+    }
+    if (inFence) continue;
     const m = line.match(/^(#{2,6})\s+(.+?)\s*$/);
     if (!m || !m[1] || !m[2]) continue;
     const depth = m[1].length as 2 | 3 | 4 | 5 | 6;

@@ -341,6 +341,7 @@ export async function generate(
     facets: cfg.facets,
     theme: cfg.theme,
     integrations: cfg.integrations,
+    contributors: cfg.contributors,
     taxonomy,
     stats: {
       totalRecords: indexRecords.length,

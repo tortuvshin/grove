@@ -189,6 +189,29 @@ export function totalPages(itemCount: number, pageSize = PAGE_SIZE): number {
   return Math.max(1, Math.ceil(itemCount / pageSize));
 }
 
+/**
+ * Windowed page list for pagination controls: all pages when 7 or
+ * fewer, otherwise `1 … active−1 active active+1 … count` with
+ * "ellipsis" markers. Shared by the server-rendered `Pagination`
+ * component and the client-side rebuild in `DirectoryIndexClient`
+ * so the two never drift.
+ */
+export function paginationPageList(
+  active: number,
+  count: number,
+): Array<number | "ellipsis"> {
+  if (count <= 7) return Array.from({ length: count }, (_, index) => index + 1);
+  const pages = new Set([1, count, active - 1, active, active + 1]);
+  const sorted = [...pages].filter((page) => page >= 1 && page <= count).sort((a, b) => a - b);
+  const result: Array<number | "ellipsis"> = [];
+  for (const page of sorted) {
+    const previous = result.at(-1);
+    if (typeof previous === "number" && page - previous > 1) result.push("ellipsis");
+    result.push(page);
+  }
+  return result;
+}
+
 /** Resolve the effective sort from a filters object, applying default. */
 export function effectiveSort(f: IndexFilters): IndexSort {
   return f.sort ?? DEFAULT_SORT;

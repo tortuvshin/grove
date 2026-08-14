@@ -532,19 +532,36 @@ export const githubIntegrationSchema = z.union([
   }),
 ]);
 
+/** Resolved per-feature GitHub integration flags. */
+export interface GithubIntegrationFlags {
+  metadata: boolean;
+  contributors: boolean;
+  health: boolean;
+}
+
+/**
+ * Normalize the `integrations.github` config value — either a blanket
+ * boolean or a partial per-feature object — into explicit flags so
+ * callers (`grove sync`, CI workflows) can gate each feature.
+ */
+export function normalizeGithubIntegration(
+  value: z.infer<typeof githubIntegrationSchema> | undefined,
+): GithubIntegrationFlags {
+  if (typeof value === "boolean") {
+    return { metadata: value, contributors: value, health: value };
+  }
+  return {
+    metadata: value?.metadata ?? false,
+    contributors: value?.contributors ?? false,
+    health: value?.health ?? false,
+  };
+}
+
 export const themeSchema = z.object({
   primaryColor: z.string().default("#16a34a"),
   radius: z.enum(["none", "soft", "round"]).default("soft"),
   density: z.enum(["compact", "comfortable", "spacious"]).default("comfortable"),
   containerWidth: z.string().default("72rem"),
-});
-
-export const componentOverrideSchema = z.object({
-  Header: z.string().optional(),
-  Footer: z.string().optional(),
-  Hero: z.string().optional(),
-  ItemCard: z.string().optional(),
-  DetailHeader: z.string().optional(),
 });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -697,8 +714,6 @@ export const groveConfigSchema = z.object({
    */
   readme: readmeConfigSchema.optional(),
 
-  components: componentOverrideSchema.default({}),
-
   paths: z
     .object({
       dataDir: z.string().default("data"),
@@ -735,7 +750,6 @@ export type FooterConfig = z.infer<typeof footerSchema>;
 export type SubmissionConfig = z.infer<typeof submissionSchema>;
 export type GithubIntegration = z.infer<typeof githubIntegrationSchema>;
 export type Theme = z.infer<typeof themeSchema>;
-export type ComponentOverride = z.infer<typeof componentOverrideSchema>;
 export type GithubMetadata = z.infer<typeof githubMetadataSchema>;
 export type GithubRepository = z.infer<typeof githubRepositorySchema>;
 export type HealthStatus = z.infer<typeof healthStatusSchema>;

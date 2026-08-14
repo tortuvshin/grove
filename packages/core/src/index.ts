@@ -47,7 +47,9 @@ export {
   blueprintKind,
   auditSchema,
   readmeConfigSchema,
+  normalizeGithubIntegration,
 } from "./schema.js";
+export type { GithubIntegrationFlags } from "./schema.js";
 
 // ── Schema-derived types ─────────────────────────────────────────────
 export type {

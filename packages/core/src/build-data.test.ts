@@ -202,6 +202,7 @@ describe("generate — filesystem round-trip", () => {
       footer: { columns: Array<{ heading: string }>; license: string };
       submission: { title: string; good: string[]; avoid: string[] };
       analytics: { googleAnalyticsId: string };
+      contributors: { showContributionCount: boolean };
     };
     expect(site.stats.totalRecords).toBe(1);
     expect(site.stats.totalApps).toBe(1);
@@ -214,6 +215,9 @@ describe("generate — filesystem round-trip", () => {
       avoid: ["Duplicates"],
     });
     expect(site.analytics.googleAnalyticsId).toBe("G-TEST123");
+    // The contributors preference must reach site-config.json so the
+    // Astro layer can honor `showContributionCount`.
+    expect(site.contributors).toEqual({ showContributionCount: true });
   });
 
   it("keeps site repository metadata separate from directory aggregates", async () => {
