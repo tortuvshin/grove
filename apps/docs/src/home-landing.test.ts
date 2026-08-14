@@ -96,7 +96,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(homeCss).toMatch(/--color-muted:\s*#89a8b3/);
 		expect(homeCss).toMatch(/--color-brand:\s*#27b7c8/);
 		expect(homeCss).toMatch(/--color-brand-light:\s*#7dd3d8/);
-		expect(homeCss).toContain("linear-gradient(120deg, #7dd3d8 8%, #27b7c8 92%)");
+		expect(homeCss).toContain("linear-gradient(120deg, #7dd3d8 8%, #27b7c8 58%, #4ac987 96%)");
 		expect(homeCss).not.toMatch(/#646cff|#41d1ff|#bd34fe/i);
 
 		// Same font story as the docs (Starlight defaults): the system stack,
@@ -156,33 +156,40 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(homeLayout).not.toContain("https://grove.dev'");
 	});
 
-	it("renders a centered, plain-language hero with the glowing mark and pill buttons", async () => {
+	it("renders the hero as the story's first frame: mark, headline, and the CLI as primary CTA", async () => {
 		const hero = await readComponent("Hero");
 
-		// Positioning line, closing phrase in the signature gradient.
+		// Micro badge + positioning line, closing phrase in the animated
+		// signature gradient.
+		expect(hero).toContain("Open source");
 		expect(hero).toContain("Build directories");
 		expect(hero).toContain("that stay useful.");
-		expect(hero).toContain("text-gradient");
+		expect(hero).toContain("text-gradient-live");
 
-		// The paragraph explains the product in user terms, not CLI terms.
-		expect(hero).toContain(
-			"open-source framework for curated directories, resource hubs, and knowledge sites",
-		);
+		// One-sentence philosophy in user terms.
+		expect(hero).toContain("searchable, SEO-ready directory");
 
-		// vite.dev-style hero: no terminals or install commands here.
+		// The CLI is the primary call to action: it types on load, prints
+		// the first scaffold lines, and the copy button hands it over.
+		expect(hero).toContain("npx @grove-dev/cli init");
+		expect(hero).toContain("Ready to grow.");
+		expect(hero).toContain("Copied");
+		expect(hero).toContain("navigator.clipboard");
 		expect(hero).not.toContain("pnpm dlx");
 		expect(hero).not.toContain("<pre");
 
-		// Buttons point at real destinations.
-		expect(hero).toContain('href="/getting-started/create-a-space/"');
+		// Secondary links point at real destinations; no triple-button row.
+		expect(hero).toContain("View on GitHub");
+		expect(hero).toContain("Read the docs");
 		expect(hero).toContain('href="/introduction/"');
 		expect(hero).toContain('href="https://github.com/tortuvshin/grove"');
 		expect(hero).toContain('target="_blank"');
 		expect(hero).toContain('href="/roadmap/"');
 
-		// Glowing floating mark + beam field degrade gracefully.
+		// Growing, swaying mark + aurora field degrade gracefully.
 		expect(hero).toContain("hero-beams");
 		expect(hero).toContain("hero-mark-glow");
+		expect(hero).toContain("hero-sway");
 		expect(hero).toContain("prefers-reduced-motion");
 
 		// Honesty strip.
