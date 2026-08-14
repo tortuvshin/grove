@@ -1,0 +1,89 @@
+packages/astro/src/components/TableOfContents.astro
+  s_115d4f48753b54::t_241533a67fc65a 66-79
+  s_115d4f48753b54::t_74b6934cfe0516 9-11
+  s_115d4f48753b54::t_876f6e3812d2f5 35
+packages/astro/src/components/SubmissionClient.astro
+  s_115d4f48753b54::t_be2681e4f01dfe 178-218
+  s_115d4f48753b54::t_7f268d55039d60 14-20,30
+packages/astro/src/components/IndexRow.astro
+  s_115d4f48753b54::t_435459fd798c7f 2-11,13,29-30,32-43,45-55
+packages/astro/src/components/RecordSidebar.astro
+  s_115d4f48753b54::t_3395f97ab900c8 72
+packages/astro/src/components/FilterGroupMenu.astro
+  s_115d4f48753b54::t_f0ed48145324d6 44-53,61-63
+packages/astro/src/components/CardGrid.astro
+  s_115d4f48753b54::t_bfe0853194b925 1-41
+packages/astro/src/components/ContributorsGrid.astro
+  s_115d4f48753b54::t_836f57eedd5a46 31-32,43
+  s_115d4f48753b54::t_8cb0b05f1df4f6 131
+packages/astro/src/page-parity.test.ts
+  s_115d4f48753b54::t_8f623c8002d4f3 191,195
+packages/astro/src/components/CollectionRow.astro
+  s_115d4f48753b54::t_cb00b5d9375d84 3-4,6-9,16,18-19,25-27,30,64,67-90,93-116
+packages/astro/src/components/CardIcon.astro
+  s_115d4f48753b54::t_69448c75e03cd4 1-67
+packages/astro/src/layouts/BaseLayout.astro
+  s_115d4f48753b54::t_762838e018e90d 72-74,77-80
+  s_115d4f48753b54::t_ec2aecdbb209f6 185
+  s_115d4f48753b54::t_c52074b1a28457 122-178
+  s_115d4f48753b54::t_32f91b325cabee 71,75-76,81-82
+  s_115d4f48753b54::t_70a03d08dd1195 179
+packages/astro/src/styles.css
+  s_115d4f48753b54::t_578c74cf4032f9 230-233
+  s_115d4f48753b54::t_d2fda7383dd719 119-123,127-132
+  s_115d4f48753b54::t_085f2b1331f5fc 199-203
+  s_115d4f48753b54::t_abb8aef9261d27 808-809,814-816
+  s_115d4f48753b54::t_3d5ddf2c3ac97c 802-807,810-813
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_115d4f48753b54::t_df3376f6dd77a6 31
+  s_115d4f48753b54::t_23c0e8e678cb2d 79
+  s_115d4f48753b54::t_0efb166f56e764 105-108,113-115,117-128,130-152,154-155
+  s_115d4f48753b54::t_331be2516f720f 46-49,51
+packages/astro/src/components/CollectionCard.astro
+  s_115d4f48753b54::t_7ed4f8c1749860 1-47
+packages/astro/src/layouts/Header.astro
+  s_115d4f48753b54::t_9b9281bfc7a9ba 63-64
+packages/astro/src/components/RecordHeader.astro
+  s_115d4f48753b54::t_7d5af97b0e9bfb 47
+packages/astro/src/theme.test.ts
+  s_115d4f48753b54::t_dafd81cc3201d8 11
+  s_115d4f48753b54::t_d4b4585bc672ed 114-129
+  s_115d4f48753b54::t_196946d85af185 130-131
+packages/astro/src/components/CollectionIndex.astro
+  s_115d4f48753b54::t_522b41c36f982d 19-20
+  s_115d4f48753b54::t_0869ac927adfe6 81,84,87
+packages/astro/src/components/Pagination.astro
+  s_115d4f48753b54::t_73b5e008c014e0 9,11,13
+packages/astro/src/index.ts
+  s_115d4f48753b54::t_6c0153684aacac 64
+  s_115d4f48753b54::t_2e70f3fc00d84b 8
+packages/astro/src/components/CollectionPage.astro
+  s_115d4f48753b54::t_ab5539e3d0454a 74,77,80
+  s_115d4f48753b54::t_3b1b1b87f0b861 16
+packages/astro/src/components/ProjectCard.astro
+  s_115d4f48753b54::t_13b2c447174487 322
+  s_115d4f48753b54::t_848712a969dddf 42
+  s_115d4f48753b54::t_acd29f0ad1f02e 175-179
+  s_115d4f48753b54::t_f9522be5c67316 3,5-8,10-28,32,35-41,43-46,50-59,61-62,69-94,102-121,124,126-137,145,148-173,183-184,189-194,245-251,261-262,277-286,293-299,301-310,320-321,323-325,327-341,365,368,377-383,385,388
+packages/astro/src/components/RecordSection.astro
+  s_115d4f48753b54::t_a62c308f914092 111
+  s_115d4f48753b54::t_c7a17e6a066854 112-113,116
+  s_115d4f48753b54::t_069dae19cee762 27
+  s_115d4f48753b54::t_79d164175a3c43 99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "dda178a868650537483ab2bf265256acf5f6e401",
+  "prompts": {},
+  "sessions": {
+    "s_115d4f48753b54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f54e25ee-07c3-4168-836e-363c63e77e7c",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
