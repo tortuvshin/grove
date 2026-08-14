@@ -1,0 +1,21 @@
+AGENTS.md
+  s_5ae21821884968::t_e1642122279020 1,5-7,9-12,14,18-20,22-23,25,27,29,31,35,37,39,41-45,53,55,58,60
+CLAUDE.md
+  s_5ae21821884968::t_58e274d86533f6 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1a4ed497c037bee73db542e489e1fed0b95060f5",
+  "prompts": {},
+  "sessions": {
+    "s_5ae21821884968": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "25e06ef7-ac5a-496c-a158-dba95c4341dc",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
