@@ -1,0 +1,126 @@
+apps/docs/src/content/docs/outputs/overview.md
+  s_73ddd1ae168e3c::t_dcd35148990bd3 1-85
+apps/docs/src/content/docs/reference/record-schema.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 7,288
+apps/docs/src/content/docs/sources/health-classification.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 8,19,39,99
+apps/docs/src/content/docs/deployment/netlify.md
+  s_73ddd1ae168e3c::t_6110ff979334b9 1-48
+apps/docs/src/content/docs/architecture/incremental-build.md
+  s_73ddd1ae168e3c::t_47d16f32be5440 1-103
+apps/docs/src/content/docs/reference/migration.md
+  s_73ddd1ae168e3c::t_da8c8b09b1a655 1-115
+apps/docs/src/content/docs/introduction.md
+  s_73ddd1ae168e3c::t_c864556453bd8d 3,6,8,10,12,14-27,29,31-33,35,39-41,43-46,48-81,85-89
+apps/docs/src/content/docs/sources/taxonomy-files.md
+  s_73ddd1ae168e3c::t_1158c740c4de8b 1-103
+  s_73ddd1ae168e3c::t_e41d6b0d10f948 104
+apps/docs/src/content/docs/sources/content-pages.md
+  s_73ddd1ae168e3c::t_05cd53df1a141e 1-65
+apps/docs/src/content/docs/deployment/github-pages.md
+  s_73ddd1ae168e3c::t_81cedd58440277 1-69
+apps/docs/src/content/docs/customize/theme.md
+  s_73ddd1ae168e3c::t_4e5ba29c72aa78 3,20-31,33,36-42,45-49,51-54,56-61,63,65-67,69-71,73-75,79-81
+  s_73ddd1ae168e3c::t_827c932deb2535 6-8,12-15,19,32,34-35,43-44,50,55,62,64,68,72,76-78,82-83
+apps/docs/src/content/docs/faq.md
+  s_73ddd1ae168e3c::t_44e40666cee38b 1-80
+apps/docs/src/content/docs/concepts/philosophy.md
+  s_73ddd1ae168e3c::t_1a58f5e8ec0b26 6,12,19,31,34,38,44,46,54,57,61,65-67,71,77-88,91-95,97
+apps/docs/src/content/docs/maintainers/security.md
+  s_73ddd1ae168e3c::t_92329d1f4a1ec7 109-235
+apps/docs/src/content/docs/customize/assets.md
+  s_73ddd1ae168e3c::t_e509a479bc4412 9-15,17-19,21-22,24-25,27-29,31-42,44-46,48,50,52-53,59-61,63-64,69-71,73-74,76,78,82-85
+  s_73ddd1ae168e3c::t_7a9f1b7a394d6f 6-8,16,20,23,26,30,43,47,49,51,57-58,62,65,68,72,75,77,79-81,86-87
+apps/docs/src/content/docs/automation/sync-github-deep-dive.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 102
+apps/docs/src/content/docs/reference/plugin-author-guide.md
+  s_73ddd1ae168e3c::t_cdd7e512375ef1 1-164
+scripts/check-starlight-sidebar.mjs
+  s_73ddd1ae168e3c::t_b7c9c28551767b 4,6-17,19-20,27-28,39-42,65-118,120-121
+apps/docs/src/content/docs/outputs/llm.md
+  s_73ddd1ae168e3c::t_74f98231517790 1-109
+apps/docs/src/content/docs/reference/api-core.md
+  s_73ddd1ae168e3c::t_69950c86345e22 1-173
+apps/docs/src/content/docs/sources/collections.md
+  s_73ddd1ae168e3c::t_0599ceee9e9cf1 1-84
+apps/docs/src/content/docs/customize/components.md
+  s_73ddd1ae168e3c::t_722faf6ab24354 6-8,10,12,14-25,27,38,47,51,57,59,61-65,70
+  s_73ddd1ae168e3c::t_c19cfe1505e315 9,11,13,26,28-31,35-36,39,41,43-44,48-50,52-56,58,60,67,69,71
+apps/docs/src/content/docs/automation/scheduled.md
+  s_73ddd1ae168e3c::t_dc7ea0f984e60f 6-107,110-132,135-211,213-216
+apps/docs/src/content/docs/reference/config.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 140,266
+apps/docs/src/content/docs/maintainers/release-process.md
+  s_73ddd1ae168e3c::t_0c1193be54400c 199-259
+apps/docs/astro.config.mjs
+  s_73ddd1ae168e3c::t_97979924c90967 161
+  s_73ddd1ae168e3c::t_5f51b3f8009531 211-220
+  s_73ddd1ae168e3c::t_ac2a87de96bba8 109-115,126-135,137-150,174-176,178-183,190,192-210,227-231
+  s_73ddd1ae168e3c::t_fc05459b54e540 177
+  s_73ddd1ae168e3c::t_9c459fc8c90f30 121
+  s_73ddd1ae168e3c::t_9bda8e1748373f 160
+  s_73ddd1ae168e3c::t_88ce997b407aab 168
+  s_73ddd1ae168e3c::t_46b769d7927546 24
+apps/docs/src/content/docs/sources/decisions.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 2-3,6,8,12-19,22,24-31,33,35,37-40,42,44,46,48,50,52,54-55
+apps/docs/src/content/docs/deployment/cloudflare.md
+  s_73ddd1ae168e3c::t_4c999983cd11c3 1-52
+apps/docs/src/content/docs/deployment/self-hosted.md
+  s_73ddd1ae168e3c::t_8f0e67ba9998d4 1-96
+apps/docs/src/content/docs/outputs/site-meta.md
+  s_73ddd1ae168e3c::t_09c6de19a6752a 1-87
+apps/docs/src/content/docs/automation/validation.md
+  s_73ddd1ae168e3c::t_b67d69f63b4b11 6-10,14-156
+apps/docs/src/content/docs/blueprints/ecosystem-map.md
+  s_73ddd1ae168e3c::t_d0a11f2dbec4f1 1-81
+apps/docs/src/docs-config.test.ts
+  s_73ddd1ae168e3c::t_13ba948bc490c1 1-2,9-12,22-48,50-124
+apps/docs/src/content/docs/maintainers/ci-quality.md
+  s_73ddd1ae168e3c::t_c81d3921715aa9 1-87
+apps/docs/src/content/docs/outputs/seo.md
+  s_73ddd1ae168e3c::t_054514b70facf4 1-96
+apps/docs/src/content/docs/getting-started/add-your-first-project.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 87
+apps/docs/src/content/docs/blueprints/resource-hub.md
+  s_73ddd1ae168e3c::t_8338daef34b64b 1-78
+apps/docs/src/content/docs/automation/submissions.md
+  s_73ddd1ae168e3c::t_3382aa7d286054 6-187
+package.json
+  s_73ddd1ae168e3c::t_7e57168dd51237 6
+apps/docs/src/content/docs/sources/records.md
+  s_73ddd1ae168e3c::t_50b86463617959 6,8,12,14,19,21,23,25,27,31,34-37,39-49,52,55,61,63,65,67,71,73,77,84-86,89-90,93,95,97,108-110,112,119,121,123,125,129,131,133
+apps/docs/src/content/docs/customize/template-customization.md
+  s_73ddd1ae168e3c::t_40dcf6d9ae15e3 2-3,6,8-10,12,14,16,36-38,41,45,47,49,51,53,66,70,77,81-85,90,94,96,98,100-102,104,106-109,111,113,115,117-120,122,124,126-129
+apps/docs/src/content/docs/maintainers/contributing.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 10,128
+  s_73ddd1ae168e3c::t_307c6fa5a9f5f9 172-197
+apps/docs/src/content/docs/deployment/overview.md
+  s_73ddd1ae168e3c::t_2b63a75dd920ef 3,6,8,14,18-19,21,23,25-31,33,37,43-45,49-57,59,61-64
+apps/docs/src/content/docs/getting-started/deploy.md
+  s_73ddd1ae168e3c::t_3eddaf9094427e 72
+apps/docs/src/content/docs/customize/branding.md
+  s_73ddd1ae168e3c::t_59d3a4aa6e2851 10-11,13,19,21,23-24,31-32,34,36,38,40,42,46-47
+  s_73ddd1ae168e3c::t_016a90460283ae 6,12,14,18,20,22,25-30,33,35,37,39,41,43-45,49-51
+  s_73ddd1ae168e3c::t_ec60f4b0217029 48
+apps/docs/src/content/docs/customize/pages.md
+  s_73ddd1ae168e3c::t_62e66870c60bfd 6,8,12-14,25,31,34-35,51,55,63-64,70,73,77,88,90,92,94-96
+  s_73ddd1ae168e3c::t_b87c844e6a172f 3,10-11,16-24,26-30,32-33,36-50,52-54,56-62,65-69,71-72,74-76,78-87,89,91,93,97-102
+apps/docs/src/content/docs/automation/github-metadata.md
+  s_73ddd1ae168e3c::t_d1095536f3f6ae 6-10,15-16,21-25,33-186,188-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ea4e5df214fbff47926f3d2f7c135761f7435cf6",
+  "prompts": {},
+  "sessions": {
+    "s_73ddd1ae168e3c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "38771dbf-4ab2-45de-b1db-5ee862865738",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
