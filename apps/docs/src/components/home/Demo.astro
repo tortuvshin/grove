@@ -632,6 +632,7 @@ const pillClass = {
     justify-content: center;
     padding: 0 1.5rem;
     pointer-events: none;
+    will-change: transform, opacity, filter;
   }
 
   #hgw.is-scrub #hgw-site {
@@ -641,6 +642,7 @@ const pillClass = {
     align-items: center;
     justify-content: center;
     padding: 0 1.5rem;
+    will-change: transform, opacity;
   }
 
   #hgw.is-scrub #hgw-site-inner { max-width: 40rem; }
@@ -664,9 +666,10 @@ const pillClass = {
 
   #hgw.is-scrub #hgw-health {
     position: absolute;
-    bottom: -1.5rem;
-    left: 0;
-    width: 68%;
+    right: 1rem;
+    bottom: 10%;
+    left: auto;
+    width: 52%;
     max-width: 360px;
     pointer-events: none;
     opacity: 0;
@@ -828,8 +831,7 @@ const pillClass = {
     const clamp = (v, min = 0, max = 1) => Math.min(Math.max(v, min), max);
     const lerp = (a, b, t) => a + (b - a) * t;
     const ramp = (p, s, e) => clamp((p - s) / (e - s));
-    // Opacity envelope: fade in a→b, hold b→c, fade out c→d.
-    const band = (p, a, b, c = 1, d = 1) => ramp(p, a, b) * (d > c ? 1 - ramp(p, c, d) : 1);
+    const smooth = (t) => t * t * (3 - 2 * t);
 
     const term = $('hgw-terminal');
     const typed = $('hgw-typed');
@@ -890,11 +892,12 @@ const pillClass = {
 
       // 01 · Initialize — the frame is present at section entry, then types,
       // prints, and hands off upward without a blank first canvas.
-      const termO = 1 - ramp(p, 0.16, 0.2);
-      const exitTerm = ramp(p, 0.16, 0.2);
+      const exitTerm = smooth(ramp(p, 0.145, 0.205));
+      const termO = 1 - exitTerm;
       term.style.opacity = termO;
       term.style.visibility = termO > 0.001 ? 'visible' : 'hidden';
-      term.style.transform = `translateY(${lerp(0, -28, exitTerm)}px) scale(${lerp(1, 0.94, exitTerm)})`;
+      term.style.transform = `translate3d(${lerp(0, -42, exitTerm)}%, ${lerp(0, -6, exitTerm)}px, 0) scale(${lerp(1, 0.96, exitTerm)})`;
+      term.style.filter = `blur(${lerp(0, 0.8, exitTerm)}px)`;
       const chars = Math.round(ramp(p, 0.01, 0.07) * COMMAND.length);
       typed.textContent = COMMAND.slice(0, chars);
       cursor.style.opacity = chars < COMMAND.length || p < 0.15 ? '1' : '0';
@@ -902,12 +905,13 @@ const pillClass = {
       line2.style.opacity = ramp(p, 0.095, 0.12);
 
       // 02 · Add content — file tree slides in from the right, hands off left.
-      const filesO = band(p, 0.15, 0.19, 0.35, 0.4);
+      const filesIn = smooth(ramp(p, 0.145, 0.205));
+      const filesOut = smooth(ramp(p, 0.34, 0.405));
+      const filesO = filesIn * (1 - filesOut);
       files.style.opacity = filesO;
       files.style.visibility = filesO > 0.001 ? 'visible' : 'hidden';
-      const filesIn = ramp(p, 0.15, 0.2);
-      const filesOut = ramp(p, 0.35, 0.4);
-      files.style.transform = `translateX(${lerp(36, 0, filesIn) + lerp(0, -28, filesOut)}px) scale(${lerp(1, 0.92, filesOut)})`;
+      files.style.transform = `translate3d(${lerp(42, 0, filesIn) + lerp(0, -42, filesOut)}%, ${lerp(6, 0, filesIn) + lerp(0, -6, filesOut)}px, 0) scale(${lerp(0.96, 1, filesIn) * lerp(1, 0.96, filesOut)})`;
+      files.style.filter = `blur(${lerp(0.8, 0, filesIn) + lerp(0, 0.8, filesOut)}px)`;
       for (const node of treeNodes) {
         const at = Number(node.dataset.at);
         const r = ramp(p, at, at + 0.02);
@@ -916,14 +920,16 @@ const pillClass = {
       }
 
       // 03 · Structure — diagram slides in from the right, hands off left.
-      const sysO = band(p, 0.35, 0.4, 0.56, 0.61);
+      const sysIn = smooth(ramp(p, 0.34, 0.405));
+      const sysOut = smooth(ramp(p, 0.545, 0.62));
+      const sysO = sysIn * (1 - sysOut);
       system.style.opacity = sysO;
       system.style.visibility = sysO > 0.001 ? 'visible' : 'hidden';
-      const sysIn = ramp(p, 0.35, 0.4);
-      const sysOut = ramp(p, 0.56, 0.61);
+      system.style.transform = `translate3d(${lerp(42, 0, sysIn) + lerp(0, -42, sysOut)}%, ${lerp(6, 0, sysIn) + lerp(0, -6, sysOut)}px, 0) scale(${lerp(0.96, 1, sysIn) * lerp(1, 0.96, sysOut)})`;
+      system.style.filter = `blur(${lerp(0.8, 0, sysIn) + lerp(0, 0.8, sysOut)}px)`;
       const stage = system.firstElementChild;
       if (stage) {
-        stage.style.transform = `translateX(${lerp(36, 0, sysIn) + lerp(0, -28, sysOut)}px) scale(${lerp(0.96, 1, ramp(p, 0.36, 0.42)) * lerp(1, 1.04, ramp(p, 0.55, 0.59))})`;
+        stage.style.transform = `scale(${lerp(0.97, 1, smooth(ramp(p, 0.36, 0.43)))})`;
       }
       const inFlow = ramp(p, 0.39, 0.45);
       const capsFlow = ramp(p, 0.44, 0.51);
@@ -954,32 +960,33 @@ const pillClass = {
       }
 
       // 04–06 · Publish / Generate / Maintain — the live site takes over.
-      const siteO = ramp(p, 0.56, 0.62);
-      const appear = ramp(p, 0.56, 0.63);
+      const appear = smooth(ramp(p, 0.545, 0.625));
+      const siteO = appear;
       const gen = ramp(p, 0.72, 0.79);
       const maint = ramp(p, 0.84, 0.92);
       const side = Math.max(gen, maint);
       site.style.opacity = siteO;
       site.style.visibility = siteO > 0.001 ? 'visible' : 'hidden';
       site.style.pointerEvents = p > 0.6 ? 'auto' : 'none';
+      site.style.transform = `translate3d(${lerp(42, 0, appear)}%, ${lerp(6, 0, appear)}px, 0)`;
       if (canvasCaption) canvasCaption.style.opacity = 1 - ramp(p, 0.54, 0.58);
       // The directory is intentionally scaled as a complete browser viewport,
       // so its header and card grid stay visible inside shorter laptop screens.
-      win.style.transform = `translateY(${lerp(28, 0, appear)}px) scale(${lerp(0.78, 0.82, appear) * lerp(1, 0.88, side)})`;
+      win.style.transform = `translate3d(${lerp(0, -12, side)}%, ${lerp(0, -4, maint)}%, 0) scale(${lerp(0.78, 0.82, appear) * lerp(1, 0.88, side)})`;
       records.forEach((record, i) => {
         const r = ramp(p, 0.59 + i * 0.002, 0.625 + i * 0.002);
         record.style.opacity = r;
         record.style.transform = `translateY(${lerp(14, 0, r)}px)`;
       });
-      outputs.style.opacity = gen * lerp(1, 0.6, maint);
-      outputs.style.transform = `translateY(-50%) translateX(${lerp(24, 0, gen)}px)`;
+      outputs.style.opacity = gen * (1 - maint);
+      outputs.style.transform = `translate3d(${lerp(24, 0, gen) + lerp(0, 36, maint)}px, calc(-50% - ${lerp(0, 24, maint)}px), 0)`;
       outItems.forEach((item, i) => {
         const r = ramp(p, 0.75 + i * 0.007, 0.8 + i * 0.007);
         item.style.opacity = r;
         item.style.transform = `scale(${lerp(0.9, 1, r)})`;
       });
       healthPanel.style.opacity = maint;
-      healthPanel.style.transform = `translateY(${lerp(20, 0, maint)}px)`;
+      healthPanel.style.transform = `translateX(${lerp(36, 0, maint)}px)`;
       if (spin) spin.style.transform = `rotate(${maint * 180}deg)`;
       healthRows.forEach((row, i) => {
         const r = ramp(p, 0.88 + i * 0.015, 0.94 + i * 0.015);
