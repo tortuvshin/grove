@@ -1,0 +1,75 @@
+packages/astro/src/pages/categories/[name].astro
+  s_115d4f48753b54::t_d1c152771f4e09 51-52,55,59,64,70,72-75,78
+  s_115d4f48753b54::t_2a54c8f52481a0 11-12
+apps/example/src/styles/global.css
+  s_115d4f48753b54::t_1b26445202f073 16-21
+apps/example/src/pages/[slug]/index.astro
+  s_115d4f48753b54::t_eade62e824436d 26
+  s_115d4f48753b54::t_ec056aa102f176 194,200,204
+  s_115d4f48753b54::t_b07ca24d79d7ca 211-214,216
+apps/example/src/pages/404.astro
+  s_115d4f48753b54::t_83e2a66a72c83f 50
+apps/example/src/components/TaxonomyList.astro
+  s_115d4f48753b54::t_c02a0dd44eb7e9 11-14,20-21,44,62-63,66-68,71,74,79,81-90,93,97,102
+apps/example/grove.config.ts
+  s_115d4f48753b54::t_357793a06d9fed 69-71
+apps/example/src/pages/[slug]/[recordSlug].astro
+  s_115d4f48753b54::t_a0537973991022 41
+apps/docs/src/content/docs/customize/components.md
+  s_115d4f48753b54::t_b62968b6c64c21 3,6,8-15,18-19,22
+packages/astro/src/pages/stacks/[name].astro
+  s_115d4f48753b54::t_b3dcf99fe3cabb 17-18
+  s_115d4f48753b54::t_9f0f5c99e5ab6b 57-58,61,65,70,76,78-81,84
+apps/docs/src/styles/home.css
+  s_99b4b89a722b01::t_f0475753d4a4c5 109-115,119-126,131
+  s_99b4b89a722b01::t_6e7c73170af408 107,143-155
+  s_99b4b89a722b01::t_63b47a358462f0 78-81,95,97-106
+  s_99b4b89a722b01::t_684cf9f4907dd6 116-118
+  s_99b4b89a722b01::t_3a7b0a594f91b7 134-135,137
+  s_99b4b89a722b01::t_e0ff53786f5b5f 108
+  s_99b4b89a722b01::t_b57e6eca18d8a9 156
+packages/astro/src/pages/licenses/[name].astro
+  s_115d4f48753b54::t_27514486bd577c 11-12
+  s_115d4f48753b54::t_350c7b35963447 49-50,53,57,62,68,70-73,76
+apps/example/src/pages/contributors.astro
+  s_115d4f48753b54::t_38472ed774bd99 100
+  s_115d4f48753b54::t_4ca19a04184ed3 18
+apps/docs/src/content/docs/adapters/astro.md
+  s_115d4f48753b54::t_f63e9aed97303f 73-74,76-81,84-85
+  s_115d4f48753b54::t_aa810eb63cf1da 39-47
+apps/docs/src/content/docs/guides/customize-astro-template.md
+  s_115d4f48753b54::t_454499d263da45 167-170
+  s_115d4f48753b54::t_dfa80d3f1faced 180,183,187,191,193-198,200-205
+apps/example/src/pages/empty.astro
+  s_115d4f48753b54::t_0b73464e44cc9f 2-6,9-10,13-29
+apps/example/src/pages/categories/index.astro
+  s_115d4f48753b54::t_bb430805e030ea 1-26
+apps/example/src/pages/index.astro
+  s_115d4f48753b54::t_85483adc6526d9 128
+apps/example/src/pages/stacks/index.astro
+  s_115d4f48753b54::t_c16858fb848e81 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f98dad6f66918e9fee092223f539f23aadbf6c5d",
+  "prompts": {},
+  "sessions": {
+    "s_115d4f48753b54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f54e25ee-07c3-4168-836e-363c63e77e7c",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_99b4b89a722b01": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8237ea-c10a-405c-ab01-620f9756b5bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
