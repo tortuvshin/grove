@@ -1,0 +1,49 @@
+packages/core/src/content-body.ts
+  s_115d4f48753b54::t_53c14860684345 210-214,216-227
+packages/core/src/directory-display.test.ts
+  s_115d4f48753b54::t_1f19222a706a28 140-153
+  s_115d4f48753b54::t_4634347b930876 8
+  s_115d4f48753b54::t_e8aa0959885a71 154
+packages/core/src/directory-search.ts
+  s_115d4f48753b54::t_9b31f26e4542af 192-214
+packages/core/src/contributors-flag.test.ts
+  s_115d4f48753b54::t_4be501ac4563d5 37-63
+packages/core/src/directory-display.ts
+  s_115d4f48753b54::t_9098213ed3577e 95-109
+packages/core/src/build-data.test.ts
+  s_115d4f48753b54::t_53fc4de3956031 205
+  s_115d4f48753b54::t_7bc117c698b549 218-220
+packages/core/src/page-document.ts
+  s_115d4f48753b54::t_2a5de4fab48003 15-17
+packages/core/src/content-body.test.ts
+  s_115d4f48753b54::t_7eae9f53a7bfb1 209-234
+packages/core/src/index.ts
+  s_115d4f48753b54::t_789fe0c50fed05 50,52
+packages/core/src/schema.ts
+  s_115d4f48753b54::t_c9dd25156855fd 535-559
+packages/core/src/build-data.ts
+  s_115d4f48753b54::t_897e0272c71231 344
+packages/cli/src/index.ts
+  s_115d4f48753b54::t_13f9002ddaecfa 117-118
+  s_115d4f48753b54::t_4968df04ea406f 97-101
+  s_115d4f48753b54::t_4d44277e65f424 13
+  s_115d4f48753b54::t_cf02a86961f058 94,96
+  s_115d4f48753b54::t_9fb4669d934583 116
+  s_115d4f48753b54::t_57d88a41a77f31 119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ff4a93d4fd98b07f6fe37e3645e87d2a41fc6762",
+  "prompts": {},
+  "sessions": {
+    "s_115d4f48753b54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f54e25ee-07c3-4168-836e-363c63e77e7c",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
