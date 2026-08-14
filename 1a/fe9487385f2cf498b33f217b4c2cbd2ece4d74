@@ -1,0 +1,21 @@
+apps/docs/src/components/home/Hero.astro
+  s_99b4b89a722b01::t_3c2ce7fbebfb94 119-120,122-124
+  s_99b4b89a722b01::t_df80977b9db282 26-28,32-37
+  s_99b4b89a722b01::t_37bef6bea213ec 82-86,88,96-118,121,125-157,161-168,178-182,185-187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1afe9487385f2cf498b33f217b4c2cbd2ece4d74",
+  "prompts": {},
+  "sessions": {
+    "s_99b4b89a722b01": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8237ea-c10a-405c-ab01-620f9756b5bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
