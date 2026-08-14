@@ -1,0 +1,37 @@
+apps/docs/src/components/home/Demo.astro
+  s_99b4b89a722b01::t_955c7b8bd6c043 92-107,110
+  s_99b4b89a722b01::t_13f1baf0d21538 788,790,792,796,809-811
+  s_99b4b89a722b01::t_bee5f466e5800c 876-877,879-887,893-904,906,908-918,920,925-929
+  s_99b4b89a722b01::t_89171271ec385b 387-401,403-404
+  s_99b4b89a722b01::t_2664ef90e422b9 136-137
+  s_99b4b89a722b01::t_a4a31d34ec96e4 343-344
+  s_99b4b89a722b01::t_8ca157ed7258c7 933
+  s_99b4b89a722b01::t_d5afecc063e1ae 593-595,597,605-610,613,616-617,619,622-627
+  s_99b4b89a722b01::t_b0d51cda5aa531 5-11
+  s_99b4b89a722b01::t_686167784ec74a 30-32,35-37
+  s_99b4b89a722b01::t_b9fa1c2627dec4 319-320,322-339,341-342,345-349,351-355,357-362
+  s_99b4b89a722b01::t_fcc73f3d18ea3f 520-522,528
+  s_99b4b89a722b01::t_ec7763978a2160 532
+  s_99b4b89a722b01::t_34e7e7b2ac5554 618
+  s_99b4b89a722b01::t_a09602051f7de8 930
+apps/docs/src/home-landing.test.ts
+  s_99b4b89a722b01::t_b96f9693a772bb 249-255,258
+  s_99b4b89a722b01::t_d40b90c17d1b8a 263-264
+  s_99b4b89a722b01::t_d4245665778d98 235-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b9c9922620b7485bd79b2c58f6fc59b308a1f39e",
+  "prompts": {},
+  "sessions": {
+    "s_99b4b89a722b01": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8237ea-c10a-405c-ab01-620f9756b5bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
