@@ -1,0 +1,37 @@
+changelogs/v0.3.x.md
+  s_5d28874895d5f2::t_c9b567035776b7 1-186
+changelogs/v0.4.0.md
+  s_5d28874895d5f2::t_3ff0131094a0a8 1-4,6-19,21,23-32,34,36-49,51,53,55-59,61-64,66-75,77-81,83-91,93,95-99,101-117,119,121-126,130-155
+  s_5d28874895d5f2::t_104772a884f0c7 5
+  s_5d28874895d5f2::t_df1524a44dbe38 100
+  s_5d28874895d5f2::t_ab99f34cf5e7b5 118,120
+  s_5d28874895d5f2::t_ed5be634e14218 50,52,54
+  s_5d28874895d5f2::t_3cc0991c87b870 60,65
+  s_5d28874895d5f2::t_bcf67ca21747b8 20,22
+  s_5d28874895d5f2::t_1c64f180efe976 76
+  s_5d28874895d5f2::t_7de1a2fb218753 82,92,94
+  s_5d28874895d5f2::t_23a3e15eff9d84 33,35
+  s_5d28874895d5f2::t_73589858761ca4 127-129
+changelogs/v0.2.x.md
+  s_5d28874895d5f2::t_b586967875dd5e 1-188
+changelogs/v0.1.x.md
+  s_5d28874895d5f2::t_3e222e6413a089 1-81
+changelogs/v0.5.0-next.md
+  s_5d28874895d5f2::t_29d2f532280337 1-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "70af627d23b1e7f060bd6e98b5c0f0fcd8f4ce2c",
+  "prompts": {},
+  "sessions": {
+    "s_5d28874895d5f2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4c0624e6-2089-425a-abc2-c444adaa93be",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
