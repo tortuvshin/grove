@@ -1,0 +1,29 @@
+apps/docs/src/components/home/OpenApps.astro
+  s_99b4b89a722b01::t_093a4b5779a84f 28
+apps/docs/src/home-landing.test.ts
+  s_99b4b89a722b01::t_7d442441d49d2a 99
+  s_99b4b89a722b01::t_fdaa3fa1c47c21 159,162-164,167,169-170,172-177,181-183,189,192
+apps/docs/src/components/home/Demo.astro
+  s_99b4b89a722b01::t_895f50fe1c621e 215
+apps/docs/src/components/home/Hero.astro
+  s_99b4b89a722b01::t_18340ddb536a05 40
+  s_99b4b89a722b01::t_1238eef10edcea 117-118
+  s_99b4b89a722b01::t_17d1d9ec2eaf1d 12,14,17
+  s_99b4b89a722b01::t_7d8933d9270cab 2-9,13,22,25,27-29,33-36,38,52,55,58-93,98,103-107,116,119-121,131-144,182-184,188-190,203-212,239-276,279,284-287,291-296,302-338
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7ef71bf3794c78ed3717262e94951b86d8314afe",
+  "prompts": {},
+  "sessions": {
+    "s_99b4b89a722b01": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8237ea-c10a-405c-ab01-620f9756b5bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
