@@ -196,9 +196,11 @@ const rootAttrs = isArticle ? {} : { href, "aria-label": `Open ${name}` };
 // Render the homepage brand strip through the shared `Icon` component
 // so brand marks come from the same `/icons/platforms/` files the
 // chip rows use. No more inline SVG strings — one source of truth.
+// `Icon` falls back to initials when an asset is missing, so the
+// strip simply renders whatever platforms the record declares.
 const visiblePlatforms = platforms.slice(0, 4);
 const platformOverflow = platforms.length - visiblePlatforms.length;
-const hasPlatforms = visiblePlatforms.some((p) => platformIcons[p.toLowerCase()]);
+const hasPlatforms = visiblePlatforms.length > 0;
 ---
 
 <Root
