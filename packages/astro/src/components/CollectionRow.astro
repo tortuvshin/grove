@@ -1,38 +1,33 @@
 ---
 /**
- * CollectionRow — card-shaped row for a single entry inside a
- * curated/generated collection.
+ * CollectionRow — collection-page adapter around the canonical
+ * `ProjectCard`.
  *
- * Mirrors `ItemCard`'s visual treatment so a collection page sitting
- * next to the directory index reads as the same site. The component
- * consumes the lightweight `CollectionEntry` shape directly — the
- * existing `IndexRow` is too tightly coupled to `IndexRecord`
- * (which carries `kind`, `repoUrl`, `github`, `bestFor` etc.) to
- * accept a `CollectionEntry` cleanly.
+ * Consumes the lightweight `CollectionEntry` shape directly and maps
+ * it onto `ProjectCard`'s explicit props, so a collection page sitting
+ * next to the directory index reads as the same site. The historical
+ * public props are preserved:
  *
- * API parity with `ItemCard`:
  *  - `entry` — the collection entry (slug, title, description, …)
  *  - `href` — full detail URL; wins over `routeSlug`
  *  - `routeSlug` — blueprint slug (e.g. "projects"); details derived
  *    as `/${routeSlug}/${slug}` when `href` is not provided
  *  - `showChips` — render platform + stack chip row (default true)
- *  - `showMeta` — render stars/updated/license metadata row (default true)
+ *  - `showMeta` — render stars/updated/license metadata (default true)
  *  - `showLabel` — render the curated/category label (default true)
- *  - `class` — extra class on the outer <article>
- *  - `eager` — bypass lazy loading for above-the-fold avatars (first 1-2)
+ *  - `class` — extra class on the card root
+ *  - `eager` — bypass lazy loading for above-the-fold avatars
  *
  * Footer links:
  *  - "View repo" — when `entry.repoHref` is set
  *  - "Visit site" — when `entry.homepageHref` is set
- *  - "Details →" — always rendered (links to the consumer's detail page)
  *
- * Analytics: emits `data-event="collection_item_click"` and
- * `data-event-source="collection_row"` so sites wire one handler
- * in BaseLayout.
+ * Analytics: emits `data-event="collection_item_click"` /
+ * `data-event-source="collection_row"` on the card root and per-link
+ * events on the footer links, so sites wire one handler in BaseLayout.
  */
 import type { CollectionEntry } from "@grove-dev/core";
-import { formatRelative, formatStars, statusDisplay, getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from "@grove-dev/astro";
-import StackPlatformChips from "./StackPlatformChips.astro";
+import ProjectCard from "./ProjectCard.astro";
 
 interface Props {
   entry: CollectionEntry;
@@ -65,182 +60,57 @@ const detailHref =
     ? hrefProp
     : entry.url || (base ? `/${base}/${slug}` : `/${slug}`);
 
-const title = entry.title;
-const initials = title
-  .split(/\s+/)
-  .map((w) => w[0])
-  .filter(Boolean)
-  .slice(0, 2)
-  .join("")
-  .toUpperCase();
-
-// Derive a logo URL from the entry's `repoHref` when present;
-// otherwise fall back to the detail URL. Detail URL is the
-// consumer's page, not necessarily a GitHub owner — so the
-// initials placeholder is the safe default when nothing matches.
 const repoHref = entry.repoHref;
-const { owner } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
-const avatar = owner ? getOwnerAvatarUrl(owner, 80) : undefined;
-
-const stack = entry.stack ? [entry.stack] : [];
-const platform = entry.platform?.slice(0, 4) ?? [];
-const platformOverflow = (entry.platform?.length ?? 0) - platform.length;
-
-const stars = entry.stars;
-const starsLabel = formatStars(stars);
-const updatedAt = entry.pushedAt;
-const updatedLabel = formatRelative(updatedAt);
-const license = entry.license ?? null;
-const status = entry.status;
-const statusText = status ? statusDisplay(status as Parameters<typeof statusDisplay>[0]) : "";
-const category = entry.categories?.[0];
+const homepageHref = entry.homepageHref;
 const curated = Boolean(entry.curationScore || (entry.activityScore && entry.activityScore > 0.5));
 
-const homepageHref = entry.homepageHref;
-const showViewRepo = typeof repoHref === "string" && repoHref.length > 0;
-const showVisitSite = typeof homepageHref === "string" && homepageHref.length > 0;
+const secondaryLinks = [
+  ...(repoHref
+    ? [
+        {
+          label: "View repo",
+          href: repoHref,
+          external: true,
+          event: "external_repo_click",
+          eventSource: "collection_row_view_repo",
+        },
+      ]
+    : []),
+  ...(homepageHref
+    ? [
+        {
+          label: "Visit site",
+          href: homepageHref,
+          external: true,
+          event: "external_link_click",
+          eventSource: "collection_row_visit_site",
+        },
+      ]
+    : []),
+];
 ---
 
-<article
-  data-event="collection_item_click"
-  data-event-source="collection_row"
-  data-event-item={slug}
-  class={`rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group relative flex h-full flex-col gap-3 p-4 ${className}`}
->
-  <header class="flex items-start gap-3">
-    {avatar ? (
-      <img
-        src={avatar}
-        alt={`${title} avatar`}
-        width="40"
-        height="40"
-        loading={eager ? "eager" : "lazy"}
-        fetchpriority={eager ? "high" : undefined}
-        decoding="async"
-        class="h-10 w-10 shrink-0 rounded-md border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900"
-      />
-    ) : (
-      <span
-        aria-hidden="true"
-        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-2xs font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300"
-      >
-        {initials}
-      </span>
-    )}
-    <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-      <h3 class="m-0 truncate text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
-        <a href={detailHref} class="inline-flex min-h-6 min-w-6 items-center text-inherit no-underline">
-          {title}
-        </a>
-      </h3>
-      {showLabel && (
-        <span class="truncate text-2xs text-ink-500 dark:text-ink-400">
-          {category}
-          {status && (
-            <>
-              <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>
-              <span class="text-ink-500 dark:text-ink-400">{statusText}</span>
-            </>
-          )}
-        </span>
-      )}
-    </div>
-    {curated && showLabel && (
-      <span
-        class="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
-        title="Has curation or activity score"
-      >
-        <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
-          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.41 5.09a.75.75 0 0 0-1.06 0L6.75 8.69 5.65 7.59a.75.75 0 1 0-1.06 1.06l1.65 1.65a.75.75 0 0 0 1.06 0l4.11-4.11a.75.75 0 0 0 0-1.06Z" />
-        </svg>
-        curated
-      </span>
-    )}
-  </header>
-
-  {entry.description && (
-    <p class="m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-500 dark:text-ink-400">
-      {entry.description}
-    </p>
-  )}
-
-  {/* Stack + platform rendered as 2 distinct labelled rows so the
-      primary/secondary hierarchy is unambiguous. Stack is the more
-      identifying signal for an item (it's the main technology) and
-      gets a filled pill; platform is secondary and gets an outlined
-      pill. Shared with `IndexRow` / `ItemCard` so the pattern is
-      identical across all card-shaped components. */}
-  <StackPlatformChips
-    show={showChips}
-    stack={stack[0]}
-    platform={platform}
-  />
-
-  {showMeta && (
-    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-ink-500 dark:text-ink-400">
-      {starsLabel !== null && (
-        <span class="inline-flex items-center gap-1" title={`${stars ?? 0} stars`}>
-          <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-amber-500">
-            <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z" />
-          </svg>
-          <span class="font-mono">{starsLabel}</span>
-        </span>
-      )}
-      {updatedAt && (
-        <span class="inline-flex items-center gap-1" title={`Last updated ${updatedAt}`}>
-          <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="text-ink-400">
-            <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm-.5 1.5a.5.5 0 0 0-1 0v3.25c0 .15.07.29.18.39l1.95 1.65a.5.5 0 0 0 .66-.76L7.5 7.55V5Z" />
-          </svg>
-          <span class="font-mono">Updated {updatedLabel}</span>
-        </span>
-      )}
-      {license && (
-        <span class="inline-flex items-center gap-1" title={`License: ${license}`}>
-          <span class="font-mono uppercase tracking-wide text-[10px]">{license}</span>
-        </span>
-      )}
-    </div>
-  )}
-
-  {/* Footer: source links (View repo / Visit site) + Details. */}
-  <footer class="mt-1 flex items-center justify-between gap-3 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
-    <div class="flex min-w-0 items-center gap-3">
-      {showViewRepo && (
-        <a
-          href={repoHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          data-event="external_repo_click"
-          data-event-source="collection_row_view_repo"
-          data-event-item={slug}
-          class="inline-flex items-center gap-1 font-medium text-ink-700 transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
-        >
-          View repo
-          <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
-            <path d="M3.75 2A1.75 1.75 0 0 0 2 3.75v8.5C2 13.216 2.784 14 3.75 14h8.5A1.75 1.75 0 0 0 14 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-8.5a.25.25 0 0 1-.25-.25v-8.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5Z" />
-            <path d="M10 0a.75.75 0 0 0-.75.75v.75h-3a.75.75 0 0 0 0 1.5h3v.75A.75.75 0 0 0 10.75 4.5h2.5A.75.75 0 0 0 14 3.75v-2.5A.75.75 0 0 0 13.25.5H10Z" />
-          </svg>
-        </a>
-      )}
-      {showVisitSite && (
-        <a
-          href={homepageHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          data-event="external_link_click"
-          data-event-source="collection_row_visit_site"
-          data-event-item={slug}
-          class="inline-flex items-center gap-1 font-medium text-ink-500 transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
-        >
-          Visit site →
-        </a>
-      )}
-    </div>
-    <a
-      href={detailHref}
-      class="inline-flex shrink-0 items-center gap-1 font-medium text-ink-500 transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
-    >
-      Details →
-    </a>
-  </footer>
-</article>
+<ProjectCard
+  href={detailHref}
+  slug={slug}
+  name={entry.title}
+  description={entry.description ?? ""}
+  repoUrl={repoHref}
+  stars={showMeta ? entry.stars : undefined}
+  pushedAt={showMeta ? entry.pushedAt : undefined}
+  license={showMeta ? (entry.license ?? null) : null}
+  category={entry.categories?.[0]}
+  status={entry.status}
+  curated={curated}
+  stack={entry.stack}
+  platforms={entry.platform ?? []}
+  showCurated={showLabel}
+  showLicense={showMeta}
+  showCategoryStatus={showLabel}
+  labelledChips={showChips}
+  secondaryLinks={secondaryLinks}
+  eager={eager}
+  event="collection_item_click"
+  eventSource="collection_row"
+  class={className}
+/>

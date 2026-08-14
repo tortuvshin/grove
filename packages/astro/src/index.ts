@@ -5,7 +5,7 @@
  *  - `default` export: an Astro integration that wires the
  *    `@grove-dev/astro/components/*` and `@grove-dev/astro/layouts/*`
  *    subpath imports into Vite so consumer projects can write:
- *        import ItemCard from "@grove-dev/astro/components/ItemCard.astro";
+ *        import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
  *    and have Vite resolve the source `.astro` file (the package's
  *    `dist/` only contains TypeScript helpers, not the components
  *    themselves).
@@ -61,7 +61,7 @@ export default function groveAstro(): AstroIntegration {
       "astro:config:setup": async ({ config, updateConfig, injectScript }) => {
         // Alias the components/layouts source directories so
         // consumer builds can import from
-        //   @grove-dev/astro/components/ItemCard.astro
+        //   @grove-dev/astro/components/ProjectCard.astro
         // without us shipping a glob-shaped `exports` map that
         // Vite/Rollup does not expand reliably.
         const consumerRoot = fileURLToPath(config.root);

@@ -8,7 +8,7 @@ const scaffoldTheme = readFileSync(
   "utf8",
 );
 const tailwindMarkup = [
-  "components/ItemCard.astro",
+  "components/FilterGroupMenu.astro",
   "layouts/Header.astro",
 ].map((file) => readFileSync(resolve(import.meta.dirname, file), "utf8")).join("\n") +
   readFileSync(resolve(import.meta.dirname, "../../../apps/example/src/pages/submit.astro"), "utf8");
@@ -109,6 +109,24 @@ describe("Astro theme contract", () => {
     expect(themeToggleMarkup).toContain("h-9 w-9");
     expect(themeToggleMarkup).toContain('width="18"');
     expect(themeToggleMarkup).toContain('height="18"');
+  });
+
+  it("wires grove.config.ts theme knobs into runtime CSS custom properties", () => {
+    // styles.css tokens must fall back through the `--grove-*`
+    // overrides that BaseLayout emits on <html>.
+    expect(astroTheme).toContain("--radius: var(--grove-radius, 0.625rem)");
+    expect(astroTheme).toContain("--container-container: var(--grove-container, 1160px)");
+    expect(astroTheme).toContain(
+      "--grove-primary: var(--grove-theme-primary, var(--grove-foreground))",
+    );
+    expect(astroTheme).toContain(
+      "--grove-primary: var(--grove-theme-primary-dark, var(--grove-foreground))",
+    );
+    // BaseLayout resolves the config into the style attribute.
+    expect(baseLayoutMarkup).toContain("RADIUS_PRESETS");
+    expect(baseLayoutMarkup).toContain("DENSITY_SPACING");
+    expect(baseLayoutMarkup).toContain("--grove-theme-primary");
+    expect(baseLayoutMarkup).toContain('<html lang="en" style={themeStyle}>');
   });
 
   it("uses directory-wide analytics config unless a page overrides it", () => {

@@ -116,15 +116,20 @@
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
 
-  /* ── Container widths (showcase rhythm) ──────────────────────── */
-  --container-container: 1160px;
+  /* ── Container widths (showcase rhythm) ──────────────────────────
+   * The default container tracks `theme.containerWidth` from
+   * grove.config.ts: BaseLayout emits `--grove-container` on <html>
+   * and the token falls back to the package default when unset. */
+  --container-container: var(--grove-container, 1160px);
   --container-wide: 1400px;
   --container-narrow: 720px;
 
-  /* ── Border radius scale ─────────────────────────────────────── */
-  --radius: 0.625rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  /* ── Border radius scale ──────────────────────────────────────────
+   * Driven by `theme.radius` ("none" | "soft" | "round") the same
+   * way — BaseLayout emits the `--grove-radius*` overrides. */
+  --radius: var(--grove-radius, 0.625rem);
+  --radius-lg: var(--grove-radius-lg, 0.5rem);
+  --radius-xl: var(--grove-radius-xl, 0.75rem);
 
   /* ── Animations ──────────────────────────────────────────────── */
   --animate-fade-in-up: fade-in-up 0.6s ease-out both;
@@ -191,8 +196,11 @@
     --grove-gray-5: var(--color-ink-400);
     --grove-gray-6: var(--color-ink-300);
     --grove-gray-7: var(--color-ink-100);
-    --grove-primary: var(--grove-foreground);
-    --grove-primary-foreground: var(--grove-gray-7);
+    /* Brand color from `theme.primaryColor` (grove.config.ts) —
+     * BaseLayout emits `--grove-theme-primary*` on <html>; without
+     * a config the site keeps the neutral ink treatment. */
+    --grove-primary: var(--grove-theme-primary, var(--grove-foreground));
+    --grove-primary-foreground: var(--grove-theme-primary-foreground, var(--grove-gray-7));
     --grove-secondary: var(--grove-gray-7);
     --grove-secondary-foreground: var(--grove-foreground);
     --grove-muted: var(--grove-gray-7);
@@ -219,8 +227,10 @@
     --grove-gray-5: var(--color-ink-700);
     --grove-gray-6: var(--color-ink-800);
     --grove-gray-7: var(--color-ink-900);
-    --grove-primary: var(--grove-foreground);
-    --grove-primary-foreground: var(--grove-gray-7);
+    /* Dark mode lifts the brand color toward white (see BaseLayout's
+     * emitted `--grove-theme-primary-dark`) so contrast holds. */
+    --grove-primary: var(--grove-theme-primary-dark, var(--grove-foreground));
+    --grove-primary-foreground: var(--grove-theme-primary-foreground, var(--grove-gray-7));
     --grove-secondary: var(--grove-gray-6);
     --grove-secondary-foreground: var(--grove-foreground);
     --grove-muted: var(--grove-gray-6);
@@ -789,6 +799,21 @@
 .grove-toc summary { color: inherit; }
 .grove-toc[open] .grove-toc-chevron,
 .grove-toc > summary:hover .grove-toc-chevron { transform: rotate(90deg); }
+/* Desktop (lg+): keep the TOC contents visible even before the
+ * component script sets the `open` attribute (and with JS disabled).
+ * Closed `<details>` content lives in a hidden UA shadow slot, so
+ * both the legacy child rule and the modern `::details-content`
+ * override are needed for cross-browser coverage; the script in
+ * `TableOfContents.astro` sets `open` as the primary mechanism. */
+@media (width >= 64rem) {
+  .grove-toc:not([open]) > *:not(summary) {
+    display: block;
+  }
+  .grove-toc:not([open])::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+}
 .grove-toc-item { padding: 0; }
 .grove-toc-link[data-toc-active] {
   background-color: var(--color-ink-100, #f0f0f0);

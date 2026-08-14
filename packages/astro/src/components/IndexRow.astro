@@ -1,7 +1,16 @@
 ---
+/**
+ * IndexRow — browse-page adapter around the canonical `ProjectCard`.
+ *
+ * Keeps the historical public props (`record`, `detailHref`,
+ * `showChips`, `eager`) so consumer pages copied from earlier versions
+ * keep working, while the visual language is now identical to every
+ * other card surface. The directory extras — curated badge, license,
+ * category · status line, labelled stack/platform chips, and the
+ * GitHub footer link — are enabled via `ProjectCard`'s opt-in props.
+ */
 import type { IndexRecord } from "@grove-dev/core";
-import StackPlatformChips from "./StackPlatformChips.astro";
-import { formatRelative, formatStars, getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl, projectStackIds, statusDisplay, licenseDisplay } from "@grove-dev/astro";
+import ProjectCard from "./ProjectCard.astro";
 
 interface Props {
   record: IndexRecord;
@@ -16,73 +25,31 @@ interface Props {
 }
 
 const { record, detailHref, showChips = true, eager = false, class: className = "" } = Astro.props;
-const item = record;
-const project = item.kind === "project" ? item : null;
-const name = item.kind === "resource" ? item.title : item.name;
-const repoHref = project?.repoUrl ?? item.links.github;
-const { owner, repo } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
-const avatar = project ? project.logoUrl ?? getOwnerAvatarUrl(owner, 80) : undefined;
-const initials = name.split(/\s+/).map((word) => word[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
-const stacks = projectStackIds(project);
-const platforms = project?.platforms ?? [];
-const stars = project?.github?.stars;
-const updatedAt = project?.github?.pushedAt ?? (item.kind === "resource" ? item.publishedAt : null);
-const license = project?.github?.license;
-const status = project?.health?.status;
-const curated = Boolean(item.curation?.reviewed || (project && (project.bestFor.length || project.whyListed.length || project.caveats.length)));
+
+const repoHref =
+  record.kind === "project" ? (record.repoUrl ?? record.links.github) : record.links.github;
+
+const secondaryLinks = repoHref
+  ? [
+      {
+        label: "GitHub",
+        href: repoHref,
+        external: true,
+        event: "external_repo_click",
+        eventSource: "index_row_github",
+      },
+    ]
+  : [];
 ---
 
-<article class={`rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group relative flex flex-col gap-3 p-4  ${className}`}>
-  <header class="flex items-start gap-3">
-    <a href={detailHref} class="relative z-10 flex shrink-0" aria-label={`Open ${name} details`}>
-      {avatar ? (
-        <img
-          src={avatar}
-          alt={`${name} avatar`}
-          width="44"
-          height="44"
-          loading={eager ? "eager" : "lazy"}
-          fetchpriority={eager ? "high" : undefined}
-          decoding="async"
-          class="h-11 w-11 rounded-md border border-ink-200 bg-white object-cover dark:border-ink-800 dark:bg-ink-900"
-        />
-      ) : (
-        <span class="flex h-11 w-11 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-sm font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-300">{initials}</span>
-      )}
-    </a>
-    <div class="min-w-0 flex-1">
-      <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-        <h3 class="m-0 text-[1.0625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
-          <a href={detailHref} class="relative z-10 hover:underline">{name}</a>
-        </h3>
-        {curated && <span class="text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400">✓ curated</span>}
-      </div>
-      <div class="flex flex-wrap items-center gap-x-1.5 text-2xs text-ink-500 dark:text-ink-400">
-        {repoHref && owner && <a href={repoHref} target="_blank" rel="noopener noreferrer" class="relative z-10 font-mono hover:text-ink-900 dark:hover:text-ink-100">@{owner}{repo ? `/${repo}` : ""}</a>}
-        {owner && <span class="text-ink-300 dark:text-ink-700">·</span>}
-        <span>{item.category}</span>
-        {status && <><span class="text-ink-300 dark:text-ink-700">·</span><span>{statusDisplay(status)}</span></>}
-      </div>
-    </div>
-  </header>
-
-  <p class="m-0 line-clamp-2 text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-300">{item.description}</p>
-
-  <dl class="grid grid-cols-3 gap-x-3 text-2xs">
-    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Stars</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{formatStars(stars) ?? "—"}</dd></div>
-    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Updated</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{formatRelative(updatedAt)}</dd></div>
-    <div class="flex items-baseline gap-1.5"><dt class="font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">License</dt><dd class="font-mono text-ink-700 dark:text-ink-300">{license ? licenseDisplay(license) : "—"}</dd></div>
-  </dl>
-
-  {showChips && (platforms.length > 0 || stacks.length > 0) && (
-    <StackPlatformChips
-      stack={stacks[0]}
-      platform={platforms}
-    />
-  )}
-
-  <footer class="relative z-10 mt-1 flex items-center gap-2 border-t border-ink-100 pt-2 text-2xs dark:border-ink-900">
-    <a href={detailHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent px-2 text-2xs">View details →</a>
-    {repoHref && <a href={repoHref} target="_blank" rel="noopener noreferrer" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent px-2 text-2xs">GitHub</a>}
-  </footer>
-</article>
+<ProjectCard
+  record={record}
+  href={detailHref}
+  showCurated
+  showLicense
+  showCategoryStatus
+  labelledChips={showChips}
+  secondaryLinks={secondaryLinks}
+  eager={eager}
+  class={className}
+/>

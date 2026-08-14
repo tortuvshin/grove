@@ -68,6 +68,18 @@ interface Site {
    * at generate time. Components use it to render hero counts,
    * origin card stats, and footer summary lines. */
   stats?: SiteStats;
+  /** Theme knobs from grove.config.ts — resolved into CSS custom
+   * properties on `<html>` so the package stylesheet picks them up.
+   * Values are plain strings because the prop usually arrives from a
+   * JSON import; unknown values fall back to the package defaults. */
+  theme?: {
+    primaryColor?: string;
+    /** "none" | "soft" | "round" */
+    radius?: string;
+    /** "compact" | "comfortable" | "spacious" */
+    density?: string;
+    containerWidth?: string;
+  };
   blueprintConfig?: {
     routeSlug?: string;
     labelSingular?: string;
@@ -107,12 +119,70 @@ const {
 const directoryPath = searchPath ?? `/${site.blueprintConfig?.routeSlug ?? 'items'}`;
 const effectiveGaId = gaId ?? site.analytics?.googleAnalyticsId;
 
+// ── Theme wiring ─────────────────────────────────────────────────
+// `theme.*` from grove.config.ts resolves to CSS custom properties
+// on the <html> style attribute. An attribute (not an inline
+// <style>) so the override wins over the bundled stylesheet
+// regardless of how Vite orders the CSS output.
+const RADIUS_PRESETS: Record<string, [string, string, string]> = {
+  none: ["0rem", "0rem", "0rem"],
+  soft: ["0.625rem", "0.5rem", "0.75rem"],
+  round: ["0.875rem", "0.75rem", "1rem"],
+};
+const DENSITY_SPACING: Record<string, string> = {
+  compact: "0.225rem",
+  comfortable: "0.25rem",
+  spacious: "0.28rem",
+};
+
+/** Black-or-white text choice for the brand color, via sRGB luma. */
+function primaryForeground(hex: string): string {
+  const raw = hex.replace("#", "");
+  const full = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
+  const int = Number.parseInt(full.slice(0, 6), 16);
+  if (Number.isNaN(int)) return "#ffffff";
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luma > 0.65 ? "var(--color-ink-950, #0a0a0a)" : "#ffffff";
+}
+
+const themeConfig = site.theme;
+const themeStyleParts: string[] = [];
+if (themeConfig) {
+  const radius = RADIUS_PRESETS[themeConfig.radius ?? "soft"];
+  if (radius && themeConfig.radius && themeConfig.radius !== "soft") {
+    themeStyleParts.push(
+      `--grove-radius: ${radius[0]}`,
+      `--grove-radius-lg: ${radius[1]}`,
+      `--grove-radius-xl: ${radius[2]}`,
+    );
+  }
+  const spacing = DENSITY_SPACING[themeConfig.density ?? "comfortable"];
+  if (spacing && themeConfig.density && themeConfig.density !== "comfortable") {
+    themeStyleParts.push(`--spacing: ${spacing}`);
+  }
+  if (themeConfig.containerWidth) {
+    themeStyleParts.push(`--grove-container: ${themeConfig.containerWidth}`);
+  }
+  const primary = themeConfig.primaryColor;
+  if (typeof primary === "string" && /^#[0-9a-fA-F]{3,8}$/.test(primary)) {
+    themeStyleParts.push(
+      `--grove-theme-primary: ${primary}`,
+      `--grove-theme-primary-dark: color-mix(in oklab, ${primary} 72%, white)`,
+      `--grove-theme-primary-foreground: ${primaryForeground(primary)}`,
+    );
+  }
+}
+const themeStyle = themeStyleParts.length > 0 ? `${themeStyleParts.join("; ")};` : undefined;
+
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" style={themeStyle}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

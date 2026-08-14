@@ -28,6 +28,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
     filtersFromSearchParams,
     hrefForLens,
     isLensActive,
+    paginationPageList,
     removeFilter,
     searchParamsFromFilters,
     sortDisplay,
@@ -42,8 +43,12 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
 
       const items = JSON.parse(source.textContent || "[]");
       const { slug, singular, plural, taxonomy } = JSON.parse(configSource.textContent || "{}");
+      // `:scope >` keeps the lookup on the page's own `<li>` wrappers —
+      // the card component inside each item also carries
+      // `data-record-slug`, and appending/hiding the inner card instead
+      // of its wrapper would tear the list apart.
       const nodes = new Map(
-        [...list.querySelectorAll("[data-record-slug]")].map((node) => [
+        [...list.querySelectorAll(":scope > [data-record-slug]")].map((node) => [
           (node as HTMLElement).dataset.recordSlug,
           node,
         ]),
@@ -71,7 +76,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         // keystroke / filter change this would otherwise thrash the
         // DOM order even when the sort + filter result is identical
         // to the previous run.
-        const currentOrder = [...list.querySelectorAll("[data-record-slug]")].map(
+        const currentOrder = [...list.querySelectorAll(":scope > [data-record-slug]")].map(
           (node) => (node as HTMLElement).dataset.recordSlug,
         );
         const nextOrder = filtered.map((record) => record.slug);
@@ -97,20 +102,57 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         if (pageLabel) pageLabel.textContent = pageCount > 1 ? ` · page ${page} of ${pageCount}` : "";
         if (empty) empty.classList.toggle("hidden", filtered.length > 0);
 
+        // Rebuild the pagination controls, mirroring the server-rendered
+        // `Pagination.astro` (Previous/Next + windowed page list via the
+        // shared `paginationPageList`) so client filtering never degrades
+        // the affordances of the initial render.
         const pagination = document.querySelector("#results-pagination");
         if (pagination) {
           pagination.innerHTML = "";
           if (pageCount > 1) {
-            for (let target = 1; target <= pageCount; target += 1) {
+            const linkClass =
+              "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent min-w-9 px-2 py-1.5 text-2xs";
+            const hrefFor = (target: number) => {
               const next = searchParamsFromFilters({ ...filters, page: target });
+              return `/${slug}${next.size ? `?${next}` : ""}`;
+            };
+            const nav = document.createElement("nav");
+            nav.className = "flex flex-wrap items-center justify-center gap-1.5";
+            nav.setAttribute("aria-label", "Pagination");
+            const control = (label: string, target: number | null, rel?: string) => {
+              if (target === null) {
+                const span = document.createElement("span");
+                span.className = `${linkClass} pointer-events-none opacity-40`;
+                span.textContent = label;
+                return span;
+              }
               const link = document.createElement("a");
-              link.href = `/${slug}${next.size ? `?${next}` : ""}`;
-              link.textContent = String(target);
-              link.setAttribute("aria-label", `Page ${target}`);
-              if (target === page) link.setAttribute("aria-current", "page");
-              link.className = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-sm";
-              pagination.append(link);
+              link.href = hrefFor(target);
+              link.textContent = label;
+              link.className = linkClass;
+              if (rel) link.rel = rel;
+              return link;
+            };
+            nav.append(control("Previous", page > 1 ? page - 1 : null, "prev"));
+            for (const entry of paginationPageList(page, pageCount)) {
+              if (entry === "ellipsis") {
+                const dots = document.createElement("span");
+                dots.className = "px-1 text-2xs text-ink-400";
+                dots.setAttribute("aria-hidden", "true");
+                dots.textContent = "...";
+                nav.append(dots);
+                continue;
+              }
+              const link = control(String(entry), entry);
+              link.setAttribute("aria-label", `Page ${entry}`);
+              if (entry === page) {
+                link.setAttribute("aria-current", "page");
+                link.className = `${linkClass} bg-primary text-primary-foreground hover:bg-primary/90`;
+              }
+              nav.append(link);
             }
+            nav.append(control("Next", page < pageCount ? page + 1 : null, "next"));
+            pagination.append(nav);
           }
         }
       }

@@ -24,6 +24,7 @@
  * homepage never collapses to a blank section.
  */
 import type { IndexRecord } from "@grove-dev/core";
+import CardGrid from "./CardGrid.astro";
 import ProjectCard from "./ProjectCard.astro";
 import Container from "../layouts/Container.astro";
 import SectionHeader from "../layouts/SectionHeader.astro";
@@ -95,9 +96,7 @@ const visible = items.slice(0, limit);
         {emptyLabel}
       </p>
     ) : (
-      <div
-        class="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      >
+      <CardGrid>
         {visible.map((item) => {
           // Resolve href: caller-supplied `hrefFor` callback wins;
           // otherwise fall back to `${pathPrefix}/${slug}`. The href
@@ -109,10 +108,12 @@ const visible = items.slice(0, limit);
           const finalHref =
             typeof hrefFor === "function" ? hrefFor(item) : fallbackHref;
           return (
-            <ProjectCard record={item} href={finalHref} />
+            <li class="m-0 p-0">
+              <ProjectCard record={item} href={finalHref} />
+            </li>
           );
         })}
-      </div>
+      </CardGrid>
     )}
 
     {viewAllHref && (

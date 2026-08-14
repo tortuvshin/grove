@@ -13,6 +13,7 @@
  * the consumer's content pipeline). `emptyLabel` matches
  * `RecordSection`'s API for empty-state copy.
  */
+import CardGrid from "./CardGrid.astro";
 import CollectionRow from "./CollectionRow.astro";
 import Container from "../layouts/Container.astro";
 import SectionHeader from "../layouts/SectionHeader.astro";
@@ -70,13 +71,13 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
         {emptyLabel}
       </p>
     ) : (
-      <ul class="m-0 flex list-none flex-col gap-3 p-0">
+      <CardGrid>
         {model.entries.map((entry, i) => (
           <li class="m-0 p-0">
-            <CollectionRow entry={entry} eager={i < 2} />
+            <CollectionRow entry={entry} eager={i < 3} />
           </li>
         ))}
-      </ul>
+      </CardGrid>
     )}
 
     {model.related.length > 0 && (

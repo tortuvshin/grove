@@ -28,6 +28,8 @@ interface Props {
   viewAllLabel?: string;
   title?: string;
   description?: string;
+  /** Render per-user contribution counts (config: contributors.showContributionCount). */
+  showContributionCount?: boolean;
   class?: string;
 }
 
@@ -38,6 +40,7 @@ const {
   viewAllLabel = "View all",
   title = "Built by the community",
   description = "The people improving this directory through code, curation, and review.",
+  showContributionCount = true,
   class: className = "",
 } = Astro.props;
 
@@ -125,7 +128,7 @@ const visible = contributors
                 <span class="line-clamp-1 text-2xs font-medium text-ink-700 group-hover:text-ink-900 dark:text-ink-300 dark:group-hover:text-ink-100">
                   {c.name ?? c.username}
                 </span>
-                {typeof c.contributions === "number" && (
+                {showContributionCount && typeof c.contributions === "number" && (
                   <span class="font-mono text-2xs text-ink-400">
                     {fmt(c.contributions) ?? c.contributions}
                   </span>
