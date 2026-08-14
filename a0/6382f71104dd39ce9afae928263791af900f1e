@@ -1,0 +1,78 @@
+apps/docs/src/layouts/HomeLayout.astro
+  s_99b4b89a722b01::t_d87043e6a9acb8 181
+apps/docs/src/components/home/OpenApps.astro
+  s_99b4b89a722b01::t_f02f73ac1b58a4 23-24
+  s_99b4b89a722b01::t_0b8394a15fb2f5 36-44
+  s_99b4b89a722b01::t_5d90d4b8a751da 2,4-6
+apps/docs/src/home-landing.test.ts
+  s_99b4b89a722b01::t_e5943c3db42841 296-330,336-341
+  s_99b4b89a722b01::t_fd246d4da323e8 108-112
+  s_99b4b89a722b01::t_cc54ddfd046729 260-261,263,266-270
+  s_99b4b89a722b01::t_e7dc55642077cf 344,351-354,356-360
+  s_99b4b89a722b01::t_7527a2c1417ff9 374
+  s_99b4b89a722b01::t_51e60c175d1c9d 249
+  s_99b4b89a722b01::t_7e0200bf331185 18,25,36-38,40,46
+  s_99b4b89a722b01::t_0491b31ca5e7a0 229-230,240
+apps/docs/src/styles/home.css
+  s_99b4b89a722b01::t_644b4463a95f6a 31-37
+apps/docs/src/pages/index.astro
+  s_99b4b89a722b01::t_0a5caa3c672ead 7
+  s_99b4b89a722b01::t_d18dee04ade1f1 20
+apps/docs/src/components/home/Pipeline.astro
+  s_99b4b89a722b01::t_3faa33a7acfa0d 136-137
+  s_99b4b89a722b01::t_fbe559f16bb3f4 246
+  s_99b4b89a722b01::t_9bea59584c5398 1-135,138-245,247-287
+packages/astro/src/styles.css
+  s_115d4f48753b54::t_a4b30177a385de 292-304
+  s_115d4f48753b54::t_ffed0c77f1108e 286-291
+apps/docs/src/components/home/Demo.astro
+  s_99b4b89a722b01::t_9d83767f37c059 306-309,313
+  s_99b4b89a722b01::t_ea72b4361e54cd 462,465
+  s_99b4b89a722b01::t_e39231f3c36067 200-202,204-205
+  s_99b4b89a722b01::t_b1ae05a8a1ace1 142
+  s_99b4b89a722b01::t_5446eb6b3ae2dc 330
+  s_99b4b89a722b01::t_beda4cba20dcfc 743-744,749,763,765-766,770-772,778-790
+  s_99b4b89a722b01::t_c0f1ec4db6bd58 571
+  s_99b4b89a722b01::t_fce46f79f64d1a 799,803-806,808-809,819,821-824,837-846,848-852,854,858-859,861,866,876
+  s_99b4b89a722b01::t_6d7beea616d866 4-10
+  s_99b4b89a722b01::t_e866e71d4038d6 128
+  s_99b4b89a722b01::t_b6c1416397380f 288
+  s_99b4b89a722b01::t_404396c8d72b3e 764
+  s_99b4b89a722b01::t_69f5aa90fae4f5 521-522,526,536,544-558,560-563,565-567,569-570,572-574,577-578,580-581
+  s_99b4b89a722b01::t_9d1bbefca4f539 365
+  s_99b4b89a722b01::t_f59b35084f3264 915-919,926-927,931
+  s_99b4b89a722b01::t_ea38202bddb34c 483
+  s_99b4b89a722b01::t_2c5153415ea673 45-57
+  s_99b4b89a722b01::t_7e5e10cc394c37 791
+apps/docs/src/components/home/FinalCta.astro
+  s_99b4b89a722b01::t_c478866a15e9a6 42-80,85-139
+  s_99b4b89a722b01::t_21f933bbf001f4 28
+  s_99b4b89a722b01::t_2e6a7f1202438f 150-154
+  s_99b4b89a722b01::t_8ffb94536dbb85 2-10
+  s_99b4b89a722b01::t_1b394c2b87d15a 36
+  s_99b4b89a722b01::t_20ef7eedd8b53b 140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a06382f71104dd39ce9afae928263791af900f1e",
+  "prompts": {},
+  "sessions": {
+    "s_115d4f48753b54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f54e25ee-07c3-4168-836e-363c63e77e7c",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_99b4b89a722b01": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef8237ea-c10a-405c-ab01-620f9756b5bc",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
