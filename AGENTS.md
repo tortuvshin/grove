@@ -1,72 +1,48 @@
-# AGENTS.md
-
-## Grove
+# Grove
 
 Grove is a **file-first publishing system for structured knowledge**.
 
-It turns structured content such as YAML and Markdown into rich outputs for both humans and machines, while helping keep those outputs synchronized and current.
+## What Grove does
 
-Think in terms of:
+Files are the source of truth — YAML, Markdown, and other structured sources owned by the user. Grove turns that content into multiple useful outputs:
 
-```text
-Files / structured data
-        ↓
-      Grove
-        ↓
-Website + rich pages + collections
-README + SEO + sitemap
-Machine-readable + LLM outputs
-        ↓
-Automated maintenance
-```
+- Websites and rich pages
+- Collections, indexes, and curated views
+- README content, SEO metadata, sitemaps, structured data
+- LLM-oriented and other machine-readable outputs
+
+Automation keeps these outputs synchronized with the source files and reduces stale content.
 
 ## Product principles
 
-- Files remain the source of truth.
-- Write content once and derive multiple outputs from it.
+- Files are the source of truth; generated outputs are derived from them.
+- One piece of content should produce many useful outputs, not be re-entered per surface.
+- Automation and synchronization are core, not optional.
 - Prefer portable, transparent formats over proprietary storage.
-- Static publishing should remain a first-class workflow.
-- Generated outputs should not become separate sources of truth.
-- Automation should reduce stale content and repeated manual maintenance.
-- Human-readable and machine-readable outputs are both important.
-- Rich Markdown content and structured metadata should work together.
-- Avoid adding infrastructure or abstractions without a real use case.
+- Static-first workflows are the default.
+- Avoid adding infrastructure (databases, servers, abstractions) without a real use case.
 
-## Positioning
+## What Grove is not
 
-Do not define Grove by a single presentation format or use case.
+A directory is one possible use case — not the product definition.
 
-A directory, catalog, resource library, knowledge base, or curated collection can all be built with Grove, but none of them alone defines the product.
+Do not position Grove primarily as a:
 
-Avoid positioning Grove primarily as:
-
-- directory starter
-- directory generator
-- directory template
+- directory starter, generator, or template
 - YAML website builder
 - Astro theme
 
-Prefer language around:
+When writing product copy, describe what Grove **enables** — file-first publishing of structured knowledge into multiple outputs — not just one presentation format.
 
-- structured content
-- structured knowledge
-- file-first publishing
-- rich knowledge sites
-- multiple outputs
-- automated maintenance
-- human and machine-readable content
+## Architecture guardrails
 
-When writing product copy, describe **what Grove enables**, not just how it is implemented.
+Before introducing a new architectural decision, check that it:
 
-## Architecture
-
-Before introducing a new architectural decision, ask:
-
-- Does it preserve file-first ownership?
-- Does it improve publishing, synchronization, or maintenance?
-- Does it work across different Grove use cases?
-- Does it introduce unnecessary server or database requirements?
-- Is there a simpler solution?
+- preserves file-first ownership
+- supports static publishing and portability
+- improves publishing, synchronization, or maintenance
+- works across Grove use cases (not just one)
+- does not introduce unnecessary database or server requirements
 
 Do not turn Grove into a traditional CMS or generic platform unless explicitly required.
 
@@ -74,14 +50,13 @@ Do not turn Grove into a traditional CMS or generic platform unless explicitly r
 
 For landing pages, README, docs, examples, and onboarding:
 
-- Keep the full Grove mental model intact.
+- Keep the full mental model intact: source content → Grove → multiple outputs → ongoing maintenance.
 - Do not reduce Grove to directories.
-- Show the relationship between source content, generated outputs, and automation.
+- Show the relationship between source files, generated outputs, and automation.
 - Prefer concrete outcomes over abstract technical terminology.
-- Use animation and visuals to explain how Grove works, not as decoration.
 
-## Core mental model
+## Mental model
 
-> **Maintain structured knowledge in files. Grove publishes it into useful human- and machine-readable outputs and keeps everything in sync.**
+> Maintain structured knowledge in files. Grove publishes it into useful human- and machine-readable outputs and keeps everything in sync.
 
 When uncertain about a product or implementation decision, return to this model.
