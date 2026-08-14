@@ -23,14 +23,18 @@
       </svg>
     </a>
 
+    <!-- The mark grows in on load: a seed falls, the stem draws upward, the
+         leaves unfurl, the glow blooms — then the whole mark keeps floating.
+         Pure CSS; with reduced motion it renders fully grown and still. -->
     <div class="hero-mark relative mt-12" aria-hidden="true">
       <div class="hero-mark-glow absolute left-1/2 top-1/2 size-40 -translate-x-1/2 -translate-y-1/2"></div>
       <svg class="relative size-20 text-fg sm:size-24" viewBox="0 0 32 32" fill="none">
-        <path d="M16 28V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        <path d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor" />
-        <path d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7" />
-        <path d="M16 18C16 18 16.2 21 19.5 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        <path d="M16 21C16 21 15.8 24 12.5 25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <circle class="hero-seed" cx="16" cy="27" r="1.6" fill="currentColor" />
+        <path class="hero-stem" d="M16 28V13" pathLength="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <path class="hero-leaf hero-leaf-r" d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor" />
+        <path class="hero-leaf hero-leaf-l" d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7" />
+        <path class="hero-shoot hero-shoot-1" d="M16 18C16 18 16.2 21 19.5 22" pathLength="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <path class="hero-shoot hero-shoot-2" d="M16 21C16 21 15.8 24 12.5 25" pathLength="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
       </svg>
     </div>
 
@@ -75,8 +79,13 @@
 </section>
 
 <style>
+  /* Growth timeline: seed falls (0–0.7s) → stem draws up (0.7–1.4s) →
+     leaves unfurl (1.3–2.1s) → side shoots (1.9–2.5s) → glow blooms, then
+     the idle float and pulse take over. Every animation uses `both`, so the
+     pre-delay state is hidden and the final state is the fully grown mark —
+     which is also exactly what reduced-motion users see. */
   .hero-mark {
-    animation: hero-mark-float 6s ease-in-out infinite alternate;
+    animation: hero-mark-float 6s ease-in-out 2.6s infinite alternate;
   }
 
   @keyframes hero-mark-float {
@@ -84,10 +93,79 @@
     to { transform: translateY(-10px); }
   }
 
+  .hero-seed {
+    opacity: 0;
+    animation:
+      hero-seed-fall 0.6s cubic-bezier(0.3, 1.3, 0.5, 1) 0.15s both,
+      hero-seed-vanish 0.35s ease-out 0.8s forwards;
+  }
+
+  @keyframes hero-seed-fall {
+    from { opacity: 0; transform: translateY(-24px); }
+    30% { opacity: 1; }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes hero-seed-vanish {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(0.5px) scale(0.4); }
+  }
+
+  .hero-stem {
+    stroke-dasharray: 1;
+    animation: hero-stem-grow 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.75s both;
+  }
+
+  /* The 0%→1% opacity step hides the round-linecap dot that an undrawn
+     dashed path would otherwise leave at its start point. */
+  @keyframes hero-stem-grow {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    1% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+  }
+
+  .hero-leaf {
+    transform-box: view-box;
+    transform-origin: 16px 13px;
+  }
+
+  .hero-leaf-r {
+    animation: hero-leaf-unfurl-r 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) 1.3s both;
+  }
+
+  .hero-leaf-l {
+    animation: hero-leaf-unfurl-l 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) 1.5s both;
+  }
+
+  @keyframes hero-leaf-unfurl-r {
+    from { opacity: 0; transform: scale(0) rotate(-14deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes hero-leaf-unfurl-l {
+    from { opacity: 0; transform: scale(0) rotate(14deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  .hero-shoot {
+    stroke-dasharray: 1;
+    animation: hero-stem-grow 0.45s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+
+  .hero-shoot-1 { animation-delay: 1.95s; }
+  .hero-shoot-2 { animation-delay: 2.1s; }
+
   .hero-mark-glow {
     background: radial-gradient(circle, rgb(39 183 200 / 0.3), rgb(125 211 216 / 0.12) 55%, transparent 72%);
     filter: blur(28px);
-    animation: hero-mark-pulse 5s ease-in-out infinite alternate;
+    animation:
+      hero-glow-bloom 1.2s ease-out 1.1s both,
+      hero-mark-pulse 5s ease-in-out 2.4s infinite alternate;
+  }
+
+  @keyframes hero-glow-bloom {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    to { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
   }
 
   @keyframes hero-mark-pulse {
@@ -97,9 +175,16 @@
 
   @media (prefers-reduced-motion: reduce) {
     .hero-mark,
-    .hero-mark-glow {
+    .hero-mark-glow,
+    .hero-seed,
+    .hero-stem,
+    .hero-leaf,
+    .hero-shoot {
       animation: none;
     }
+
+    /* Base states are the grown mark; only the seed must stay hidden. */
+    .hero-seed { opacity: 0; }
   }
 </style>
 
