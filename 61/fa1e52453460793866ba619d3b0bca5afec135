@@ -1,0 +1,19 @@
+apps/docs/src/content/docs/sources/decisions.md
+  s_73ddd1ae168e3c::t_cb98be74717299 2-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "61fa1e52453460793866ba619d3b0bca5afec135",
+  "prompts": {},
+  "sessions": {
+    "s_73ddd1ae168e3c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "38771dbf-4ab2-45de-b1db-5ee862865738",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
