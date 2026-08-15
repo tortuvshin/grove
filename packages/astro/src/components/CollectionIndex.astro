@@ -34,6 +34,14 @@ interface Props {
   emptyLabel?: string;
   /** Cap the number of cards rendered. Omit for "all". */
   limit?: number;
+  /**
+   * Heading level for the section title. Pass 1 when this component
+   * renders the page's title (the `/collections` index); the default
+   * 2 fits embedded use (homepage teaser).
+   */
+  headingLevel?: 1 | 2;
+  /** Noun pair for the per-card entry counts (blueprint labels). */
+  countNoun?: { singular: string; plural: string };
   class?: string;
 }
 
@@ -47,6 +55,8 @@ const {
   viewAllLabel = "View all",
   emptyLabel = "No collections yet.",
   limit,
+  headingLevel = 2,
+  countNoun,
   class: className = "",
 } = Astro.props;
 
@@ -57,7 +67,7 @@ const headerActions = Astro.slots.has("header-actions");
 <section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <SectionHeader eyebrow={eyebrow} title={title} description={description} />
+      <SectionHeader eyebrow={eyebrow} title={title} description={description} level={headingLevel} />
       {(viewAllHref || headerActions) && (
         <div class="flex shrink-0 items-center gap-2 pb-2">
           {viewAllHref && (
@@ -81,7 +91,7 @@ const headerActions = Astro.slots.has("header-actions");
       <CardGrid>
         {cards.map((c) => (
           <li class="m-0 p-0">
-            <CollectionCard collection={c} />
+            <CollectionCard collection={c} countNoun={countNoun} />
           </li>
         ))}
       </CardGrid>

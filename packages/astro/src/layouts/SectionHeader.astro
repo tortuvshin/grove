@@ -4,11 +4,12 @@ interface Props {
   title: string;
   description?: string;
   align?: "left" | "center";
-  level?: 2 | 3;
+  /** Pass 1 when this header IS the page title (one h1 per route). */
+  level?: 1 | 2 | 3;
 }
 
 const { eyebrow, title, description, align = "left", level = 2 } = Astro.props;
-const Heading = `h${level}` as "h2" | "h3";
+const Heading = `h${level}` as "h1" | "h2" | "h3";
 ---
 
 <header

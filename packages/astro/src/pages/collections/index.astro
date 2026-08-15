@@ -21,6 +21,10 @@ const entries = recordsToCollectionEntries(
   siteConfig,
 );
 const model = getCollectionIndexModel(collections, entries);
+const countNoun = {
+  singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
+  plural: siteConfig.blueprintConfig?.labelPlural ?? "items",
+};
 ---
 
 <BaseLayout
@@ -28,5 +32,5 @@ const model = getCollectionIndexModel(collections, entries);
   description="Curated and generated directories of related items."
   site={siteConfig}
 >
-  <CollectionIndex model={model} />
+  <CollectionIndex model={model} headingLevel={1} countNoun={countNoun} />
 </BaseLayout>

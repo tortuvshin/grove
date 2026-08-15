@@ -7,10 +7,11 @@
 import siteConfig from "@grove/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
-import { getHomePageModel, itemLabelPlural } from "@grove-dev/astro/server";
+import { getHomePageModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
 const { stacks } = getHomePageModel(siteConfig);
+const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
 ---
 
 <BaseLayout
@@ -22,5 +23,7 @@ const { stacks } = getHomePageModel(siteConfig);
     stacks={stacks}
     pathPrefix={`/${slug}`}
     itemLabelPlural={itemLabelPlural()}
+    itemNoun={itemNoun}
+    headingLevel={1}
   />
 </BaseLayout>

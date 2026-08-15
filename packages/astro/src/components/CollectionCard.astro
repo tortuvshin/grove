@@ -8,6 +8,8 @@
  * and stays in sync with the record cards as the design evolves.
  * Follows the `CardGrid` sizing contract (`h-full flex flex-col`).
  */
+import { formatCount } from "@grove-dev/core";
+
 interface Props {
   collection: {
     slug: string;
@@ -19,10 +21,17 @@ interface Props {
   };
   /** Analytics source emitted with `collection_card_click`. */
   eventSource?: string;
+  /** Noun pair for the entry count (blueprint labels). */
+  countNoun?: { singular: string; plural: string };
   class?: string;
 }
 
-const { collection: c, eventSource = "collection_index", class: className = "" } = Astro.props;
+const {
+  collection: c,
+  eventSource = "collection_index",
+  countNoun = { singular: "item", plural: "items" },
+  class: className = "",
+} = Astro.props;
 ---
 
 <a
@@ -42,6 +51,6 @@ const { collection: c, eventSource = "collection_index", class: className = "" }
     {c.description}
   </span>
   <span class="mt-auto pt-2 text-2xs font-medium text-ink-500 transition-colors group-hover:text-ink-900 dark:text-ink-400 dark:group-hover:text-ink-100">
-    {c.count} {c.count === 1 ? "item" : "items"} →
+    {formatCount(c.count, countNoun)} →
   </span>
 </a>

@@ -1,4 +1,5 @@
 ---
+import { formatCount } from "@grove-dev/core";
 import Icon from "./Icon.astro";
 /**
  * StackGrid — browse-by-stack grid for the home page.
@@ -32,6 +33,10 @@ interface Props {
   /** Hide the section eyebrow / header entirely. */
   bare?: boolean;
   itemLabelPlural?: string;
+  /** Noun pair for count chips — singular fixes "1 projects". */
+  itemNoun?: { singular: string; plural: string };
+  /** Pass 1 when this grid IS the page (`/stacks` index). */
+  headingLevel?: 1 | 2;
 }
 
 const {
@@ -41,7 +46,11 @@ const {
   class: className = "",
   bare = false,
   itemLabelPlural = "items",
+  itemNoun = { singular: "item", plural: "items" },
+  headingLevel = 2,
 } = Astro.props;
+
+const Heading = `h${headingLevel}` as "h1" | "h2";
 
 function buildHref(slug: string): string {
   const base = pathPrefix.replace(/\/$/, "");
@@ -73,12 +82,12 @@ function statusLabel(s: StackEntry["status"]): string | null {
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           Stacks
         </span>
-        <h2
+        <Heading
           id="grove-stackgrid-heading"
           class="m-0 mt-1 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
         >
           Browse by stack
-        </h2>
+        </Heading>
         <p class="m-0 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
           Pick a stack to see real {itemLabelPlural} built with it.
         </p>
@@ -104,7 +113,7 @@ function statusLabel(s: StackEntry["status"]): string | null {
               </h3>
               {typeof s.count === "number" && (
                 <span class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400">
-                  {s.count} {itemLabelPlural}
+                  {formatCount(s.count, itemNoun)}
                 </span>
               )}
             </div>

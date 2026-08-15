@@ -33,5 +33,9 @@ const model = getCollectionPageModel(collection, entries, collections);
   <CollectionPage
     model={model}
     eyebrow={model.collection.kind === "curated" ? "Curated collection" : "Generated collection"}
+    countNoun={{
+      singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
+      plural: siteConfig.blueprintConfig?.labelPlural ?? "items",
+    }}
   />
 </BaseLayout>

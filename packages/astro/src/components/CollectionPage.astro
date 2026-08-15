@@ -13,6 +13,7 @@
  * the consumer's content pipeline). `emptyLabel` matches
  * `RecordSection`'s API for empty-state copy.
  */
+import { formatCount } from "@grove-dev/core";
 import CardGrid from "./CardGrid.astro";
 import CollectionRow from "./CollectionRow.astro";
 import Container from "../layouts/Container.astro";
@@ -31,6 +32,13 @@ interface Props {
   emptyLabel?: string;
   /** Section id (deep link + stable key). */
   id?: string;
+  /**
+   * Heading level for the collection title. This component IS the
+   * page on collection detail routes, so it defaults to 1.
+   */
+  headingLevel?: 1 | 2;
+  /** Noun pair for the entry count (blueprint labels). */
+  countNoun?: { singular: string; plural: string };
   class?: string;
 }
 
@@ -41,6 +49,8 @@ const {
   description,
   emptyLabel = "This collection is currently empty.",
   id,
+  headingLevel = 1,
+  countNoun = { singular: "item", plural: "items" },
   class: className = "",
 } = Astro.props;
 
@@ -51,7 +61,7 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
 
 <section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
-    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} />
+    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} level={headingLevel} />
 
     {model.collection.selectionNote && (
       <p class="m-0 mb-6 max-w-[64ch] text-[0.875rem] font-medium text-ink-700 dark:text-ink-300">
@@ -63,7 +73,7 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
     <slot name="intro" />
 
     <p class="m-0 mb-4 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-      {model.total} {model.total === 1 ? "item" : "items"}
+      {formatCount(model.total, countNoun)}
     </p>
 
     {model.isEmpty ? (
