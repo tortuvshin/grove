@@ -1,0 +1,48 @@
+packages/astro/src/components/ProjectCard.astro
+  s_24bcb38f14ac54::t_a41893f70eb9c8 184-187
+apps/example/src/pages/categories/index.astro
+  s_24bcb38f14ac54::t_2d4464a3adf084 10,13
+  s_24bcb38f14ac54::t_c97e01b2d005a1 28
+packages/astro/src/components/SubmissionClient.astro
+  s_24bcb38f14ac54::t_84364261a55595 49
+  s_24bcb38f14ac54::t_a565d8d923fce1 79-81
+  s_24bcb38f14ac54::t_b3d8e179998019 109
+  s_24bcb38f14ac54::t_ebe4f9155fcb16 245
+  s_24bcb38f14ac54::t_09d565937acf25 6
+apps/example/src/pages/404.astro
+  s_24bcb38f14ac54::t_8698c962b72ef7 26-29,31-32,35,38,44,49-50,55-59
+  s_24bcb38f14ac54::t_a623774c10df35 12-13
+packages/astro/src/server/models.ts
+  s_24bcb38f14ac54::t_a931ac6c153225 212-215
+  s_24bcb38f14ac54::t_b967f6702d14ee 382-384,392-399
+  s_24bcb38f14ac54::t_21bdf41f166342 126-166
+apps/example/src/pages/stacks/index.astro
+  s_24bcb38f14ac54::t_7066e0127f42c7 30
+  s_24bcb38f14ac54::t_9ef64b5dad1df0 10,13-15
+apps/example/src/pages/submit.astro
+  s_24bcb38f14ac54::t_55b3928c3f089e 164-165
+  s_24bcb38f14ac54::t_93b772d7471ce3 181
+  s_24bcb38f14ac54::t_bf0f33c4ae4738 57-59,61-67
+  s_24bcb38f14ac54::t_d2e9750e382450 21-22
+  s_24bcb38f14ac54::t_60fb74d5c75f6a 129-138
+  s_24bcb38f14ac54::t_dfcbe3553151d3 79
+  s_24bcb38f14ac54::t_fbc0d730d1a8ff 7
+apps/example/src/pages/index.astro
+  s_24bcb38f14ac54::t_e32231c49b568a 123,134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "bf433b6a522408da6590acfb289a40e1bb963a19",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
