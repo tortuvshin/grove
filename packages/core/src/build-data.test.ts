@@ -331,4 +331,30 @@ describe("generate — filesystem round-trip", () => {
       "unordered-b",
     ]);
   });
+
+  it("generates a byte-identical site-config.json on repeated runs", async () => {
+    await writeFile(
+      join(cwd, "data", "records", "demo.yml"),
+      [
+        "kind: project",
+        "slug: demo",
+        "name: Demo",
+        "description: a demo",
+        "category: tools",
+        "links: {}",
+        "curation: { reviewed: false, labels: [], lenses: [] }",
+        "scores: {}",
+      ].join("\n"),
+    );
+
+    const sitePath = join(cwd, "data", "generated", "site-config.json");
+    await generate(cwd);
+    const first = await readFile(sitePath, "utf8");
+    await generate(cwd);
+    const second = await readFile(sitePath, "utf8");
+    // Determinism gate: same sources must produce the same artifact —
+    // a non-deterministic config would make every build a spurious
+    // diff in the committed generated files.
+    expect(second).toBe(first);
+  });
 });
