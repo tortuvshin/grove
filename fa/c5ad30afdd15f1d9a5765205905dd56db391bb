@@ -1,0 +1,57 @@
+packages/astro/src/components/CollectionCard.astro
+  s_24bcb38f14ac54::t_18c819874347a8 11-12,24-25,29-34
+  s_24bcb38f14ac54::t_2e76e6fe298e2d 54
+apps/example/src/pages/stacks/index.astro
+  s_24bcb38f14ac54::t_02af4acdf01091 10,14
+  s_24bcb38f14ac54::t_b57f4079486da7 26-27
+packages/astro/src/components/StackGrid.astro
+  s_24bcb38f14ac54::t_7ccbe6a9717557 36-39,49-50,53
+  s_24bcb38f14ac54::t_fb8350e9b9910a 116
+  s_24bcb38f14ac54::t_0822b2c018d918 2
+  s_24bcb38f14ac54::t_38e4c1bc527a0d 85,90
+  s_24bcb38f14ac54::t_916a66d33dfa54 54
+packages/astro/src/components/CollectionIndex.astro
+  s_24bcb38f14ac54::t_44835a32be71d6 94
+  s_24bcb38f14ac54::t_d9d694e106aef4 70
+  s_24bcb38f14ac54::t_6190186454f76f 37-44,58-59
+packages/astro/src/pages/collections/[slug].astro
+  s_24bcb38f14ac54::t_e72aa8627f7783 49-52
+packages/astro/src/pages/collections/index.astro
+  s_24bcb38f14ac54::t_98c7826166595a 24-27,35
+apps/example/src/pages/categories/index.astro
+  s_24bcb38f14ac54::t_e515c86878dfc4 26-27
+  s_24bcb38f14ac54::t_80fd6087816399 10,14
+apps/example/src/pages/collections/index.astro
+  s_24bcb38f14ac54::t_dee2387ec2561b 18-21,28
+packages/astro/src/components/CollectionPage.astro
+  s_24bcb38f14ac54::t_228dfb25650f44 35-41,52-53
+  s_24bcb38f14ac54::t_50cd4bd4ebb182 76
+  s_24bcb38f14ac54::t_c385d45bd16fed 16
+  s_24bcb38f14ac54::t_adbbcaf3448675 64
+packages/astro/src/components/CategoryGrid.astro
+  s_24bcb38f14ac54::t_84b7d9a2e25146 62,67
+  s_24bcb38f14ac54::t_96eea75ab64b7d 2
+  s_24bcb38f14ac54::t_c9ea9357c57fc2 27-30,39-40,43
+  s_24bcb38f14ac54::t_d642a0652f1398 89
+  s_24bcb38f14ac54::t_b6e34f9a4291d2 44
+apps/example/src/pages/collections/[slug].astro
+  s_24bcb38f14ac54::t_4dfcd9ab0287ff 36-39
+packages/astro/src/layouts/SectionHeader.astro
+  s_24bcb38f14ac54::t_dd6f6941377512 7-8,12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "fac5ad30afdd15f1d9a5765205905dd56db391bb",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
