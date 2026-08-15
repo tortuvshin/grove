@@ -33,6 +33,7 @@ import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
 import Pagination from "@grove-dev/astro/components/Pagination.astro";
 import DirectoryIndexClient from "@grove-dev/astro/components/DirectoryIndexClient.astro";
 import { removeFilter, searchParamsFromFilters, sortDisplay, SORT_OPTIONS } from "@grove-dev/astro";
+import { formatCount } from "@grove-dev/core";
 
 export function getStaticPaths() {
   const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
@@ -78,7 +79,7 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
         Browse {slug}
       </h1>
       <p class="m-0 mt-2 max-w-[64ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
-        Search, filter, and explore {total} {itemLabel()}{total === 1 ? "" : "s"} in this directory.
+        Search, filter, and explore {formatCount(total, { singular: itemLabel(), plural: itemLabelPlural() })} in this directory.
       </p>
 
       <form
@@ -207,7 +208,7 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
       </CardGrid>
       <div id="empty-state" class:list={["py-12 text-center", sorted.length > 0 && "hidden"]}>
         <p class="m-0 text-sm font-medium text-ink-700 dark:text-ink-200">
-          {`No ${itemLabel()}s match these filters.`}
+          {`No ${itemLabelPlural()} match these filters.`}
         </p>
         <a href={clearFiltersHref} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent mt-4">Clear filters</a>
       </div>

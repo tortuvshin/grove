@@ -116,9 +116,22 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     viewAllLabel={`View all established`}
   />
 
-  <StackGrid stacks={stacks} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
-  <CollectionTeaser model={collectionTeaser} />
-  <CategoryGrid categories={categories} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
+  <StackGrid
+    stacks={stacks}
+    pathPrefix={`/${slug}`}
+    itemLabelPlural={itemPlural}
+    itemNoun={{ singular: itemSingular, plural: itemPlural }}
+  />
+  <CollectionTeaser
+    model={collectionTeaser}
+    countNoun={{ singular: itemSingular, plural: itemPlural }}
+  />
+  <CategoryGrid
+    categories={categories}
+    pathPrefix={`/${slug}`}
+    itemLabelPlural={itemPlural}
+    itemNoun={{ singular: itemSingular, plural: itemPlural }}
+  />
 
   <ContributorsGrid
     contributors={contributors}

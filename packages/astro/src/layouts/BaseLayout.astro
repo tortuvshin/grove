@@ -273,6 +273,12 @@ const favicon =
     </script>
   </head>
   <body class="min-h-screen bg-background text-foreground">
+    <a
+      href="#main"
+      class="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm font-medium text-foreground outline-none ring-2 ring-ring focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+    >
+      Skip to content
+    </a>
     <slot name="header">
       <Header
         site={site}
@@ -281,7 +287,7 @@ const favicon =
       />
     </slot>
 
-    <main>
+    <main id="main">
       <slot />
     </main>
 

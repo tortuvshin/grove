@@ -19,6 +19,8 @@
  */
 import CardGrid from "@grove-dev/astro/components/CardGrid.astro";
 import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
+import { itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { formatCount } from "@grove-dev/core";
 
 interface TaxonomyRecord {
   slug: string;
@@ -37,8 +39,12 @@ interface Props {
   displayName: string;
   /** Lede copy under the heading. */
   lede: string;
-  /** Singular noun used in the count label ("1 project" / "3 projects"). */
-  itemNoun?: string;
+  /**
+   * Noun pair for the heading and count label. Defaults to the
+   * blueprint's singular/plural labels so irregular plurals render
+   * correctly on every blueprint.
+   */
+  itemNoun?: { singular: string; plural: string };
   /** Records filtered by `filterRecords` upstream. */
   records: TaxonomyRecord[];
   /** Index route (e.g. "/projects") for the back link and card hrefs. */
@@ -52,10 +58,10 @@ const {
   eyebrow,
   displayName,
   lede,
-  itemNoun = "project",
+  itemNoun = { singular: itemLabel(), plural: itemLabelPlural() },
   records,
   backHref = "/projects",
-  backLabel = "← Back to all projects",
+  backLabel = `← Back to all ${itemLabelPlural()}`,
 } = Astro.props;
 
 const count = records.length;
@@ -66,17 +72,17 @@ type CardRecord = Parameters<typeof ProjectCard>[0]["record"];
 <section class="mx-auto w-full max-w-wide px-5 py-12 sm:px-7 sm:py-16">
   <p class="m-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">{eyebrow}</p>
   <h1 class="m-0 mt-2 text-[1.875rem] font-semibold tracking-tight text-ink-900 sm:text-[2.125rem] dark:text-ink-100">
-    {displayName} {itemNoun}s
+    {displayName} {itemNoun.plural}
   </h1>
   <p class="m-0 mt-3 max-w-2xl text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400">{lede}</p>
 
   <div class="mt-10">
     <p class="m-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-      {count} {count === 1 ? itemNoun : `${itemNoun}s`}
+      {formatCount(count, itemNoun)}
     </p>
 
     {count === 0 ? (
-      <p class="mt-4 text-sm text-ink-500 dark:text-ink-400">No records yet for this {itemNoun}.</p>
+      <p class="mt-4 text-sm text-ink-500 dark:text-ink-400">No {itemNoun.plural} yet in {displayName}.</p>
     ) : (
       <CardGrid class="mt-6">
         {records.map((record, i) => (

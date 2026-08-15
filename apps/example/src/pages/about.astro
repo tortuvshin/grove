@@ -21,13 +21,14 @@
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 import siteConfig from "@grove/generated/site-config.json";
-import { getPageContentHtml, indexSlug, itemLabel } from "@grove-dev/astro/server";
+import { getPageContentHtml, indexSlug, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const githubUrl = siteConfig.repoUrl;
 const title = `About — ${siteConfig.name}`;
 const description = `${siteConfig.tagline} Built with Grove.`;
 const slug = indexSlug();
 const item = itemLabel();
+const items = itemLabelPlural();
 const pageContentHtml = getPageContentHtml("about");
 ---
 
@@ -54,7 +55,7 @@ const pageContentHtml = getPageContentHtml("about");
         <p class="mt-4 m-0 text-[1rem] sm:text-[1.0625rem] leading-relaxed text-ink-700 dark:text-ink-200 max-w-[62ch]">
           {siteConfig.name} is a curated, health-aware developer directory —
           built so you can find, compare, run, study, and contribute to
-          open-source {item}s.
+          open-source {items}.
         </p>
         <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400 max-w-[62ch]">
           A growing list, forked from the original. Same shape, same
@@ -85,7 +86,7 @@ const pageContentHtml = getPageContentHtml("about");
 
       <section class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors mt-4 p-5 sm:p-6">
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-          Why real {item}s
+          Why real {items}
         </span>
         <h2 class="mt-1 m-0 text-[1.125rem] sm:text-[1.25rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
           Real, runnable source
