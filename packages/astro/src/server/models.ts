@@ -614,7 +614,9 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     // because the TOC + reading-time want the *body* (frontmatter
     // stripped), not the HTML. Re-reading is cheap and keeps the
     // pipeline self-documenting.
-    toc: tocBody ? extractToc(tocBody.body, { maxDepth: 2 }) : [],
+    // Depth 3 so subsections surface in the TOC, indented under
+    // their h2 parents.
+    toc: tocBody ? extractToc(tocBody.body, { maxDepth: 3 }) : [],
     readingMetrics: tocBody ? readingMetrics(tocBody.body) : { wordCount: 0, minutes: 1 },
     jsonLd,
   };

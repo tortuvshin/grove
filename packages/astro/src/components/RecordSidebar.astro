@@ -33,9 +33,15 @@ interface Props {
    * sticky column).
    */
   sticky?: boolean;
+  /**
+   * "column" (default) stacks the cards vertically for a rail;
+   * "grid" lays them out in responsive columns for full-width
+   * placement below the article.
+   */
+  layout?: "column" | "grid";
 }
 
-const { detail, sticky = true } = Astro.props;
+const { detail, sticky = true, layout = "column" } = Astro.props;
 const {
   sidebar,
   github,
@@ -79,10 +85,14 @@ function row(label: string, value: unknown) {
 
 <aside
   class:list={[
-    "grove-sidebar flex flex-col gap-4",
-    sticky && "lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto",
+    layout === "grid"
+      ? "grove-sidebar grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      : "grove-sidebar flex flex-col gap-4",
+    layout === "column" &&
+      sticky &&
+      "lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto",
   ]}
-  aria-label="Record metadata sidebar"
+  aria-label="Record metadata"
 >
 
   {/* ── Activity card ──────────────────────────────────────── */}

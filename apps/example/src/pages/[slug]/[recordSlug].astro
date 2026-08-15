@@ -43,7 +43,7 @@ const { record, name, title, description, itemSingular, jsonLd } = detail;
       <RecordHeader detail={detail} />
 
       <div
-        class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_340px]"
+        class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12"
       >
         {/* Reading column: editorial context, then the article —
             no TOC panel pushing the body down. */}
@@ -54,13 +54,16 @@ const { record, name, title, description, itemSingular, jsonLd } = detail;
             fallback={record.content ? "This record doesn't have notes yet." : undefined}
           />
         </div>
-        {/* Right rail: TOC on top (navigation first), metadata stats
-            below it, one sticky column. */}
-        <div class="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto">
+        {/* Right rail: the TOC and nothing else. */}
+        <div class="min-w-0 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto">
           <TableOfContents items={detail.toc} />
-          <RecordSidebar detail={detail} sticky={false} />
         </div>
       </div>
+
+      {/* Metadata panels — full width below the article. */}
+      <section class="mt-12 border-t border-border pt-8" aria-label="Project details">
+        <RecordSidebar detail={detail} sticky={false} layout="grid" />
+      </section>
     </div>
   </article>
 </BaseLayout>

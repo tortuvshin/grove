@@ -44,14 +44,23 @@ const hasItems = items.length > 1;
         </span>
       </span>
     </summary>
-    {/* Capped + scrollable on desktop so a long document (17+
-        headings) never pushes the article below the fold. */}
-    <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:max-h-60 lg:overflow-y-auto lg:border-t-0 lg:p-0">
+    {/* Full list, no inner scroll — the TOC lives in the right rail
+        and every entry stays visible. h3 entries indent under their
+        h2 parents. */}
+    <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:border-t-0 lg:p-0">
       {items.map((entry) => (
-        <li class="grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5">
+        <li
+          class:list={[
+            "grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5",
+            entry.depth >= 3 && "ml-4 lg:ml-3",
+          ]}
+        >
           <a
             href={`#${entry.id}`}
-            class="grove-toc-link block truncate px-3 py-2 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:px-2 lg:py-1"
+            class:list={[
+              "grove-toc-link block truncate px-3 py-2 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:px-2 lg:py-1",
+              entry.depth >= 3 && "text-[0.8125rem]",
+            ]}
             data-toc-link={entry.id}
           >
             {entry.text}
