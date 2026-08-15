@@ -45,15 +45,21 @@ const { record, name, title, description, itemSingular, jsonLd } = detail;
       <div
         class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_340px]"
       >
+        {/* Reading column: editorial context, then the article —
+            no TOC panel pushing the body down. */}
         <div class="min-w-0">
           <EditorialSummary bestFor={detail.bestFor} caveats={detail.caveats} />
-          <TableOfContents items={detail.toc} />
           <MarkdownBody
             recordSlug={record.slug}
             fallback={record.content ? "This record doesn't have notes yet." : undefined}
           />
         </div>
-        <RecordSidebar detail={detail} />
+        {/* Right rail: TOC on top (navigation first), metadata stats
+            below it, one sticky column. */}
+        <div class="flex min-w-0 flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto">
+          <TableOfContents items={detail.toc} />
+          <RecordSidebar detail={detail} sticky={false} />
+        </div>
       </div>
     </div>
   </article>

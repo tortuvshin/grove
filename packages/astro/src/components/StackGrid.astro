@@ -106,7 +106,7 @@ function statusLabel(s: StackEntry["status"]): string | null {
       {stacks.map((s) => (
         <a
           href={buildHref(s.slug)}
-          class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors hover:bg-secondary group flex h-full items-center gap-3 p-3.5 no-underline"
+          class="rounded-[calc(var(--radius)+0.25rem)] border border-border bg-card shadow-none transition-colors hover:border-ink-300 dark:hover:border-ink-700 group flex h-full items-center gap-3 p-3.5 no-underline"
           data-event="stack_grid_click"
           data-event-source="stack_grid"
         >

@@ -15,7 +15,6 @@ export default defineConfig({
     tagline: "One line about what this is.",
   },
   theme: {
-    primaryColor: "#16a34a",
     radius: "soft",
     density: "comfortable",
   },

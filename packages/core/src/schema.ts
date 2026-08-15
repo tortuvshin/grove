@@ -558,14 +558,16 @@ export function normalizeGithubIntegration(
   };
 }
 
-/** Default brand color — the single source for the green default. */
-export const DEFAULT_PRIMARY_COLOR = "#16a34a";
-
 export const themeSchema = z.object({
+  /**
+   * Optional brand color. When unset (the default), buttons and
+   * accents use the neutral ink treatment — near-black on light,
+   * near-white on dark — instead of injecting an arbitrary hue.
+   */
   primaryColor: z
     .string()
-    .regex(/^#[0-9a-fA-F]{3,8}$/, "theme.primaryColor must be a hex color such as #16a34a")
-    .default(DEFAULT_PRIMARY_COLOR),
+    .regex(/^#[0-9a-fA-F]{3,8}$/, "theme.primaryColor must be a hex color such as #4f46e5")
+    .optional(),
   radius: z.enum(["none", "soft", "round"]).default("soft"),
   density: z.enum(["compact", "comfortable", "spacious"]).default("comfortable"),
   containerWidth: z.string().default("72rem"),

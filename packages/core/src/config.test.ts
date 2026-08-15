@@ -76,9 +76,20 @@ describe("browse.facets contract", () => {
 });
 
 describe("theme.primaryColor validation", () => {
-  it("defaults to the documented green", () => {
+  it("has NO default — unset means the neutral ink treatment", () => {
+    // No arbitrary brand hue is injected: without a configured
+    // primaryColor, BaseLayout emits no --grove-theme-primary* vars
+    // and styles.css falls back to the foreground color.
     const config = defineConfig({ site: { name: "Directory" } });
-    expect(config.theme.primaryColor).toBe("#16a34a");
+    expect(config.theme.primaryColor).toBeUndefined();
+  });
+
+  it("accepts an explicit brand hex", () => {
+    const config = defineConfig({
+      site: { name: "Directory" },
+      theme: { primaryColor: "#4f46e5" },
+    });
+    expect(config.theme.primaryColor).toBe("#4f46e5");
   });
 
   it("rejects non-hex values", () => {

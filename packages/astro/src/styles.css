@@ -375,6 +375,11 @@
     display: none;
   }
 
+  /* Inputs that live INSIDE a styled shell (the hero search pill)
+   * opt out with `.grove-input-unstyled`: the shell owns the border,
+   * radius, background, and the focus treatment via `focus-within` —
+   * forcing a second background/radius/focus ring on the inner input
+   * paints a box-within-a-box. */
   :where(
     input[type="text"],
     input[type="search"],
@@ -383,7 +388,7 @@
     input:not([type]),
     select,
     textarea
-  ) {
+  ):not(.grove-input-unstyled) {
     border-color: var(--grove-input) !important;
     border-radius: var(--radius) !important;
     background-color: var(--grove-background) !important;
@@ -398,7 +403,7 @@
     input:not([type]),
     select,
     textarea
-  ):focus-visible {
+  ):not(.grove-input-unstyled):focus-visible {
     border-color: var(--grove-ring) !important;
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--grove-ring) 35%, transparent);

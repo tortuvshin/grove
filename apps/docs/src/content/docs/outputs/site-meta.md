@@ -16,7 +16,7 @@ A [W3C Recommendation](https://www.w3.org/TR/manifest/) that gives browsers the 
   "start_url": "/",
   "display": "standalone",
   "background_color": "#08090a",
-  "theme_color": "#16a34a",
+  "theme_color": "#0a0a0a",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

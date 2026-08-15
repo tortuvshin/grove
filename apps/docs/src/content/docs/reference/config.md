@@ -29,7 +29,7 @@ export default defineConfig({
 
   integrations: { github: false },
 
-  facets: ["category", "tags"],
+  browse: { facets: ["category", "tags"] },
 });
 ```
 
@@ -93,7 +93,9 @@ export default defineConfig({
     avoid: ["Duplicates and marketing-only pages"],
   },
 
-  facets: ["category", "stack", "platform", "tags"],
+  browse: {
+    facets: ["category", "stack", "platform", "tags"],
+  },
 
   integrations: {
     // Either a boolean (enable/disable GitHub integration)
@@ -106,7 +108,6 @@ export default defineConfig({
   },
 
   theme: {
-    primaryColor: "#16a34a",
     radius: "soft",          // "none" | "soft" | "round"
     density: "comfortable",  // "compact" | "comfortable" | "spacious"
     containerWidth: "72rem",
@@ -216,7 +217,7 @@ the metadata on every render.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `primaryColor` | `string` (CSS color) | `"#16a34a"` | Primary brand color. Used for buttons, links, accents. |
+| `primaryColor` | `string` (hex color) | *unset* | Optional brand color for buttons and accents. When unset, primary actions use the neutral ink treatment (near-black on light, near-white on dark). Text on the brand color is computed for WCAG AA automatically. |
 | `radius` | `"none" \| "soft" \| "round"` | `"soft"` | Border-radius scale. `none` = sharp, `soft` = subtle, `round` = pill. |
 | `density` | `"compact" \| "comfortable" \| "spacious"` | `"comfortable"` | Vertical spacing density. |
 | `containerWidth` | `string` (CSS length) | `"72rem"` | Max width of the content container. |
