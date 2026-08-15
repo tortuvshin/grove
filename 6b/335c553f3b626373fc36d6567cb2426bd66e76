@@ -1,0 +1,65 @@
+apps/docs/src/content/docs/reference/config.md
+  s_24bcb38f14ac54::t_363bb6862b1c23 163,168-181
+  s_24bcb38f14ac54::t_a885b103bb0393 193
+apps/docs/src/content/docs/customize/template-customization.md
+  s_24bcb38f14ac54::t_7571bc3cf59a55 34
+packages/core/src/directory-search.test.ts
+  s_24bcb38f14ac54::t_96c39946210bc3 161-192
+  s_24bcb38f14ac54::t_e5308def7c8fe0 160
+packages/core/src/directory-search.ts
+  s_24bcb38f14ac54::t_2654de0fac62ea 459-468
+  s_24bcb38f14ac54::t_32c1fbfc02f581 556-573,575-578,580
+packages/core/src/build-data.test.ts
+  s_24bcb38f14ac54::t_f1ae4a58f21d58 96,201,209-211
+  s_24bcb38f14ac54::t_1068eb13165bd1 286-333
+apps/docs/src/docs-taxonomy-guard.test.ts
+  s_24bcb38f14ac54::t_56558f1bdfc8ef 62-67
+  s_24bcb38f14ac54::t_04fc42ce6b0784 1-61
+apps/docs/src/content/docs/sources/taxonomy-files.md
+  s_24bcb38f14ac54::t_2368b267cd9941 3,6-8,17,22-23,27,30,35,40,43,48,53,55,57,61-72,77-78,80-81,85,90,93,98,102-105,111,114
+apps/example/data/taxonomy/topics.yml
+  s_24bcb38f14ac54::t_3330e866d48ebf 1-29
+packages/core/src/config.test.ts
+  s_24bcb38f14ac54::t_f1ae4a58f21d58 23-92
+packages/core/src/schema.ts
+  s_24bcb38f14ac54::t_f1ae4a58f21d58 3,561-563,565-568,677-681,683-708,716-718
+packages/astro/src/server/directory.ts
+  s_24bcb38f14ac54::t_bc078831c6face 103-106,111
+  s_24bcb38f14ac54::t_b9d0b2bd3a3d2b 87
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_24bcb38f14ac54::t_ba3b06f05c0ca0 195-196
+  s_24bcb38f14ac54::t_c8f670bdf3be56 216-220
+apps/example/grove.config.ts
+  s_24bcb38f14ac54::t_f1ae4a58f21d58 67-72
+packages/astro/src/server/models.ts
+  s_24bcb38f14ac54::t_f1ae4a58f21d58 20,55-57,85-90,220-226,330
+  s_24bcb38f14ac54::t_b7f624dd397966 229-230,234,236,240-248,250,252,254-260,262-266,268-282,292-293
+  s_24bcb38f14ac54::t_5580c22fb08752 227-228
+packages/astro/src/components/RefinePanel.astro
+  s_24bcb38f14ac54::t_fd4c6e0da9b718 5-10,26-32,36-38,42-43,47,54,56-60,64-69
+apps/example/src/pages/[slug]/index.astro
+  s_24bcb38f14ac54::t_65e685d8176425 36
+  s_24bcb38f14ac54::t_5b3f09e423003f 119
+  s_24bcb38f14ac54::t_ad06b82ff669c2 44-55
+  s_24bcb38f14ac54::t_07de7c6c95978a 153,158
+packages/core/src/build-data.ts
+  s_24bcb38f14ac54::t_5f2772ab0aed71 116,131-142
+  s_24bcb38f14ac54::t_f1ae4a58f21d58 355
+  s_24bcb38f14ac54::t_fb0f41a3f25482 124-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6b335c553f3b626373fc36d6567cb2426bd66e76",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
