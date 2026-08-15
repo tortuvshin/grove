@@ -4,6 +4,7 @@ import { getSubmissionPageModel } from "@grove-dev/astro/server";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 import SubmissionClient from "@grove-dev/astro/components/SubmissionClient.astro";
+import { buttonClass } from "@grove-dev/astro/ui/button";
 
 const {
   singular,
@@ -17,6 +18,8 @@ const {
   existingSlugs,
   existingFullNames,
   platformOptions,
+  licenseOptions,
+  taxonomy,
 } = getSubmissionPageModel(siteConfig);
 const goodSubmissions = [
   ...(copy.good?.length ? copy.good : [
@@ -51,18 +54,17 @@ const pleaseAvoid = [
         </p>
       </div>
 
-      <ol class="mt-6 grid grid-cols-1 gap-2 text-2xs sm:grid-cols-3 sm:gap-3" aria-label="Submission steps">
+      {/* One compact line, not three cards — on mobile the form
+          starts within the first viewport. */}
+      <ol class="mt-4 flex flex-wrap gap-x-6 gap-y-1.5 text-2xs text-muted-foreground" aria-label="Submission steps">
         {[
-          ["1", "Paste a GitHub URL", "We'll pull the metadata automatically."],
-          ["2", "Edit the draft", "Review the configured taxonomy and project details."],
-          ["3", "Open a pull request", "Reviewers will validate and merge the record."],
-        ].map(([number, heading, copy]) => (
-          <li class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex items-start gap-2 p-3">
-            <span class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-ink-300 font-mono font-semibold text-ink-700 dark:border-ink-700 dark:text-ink-300">{number}</span>
-            <div>
-              <div class="font-medium text-ink-900 dark:text-ink-100">{heading}</div>
-              <div class="text-ink-500 dark:text-ink-400">{copy}</div>
-            </div>
+          ["1", "Paste a GitHub URL"],
+          ["2", "Review the draft"],
+          ["3", "Open a pull request"],
+        ].map(([number, heading]) => (
+          <li class="flex items-center gap-1.5">
+            <span class="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border border-border font-mono text-[10px] font-semibold text-foreground">{number}</span>
+            <span class="font-medium text-foreground">{heading}</span>
           </li>
         ))}
       </ol>
@@ -74,7 +76,7 @@ const pleaseAvoid = [
               <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">GitHub URL</span>
               <div class="flex flex-col gap-2 sm:flex-row">
                 <input id="repo-url" type="url" required placeholder="https://github.com/owner/repo" class="min-h-10 flex-1 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
-                <button id="fetch-repo" type="button" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius)] border border-transparent bg-primary px-3 text-sm font-medium leading-none text-primary-foreground no-underline outline-none transition-colors hover:bg-primary/90 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 min-h-10 justify-center">Generate draft</button>
+                <button id="fetch-repo" type="button" class={buttonClass("primary", "bare", "min-h-10 whitespace-nowrap px-3 text-sm")}>Generate draft</button>
               </div>
               <span class="text-2xs text-muted-foreground">The repository must be public. We never write to it.</span>
             </label>
@@ -124,6 +126,16 @@ const pleaseAvoid = [
             </fieldset>}
 
             {fields.tags && <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Tags</span><input id="item-tags" type="text" placeholder="self-hosted, developer-tools, offline-first" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>}
+
+            {fields.license && licenseOptions.length > 0 && (
+              <label class="grid gap-1.5">
+                <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">License</span>
+                <select id="item-license" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35">
+                  <option value="">Detected from the repository if left empty</option>
+                  {licenseOptions.map((option) => <option value={option.id}>{option.label}</option>)}
+                </select>
+              </label>
+            )}
             <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Website</span><input id="item-website" type="url" placeholder="https://example.com" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
             <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Best for</span><textarea id="best-for" rows="3" class="min-h-10 resize-y rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" placeholder="One use case per line"></textarea></label>
           </div>
@@ -149,8 +161,8 @@ const pleaseAvoid = [
             <div class="flex flex-wrap items-center justify-between gap-3">
               <h2 class="m-0 text-base font-semibold text-ink-900 dark:text-ink-100">YAML draft</h2>
               <div class="flex items-center gap-2">
-                <button id="copy-yaml" type="button" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius)] border border-border bg-secondary px-3 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 pointer-events-none opacity-50" disabled>Copy YAML</button>
-                <a id="open-pr-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius)] border border-border bg-secondary px-3 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 pointer-events-none opacity-50">Open PR draft</a>
+                <button id="copy-yaml" type="button" class={buttonClass("secondary", "sm", "whitespace-nowrap pointer-events-none opacity-50")} disabled>Copy YAML</button>
+                <a id="open-pr-link" href="#" target="_blank" rel="noopener noreferrer" class={buttonClass("secondary", "sm", "whitespace-nowrap pointer-events-none opacity-50")}>Open PR draft</a>
               </div>
             </div>
             <pre class="mt-4 min-h-0 flex-1 overflow-auto rounded-md border border-ink-200 bg-ink-50 p-3 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"><code id="yaml-preview">Paste a GitHub URL to generate a draft.</code></pre>
@@ -166,5 +178,6 @@ const pleaseAvoid = [
     existingFullNames={existingFullNames}
     repoUrl={repoUrl}
     fields={fields}
+    taxonomy={taxonomy}
   />
 </BaseLayout>

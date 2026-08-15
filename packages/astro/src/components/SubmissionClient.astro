@@ -3,7 +3,7 @@ interface Props {
   existingSlugs: string[];
   existingFullNames: string[];
   repoUrl: string;
-  fields: { category: boolean; stack: boolean; platforms: boolean; tags: boolean };
+  fields: { category: boolean; stack: boolean; platforms: boolean; tags: boolean; license?: boolean };
   /** Taxonomy ids for client-side validation. */
   taxonomy?: {
     categoryIds?: string[];
@@ -46,6 +46,7 @@ const {
       category: /** @type {HTMLSelectElement | null} */ ($("#item-category")),
       stack: /** @type {HTMLSelectElement | null} */ ($("#primary-stack")),
       tags: /** @type {HTMLInputElement | null} */ ($("#item-tags")),
+      license: /** @type {HTMLSelectElement | null} */ ($("#item-license")),
       website: /** @type {HTMLInputElement | null} */ ($("#item-website")),
       bestFor: /** @type {HTMLTextAreaElement | null} */ ($("#best-for")),
     };
@@ -75,7 +76,9 @@ const {
     const setStatus = (text, tone = "muted") => {
       if (!status) return;
       status.textContent = text;
-      status.className = `mt-3 min-h-5 text-2xs ${tone === "error" ? "text-red-600 dark:text-red-400" : tone === "warn" ? "text-amber-700 dark:text-amber-400" : tone === "success" ? "text-emerald-700 dark:text-emerald-400" : "text-ink-500 dark:text-ink-400"}`;
+      // Status tokens (danger/warning/success) so the submit states use
+      // the same semantic roles as the rest of the system.
+      status.className = `mt-3 min-h-5 text-2xs ${tone === "error" ? "text-danger" : tone === "warn" ? "text-warning" : tone === "success" ? "text-success" : "text-muted-foreground"}`;
     };
     const inferStack = /** @param {GitHubRepo} repo */ (repo) => {
       const language = String(repo.language || "").toLowerCase();
@@ -103,6 +106,7 @@ const {
         ...(fields.stack && inputs.stack?.value ? [`stack: ${quote(inputs.stack.value)}`] : []),
         ...(fields.platforms ? ["platforms:", platforms.length ? lines(platforms) : "  []"] : []),
         ...(fields.tags ? ["tags:", tags.length ? lines(tags) : "  []"] : []),
+        ...(fields.license && inputs.license?.value ? ["licenses:", lines([inputs.license.value])] : []),
         `repoUrl: ${repository.html_url}`,
         "links:",
         `  github: ${repository.html_url}`,
@@ -238,6 +242,7 @@ const {
       }
     });
     $("#submit-form")?.addEventListener("input", refresh);
+    $("#submit-form")?.addEventListener("change", refresh);
     copyButton?.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(preview?.textContent || "");

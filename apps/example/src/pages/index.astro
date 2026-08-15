@@ -120,7 +120,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     pathPrefix={`/${slug}`}
     itemLabelPlural={itemPlural}
     itemNoun={{ singular: itemSingular, plural: itemPlural }}
-    hrefFor={(stackSlug) => `/stacks/${stackSlug}`}
+    hrefFor={(stackSlug: string) => `/stacks/${stackSlug}`}
   />
   <CollectionTeaser
     model={collectionTeaser}
@@ -131,7 +131,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     pathPrefix={`/${slug}`}
     itemLabelPlural={itemPlural}
     itemNoun={{ singular: itemSingular, plural: itemPlural }}
-    hrefFor={(categorySlug) => `/categories/${categorySlug}`}
+    hrefFor={(categorySlug: string) => `/categories/${categorySlug}`}
   />
 
   <ContributorsGrid

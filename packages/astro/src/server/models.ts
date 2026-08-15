@@ -123,6 +123,47 @@ export function loadDirectoryContributors(root = process.cwd()): DirectoryContri
   }
 }
 
+/**
+ * Canonical taxonomy counts — the ONE algorithm every count surface
+ * uses. Counts the VISIBLE index (`items`, the same set browse
+ * filters over) with the primary+supporting stack union
+ * (`projectStackIds`), so the homepage grid, `/stacks`,
+ * `/categories`, and the browse facet counts can never disagree.
+ * (Counting `fullItems` with the singular `record.stack` was the
+ * audit's "Python 3 vs 4" drift.)
+ */
+export function countTaxonomies() {
+  const stackCounts = new Map<string, number>();
+  const categoryCounts = new Map<string, number>();
+  for (const record of items) {
+    if (record.category) categoryCounts.set(record.category, (categoryCounts.get(record.category) ?? 0) + 1);
+    if (record.kind === "project") {
+      for (const stackId of projectStackIds(record)) {
+        stackCounts.set(stackId, (stackCounts.get(stackId) ?? 0) + 1);
+      }
+    }
+  }
+  const toEntries = (
+    counts: Map<string, number>,
+    kind: "stacks" | "categories",
+  ) =>
+    [...counts]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([id, count]) => ({ name: taxonomyLabel(kind, id), slug: id, count }));
+  return {
+    stacks: toEntries(stackCounts, "stacks"),
+    categories: toEntries(categoryCounts, "categories"),
+  };
+}
+
+/**
+ * Uncapped taxonomy index model for the `/stacks` and `/categories`
+ * pages — same canonical counts, no homepage display cap.
+ */
+export function getTaxonomyIndexModel() {
+  return countTaxonomies();
+}
+
 export function getHomePageModel(site: DirectorySiteConfig) {
   const slug = site.blueprintConfig?.routeSlug ?? "projects";
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
@@ -168,28 +209,10 @@ export function getHomePageModel(site: DirectorySiteConfig) {
     "most-starred",
   ).slice(0, 6);
 
-  // Count over the VISIBLE index (`items`, same set browse filters
-  // over) using the canonical primary+supporting stack union
-  // (`projectStackIds`) — so the homepage grid, /stacks, and the
-  // browse facet counts can never disagree. Counting `fullItems` with
-  // the singular `record.stack` was the audit's "Python 3 vs 4" drift.
-  const stackCounts = new Map<string, number>();
-  const categoryCounts = new Map<string, number>();
-  for (const record of items) {
-    if (record.category) categoryCounts.set(record.category, (categoryCounts.get(record.category) ?? 0) + 1);
-    if (record.kind === "project") {
-      for (const stackId of projectStackIds(record)) {
-        stackCounts.set(stackId, (stackCounts.get(stackId) ?? 0) + 1);
-      }
-    }
-  }
-  const stacks = [...stackCounts]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 12)
-    .map(([id, count]) => ({ name: taxonomyLabel("stacks", id), slug: id, count }));
-  const categories = [...categoryCounts]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([id, count]) => ({ name: taxonomyLabel("categories", id), slug: id, count }));
+  // Homepage layout choice: cap the stack grid at 12. The counting
+  // itself is the canonical algorithm in `countTaxonomies`.
+  const { stacks: allStacks, categories } = countTaxonomies();
+  const stacks = allStacks.slice(0, 12);
   const contributors = loadDirectoryContributors();
   const description = site.description ??
     `A searchable directory of real ${plural} — organized by stack, category, platform, license, activity, and maturity.`;
@@ -356,6 +379,9 @@ export function getSubmissionPageModel(site: DirectorySiteConfig) {
       stack: enabled.has("stacks"),
       platforms: enabled.has("platforms"),
       tags: enabled.has("tags"),
+      // The submit form mirrors the browse dimensions: a directory
+      // that filters by license also collects it at submission time.
+      license: enabled.has("licenses"),
     },
     categories,
     stacks,
@@ -363,6 +389,14 @@ export function getSubmissionPageModel(site: DirectorySiteConfig) {
     existingFullNames,
     platformOptions: site.taxonomy?.platforms?.map(({ id, name }) => ({ id, label: name })) ??
       ["ios", "android", "web", "macos", "windows", "linux"].map((id) => ({ id, label: taxonomyLabel("platforms", id) })),
+    licenseOptions: site.taxonomy?.licenses?.map(({ id, name }) => ({ id, label: name })) ?? [],
+    // Ids for client-side validation — without this the submit form's
+    // taxonomy checks silently no-op.
+    taxonomy: {
+      categoryIds: categories.map((option) => option.id),
+      stackIds: stacks.map((option) => option.id),
+      platformIds: (site.taxonomy?.platforms ?? []).map(({ id }) => id),
+    },
   };
 }
 

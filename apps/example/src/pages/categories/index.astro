@@ -7,10 +7,10 @@
 import siteConfig from "@grove/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
-import { getHomePageModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { getTaxonomyIndexModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
-const { categories } = getHomePageModel(siteConfig);
+const { categories } = getTaxonomyIndexModel();
 const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
 ---
 
@@ -25,5 +25,6 @@ const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
     itemLabelPlural={itemLabelPlural()}
     itemNoun={itemNoun}
     headingLevel={1}
+    hrefFor={(categorySlug: string) => `/categories/${categorySlug}`}
   />
 </BaseLayout>

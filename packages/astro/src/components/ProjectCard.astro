@@ -181,7 +181,10 @@ const stackId =
 
 const starsLabel = formatStars(stars);
 const updatedLabel = formatRelative(pushedAt);
-const statusText = status ? statusDisplay(status as Parameters<typeof statusDisplay>[0]) : "";
+// "Unknown" is an internal placeholder, not information — suppress it
+// so card metadata never reads "Category · Unknown" to visitors.
+const rawStatusText = status ? statusDisplay(status as Parameters<typeof statusDisplay>[0]) : "";
+const statusText = rawStatusText === "Unknown" ? "" : rawStatusText;
 const licenseLabel = license ? licenseDisplay(license) : null;
 
 const hasStars = starsLabel !== null && typeof stars === "number" && stars > 0;
