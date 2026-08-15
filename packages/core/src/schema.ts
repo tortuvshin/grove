@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parse, stringify } from "yaml";
+import { DEFAULT_FACETS, FACET_IDS } from "./directory-facets.js";
 
 // ──────────────────────────────────────────────────────────────────────
 // Blueprints and kinds
@@ -557,8 +558,14 @@ export function normalizeGithubIntegration(
   };
 }
 
+/** Default brand color — the single source for the green default. */
+export const DEFAULT_PRIMARY_COLOR = "#16a34a";
+
 export const themeSchema = z.object({
-  primaryColor: z.string().default("#16a34a"),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{3,8}$/, "theme.primaryColor must be a hex color such as #16a34a")
+    .default(DEFAULT_PRIMARY_COLOR),
   radius: z.enum(["none", "soft", "round"]).default("soft"),
   density: z.enum(["compact", "comfortable", "spacious"]).default("comfortable"),
   containerWidth: z.string().default("72rem"),
@@ -667,11 +674,38 @@ export const groveConfigSchema = z.object({
     .default({}),
 
   /**
-   * Browse and submission dimensions owned by this directory. Taxonomy
-   * values live in data/taxonomy; this list decides which dimensions the
-   * site exposes. Singular and plural spellings are both accepted.
+   * Browse configuration. `facets` decides WHICH browse/submission
+   * dimensions the site exposes and in WHAT ORDER the filter groups
+   * render. Only the canonical ids in `FACET_IDS` validate — a typo
+   * fails config parsing instead of being silently ignored. Taxonomy
+   * VALUES (allowed options, labels, order) live in data/taxonomy.
    */
-  facets: z.array(z.string()).default(["category", "tags"]),
+  browse: z
+    .object({
+      facets: z
+        .array(z.enum(FACET_IDS))
+        .refine((facets) => new Set(facets).size === facets.length, {
+          message: "browse.facets contains duplicate entries",
+        })
+        .default([...DEFAULT_FACETS]),
+    })
+    // `.prefault` (not `.default`) so `{}` is parsed through the inner
+    // schema and the facets default applies.
+    .prefault({}),
+
+  /**
+   * Legacy location of the facet list. Clean break: fail with a
+   * pointed migration message instead of silently accepting (or
+   * silently dropping) the old key.
+   */
+  facets: z
+    .unknown()
+    .optional()
+    .refine((value) => value === undefined, {
+      message:
+        "`facets` moved to `browse.facets` in grove.config.ts. " +
+        `Supported ids: ${FACET_IDS.join(", ")} (canonical spellings only).`,
+    }),
 
   integrations: z
     .object({
@@ -679,12 +713,9 @@ export const groveConfigSchema = z.object({
     })
     .default({ github: false }),
 
-  theme: themeSchema.default({
-    primaryColor: "#16a34a",
-    radius: "soft",
-    density: "comfortable",
-    containerWidth: "72rem",
-  }),
+  // `.prefault({})` runs `{}` through themeSchema's own per-field
+  // defaults, so the default values live in exactly one place.
+  theme: themeSchema.prefault({}),
 
   /**
    * Contributors page affordances. `showContributionCount` controls

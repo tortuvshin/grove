@@ -33,7 +33,7 @@ import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
 import Pagination from "@grove-dev/astro/components/Pagination.astro";
 import DirectoryIndexClient from "@grove-dev/astro/components/DirectoryIndexClient.astro";
 import { removeFilter, searchParamsFromFilters, sortDisplay, SORT_OPTIONS } from "@grove-dev/astro";
-import { formatCount } from "@grove-dev/core";
+import { formatCount, PRIMARY_LENSES } from "@grove-dev/core";
 
 export function getStaticPaths() {
   const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
@@ -41,8 +41,18 @@ export function getStaticPaths() {
 }
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
-const { total, filters, facets, sort, sorted, pages, page, chips, clientItemsJson } =
-  getDirectoryIndexModel(Astro.url.searchParams, siteConfig);
+const {
+  total,
+  filters,
+  facetGroups,
+  searchPlaceholder,
+  sort,
+  sorted,
+  pages,
+  page,
+  chips,
+  clientItemsJson,
+} = getDirectoryIndexModel(Astro.url.searchParams, siteConfig);
 
 const title = `Browse ${slug} — ${siteConfig.name}`;
 const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
@@ -106,7 +116,7 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
             type="search"
             name="q"
             value={filters.q ?? ""}
-            placeholder={`Search ${itemLabelPlural()}, stacks, categories, platforms, licenses...`}
+            placeholder={searchPlaceholder}
             class="h-10 w-full rounded-md border border-ink-200 bg-white py-2 pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
           />
         </label>
@@ -140,12 +150,12 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
           class="contents"
           currentParams={Astro.url.searchParams}
           pathPrefix={`/${slug}`}
-          lensIds={["all", "hot", "mature", "production-like", "good-to-learn"]}
+          lensIds={PRIMARY_LENSES}
           allLabel={`All ${itemLabelPlural()}`}
         />
         <RefinePanel
           class="contents"
-          facets={facets}
+          groups={facetGroups}
           initial={filters}
           pathPrefix={`/${slug}`}
           hide={["sort"]}

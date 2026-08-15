@@ -456,6 +456,16 @@ export function buildFacets(
      * `IndexFilters` minus each facet's filter.
      */
     filters?: IndexFilters | null;
+    /**
+     * Taxonomy-owned display order per dimension: an array of ids in
+     * the order the taxonomy YAML declares them. Known ids sort by
+     * that position; ids that exist only in record data append after,
+     * in the default count-desc-then-alpha order. Curated tag ids
+     * (topics.yml) flow through the `tags` key the same way.
+     */
+    order?: Partial<
+      Record<"stacks" | "platforms" | "categories" | "tags" | "licenses", string[]>
+    >;
   },
 ) {
   const curatedTagIds = options?.curatedTagIds;
@@ -543,13 +553,31 @@ export function buildFacets(
     [...m.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, count }));
+  // Taxonomy order wins when provided: known ids keep their YAML
+  // position, data-only ids append in the count-desc fallback order.
+  const applyOrder = (
+    entries: Array<{ value: string; count: number }>,
+    orderedIds?: string[],
+  ) => {
+    if (!orderedIds || orderedIds.length === 0) return entries;
+    const position = new Map(orderedIds.map((id, index) => [id, index]));
+    return [...entries].sort((a, b) => {
+      const posA = position.get(a.value) ?? Number.POSITIVE_INFINITY;
+      const posB = position.get(b.value) ?? Number.POSITIVE_INFINITY;
+      if (posA !== posB) return posA - posB;
+      // Both unknown: preserve the count-desc fallback (entries are
+      // already in that order, and this sort is stable).
+      return 0;
+    });
+  };
+  const order = options?.order;
   return {
-    stacks: sortByCountThenName(counts.stack),
-    platforms: sortByCountThenName(counts.platform),
-    categories: sortByCountThenName(counts.category),
-    tags: sortByCountThenName(counts.tag),
+    stacks: applyOrder(sortByCountThenName(counts.stack), order?.stacks),
+    platforms: applyOrder(sortByCountThenName(counts.platform), order?.platforms),
+    categories: applyOrder(sortByCountThenName(counts.category), order?.categories),
+    tags: applyOrder(sortByCountThenName(counts.tag), order?.tags),
     labels: sortByCountThenName(counts.label),
-    licenses: sortByCountThenName(counts.license),
+    licenses: applyOrder(sortByCountThenName(counts.license), order?.licenses),
   };
 }
 

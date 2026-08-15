@@ -31,7 +31,7 @@ export default defineConfig({
     { label: "Browse", href: "/projects" },
     { label: "About", href: "/about" },
   ],
-  facets: ["category", "stack", "platform", "tags"],
+  browse: { facets: ["category", "stack", "platform", "tags"] },
   theme: {
     primaryColor: "#0ea5e9",
     radius: "soft",

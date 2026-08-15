@@ -158,6 +158,39 @@ describe("facet intersection counts", () => {
 });
 
 /**
+ * Facet option ordering — the `order` option of `buildFacets`.
+ * Taxonomy YAML owns display order; ids that exist only in record
+ * data append after the curated ids in the count-desc fallback order.
+ */
+describe("facet option ordering", () => {
+  const fleet = [
+    record("a", { stacks: ["python"], platforms: ["linux", "macos"] }),
+    record("b", { stacks: ["python"], platforms: ["linux"] }),
+    record("c", { stacks: ["typescript", "zig"], platforms: ["linux", "web"] }),
+  ];
+
+  it("orders known ids by taxonomy position instead of count", () => {
+    const facets = buildFacets(fleet, {
+      order: { stacks: ["zig", "typescript", "python"] },
+    });
+    expect(facets.stacks.map((f) => f.value)).toEqual(["zig", "typescript", "python"]);
+  });
+
+  it("appends data-only ids after taxonomy ids in count-desc order", () => {
+    const facets = buildFacets(fleet, {
+      order: { platforms: ["web"] },
+    });
+    // web is curated → first; linux (3) then macos (1) follow by count.
+    expect(facets.platforms.map((f) => f.value)).toEqual(["web", "linux", "macos"]);
+  });
+
+  it("keeps the count-desc default when no order is provided", () => {
+    const facets = buildFacets(fleet);
+    expect(facets.stacks.map((f) => f.value)).toEqual(["python", "typescript", "zig"]);
+  });
+});
+
+/**
  * License filter behavior — covers the curated-array + GitHub-fallback
  * branch in `filterRecords` and the curated-license count in
  * `buildFacets`. The branch has subtle behavior around:

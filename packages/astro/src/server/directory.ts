@@ -84,7 +84,7 @@ interface SiteConfigPayload {
   };
   taxonomy?: Partial<
     Record<
-      'categories' | 'stacks' | 'platforms' | 'distributionChannels',
+      'categories' | 'stacks' | 'platforms' | 'topics' | 'licenses' | 'distributionChannels',
       Array<{ id: string; name: string }>
     >
   >;
@@ -100,12 +100,15 @@ const taxonomyMaps = Object.fromEntries(
     new Map((entries ?? []).map((entry) => [entry.id, entry.name])),
   ]),
 ) as Partial<
-  Record<'categories' | 'stacks' | 'platforms' | 'distributionChannels', Map<string, string>>
+  Record<
+    'categories' | 'stacks' | 'platforms' | 'topics' | 'licenses' | 'distributionChannels',
+    Map<string, string>
+  >
 >;
 export const taxonomy = siteConfigRaw.taxonomy ?? {};
 
 export function taxonomyLabel(
-  kind: 'categories' | 'stacks' | 'platforms' | 'distributionChannels',
+  kind: 'categories' | 'stacks' | 'platforms' | 'topics' | 'licenses' | 'distributionChannels',
   id: string,
 ): string {
   return taxonomyMaps[kind]?.get(id) ?? prettySlug(id);

@@ -1,0 +1,29 @@
+# Curated tag vocabulary for the Tag browse facet.
+#
+# File order is display order (an explicit `order:` field would win).
+# Tags used by records but NOT listed here stay searchable and render
+# on record pages — they just don't appear in the Tag filter dropdown.
+- id: agents
+  name: Agents
+- id: rag
+  name: RAG
+- id: llm
+  name: LLM
+- id: chat
+  name: Chat
+- id: workflow
+  name: Workflow
+- id: automation
+  name: Automation
+- id: multi-agent
+  name: Multi-agent
+- id: self-host
+  name: Self-hosted
+- id: local-ai
+  name: Local AI
+- id: inference
+  name: Inference
+- id: low-code
+  name: Low-code
+- id: data
+  name: Data

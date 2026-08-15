@@ -17,6 +17,7 @@ import {
   activeFilterChips,
   applySort,
   buildFacets,
+  configuredFacetDefs,
   effectivePage,
   effectiveSort,
   extractToc,
@@ -51,7 +52,9 @@ export interface DirectorySiteConfig {
   description?: string;
   repoUrl?: string;
   nav?: Array<{ label: string; href: string }>;
-  facets?: string[];
+  browse?: {
+    facets?: string[];
+  };
   analytics?: {
     googleAnalyticsId?: string;
   };
@@ -79,6 +82,12 @@ export interface DirectorySiteConfig {
     categories?: Array<{ id: string; name: string }>;
     stacks?: Array<{ id: string; name: string }>;
     platforms?: Array<{ id: string; name: string }>;
+    topics?: Array<{ id: string; name: string }>;
+    licenses?: Array<{ id: string; name: string }>;
+    distributionChannels?: Array<{ id: string; name: string }>;
+  };
+  contributors?: {
+    showContributionCount?: boolean;
   };
   stats?: {
     originalRepo?: string;
@@ -208,39 +217,69 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   };
 }
 
-const FACET_ALIASES: Record<string, "stacks" | "platforms" | "categories" | "tags" | "licenses"> = {
-  stack: "stacks",
-  stacks: "stacks",
-  platform: "platforms",
-  platforms: "platforms",
-  category: "categories",
-  categories: "categories",
-  tag: "tags",
-  tags: "tags",
-  license: "licenses",
-  licenses: "licenses",
-};
-
-function configuredFacets(site?: DirectorySiteConfig) {
-  return new Set((site?.facets ?? ["category", "tags"])
-    .map((facet) => FACET_ALIASES[facet])
-    .filter((facet): facet is NonNullable<typeof facet> => Boolean(facet)));
+/**
+ * Ordered facet definitions for this site — the single registry in
+ * `@grove-dev/core` resolves `browse.facets`, so visibility, ORDER,
+ * labels, and selection mode all come from one place.
+ */
+function enabledFacetDefs(site?: DirectorySiteConfig) {
+  return configuredFacetDefs(site?.browse?.facets);
 }
+
+/** Taxonomy list that labels/orders each facet dimension. */
+const TAXONOMY_KIND_FOR_DIMENSION = {
+  stacks: "stacks",
+  platforms: "platforms",
+  categories: "categories",
+  tags: "topics",
+  licenses: "licenses",
+} as const;
 
 export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: DirectorySiteConfig) {
   const filters = filtersFromSearchParams(searchParams);
-  const rawFacets = buildFacets(items, {
-    curatedTagIds: site.taxonomy?.topics?.map((t) => t.id),
-    filters, // Intersection counts: each facet reflects all OTHER filters.
-  });
-  const enabled = configuredFacets(site);
-  const facets = {
-    stacks: enabled.has("stacks") ? rawFacets.stacks.map((option) => ({ ...option, label: taxonomyLabel("stacks", option.value) })) : [],
-    platforms: enabled.has("platforms") ? rawFacets.platforms.map((option) => ({ ...option, label: taxonomyLabel("platforms", option.value) })) : [],
-    categories: enabled.has("categories") ? rawFacets.categories.map((option) => ({ ...option, label: taxonomyLabel("categories", option.value) })) : [],
-    tags: enabled.has("tags") ? rawFacets.tags : [],
-    licenses: enabled.has("licenses") ? rawFacets.licenses : [],
+  // Taxonomy YAML owns option order: the generated arrays preserve
+  // file/`order:` position, so their id sequence IS the display order.
+  const taxonomyOrder = {
+    stacks: site?.taxonomy?.stacks?.map((t) => t.id),
+    platforms: site?.taxonomy?.platforms?.map((t) => t.id),
+    categories: site?.taxonomy?.categories?.map((t) => t.id),
+    tags: site?.taxonomy?.topics?.map((t) => t.id),
+    licenses: site?.taxonomy?.licenses?.map((t) => t.id),
   };
+  const rawFacets = buildFacets(items, {
+    curatedTagIds: taxonomyOrder.tags,
+    filters, // Intersection counts: each facet reflects all OTHER filters.
+    order: taxonomyOrder,
+  });
+  const defs = enabledFacetDefs(site);
+  const enabled = new Set(defs.map((def) => def.dimension));
+  const labeled = (dimension: keyof typeof TAXONOMY_KIND_FOR_DIMENSION) =>
+    rawFacets[dimension].map((option) => ({
+      ...option,
+      label: taxonomyLabel(TAXONOMY_KIND_FOR_DIMENSION[dimension], option.value),
+    }));
+  const facets = {
+    stacks: enabled.has("stacks") ? labeled("stacks") : [],
+    platforms: enabled.has("platforms") ? labeled("platforms") : [],
+    categories: enabled.has("categories") ? labeled("categories") : [],
+    tags: enabled.has("tags") ? labeled("tags") : [],
+    licenses: enabled.has("licenses") ? labeled("licenses") : [],
+  };
+  // Ordered filter groups — `browse.facets` array order is the render
+  // order; label + selection mode come from the core registry.
+  const facetGroups = defs
+    .map((def) => ({
+      id: def.id,
+      filterKey: def.dimension,
+      label: def.label,
+      single: def.single,
+      options: facets[def.dimension],
+      initial: (filters[def.dimension] ?? []) as string[],
+    }))
+    .filter((group) => group.options.length > 0);
+  const plural = site?.blueprintConfig?.labelPlural ?? itemLabelPlural();
+  // Placeholder names only the ENABLED dimensions, in config order.
+  const searchPlaceholder = `Search ${plural}, ${defs.map((def) => def.dimension).join(", ")}...`;
   const sort = effectiveSort(filters);
   const sorted = applySort(filterRecords(items, filters), sort);
   const pageCount = totalPages(sorted.length);
@@ -250,6 +289,8 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
     total: items.length,
     filters,
     facets,
+    facetGroups,
+    searchPlaceholder,
     sort,
     sorted,
     pages: pageCount,
@@ -286,7 +327,7 @@ export function getContributorsPageModel(site: DirectorySiteConfig) {
 
 export function getSubmissionPageModel(site: DirectorySiteConfig) {
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
-  const enabled = configuredFacets(site);
+  const enabled = new Set(enabledFacetDefs(site).map((def) => def.dimension));
   const values = (key: "category" | "stack") =>
     [...new Set(fullProjects.map((record) => String(record[key] ?? "")).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));

@@ -160,16 +160,25 @@ Top-navigation items, in order. Each item has a `label` (visible
 text) and an `href` (link target; can be a relative path or a full
 URL).
 
-### `facets`
+### `browse.facets`
 
 **Type:** `Array<string>`
 **Default:** `["category", "tags"]`
 
-Which record fields the browse and submission pages expose. Supported values
-are `category`, `stack`, `platform`, `tags`, and `license`; plural aliases are
-accepted for compatibility. Category, stack, and platform values come from
-`data/taxonomy/*.yml`. Tags come from each record and stay a separate
-many-to-many facet rather than being promoted into the taxonomy.
+Which browse dimensions the site exposes, and in what order. The array order
+is the filter-group render order on the browse page. Supported ids are exactly
+`category`, `stack`, `platform`, `tags`, and `license` — canonical spellings
+only. Unknown ids, plural spellings, and duplicates fail config validation
+instead of being silently dropped.
+
+Option values, display names, and option order come from
+`data/taxonomy/*.yml` (see [Taxonomy files](/sources/taxonomy-files/)). Tags
+come from each record and stay a separate many-to-many facet; add
+`data/taxonomy/topics.yml` to curate which tags the Tag filter offers.
+
+> **Migration:** the former top-level `facets` key was replaced by
+> `browse.facets` in a clean break. A leftover top-level `facets` key fails
+> validation with a pointed error.
 
 ### `footer`
 
@@ -181,7 +190,7 @@ empty, Grove derives useful repository links.
 
 Customizes the default submit page without forking it. `eyebrow`, `title`, and
 `description` control the introduction; `good` and `avoid` control the review
-criteria. The form renders only taxonomy fields enabled by `facets`.
+criteria. The form renders only taxonomy fields enabled by `browse.facets`.
 
 ### `integrations.github`
 

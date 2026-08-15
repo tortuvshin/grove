@@ -192,6 +192,8 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         stacks: "stacks",
         platforms: "platforms",
         categories: "categories",
+        tags: "topics",
+        licenses: "licenses",
       };
       const taxonomyName = (groupKey, value) =>
         (taxonomy[taxonomyKinds[groupKey]] || []).find((entry) => entry.id === value)?.name ??
@@ -211,7 +213,11 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
               ? `Platform: ${taxonomyName("platforms", chip.value)}`
               : chip.key === "categories"
                 ? `Category: ${taxonomyName("categories", chip.value)}`
-                : chip.label,
+                : chip.key === "tags"
+                  ? `Tag: ${taxonomyName("tags", chip.value)}`
+                  : chip.key === "licenses"
+                    ? `License: ${taxonomyName("licenses", chip.value)}`
+                    : chip.label,
         }));
 
         for (const chip of chips) {
