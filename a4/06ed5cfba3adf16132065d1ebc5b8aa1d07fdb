@@ -1,0 +1,23 @@
+packages/core/src/build-data.test.ts
+  s_24bcb38f14ac54::t_93adb94d015551 334-359
+packages/astro/src/quality-gates.test.ts
+  s_24bcb38f14ac54::t_59cbdf29b9aa5f 1-152
+packages/astro/src/theme-contrast.test.ts
+  s_24bcb38f14ac54::t_4c4fabd400a2a2 1-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a406ed5cfba3adf16132065d1ebc5b8aa1d07fdb",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
