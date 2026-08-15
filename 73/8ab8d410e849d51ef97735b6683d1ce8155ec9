@@ -1,0 +1,30 @@
+packages/core/src/directory-facets.ts
+  s_24bcb38f14ac54::t_8ce6eb42639f72 1-82
+packages/astro/src/components/CollectionPage.astro
+  s_24bcb38f14ac54::t_e0a79d0421c800 103
+  s_24bcb38f14ac54::t_ac5b1ba47b5581 75-78
+packages/astro/src/components/StackGrid.astro
+  s_24bcb38f14ac54::t_191cee6970d433 111-114,116
+packages/astro/src/components/CategoryGrid.astro
+  s_24bcb38f14ac54::t_c0983d64bb8530 84-86,88
+packages/core/src/directory-client.ts
+  s_24bcb38f14ac54::t_f2373834e3f259 9
+packages/core/src/index.ts
+  s_24bcb38f14ac54::t_08c738f56e30c4 186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "738ab8d410e849d51ef97735b6683d1ce8155ec9",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
