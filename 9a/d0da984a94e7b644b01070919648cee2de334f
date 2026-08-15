@@ -1,0 +1,40 @@
+apps/example/src/pages/index.astro
+  s_24bcb38f14ac54::t_2220c708371acb 119-134
+apps/example/src/pages/about.astro
+  s_24bcb38f14ac54::t_3db7ff3fb4bb1a 89
+  s_24bcb38f14ac54::t_7b0a064dc1e350 58
+  s_24bcb38f14ac54::t_06a2617c57e5fc 24
+  s_24bcb38f14ac54::t_5e2569e2179d94 31
+packages/astro/src/layouts/BaseLayout.astro
+  s_24bcb38f14ac54::t_3192a4f0acac3d 276-281,290
+packages/astro/src/components/CollectionTeaser.astro
+  s_24bcb38f14ac54::t_07ce77b34bf00a 21-22,33,45
+apps/example/src/components/TaxonomyList.astro
+  s_24bcb38f14ac54::t_96306ee26407e8 23
+  s_24bcb38f14ac54::t_60ba09e5d1fd70 75
+  s_24bcb38f14ac54::t_7b05558865bf97 81
+  s_24bcb38f14ac54::t_f97d8e36b0f612 85
+  s_24bcb38f14ac54::t_7924873214fea8 61,64
+  s_24bcb38f14ac54::t_c56579fe528c3a 22
+  s_24bcb38f14ac54::t_088ed97fd64dee 42-47
+apps/example/src/pages/[slug]/index.astro
+  s_24bcb38f14ac54::t_19dad7fd05a462 36
+  s_24bcb38f14ac54::t_5a13a2a21a3883 82
+  s_24bcb38f14ac54::t_d7929dd979b9b3 211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9ad0da984a94e7b644b01070919648cee2de334f",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
