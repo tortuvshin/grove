@@ -22,7 +22,7 @@ const { class: className = "" } = Astro.props;
   type="button"
   id="theme-toggle"
   data-theme-toggle
-  aria-label="Toggle theme"
+  aria-label="Theme: system — switch to light"
   title="Toggle theme"
   class={`inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-[var(--radius)] border border-border bg-secondary p-0 text-foreground outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 ${className}`}
 >
@@ -58,6 +58,9 @@ const { class: className = "" } = Astro.props;
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
   </svg>
 </button>
+{/* Announces theme changes to assistive tech — the icon alone can't
+    distinguish "dark" from "system resolving to dark". */}
+<span data-theme-toggle-status role="status" class="sr-only"></span>
 
 <script>
   // The toggle button simply rotates between the three modes on
@@ -82,18 +85,32 @@ const { class: className = "" } = Astro.props;
     return next;
   }
 
-  // A small tooltip label so the user knows what mode they'll get
-  // on the next click. We re-read current mode on focus/hover so it
-  // stays in sync.
+  function nextMode(): Mode {
+    const order: Mode[] = ["light", "dark", "system"];
+    return order[(order.indexOf(currentMode()) + 1) % order.length];
+  }
+
+  // The accessible name carries BOTH the current state and the next
+  // action ("Theme: dark — switch to system"); title mirrors it for
+  // sighted tooltip users. Re-read on focus/hover so another tab or
+  // toggle instance can't leave it stale.
   function updateLabel(btn: HTMLButtonElement) {
-    btn.title = `Theme: ${currentMode()} (click to switch)`;
+    const label = `Theme: ${currentMode()} — switch to ${nextMode()}`;
+    btn.setAttribute("aria-label", label);
+    btn.title = label;
+  }
+
+  function announce(mode: Mode) {
+    const status = document.querySelector("[data-theme-toggle-status]");
+    if (status) status.textContent = `Theme set to ${mode}`;
   }
 
   document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((btn) => {
     updateLabel(btn);
     btn.addEventListener("click", () => {
-      rotate();
+      const mode = rotate();
       updateLabel(btn);
+      announce(mode);
     });
     btn.addEventListener("mouseenter", () => updateLabel(btn));
     btn.addEventListener("focus", () => updateLabel(btn));

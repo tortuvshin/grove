@@ -77,8 +77,11 @@ const {
           {l}
         </span>
       ))}
+      {/* Curated = reviewed provenance, not a success status —
+          neutral outline treatment so green stays reserved for
+          actual status signals. */}
       {record.curation?.reviewed && (
-        <span class="inline-flex items-center gap-1 rounded border border-emerald-300/60 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+        <span class="inline-flex items-center gap-1 rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
           <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
             <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.41 5.09a.75.75 0 0 0-1.06 0L6.75 8.69 5.65 7.59a.75.75 0 1 0-1.06 1.06l1.65 1.65a.75.75 0 0 0 1.06 0l4.11-4.11a.75.75 0 0 0 0-1.06Z" />
           </svg>

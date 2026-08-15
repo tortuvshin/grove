@@ -252,6 +252,13 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
           activeFilters.append(clear);
         }
         activeFilters.classList.toggle("hidden", chips.length === 0);
+
+        // Mobile filter-drawer badge mirrors the live chip count.
+        const drawerCount = document.querySelector("[data-drawer-count]");
+        if (drawerCount) {
+          drawerCount.textContent = String(chips.length);
+          drawerCount.classList.toggle("hidden", chips.length === 0);
+        }
       }
 
       document.querySelectorAll(".grove-filter").forEach((group) => {

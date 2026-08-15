@@ -44,7 +44,9 @@ const hasItems = items.length > 1;
         </span>
       </span>
     </summary>
-    <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:border-t-0 lg:p-0">
+    {/* Capped + scrollable on desktop so a long document (17+
+        headings) never pushes the article below the fold. */}
+    <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:max-h-60 lg:overflow-y-auto lg:border-t-0 lg:p-0">
       {items.map((entry) => (
         <li class="grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5">
           <a

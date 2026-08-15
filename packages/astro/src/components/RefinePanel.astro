@@ -130,7 +130,16 @@ const groups = groupModels.map((group) => ({
       popover?.addEventListener("click", (event) => event.stopPropagation());
     });
     document.addEventListener("click", () => closeAll());
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeAll(); });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      // Restore focus to the trigger whose popover was open so
+      // keyboard users don't lose their place.
+      const openGroup = [...groups].find((group) =>
+        group.querySelector('.grove-filter-trigger[aria-expanded="true"]'),
+      );
+      closeAll();
+      openGroup?.querySelector(".grove-filter-trigger")?.focus();
+    });
     document.querySelector('select[name="sort"]')?.addEventListener("change", (event) => {
       const params = new URLSearchParams(location.search);
       params.set("sort", event.target.value);

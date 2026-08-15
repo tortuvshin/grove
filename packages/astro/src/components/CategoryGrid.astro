@@ -28,6 +28,8 @@ interface Props {
   itemNoun?: { singular: string; plural: string };
   /** Pass 1 when this grid IS the page (`/categories` index). */
   headingLevel?: 1 | 2;
+  /** Card link builder (defaults to browse filtered by category). */
+  hrefFor?: (slug: string) => string;
 }
 
 const {
@@ -38,11 +40,13 @@ const {
   itemLabelPlural = "items",
   itemNoun = { singular: "item", plural: "items" },
   headingLevel = 2,
+  hrefFor,
 } = Astro.props;
 
 const Heading = `h${headingLevel}` as "h1" | "h2";
 
 function buildHref(slug: string): string {
+  if (hrefFor) return hrefFor(slug);
   const base = pathPrefix.replace(/\/$/, "");
   return `${base}?category=${encodeURIComponent(slug)}`;
 }

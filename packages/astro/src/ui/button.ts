@@ -18,7 +18,8 @@
  */
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "selected";
-export type ButtonSize = "sm" | "md" | "lg";
+/** `bare` emits no size classes — pass custom geometry via `extra`. */
+export type ButtonSize = "sm" | "md" | "lg" | "bare";
 
 const BASE =
   "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35";
@@ -31,6 +32,7 @@ const SIZES: Record<ButtonSize, string> = {
   sm: "h-8 px-3 text-sm",
   md: "h-9 px-3 text-sm max-sm:min-h-11",
   lg: "h-11 px-4 text-sm",
+  bare: "",
 };
 
 const VARIANTS: Record<ButtonVariant, string> = {

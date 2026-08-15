@@ -69,12 +69,12 @@ function row(label: string, value: unknown) {
 }
 ---
 
-<aside class="grove-sidebar flex flex-col gap-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto" aria-label="Record metadata sidebar">
+<aside class="grove-sidebar flex flex-col gap-4 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto" aria-label="Record metadata sidebar">
 
   {/* ── Activity card ──────────────────────────────────────── */}
   {sidebar.showActivity && (
     <section
-      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-5 dark:border-ink-800"
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-4 dark:border-ink-800"
       aria-labelledby="sidebar-activity-title"
     >
       <h2
@@ -164,7 +164,7 @@ function row(label: string, value: unknown) {
   {/* ── Freshness card ─────────────────────────────────────── */}
   {sidebar.showFreshness && (
     <section
-      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-5 dark:border-ink-800"
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-4 dark:border-ink-800"
       aria-labelledby="sidebar-freshness-title"
     >
       <h2
@@ -237,7 +237,7 @@ function row(label: string, value: unknown) {
   {/* ── Ecosystem card ─────────────────────────────────────── */}
   {sidebar.showEcosystem && (
     <section
-      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-5 dark:border-ink-800"
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-4 dark:border-ink-800"
       aria-labelledby="sidebar-ecosystem-title"
     >
       <h2

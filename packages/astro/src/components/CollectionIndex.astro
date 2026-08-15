@@ -20,6 +20,7 @@ import CardGrid from "./CardGrid.astro";
 import CollectionCard from "./CollectionCard.astro";
 import Container from "../layouts/Container.astro";
 import SectionHeader from "../layouts/SectionHeader.astro";
+import EmptyState from "../ui/EmptyState.astro";
 import type { CollectionIndexModel } from "../server/collections.js";
 
 interface Props {
@@ -84,9 +85,10 @@ const headerActions = Astro.slots.has("header-actions");
     </div>
 
     {cards.length === 0 ? (
-      <p class="rounded-md border border-dashed border-ink-200 bg-white p-6 text-sm text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
-        {emptyLabel}
-      </p>
+      <EmptyState
+        title={emptyLabel}
+        description="Collections are defined in data/collections/*.yml — add a file there and it appears here on the next build."
+      />
     ) : (
       <CardGrid>
         {cards.map((c) => (

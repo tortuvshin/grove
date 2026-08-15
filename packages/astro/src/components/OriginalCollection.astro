@@ -10,6 +10,7 @@
  * Generic: takes plain `stats` and a `repoUrl`. No blueprint or
  * site-specific copy.
  */
+import { buttonClass } from "../ui/button.js";
 
 interface OriginStats {
   stars?: number;
@@ -104,7 +105,7 @@ const hasStats =
           href={repoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90"
+          class={buttonClass("primary", "sm")}
           data-event="original_collection_click"
           data-event-source="original_collection"
         >
