@@ -1,0 +1,19 @@
+packages/astro/src/components/RecordSidebar.astro
+  s_24bcb38f14ac54::t_332a422e2d17d0 310
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "007457484472f20976234ff23d70cfa878007817",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
