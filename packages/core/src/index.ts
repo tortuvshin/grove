@@ -47,7 +47,9 @@ export {
   blueprintKind,
   auditSchema,
   readmeConfigSchema,
+  normalizeGithubIntegration,
 } from "./schema.js";
+export type { GithubIntegrationFlags } from "./schema.js";
 
 // ── Schema-derived types ─────────────────────────────────────────────
 export type {
@@ -181,6 +183,7 @@ export type { ValidationResult, ValidationIssue, ValidationSeverity } from "./va
 // renderer. These helpers intentionally know nothing about Astro, HTML,
 // generated file locations, or component structure.
 export * from "./directory-display.js";
+export * from "./directory-facets.js";
 export * from "./directory-format.js";
 export * from "./directory-lenses.js";
 export * from "./directory-repo.js";

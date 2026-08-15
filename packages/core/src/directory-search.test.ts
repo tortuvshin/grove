@@ -5,7 +5,16 @@ import { hrefForLens, isLensActive } from "./directory-lenses.js";
 
 function record(
   slug: string,
-  options: { labels?: string[]; lenses?: string[]; category?: string; stacks?: string[]; tags?: string[]; reviewedAt?: string } = {},
+  options: {
+    labels?: string[];
+    lenses?: string[];
+    category?: string;
+    stack?: string;
+    stacks?: string[];
+    platforms?: string[];
+    tags?: string[];
+    reviewedAt?: string;
+  } = {},
 ): IndexRecord {
   return {
     kind: "project",
@@ -14,9 +23,9 @@ function record(
     description: `${slug} description`,
     category: options.category ?? "tools",
     tags: options.tags ?? [],
-    stack: options.stacks?.[0],
+    stack: options.stack ?? options.stacks?.[0],
     stacks: options.stacks ?? [],
-    platforms: [],
+    platforms: options.platforms ?? [],
     projectType: "real-app",
     bestFor: [],
     whyListed: [],
@@ -85,6 +94,99 @@ describe("directory discovery state", () => {
       .toBe("/projects?q=agent&category=agents&sort=alphabetical&label=hot");
     expect(isLensActive("hot", new URL("https://example.com/projects?label=hot").searchParams)).toBe(true);
     expect(isLensActive("all", new URL("https://example.com/projects?category=agents").searchParams)).toBe(true);
+  });
+});
+
+/**
+ * Facet intersection counts — the `filters` option of `buildFacets`.
+ * Each facet's counts must reflect every OTHER active filter (so
+ * Platform counts under an active Stack filter show the intersection)
+ * while ignoring the facet's own selections (so Stack counts never
+ * collapse to just the selected stack). This was the audit's P0:
+ * `/projects?stack=python` narrowed the results but the platform
+ * counts stayed global.
+ */
+describe("facet intersection counts", () => {
+  const fleet = [
+    record("a", { stacks: ["python"], platforms: ["linux", "macos"] }),
+    record("b", { stacks: ["python", "go"], platforms: ["linux"] }),
+    record("c", { stacks: ["typescript"], platforms: ["linux", "web"] }),
+    // Primary stack diverges from the supporting array (the
+    // open-webui shape): must count as python via the union.
+    record("d", { stack: "typescript", stacks: ["typescript", "python"], platforms: ["web"] }),
+  ];
+
+  it("keeps global counts when no filters are passed", () => {
+    const facets = buildFacets(fleet);
+    expect(new Map(facets.platforms.map((f) => [f.value, f.count]))).toEqual(
+      new Map([["linux", 3], ["macos", 1], ["web", 2]]),
+    );
+  });
+
+  it("scopes other facets to the active stack filter", () => {
+    const filters = filtersFromSearchParams(new URLSearchParams("stack=python"));
+    expect(filterRecords(fleet, filters).map((r) => r.slug).sort()).toEqual(["a", "b", "d"]);
+    const facets = buildFacets(fleet, { filters });
+    expect(new Map(facets.platforms.map((f) => [f.value, f.count]))).toEqual(
+      new Map([["linux", 2], ["macos", 1], ["web", 1]]),
+    );
+  });
+
+  it("ignores a facet's own selections when counting that facet", () => {
+    const filters = filtersFromSearchParams(new URLSearchParams("stack=python"));
+    const facets = buildFacets(fleet, { filters });
+    // Stack counts stay unscoped by the stack filter itself so the
+    // user can still see and switch to the other options.
+    expect(new Map(facets.stacks.map((f) => [f.value, f.count]))).toEqual(
+      new Map([["python", 3], ["typescript", 2], ["go", 1]]),
+    );
+  });
+
+  it("intersects across two active dimensions", () => {
+    const filters = filtersFromSearchParams(new URLSearchParams("stack=python&platform=web"));
+    const facets = buildFacets(fleet, { filters });
+    // Stack counts scoped by platform=web only (c, d): union counting
+    // gives typescript 2 and python 1 (d's supporting stack).
+    expect(new Map(facets.stacks.map((f) => [f.value, f.count]))).toEqual(
+      new Map([["typescript", 2], ["python", 1]]),
+    );
+    // Platform counts scoped by stack=python only (a, b, d).
+    expect(new Map(facets.platforms.map((f) => [f.value, f.count]))).toEqual(
+      new Map([["linux", 2], ["macos", 1], ["web", 1]]),
+    );
+  });
+});
+
+/**
+ * Facet option ordering — the `order` option of `buildFacets`.
+ * Taxonomy YAML owns display order; ids that exist only in record
+ * data append after the curated ids in the count-desc fallback order.
+ */
+describe("facet option ordering", () => {
+  const fleet = [
+    record("a", { stacks: ["python"], platforms: ["linux", "macos"] }),
+    record("b", { stacks: ["python"], platforms: ["linux"] }),
+    record("c", { stacks: ["typescript", "zig"], platforms: ["linux", "web"] }),
+  ];
+
+  it("orders known ids by taxonomy position instead of count", () => {
+    const facets = buildFacets(fleet, {
+      order: { stacks: ["zig", "typescript", "python"] },
+    });
+    expect(facets.stacks.map((f) => f.value)).toEqual(["zig", "typescript", "python"]);
+  });
+
+  it("appends data-only ids after taxonomy ids in count-desc order", () => {
+    const facets = buildFacets(fleet, {
+      order: { platforms: ["web"] },
+    });
+    // web is curated → first; linux (3) then macos (1) follow by count.
+    expect(facets.platforms.map((f) => f.value)).toEqual(["web", "linux", "macos"]);
+  });
+
+  it("keeps the count-desc default when no order is provided", () => {
+    const facets = buildFacets(fleet);
+    expect(facets.stacks.map((f) => f.value)).toEqual(["python", "typescript", "zig"]);
   });
 });
 

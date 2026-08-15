@@ -62,6 +62,33 @@
   --color-popover: var(--grove-popover);
   --color-popover-foreground: var(--grove-popover-foreground);
 
+  /* ── Surfaces ───────────────────────────────────────────────────
+   * Elevation roles. `card` and `popover` above resolve to these so
+   * legacy utilities keep working while new components can name the
+   * elevation they mean.
+   */
+  --color-surface-raised: var(--grove-surface-raised);
+  --color-surface-sunken: var(--grove-surface-sunken);
+  --color-surface-overlay: var(--grove-surface-overlay);
+
+  /* ── Selection (neutral inversion) ──────────────────────────────
+   * Active filters, current lens/page, and other "you are here"
+   * states. Deliberately decoupled from the brand primary so green
+   * can mean brand action or success — never selection.
+   */
+  --color-selected: var(--grove-selected);
+  --color-selected-foreground: var(--grove-selected-foreground);
+
+  /* ── Status roles (solid fill + text-on-fill pairs) ───────────── */
+  --color-success: var(--grove-success);
+  --color-success-foreground: var(--grove-success-foreground);
+  --color-warning: var(--grove-warning);
+  --color-warning-foreground: var(--grove-warning-foreground);
+  --color-danger: var(--grove-danger);
+  --color-danger-foreground: var(--grove-danger-foreground);
+  --color-info: var(--grove-info);
+  --color-info-foreground: var(--grove-info-foreground);
+
   /* ── Accent (interactive states) ─────────────────────────────── */
   --color-accent-muted: color-mix(in oklab, var(--grove-foreground) 8%, transparent);
 
@@ -116,15 +143,20 @@
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
 
-  /* ── Container widths (showcase rhythm) ──────────────────────── */
-  --container-container: 1160px;
+  /* ── Container widths (showcase rhythm) ──────────────────────────
+   * The default container tracks `theme.containerWidth` from
+   * grove.config.ts: BaseLayout emits `--grove-container` on <html>
+   * and the token falls back to the package default when unset. */
+  --container-container: var(--grove-container, 1160px);
   --container-wide: 1400px;
   --container-narrow: 720px;
 
-  /* ── Border radius scale ─────────────────────────────────────── */
-  --radius: 0.625rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+  /* ── Border radius scale ──────────────────────────────────────────
+   * Driven by `theme.radius` ("none" | "soft" | "round") the same
+   * way — BaseLayout emits the `--grove-radius*` overrides. */
+  --radius: var(--grove-radius, 0.625rem);
+  --radius-lg: var(--grove-radius-lg, 0.5rem);
+  --radius-xl: var(--grove-radius-xl, 0.75rem);
 
   /* ── Animations ──────────────────────────────────────────────── */
   --animate-fade-in-up: fade-in-up 0.6s ease-out both;
@@ -191,8 +223,11 @@
     --grove-gray-5: var(--color-ink-400);
     --grove-gray-6: var(--color-ink-300);
     --grove-gray-7: var(--color-ink-100);
-    --grove-primary: var(--grove-foreground);
-    --grove-primary-foreground: var(--grove-gray-7);
+    /* Brand color from `theme.primaryColor` (grove.config.ts) —
+     * BaseLayout emits `--grove-theme-primary*` on <html>; without
+     * a config the site keeps the neutral ink treatment. */
+    --grove-primary: var(--grove-theme-primary, var(--grove-foreground));
+    --grove-primary-foreground: var(--grove-theme-primary-foreground, var(--grove-gray-7));
     --grove-secondary: var(--grove-gray-7);
     --grove-secondary-foreground: var(--grove-foreground);
     --grove-muted: var(--grove-gray-7);
@@ -202,10 +237,28 @@
     --grove-border: var(--grove-gray-6);
     --grove-input: var(--grove-gray-6);
     --grove-ring: var(--grove-gray-4);
-    --grove-card: var(--grove-background);
+    /* Elevation: raised surfaces stay in the light family — cards sit
+     * on the page via border, not a dark fill. */
+    --grove-surface-raised: var(--grove-background);
+    --grove-surface-sunken: var(--color-ink-100);
+    --grove-surface-overlay: var(--grove-background);
+    --grove-card: var(--grove-surface-raised);
     --grove-card-foreground: var(--grove-foreground);
-    --grove-popover: var(--grove-background);
+    --grove-popover: var(--grove-surface-overlay);
     --grove-popover-foreground: var(--grove-foreground);
+    /* Selection: neutral inversion (vite.dev-style), never the brand
+     * primary. */
+    --grove-selected: var(--color-ink-900);
+    --grove-selected-foreground: var(--color-ink-50);
+    /* Status fills with AA text-on-fill partners. */
+    --grove-success: #15803d;
+    --grove-success-foreground: #ffffff;
+    --grove-warning: #92400e;
+    --grove-warning-foreground: #ffffff;
+    --grove-danger: #b91c1c;
+    --grove-danger-foreground: #ffffff;
+    --grove-info: #1d4ed8;
+    --grove-info-foreground: #ffffff;
   }
 
   :root.dark {
@@ -219,8 +272,11 @@
     --grove-gray-5: var(--color-ink-700);
     --grove-gray-6: var(--color-ink-800);
     --grove-gray-7: var(--color-ink-900);
-    --grove-primary: var(--grove-foreground);
-    --grove-primary-foreground: var(--grove-gray-7);
+    /* Dark mode lifts the brand color toward white (see BaseLayout's
+     * emitted `--grove-theme-primary-dark`) so contrast holds. The
+     * foreground is computed against that lifted value, never assumed. */
+    --grove-primary: var(--grove-theme-primary-dark, var(--grove-foreground));
+    --grove-primary-foreground: var(--grove-theme-primary-dark-foreground, var(--grove-gray-7));
     --grove-secondary: var(--grove-gray-6);
     --grove-secondary-foreground: var(--grove-foreground);
     --grove-muted: var(--grove-gray-6);
@@ -230,10 +286,27 @@
     --grove-border: var(--grove-gray-6);
     --grove-input: var(--grove-gray-5);
     --grove-ring: var(--grove-gray-4);
-    --grove-card: var(--grove-background);
+    /* Elevation: the dark raised surface sits just above the ink-950
+     * page (deliberate landing-page value; hover lifts to ink-900). */
+    --grove-surface-raised: #141516;
+    --grove-surface-sunken: oklch(11.5% 0 0);
+    --grove-surface-overlay: var(--grove-gray-7);
+    --grove-card: var(--grove-surface-raised);
     --grove-card-foreground: var(--grove-foreground);
-    --grove-popover: var(--grove-gray-7);
+    --grove-popover: var(--grove-surface-overlay);
     --grove-popover-foreground: var(--grove-foreground);
+    /* Selection: neutral inversion, mirrored. */
+    --grove-selected: var(--color-ink-100);
+    --grove-selected-foreground: var(--color-ink-950);
+    /* Status fills lift toward pastels with dark text-on-fill. */
+    --grove-success: #4ade80;
+    --grove-success-foreground: var(--color-ink-950);
+    --grove-warning: #fbbf24;
+    --grove-warning-foreground: var(--color-ink-950);
+    --grove-danger: #f87171;
+    --grove-danger-foreground: var(--color-ink-950);
+    --grove-info: #60a5fa;
+    --grove-info-foreground: var(--color-ink-950);
   }
 
   html {
@@ -289,9 +362,33 @@
     input[type="url"],
     input[type="email"],
     input:not([type]),
-    select,
     textarea
   ) {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    display: none;
+  }
+
+  /* Inputs that live INSIDE a styled shell (the hero search pill)
+   * opt out with `.grove-input-unstyled`: the shell owns the border,
+   * radius, background, and the focus treatment via `focus-within` —
+   * forcing a second background/radius/focus ring on the inner input
+   * paints a box-within-a-box. */
+  :where(
+    input[type="text"],
+    input[type="search"],
+    input[type="url"],
+    input[type="email"],
+    input:not([type]),
+    select,
+    textarea
+  ):not(.grove-input-unstyled) {
     border-color: var(--grove-input) !important;
     border-radius: var(--radius) !important;
     background-color: var(--grove-background) !important;
@@ -306,7 +403,7 @@
     input:not([type]),
     select,
     textarea
-  ):focus-visible {
+  ):not(.grove-input-unstyled):focus-visible {
     border-color: var(--grove-ring) !important;
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--grove-ring) 35%, transparent);
@@ -770,6 +867,21 @@
 .grove-toc summary { color: inherit; }
 .grove-toc[open] .grove-toc-chevron,
 .grove-toc > summary:hover .grove-toc-chevron { transform: rotate(90deg); }
+/* Desktop (lg+): keep the TOC contents visible even before the
+ * component script sets the `open` attribute (and with JS disabled).
+ * Closed `<details>` content lives in a hidden UA shadow slot, so
+ * both the legacy child rule and the modern `::details-content`
+ * override are needed for cross-browser coverage; the script in
+ * `TableOfContents.astro` sets `open` as the primary mechanism. */
+@media (width >= 64rem) {
+  .grove-toc:not([open]) > *:not(summary) {
+    display: block;
+  }
+  .grove-toc:not([open])::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+}
 .grove-toc-item { padding: 0; }
 .grove-toc-link[data-toc-active] {
   background-color: var(--color-ink-100, #f0f0f0);

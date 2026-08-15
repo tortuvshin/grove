@@ -7,7 +7,7 @@ This page is the contributor's path. The maintainer's path is in
 [Governance](/maintainers/governance/).
 
 The mechanics of writing a record are in
-[Author a record](/guides/author-a-record/). This page covers the
+[Author a record](/sources/records/). This page covers the
 *editorial* side: what a reviewer is looking for, what's likely to be
 rejected, and how to write a PR that lands on the first try.
 
@@ -125,7 +125,7 @@ A PR that fills these out takes the reviewer 30 seconds to process.
 - **The PR bundles multiple records.** One record per PR.
 - **The record edits an existing record's `health` block by hand.**
   Don't. The health block is auto-derived. See
-  [Sync GitHub metadata](/guides/sync-github-metadata/).
+  [Sync GitHub metadata](/automation/sync-github-deep-dive/).
 
 ## What happens after the PR lands
 
@@ -170,3 +170,28 @@ For contributing to the docs site, see
 The three paths share the same `Code of Conduct` and the same
 etiquette, but the review bars, the test gates, and the merge
 criteria are all different.
+
+## CI gates for framework contributors
+
+If you are opening a PR against `@grove-dev/core`, `@grove-dev/cli`,
+`@grove-dev/astro`, or `@grove-dev/starlight`, the framework's
+[CI quality gates](/maintainers/ci-quality/) apply. These include:
+
+- **Biome** for lint and formatting — `pnpm lint` must pass.
+- **Vitest + Codecov** for unit tests — coverage must not drop
+  below the configured threshold.
+- **lychee** for link checking — broken internal links fail CI.
+- **Lighthouse CI** (for the example app) — performance,
+  accessibility, best-practices, and SEO budgets must hold.
+- **Renovate** for dependency updates — weekly automated PRs;
+  maintainers merge after review.
+- **`dependency-review-action`** for new dependencies — fails on
+  known vulnerabilities, license violations, or fresh packages.
+
+A PR that fails any of these gates is blocked from merging. See
+[CI quality](/maintainers/ci-quality/) for the full configuration
+and rationale.
+
+The contributor path for a *record* (this page) does not run
+Biome or Vitest; the gates are `grove check --strict` and
+`pnpm build` only.

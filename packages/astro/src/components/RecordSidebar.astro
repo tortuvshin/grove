@@ -21,13 +21,27 @@
  */
 import { licenseDisplay } from "@grove-dev/core";
 import type { RecordDetailModel } from "../server/models.js";
+import { taxonomyLabel } from "../server/directory.js";
+import Icon from "./Icon.astro";
 import LanguageBreakdown from "./LanguageBreakdown.astro";
 
 interface Props {
   detail: RecordDetailModel;
+  /**
+   * Pass false when a parent wrapper owns the sticky behavior (e.g.
+   * the detail page stacks the TOC above this sidebar inside one
+   * sticky column).
+   */
+  sticky?: boolean;
+  /**
+   * "column" (default) stacks the cards vertically for a rail;
+   * "grid" lays them out in responsive columns for full-width
+   * placement below the article.
+   */
+  layout?: "column" | "grid";
 }
 
-const { detail } = Astro.props;
+const { detail, sticky = true, layout = "column" } = Astro.props;
 const {
   sidebar,
   github,
@@ -69,12 +83,22 @@ function row(label: string, value: unknown) {
 }
 ---
 
-<aside class="grove-sidebar flex flex-col gap-6 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto" aria-label="Record metadata sidebar">
+<aside
+  class:list={[
+    layout === "grid"
+      ? "grove-sidebar grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      : "grove-sidebar flex flex-col gap-4",
+    layout === "column" &&
+      sticky &&
+      "lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto",
+  ]}
+  aria-label="Record metadata"
+>
 
   {/* ── Activity card ──────────────────────────────────────── */}
   {sidebar.showActivity && (
     <section
-      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800"
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-4 dark:border-ink-800"
       aria-labelledby="sidebar-activity-title"
     >
       <h2
@@ -164,7 +188,7 @@ function row(label: string, value: unknown) {
   {/* ── Freshness card ─────────────────────────────────────── */}
   {sidebar.showFreshness && (
     <section
-      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800"
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-4 dark:border-ink-800"
       aria-labelledby="sidebar-freshness-title"
     >
       <h2
@@ -237,7 +261,7 @@ function row(label: string, value: unknown) {
   {/* ── Ecosystem card ─────────────────────────────────────── */}
   {sidebar.showEcosystem && (
     <section
-      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-background p-5 dark:border-ink-800"
+      class="grove-card rounded-[var(--radius-lg)] border border-ink-200 bg-card p-4 dark:border-ink-800"
       aria-labelledby="sidebar-ecosystem-title"
     >
       <h2
@@ -253,8 +277,9 @@ function row(label: string, value: unknown) {
           <ul class="m-0 flex list-none flex-wrap gap-1.5 p-0">
             {stacks.map((s) => (
               <li>
-                <a href={`/${detail.slug}?stack=${encodeURIComponent(s)}`} class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground no-underline">
-                  {s}
+                <a href={`/${detail.slug}?stack=${encodeURIComponent(s)}`} class="inline-flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pl-1.5 pr-2 text-2xs font-medium text-secondary-foreground no-underline">
+                  <Icon name={s} category="stack" size={12} />
+                  {taxonomyLabel("stacks", s)}
                 </a>
               </li>
             ))}
@@ -267,8 +292,9 @@ function row(label: string, value: unknown) {
           <h3 class="m-0 mb-1.5 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Platforms</h3>
           <ul class="m-0 flex list-none flex-wrap gap-1.5 p-0">
             {platforms.map((p) => (
-              <li class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
-                {p}
+              <li class="inline-flex items-center gap-1.5 rounded-full border border-ink-200 py-0.5 pl-1.5 pr-2 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
+                <Icon name={p} category="platform" size={12} />
+                {taxonomyLabel("platforms", p)}
               </li>
             ))}
           </ul>
@@ -279,7 +305,7 @@ function row(label: string, value: unknown) {
         <div class="mb-3">
           <h3 class="m-0 mb-1.5 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Category</h3>
           <a href={`/${detail.slug}?category=${encodeURIComponent(category)}`} class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground no-underline">
-            {category}
+            {taxonomyLabel("categories", category)}
           </a>
         </div>
       )}
@@ -291,7 +317,7 @@ function row(label: string, value: unknown) {
             {tags.map((t) => (
               <li>
                 <a href={`/${detail.slug}?tag=${encodeURIComponent(t)}`} class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 no-underline dark:border-ink-800 dark:text-ink-300">
-                  {t}
+                  {taxonomyLabel("topics", t)}
                 </a>
               </li>
             ))}
@@ -326,7 +352,7 @@ function row(label: string, value: unknown) {
   {/* ── Source card (small) ────────────────────────────────── */}
   {sidebar.showSource && (
     <section
-      class="grove-card grove-card--muted rounded-[var(--radius-lg)] border border-dashed border-ink-200 bg-background/50 p-4 text-2xs text-ink-500 dark:border-ink-800 dark:text-ink-400"
+      class="grove-card grove-card--muted rounded-[var(--radius-lg)] border border-dashed border-ink-200 bg-card/50 p-4 text-2xs text-ink-500 dark:border-ink-800 dark:text-ink-400"
       aria-labelledby="sidebar-source-title"
     >
       <h2

@@ -196,6 +196,67 @@ coordination headache. Don't ship on red.
 - **A user reports a regression within hours of a release.** The
   fastest fix is a patch release with the regression fix.
 
+## Considering Changesets
+
+Grove currently uses a hand-rolled `scripts/release.mjs` for the
+reason that the four published packages (`core`, `astro`, `cli`,
+`starlight`) always release together as a single version line.
+[Changesets](https://github.com/changesets/changesets) is the
+de-facto standard for JS package releases; we evaluated it.
+
+### Why we did not adopt Changesets (yet)
+
+- **Single-version line.** Grove's packages move together. A
+  Changesets workflow that bumps each package independently
+  produces four diffs and four changelogs to reconcile, where
+  `scripts/release.mjs` produces one.
+- **Author friction.** Changesets requires a `.changeset/*.md`
+  file in every PR that touches a public API. For a small
+  maintainer team, the extra PR step slowed reviews in pilot
+  testing.
+- **Single CHANGELOG.md.** The repository publishes one
+  CHANGELOG.md, not per-package. Changesets' per-package
+  changelog files would have to be aggregated by the release
+  script — adding the work it removes.
+
+### What we will re-evaluate
+
+- **Multi-version lines.** If a package splits off (say,
+  `@grove-dev/starlight` ships independently), Changesets
+  becomes the better fit.
+- **External contributors.** If the maintainer team grows to > 5
+  and a Changesets bot removes the "who bumps the version"
+  conversation, the trade-off shifts.
+- **Dependents.** If other packages in the JS ecosystem start
+  depending on individual Grove packages with their own release
+  schedules, per-package versions matter.
+
+### Migration plan
+
+The migration from `scripts/release.mjs` to Changesets is
+mechanical:
+
+1. `pnpm add -Dw @changesets/cli` (and `@changesets/changelog-github`).
+2. Add `.changeset/config.json` with the linked-package preset:
+   ```json
+   {
+     "linked": [
+       ["@grove-dev/core", "@grove-dev/astro", "@grove-dev/cli", "@grove-dev/starlight"]
+     ]
+   }
+   ```
+3. Add a `version-packages` workflow (`changesets/action`) on push
+   to `main`.
+4. Add a `publish-packages` workflow that runs `pnpm publish` after
+   the version PR merges.
+5. Retire `scripts/release.mjs`.
+
+The CHANGELOG.md can stay (Changesets can be configured to
+aggregate into a single file) or split per-package (the default).
+
+For now, the hand-rolled script is fine; the migration is a
+day's work when the trade-off shifts.
+
 ## What is not in the release process
 
 - **The docs site (`apps/docs/`)** is built and deployed separately

@@ -21,6 +21,7 @@
  * the badge's `data-activity-tone` attribute picks one at runtime.
  */
 import type { RecordDetailModel } from "../server/models.js";
+import { buttonClass } from "../ui/button.js";
 
 interface Props {
   detail: RecordDetailModel;
@@ -44,29 +45,60 @@ const {
 } = detail;
 ---
 
-<header class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-  {avatarSrc ? (
-    <img
-      src={avatarSrc}
-      alt=""
-      width="64"
-      height="64"
-      loading="lazy"
-      decoding="async"
-      class="h-14 w-14 shrink-0 rounded-lg border border-ink-200 object-contain bg-white p-1 dark:border-ink-800 dark:bg-ink-950 sm:h-16 sm:w-16"
-    />
-  ) : (
-    <span
-      aria-hidden="true"
-      class="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-ink-200 bg-ink-50 text-xl font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200 sm:h-16 sm:w-16"
-    >
-      {initials || "·"}
-    </span>
-  )}
+<header class="mb-8">
+  {/* Identity row: logo sized to the name+repo block beside it — no
+      tall avatar column leaving dead space under the logo. Pills sit
+      at the row's right edge on wide viewports and wrap below on
+      mobile. */}
+  <div class="flex items-center gap-4">
+    {avatarSrc ? (
+      <img
+        src={avatarSrc}
+        alt=""
+        width="56"
+        height="56"
+        loading="lazy"
+        decoding="async"
+        class="h-12 w-12 shrink-0 rounded-lg border border-ink-200 object-contain bg-white p-1 dark:border-ink-800 dark:bg-ink-950 sm:h-14 sm:w-14"
+      />
+    ) : (
+      <span
+        aria-hidden="true"
+        class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-ink-200 bg-ink-50 text-xl font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200 sm:h-14 sm:w-14"
+      >
+        {initials || "·"}
+      </span>
+    )}
 
-  <div class="min-w-0 flex-1">
-    {/* Pills row — category + curation + Curated check + activity badge. */}
-    <div class="flex flex-wrap items-center gap-1.5">
+    <div class="min-w-0 flex-1">
+      <h1 class="m-0 text-[1.75rem] font-semibold leading-tight tracking-tight text-ink-900 dark:text-ink-100 sm:text-[2rem]">
+        {name}
+      </h1>
+      {ownerRepo && (
+        <p class="m-0 mt-0.5 text-sm text-ink-500 dark:text-ink-400">
+          <a
+            href={`https://github.com/${ownerRepo.owner}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
+          >
+            @{ownerRepo.owner}
+          </a>
+          <span class="mx-1 text-ink-300 dark:text-ink-700">/</span>
+          <a
+            href={repoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
+          >
+            {ownerRepo.repo}
+          </a>
+        </p>
+      )}
+    </div>
+
+    {/* Pills — right-aligned beside the name on wide viewports. */}
+    <div class="hidden shrink-0 flex-wrap items-center justify-end gap-1.5 md:flex">
       {category && (
         <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
           {category}
@@ -77,8 +109,9 @@ const {
           {l}
         </span>
       ))}
+      {/* Curated = reviewed provenance, not a success status. */}
       {record.curation?.reviewed && (
-        <span class="inline-flex items-center gap-1 rounded border border-emerald-300/60 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+        <span class="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground">
           <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
             <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.41 5.09a.75.75 0 0 0-1.06 0L6.75 8.69 5.65 7.59a.75.75 0 1 0-1.06 1.06l1.65 1.65a.75.75 0 0 0 1.06 0l4.11-4.11a.75.75 0 0 0 0-1.06Z" />
           </svg>
@@ -88,7 +121,7 @@ const {
       {activityBadge && (
         <span
           data-activity-tone={activityBadge.tone}
-          class="grove-pill grove-pill--activity inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium"
+          class="grove-pill grove-pill--activity inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-medium"
         >
           <span class="relative flex h-1.5 w-1.5">
             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60"></span>
@@ -98,68 +131,65 @@ const {
         </span>
       )}
     </div>
+  </div>
 
-    <h1 class="m-0 mt-2 text-[2rem] font-semibold leading-tight tracking-tight text-ink-900 dark:text-ink-100 sm:text-[2.25rem]">
-      {name}
-    </h1>
-
-    {ownerRepo && (
-      <p class="m-0 mt-1 text-sm text-ink-500 dark:text-ink-400">
-        <a
-          href={`https://github.com/${ownerRepo.owner}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
-        >
-          @{ownerRepo.owner}
-        </a>
-        <span class="mx-1 text-ink-300 dark:text-ink-700">/</span>
-        <a
-          href={repoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
-        >
-          {ownerRepo.repo}
-        </a>
-      </p>
+  {/* Same pills below the identity row on narrow viewports. */}
+  <div class="mt-3 flex flex-wrap items-center gap-1.5 md:hidden">
+    {category && (
+      <span class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 dark:border-ink-800 dark:text-ink-300">
+        {category}
+      </span>
     )}
-
-    {summary && (
-      <p class="m-0 mt-3 max-w-[68ch] text-base leading-relaxed text-ink-700 dark:text-ink-200">
-        {summary}
-      </p>
+    {curationLabels.map((l) => (
+      <span class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground">
+        {l}
+      </span>
+    ))}
+    {record.curation?.reviewed && (
+      <span class="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground">
+        <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
+          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.41 5.09a.75.75 0 0 0-1.06 0L6.75 8.69 5.65 7.59a.75.75 0 1 0-1.06 1.06l1.65 1.65a.75.75 0 0 0 1.06 0l4.11-4.11a.75.75 0 0 0 0-1.06Z" />
+        </svg>
+        Curated
+      </span>
     )}
-    {sourceDescription && sourceDescription !== summary && (
-      <p class="m-0 mt-2 max-w-[68ch] text-sm leading-relaxed text-ink-500 dark:text-ink-400">
-        <span class="text-2xs font-semibold uppercase tracking-wider">From the project's README: </span>
-        {sourceDescription}
-      </p>
-    )}
+  </div>
 
-    {/* CTA row — primary actions only. */}
-    <div class="mt-4 flex flex-wrap items-center gap-2">
-      {repoUrl && (
-        <a
-          href={repoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          View on GitHub →
-        </a>
-      )}
-      {homepageUrl && (
-        <a
-          href={homepageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-border bg-secondary px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 text-foreground hover:bg-accent"
-        >
-          Homepage
-        </a>
-      )}
-    </div>
+  {/* Description — full width below the identity row. */}
+  {summary && (
+    <p class="m-0 mt-4 max-w-[72ch] text-base leading-relaxed text-ink-700 dark:text-ink-200">
+      {summary}
+    </p>
+  )}
+  {sourceDescription && sourceDescription !== summary && (
+    <p class="m-0 mt-2 max-w-[72ch] text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+      <span class="text-2xs font-semibold uppercase tracking-wider">From the project's README: </span>
+      {sourceDescription}
+    </p>
+  )}
+
+  {/* CTA row — primary actions only. */}
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    {repoUrl && (
+      <a
+        href={repoUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class={buttonClass("primary", "sm")}
+      >
+        View on GitHub →
+      </a>
+    )}
+    {homepageUrl && (
+      <a
+        href={homepageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class={buttonClass("secondary", "sm")}
+      >
+        Homepage
+      </a>
+    )}
   </div>
   {screenshots && screenshots.length > 0 && (
     <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Screenshots">

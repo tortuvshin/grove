@@ -1,0 +1,50 @@
+---
+/**
+ * SearchField — labeled search input with the leading glass icon.
+ *
+ * The label is visually hidden but always present; placeholder text
+ * is display copy, not the accessible name. Pass the derived
+ * placeholder from `getDirectoryIndexModel().searchPlaceholder` so it
+ * only names ENABLED facets.
+ */
+
+interface Props {
+  label: string;
+  name?: string;
+  id?: string;
+  value?: string;
+  placeholder?: string;
+  class?: string;
+}
+
+const {
+  label,
+  name = "q",
+  id = "search-input",
+  value = "",
+  placeholder,
+  class: className = "",
+} = Astro.props;
+---
+
+<label class={`relative block ${className}`}>
+  <span class="sr-only">{label}</span>
+  <svg
+    viewBox="0 0 16 16"
+    width="16"
+    height="16"
+    aria-hidden="true"
+    class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+    fill="currentColor"
+  >
+    <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.5 4.5 0 1 0-9 0 4.5 4.5 0 0 0 9 0Z" />
+  </svg>
+  <input
+    id={id}
+    type="search"
+    name={name}
+    value={value}
+    placeholder={placeholder}
+    class="h-10 w-full rounded-md border border-input bg-background py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
+  />
+</label>

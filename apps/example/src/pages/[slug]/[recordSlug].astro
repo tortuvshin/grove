@@ -38,23 +38,32 @@ const { record, name, title, description, itemSingular, jsonLd } = detail;
   submitHref="/submit"
   submitLabel={`Submit ${itemSingular}`}
 >
-  <article class="py-10 sm:py-14">
+  <article class="py-8 sm:py-10">
     <div class="mx-auto w-full max-w-[1240px] px-5 sm:px-7">
       <RecordHeader detail={detail} />
 
       <div
-        class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_340px]"
+        class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12"
       >
+        {/* Reading column: editorial context, then the article —
+            no TOC panel pushing the body down. */}
         <div class="min-w-0">
           <EditorialSummary bestFor={detail.bestFor} caveats={detail.caveats} />
-          <TableOfContents items={detail.toc} />
           <MarkdownBody
             recordSlug={record.slug}
             fallback={record.content ? "This record doesn't have notes yet." : undefined}
           />
         </div>
-        <RecordSidebar detail={detail} />
+        {/* Right rail: the TOC and nothing else. */}
+        <div class="min-w-0 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:self-start lg:overflow-y-auto">
+          <TableOfContents items={detail.toc} />
+        </div>
       </div>
+
+      {/* Metadata panels — full width below the article. */}
+      <section class="mt-12 border-t border-border pt-8" aria-label="Project details">
+        <RecordSidebar detail={detail} sticky={false} layout="grid" />
+      </section>
     </div>
   </article>
 </BaseLayout>

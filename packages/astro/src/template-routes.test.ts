@@ -97,6 +97,71 @@ describe("default Astro route configuration", () => {
     expect(listClient).toContain("filterRecords(items, filters)");
   });
 
+  it("recomputes facet intersection counts from the live query string", async () => {
+    // The route is prerendered with global (unfiltered) counts; the
+    // client must re-run buildFacets with the URL's filters and patch
+    // the count spans in place (audit P0: counts stayed global under
+    // an active filter).
+    const listClient = await readFile(
+      resolve(import.meta.dirname, "components/DirectoryIndexClient.astro"),
+      "utf8",
+    );
+    const filterOptions = await readFile(
+      resolve(import.meta.dirname, "components/FilterOptions.astro"),
+      "utf8",
+    );
+
+    expect(listClient).toContain("buildFacets,");
+    expect(listClient).toContain("buildFacets(items, {");
+    expect(listClient).toContain('querySelectorAll("[data-facet-count]")');
+    expect(filterOptions).toContain("data-facet-count");
+    expect(filterOptions).toContain("data-facet={filterKey}");
+    expect(filterOptions).toContain("data-value={option.value}");
+  });
+
+  it("exposes filter popovers as groups of native inputs, never listboxes", async () => {
+    // role="listbox" over label/input children has no valid a11y
+    // tree; the popover is a group of native checkboxes/radios.
+    const menu = await readFile(
+      resolve(import.meta.dirname, "components/FilterGroupMenu.astro"),
+      "utf8",
+    );
+    expect(menu).not.toContain('role="listbox"');
+    expect(menu).not.toContain('aria-haspopup="listbox"');
+    expect(menu).toContain('role="group"');
+    expect(menu).toContain('aria-expanded="false"');
+  });
+
+  it("announces theme changes with a stateful label and live region", async () => {
+    const toggle = await readFile(
+      resolve(import.meta.dirname, "layouts/ThemeToggle.astro"),
+      "utf8",
+    );
+    expect(toggle).toContain('role="status"');
+    expect(toggle).toContain("switch to");
+    expect(toggle).toContain('setAttribute("aria-label"');
+    expect(toggle).not.toContain('aria-label="Toggle theme"');
+  });
+
+  it("builds the mobile filter drawer on a native dialog", async () => {
+    const drawer = await readFile(
+      resolve(import.meta.dirname, "ui/FilterDrawer.astro"),
+      "utf8",
+    );
+    expect(drawer).toContain("<dialog");
+    expect(drawer).toContain("showModal()");
+    expect(drawer).toContain('aria-haspopup="dialog"');
+  });
+
+  it("restores focus to the trigger when Escape closes a filter popover", async () => {
+    const panel = await readFile(
+      resolve(import.meta.dirname, "components/RefinePanel.astro"),
+      "utf8",
+    );
+    expect(panel).toContain('aria-expanded="true"');
+    expect(panel).toContain(".focus()");
+  });
+
   it("uses generated taxonomy names as display labels", async () => {
     const recordsModule = await readFile(
       resolve(import.meta.dirname, "server/directory.ts"),

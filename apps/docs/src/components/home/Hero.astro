@@ -1,36 +1,47 @@
 ---
-// vite.dev-style hero: glowing mark, one plain headline, one paragraph,
-// three pill buttons. No terminals, no panels — the product explains itself.
+// Grove hero — the landing story's first frame. A micro badge, the growing
+// mark, one headline, one sentence, and the CLI as the primary call to
+// action: on load it types `npx @grove-dev/cli init` and prints the first
+// scaffold lines, which the "How Grove works" story then picks up on
+// scroll. GitHub and docs step back into quiet secondary links.
+const CLI_COMMAND = 'npx @grove-dev/cli init';
+
+const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow.'];
 ---
 
+<!-- `isolate` gives the section its own stacking context, so the z-index -1
+     aurora layers paint above the body background instead of being buried
+     underneath it. -->
 <section
   id="hero-section"
-  class="relative overflow-hidden"
+  class="relative isolate overflow-hidden"
   aria-labelledby="hero-title"
 >
   <div class="hero-beams" aria-hidden="true"></div>
 
-  <div class="relative mx-auto flex max-w-4xl flex-col items-center px-6 pb-24 pt-16 text-center sm:pb-28 sm:pt-20">
+  <div class="relative mx-auto flex max-w-4xl flex-col items-center px-6 pb-24 pt-14 text-center sm:pb-28 sm:pt-16">
     <a
       href="/roadmap/"
-      class="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 py-1.5 pl-3 pr-4 text-xs font-medium text-muted backdrop-blur transition-colors hover:border-border-strong hover:text-fg"
+      class="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3.5 py-1 text-xs font-medium text-muted backdrop-blur transition-colors hover:border-border-strong hover:text-fg"
     >
-      <span class="rounded-full bg-brand/20 px-2 py-0.5 text-[11px] font-semibold text-brand-light">v0.5.0-next</span>
-      grove import turns awesome lists into records
-      <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M5 12h14"></path>
-        <path d="m12 5 7 7-7 7"></path>
-      </svg>
+      Grove v0.5
+      <span class="text-border-strong" aria-hidden="true">·</span>
+      Open source
     </a>
 
-    <div class="hero-mark relative mt-12" aria-hidden="true">
+    <!-- The mark grows in on load: a seed falls, the stem draws upward, the
+         leaves unfurl, roots take hold, the glow blooms — and then the whole
+         sprout keeps swaying gently, like wind. Pure CSS; with reduced
+         motion it renders fully grown and still. -->
+    <div class="hero-mark relative mt-10" aria-hidden="true">
       <div class="hero-mark-glow absolute left-1/2 top-1/2 size-40 -translate-x-1/2 -translate-y-1/2"></div>
-      <svg class="relative size-20 text-fg sm:size-24" viewBox="0 0 32 32" fill="none">
-        <path d="M16 28V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        <path d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor" />
-        <path d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7" />
-        <path d="M16 18C16 18 16.2 21 19.5 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        <path d="M16 21C16 21 15.8 24 12.5 25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      <svg class="hero-mark-svg relative size-20 text-fg sm:size-24" viewBox="0 0 32 32" fill="none">
+        <circle class="hero-seed" cx="16" cy="27" r="1.6" fill="currentColor" />
+        <path class="hero-stem" d="M16 28C15.6 24.5 15.8 18.5 16 13" pathLength="1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <path class="hero-leaf hero-leaf-r" d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor" />
+        <path class="hero-leaf hero-leaf-l" d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7" />
+        <path class="hero-shoot hero-shoot-1" d="M16 18C16 18 16.2 21 19.5 22" pathLength="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <path class="hero-shoot hero-shoot-2" d="M16 21C16 21 15.8 24 12.5 25" pathLength="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
       </svg>
     </div>
 
@@ -38,35 +49,62 @@
       id="hero-title"
       class="mt-10 max-w-3xl text-balance text-5xl font-bold leading-[1.08] tracking-tight text-fg sm:text-6xl md:text-[68px]"
     >
-      Build directories <span class="text-gradient">that stay useful.</span>
+      Build directories <span class="text-gradient text-gradient-live">that stay useful.</span>
     </h1>
     <p class="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted sm:text-xl">
-      Grove is an open-source framework for curated directories, resource hubs, and knowledge sites — searchable, easy to publish, and practical to maintain for years.
+      Turn plain YAML and Markdown into a searchable, SEO-ready directory that stays current as your sources change.
     </p>
 
-    <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-      <a
-        href="/getting-started/create-a-space/"
-        class="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-light"
-      >
-        Get started
-      </a>
-      <a
-        href="/introduction/"
-        class="rounded-full bg-card px-6 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover"
-      >
-        Why Grove?
-      </a>
+    <!-- Primary CTA: the CLI itself. Types on load, prints the scaffold,
+         and the copy button hands the command over. Output lines are always
+         in the DOM, so the box never changes height and nothing below
+         shifts. Without JS or with reduced motion everything is simply
+         visible. -->
+    <div
+      id="hero-cli"
+      class="mt-10 w-full max-w-sm overflow-hidden rounded-lg border border-border-strong bg-surface/80 text-left font-mono shadow-2xl shadow-black/40 backdrop-blur"
+    >
+      <div class="flex items-center gap-2 px-4 py-3">
+        <span class="select-none text-brand-light" aria-hidden="true">$</span>
+        <span class="flex min-w-0 items-center">
+          <code id="hero-cli-cmd" class="hero-cli-cmd text-[13px] text-fg">{CLI_COMMAND}</code>
+          <span class="hero-cli-cursor ml-0.5 inline-block h-4 w-[7px] shrink-0 bg-brand" aria-hidden="true"></span>
+        </span>
+        <button
+          type="button"
+          id="hero-cli-copy"
+          class="ml-auto shrink-0 rounded-sm p-1 text-subtle transition-colors hover:text-fg"
+          aria-label="Copy the install command"
+        >
+          <svg class="hero-copy-icon size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+          <span class="hero-copy-done hidden whitespace-nowrap text-[11px] font-medium text-accent-green">Copied ✓</span>
+        </button>
+        <span class="sr-only" aria-live="polite" data-copy-status></span>
+      </div>
+      <div class="space-y-1 border-t border-border/60 px-4 pb-3.5 pt-3 text-xs">
+        {cliOutput.map((line, i) => (
+          <div class="hero-cli-line text-muted" style={`--d: ${2.3 + i * 0.3}s`}>
+            <span class="text-accent-green" aria-hidden="true">✓</span> {line}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
       <a
         href="https://github.com/tortuvshin/grove"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 rounded-full bg-card px-6 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover"
+        class="inline-flex items-center gap-1.5 font-medium text-muted transition-colors hover:text-fg"
       >
         <svg class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"></path>
         </svg>
-        GitHub
+        View on GitHub
+      </a>
+      <span class="text-border-strong" aria-hidden="true">·</span>
+      <a href="/introduction/" class="font-medium text-muted transition-colors hover:text-fg">
+        Read the docs
       </a>
     </div>
 
@@ -75,8 +113,14 @@
 </section>
 
 <style>
+  /* Growth timeline: seed falls (0–0.75s) → stem draws up (0.75–1.45s) →
+     leaves unfurl (1.3–2.15s) → side shoots (1.95–2.55s) → glow blooms —
+     then the sway, float, and pulse take over.
+     Every animation uses `both`, so the pre-delay state is hidden and the
+     final state is the fully grown mark — which is also exactly what
+     reduced-motion users see. */
   .hero-mark {
-    animation: hero-mark-float 6s ease-in-out infinite alternate;
+    animation: hero-mark-float 6s ease-in-out 2.6s infinite alternate;
   }
 
   @keyframes hero-mark-float {
@@ -84,10 +128,107 @@
     to { transform: translateY(-10px); }
   }
 
+  /* After growing, the sprout sways like wind is moving through it: the
+     whole plant rocks around its base while each leaf flexes on its own
+     slightly offset rhythm, so the loop never reads as mechanical. */
+  .hero-mark-svg {
+    transform-origin: 50% 96%;
+    animation: hero-sway 7s ease-in-out 3s infinite;
+  }
+
+  @keyframes hero-sway {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(1.7deg); }
+    65% { transform: rotate(-1.3deg); }
+  }
+
+  .hero-seed {
+    opacity: 0;
+    animation:
+      hero-seed-fall 0.6s cubic-bezier(0.3, 1.3, 0.5, 1) 0.15s both,
+      hero-seed-vanish 0.35s ease-out 0.8s forwards;
+  }
+
+  @keyframes hero-seed-fall {
+    from { opacity: 0; transform: translateY(-24px); }
+    30% { opacity: 1; }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes hero-seed-vanish {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(0.5px) scale(0.4); }
+  }
+
+  .hero-stem {
+    stroke-dasharray: 1;
+    animation: hero-stem-grow 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.75s both;
+  }
+
+  /* The 0%→1% opacity step hides the round-linecap dot that an undrawn
+     dashed path would otherwise leave at its start point. */
+  @keyframes hero-stem-grow {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    1% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+  }
+
+  .hero-leaf {
+    transform-box: view-box;
+    transform-origin: 16px 13px;
+  }
+
+  .hero-leaf-r {
+    animation:
+      hero-leaf-unfurl-r 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) 1.3s both,
+      hero-leaf-sway-r 5.2s ease-in-out 3.2s infinite alternate;
+  }
+
+  .hero-leaf-l {
+    animation:
+      hero-leaf-unfurl-l 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) 1.5s both,
+      hero-leaf-sway-l 6.4s ease-in-out 3.6s infinite alternate;
+  }
+
+  @keyframes hero-leaf-unfurl-r {
+    from { opacity: 0; transform: scale(0) rotate(-14deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes hero-leaf-unfurl-l {
+    from { opacity: 0; transform: scale(0) rotate(14deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes hero-leaf-sway-r {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(2.2deg); }
+  }
+
+  @keyframes hero-leaf-sway-l {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-1.8deg); }
+  }
+
+  .hero-shoot {
+    stroke-dasharray: 1;
+    animation: hero-stem-grow 0.45s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+
+  .hero-shoot-1 { animation-delay: 1.95s; }
+  .hero-shoot-2 { animation-delay: 2.1s; }
+
   .hero-mark-glow {
-    background: radial-gradient(circle, rgb(65 209 255 / 0.35), rgb(189 52 254 / 0.25) 55%, transparent 70%);
+    background: radial-gradient(circle, rgb(39 183 200 / 0.3), rgb(125 211 216 / 0.12) 55%, transparent 72%);
     filter: blur(28px);
-    animation: hero-mark-pulse 5s ease-in-out infinite alternate;
+    animation:
+      hero-glow-bloom 1.2s ease-out 1.1s both,
+      hero-mark-pulse 5s ease-in-out 2.4s infinite alternate;
+  }
+
+  @keyframes hero-glow-bloom {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    to { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
   }
 
   @keyframes hero-mark-pulse {
@@ -95,25 +236,106 @@
     to { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
   }
 
+  /* CLI: the command types itself (monospace + steps() width), the cursor
+     blinks along and bows out as the output starts printing. */
+  .hero-cli-cmd {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: hero-cli-type 1.1s steps(23) 0.9s both;
+  }
+
+  @keyframes hero-cli-type {
+    from { width: 0; }
+    to { width: 23ch; }
+  }
+
+  .hero-cli-cursor {
+    animation:
+      hero-cursor-blink 1s steps(2) infinite,
+      hero-cursor-out 0.3s ease-out 2.5s forwards;
+  }
+
+  @keyframes hero-cursor-blink {
+    50% { opacity: 0; }
+  }
+
+  @keyframes hero-cursor-out {
+    to { opacity: 0; }
+  }
+
+  .hero-cli-line {
+    animation: hero-cli-line-in 0.45s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+    animation-delay: var(--d, 0s);
+  }
+
+  @keyframes hero-cli-line-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .hero-mark,
-    .hero-mark-glow {
+    .hero-mark-svg,
+    .hero-mark-glow,
+    .hero-seed,
+    .hero-stem,
+    .hero-leaf,
+    .hero-shoot,
+    .hero-cli-cmd,
+    .hero-cli-cursor,
+    .hero-cli-line {
       animation: none;
+    }
+
+    /* Base states are the grown mark and the finished terminal; only the
+       seed and the cursor must stay hidden. */
+    .hero-seed,
+    .hero-cli-cursor {
+      opacity: 0;
     }
   }
 </style>
 
 <script is:inline>
   (() => {
-    // Beam field follows the pointer, desktop only.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    const hero = document.getElementById('hero-section');
-    if (!hero) return;
-    hero.addEventListener('pointermove', (event) => {
-      const rect = hero.getBoundingClientRect();
-      hero.style.setProperty('--mx', `${(((event.clientX - rect.left) / rect.width) * 100).toFixed(1)}%`);
-      hero.style.setProperty('--my', `${(((event.clientY - rect.top) / rect.height) * 100).toFixed(1)}%`);
+    // Aurora field follows the pointer, desktop only.
+    if (
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+      window.matchMedia('(pointer: fine)').matches
+    ) {
+      const hero = document.getElementById('hero-section');
+      if (hero) {
+        hero.addEventListener('pointermove', (event) => {
+          const rect = hero.getBoundingClientRect();
+          hero.style.setProperty('--mx', `${(((event.clientX - rect.left) / rect.width) * 100).toFixed(1)}%`);
+          hero.style.setProperty('--my', `${(((event.clientY - rect.top) / rect.height) * 100).toFixed(1)}%`);
+        });
+      }
+    }
+
+    // Copy the install command; the icon becomes "Copied ✓" for a moment.
+    const button = document.getElementById('hero-cli-copy');
+    const command = document.getElementById('hero-cli-cmd');
+    const status = document.querySelector('#hero-cli [data-copy-status]');
+    if (!button || !command) return;
+    let timer = 0;
+    button.addEventListener('click', async () => {
+      if (!navigator.clipboard) return;
+      try {
+        await navigator.clipboard.writeText(command.textContent ?? '');
+      } catch {
+        return;
+      }
+      button.querySelector('.hero-copy-icon')?.classList.add('hidden');
+      button.querySelector('.hero-copy-done')?.classList.remove('hidden');
+      if (status) status.textContent = 'Copied';
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        button.querySelector('.hero-copy-icon')?.classList.remove('hidden');
+        button.querySelector('.hero-copy-done')?.classList.add('hidden');
+        if (status) status.textContent = '';
+      }, 1500);
     });
   })();
 </script>

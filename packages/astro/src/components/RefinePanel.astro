@@ -2,17 +2,15 @@
 /**
  * RefinePanel — multi-select facet dropdowns.
  *
- * Renders a row of facet dropdowns (Stack, Platform, Category,
- * License) plus a Sort dropdown, all using native <select> for
- * server-render-only behavior. Selection auto-submits the form
- * to the same list page with the chosen values merged into the URL.
+ * Renders the ordered `groups` view-model produced by
+ * `getDirectoryIndexModel().facetGroups` — visibility, ORDER, display
+ * label, and selection mode all come from `browse.facets` + the core
+ * facet registry, never from this component. Option labels arrive
+ * pre-resolved from the taxonomy YAML, so the server render and the
+ * client script share one label source.
  *
  * The form is a GET to the list page base, with each facet as a
  * repeated key. Empty values are dropped, so the URL stays clean.
- *
- * Generic: takes a `facets` map of `{ value, label, count }[]` per
- * dimension and an `initial` `IndexFilters` for preselecting the
- * current URL state.
  */
 
 import type { IndexFilters } from "../lib/search";
@@ -25,78 +23,50 @@ interface FacetValue {
   count?: number;
 }
 
-interface Facets {
-  stacks?: FacetValue[];
-  platforms?: FacetValue[];
-  categories?: FacetValue[];
-  tags?: FacetValue[];
-  labels?: FacetValue[];
-  licenses?: FacetValue[];
+interface FacetGroupModel {
+  id: string;
+  filterKey: "stacks" | "platforms" | "categories" | "tags" | "licenses";
+  label: string;
+  single?: boolean;
+  options: FacetValue[];
+  initial: string[];
 }
 
 interface Props {
-  facets: Facets;
+  /** Ordered filter groups (see `getDirectoryIndexModel`). */
+  groups: FacetGroupModel[];
+  /** Current URL filter state — used to preselect the sort. */
   initial: IndexFilters;
   pathPrefix?: string;
   class?: string;
-  /** Hide specific facets. Default: all shown. */
-  hide?: Array<"stack" | "platform" | "category" | "tag" | "license" | "sort">;
+  /** Hide the sort select (e.g. when the page renders its own). */
+  hide?: Array<"sort">;
 }
 
 const {
-  facets,
+  groups: groupModels,
   initial,
   pathPrefix = "/",
   class: className = "",
   hide = [],
 } = Astro.props;
 
-interface FilterGroup {
-  label: string;
-  filterKey: "stacks" | "platforms" | "categories" | "tags" | "licenses";
-  options: FacetValue[];
-  initial: string[];
-  single?: boolean;
-}
-
-interface RenderedFilterGroup extends FilterGroup {
-  active: boolean;
-  popoverId: string;
-  trigger: string;
-}
-
-const baseGroups: FilterGroup[] = [
-  { label: "Stack", filterKey: "stacks", options: facets.stacks ?? [], initial: initial.stacks ?? [] },
-  { label: "Platform", filterKey: "platforms", options: facets.platforms ?? [], initial: initial.platforms ?? [] },
-  { label: "Category", filterKey: "categories", options: facets.categories ?? [], initial: initial.categories ?? [] },
-  { label: "Tag", filterKey: "tags", options: facets.tags ?? [], initial: initial.tags ?? [] },
-  { label: "License", filterKey: "licenses", options: facets.licenses ?? [], initial: initial.licenses ?? [], single: true },
-];
-
-function pretty(value: string): string {
-  return value
-    .split(/[-_]/)
-    .map((part) => part ? part[0].toUpperCase() + part.slice(1) : part)
-    .join(" ");
-}
-
-function triggerLabel(group: FilterGroup): string {
+function triggerLabel(group: FacetGroupModel): string {
   if (group.initial.length === 0) return `${group.label}: Any`;
-  if (group.initial.length === 1) return `${group.label}: ${pretty(group.initial[0])}`;
+  if (group.initial.length === 1) {
+    const selected = group.initial[0];
+    const option = group.options.find((candidate) => candidate.value === selected);
+    return `${group.label}: ${option?.label ?? selected}`;
+  }
   return `${group.label}: ${group.initial.length} selected`;
 }
 
-const groups: RenderedFilterGroup[] = baseGroups
-  .filter((group) => {
-    const singular = group.filterKey.slice(0, -1) as "stack" | "platform" | "category" | "tag" | "license";
-    return !hide.includes(singular) && group.options.length > 0;
-  })
-  .map((group) => ({
-    ...group,
-    active: group.initial.length > 0,
-    popoverId: `filter-popover-${group.filterKey}`,
-    trigger: triggerLabel(group),
-  }));
+const groups = groupModels.map((group) => ({
+  ...group,
+  active: group.initial.length > 0,
+  popoverId: `filter-popover-${group.filterKey}`,
+  trigger: triggerLabel(group),
+}));
 ---
 
 <div class:list={["flex flex-wrap items-center gap-2", className]} role="toolbar" aria-label="Filter items">
@@ -160,7 +130,16 @@ const groups: RenderedFilterGroup[] = baseGroups
       popover?.addEventListener("click", (event) => event.stopPropagation());
     });
     document.addEventListener("click", () => closeAll());
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeAll(); });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      // Restore focus to the trigger whose popover was open so
+      // keyboard users don't lose their place.
+      const openGroup = [...groups].find((group) =>
+        group.querySelector('.grove-filter-trigger[aria-expanded="true"]'),
+      );
+      closeAll();
+      openGroup?.querySelector(".grove-filter-trigger")?.focus();
+    });
     document.querySelector('select[name="sort"]')?.addEventListener("change", (event) => {
       const params = new URLSearchParams(location.search);
       params.set("sort", event.target.value);

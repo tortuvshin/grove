@@ -1,41 +1,89 @@
 ---
 title: Introduction
-description: Grove turns structured files into a fast, searchable, contributor-friendly community knowledge space. A 60-second pitch.
+description: Grove is a file-first publishing system for structured knowledge. One source of truth — many useful outputs.
 ---
 
-Grove is a framework for building structured community directories.
+Grove is a **file-first publishing system for structured knowledge**.
 
-It gives you:
+You write the source of truth — YAML records, Markdown bodies, taxonomy files. Grove publishes it into a coordinated set of human- and machine-readable outputs and keeps everything in sync.
 
-- a ready-to-use directory website
-- YAML-based project records
-- search and filtering
-- GitHub metadata updates
-- pull-request-based submissions
-- static deployment
+> Maintain structured knowledge in files. Grove publishes it into useful human- and machine-readable outputs and keeps everything in sync.
 
-Grove currently supports **project directories** built with **Astro**. Two more blueprints (resource-hub and ecosystem-map) ship schemas today and land polished templates in V1.1.
+## One piece of content → many useful outputs
 
-## What you can build
+A single YAML record in `data/records/<slug>.yml` becomes, all at once:
 
-Grove fits problems where a community needs to curate a long-lived list of things — apps, tools, libraries, guides, organizations — and keep that list useful over months and years, not days.
+| Output | Audience |
+|---|---|
+| A page on your site | Visitors browsing the directory |
+| An entry in `sitemap.xml` | Search engines |
+| An entry in `llms.txt` | AI assistants and crawlers |
+| A JSON-LD `SoftwareSourceCode` block | Google rich results |
+| An OG image preview | Slack, LinkedIn, Discord |
+| A row in `data/generated/records.json` | Anything consuming your dataset |
 
-Examples:
+The same loop applies to taxonomy, decisions, collections, and content pages. Files stay in your repo; outputs follow.
 
-- an open-source app directory
-- a developer tools index
-- a local ecosystem map (cities, communities, schools)
-- an internal knowledge hub (replacing spreadsheets with versioned data)
-- a curated learning resources collection
+## Three blueprints
+
+Every Grove space is built around one of three blueprints:
+
+- **[project-directory](/blueprints/project-directory/)** — open-source projects (default).
+- **[resource-hub](/blueprints/resource-hub/)** — articles, tutorials, videos, papers.
+- **[ecosystem-map](/blueprints/ecosystem-map/)** — organizations, people, working groups.
+
+Each blueprint has its own JSON-LD type, lens semantics, and visible-by-default fields. The same renderer serves all three.
 
 ## How it works
 
-You start with `pnpm dlx @grove-dev/cli@latest init my-directory`. There are no prompts: the CLI copies the complete Astro example space — records, taxonomy, `grove.config.ts`, and GitHub Actions for validation, sync, and deployment — and renames it to your project. Run `pnpm install && pnpm dev` and the dev server starts at `http://localhost:4321`.
+```bash
+# 1. Scaffold
+pnpm dlx @grove-dev/cli@latest init my-directory
 
-You add records as YAML files under `data/records/`. You push a pull request. `validate-data.yml` checks the schema. Merge. `build.yml` deploys.
+# 2. Run the dev server
+cd my-directory
+pnpm install
+pnpm dev
 
-Every record is a file. Every change is reviewable. The site is static. There is no database, no CMS, no admin dashboard.
+# 3. Edit records
+$EDITOR data/records/<slug>.yml
+
+# 4. Deploy
+pnpm build && pnpm exec astro deploy
+```
+
+The CLI copies the example Astro space (`apps/example/`), wires up `@grove-dev/astro`, and runs `pnpm install`. The dev server starts at `http://localhost:4321`. Every record change shows up after a rebuild.
+
+## What you can build
+
+Grove fits problems where a community needs to curate a long-lived list of things — apps, tools, libraries, guides, organizations — and keep that list useful over months and years:
+
+- **Open-source app directory** — `awesome-foo.com` clone with curation.
+- **Developer tools index** — discoverable by humans *and* AI assistants.
+- **Learning resources hub** — courses, videos, articles, organized by topic.
+- **Ecosystem map** — foundations, companies, working groups in a domain.
+- **Internal knowledge hub** — versioned data instead of spreadsheets.
+
+## Mental model
+
+```
+  source files          Grove                  outputs
+  ───────────          ──────                 ───────
+  data/records/   ─►   prepareDirectory  ─►   *.html
+  data/taxonomy/  ─►   generate()        ─►   sitemap.xml
+  content/*.md    ─►   buildSitemap()    ─►   llms.txt + llms-full.txt
+  grove.config.ts ─►   buildLlmsFiles()  ─►   JSON-LD per page
+                     ─► buildSiteArtif. ─►   robots.txt
+                     ─►                   ─►   og-image.svg
+                     ─►                   ─►   data/generated/*.json
+```
+
+Each step is a pure function from sources to outputs. To add a new output, drop a function into the pipeline and emit one new file.
 
 ## Ready to start?
 
 **[Create a project directory →](/getting-started/create-a-space/)** — scaffold your first Grove space in under 10 minutes.
+
+**[Compare Grove to other tools →](/concepts/philosophy/#how-grove-compares-to-other-tools)** — when to use Grove and when to use Hugo, Astro, Docusaurus, or a CMS.
+
+**[Read the full philosophy →](/concepts/philosophy/)** — why files, why static, why curation.

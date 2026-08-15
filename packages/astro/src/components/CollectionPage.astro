@@ -13,9 +13,12 @@
  * the consumer's content pipeline). `emptyLabel` matches
  * `RecordSection`'s API for empty-state copy.
  */
+import { formatCount } from "@grove-dev/core";
+import CardGrid from "./CardGrid.astro";
 import CollectionRow from "./CollectionRow.astro";
 import Container from "../layouts/Container.astro";
 import SectionHeader from "../layouts/SectionHeader.astro";
+import EmptyState from "../ui/EmptyState.astro";
 import type { CollectionPageModel } from "../server/collections.js";
 
 interface Props {
@@ -30,6 +33,13 @@ interface Props {
   emptyLabel?: string;
   /** Section id (deep link + stable key). */
   id?: string;
+  /**
+   * Heading level for the collection title. This component IS the
+   * page on collection detail routes, so it defaults to 1.
+   */
+  headingLevel?: 1 | 2;
+  /** Noun pair for the entry count (blueprint labels). */
+  countNoun?: { singular: string; plural: string };
   class?: string;
 }
 
@@ -40,6 +50,8 @@ const {
   description,
   emptyLabel = "This collection is currently empty.",
   id,
+  headingLevel = 1,
+  countNoun = { singular: "item", plural: "items" },
   class: className = "",
 } = Astro.props;
 
@@ -50,33 +62,44 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
 
 <section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
-    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} />
+    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} level={headingLevel} />
 
+    {/* Editorial context reads as a quiet callout, not metadata
+        shouting in uppercase. */}
     {model.collection.selectionNote && (
-      <p class="m-0 mb-6 max-w-[64ch] text-[0.875rem] font-medium text-ink-700 dark:text-ink-300">
-        <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Selection criteria · </span>
-        {model.collection.selectionNote}
-      </p>
+      <aside class="mb-6 max-w-[64ch] rounded-[var(--radius-lg)] border-l-2 border-border bg-surface-sunken px-4 py-3">
+        <p class="m-0 text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+          Selection criteria
+        </p>
+        <p class="m-0 mt-1 text-[0.875rem] leading-relaxed text-foreground">
+          {model.collection.selectionNote}
+        </p>
+      </aside>
     )}
 
     <slot name="intro" />
 
+    {/* Bridges the heading outline: the page title is an h1 and the
+        entry cards render h3 titles — without this h2 Lighthouse
+        flags a heading-order skip. */}
+    <h2 class="sr-only">Entries</h2>
     <p class="m-0 mb-4 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-      {model.total} {model.total === 1 ? "item" : "items"}
+      {formatCount(model.total, countNoun)}
     </p>
 
     {model.isEmpty ? (
-      <p class="rounded-md border border-dashed border-ink-200 bg-white p-6 text-sm text-ink-500 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-400">
-        {emptyLabel}
-      </p>
+      <EmptyState
+        title={emptyLabel}
+        description="No records currently match this collection's query. The collection fills automatically as matching records are added."
+      />
     ) : (
-      <ul class="m-0 flex list-none flex-col gap-3 p-0">
+      <CardGrid>
         {model.entries.map((entry, i) => (
           <li class="m-0 p-0">
-            <CollectionRow entry={entry} eager={i < 2} />
+            <CollectionRow entry={entry} eager={i < 3} />
           </li>
         ))}
-      </ul>
+      </CardGrid>
     )}
 
     {model.related.length > 0 && (
@@ -85,7 +108,7 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
           eyebrow="Related"
           title="Related collections"
           description="Other curated groupings of related items."
-          level={3}
+          level={2}
         />
         <ul class="m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-4">
           {model.related.map((r) => (

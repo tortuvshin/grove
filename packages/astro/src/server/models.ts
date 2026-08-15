@@ -17,6 +17,7 @@ import {
   activeFilterChips,
   applySort,
   buildFacets,
+  configuredFacetDefs,
   effectivePage,
   effectiveSort,
   extractToc,
@@ -51,7 +52,9 @@ export interface DirectorySiteConfig {
   description?: string;
   repoUrl?: string;
   nav?: Array<{ label: string; href: string }>;
-  facets?: string[];
+  browse?: {
+    facets?: string[];
+  };
   analytics?: {
     googleAnalyticsId?: string;
   };
@@ -79,6 +82,12 @@ export interface DirectorySiteConfig {
     categories?: Array<{ id: string; name: string }>;
     stacks?: Array<{ id: string; name: string }>;
     platforms?: Array<{ id: string; name: string }>;
+    topics?: Array<{ id: string; name: string }>;
+    licenses?: Array<{ id: string; name: string }>;
+    distributionChannels?: Array<{ id: string; name: string }>;
+  };
+  contributors?: {
+    showContributionCount?: boolean;
   };
   stats?: {
     originalRepo?: string;
@@ -112,6 +121,47 @@ export function loadDirectoryContributors(root = process.cwd()): DirectoryContri
   } catch {
     return [];
   }
+}
+
+/**
+ * Canonical taxonomy counts — the ONE algorithm every count surface
+ * uses. Counts the VISIBLE index (`items`, the same set browse
+ * filters over) with the primary+supporting stack union
+ * (`projectStackIds`), so the homepage grid, `/stacks`,
+ * `/categories`, and the browse facet counts can never disagree.
+ * (Counting `fullItems` with the singular `record.stack` was the
+ * audit's "Python 3 vs 4" drift.)
+ */
+export function countTaxonomies() {
+  const stackCounts = new Map<string, number>();
+  const categoryCounts = new Map<string, number>();
+  for (const record of items) {
+    if (record.category) categoryCounts.set(record.category, (categoryCounts.get(record.category) ?? 0) + 1);
+    if (record.kind === "project") {
+      for (const stackId of projectStackIds(record)) {
+        stackCounts.set(stackId, (stackCounts.get(stackId) ?? 0) + 1);
+      }
+    }
+  }
+  const toEntries = (
+    counts: Map<string, number>,
+    kind: "stacks" | "categories",
+  ) =>
+    [...counts]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([id, count]) => ({ name: taxonomyLabel(kind, id), slug: id, count }));
+  return {
+    stacks: toEntries(stackCounts, "stacks"),
+    categories: toEntries(categoryCounts, "categories"),
+  };
+}
+
+/**
+ * Uncapped taxonomy index model for the `/stacks` and `/categories`
+ * pages — same canonical counts, no homepage display cap.
+ */
+export function getTaxonomyIndexModel() {
+  return countTaxonomies();
 }
 
 export function getHomePageModel(site: DirectorySiteConfig) {
@@ -159,21 +209,10 @@ export function getHomePageModel(site: DirectorySiteConfig) {
     "most-starred",
   ).slice(0, 6);
 
-  const stackCounts = new Map<string, number>();
-  const categoryCounts = new Map<string, number>();
-  for (const record of fullItems) {
-    if (record.category) categoryCounts.set(record.category, (categoryCounts.get(record.category) ?? 0) + 1);
-    if (record.kind === "project" && record.stack) {
-      stackCounts.set(record.stack, (stackCounts.get(record.stack) ?? 0) + 1);
-    }
-  }
-  const stacks = [...stackCounts]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 12)
-    .map(([id, count]) => ({ name: taxonomyLabel("stacks", id), slug: id, count }));
-  const categories = [...categoryCounts]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .map(([id, count]) => ({ name: taxonomyLabel("categories", id), slug: id, count }));
+  // Homepage layout choice: cap the stack grid at 12. The counting
+  // itself is the canonical algorithm in `countTaxonomies`.
+  const { stacks: allStacks, categories } = countTaxonomies();
+  const stacks = allStacks.slice(0, 12);
   const contributors = loadDirectoryContributors();
   const description = site.description ??
     `A searchable directory of real ${plural} — organized by stack, category, platform, license, activity, and maturity.`;
@@ -201,39 +240,69 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   };
 }
 
-const FACET_ALIASES: Record<string, "stacks" | "platforms" | "categories" | "tags" | "licenses"> = {
-  stack: "stacks",
-  stacks: "stacks",
-  platform: "platforms",
-  platforms: "platforms",
-  category: "categories",
-  categories: "categories",
-  tag: "tags",
-  tags: "tags",
-  license: "licenses",
-  licenses: "licenses",
-};
-
-function configuredFacets(site?: DirectorySiteConfig) {
-  return new Set((site?.facets ?? ["category", "tags"])
-    .map((facet) => FACET_ALIASES[facet])
-    .filter((facet): facet is NonNullable<typeof facet> => Boolean(facet)));
+/**
+ * Ordered facet definitions for this site — the single registry in
+ * `@grove-dev/core` resolves `browse.facets`, so visibility, ORDER,
+ * labels, and selection mode all come from one place.
+ */
+function enabledFacetDefs(site?: DirectorySiteConfig) {
+  return configuredFacetDefs(site?.browse?.facets);
 }
+
+/** Taxonomy list that labels/orders each facet dimension. */
+const TAXONOMY_KIND_FOR_DIMENSION = {
+  stacks: "stacks",
+  platforms: "platforms",
+  categories: "categories",
+  tags: "topics",
+  licenses: "licenses",
+} as const;
 
 export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: DirectorySiteConfig) {
   const filters = filtersFromSearchParams(searchParams);
-  const rawFacets = buildFacets(items, {
-    curatedTagIds: site.taxonomy?.topics?.map((t) => t.id),
-    filters, // Intersection counts: each facet reflects all OTHER filters.
-  });
-  const enabled = configuredFacets(site);
-  const facets = {
-    stacks: enabled.has("stacks") ? rawFacets.stacks.map((option) => ({ ...option, label: taxonomyLabel("stacks", option.value) })) : [],
-    platforms: enabled.has("platforms") ? rawFacets.platforms.map((option) => ({ ...option, label: taxonomyLabel("platforms", option.value) })) : [],
-    categories: enabled.has("categories") ? rawFacets.categories.map((option) => ({ ...option, label: taxonomyLabel("categories", option.value) })) : [],
-    tags: enabled.has("tags") ? rawFacets.tags : [],
-    licenses: enabled.has("licenses") ? rawFacets.licenses : [],
+  // Taxonomy YAML owns option order: the generated arrays preserve
+  // file/`order:` position, so their id sequence IS the display order.
+  const taxonomyOrder = {
+    stacks: site?.taxonomy?.stacks?.map((t) => t.id),
+    platforms: site?.taxonomy?.platforms?.map((t) => t.id),
+    categories: site?.taxonomy?.categories?.map((t) => t.id),
+    tags: site?.taxonomy?.topics?.map((t) => t.id),
+    licenses: site?.taxonomy?.licenses?.map((t) => t.id),
   };
+  const rawFacets = buildFacets(items, {
+    curatedTagIds: taxonomyOrder.tags,
+    filters, // Intersection counts: each facet reflects all OTHER filters.
+    order: taxonomyOrder,
+  });
+  const defs = enabledFacetDefs(site);
+  const enabled = new Set(defs.map((def) => def.dimension));
+  const labeled = (dimension: keyof typeof TAXONOMY_KIND_FOR_DIMENSION) =>
+    rawFacets[dimension].map((option) => ({
+      ...option,
+      label: taxonomyLabel(TAXONOMY_KIND_FOR_DIMENSION[dimension], option.value),
+    }));
+  const facets = {
+    stacks: enabled.has("stacks") ? labeled("stacks") : [],
+    platforms: enabled.has("platforms") ? labeled("platforms") : [],
+    categories: enabled.has("categories") ? labeled("categories") : [],
+    tags: enabled.has("tags") ? labeled("tags") : [],
+    licenses: enabled.has("licenses") ? labeled("licenses") : [],
+  };
+  // Ordered filter groups — `browse.facets` array order is the render
+  // order; label + selection mode come from the core registry.
+  const facetGroups = defs
+    .map((def) => ({
+      id: def.id,
+      filterKey: def.dimension,
+      label: def.label,
+      single: def.single,
+      options: facets[def.dimension],
+      initial: (filters[def.dimension] ?? []) as string[],
+    }))
+    .filter((group) => group.options.length > 0);
+  const plural = site?.blueprintConfig?.labelPlural ?? itemLabelPlural();
+  // Placeholder names only the ENABLED dimensions, in config order.
+  const searchPlaceholder = `Search ${plural}, ${defs.map((def) => def.dimension).join(", ")}...`;
   const sort = effectiveSort(filters);
   const sorted = applySort(filterRecords(items, filters), sort);
   const pageCount = totalPages(sorted.length);
@@ -243,6 +312,8 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
     total: items.length,
     filters,
     facets,
+    facetGroups,
+    searchPlaceholder,
     sort,
     sorted,
     pages: pageCount,
@@ -279,7 +350,7 @@ export function getContributorsPageModel(site: DirectorySiteConfig) {
 
 export function getSubmissionPageModel(site: DirectorySiteConfig) {
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
-  const enabled = configuredFacets(site);
+  const enabled = new Set(enabledFacetDefs(site).map((def) => def.dimension));
   const values = (key: "category" | "stack") =>
     [...new Set(fullProjects.map((record) => String(record[key] ?? "")).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));
@@ -308,6 +379,9 @@ export function getSubmissionPageModel(site: DirectorySiteConfig) {
       stack: enabled.has("stacks"),
       platforms: enabled.has("platforms"),
       tags: enabled.has("tags"),
+      // The submit form mirrors the browse dimensions: a directory
+      // that filters by license also collects it at submission time.
+      license: enabled.has("licenses"),
     },
     categories,
     stacks,
@@ -315,6 +389,14 @@ export function getSubmissionPageModel(site: DirectorySiteConfig) {
     existingFullNames,
     platformOptions: site.taxonomy?.platforms?.map(({ id, name }) => ({ id, label: name })) ??
       ["ios", "android", "web", "macos", "windows", "linux"].map((id) => ({ id, label: taxonomyLabel("platforms", id) })),
+    licenseOptions: site.taxonomy?.licenses?.map(({ id, name }) => ({ id, label: name })) ?? [],
+    // Ids for client-side validation — without this the submit form's
+    // taxonomy checks silently no-op.
+    taxonomy: {
+      categoryIds: categories.map((option) => option.id),
+      stackIds: stacks.map((option) => option.id),
+      platformIds: (site.taxonomy?.platforms ?? []).map(({ id }) => id),
+    },
   };
 }
 
@@ -532,7 +614,9 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     // because the TOC + reading-time want the *body* (frontmatter
     // stripped), not the HTML. Re-reading is cheap and keeps the
     // pipeline self-documenting.
-    toc: tocBody ? extractToc(tocBody.body, { maxDepth: 2 }) : [],
+    // Depth 3 so subsections surface in the TOC, indented under
+    // their h2 parents.
+    toc: tocBody ? extractToc(tocBody.body, { maxDepth: 3 }) : [],
     readingMetrics: tocBody ? readingMetrics(tocBody.body) : { wordCount: 0, minutes: 1 },
     jsonLd,
   };

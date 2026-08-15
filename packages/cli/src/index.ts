@@ -10,6 +10,7 @@ import {
   enrichFromGithubHtml,
   fetchGithubMetadata,
   loadConfig,
+  normalizeGithubIntegration,
   parseGithubRepoUrl,
   prepareDirectory,
   stringifyRecordYaml,
@@ -90,7 +91,14 @@ program
   .option("--strict", "fail if any GitHub record cannot be refreshed")
   .action(async (target: string, options: { limit?: number; strict?: boolean }) => {
     const config = await loadConfig();
+    const githubFlags = normalizeGithubIntegration(config.integrations?.github);
     if (target === "contributors") {
+      if (!githubFlags.contributors) {
+        console.log(
+          "[sync contributors] disabled by integrations.github.contributors — skipping",
+        );
+        return;
+      }
       await prepareDirectory();
       const result = await syncContributors({
         cwd: process.cwd(),
@@ -104,6 +112,10 @@ program
     }
     if (target !== "github") {
       throw new Error(`Unknown sync target "${target}". Use github or contributors.`);
+    }
+    if (!githubFlags.metadata) {
+      console.log("[sync github] disabled by integrations.github.metadata — skipping");
+      return;
     }
 
     const recordsDir = resolve(process.cwd(), config.paths.recordsDir);

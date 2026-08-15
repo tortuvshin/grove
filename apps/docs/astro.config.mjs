@@ -21,7 +21,7 @@ export default defineConfig({
             // from the home header as the Docs entry.
             title: 'Grove',
             description:
-                'Grove turns structured files into fast, searchable, contributor-friendly community knowledge spaces.',
+                'Grove is a file-first publishing system for structured knowledge. Source files in, many useful outputs out — web pages, llms.txt, sitemap, JSON-LD, OG images, JSON datasets.',
             logo: {
                 replacesTitle: false,
                 alt: 'Grove',
@@ -107,24 +107,47 @@ export default defineConfig({
             ],
             sidebar: [
                 {
+                    label: 'Introduction',
+                    items: [
+                        { label: 'Introduction', slug: 'introduction' },
+                        { label: 'Philosophy', slug: 'concepts/philosophy' },
+                    ],
+                },
+                {
                     label: 'Getting Started',
                     items: [
-                        // Introduction was moved to /introduction/ and linked
-                        // from the home header — the remaining three items
-                        // stay under the Getting Started sidebar.
                         { label: 'Create a project directory', slug: 'getting-started/create-a-space' },
                         { label: 'Add your first project', slug: 'getting-started/add-your-first-project' },
+                        { label: 'Configure your space', slug: 'getting-started/configure' },
                         { label: 'Deploy your site', slug: 'getting-started/deploy' },
                     ],
                 },
                 {
-                    label: 'Build your directory',
+                    label: 'Records & Blueprints',
                     items: [
-                        { label: 'Configure your space', slug: 'build/configure' },
-                        { label: 'Projects', slug: 'build/projects' },
-                        { label: 'Categories and tags', slug: 'build/taxonomy' },
-                        { label: 'Pages and content', slug: 'build/pages' },
-                        { label: 'Images and assets', slug: 'build/assets' },
+                        { label: 'Project directory', slug: 'blueprints/project-directory' },
+                        { label: 'Resource hub', slug: 'blueprints/resource-hub' },
+                        { label: 'Ecosystem map', slug: 'blueprints/ecosystem-map' },
+                        { label: 'Author a record', slug: 'sources/records' },
+                    ],
+                },
+                {
+                    label: 'Sources',
+                    items: [
+                        { label: 'Taxonomy files', slug: 'sources/taxonomy-files' },
+                        { label: 'Curated collections', slug: 'sources/collections' },
+                        { label: 'Decisions', slug: 'sources/decisions' },
+                        { label: 'Content pages', slug: 'sources/content-pages' },
+                        { label: 'Health classification', slug: 'sources/health-classification' },
+                    ],
+                },
+                {
+                    label: 'Generated Outputs',
+                    items: [
+                        { label: 'Overview', slug: 'outputs/overview' },
+                        { label: 'LLM-oriented', slug: 'outputs/llm' },
+                        { label: 'SEO & social', slug: 'outputs/seo' },
+                        { label: 'Site metadata', slug: 'outputs/site-meta' },
                     ],
                 },
                 {
@@ -134,15 +157,28 @@ export default defineConfig({
                         { label: 'Theme', slug: 'customize/theme' },
                         { label: 'Components', slug: 'customize/components' },
                         { label: 'Custom pages', slug: 'customize/pages' },
+                        { label: 'Template customization', slug: 'customize/template-customization' },
+                        { label: 'Images and assets', slug: 'customize/assets' },
                     ],
                 },
                 {
                     label: 'Automation',
                     items: [
                         { label: 'GitHub metadata', slug: 'automation/github-metadata' },
+                        { label: 'Sync deep-dive', slug: 'automation/sync-github-deep-dive' },
                         { label: 'Community submissions', slug: 'automation/submissions' },
                         { label: 'Validation', slug: 'automation/validation' },
                         { label: 'Scheduled maintenance', slug: 'automation/scheduled' },
+                    ],
+                },
+                {
+                    label: 'Deployment',
+                    items: [
+                        { label: 'Overview', slug: 'deployment/overview' },
+                        { label: 'GitHub Pages', slug: 'deployment/github-pages' },
+                        { label: 'Cloudflare', slug: 'deployment/cloudflare' },
+                        { label: 'Netlify', slug: 'deployment/netlify' },
+                        { label: 'Self-hosted', slug: 'deployment/self-hosted' },
                     ],
                 },
                 {
@@ -151,15 +187,48 @@ export default defineConfig({
                         { label: 'Configuration', slug: 'reference/config' },
                         { label: 'Project record', slug: 'reference/record-schema' },
                         { label: 'CLI', slug: 'reference/cli' },
+                        { label: 'Programmatic API', slug: 'reference/api-core' },
                         { label: 'Astro components', slug: 'reference/components' },
+                        { label: 'Plugin API', slug: 'reference/plugin-api' },
+                        { label: 'Plugin author guide', slug: 'reference/plugin-author-guide' },
+                        { label: 'Migration guide', slug: 'reference/migration' },
+                        { label: 'Framework status', slug: 'reference/frameworks' },
+                    ],
+                },
+                {
+                    label: 'Architecture',
+                    items: [
+                        { label: 'Incremental build', slug: 'architecture/incremental-build' },
+                    ],
+                },
+                {
+                    label: 'FAQ',
+                    items: [
+                        { slug: 'faq' },
+                    ],
+                },
+                {
+                    label: 'Showcase',
+                    items: [
+                        { label: 'Splash pages', slug: 'showcase/splash-pages' },
+                        { label: 'Banner layout', slug: 'showcase/splash/banner' },
+                        { label: 'Centered layout', slug: 'showcase/splash/centered' },
+                        { label: 'Centered-top layout', slug: 'showcase/splash/centered-top' },
+                        { label: 'Split-left layout', slug: 'showcase/splash/split-left' },
+                        { label: 'Split-right layout', slug: 'showcase/splash/split-right' },
+                        { label: 'Starlight components', slug: 'showcase/starlight-components' },
+                        { label: 'Typography', slug: 'showcase/typography' },
                     ],
                 },
                 {
                     label: 'Project',
                     items: [
-                        { label: 'Framework status', slug: 'reference/frameworks' },
                         { label: 'Roadmap', slug: 'roadmap' },
-                        { label: 'Maintainers', slug: 'maintainers/contributing' },
+                        { label: 'Contributing', slug: 'maintainers/contributing' },
+                        { label: 'Governance', slug: 'maintainers/governance' },
+                        { label: 'CI & quality', slug: 'maintainers/ci-quality' },
+                        { label: 'Release process', slug: 'maintainers/release-process' },
+                        { label: 'Security', slug: 'maintainers/security' },
                     ],
                 },
             ],

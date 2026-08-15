@@ -6,24 +6,14 @@ interface Props {
   class?: string;
 }
 
+import { paginationPageList } from "@grove-dev/astro";
+import { buttonClass, PAGINATION_EXTRA } from "../ui/button.js";
+
 const { current, total, hrefFor, class: className = "" } = Astro.props;
 
-function pageList(active: number, count: number): Array<number | "ellipsis"> {
-  if (count <= 7) return Array.from({ length: count }, (_, index) => index + 1);
-  const pages = new Set([1, count, active - 1, active, active + 1]);
-  const sorted = [...pages].filter((page) => page >= 1 && page <= count).sort((a, b) => a - b);
-  const result: Array<number | "ellipsis"> = [];
-  for (const page of sorted) {
-    const previous = result.at(-1);
-    if (typeof previous === "number" && page - previous > 1) result.push("ellipsis");
-    result.push(page);
-  }
-  return result;
-}
-
-const pages = pageList(current, total);
-const linkClass =
-  "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent min-w-9 px-2 py-1.5 text-2xs";
+const pages = paginationPageList(current, total);
+const linkClass = buttonClass("secondary", "sm", PAGINATION_EXTRA);
+const currentClass = buttonClass("selected", "sm", PAGINATION_EXTRA);
 ---
 
 {total > 1 && (
@@ -43,10 +33,7 @@ const linkClass =
       ) : (
         <a
           href={hrefFor(page)}
-          class:list={[
-            linkClass,
-            page === current && "bg-primary text-primary-foreground hover:bg-primary/90",
-          ]}
+          class={page === current ? currentClass : linkClass}
           aria-current={page === current ? "page" : undefined}
         >
           {page}

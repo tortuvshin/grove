@@ -13,9 +13,10 @@
  */
 import siteConfig from "@grove/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import EmptyState from "@grove-dev/astro/ui/EmptyState.astro";
 import { getContributorsPageModel } from "@grove-dev/astro/server";
 
-const { contributors: sorted, total, title, description, contributorsGraphHref } =
+const { contributors: sorted, total, title, description, contributorsGraphHref, showContributionCount } =
   getContributorsPageModel(siteConfig);
 ---
 
@@ -50,14 +51,15 @@ const { contributors: sorted, total, title, description, contributorsGraphHref }
   </section>
 
   {sorted.length === 0 ? (
-    <section class="py-12 sm:py-16">
+    <section class="py-4">
       <div class="mx-auto w-full max-w-container px-5 pb-16 sm:px-7">
-        <div class="rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex flex-col items-center gap-3 p-8 text-center">
-          <p class="m-0 text-sm text-ink-500 dark:text-ink-400">
-            No contributors synced yet. Once the first sync runs, every
-            contributor avatar lands here.
-          </p>
-        </div>
+        <EmptyState
+          title="No contributors synced yet"
+          description={`Contributor profiles come from data/generated/contributors.json, written by the weekly sync-contributors workflow. Run "grove sync contributors" (or wait for the scheduled sync) and every contributor avatar lands here.`}
+          action={contributorsGraphHref
+            ? { label: "View contributors on GitHub", href: contributorsGraphHref }
+            : undefined}
+        />
       </div>
     </section>
   ) : (
@@ -78,7 +80,7 @@ const { contributors: sorted, total, title, description, contributorsGraphHref }
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="group rounded-[calc(var(--radius)+0.25rem)] border-0 bg-muted shadow-none transition-colors flex flex-col items-center gap-2 p-3 text-center no-underline  hover:border-ink-300 dark:hover:border-ink-700"
+                  class="group rounded-[calc(var(--radius)+0.25rem)] border border-border bg-card shadow-none transition-colors flex flex-col items-center gap-2 p-3 text-center no-underline  hover:border-ink-300 dark:hover:border-ink-700"
                   data-event="contributor_click"
                   data-event-source="contributors_page"
                 >
@@ -97,7 +99,7 @@ const { contributors: sorted, total, title, description, contributorsGraphHref }
                   <span class="text-2xs text-ink-500 dark:text-ink-400">
                     @{c.username}
                   </span>
-                  {typeof c.contributions === "number" && (
+                  {showContributionCount && typeof c.contributions === "number" && (
                     <span class="font-mono text-2xs text-ink-400">
                       {c.contributions.toLocaleString()} contributions
                     </span>

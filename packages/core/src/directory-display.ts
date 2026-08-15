@@ -92,6 +92,21 @@ export function prettySlug(value: string | null | undefined): string {
     .join(' ');
 }
 
+/**
+ * Up-to-two-letter initials for avatar placeholders (e.g. "Open WebUI"
+ * → "OW"). Shared by every card component so the fallback treatment
+ * stays identical across the directory.
+ */
+export function nameInitials(name: string | null | undefined): string {
+  return (name ?? '')
+    .split(/\s+/)
+    .map((word) => word[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
 // ── Status option list (used by filter dropdowns) ───────────────────
 // "needs-maintainer" is included even though it's a derived/composite
 // status — filter dropdowns and chip rendering need to offer it

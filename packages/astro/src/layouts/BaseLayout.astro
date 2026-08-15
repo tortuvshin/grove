@@ -18,6 +18,7 @@ import '../styles.css';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
 import Seo from './Seo.astro';
+import { derivePrimaryPalette } from '../server/contrast';
 
 interface NavItem {
   label: string;
@@ -68,6 +69,18 @@ interface Site {
    * at generate time. Components use it to render hero counts,
    * origin card stats, and footer summary lines. */
   stats?: SiteStats;
+  /** Theme knobs from grove.config.ts — resolved into CSS custom
+   * properties on `<html>` so the package stylesheet picks them up.
+   * Values are plain strings because the prop usually arrives from a
+   * JSON import; unknown values fall back to the package defaults. */
+  theme?: {
+    primaryColor?: string;
+    /** "none" | "soft" | "round" */
+    radius?: string;
+    /** "compact" | "comfortable" | "spacious" */
+    density?: string;
+    containerWidth?: string;
+  };
   blueprintConfig?: {
     routeSlug?: string;
     labelSingular?: string;
@@ -107,12 +120,64 @@ const {
 const directoryPath = searchPath ?? `/${site.blueprintConfig?.routeSlug ?? 'items'}`;
 const effectiveGaId = gaId ?? site.analytics?.googleAnalyticsId;
 
+// ── Theme wiring ─────────────────────────────────────────────────
+// `theme.*` from grove.config.ts resolves to CSS custom properties
+// on the <html> style attribute. An attribute (not an inline
+// <style>) so the override wins over the bundled stylesheet
+// regardless of how Vite orders the CSS output.
+const RADIUS_PRESETS: Record<string, [string, string, string]> = {
+  none: ["0rem", "0rem", "0rem"],
+  soft: ["0.625rem", "0.5rem", "0.75rem"],
+  round: ["0.875rem", "0.75rem", "1rem"],
+};
+const DENSITY_SPACING: Record<string, string> = {
+  compact: "0.225rem",
+  comfortable: "0.25rem",
+  spacious: "0.28rem",
+};
+
+// Brand fill and text derive from ONE WCAG computation (contrast.ts)
+// so background and foreground can never drift apart across themes.
+
+const themeConfig = site.theme;
+const themeStyleParts: string[] = [];
+if (themeConfig) {
+  const radius = RADIUS_PRESETS[themeConfig.radius ?? "soft"];
+  if (radius && themeConfig.radius && themeConfig.radius !== "soft") {
+    themeStyleParts.push(
+      `--grove-radius: ${radius[0]}`,
+      `--grove-radius-lg: ${radius[1]}`,
+      `--grove-radius-xl: ${radius[2]}`,
+    );
+  }
+  const spacing = DENSITY_SPACING[themeConfig.density ?? "comfortable"];
+  if (spacing && themeConfig.density && themeConfig.density !== "comfortable") {
+    themeStyleParts.push(`--spacing: ${spacing}`);
+  }
+  if (themeConfig.containerWidth) {
+    themeStyleParts.push(`--grove-container: ${themeConfig.containerWidth}`);
+  }
+  const primary = themeConfig.primaryColor;
+  if (typeof primary === "string" && /^#[0-9a-fA-F]{3,8}$/.test(primary)) {
+    const palette = derivePrimaryPalette(primary);
+    if (palette) {
+      themeStyleParts.push(
+        `--grove-theme-primary: ${palette.solid}`,
+        `--grove-theme-primary-foreground: ${palette.solidForeground}`,
+        `--grove-theme-primary-dark: ${palette.dark}`,
+        `--grove-theme-primary-dark-foreground: ${palette.darkForeground}`,
+      );
+    }
+  }
+}
+const themeStyle = themeStyleParts.length > 0 ? `${themeStyleParts.join("; ")};` : undefined;
+
 const favicon =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" style={themeStyle}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -208,6 +273,12 @@ const favicon =
     </script>
   </head>
   <body class="min-h-screen bg-background text-foreground">
+    <a
+      href="#main"
+      class="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm font-medium text-foreground outline-none ring-2 ring-ring focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+    >
+      Skip to content
+    </a>
     <slot name="header">
       <Header
         site={site}
@@ -216,7 +287,7 @@ const favicon =
       />
     </slot>
 
-    <main>
+    <main id="main">
       <slot />
     </main>
 

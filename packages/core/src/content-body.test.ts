@@ -206,6 +206,32 @@ describe("extractToc", () => {
       { text: "Hello, World!", id: "hello-world", depth: 2 },
     ]);
   });
+
+  it("ignores headings inside fenced code blocks", () => {
+    // The renderer never emits headings for fenced lines, so a TOC
+    // entry here would be a dead anchor link.
+    const body = [
+      "## Real section",
+      "```bash",
+      "## not a heading",
+      "```",
+      "~~~",
+      "## also not a heading",
+      "~~~",
+      "## Another real section",
+    ].join("\n");
+    expect(extractToc(body)).toEqual([
+      { text: "Real section", id: "real-section", depth: 2 },
+      { text: "Another real section", id: "another-real-section", depth: 2 },
+    ]);
+  });
+
+  it("does not treat a nested different fence marker as a closer", () => {
+    const body = ["```md", "~~~", "## hidden", "```", "## Visible"].join("\n");
+    expect(extractToc(body)).toEqual([
+      { text: "Visible", id: "visible", depth: 2 },
+    ]);
+  });
 });
 
 // ── readingMetrics ──────────────────────────────────────────────────

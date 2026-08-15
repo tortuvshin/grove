@@ -189,6 +189,29 @@ export function totalPages(itemCount: number, pageSize = PAGE_SIZE): number {
   return Math.max(1, Math.ceil(itemCount / pageSize));
 }
 
+/**
+ * Windowed page list for pagination controls: all pages when 7 or
+ * fewer, otherwise `1 … active−1 active active+1 … count` with
+ * "ellipsis" markers. Shared by the server-rendered `Pagination`
+ * component and the client-side rebuild in `DirectoryIndexClient`
+ * so the two never drift.
+ */
+export function paginationPageList(
+  active: number,
+  count: number,
+): Array<number | "ellipsis"> {
+  if (count <= 7) return Array.from({ length: count }, (_, index) => index + 1);
+  const pages = new Set([1, count, active - 1, active, active + 1]);
+  const sorted = [...pages].filter((page) => page >= 1 && page <= count).sort((a, b) => a - b);
+  const result: Array<number | "ellipsis"> = [];
+  for (const page of sorted) {
+    const previous = result.at(-1);
+    if (typeof previous === "number" && page - previous > 1) result.push("ellipsis");
+    result.push(page);
+  }
+  return result;
+}
+
 /** Resolve the effective sort from a filters object, applying default. */
 export function effectiveSort(f: IndexFilters): IndexSort {
   return f.sort ?? DEFAULT_SORT;
@@ -433,6 +456,16 @@ export function buildFacets(
      * `IndexFilters` minus each facet's filter.
      */
     filters?: IndexFilters | null;
+    /**
+     * Taxonomy-owned display order per dimension: an array of ids in
+     * the order the taxonomy YAML declares them. Known ids sort by
+     * that position; ids that exist only in record data append after,
+     * in the default count-desc-then-alpha order. Curated tag ids
+     * (topics.yml) flow through the `tags` key the same way.
+     */
+    order?: Partial<
+      Record<"stacks" | "platforms" | "categories" | "tags" | "licenses", string[]>
+    >;
   },
 ) {
   const curatedTagIds = options?.curatedTagIds;
@@ -520,13 +553,31 @@ export function buildFacets(
     [...m.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, count }));
+  // Taxonomy order wins when provided: known ids keep their YAML
+  // position, data-only ids append in the count-desc fallback order.
+  const applyOrder = (
+    entries: Array<{ value: string; count: number }>,
+    orderedIds?: string[],
+  ) => {
+    if (!orderedIds || orderedIds.length === 0) return entries;
+    const position = new Map(orderedIds.map((id, index) => [id, index]));
+    return [...entries].sort((a, b) => {
+      const posA = position.get(a.value) ?? Number.POSITIVE_INFINITY;
+      const posB = position.get(b.value) ?? Number.POSITIVE_INFINITY;
+      if (posA !== posB) return posA - posB;
+      // Both unknown: preserve the count-desc fallback (entries are
+      // already in that order, and this sort is stable).
+      return 0;
+    });
+  };
+  const order = options?.order;
   return {
-    stacks: sortByCountThenName(counts.stack),
-    platforms: sortByCountThenName(counts.platform),
-    categories: sortByCountThenName(counts.category),
-    tags: sortByCountThenName(counts.tag),
+    stacks: applyOrder(sortByCountThenName(counts.stack), order?.stacks),
+    platforms: applyOrder(sortByCountThenName(counts.platform), order?.platforms),
+    categories: applyOrder(sortByCountThenName(counts.category), order?.categories),
+    tags: applyOrder(sortByCountThenName(counts.tag), order?.tags),
     labels: sortByCountThenName(counts.label),
-    licenses: sortByCountThenName(counts.license),
+    licenses: applyOrder(sortByCountThenName(counts.license), order?.licenses),
   };
 }
 

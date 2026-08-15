@@ -13,7 +13,7 @@
  */
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Hero from "@grove-dev/astro/components/Hero.astro";
-import WhyThisExists from "@grove-dev/astro/components/WhyThisExists.astro";
+import PipelineStrip from "../components/PipelineStrip.astro";
 import RecordSection from "@grove-dev/astro/components/RecordSection.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
@@ -56,9 +56,8 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
   <Hero
     name={`Find ${itemPlural} you can actually`}
     tagline="run, study, and contribute to."
-    description={description}
-    eyebrow={`A directory of real curated ${itemPlural}`}
-    eyebrowBadge="Beta"
+    description={`Every listing is a YAML file in a public repository — Grove publishes those files as this site, a README, and machine-readable outputs, and keeps them in sync.`}
+    eyebrow="Curated in plain files, published by Grove"
     stats={{
       totalApps: stats.apps,
       totalCategories: stats.categories,
@@ -74,14 +73,14 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     quickFilters={[
       { label: `Trending ${itemPlural}`, href: `/${slug}?label=hot` },
       { label: "Recently added", href: `/${slug}?sort=recently-added` },
-      { label: "Established", href: `/${slug}?label=mature` },
+      { label: "How this site works", href: "#pipeline" },
     ]}
     ctas={[
       { label: `Browse ${itemPlural}`, href: `/${slug}`, variant: "primary" },
     ]}
   />
 
-  <WhyThisExists />
+  <PipelineStrip repoUrl={siteConfig.repoUrl} />
 
   <RecordSection
     id="hot"
@@ -116,15 +115,31 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     viewAllLabel={`View all established`}
   />
 
-  <StackGrid stacks={stacks} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
-  <CollectionTeaser model={collectionTeaser} />
-  <CategoryGrid categories={categories} pathPrefix={`/${slug}`} itemLabelPlural={itemPlural} />
+  <StackGrid
+    stacks={stacks}
+    pathPrefix={`/${slug}`}
+    itemLabelPlural={itemPlural}
+    itemNoun={{ singular: itemSingular, plural: itemPlural }}
+    hrefFor={(stackSlug: string) => `/stacks/${stackSlug}`}
+  />
+  <CollectionTeaser
+    model={collectionTeaser}
+    countNoun={{ singular: itemSingular, plural: itemPlural }}
+  />
+  <CategoryGrid
+    categories={categories}
+    pathPrefix={`/${slug}`}
+    itemLabelPlural={itemPlural}
+    itemNoun={{ singular: itemSingular, plural: itemPlural }}
+    hrefFor={(categorySlug: string) => `/categories/${categorySlug}`}
+  />
 
   <ContributorsGrid
     contributors={contributors}
     total={contributors.length || undefined}
     viewAllHref={`/contributors`}
     viewAllLabel="Meet the community"
+    showContributionCount={siteConfig.contributors?.showContributionCount ?? true}
   />
 
   {siteConfig.stats?.originalRepo && (

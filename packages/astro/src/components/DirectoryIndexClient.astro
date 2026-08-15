@@ -22,17 +22,26 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
     PAGE_SIZE,
     activeFilterChips,
     applySort,
+    buildFacets,
     effectivePage,
     effectiveSort,
     filterRecords,
     filtersFromSearchParams,
     hrefForLens,
     isLensActive,
+    paginationPageList,
     removeFilter,
     searchParamsFromFilters,
     sortDisplay,
     totalPages,
   } from "@grove-dev/core/directory";
+  import {
+    PAGINATION_EXTRA,
+    buttonClass,
+    chipClass,
+    filterTriggerClass,
+    lensTabClass,
+  } from "../ui/button.js";
 
   (() => {
       const source = document.querySelector("#grove-index-data");
@@ -42,8 +51,12 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
 
       const items = JSON.parse(source.textContent || "[]");
       const { slug, singular, plural, taxonomy } = JSON.parse(configSource.textContent || "{}");
+      // `:scope >` keeps the lookup on the page's own `<li>` wrappers —
+      // the card component inside each item also carries
+      // `data-record-slug`, and appending/hiding the inner card instead
+      // of its wrapper would tear the list apart.
       const nodes = new Map(
-        [...list.querySelectorAll("[data-record-slug]")].map((node) => [
+        [...list.querySelectorAll(":scope > [data-record-slug]")].map((node) => [
           (node as HTMLElement).dataset.recordSlug,
           node,
         ]),
@@ -71,7 +84,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         // keystroke / filter change this would otherwise thrash the
         // DOM order even when the sort + filter result is identical
         // to the previous run.
-        const currentOrder = [...list.querySelectorAll("[data-record-slug]")].map(
+        const currentOrder = [...list.querySelectorAll(":scope > [data-record-slug]")].map(
           (node) => (node as HTMLElement).dataset.recordSlug,
         );
         const nextOrder = filtered.map((record) => record.slug);
@@ -97,20 +110,56 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         if (pageLabel) pageLabel.textContent = pageCount > 1 ? ` · page ${page} of ${pageCount}` : "";
         if (empty) empty.classList.toggle("hidden", filtered.length > 0);
 
+        // Rebuild the pagination controls, mirroring the server-rendered
+        // `Pagination.astro` (Previous/Next + windowed page list via the
+        // shared `paginationPageList`) so client filtering never degrades
+        // the affordances of the initial render.
         const pagination = document.querySelector("#results-pagination");
         if (pagination) {
           pagination.innerHTML = "";
           if (pageCount > 1) {
-            for (let target = 1; target <= pageCount; target += 1) {
+            const linkClass = buttonClass("secondary", "sm", PAGINATION_EXTRA);
+            const hrefFor = (target: number) => {
               const next = searchParamsFromFilters({ ...filters, page: target });
+              return `/${slug}${next.size ? `?${next}` : ""}`;
+            };
+            const nav = document.createElement("nav");
+            nav.className = "flex flex-wrap items-center justify-center gap-1.5";
+            nav.setAttribute("aria-label", "Pagination");
+            const control = (label: string, target: number | null, rel?: string) => {
+              if (target === null) {
+                const span = document.createElement("span");
+                span.className = `${linkClass} pointer-events-none opacity-40`;
+                span.textContent = label;
+                return span;
+              }
               const link = document.createElement("a");
-              link.href = `/${slug}${next.size ? `?${next}` : ""}`;
-              link.textContent = String(target);
-              link.setAttribute("aria-label", `Page ${target}`);
-              if (target === page) link.setAttribute("aria-current", "page");
-              link.className = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-sm";
-              pagination.append(link);
+              link.href = hrefFor(target);
+              link.textContent = label;
+              link.className = linkClass;
+              if (rel) link.rel = rel;
+              return link;
+            };
+            nav.append(control("Previous", page > 1 ? page - 1 : null, "prev"));
+            for (const entry of paginationPageList(page, pageCount)) {
+              if (entry === "ellipsis") {
+                const dots = document.createElement("span");
+                dots.className = "px-1 text-2xs text-ink-400";
+                dots.setAttribute("aria-hidden", "true");
+                dots.textContent = "...";
+                nav.append(dots);
+                continue;
+              }
+              const link = control(String(entry), entry);
+              link.setAttribute("aria-label", `Page ${entry}`);
+              if (entry === page) {
+                link.setAttribute("aria-current", "page");
+                link.className = buttonClass("selected", "sm", PAGINATION_EXTRA);
+              }
+              nav.append(link);
             }
+            nav.append(control("Next", page < pageCount ? page + 1 : null, "next"));
+            pagination.append(nav);
           }
         }
       }
@@ -149,6 +198,8 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         stacks: "stacks",
         platforms: "platforms",
         categories: "categories",
+        tags: "topics",
+        licenses: "licenses",
       };
       const taxonomyName = (groupKey, value) =>
         (taxonomy[taxonomyKinds[groupKey]] || []).find((entry) => entry.id === value)?.name ??
@@ -168,7 +219,11 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
               ? `Platform: ${taxonomyName("platforms", chip.value)}`
               : chip.key === "categories"
                 ? `Category: ${taxonomyName("categories", chip.value)}`
-                : chip.label,
+                : chip.key === "tags"
+                  ? `Tag: ${taxonomyName("tags", chip.value)}`
+                  : chip.key === "licenses"
+                    ? `License: ${taxonomyName("licenses", chip.value)}`
+                    : chip.label,
         }));
 
         for (const chip of chips) {
@@ -179,7 +234,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
           // announces the filter value, and the aria-label spells out
           // the action for assistive tech.
           link.setAttribute("aria-label", `Remove filter: ${chip.label}`);
-          link.className = "inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground transition-colors hover:border-ink-400";
+          link.className = chipClass();
           link.append(document.createTextNode(`${chip.label} `));
           const close = document.createElement("span");
           close.setAttribute("aria-hidden", "true");
@@ -197,6 +252,13 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
           activeFilters.append(clear);
         }
         activeFilters.classList.toggle("hidden", chips.length === 0);
+
+        // Mobile filter-drawer badge mirrors the live chip count.
+        const drawerCount = document.querySelector("[data-drawer-count]");
+        if (drawerCount) {
+          drawerCount.textContent = String(chips.length);
+          drawerCount.classList.toggle("hidden", chips.length === 0);
+        }
       }
 
       document.querySelectorAll(".grove-filter").forEach((group) => {
@@ -220,16 +282,37 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
             : `${label}: Any`;
         }
         if (triggerButton) {
-          triggerButton.classList.toggle("bg-primary", selected.length > 0);
-          triggerButton.classList.toggle("text-primary-foreground", selected.length > 0);
-          triggerButton.classList.toggle("hover:bg-primary/90", selected.length > 0);
-          triggerButton.classList.toggle("hover:text-primary-foreground", selected.length > 0);
-          triggerButton.classList.toggle("border-border", selected.length === 0);
-          triggerButton.classList.toggle("bg-secondary", selected.length === 0);
-          triggerButton.classList.toggle("text-foreground", selected.length === 0);
-          triggerButton.classList.toggle("hover:bg-accent", selected.length === 0);
+          // Same builder the server render used — the class string is
+          // reassigned wholesale so the two can never drift.
+          triggerButton.className = filterTriggerClass(selected.length > 0);
         }
         group.querySelector(".grove-filter-clear")?.classList.toggle("hidden", selected.length === 0);
+      });
+
+      // Facet counts were rendered at build time from the UNFILTERED
+      // record set (the route is prerendered, so the server never sees
+      // the live query string). Recompute intersection counts against
+      // the current filters and patch each count span in place —
+      // never re-render the option lists, which would destroy
+      // checkbox, focus, and scroll state.
+      const liveFacets: Record<string, { value: string; count: number }[]> = buildFacets(items, {
+        filters,
+        curatedTagIds: (taxonomy.topics || []).map((topic: { id: string }) => topic.id),
+      });
+      document.querySelectorAll("[data-facet-count]").forEach((span) => {
+        if (!(span instanceof HTMLElement)) return;
+        const options = liveFacets[span.dataset.facet ?? ""] ?? [];
+        const count = options.find((option) => option.value === span.dataset.value)?.count ?? 0;
+        span.textContent = String(count);
+        const row = span.closest("label");
+        const input = row?.querySelector(".grove-filter-input");
+        const checked = input instanceof HTMLInputElement && input.checked;
+        // A zero-count option can't narrow anything — dim and disable
+        // it unless it's the currently selected value (which must stay
+        // interactive so the user can un-select it).
+        const inert = count === 0 && !checked;
+        row?.classList.toggle("opacity-45", inert);
+        if (input instanceof HTMLInputElement) input.disabled = inert;
       });
 
       let activeLens = LENSES[0];
@@ -241,14 +324,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         node.href = hrefForLens(lens.id, params, `/${slug}`);
         if (active) node.setAttribute("aria-current", "page");
         else node.removeAttribute("aria-current");
-        node.classList.toggle("bg-primary", active);
-        node.classList.toggle("text-primary-foreground", active);
-        node.classList.toggle("hover:bg-primary/90", active);
-        node.classList.toggle("hover:text-primary-foreground", active);
-        node.classList.toggle("border-border", !active);
-        node.classList.toggle("bg-secondary", !active);
-        node.classList.toggle("text-foreground", !active);
-        node.classList.toggle("hover:bg-accent", !active);
+        node.className = lensTabClass(active);
         if (active) activeLens = lens;
       });
       const heading = document.querySelector("#results-heading");

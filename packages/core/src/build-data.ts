@@ -113,7 +113,7 @@ async function loadTaxonomyFile(
     const text = await readFile(resolve(cwd, taxonomyDir, filename), "utf8");
     const raw = parseYaml(text, { schema: "core" });
     if (!Array.isArray(raw)) return [];
-    return raw
+    const items = raw
       .filter(
         (item): item is Record<string, unknown> =>
           Boolean(item) &&
@@ -121,11 +121,25 @@ async function loadTaxonomyFile(
           typeof item.id === "string" &&
           typeof item.name === "string",
       )
-      .map((item) => ({
-        ...item,
-        id: item.id as string,
-        name: item.name as string,
-      }));
+      .map(
+        (item): GeneratedTaxonomyItem => ({
+          ...item,
+          id: item.id as string,
+          name: item.name as string,
+        }),
+      );
+    // Taxonomy YAML owns display order: file position by default, an
+    // explicit numeric `order` field wins when present. The sorted
+    // array serializes into site-config.json, so every downstream
+    // surface (filter options, taxonomy pages) inherits it.
+    return items
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => {
+        const orderA = typeof a.item.order === "number" ? a.item.order : Number.POSITIVE_INFINITY;
+        const orderB = typeof b.item.order === "number" ? b.item.order : Number.POSITIVE_INFINITY;
+        return orderA - orderB || a.index - b.index;
+      })
+      .map(({ item }) => item);
   } catch {
     return [];
   }
@@ -338,9 +352,10 @@ export async function generate(
     footer: cfg.footer,
     submission: cfg.submission,
     analytics: cfg.analytics,
-    facets: cfg.facets,
+    browse: cfg.browse,
     theme: cfg.theme,
     integrations: cfg.integrations,
+    contributors: cfg.contributors,
     taxonomy,
     stats: {
       totalRecords: indexRecords.length,

@@ -64,12 +64,18 @@ export default defineConfig({
     ],
   },
 
-  facets: ["category", "stack", "platform", "tags"],
+  // Which browse dimensions the site exposes, in filter-group order.
+  // `license` is enabled so the license taxonomy pages, the browse
+  // filter, and the search placeholder stay consistent.
+  browse: {
+    facets: ["category", "stack", "platform", "tags", "license"],
+  },
 
-  integrations: { github: false },
+  // The scheduled sync workflows (.github/workflows/sync-*.yml) honor
+  // these flags — disable a sub-feature here to turn its sync into a no-op.
+  integrations: { github: { metadata: true, contributors: true, health: true } },
 
   theme: {
-    primaryColor: "#1f6feb",
     radius: "soft",
     density: "comfortable",
     containerWidth: "72rem",

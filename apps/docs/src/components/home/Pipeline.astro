@@ -1,0 +1,287 @@
+---
+import Statement from './Statement.astro';
+
+// "One source, every surface" — the transformation diagram: the plain files
+// you write flow through Grove and come out as a complete website plus every
+// artifact around it (SEO files, AI indexes, README, JSON data).
+//
+// Without JS (or with reduced motion) everything renders visible and static;
+// JS only adds the connector paths, the staged reveal, and the traveling
+// pulses. The connectors are drawn from measured DOM positions, so the
+// columns are plain flex/grid layout and nothing can overlap or distort.
+
+const inputs = ['YAML records', 'Markdown', 'Collections', 'Taxonomy'];
+
+// Every output is real: the site capabilities ship with @grove-dev/astro,
+// the public files come from GENERATED_PUBLIC_NAMES in packages/cli, the
+// README from `grove readme generate`, the JSON from data/generated/.
+const groups = [
+  { title: 'Website', items: ['Search', 'Filters', 'Lenses', 'Collections', 'Detail pages'] },
+  { title: 'SEO', items: ['sitemap.xml', 'robots.txt', 'og-image.svg'] },
+  { title: 'AI-ready', items: ['llms.txt', 'llms-full.txt'] },
+  { title: 'Repo', items: ['README.md', 'JSON data'] },
+];
+---
+
+<section id="pipeline" aria-labelledby="pipeline-title">
+  <Statement
+    eyebrow="One source, every surface"
+    titleId="pipeline-title"
+    lede="The YAML and Markdown you already write become a full website — search, filters, lenses, collections, detail pages — plus the SEO files, AI indexes, and README a healthy directory needs. One build, every surface in sync."
+  >
+    Plain files in. A <span class="text-gradient">complete site</span> out.
+  </Statement>
+
+  <div class="mx-auto max-w-6xl px-6 pb-24">
+    <div
+      id="pipeline-stage"
+      class="relative overflow-hidden rounded-lg border border-border bg-surface/60 px-6 py-10 sm:px-10 sm:py-14"
+    >
+      <div class="pipeline-gridbg absolute inset-0" aria-hidden="true"></div>
+      <svg id="pipeline-paths" class="absolute inset-0 h-full w-full" fill="none" aria-hidden="true"
+      ></svg>
+
+      <div class="relative grid items-center gap-10 md:grid-cols-[1fr_auto_1.2fr] md:gap-4">
+        <ul
+          class="flex flex-wrap justify-center gap-2.5 md:flex-col md:items-end md:gap-7"
+          aria-label="The files you write"
+        >
+          {
+            inputs.map((label, i) => (
+              <li
+                class="pipeline-node pipeline-in whitespace-nowrap rounded-full border border-border bg-card px-4 py-1.5 font-mono text-xs text-fg"
+                style={`--d: ${i * 90}ms`}
+              >
+                {label}
+              </li>
+            ))
+          }
+        </ul>
+
+        <div
+          class="pipeline-node pipeline-core mx-auto flex flex-col items-center gap-1 rounded-xl border border-brand/40 bg-brand/10 px-9 py-6 shadow-[0_0_48px_-8px_rgb(39_183_200/0.65)] backdrop-blur-sm md:mx-10"
+          style="--d: 380ms"
+        >
+          <span class="text-2xl font-semibold tracking-tight text-brand-light">Grove</span>
+          <span class="font-mono text-[10px] uppercase tracking-widest text-subtle"
+            >one command build</span
+          >
+        </div>
+
+        <ul
+          class="grid gap-3 sm:grid-cols-2 md:grid-cols-1 md:max-w-sm md:justify-self-end"
+          aria-label="Everything Grove generates"
+        >
+          {
+            groups.map((group, i) => (
+              <li
+                class="pipeline-node pipeline-out rounded-lg border border-border bg-card/90 p-3.5"
+                style={`--d: ${520 + i * 130}ms`}
+              >
+                <h3 class="font-mono text-[10px] uppercase tracking-widest text-brand-light">
+                  {group.title}
+                </h3>
+                <ul class="mt-2 flex flex-wrap gap-1.5">
+                  {group.items.map((item) => (
+                    <li class="rounded-full border border-border/80 bg-surface px-2.5 py-0.5 font-mono text-[10px] text-muted">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  #pipeline .pipeline-gridbg {
+    opacity: 0.5;
+    background-image:
+      linear-gradient(to right, rgb(54 86 102 / 0.3) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(54 86 102 / 0.3) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(120% 120% at 50% 50%, black 55%, transparent 100%);
+    mask-image: radial-gradient(120% 120% at 50% 50%, black 55%, transparent 100%);
+  }
+
+  /* Staged reveal. Nodes are hidden only after JS tags the stage as
+     .pipeline-ready (never without JS, never with reduced motion), then
+     .is-inview reveals them on their per-node --d delay. */
+  #pipeline-stage.pipeline-ready .pipeline-node {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.6s cubic-bezier(0.2, 0.6, 0.2, 1),
+      transform 0.6s cubic-bezier(0.2, 0.6, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+
+  #pipeline-stage.pipeline-ready .pipeline-core {
+    transform: scale(0.92);
+  }
+
+  #pipeline-stage.pipeline-ready.is-inview .pipeline-node {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Connector paths are created by JS, so their styles must be global. */
+  #pipeline-paths .pipeline-path {
+    stroke: var(--color-border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0.8;
+    transition: stroke-dashoffset 0.9s cubic-bezier(0.2, 0.6, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+
+  #pipeline-paths .pipeline-path.pipeline-path-out {
+    stroke: var(--color-brand);
+    opacity: 0.5;
+  }
+
+  #pipeline-stage.is-inview .pipeline-path {
+    stroke-dashoffset: 0;
+  }
+
+  /* A quiet pulse travels each connector once the reveal has finished. */
+  #pipeline-paths .pipeline-pulse {
+    stroke: var(--color-brand-light);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-dasharray: 6 94;
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+
+  #pipeline-stage.is-inview .pipeline-pulse {
+    animation: pipeline-pulse 3.6s linear infinite;
+    animation-delay: var(--d, 0ms);
+  }
+
+  @keyframes pipeline-pulse {
+    0% {
+      stroke-dashoffset: 100;
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.85;
+    }
+    58% {
+      stroke-dashoffset: 0;
+      opacity: 0.85;
+    }
+    66%,
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0;
+    }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    // Connector paths + staged reveal. Enhancement only: without JS the
+    // columns already read left → Grove → right, just without the lines.
+    const stage = document.getElementById('pipeline-stage');
+    const svg = document.getElementById('pipeline-paths');
+    if (!stage || !svg) return;
+    const core = stage.querySelector('.pipeline-core');
+    const ins = [...stage.querySelectorAll('.pipeline-in')];
+    const outs = [...stage.querySelectorAll('.pipeline-out')];
+    if (!core || !ins.length || !outs.length) return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const wide = window.matchMedia('(min-width: 768px)');
+    const NS = 'http://www.w3.org/2000/svg';
+
+    const draw = () => {
+      svg.replaceChildren();
+      // The stacked mobile layout has no meaningful left→right geometry.
+      if (!wide.matches) return;
+      const sr = stage.getBoundingClientRect();
+      if (sr.width === 0) return;
+      svg.setAttribute('viewBox', `0 0 ${sr.width} ${sr.height}`);
+      svg.setAttribute('preserveAspectRatio', 'none');
+      const cr = core.getBoundingClientRect();
+      const coreL = { x: cr.left - sr.left, y: cr.top - sr.top + cr.height / 2 };
+      const coreR = { x: cr.right - sr.left, y: coreL.y };
+
+      const connect = (from, to, cls, delay) => {
+        const midX = (from.x + to.x) / 2;
+        const d = `M ${from.x} ${from.y} C ${midX} ${from.y}, ${midX} ${to.y}, ${to.x} ${to.y}`;
+        for (const [extra, pulseDelay] of [
+          ['pipeline-path ' + cls, delay],
+          ['pipeline-pulse', delay + 900],
+        ]) {
+          const path = document.createElementNS(NS, 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('pathLength', '100');
+          path.setAttribute('vector-effect', 'non-scaling-stroke');
+          path.setAttribute('class', extra);
+          path.style.setProperty('--d', `${pulseDelay}ms`);
+          svg.appendChild(path);
+        }
+      };
+
+      ins.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        connect(
+          { x: r.right - sr.left + 6, y: r.top - sr.top + r.height / 2 },
+          { x: coreL.x - 6, y: coreL.y },
+          'pipeline-path-in',
+          250 + i * 70,
+        );
+      });
+      outs.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        connect(
+          { x: coreR.x + 6, y: coreR.y },
+          { x: r.left - sr.left - 6, y: r.top - sr.top + r.height / 2 },
+          'pipeline-path-out',
+          600 + i * 110,
+        );
+      });
+    };
+
+    const setup = () => {
+      draw();
+      if (reduced.matches || !('IntersectionObserver' in window)) {
+        stage.classList.add('is-inview');
+        return;
+      }
+      stage.classList.add('pipeline-ready');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            stage.classList.add('is-inview');
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.35 },
+      );
+      observer.observe(stage);
+    };
+
+    let raf = 0;
+    window.addEventListener(
+      'resize',
+      () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          draw();
+        });
+      },
+      { passive: true },
+    );
+
+    setup();
+  })();
+</script>

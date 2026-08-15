@@ -179,7 +179,6 @@ export default defineConfig({
   },
 
   theme: {
-    primaryColor: '#16a34a',
     radius: 'soft',
     density: 'comfortable',
     containerWidth: '72rem',
@@ -213,7 +212,7 @@ export default defineConfig({
 | `nav`                 | array             | `[]`                                                                                           | Top navigation. Each item is `{ label, href }`.                                                                     |
 | `facets`              | array             | `["category", "tags"]`                                                                         | Record fields exposed as refinement facets on the list page.                                                        |
 | `integrations.github` | boolean \| object | `false`                                                                                        | Optional. `metadata: true` enables stars/forks/pushedAt/license enrichment; `health: true` derives `health.status`. |
-| `theme`               | object            | `{ primaryColor: "#16a34a", radius: "soft", density: "comfortable", containerWidth: "72rem" }` | Design tokens consumed by the Astro template's `src/styles.css`.                                                    |
+| `theme`               | object            | `{ radius: "soft", density: "comfortable", containerWidth: "72rem" }` (primaryColor unset — neutral ink) | Design tokens consumed by the Astro template's `src/styles.css`.                                                    |
 | `components`          | object            | all undefined                                                                                  | Override any of `Header`, `Footer`, `Hero`, `ItemCard`, `DetailHeader` with a path to a custom `.astro` file.       |
 | `paths`               | object            | sensible defaults                                                                              | Filesystem layout. Every field has a default; override only what you need.                                          |
 

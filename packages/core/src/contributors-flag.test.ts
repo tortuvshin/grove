@@ -34,3 +34,30 @@ describe("contributors showContributionCount default", () => {
   });
 });
 
+describe("normalizeGithubIntegration", () => {
+  it("expands a blanket boolean into per-feature flags", async () => {
+    const { normalizeGithubIntegration } = await import("./schema.js");
+    expect(normalizeGithubIntegration(true)).toEqual({
+      metadata: true,
+      contributors: true,
+      health: true,
+    });
+    expect(normalizeGithubIntegration(false)).toEqual({
+      metadata: false,
+      contributors: false,
+      health: false,
+    });
+  });
+
+  it("fills missing per-feature flags with false", async () => {
+    const { normalizeGithubIntegration } = await import("./schema.js");
+    expect(
+      normalizeGithubIntegration({ metadata: true, contributors: false, health: false }),
+    ).toEqual({ metadata: true, contributors: false, health: false });
+    expect(normalizeGithubIntegration(undefined)).toEqual({
+      metadata: false,
+      contributors: false,
+      health: false,
+    });
+  });
+});

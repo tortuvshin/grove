@@ -158,11 +158,14 @@ const primaryCta: CTA | undefined =
         </p>
       )}
 
-      {/* Search — primary interaction. Border lives on the FORM, not the input:
-          styles.css forces border-radius/border-color/background-color !important
-          on input[type=search], so a bordered input cannot be 12px-rounded. */}
+      {/* Search — primary interaction. The FORM is the visual control:
+          it owns the border, radius, and the single focus treatment
+          (focus-within border + soft ring). The inner input opts out
+          of the global input styling (`grove-input-unstyled`) so it
+          stays a transparent, chrome-free text slot — no second box
+          or ring appearing inside the pill on focus. */}
       <form
-        class="mt-8 flex h-[58px] w-full max-w-[840px] animate-fade-in-up items-center gap-3 rounded-xl border border-ink-200 bg-background p-1.5 pl-4 transition-colors focus-within:border-ink-400 dark:border-ink-800 dark:focus-within:border-ink-600"
+        class="mt-8 flex h-[58px] w-full max-w-[840px] animate-fade-in-up items-center gap-3 rounded-xl border border-ink-200 bg-background p-1.5 pl-4 transition-[border-color,box-shadow] focus-within:border-ink-400 focus-within:ring-3 focus-within:ring-ring/15 dark:border-ink-800 dark:focus-within:border-ink-600"
         style="animation-delay: 0.15s;"
         role="search"
         action={searchHref}
@@ -177,7 +180,7 @@ const primaryCta: CTA | undefined =
             type="search"
             name="q"
             placeholder={searchPlaceholder}
-            class="h-full w-full min-w-0 border-0 bg-transparent px-0 text-[16px] text-ink-900 outline-none placeholder:text-ink-400 dark:text-ink-100 dark:placeholder:text-ink-500"
+            class="grove-input-unstyled h-full w-full min-w-0 rounded-none border-0 bg-transparent px-0 text-[16px] text-ink-900 outline-none placeholder:text-ink-400 dark:text-ink-100 dark:placeholder:text-ink-500"
           />
         </label>
         <button

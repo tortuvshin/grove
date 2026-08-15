@@ -69,7 +69,7 @@ every page, check every filter, click every link before you push.
 
 ## Next steps
 
-- **[Configure your space →](/build/configure/)** — branding, theme,
+- **[Configure your space →](/getting-started/configure/)** — branding, theme,
   taxonomy.
 - **[Community submissions →](/automation/submissions/)** — accept
   new entries from contributors.

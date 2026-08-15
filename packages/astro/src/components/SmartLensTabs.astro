@@ -17,13 +17,14 @@
 
 import { LENSES, hrefForLens, isLensActive } from "../lib/lenses";
 import { lensDisplay } from "../lib/display";
+import { lensTabClass } from "../ui/button.js";
 
 interface Props {
   currentParams: URLSearchParams;
   pathPrefix?: string;
   class?: string;
   /** Override the visible lens list (defaults to LENSES). */
-  lensIds?: string[];
+  lensIds?: readonly string[];
   /** Consumer noun for the unfiltered lens, e.g. "All apps". */
   allLabel?: string;
 }
@@ -57,12 +58,7 @@ const lenses =
     return (
       <a
         href={hrefForLens(lens.id, currentParams, pathPrefix)}
-        class:list={[
-          "inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-[0.8125rem] font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35",
-          active
-            ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
-            : "border-border bg-secondary text-foreground hover:bg-accent",
-        ]}
+        class={lensTabClass(active)}
         aria-current={active ? "page" : undefined}
         data-lens-id={lens.id}
         data-event="lens_tab_click"

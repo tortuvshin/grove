@@ -1,4 +1,5 @@
 ---
+import { formatCount } from "@grove-dev/core";
 /**
  * CategoryGrid — browse-by-category grid for the home page.
  *
@@ -23,6 +24,12 @@ interface Props {
   /** Hide the section header. */
   bare?: boolean;
   itemLabelPlural?: string;
+  /** Noun pair for count chips — singular fixes "1 projects". */
+  itemNoun?: { singular: string; plural: string };
+  /** Pass 1 when this grid IS the page (`/categories` index). */
+  headingLevel?: 1 | 2;
+  /** Card link builder (defaults to browse filtered by category). */
+  hrefFor?: (slug: string) => string;
 }
 
 const {
@@ -31,9 +38,15 @@ const {
   class: className = "",
   bare = false,
   itemLabelPlural = "items",
+  itemNoun = { singular: "item", plural: "items" },
+  headingLevel = 2,
+  hrefFor,
 } = Astro.props;
 
+const Heading = `h${headingLevel}` as "h1" | "h2";
+
 function buildHref(slug: string): string {
+  if (hrefFor) return hrefFor(slug);
   const base = pathPrefix.replace(/\/$/, "");
   return `${base}?category=${encodeURIComponent(slug)}`;
 }
@@ -50,12 +63,12 @@ function buildHref(slug: string): string {
         <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
           Categories
         </span>
-        <h2
+        <Heading
           id="grove-categorygrid-heading"
           class="m-0 mt-1 text-[1.5rem] sm:text-[1.625rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
         >
           Browse by category
-        </h2>
+        </Heading>
         <p class="m-0 max-w-[60ch] text-[0.9375rem] text-ink-500 dark:text-ink-400">
           Find {itemLabelPlural} by what they do, not by which stack they use.
         </p>
@@ -72,12 +85,14 @@ function buildHref(slug: string): string {
             >
               <div class="flex min-w-0 flex-1 flex-col gap-0.5">
                 <div class="flex items-center gap-2">
-                  <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+                  {/* Not a heading — see StackGrid: link tiles under a
+                      page h1 must not introduce h3 skips. */}
+                  <span class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
                     {c.name}
-                  </h3>
+                  </span>
                   {typeof c.count === "number" && (
                     <span class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400">
-                      {c.count} {itemLabelPlural}
+                      {formatCount(c.count, itemNoun)}
                     </span>
                   )}
                 </div>

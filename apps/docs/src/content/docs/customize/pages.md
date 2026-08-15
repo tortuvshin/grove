@@ -1,14 +1,102 @@
 ---
 title: Custom pages
-description: Add new Astro pages to your Grove directory. Changelogs, methodology, contributor guides — anything that's not a record.
+description: Add new Astro pages to your Grove space. Changelogs, methodology, contributor guides — anything that's not a record.
 ---
 
-Add any `.astro` file under `src/pages/` and Astro picks it up automatically. Examples:
+A Grove space is an Astro project; adding a page is a normal Astro workflow. Drop a `.astro` file under `src/pages/` and the build picks it up.
 
-- `src/pages/changelog.astro` — release notes
-- `src/pages/methodology.astro` — how the directory is curated
-- `src/pages/contributors.astro` — already shipped in the default template
+## Three page patterns
 
-For static Markdown content rendered with Grove's layout, write a Markdown file under `content/pages/<page>.md` and reference it from a custom `.astro` page using `getPageContentHtml("<page>")` from `@grove-dev/astro`. The default template uses this pattern for `about.md` and `methodology.md`.
+| Pattern | Use for |
+|---|---|
+| `src/pages/<page>.astro` | Curated pages with bespoke layout — submit form, changelog, status dashboard |
+| `content/pages/<page>.md` (rendered via `getPageContentHtml`) | Long-form prose with the default layout |
+| `data/records/<slug>.yml` + the scaffolded `[slug].astro` | Directory entries — pages generated from data |
 
-To add the new page to the top navigation, append to `nav` in `grove.config.ts`.
+## Adding an Astro page
+
+Create `src/pages/<page>.astro`:
+
+```astro
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { records } from "@grove-dev/astro/server";
+
+const recent = records
+  .filter(r => r.github?.sync?.syncedAt)
+  .sort((a, b) => (b.github.sync.syncedAt > a.github.sync.syncedAt ? 1 : -1))
+  .slice(0, 10);
+---
+
+<BaseLayout title="Changelog" description="Recent updates">
+  <h1>Changelog</h1>
+  <ul>
+    {recent.map(r => (
+      <li><a href={`/projects/${r.slug}/`}>{r.name}</a></li>
+    ))}
+  </ul>
+</BaseLayout>
+```
+
+Add it to the top nav in `grove.config.ts`:
+
+```ts
+nav: [
+  { label: "Home", href: "/" },
+  { label: "Browse", href: "/projects" },
+  { label: "Changelog", href: "/changelog" },
+],
+```
+
+That's it. The page is part of the site.
+
+## Adding a Markdown page
+
+For prose-heavy pages (methodology, contributing, code of conduct), use Markdown under `content/pages/`:
+
+```markdown
+---
+title: Methodology
+description: How projects are selected, scored, and curated.
+---
+
+Projects are added through a public submission process. A maintainer
+reviews each submission against the criteria below ...
+
+## Inclusion criteria
+
+- Active maintenance (commit within the last 12 months)
+- Public source and a clear license
+- Functional software, not vaporware
+```
+
+Render it from an Astro wrapper:
+
+```astro
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPageContentHtml } from "@grove-dev/astro";
+
+const { html, frontmatter } = getPageContentHtml("methodology");
+---
+
+<BaseLayout title={frontmatter.title} description={frontmatter.description}>
+  <article set:html={html} />
+</BaseLayout>
+```
+
+The Markdown file is rendered to HTML at build time and embedded in the page.
+
+## When Markdown isn't enough
+
+Use an Astro page when:
+
+- The page needs structured data (`records.filter(...)` to render a list).
+- The page needs interactivity (search, form, tabs).
+- The page has bespoke layout (dashboard, calendar, status board).
+
+## Related
+
+- [Components](/customize/components/) — overriding default components
+- [Branding](/customize/branding/) — site identity
+- [Astro pages](https://docs.astro.build/en/basics/astro-pages/) — full Astro reference

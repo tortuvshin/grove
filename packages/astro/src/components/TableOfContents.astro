@@ -6,8 +6,9 @@
  *
  * Behavior:
  *   - Mobile (<lg): rendered as a closed `<details>` dropdown.
- *   - Desktop (lg+): forced open via `lg:!open` so the nav stays
- *     visible while the user scrolls.
+ *   - Desktop (lg+): forced open by the `.grove-toc` media rule in
+ *     `styles.css` (CSS reveals the list without the `open`
+ *     attribute) so the nav stays visible while the user scrolls.
  *   - Heading IDs come from the markdown renderer; the TOC entries
  *     are pre-computed by `extractToc` and passed in.
  *
@@ -31,7 +32,7 @@ const hasItems = items.length > 1;
 ---
 
 {hasItems && (
-  <details class="grove-toc mb-8 rounded-[var(--radius-lg)] border border-ink-200 bg-background open:bg-background dark:border-ink-800 lg:!open">
+  <details class="grove-toc rounded-[var(--radius-lg)] border border-ink-200 bg-card open:bg-card dark:border-ink-800">
     <summary class="cursor-pointer list-none px-4 py-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:cursor-default lg:pointer-events-none">
       <span class="inline-flex items-center gap-1.5">
         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="grove-toc-chevron transition-transform lg:hidden">
@@ -43,12 +44,23 @@ const hasItems = items.length > 1;
         </span>
       </span>
     </summary>
+    {/* Full list, no inner scroll — the TOC lives in the right rail
+        and every entry stays visible. h3 entries indent under their
+        h2 parents. */}
     <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:border-t-0 lg:p-0">
       {items.map((entry) => (
-        <li class="grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5">
+        <li
+          class:list={[
+            "grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5",
+            entry.depth >= 3 && "ml-4 lg:ml-3",
+          ]}
+        >
           <a
             href={`#${entry.id}`}
-            class="grove-toc-link block truncate px-3 py-2 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:px-2 lg:py-1"
+            class:list={[
+              "grove-toc-link block truncate px-3 py-2 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:px-2 lg:py-1",
+              entry.depth >= 3 && "text-[0.8125rem]",
+            ]}
             data-toc-link={entry.id}
           >
             {entry.text}
@@ -62,6 +74,20 @@ const hasItems = items.length > 1;
 {hasItems && (
   <script is:inline define:vars={{ tocIds: items.map((i) => i.id) }}>
     (function () {
+      // Desktop (lg+): force the details open so the nav stays visible
+      // while scrolling; the summary is pointer-events-none there. On
+      // narrow viewports restore the closed dropdown default. CSS in
+      // styles.css covers the no-JS case.
+      var toc = document.querySelector(".grove-toc");
+      if (toc) {
+        var mq = window.matchMedia("(min-width: 64rem)");
+        var syncOpen = function () { toc.open = mq.matches; };
+        if (typeof mq.addEventListener === "function") {
+          mq.addEventListener("change", syncOpen);
+        }
+        syncOpen();
+      }
+
       // Smooth scroll + history-replace on TOC link clicks.
       function onClick(e) {
         var link = e.target.closest("a[data-toc-link]");

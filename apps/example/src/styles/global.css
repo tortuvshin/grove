@@ -13,14 +13,9 @@
  * the variant resolution and produce utilities that key off
  * `prefers-color-scheme` instead of the `.dark` class on <html>.
  */
-@theme {
-  --color-grove-primary: var(--color-foreground);
-}
-
-@layer base {
-  :root {
-    --grove-color-primary: var(--color-grove-primary);
-    --grove-radius: 0.5rem;
-    --grove-container-width: 72rem;
-  }
-}
+/*
+ * Brand color, radius, density, and container width all come from
+ * `theme` in grove.config.ts — BaseLayout resolves them into
+ * `--grove-*` custom properties on <html>. Add page-level overrides
+ * here only when a token needs to differ from the config.
+ */

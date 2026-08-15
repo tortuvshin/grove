@@ -1,5 +1,6 @@
 ---
 import FilterOptions from "./FilterOptions.astro";
+import { buttonClass, filterTriggerClass } from "../ui/button.js";
 
 interface FacetValue {
   value: string;
@@ -24,13 +25,7 @@ const group = Astro.props;
 <div class="grove-filter relative" data-filter-group-key={group.filterKey} data-filter-single={group.single ? "true" : "false"}>
   <button
     type="button"
-    class:list={[
-      "grove-filter-trigger inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-[0.8125rem] font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35",
-      group.active
-        ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
-        : "border-border bg-secondary text-foreground hover:bg-accent",
-    ]}
-    aria-haspopup="listbox"
+    class={filterTriggerClass(group.active)}
     aria-expanded="false"
     aria-controls={group.popoverId}
   >
@@ -39,9 +34,26 @@ const group = Astro.props;
       <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"/>
     </svg>
   </button>
-  <div id={group.popoverId} class="rounded-[calc(var(--radius)+0.25rem)] border border-border bg-popover text-popover-foreground shadow-xl grove-filter-popover absolute left-0 top-full z-40 mt-1 hidden w-72 max-w-[calc(100vw-2rem)] p-1.5" role="listbox" hidden>
+  {/* A group of native checkboxes/radios — the old listbox role over
+      label/input children had no valid accessibility tree. */}
+  <div
+    id={group.popoverId}
+    class="rounded-[calc(var(--radius)+0.25rem)] border border-border bg-popover text-popover-foreground shadow-xl grove-filter-popover absolute left-0 top-full z-40 mt-1 hidden w-72 max-w-[calc(100vw-2rem)] p-1.5"
+    role="group"
+    aria-label={`${group.label} filters`}
+    hidden
+  >
     <FilterOptions filterKey={group.filterKey} options={group.options} initial={group.initial} single={group.single} />
-    <div class="mt-1 flex items-center justify-between border-t border-ink-100 px-2 pt-1.5 dark:border-ink-900">
+    {/* Single-select groups navigate on change, so Apply would be a
+        dead affordance — they keep only Clear, and the whole footer
+        hides itself while Clear is hidden (the client script toggles
+        Clear's `hidden` class from the live URL state). */}
+    <div
+      class:list={[
+        "mt-1 flex items-center justify-between border-t border-ink-100 px-2 pt-1.5 dark:border-ink-900",
+        group.single && "has-[.grove-filter-clear.hidden]:hidden",
+      ]}
+    >
       <button
         type="button"
         class:list={[
@@ -49,7 +61,9 @@ const group = Astro.props;
           !group.active && "hidden",
         ]}
       >Clear {group.label.toLowerCase()}</button>
-      <button type="button" class="grove-filter-apply inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90 ml-auto px-2.5 text-2xs">Apply</button>
+      {!group.single && (
+        <button type="button" class={buttonClass("primary", "sm", "grove-filter-apply ml-auto px-2.5 text-2xs")}>Apply</button>
+      )}
     </div>
   </div>
 </div>

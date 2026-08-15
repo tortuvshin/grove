@@ -1,0 +1,30 @@
+---
+/**
+ * Categories index — every category with live counts. Linked from the
+ * default header nav; each tile opens the browse page pre-filtered to
+ * the category (detail pages live at `/categories/<id>/`).
+ */
+import siteConfig from "@grove/generated/site-config.json";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
+import { getTaxonomyIndexModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+
+const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+const { categories } = getTaxonomyIndexModel();
+const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
+---
+
+<BaseLayout
+  title={`Categories — ${siteConfig.name}`}
+  description={`Browse every category of ${itemLabelPlural()} in ${siteConfig.name}.`}
+  site={siteConfig}
+>
+  <CategoryGrid
+    categories={categories}
+    pathPrefix={`/${slug}`}
+    itemLabelPlural={itemLabelPlural()}
+    itemNoun={itemNoun}
+    headingLevel={1}
+    hrefFor={(categorySlug: string) => `/categories/${categorySlug}`}
+  />
+</BaseLayout>

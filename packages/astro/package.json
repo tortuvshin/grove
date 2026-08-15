@@ -48,6 +48,8 @@
     "./components/*": "./src/components/*.astro",
     "./server": "./src/server/index.ts",
     "./server/*": "./dist/server/*.js",
+    "./ui/*.astro": "./src/ui/*.astro",
+    "./ui/*": "./src/ui/*.ts",
     "./layouts/*.astro": "./src/layouts/*.astro",
     "./layouts/*": "./src/layouts/*.astro"
   },

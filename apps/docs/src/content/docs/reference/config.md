@@ -29,7 +29,7 @@ export default defineConfig({
 
   integrations: { github: false },
 
-  facets: ["category", "tags"],
+  browse: { facets: ["category", "tags"] },
 });
 ```
 
@@ -93,7 +93,9 @@ export default defineConfig({
     avoid: ["Duplicates and marketing-only pages"],
   },
 
-  facets: ["category", "stack", "platform", "tags"],
+  browse: {
+    facets: ["category", "stack", "platform", "tags"],
+  },
 
   integrations: {
     // Either a boolean (enable/disable GitHub integration)
@@ -106,19 +108,9 @@ export default defineConfig({
   },
 
   theme: {
-    primaryColor: "#16a34a",
     radius: "soft",          // "none" | "soft" | "round"
     density: "comfortable",  // "compact" | "comfortable" | "spacious"
     containerWidth: "72rem",
-  },
-
-  components: {
-    // Override default Astro components with custom ones.
-    Header: "./src/components/MyHeader.astro",
-    Footer: undefined,
-    Hero: undefined,
-    ItemCard: undefined,
-    DetailHeader: undefined,
   },
 
   paths: {
@@ -146,7 +138,7 @@ export default defineConfig({
 
 Which blueprint this space follows. Determines the record kind
 (`project` / `resource` / `entity`) and the schema. See
-[Blueprints](/concepts/blueprints/).
+[Blueprints](/blueprints/project-directory/).
 
 ### `site`
 
@@ -169,16 +161,25 @@ Top-navigation items, in order. Each item has a `label` (visible
 text) and an `href` (link target; can be a relative path or a full
 URL).
 
-### `facets`
+### `browse.facets`
 
 **Type:** `Array<string>`
 **Default:** `["category", "tags"]`
 
-Which record fields the browse and submission pages expose. Supported values
-are `category`, `stack`, `platform`, `tags`, and `license`; plural aliases are
-accepted for compatibility. Category, stack, and platform values come from
-`data/taxonomy/*.yml`. Tags come from each record and stay a separate
-many-to-many facet rather than being promoted into the taxonomy.
+Which browse dimensions the site exposes, and in what order. The array order
+is the filter-group render order on the browse page. Supported ids are exactly
+`category`, `stack`, `platform`, `tags`, and `license` — canonical spellings
+only. Unknown ids, plural spellings, and duplicates fail config validation
+instead of being silently dropped.
+
+Option values, display names, and option order come from
+`data/taxonomy/*.yml` (see [Taxonomy files](/sources/taxonomy-files/)). Tags
+come from each record and stay a separate many-to-many facet; add
+`data/taxonomy/topics.yml` to curate which tags the Tag filter offers.
+
+> **Migration:** the former top-level `facets` key was replaced by
+> `browse.facets` in a clean break. A leftover top-level `facets` key fails
+> validation with a pointed error.
 
 ### `footer`
 
@@ -190,7 +191,7 @@ empty, Grove derives useful repository links.
 
 Customizes the default submit page without forking it. `eyebrow`, `title`, and
 `description` control the introduction; `good` and `avoid` control the review
-criteria. The form renders only taxonomy fields enabled by `facets`.
+criteria. The form renders only taxonomy fields enabled by `browse.facets`.
 
 ### `integrations.github`
 
@@ -216,29 +217,10 @@ the metadata on every render.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `primaryColor` | `string` (CSS color) | `"#16a34a"` | Primary brand color. Used for buttons, links, accents. |
+| `primaryColor` | `string` (hex color) | *unset* | Optional brand color for buttons and accents. When unset, primary actions use the neutral ink treatment (near-black on light, near-white on dark). Text on the brand color is computed for WCAG AA automatically. |
 | `radius` | `"none" \| "soft" \| "round"` | `"soft"` | Border-radius scale. `none` = sharp, `soft` = subtle, `round` = pill. |
 | `density` | `"compact" \| "comfortable" \| "spacious"` | `"comfortable"` | Vertical spacing density. |
 | `containerWidth` | `string` (CSS length) | `"72rem"` | Max width of the content container. |
-
-### `components`
-
-**Type:** `object`
-
-Override the default Astro components for the site chrome and
-record cards. Each value is a path to a `.astro` file (relative to
-the project root).
-
-| Field | Default component | What it renders |
-|---|---|---|
-| `Header` | `@grove-dev/astro`'s default | Top nav and site name |
-| `Footer` | default | Footer with repo link, build info |
-| `Hero` | default | The home-page hero (with tagline, CTAs) |
-| `ItemCard` | default | A single record card in list views |
-| `DetailHeader` | default | The header at the top of a record detail page |
-
-Set a field to `undefined` (or omit it) to use the default.
-Setting it to a path replaces the default with your component.
 
 ### `paths`
 
@@ -291,5 +273,5 @@ type safety.
   and writes to the paths declared here.
 - **[Record schema](/reference/record-schema/)** — what the
   records in `recordsDir` look like.
-- **[Blueprints](/concepts/blueprints/)** — which `blueprint`
+- **[Blueprints](/blueprints/project-directory/)** — which `blueprint`
   value to pick.

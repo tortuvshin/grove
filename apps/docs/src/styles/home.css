@@ -7,32 +7,34 @@
   --font-mono: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
   --font-display: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* vite.dev-style neutral dark canvas. */
-  --color-bg: #101010;
-  --color-surface: #161618;
-  --color-card: #1b1b1f;
-  --color-card-hover: #202127;
-  --color-border: #27272a;
-  --color-border-strong: #3f3f46;
-  --color-fg: #f6f6f7;
-  --color-muted: #a1a1aa;
-  --color-subtle: #71717a;
+  /* Grove blue + teal: an ink-dark technical canvas with restrained color. */
+  --color-bg: #091116;
+  --color-surface: #111d25;
+  --color-card: #13212a;
+  --color-card-hover: #172a34;
+  --color-border: #243b48;
+  --color-border-strong: #365666;
+  --color-fg: #e3f3f5;
+  --color-muted: #89a8b3;
+  --color-subtle: #718b95;
 
-  /* vite.dev accents: indigo brand, cyan→purple signature gradient. */
-  --color-brand: #646cff;
-  --color-brand-light: #747bff;
-  --color-accent-cyan: #41d1ff;
-  --color-accent-purple: #bd34fe;
-  --color-accent-yellow: #ffc517;
+  /* Teal is reserved for emphasis, active states, and connected motion. */
+  --color-brand: #27b7c8;
+  --color-brand-light: #7dd3d8;
+  --color-accent-cyan: #4cc9d8;
+  --color-accent-yellow: #e6c56a;
 
   /* Status colors (record health dots, warnings). */
-  --color-accent-green: #3fb950;
-  --color-accent-orange: #d29922;
+  --color-accent-green: #4ac987;
+  --color-accent-orange: #e5a55d;
 
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 1.75rem;
+  /* Radius ladder mirrors the docs standard
+     (packages/starlight/styles/base.css, --radius: 0.625rem). */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 0.875rem;
 }
 
 html {
@@ -70,11 +72,13 @@ summary::-webkit-details-marker {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(600px circle at 50% 0%, rgb(100 108 255 / 0.12), transparent 65%);
+  background: radial-gradient(600px circle at 50% 0%, rgb(39 183 200 / 0.12), transparent 65%);
 }
 
-/* Hero beams: the vite.dev-style cyan/purple glow field. --mx/--my are set
-   by the hero script (static center fallback without JS or on touch). */
+/* Aurora field: a few large, heavily blurred teal / cyan / faint-blue
+   radials drifting so slowly the eye reads "alive", not "gradient".
+   --mx/--my are set by the hero script, with a static fallback when JS,
+   fine pointers, or motion are unavailable. */
 .hero-beams {
   position: absolute;
   inset: 0;
@@ -88,23 +92,66 @@ summary::-webkit-details-marker {
   position: absolute;
   inset: -20%;
   background:
-    radial-gradient(38% 42% at var(--mx, 38%) var(--my, 30%), rgb(189 52 254 / 0.16), transparent 70%),
-    radial-gradient(34% 38% at 68% 24%, rgb(65 209 255 / 0.14), transparent 70%),
-    radial-gradient(30% 34% at 50% 78%, rgb(100 108 255 / 0.1), transparent 70%);
-  animation: hero-beams-breathe 10s ease-in-out infinite alternate;
+    radial-gradient(34% 38% at var(--mx, 38%) var(--my, 30%), rgb(39 183 200 / 0.13), transparent 72%),
+    radial-gradient(30% 34% at 70% 24%, rgb(125 211 216 / 0.09), transparent 72%),
+    radial-gradient(26% 30% at 26% 58%, rgb(74 201 135 / 0.05), transparent 74%),
+    radial-gradient(24% 30% at 82% 66%, rgb(96 140 230 / 0.05), transparent 76%);
+  filter: blur(8px);
+  animation: hero-aurora-drift 22s ease-in-out infinite;
+}
+
+@keyframes hero-aurora-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.85; }
+  33% { transform: translate3d(2.5%, -1.5%, 0) scale(1.06); opacity: 1; }
+  66% { transform: translate3d(-2%, 1.8%, 0) scale(1.02); opacity: 0.9; }
+}
+
+/* Ground light: a teal-green dawn rising from the base of the hero — the
+   soil the mark grows out of. It lifts in once, then keeps breathing. */
+.hero-beams::after {
+  content: '';
+  position: absolute;
+  inset: -10% 0 0;
+  background:
+    radial-gradient(44% 34% at 50% 88%, rgb(39 183 200 / 0.34), transparent 66%),
+    radial-gradient(26% 20% at 50% 99%, rgb(74 201 135 / 0.24), transparent 70%),
+    radial-gradient(72% 52% at 50% 102%, rgb(125 211 216 / 0.12), transparent 76%);
+  animation:
+    hero-dawn-rise 2s cubic-bezier(0.2, 0.6, 0.2, 1) 0.4s both,
+    hero-beams-breathe 12s ease-in-out 2.4s infinite alternate;
+}
+
+@keyframes hero-dawn-rise {
+  from { opacity: 0; transform: translateY(7%); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes hero-beams-breathe {
   from { opacity: 0.75; transform: scale(1); }
-  to { opacity: 1; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1.04); }
 }
 
-/* The vite.dev signature gradient for emphasized phrases. */
+/* The signature gradient for emphasized phrases: light teal deepening into
+   brand teal and finishing on growth green — the palette's health color. */
 .text-gradient {
-  background: linear-gradient(120deg, #41d1ff 10%, #bd34fe);
+  background: linear-gradient(120deg, #7dd3d8 8%, #27b7c8 58%, #4ac987 96%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Hero-only variant: the gradient pans across the phrase so slowly it reads
+   as barely-alive shimmer, never as an animated banner. The moving layer is
+   the background; the text itself stays put. */
+.text-gradient-live {
+  background-size: 160% 100%;
+  background-position: 0% 50%;
+  animation: text-gradient-drift 18s ease-in-out infinite alternate;
+}
+
+@keyframes text-gradient-drift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
 }
 
 /* Scroll-reveal: the layout script tags sections with .reveal-init only when

@@ -14,6 +14,7 @@
  */
 
 import ThemeToggle from "./ThemeToggle.astro";
+import { buttonClass } from "../ui/button.js";
 
 interface NavItem {
   label: string;
@@ -60,8 +61,8 @@ const defaultNavItems = site.blueprintConfig
   ? [
       { label: "Recently added", href: `${directoryPath}?sort=recently-added` },
       { label: "Trending", href: `${directoryPath}?label=hot` },
-      { label: "Categories", href: directoryPath },
-      { label: "Stacks", href: directoryPath },
+      { label: "Categories", href: "/categories" },
+      { label: "Stacks", href: "/stacks" },
       { label: "About", href: "/about" },
     ]
   : [];
@@ -128,7 +129,7 @@ const starsLabel =
       {submitHref && (
         <a
           href={submitHref}
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent max-sm:!hidden"
+          class={buttonClass("secondary", "sm", "max-sm:!hidden")}
         >
           <svg
             viewBox="0 0 16 16"
@@ -150,7 +151,7 @@ const starsLabel =
           rel="noopener noreferrer"
           aria-label={`${repoLabel} on GitHub${starsLabel ? ` — ${stars} stars` : ""}`}
           title={`${repoLabel} on GitHub`}
-          class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-[var(--radius)] border border-border bg-secondary p-0 text-sm font-medium leading-none text-foreground no-underline outline-none transition-colors hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"
+          class={buttonClass("secondary", "bare", "h-8 overflow-hidden p-0 text-sm")}
         >
           <span class="flex items-center gap-1.5 px-2.5 py-1.5 text-ink-900 dark:text-ink-100">
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">

@@ -93,7 +93,7 @@ describe("generate — filesystem round-trip", () => {
         "  blueprint: 'project-directory',",
         "  nav: [],",
         "  analytics: { googleAnalyticsId: 'G-TEST123' },",
-        "  facets: ['stack', 'tags'],",
+        "  browse: { facets: ['stack', 'tags'] },",
         "  footer: { columns: [{ heading: 'Explore', items: [{ label: 'Browse', href: '/projects' }] }], license: 'CC BY 4.0' },",
         "  submission: { title: 'Suggest a project', good: ['Public source'], avoid: ['Duplicates'] },",
         "  theme: {},",
@@ -198,14 +198,17 @@ describe("generate — filesystem round-trip", () => {
     const sitePath = join(cwd, "data", "generated", "site-config.json");
     const site = JSON.parse(await readFile(sitePath, "utf8")) as {
       stats: { totalRecords: number; totalApps: number };
-      facets: string[];
+      browse: { facets: string[] };
       footer: { columns: Array<{ heading: string }>; license: string };
       submission: { title: string; good: string[]; avoid: string[] };
       analytics: { googleAnalyticsId: string };
+      contributors: { showContributionCount: boolean };
     };
     expect(site.stats.totalRecords).toBe(1);
     expect(site.stats.totalApps).toBe(1);
-    expect(site.facets).toEqual(["stack", "tags"]);
+    // Order is the contract: the configured order round-trips into the
+    // generated artifact verbatim.
+    expect(site.browse.facets).toEqual(["stack", "tags"]);
     expect(site.footer.columns[0]?.heading).toBe("Explore");
     expect(site.footer.license).toBe("CC BY 4.0");
     expect(site.submission).toEqual({
@@ -214,6 +217,9 @@ describe("generate — filesystem round-trip", () => {
       avoid: ["Duplicates"],
     });
     expect(site.analytics.googleAnalyticsId).toBe("G-TEST123");
+    // The contributors preference must reach site-config.json so the
+    // Astro layer can honor `showContributionCount`.
+    expect(site.contributors).toEqual({ showContributionCount: true });
   });
 
   it("keeps site repository metadata separate from directory aggregates", async () => {
@@ -276,5 +282,79 @@ describe("generate — filesystem round-trip", () => {
       { id: "news", name: "News and Magazine" },
       { id: "tools", name: "Developer Tools" },
     ]);
+  });
+
+  it("sorts taxonomy entries by explicit order field, then file position", async () => {
+    await mkdir(join(cwd, "data", "taxonomy"), { recursive: true });
+    await writeFile(
+      join(cwd, "data", "taxonomy", "categories.yml"),
+      [
+        "- id: last",
+        "  name: Last",
+        "  order: 99",
+        "- id: first",
+        "  name: First",
+        "  order: 1",
+        "- id: unordered-a",
+        "  name: Unordered A",
+        "- id: unordered-b",
+        "  name: Unordered B",
+      ].join("\n"),
+    );
+    await writeFile(
+      join(cwd, "data", "records", "demo.yml"),
+      [
+        "kind: project",
+        "slug: demo",
+        "name: Demo",
+        "description: a demo",
+        "category: first",
+        "links: {}",
+        "curation: { reviewed: false, labels: [], lenses: [] }",
+        "scores: {}",
+      ].join("\n"),
+    );
+
+    await generate(cwd);
+    const site = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "site-config.json"), "utf8"),
+    ) as {
+      taxonomy?: { categories?: Array<{ id: string }> };
+    };
+
+    // Explicit `order` values sort first; entries without one keep
+    // file position after them.
+    expect(site.taxonomy?.categories?.map((c) => c.id)).toEqual([
+      "first",
+      "last",
+      "unordered-a",
+      "unordered-b",
+    ]);
+  });
+
+  it("generates a byte-identical site-config.json on repeated runs", async () => {
+    await writeFile(
+      join(cwd, "data", "records", "demo.yml"),
+      [
+        "kind: project",
+        "slug: demo",
+        "name: Demo",
+        "description: a demo",
+        "category: tools",
+        "links: {}",
+        "curation: { reviewed: false, labels: [], lenses: [] }",
+        "scores: {}",
+      ].join("\n"),
+    );
+
+    const sitePath = join(cwd, "data", "generated", "site-config.json");
+    await generate(cwd);
+    const first = await readFile(sitePath, "utf8");
+    await generate(cwd);
+    const second = await readFile(sitePath, "utf8");
+    // Determinism gate: same sources must produce the same artifact —
+    // a non-deterministic config would make every build a spurious
+    // diff in the committed generated files.
+    expect(second).toBe(first);
   });
 });

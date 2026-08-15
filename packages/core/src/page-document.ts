@@ -12,8 +12,9 @@
  *
  * The JSON-LD registry (`siteSchema`, `collectionSchema`, `recordSchema`,
  * `contentSchema`, `buildJsonLd`) is a small blueprint layer: each schema
- * function takes a typed input and returns the JSON-LD node graph that
- * `GroveDocumentHead` will serialize into `<script type="application/ld+json">`.
+ * function takes a typed input and returns the JSON-LD node graph the
+ * consumer serializes into `<script type="application/ld+json">` in its
+ * own `<head>` (e.g. via the adapter's `Seo` component).
  *
  * `validateJsonLd` is the validator that runs over a node graph and
  * reports well-formedness issues (missing @context, relative URLs, duplicate

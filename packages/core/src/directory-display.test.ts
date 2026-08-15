@@ -5,6 +5,7 @@ import {
   lensDisplay,
   LICENSE_NOT_DETECTED,
   licenseDisplay,
+  nameInitials,
   prettySlug,
   sortDisplay,
   statusDisplay,
@@ -134,5 +135,20 @@ describe('licenseDisplay', () => {
   it('is case-insensitive for placeholder lookup', () => {
     expect(licenseDisplay('NoAssertion')).toBe(LICENSE_NOT_DETECTED);
     expect(licenseDisplay('none')).toBe(LICENSE_NOT_DETECTED);
+  });
+});
+
+describe('nameInitials', () => {
+  it('takes the first letter of the first two words, uppercased', () => {
+    expect(nameInitials('Open WebUI')).toBe('OW');
+    expect(nameInitials('ollama')).toBe('O');
+    expect(nameInitials('a b c')).toBe('AB');
+  });
+
+  it('handles empty, null, and whitespace-only input', () => {
+    expect(nameInitials('')).toBe('');
+    expect(nameInitials(null)).toBe('');
+    expect(nameInitials(undefined)).toBe('');
+    expect(nameInitials('   ')).toBe('');
   });
 });

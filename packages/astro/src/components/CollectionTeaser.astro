@@ -18,6 +18,8 @@ interface Props {
   viewAllLabel?: string;
   /** Cap the number of cards rendered. Default: 3. */
   limit?: number;
+  /** Noun pair for the per-card entry counts (blueprint labels). */
+  countNoun?: { singular: string; plural: string };
   class?: string;
 }
 
@@ -28,6 +30,7 @@ const {
   viewAllHref = "/collections/",
   viewAllLabel = "View all collections",
   limit = 3,
+  countNoun,
   class: className,
 } = Astro.props;
 ---
@@ -39,5 +42,6 @@ const {
   viewAllHref={viewAllHref}
   viewAllLabel={viewAllLabel}
   limit={limit}
+  countNoun={countNoun}
   class={className}
 />

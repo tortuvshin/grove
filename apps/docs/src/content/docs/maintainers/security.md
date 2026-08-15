@@ -106,6 +106,133 @@ hours.
 - **Vulnerabilities in third-party templates** (a downstream user's
   custom Astro template, for example).
 
+## Supply-chain hardening
+
+The framework is small but it does pull in dependencies. Three
+measures harden the supply chain without slowing development:
+
+### `pnpm` `onlyBuiltDependencies` allowlist
+
+By default, pnpm 9+ does not run install scripts for dependencies
+unless they appear in `pnpm.onlyBuiltDependencies` in
+`package.json`. The repository's `package.json` includes an
+explicit allowlist:
+
+```json
+{
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "playwright", "@parcel/watcher"]
+  }
+}
+```
+
+Adding a new entry requires a PR review — that's the gate. If a
+transitive dependency tries to run an install script, pnpm will
+refuse unless the package is on the list. This is the
+**defence-in-depth** against a malicious post-install script
+(typosquat, namespace takeover, supply-chain compromise).
+
+### `dependency-review-action` on PRs
+
+`.github/workflows/dependency-review.yml` runs GitHub's
+[`dependency-review-action`](https://github.com/actions/dependency-review-action)
+on every pull request. It fails the PR if any new dependency
+introduces:
+
+- A vulnerability in the GitHub Advisory Database.
+- A license that's not in the project's allowlist.
+- A package that was published less than 7 days ago (a
+  typosquat-protection heuristic).
+
+Configuration:
+
+```yaml
+- uses: actions/dependency-review-action@v4
+  with:
+    fail-on-severity: high
+    license-check: true
+    deny-licenses: AGPL-3.0, AGPL-3.0-or-later, SSPL-1.0
+    comment-summary-on-pr: always
+```
+
+The `deny-licenses` list is intentionally conservative. If your
+project accepts AGPL, remove it from the list.
+
+### Socket.dev GitHub App (optional)
+
+For repositories that want stronger supply-chain signals,
+[Socket.dev](https://socket.dev/) is a GitHub App that scans every
+PR for:
+
+- Typosquats and namespace takeovers.
+- Install scripts that exfiltrate env vars.
+- Behavioural changes (a maintainer pushes a new version with
+  suspicious network calls).
+- Known-malicious maintainer accounts.
+
+Socket is opt-in — install the GitHub App at the org level and it
+applies to every repository automatically. It is not a substitute
+for `dependency-review-action`; the two are complementary
+(static-vulnerability + behavioural-analysis).
+
+## `security.txt` (RFC 9116)
+
+A `security.txt` file at `/.well-known/security.txt` (or
+`/security.txt`) advertises the security contact for *the site*
+(rather than the framework). For a Grove-powered directory, it
+helps researchers who find a vulnerability in the *deployed site*
+(say, an XSS in a record body) reach the right maintainer.
+
+The file format is defined in [RFC 9116](https://datatracker.ietf.org/doc/html/rfc9116):
+
+```
+# RFC 9116 — /.well-known/security.txt
+Contact: mailto:security@example.com
+Contact: https://example.com/security
+Expires: 2027-12-31T23:59:59Z
+Preferred-Languages: en
+Canonical: https://example.com/.well-known/security.txt
+```
+
+To enable in a Grove space:
+
+1. Create `public/.well-known/security.txt` with the contents above.
+2. Replace the contact and `Expires` field (set it to ~12 months out
+   and renew).
+3. Run `grove check` — the file is served as-is from `public/`.
+
+The framework does **not** generate a `security.txt`; the contact
+and the cadence are decisions the directory maintainer owns.
+
+## `ai.txt` (IETF draft 00) — opt-in
+
+The [ai.txt IETF draft 00](https://www.ietf.org/archive/id/draft-car-ai-txt-wellknown-00.html)
+specifies a way to declare AI training and scraping policy at
+`/.well-known/ai.txt`. A Grove site can opt in by creating
+`public/.well-known/ai.txt`:
+
+```
+User-Agent: *
+Training: deny
+Scraping: allow
+```
+
+For Cloudflare-fronted sites, the same policy can be expressed as
+a [Content Signal](https://blog.cloudflare.com/content-signals-policy/)
+in `robots.txt`:
+
+```
+# robots.txt
+User-Agent: *
+Content-Signal: search=yes, ai-train=no, ai-input=yes
+```
+
+These are advisory; well-behaved crawlers respect them, but
+malicious scrapers ignore them. They are a clarity signal, not a
+hard barrier.
+
+---
+
 ## What data Grove does (and does not) collect
 
 Grove is a build-time tool. It does not phone home, log analytics, or

@@ -8,7 +8,7 @@ const scaffoldTheme = readFileSync(
   "utf8",
 );
 const tailwindMarkup = [
-  "components/ItemCard.astro",
+  "components/FilterGroupMenu.astro",
   "layouts/Header.astro",
 ].map((file) => readFileSync(resolve(import.meta.dirname, file), "utf8")).join("\n") +
   readFileSync(resolve(import.meta.dirname, "../../../apps/example/src/pages/submit.astro"), "utf8");
@@ -53,6 +53,53 @@ describe("Astro theme contract", () => {
     ]) {
       expect(astroTheme).toContain(`--color-${token}: var(--grove-${token})`);
     }
+  });
+
+  it("keeps raised surfaces in the theme's own family (light cards are light)", () => {
+    // The dark landing surface #141516 may exist ONLY as the dark
+    // `--grove-surface-raised` value — never in the light block
+    // (regression guard for the light-theme dark-card P0).
+    expect(astroTheme.match(/#141516/g)?.length).toBe(1);
+    expect(astroTheme).toContain("--grove-surface-raised: var(--grove-background)");
+    expect(astroTheme).toContain("--grove-surface-raised: #141516");
+    expect(astroTheme).toContain("--grove-card: var(--grove-surface-raised)");
+    expect(astroTheme).toContain("--grove-popover: var(--grove-surface-overlay)");
+  });
+
+  it("defines selection and status roles in both themes", () => {
+    for (const token of [
+      "surface-raised",
+      "surface-sunken",
+      "surface-overlay",
+      "selected",
+      "selected-foreground",
+      "success",
+      "success-foreground",
+      "warning",
+      "warning-foreground",
+      "danger",
+      "danger-foreground",
+      "info",
+      "info-foreground",
+    ]) {
+      expect(astroTheme).toContain(`--color-${token}: var(--grove-${token})`);
+      // Each runtime token must be defined twice: :root and :root.dark.
+      const definitions = astroTheme.match(new RegExp(`--grove-${token}:`, "g")) ?? [];
+      expect(definitions.length, token).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("derives primary fill and text from one WCAG computation", () => {
+    // The old pipeline derived the dark variant in CSS `color-mix`
+    // while the foreground stayed a build-time luma guess — the two
+    // could drift (white on #16a34a shipped at 3.3:1). Everything now
+    // comes from contrast.ts.
+    expect(baseLayoutMarkup).not.toContain("color-mix");
+    expect(baseLayoutMarkup).toContain("derivePrimaryPalette");
+    expect(baseLayoutMarkup).toContain("--grove-theme-primary-dark-foreground");
+    expect(astroTheme).toContain(
+      "--grove-primary-foreground: var(--grove-theme-primary-dark-foreground, var(--grove-gray-7))",
+    );
   });
 
   it("uses the same system and mono font stacks as the docs", () => {
@@ -109,6 +156,24 @@ describe("Astro theme contract", () => {
     expect(themeToggleMarkup).toContain("h-9 w-9");
     expect(themeToggleMarkup).toContain('width="18"');
     expect(themeToggleMarkup).toContain('height="18"');
+  });
+
+  it("wires grove.config.ts theme knobs into runtime CSS custom properties", () => {
+    // styles.css tokens must fall back through the `--grove-*`
+    // overrides that BaseLayout emits on <html>.
+    expect(astroTheme).toContain("--radius: var(--grove-radius, 0.625rem)");
+    expect(astroTheme).toContain("--container-container: var(--grove-container, 1160px)");
+    expect(astroTheme).toContain(
+      "--grove-primary: var(--grove-theme-primary, var(--grove-foreground))",
+    );
+    expect(astroTheme).toContain(
+      "--grove-primary: var(--grove-theme-primary-dark, var(--grove-foreground))",
+    );
+    // BaseLayout resolves the config into the style attribute.
+    expect(baseLayoutMarkup).toContain("RADIUS_PRESETS");
+    expect(baseLayoutMarkup).toContain("DENSITY_SPACING");
+    expect(baseLayoutMarkup).toContain("--grove-theme-primary");
+    expect(baseLayoutMarkup).toContain('<html lang="en" style={themeStyle}>');
   });
 
   it("uses directory-wide analytics config unless a page overrides it", () => {

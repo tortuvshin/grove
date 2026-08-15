@@ -9,6 +9,8 @@
 import siteConfig from "@grove/generated/site-config.json";
 import { indexSlug } from "@grove-dev/astro/server";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import { buttonClass } from "@grove-dev/astro/ui/button";
+import SearchField from "@grove-dev/astro/ui/SearchField.astro";
 
 const slug = indexSlug();
 const title = `Not found — ${siteConfig.name}`;
@@ -21,43 +23,40 @@ const description = `That page doesn't exist on ${siteConfig.name}.`;
   site={siteConfig}
   noindex
 >
+  {/* One recovery hierarchy: search is the primary tool, Browse the
+      single button action, home a quiet text link — no three
+      competing primary CTAs. Centered so the wide viewport doesn't
+      pin everything into the top-left corner. */}
   <section class="py-12 sm:py-16">
-    <div class="mx-auto w-full max-w-container px-5 py-20 sm:px-7 sm:py-28">
-      <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
+    <div class="mx-auto w-full max-w-narrow px-5 py-16 text-center sm:px-7 sm:py-24">
+      <span class="text-2xs font-medium uppercase tracking-wider text-muted-foreground">
         404
       </span>
-      <h1 class="m-0 mt-2 text-[2.25rem] sm:text-[3rem] font-semibold leading-[1.05] tracking-tight text-ink-900 dark:text-ink-100">
+      <h1 class="m-0 mt-2 text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-foreground sm:text-[3rem]">
         Page not found
       </h1>
-      <p class="m-0 mt-4 max-w-xl text-lg leading-relaxed text-ink-700 dark:text-ink-200">
+      <p class="mx-auto m-0 mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
         The page you're looking for doesn't exist on {siteConfig.name}.
         It may have been moved, renamed, or never existed.
       </p>
 
       <form
-        class="mt-8 flex max-w-xl flex-col gap-2 sm:flex-row sm:items-center"
+        class="mx-auto mt-8 flex max-w-xl flex-col gap-2 sm:flex-row sm:items-center"
         role="search"
         action={`/${slug}`}
         method="get"
       >
-        <label class="relative flex-1">
-          <span class="sr-only">Search</span>
-          <input
-            type="search"
-            name="q"
-            placeholder={`Search ${slug}...`}
-            autocomplete="off"
-            class="w-full rounded-md border border-ink-200 bg-white py-2.5 px-3 text-sm placeholder:text-ink-400 focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10 dark:border-ink-800 dark:bg-ink-950 dark:text-ink-100"
-          />
-        </label>
-        <button type="submit" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">
+        <SearchField class="flex-1" label="Search" placeholder={`Search ${slug}...`} id="not-found-search" />
+        <button type="submit" class={buttonClass("primary", "bare", "h-10 px-4 text-sm max-sm:min-h-11")}>
           Search
         </button>
       </form>
 
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a href="/" class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 bg-primary text-primary-foreground hover:bg-primary/90">Back to home</a>
-        <a href={`/${slug}`} class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent">Browse {slug}</a>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4">
+        <a href={`/${slug}`} class={buttonClass("secondary", "sm")}>Browse {slug}</a>
+        <a href="/" class="text-sm font-medium text-muted-foreground underline decoration-border underline-offset-2 hover:text-foreground">
+          Back to home
+        </a>
       </div>
     </div>
   </section>

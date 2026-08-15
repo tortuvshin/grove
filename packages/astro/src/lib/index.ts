@@ -8,7 +8,6 @@
  *   - format counts, dates, stars (`lib/format`)
  *   - apply curated lenses / facets / search filters (`lib/lenses`,
  *     `lib/search`)
- *   - render score bars (`lib/scores`)
  *   - compute taxonomy counts at build time (`lib/taxonomy-counts`)
  *   - pretty-print slugs and label/lens/sort/status ids (`lib/display`)
  *
@@ -21,7 +20,6 @@ export * from "./repo.js";
 export * from "./format.js";
 export * from "./lenses.js";
 export * from "./search.js";
-export * from "./scores.js";
 export * from "./taxonomy-counts.js";
 export * from "./display.js";
 export * from "./load-collections.js";
