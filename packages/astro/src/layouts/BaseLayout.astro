@@ -18,6 +18,7 @@ import '../styles.css';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
 import Seo from './Seo.astro';
+import { derivePrimaryPalette } from '../server/contrast';
 
 interface NavItem {
   label: string;
@@ -135,18 +136,8 @@ const DENSITY_SPACING: Record<string, string> = {
   spacious: "0.28rem",
 };
 
-/** Black-or-white text choice for the brand color, via sRGB luma. */
-function primaryForeground(hex: string): string {
-  const raw = hex.replace("#", "");
-  const full = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
-  const int = Number.parseInt(full.slice(0, 6), 16);
-  if (Number.isNaN(int)) return "#ffffff";
-  const r = (int >> 16) & 255;
-  const g = (int >> 8) & 255;
-  const b = int & 255;
-  const luma = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luma > 0.65 ? "var(--color-ink-950, #0a0a0a)" : "#ffffff";
-}
+// Brand fill and text derive from ONE WCAG computation (contrast.ts)
+// so background and foreground can never drift apart across themes.
 
 const themeConfig = site.theme;
 const themeStyleParts: string[] = [];
@@ -168,11 +159,15 @@ if (themeConfig) {
   }
   const primary = themeConfig.primaryColor;
   if (typeof primary === "string" && /^#[0-9a-fA-F]{3,8}$/.test(primary)) {
-    themeStyleParts.push(
-      `--grove-theme-primary: ${primary}`,
-      `--grove-theme-primary-dark: color-mix(in oklab, ${primary} 72%, white)`,
-      `--grove-theme-primary-foreground: ${primaryForeground(primary)}`,
-    );
+    const palette = derivePrimaryPalette(primary);
+    if (palette) {
+      themeStyleParts.push(
+        `--grove-theme-primary: ${palette.solid}`,
+        `--grove-theme-primary-foreground: ${palette.solidForeground}`,
+        `--grove-theme-primary-dark: ${palette.dark}`,
+        `--grove-theme-primary-dark-foreground: ${palette.darkForeground}`,
+      );
+    }
   }
 }
 const themeStyle = themeStyleParts.length > 0 ? `${themeStyleParts.join("; ")};` : undefined;

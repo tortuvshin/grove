@@ -62,6 +62,33 @@
   --color-popover: var(--grove-popover);
   --color-popover-foreground: var(--grove-popover-foreground);
 
+  /* ── Surfaces ───────────────────────────────────────────────────
+   * Elevation roles. `card` and `popover` above resolve to these so
+   * legacy utilities keep working while new components can name the
+   * elevation they mean.
+   */
+  --color-surface-raised: var(--grove-surface-raised);
+  --color-surface-sunken: var(--grove-surface-sunken);
+  --color-surface-overlay: var(--grove-surface-overlay);
+
+  /* ── Selection (neutral inversion) ──────────────────────────────
+   * Active filters, current lens/page, and other "you are here"
+   * states. Deliberately decoupled from the brand primary so green
+   * can mean brand action or success — never selection.
+   */
+  --color-selected: var(--grove-selected);
+  --color-selected-foreground: var(--grove-selected-foreground);
+
+  /* ── Status roles (solid fill + text-on-fill pairs) ───────────── */
+  --color-success: var(--grove-success);
+  --color-success-foreground: var(--grove-success-foreground);
+  --color-warning: var(--grove-warning);
+  --color-warning-foreground: var(--grove-warning-foreground);
+  --color-danger: var(--grove-danger);
+  --color-danger-foreground: var(--grove-danger-foreground);
+  --color-info: var(--grove-info);
+  --color-info-foreground: var(--grove-info-foreground);
+
   /* ── Accent (interactive states) ─────────────────────────────── */
   --color-accent-muted: color-mix(in oklab, var(--grove-foreground) 8%, transparent);
 
@@ -210,10 +237,28 @@
     --grove-border: var(--grove-gray-6);
     --grove-input: var(--grove-gray-6);
     --grove-ring: var(--grove-gray-4);
-    --grove-card: #141516;
+    /* Elevation: raised surfaces stay in the light family — cards sit
+     * on the page via border, not a dark fill. */
+    --grove-surface-raised: var(--grove-background);
+    --grove-surface-sunken: var(--color-ink-100);
+    --grove-surface-overlay: var(--grove-background);
+    --grove-card: var(--grove-surface-raised);
     --grove-card-foreground: var(--grove-foreground);
-    --grove-popover: var(--grove-background);
+    --grove-popover: var(--grove-surface-overlay);
     --grove-popover-foreground: var(--grove-foreground);
+    /* Selection: neutral inversion (vite.dev-style), never the brand
+     * primary. */
+    --grove-selected: var(--color-ink-900);
+    --grove-selected-foreground: var(--color-ink-50);
+    /* Status fills with AA text-on-fill partners. */
+    --grove-success: #15803d;
+    --grove-success-foreground: #ffffff;
+    --grove-warning: #92400e;
+    --grove-warning-foreground: #ffffff;
+    --grove-danger: #b91c1c;
+    --grove-danger-foreground: #ffffff;
+    --grove-info: #1d4ed8;
+    --grove-info-foreground: #ffffff;
   }
 
   :root.dark {
@@ -228,9 +273,10 @@
     --grove-gray-6: var(--color-ink-800);
     --grove-gray-7: var(--color-ink-900);
     /* Dark mode lifts the brand color toward white (see BaseLayout's
-     * emitted `--grove-theme-primary-dark`) so contrast holds. */
+     * emitted `--grove-theme-primary-dark`) so contrast holds. The
+     * foreground is computed against that lifted value, never assumed. */
     --grove-primary: var(--grove-theme-primary-dark, var(--grove-foreground));
-    --grove-primary-foreground: var(--grove-theme-primary-foreground, var(--grove-gray-7));
+    --grove-primary-foreground: var(--grove-theme-primary-dark-foreground, var(--grove-gray-7));
     --grove-secondary: var(--grove-gray-6);
     --grove-secondary-foreground: var(--grove-foreground);
     --grove-muted: var(--grove-gray-6);
@@ -240,10 +286,27 @@
     --grove-border: var(--grove-gray-6);
     --grove-input: var(--grove-gray-5);
     --grove-ring: var(--grove-gray-4);
-    --grove-card: #141516;
+    /* Elevation: the dark raised surface sits just above the ink-950
+     * page (deliberate landing-page value; hover lifts to ink-900). */
+    --grove-surface-raised: #141516;
+    --grove-surface-sunken: oklch(11.5% 0 0);
+    --grove-surface-overlay: var(--grove-gray-7);
+    --grove-card: var(--grove-surface-raised);
     --grove-card-foreground: var(--grove-foreground);
-    --grove-popover: var(--grove-gray-7);
+    --grove-popover: var(--grove-surface-overlay);
     --grove-popover-foreground: var(--grove-foreground);
+    /* Selection: neutral inversion, mirrored. */
+    --grove-selected: var(--color-ink-100);
+    --grove-selected-foreground: var(--color-ink-950);
+    /* Status fills lift toward pastels with dark text-on-fill. */
+    --grove-success: #4ade80;
+    --grove-success-foreground: var(--color-ink-950);
+    --grove-warning: #fbbf24;
+    --grove-warning-foreground: var(--color-ink-950);
+    --grove-danger: #f87171;
+    --grove-danger-foreground: var(--color-ink-950);
+    --grove-info: #60a5fa;
+    --grove-info-foreground: var(--color-ink-950);
   }
 
   html {

@@ -55,6 +55,53 @@ describe("Astro theme contract", () => {
     }
   });
 
+  it("keeps raised surfaces in the theme's own family (light cards are light)", () => {
+    // The dark landing surface #141516 may exist ONLY as the dark
+    // `--grove-surface-raised` value — never in the light block
+    // (regression guard for the light-theme dark-card P0).
+    expect(astroTheme.match(/#141516/g)?.length).toBe(1);
+    expect(astroTheme).toContain("--grove-surface-raised: var(--grove-background)");
+    expect(astroTheme).toContain("--grove-surface-raised: #141516");
+    expect(astroTheme).toContain("--grove-card: var(--grove-surface-raised)");
+    expect(astroTheme).toContain("--grove-popover: var(--grove-surface-overlay)");
+  });
+
+  it("defines selection and status roles in both themes", () => {
+    for (const token of [
+      "surface-raised",
+      "surface-sunken",
+      "surface-overlay",
+      "selected",
+      "selected-foreground",
+      "success",
+      "success-foreground",
+      "warning",
+      "warning-foreground",
+      "danger",
+      "danger-foreground",
+      "info",
+      "info-foreground",
+    ]) {
+      expect(astroTheme).toContain(`--color-${token}: var(--grove-${token})`);
+      // Each runtime token must be defined twice: :root and :root.dark.
+      const definitions = astroTheme.match(new RegExp(`--grove-${token}:`, "g")) ?? [];
+      expect(definitions.length, token).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("derives primary fill and text from one WCAG computation", () => {
+    // The old pipeline derived the dark variant in CSS `color-mix`
+    // while the foreground stayed a build-time luma guess — the two
+    // could drift (white on #16a34a shipped at 3.3:1). Everything now
+    // comes from contrast.ts.
+    expect(baseLayoutMarkup).not.toContain("color-mix");
+    expect(baseLayoutMarkup).toContain("derivePrimaryPalette");
+    expect(baseLayoutMarkup).toContain("--grove-theme-primary-dark-foreground");
+    expect(astroTheme).toContain(
+      "--grove-primary-foreground: var(--grove-theme-primary-dark-foreground, var(--grove-gray-7))",
+    );
+  });
+
   it("uses the same system and mono font stacks as the docs", () => {
     expect(astroTheme).toContain(
       '--font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,',
