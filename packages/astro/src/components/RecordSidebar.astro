@@ -307,7 +307,7 @@ function row(label: string, value: unknown) {
             {tags.map((t) => (
               <li>
                 <a href={`/${detail.slug}?tag=${encodeURIComponent(t)}`} class="rounded-full border border-ink-200 px-2 py-0.5 text-2xs font-medium text-ink-700 no-underline dark:border-ink-800 dark:text-ink-300">
-                  {t}
+                  {taxonomyLabel("topics", t)}
                 </a>
               </li>
             ))}
