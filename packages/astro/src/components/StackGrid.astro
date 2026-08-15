@@ -108,9 +108,12 @@ function statusLabel(s: StackEntry["status"]): string | null {
 
           <div class="flex min-w-0 flex-1 flex-col gap-0.5">
             <div class="flex items-center gap-2">
-              <h3 class="m-0 text-[0.875rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+              {/* Not a heading: these tiles are links in a grid, and
+                  heading-per-card breaks the outline when the grid
+                  sits directly under the page h1 (/stacks). */}
+              <span class="m-0 text-[0.875rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
                 {s.name}
-              </h3>
+              </span>
               {typeof s.count === "number" && (
                 <span class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400">
                   {formatCount(s.count, itemNoun)}

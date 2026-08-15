@@ -72,6 +72,10 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
 
     <slot name="intro" />
 
+    {/* Bridges the heading outline: the page title is an h1 and the
+        entry cards render h3 titles — without this h2 Lighthouse
+        flags a heading-order skip. */}
+    <h2 class="sr-only">Entries</h2>
     <p class="m-0 mb-4 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
       {formatCount(model.total, countNoun)}
     </p>
@@ -96,7 +100,7 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
           eyebrow="Related"
           title="Related collections"
           description="Other curated groupings of related items."
-          level={3}
+          level={2}
         />
         <ul class="m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-4">
           {model.related.map((r) => (

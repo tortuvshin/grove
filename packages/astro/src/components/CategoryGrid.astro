@@ -81,9 +81,11 @@ function buildHref(slug: string): string {
             >
               <div class="flex min-w-0 flex-1 flex-col gap-0.5">
                 <div class="flex items-center gap-2">
-                  <h3 class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
+                  {/* Not a heading — see StackGrid: link tiles under a
+                      page h1 must not introduce h3 skips. */}
+                  <span class="m-0 text-[0.9375rem] font-semibold tracking-tight text-ink-900 group-hover:underline dark:text-ink-100">
                     {c.name}
-                  </h3>
+                  </span>
                   {typeof c.count === "number" && (
                     <span class="inline-flex items-center rounded-md border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-600 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-400">
                       {formatCount(c.count, itemNoun)}
