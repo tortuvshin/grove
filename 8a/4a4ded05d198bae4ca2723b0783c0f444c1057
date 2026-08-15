@@ -1,0 +1,47 @@
+packages/astro/src/components/FilterGroupMenu.astro
+  s_24bcb38f14ac54::t_c9de7af2b7df12 28
+  s_24bcb38f14ac54::t_615f6790faa074 37-45
+  s_24bcb38f14ac54::t_168a2992a78be8 65
+  s_24bcb38f14ac54::t_d456109d9ac572 3
+packages/astro/src/components/SmartLensTabs.astro
+  s_24bcb38f14ac54::t_7c68fe26ef9671 20,27
+  s_24bcb38f14ac54::t_1a08110460c487 61
+packages/astro/src/ui/Button.astro
+  s_24bcb38f14ac54::t_8e9a5626870fef 1-42
+packages/astro/src/ui/Badge.astro
+  s_24bcb38f14ac54::t_1ebb4a0c8d6acc 1-38
+packages/astro/package.json
+  s_24bcb38f14ac54::t_f9ad56754ac805 51-52
+packages/astro/src/components/DirectoryIndexClient.astro
+  s_24bcb38f14ac54::t_7b23884b61403e 121
+  s_24bcb38f14ac54::t_eb2f4979fa2112 157
+  s_24bcb38f14ac54::t_3a639d2d10cb8f 237
+  s_24bcb38f14ac54::t_7781ebd01737ba 38-44
+  s_24bcb38f14ac54::t_c246c214f6b206 320
+  s_24bcb38f14ac54::t_65e3e4b99cb85d 278-280
+packages/astro/src/components/Pagination.astro
+  s_24bcb38f14ac54::t_bcfd270def6bc0 10,15-16
+  s_24bcb38f14ac54::t_8a6dbcda55c4d3 36
+packages/astro/src/ui/button.ts
+  s_24bcb38f14ac54::t_d8e071353dd412 59-85
+  s_24bcb38f14ac54::t_6fde25a2c07dd9 1-52,86-96
+  s_24bcb38f14ac54::t_54aa9ef0d56c21 53-58
+apps/docs/src/docs-taxonomy-guard.test.ts
+  s_24bcb38f14ac54::t_5d9c6293a96893 62-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8a4a4ded05d198bae4ca2723b0783c0f444c1057",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
