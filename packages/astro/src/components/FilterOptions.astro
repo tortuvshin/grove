@@ -37,7 +37,12 @@ function pretty(value: string): string {
           />
           <span class="truncate">{option.label ?? pretty(option.value)}</span>
         </span>
-        <span class="font-mono text-2xs tabular-nums text-ink-500 dark:text-ink-400">{option.count ?? 0}</span>
+        <span
+          class="font-mono text-2xs tabular-nums text-ink-500 dark:text-ink-400"
+          data-facet-count
+          data-facet={filterKey}
+          data-value={option.value}
+        >{option.count ?? 0}</span>
       </label>
     </li>
   ))}

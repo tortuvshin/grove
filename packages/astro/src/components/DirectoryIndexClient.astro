@@ -22,6 +22,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
     PAGE_SIZE,
     activeFilterChips,
     applySort,
+    buildFacets,
     effectivePage,
     effectiveSort,
     filterRecords,
@@ -272,6 +273,32 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
           triggerButton.classList.toggle("hover:bg-accent", selected.length === 0);
         }
         group.querySelector(".grove-filter-clear")?.classList.toggle("hidden", selected.length === 0);
+      });
+
+      // Facet counts were rendered at build time from the UNFILTERED
+      // record set (the route is prerendered, so the server never sees
+      // the live query string). Recompute intersection counts against
+      // the current filters and patch each count span in place —
+      // never re-render the option lists, which would destroy
+      // checkbox, focus, and scroll state.
+      const liveFacets: Record<string, { value: string; count: number }[]> = buildFacets(items, {
+        filters,
+        curatedTagIds: (taxonomy.topics || []).map((topic: { id: string }) => topic.id),
+      });
+      document.querySelectorAll("[data-facet-count]").forEach((span) => {
+        if (!(span instanceof HTMLElement)) return;
+        const options = liveFacets[span.dataset.facet ?? ""] ?? [];
+        const count = options.find((option) => option.value === span.dataset.value)?.count ?? 0;
+        span.textContent = String(count);
+        const row = span.closest("label");
+        const input = row?.querySelector(".grove-filter-input");
+        const checked = input instanceof HTMLInputElement && input.checked;
+        // A zero-count option can't narrow anything — dim and disable
+        // it unless it's the currently selected value (which must stay
+        // interactive so the user can un-select it).
+        const inert = count === 0 && !checked;
+        row?.classList.toggle("opacity-45", inert);
+        if (input instanceof HTMLInputElement) input.disabled = inert;
       });
 
       let activeLens = LENSES[0];

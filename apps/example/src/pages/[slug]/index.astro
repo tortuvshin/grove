@@ -13,11 +13,14 @@
  * so the same page works for every blueprint without per-blueprint
  * forks.
  *
- * Navigation model: full-page render. The form posts via `method="get"`
- * so the browser navigates to `?q=...&sort=...&stack=...`, and the
- * server re-runs `filterRecords` / `applySort` / `paginate` from
- * those query params. No client-side filter shim, no duplicated
- * logic. The URL stays the single source of truth for filter state.
+ * Navigation model: the URL is the single source of truth for filter
+ * state — the form submits via `method="get"` so every change is a
+ * full-page navigation to `?q=...&sort=...&stack=...`. But this route
+ * is PRERENDERED: at build time `Astro.url.searchParams` is empty, so
+ * the server renders the unfiltered state once. `DirectoryIndexClient`
+ * re-reads `location.search` on load and re-derives the result list,
+ * chips, pagination, and facet intersection counts with the same
+ * `@grove-dev/core/directory` functions the server used.
  */
 import siteConfig from "@grove/generated/site-config.json";
 import { getDirectoryIndexModel, itemLabel, itemLabelPlural, taxonomy } from "@grove-dev/astro/server";
