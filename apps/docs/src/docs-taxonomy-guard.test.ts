@@ -59,7 +59,12 @@ describe("taxonomy docs match the implementation", () => {
 
   it("lists exactly the facet ids the schema accepts", async () => {
     const configDoc = await readFile(configDocPath, "utf8");
-    const { FACET_IDS } = await import("@grove-dev/core");
+    // apps/docs has no dependency on @grove-dev/core — import the
+    // registry source directly so the doc is checked against the
+    // real id list.
+    const { FACET_IDS } = (await import(
+      resolve(repoRoot, "packages/core/src/directory-facets.ts")
+    )) as { FACET_IDS: readonly string[] };
     for (const id of FACET_IDS) {
       expect(configDoc, id).toContain(`\`${id}\``);
     }

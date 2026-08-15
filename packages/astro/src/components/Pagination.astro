@@ -7,12 +7,13 @@ interface Props {
 }
 
 import { paginationPageList } from "@grove-dev/astro";
+import { buttonClass, PAGINATION_EXTRA } from "../ui/button.js";
 
 const { current, total, hrefFor, class: className = "" } = Astro.props;
 
 const pages = paginationPageList(current, total);
-const linkClass =
-  "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent min-w-9 px-2 py-1.5 text-2xs";
+const linkClass = buttonClass("secondary", "sm", PAGINATION_EXTRA);
+const currentClass = buttonClass("selected", "sm", PAGINATION_EXTRA);
 ---
 
 {total > 1 && (
@@ -32,10 +33,7 @@ const linkClass =
       ) : (
         <a
           href={hrefFor(page)}
-          class:list={[
-            linkClass,
-            page === current && "bg-primary text-primary-foreground hover:bg-primary/90",
-          ]}
+          class={page === current ? currentClass : linkClass}
           aria-current={page === current ? "page" : undefined}
         >
           {page}

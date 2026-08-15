@@ -35,6 +35,13 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
     sortDisplay,
     totalPages,
   } from "@grove-dev/core/directory";
+  import {
+    PAGINATION_EXTRA,
+    buttonClass,
+    chipClass,
+    filterTriggerClass,
+    lensTabClass,
+  } from "../ui/button.js";
 
   (() => {
       const source = document.querySelector("#grove-index-data");
@@ -111,8 +118,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         if (pagination) {
           pagination.innerHTML = "";
           if (pageCount > 1) {
-            const linkClass =
-              "inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--radius)] border border-transparent px-3 text-sm font-medium leading-none no-underline outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35 border-border bg-secondary text-foreground hover:bg-accent min-w-9 px-2 py-1.5 text-2xs";
+            const linkClass = buttonClass("secondary", "sm", PAGINATION_EXTRA);
             const hrefFor = (target: number) => {
               const next = searchParamsFromFilters({ ...filters, page: target });
               return `/${slug}${next.size ? `?${next}` : ""}`;
@@ -148,7 +154,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
               link.setAttribute("aria-label", `Page ${entry}`);
               if (entry === page) {
                 link.setAttribute("aria-current", "page");
-                link.className = `${linkClass} bg-primary text-primary-foreground hover:bg-primary/90`;
+                link.className = buttonClass("selected", "sm", PAGINATION_EXTRA);
               }
               nav.append(link);
             }
@@ -228,7 +234,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
           // announces the filter value, and the aria-label spells out
           // the action for assistive tech.
           link.setAttribute("aria-label", `Remove filter: ${chip.label}`);
-          link.className = "inline-flex min-h-5 items-center justify-center gap-1 rounded-full border border-transparent bg-secondary px-2 py-0.5 align-middle text-xs font-medium leading-none text-secondary-foreground transition-colors hover:border-ink-400";
+          link.className = chipClass();
           link.append(document.createTextNode(`${chip.label} `));
           const close = document.createElement("span");
           close.setAttribute("aria-hidden", "true");
@@ -269,14 +275,9 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
             : `${label}: Any`;
         }
         if (triggerButton) {
-          triggerButton.classList.toggle("bg-primary", selected.length > 0);
-          triggerButton.classList.toggle("text-primary-foreground", selected.length > 0);
-          triggerButton.classList.toggle("hover:bg-primary/90", selected.length > 0);
-          triggerButton.classList.toggle("hover:text-primary-foreground", selected.length > 0);
-          triggerButton.classList.toggle("border-border", selected.length === 0);
-          triggerButton.classList.toggle("bg-secondary", selected.length === 0);
-          triggerButton.classList.toggle("text-foreground", selected.length === 0);
-          triggerButton.classList.toggle("hover:bg-accent", selected.length === 0);
+          // Same builder the server render used — the class string is
+          // reassigned wholesale so the two can never drift.
+          triggerButton.className = filterTriggerClass(selected.length > 0);
         }
         group.querySelector(".grove-filter-clear")?.classList.toggle("hidden", selected.length === 0);
       });
@@ -316,14 +317,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy }).re
         node.href = hrefForLens(lens.id, params, `/${slug}`);
         if (active) node.setAttribute("aria-current", "page");
         else node.removeAttribute("aria-current");
-        node.classList.toggle("bg-primary", active);
-        node.classList.toggle("text-primary-foreground", active);
-        node.classList.toggle("hover:bg-primary/90", active);
-        node.classList.toggle("hover:text-primary-foreground", active);
-        node.classList.toggle("border-border", !active);
-        node.classList.toggle("bg-secondary", !active);
-        node.classList.toggle("text-foreground", !active);
-        node.classList.toggle("hover:bg-accent", !active);
+        node.className = lensTabClass(active);
         if (active) activeLens = lens;
       });
       const heading = document.querySelector("#results-heading");
