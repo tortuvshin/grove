@@ -1,0 +1,70 @@
+packages/astro/src/components/OriginalCollection.astro
+  s_24bcb38f14ac54::t_db5f62dd6e0eef 58
+packages/astro/src/components/RecordSidebar.astro
+  s_24bcb38f14ac54::t_4d0c82706e129b 270-272
+  s_24bcb38f14ac54::t_e5cd51dc2b4dbe 285-287
+  s_24bcb38f14ac54::t_6edec089156fff 24-25
+  s_24bcb38f14ac54::t_9d1005a6cc6bb6 298
+  s_24bcb38f14ac54::t_67ccfaf16d1781 30-35,38
+  s_24bcb38f14ac54::t_9d103e4a95b1ce 80-86
+packages/astro/src/components/FinalCta.astro
+  s_24bcb38f14ac54::t_db5f62dd6e0eef 23
+apps/example/public/icons/platforms/windows.svg
+  s_24bcb38f14ac54::t_b7eccc8bc35fff 1-5
+packages/astro/src/components/WhyThisExists.astro
+  s_24bcb38f14ac54::t_db5f62dd6e0eef 85
+apps/docs/src/content/docs/customize/theme.md
+  s_24bcb38f14ac54::t_c1905e834524ad 3,6,12,21-26,29,33-42,46,50,56,79
+packages/astro/src/components/RecordHeader.astro
+  s_24bcb38f14ac54::t_1f317ef2019c63 48-98,100-101,112,114,124,134,136-154,156,158-181,183-191
+  s_24bcb38f14ac54::t_38bc0b09bb07df 24
+packages/core/src/site-artifacts.ts
+  s_24bcb38f14ac54::t_ce3348717f72d7 57-59
+apps/docs/src/content/docs/outputs/site-meta.md
+  s_24bcb38f14ac54::t_cdba4b308251bd 19
+packages/core/src/schema.ts
+  s_24bcb38f14ac54::t_ea828b46d8fd19 562-566,569-570
+packages/astro/src/components/TableOfContents.astro
+  s_24bcb38f14ac54::t_f82cecada613a6 35
+apps/example/src/pages/contributors.astro
+  s_24bcb38f14ac54::t_db5f62dd6e0eef 83
+apps/docs/src/content/docs/reference/config.md
+  s_24bcb38f14ac54::t_fb1cd103bf49ba 96-98
+  s_24bcb38f14ac54::t_699aea7e903927 32
+  s_24bcb38f14ac54::t_a11004f7c33218 220
+packages/astro/src/styles.css
+  s_24bcb38f14ac54::t_66084b5bce1ddc 378-382,391,406
+packages/core/src/config.test.ts
+  s_24bcb38f14ac54::t_45d86dbf7f8568 79-82,84-92
+apps/docs/PRODUCT.md
+  s_24bcb38f14ac54::t_cdba4b308251bd 215
+apps/example/src/pages/[slug]/[recordSlug].astro
+  s_24bcb38f14ac54::t_92b7deaad7eeea 48-49,57-61
+  s_24bcb38f14ac54::t_ea53911973ce5a 62
+apps/example/src/pages/submit.astro
+  s_24bcb38f14ac54::t_db5f62dd6e0eef 145,160
+packages/astro/src/components/StackGrid.astro
+  s_24bcb38f14ac54::t_db5f62dd6e0eef 109
+packages/astro/src/components/Hero.astro
+  s_24bcb38f14ac54::t_1b474348c32a9c 161-166,168,183
+apps/example/public/icons/stacks/go.svg
+  s_24bcb38f14ac54::t_9266c0cd76f50f 1
+apps/example/public/icons/platforms/web.svg
+  s_24bcb38f14ac54::t_6e67c99cd89797 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1ffc4102b4299c86f341a63af6de6ebc84a3c9fc",
+  "prompts": {},
+  "sessions": {
+    "s_24bcb38f14ac54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9c1cae11-8ade-4c91-97d5-bfddabc95371",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
