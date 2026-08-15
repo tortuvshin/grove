@@ -1,0 +1,20 @@
+packages/astro/package.json
+  h_62cffde5d182b0 3
+packages/cli/package.json
+  h_62cffde5d182b0 3
+packages/core/package.json
+  h_62cffde5d182b0 3
+packages/starlight/package.json
+  h_62cffde5d182b0 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "eb3048bacd47f1a787b0e75d405d7d7de055f53b",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
