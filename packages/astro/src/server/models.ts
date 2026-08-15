@@ -159,12 +159,19 @@ export function getHomePageModel(site: DirectorySiteConfig) {
     "most-starred",
   ).slice(0, 6);
 
+  // Count over the VISIBLE index (`items`, same set browse filters
+  // over) using the canonical primary+supporting stack union
+  // (`projectStackIds`) — so the homepage grid, /stacks, and the
+  // browse facet counts can never disagree. Counting `fullItems` with
+  // the singular `record.stack` was the audit's "Python 3 vs 4" drift.
   const stackCounts = new Map<string, number>();
   const categoryCounts = new Map<string, number>();
-  for (const record of fullItems) {
+  for (const record of items) {
     if (record.category) categoryCounts.set(record.category, (categoryCounts.get(record.category) ?? 0) + 1);
-    if (record.kind === "project" && record.stack) {
-      stackCounts.set(record.stack, (stackCounts.get(record.stack) ?? 0) + 1);
+    if (record.kind === "project") {
+      for (const stackId of projectStackIds(record)) {
+        stackCounts.set(stackId, (stackCounts.get(stackId) ?? 0) + 1);
+      }
     }
   }
   const stacks = [...stackCounts]

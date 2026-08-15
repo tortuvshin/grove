@@ -48,6 +48,28 @@ export function formatRelative(iso: string | null | undefined): string {
 }
 
 /**
+ * Pick the singular or plural noun for a count. The plural form is
+ * explicit — never derived with a naive `+"s"` — so blueprint labels
+ * with irregular plurals ("entity"/"entities") render correctly.
+ */
+export function pluralize(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural;
+}
+
+/**
+ * Format a count with its noun: `formatCount(1, {singular: "project",
+ * plural: "projects"})` → "1 project". The noun pair typically comes
+ * from the blueprint labels, so every surface (grids, collection
+ * cards, browse results) counts with the same vocabulary.
+ */
+export function formatCount(
+  count: number,
+  noun: { singular: string; plural: string },
+): string {
+  return `${count} ${pluralize(count, noun.singular, noun.plural)}`;
+}
+
+/**
  * Format an ISO date as a localized short date (e.g. "Jan 5, 2026").
  * Returns the original string for unparseable input, or "—" when
  * no value is provided.
