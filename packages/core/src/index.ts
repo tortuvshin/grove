@@ -64,6 +64,7 @@ export type {
   DecisionVisibility,
   Resource,
   ProjectRecord,
+  EditorialTier,
   ResourceRecord,
   EntityRecord,
   IndexRecord,

@@ -1,0 +1,97 @@
+---
+/**
+ * EvidenceLedger — the cited claims behind a record.
+ *
+ * Every factual claim that can change, or that could cause harm if
+ * wrong, points at a direct source URL with the date it was checked
+ * and the person who checked it. Rendering the ledger is what makes
+ * a claim auditable rather than asserted.
+ *
+ * The table scrolls inside its own container so a long URL cannot
+ * force the whole page to scroll sideways on mobile.
+ *
+ * Renders nothing when there is no evidence.
+ */
+import type { ProjectRecord } from "@grove-dev/core";
+
+interface Props {
+  evidence: ProjectRecord["evidence"];
+  /** Heading id, so a TableOfContents can link to the section. */
+  id?: string;
+}
+
+const { evidence, id = "evidence" } = Astro.props;
+
+const SOURCE_LABEL: Record<string, string> = {
+  "repository-file": "Repository file",
+  documentation: "Documentation",
+  "release-notes": "Release notes",
+  "maintainer-issue": "Maintainer issue",
+  "store-listing": "Store listing",
+  "pricing-page": "Pricing page",
+  "independent-review": "Independent review",
+  "community-report": "Community report",
+};
+
+/** Shorten a URL to host + last path segment, keeping the full one in the title. */
+function label(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const last = parsed.pathname.split("/").filter(Boolean).pop();
+    return last ? `${parsed.host}/…/${last}` : parsed.host;
+  } catch {
+    return url;
+  }
+}
+---
+
+{evidence.length > 0 && (
+  <section class="grove-evidence mt-10" aria-labelledby={`${id}-heading`}>
+    <h2
+      id={`${id}-heading`}
+      class="m-0 text-lg font-semibold text-ink-900 dark:text-ink-50"
+    >
+      Evidence
+    </h2>
+    <p class="mt-1 mb-4 text-sm text-ink-600 dark:text-ink-300">
+      Each claim below links to the source it was checked against.
+    </p>
+
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-left text-sm">
+        <thead>
+          <tr class="border-b border-ink-200 dark:border-ink-800">
+            <th scope="col" class="py-2 pr-4 font-semibold text-ink-700 dark:text-ink-200">Claim</th>
+            <th scope="col" class="py-2 pr-4 font-semibold text-ink-700 dark:text-ink-200">Source</th>
+            <th scope="col" class="py-2 pr-4 font-semibold text-ink-700 dark:text-ink-200">Type</th>
+            <th scope="col" class="py-2 font-semibold text-ink-700 dark:text-ink-200">Checked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {evidence.map((entry) => (
+            <tr id={`evidence-${entry.id}`} class="border-b border-ink-100 dark:border-ink-900">
+              <td class="py-2 pr-4 align-top text-ink-800 dark:text-ink-100">{entry.claim}</td>
+              <td class="py-2 pr-4 align-top">
+                <a
+                  href={entry.url}
+                  title={entry.url}
+                  rel="noopener nofollow"
+                  class="break-words underline underline-offset-2"
+                >
+                  {label(entry.url)}
+                </a>
+              </td>
+              <td class="py-2 pr-4 align-top whitespace-nowrap text-ink-600 dark:text-ink-300">
+                {SOURCE_LABEL[entry.sourceType] ?? entry.sourceType}
+              </td>
+              <td class="py-2 align-top whitespace-nowrap text-ink-600 dark:text-ink-300">
+                <time datetime={entry.checkedAt}>{entry.checkedAt}</time>
+                <span class="block text-2xs text-ink-500 dark:text-ink-400">{entry.checkedBy}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+)}

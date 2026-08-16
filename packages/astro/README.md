@@ -161,7 +161,7 @@ import BaseLayout from '@grove-dev/astro/layouts/BaseLayout.astro';
 | --- | --- |
 | **Layout / shell** | `BaseLayout`, `Container`, `Header`, `Footer`, `SectionHeader`, `Seo`, `ThemeToggle` |
 | **Browse / search** | `DirectoryIndexClient`, `RefinePanel`, `FilterGroupMenu`, `FilterOptions`, `SmartLensTabs`, `Pagination`, `IndexRow`, `CardGrid` |
-| **Record detail** | `RecordHeader`, `RecordSection`, `RecordSidebar`, `EditorialSummary`, `MarkdownBody`, `TableOfContents`, `LanguageBreakdown`, `StackPlatformChips` |
+| **Record detail** | `RecordHeader`, `RecordSection`, `RecordSidebar`, `EditorialSummary`, `EditorialVerdict`, `EvidenceLedger`, `AlternativesTable`, `MarkdownBody`, `TableOfContents`, `LanguageBreakdown`, `StackPlatformChips` |
 | **Editorial evidence** | `EditorialVerdict`, `EvidenceLedger`, `AlternativesTable` — the review tier behind a record, the cited sources for its claims, and what to consider instead |
 | **Cards** | `ProjectCard`, `CardIcon`, `Icon` |
 | **Collections / taxonomy** | `CollectionCard`, `CollectionIndex`, `CollectionPage`, `CollectionRow`, `CollectionTeaser`, `OriginalCollection`, `CategoryGrid`, `StackGrid` |

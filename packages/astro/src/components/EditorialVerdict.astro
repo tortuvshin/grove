@@ -1,0 +1,120 @@
+---
+/**
+ * EditorialVerdict — publication tier, verdict, and review freshness.
+ *
+ * Sits above the record body, next to EditorialSummary: the summary
+ * says who an app suits, this says how much human work stands behind
+ * that judgement and when it was last true.
+ *
+ * The `candidate` and `catalogued` tiers render a metadata-only
+ * notice rather than a verdict. That is the point of the component —
+ * an unreviewed record must not read like a recommendation.
+ *
+ * Renders nothing only when there is genuinely nothing to say
+ * (no tier claim and no verdict).
+ */
+import type { EditorialTier } from "@grove-dev/core";
+import Badge from "../ui/Badge.astro";
+
+type BadgeVariant = "neutral" | "selected" | "success" | "warning" | "danger" | "info";
+
+interface Props {
+  tier: EditorialTier;
+  verdict?: string | undefined;
+  reviewedAt?: string | undefined;
+  reviewedBy?: string | undefined;
+  notFor?: string[];
+}
+
+const {
+  tier,
+  verdict,
+  reviewedAt,
+  reviewedBy,
+  notFor = [],
+} = Astro.props;
+
+const TIER_LABEL: Record<EditorialTier, string> = {
+  candidate: "Not reviewed",
+  catalogued: "Metadata only",
+  reviewed: "Reviewed",
+  featured: "Featured review",
+  retired: "Retired",
+};
+
+const TIER_VARIANT: Record<EditorialTier, BadgeVariant> = {
+  candidate: "neutral",
+  catalogued: "neutral",
+  reviewed: "success",
+  featured: "success",
+  retired: "warning",
+};
+
+const TIER_NOTE: Record<EditorialTier, string | null> = {
+  candidate: "This entry has not been reviewed. Its details come from the repository, not from an editor.",
+  catalogued: "Metadata only. Identity, license, and activity are verified; nothing on this page is an editorial recommendation.",
+  reviewed: null,
+  featured: null,
+  retired: "This project is no longer recommended. The page is kept for reference.",
+};
+
+const note = TIER_NOTE[tier];
+
+/** Days since review, for an honest freshness signal. */
+function daysSince(date: string): number | null {
+  const parsed = Date.parse(date);
+  if (Number.isNaN(parsed)) return null;
+  return Math.floor((Date.now() - parsed) / 86_400_000);
+}
+
+const age = reviewedAt ? daysSince(reviewedAt) : null;
+const ageLabel =
+  age === null ? null : age <= 0 ? "today" : age === 1 ? "1 day ago" : `${age} days ago`;
+
+const hasAnything = Boolean(verdict) || Boolean(note) || tier !== "candidate";
+---
+
+{hasAnything && (
+  <section
+    class="grove-verdict mb-6 rounded-[var(--radius-lg)] border border-ink-200 bg-card p-5 dark:border-ink-800"
+    aria-label="Editorial verdict"
+  >
+    <h2 class="sr-only">Editorial verdict</h2>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <Badge variant={TIER_VARIANT[tier]}>{TIER_LABEL[tier]}</Badge>
+      {reviewedAt && (
+        <span class="text-2xs text-ink-500 dark:text-ink-400">
+          Reviewed <time datetime={reviewedAt}>{reviewedAt}</time>
+          {ageLabel && ` · ${ageLabel}`}
+          {reviewedBy && ` · ${reviewedBy}`}
+        </span>
+      )}
+    </div>
+
+    {verdict && (
+      <p class="mt-3 mb-0 text-base leading-relaxed text-ink-800 dark:text-ink-100">
+        {verdict}
+      </p>
+    )}
+
+    {note && (
+      <p class="mt-3 mb-0 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        {note}
+      </p>
+    )}
+
+    {notFor.length > 0 && (
+      <div class="mt-4">
+        <h3 class="m-0 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          Not for
+        </h3>
+        <ul class="mt-2 m-0 flex list-none flex-col gap-1.5 p-0 text-sm text-ink-700 dark:text-ink-200">
+          {notFor.map((n) => (
+            <li class="leading-relaxed">{n}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </section>
+)}

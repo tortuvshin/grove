@@ -1,0 +1,80 @@
+---
+/**
+ * AlternativesTable — what to consider instead, and why.
+ *
+ * A recommendation is only useful next to its competition, so this
+ * renders the record's alternatives with an explicit relationship and
+ * a reason rather than a bare list of names. Entries that name a slug
+ * in this directory link to it; the rest link out or render as plain
+ * text.
+ *
+ * Renders nothing when there are no alternatives.
+ */
+import type { ProjectRecord } from "@grove-dev/core";
+
+interface Props {
+  alternatives: ProjectRecord["alternatives"];
+  /** Detail-page href builder for in-directory slugs. */
+  hrefFor?: ((slug: string) => string) | undefined;
+  id?: string;
+}
+
+const { alternatives, hrefFor, id = "alternatives" } = Astro.props;
+
+const RELATIONSHIP_LABEL: Record<string, string> = {
+  "open-source-alternative": "Open-source alternative",
+  "proprietary-alternative": "Proprietary alternative",
+  fork: "Fork",
+  predecessor: "Predecessor",
+  successor: "Successor",
+  complement: "Works alongside",
+};
+
+function hrefOf(alt: ProjectRecord["alternatives"][number]): string | null {
+  if (alt.slug && hrefFor) return hrefFor(alt.slug);
+  return alt.url ?? null;
+}
+---
+
+{alternatives.length > 0 && (
+  <section class="grove-alternatives mt-10" aria-labelledby={`${id}-heading`}>
+    <h2
+      id={`${id}-heading`}
+      class="m-0 text-lg font-semibold text-ink-900 dark:text-ink-50"
+    >
+      Alternatives
+    </h2>
+
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full border-collapse text-left text-sm">
+        <thead>
+          <tr class="border-b border-ink-200 dark:border-ink-800">
+            <th scope="col" class="py-2 pr-4 font-semibold text-ink-700 dark:text-ink-200">Alternative</th>
+            <th scope="col" class="py-2 pr-4 font-semibold text-ink-700 dark:text-ink-200">Relationship</th>
+            <th scope="col" class="py-2 font-semibold text-ink-700 dark:text-ink-200">Why it might suit you better</th>
+          </tr>
+        </thead>
+        <tbody>
+          {alternatives.map((alt) => {
+            const href = hrefOf(alt);
+            return (
+              <tr class="border-b border-ink-100 dark:border-ink-900">
+                <td class="py-2 pr-4 align-top font-medium text-ink-800 dark:text-ink-100">
+                  {href ? (
+                    <a href={href} class="underline underline-offset-2">{alt.name}</a>
+                  ) : (
+                    alt.name
+                  )}
+                </td>
+                <td class="py-2 pr-4 align-top whitespace-nowrap text-ink-600 dark:text-ink-300">
+                  {RELATIONSHIP_LABEL[alt.relationship] ?? alt.relationship}
+                </td>
+                <td class="py-2 align-top text-ink-700 dark:text-ink-200">{alt.note}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </section>
+)}

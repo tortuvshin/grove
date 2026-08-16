@@ -39,6 +39,9 @@ The validator runs in this order; the first failure stops the run:
 13. **LLMs** — `llms.txt` is well-formed, doesn't exceed 50KB, and links to all records.
 14. **Robots** — `robots.txt` is well-formed and contains a `Sitemap:` directive.
 15. **OG image** — `public/og-image.svg` exists, is 1200×630, and is parseable.
+16. **Unknown fields** — every key in a record is one the schema defines. Record schemas *strip* unknown keys, so an undefined field would otherwise be discarded silently between the YAML and `data/generated/`. This is a warning (`unknown_field`), not an error, so it never breaks an existing space — but it makes the data loss visible. Passthrough blocks (`links`, `github`, `distribution.channels`) accept extra keys by design and are exempt.
+17. **Editorial tiers** — a record claiming `editorial.tier: reviewed` carries `reviewedAt`, `reviewedBy`, `verdict`, at least one `bestFor`, one `caveats`, and one `evidence` entry. `featured` additionally requires a screenshot and an alternative. `reviewedAt` cannot be in the future, and `nextReviewAt` cannot precede it. These are errors: a tier is a public claim and must not outrun the data.
+18. **Evidence and alternatives** — evidence ids are unique within a record; an `alternatives[].slug` that names no existing record is a warning.
 
 If a `astro check` passes, the build is good to go.
 

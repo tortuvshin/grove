@@ -6,6 +6,8 @@ import {
   blueprintKind,
   decisionsFileSchema,
   healthFileSchema,
+  knownNestedKeys,
+  knownRecordKeys,
   recordsFileSchema,
   unwrapDecisions,
   unwrapHealth,
@@ -90,6 +92,8 @@ export async function validateProject(
   const slugs = new Set<string>();
   /** Slugs that have a github link and therefore need a health entry. */
   const slugsNeedingHealth = new Set<string>();
+  /** `alternatives[].slug` references, resolved once every slug is known. */
+  const alternativeSlugRefs: { from: string; to: string }[] = [];
   const taxonomyDir = config.paths.taxonomyDir ?? "data/taxonomy";
   const taxonomy = {
     categories: await taxonomyIds(
@@ -174,6 +178,34 @@ export async function validateProject(
       }
       continue;
     }
+    // Fields the schema does not define parse cleanly and are then
+    // dropped by Zod's default strip behaviour, so they never reach
+    // `data/generated/` or a template. Without this warning that data
+    // loss is completely silent — the record looks accepted.
+    const knownTop = knownRecordKeys(String(obj.kind));
+    for (const key of Object.keys(obj)) {
+      if (knownTop.has(key)) continue;
+      warnings.push({
+        code: "unknown_field",
+        message: `${fileSlug}: "${key}" is not defined in the record schema and will be discarded`,
+        severity: "warning",
+      });
+    }
+    for (const [block, value] of Object.entries(obj)) {
+      const knownNested = knownNestedKeys(block);
+      if (!knownNested || !value || typeof value !== "object" || Array.isArray(value)) {
+        continue;
+      }
+      for (const key of Object.keys(value as Record<string, unknown>)) {
+        if (knownNested.has(key)) continue;
+        warnings.push({
+          code: "unknown_field",
+          message: `${fileSlug}: "${block}.${key}" is not defined in the record schema and will be discarded`,
+          severity: "warning",
+        });
+      }
+    }
+
     // Override the filename-derived slug with the record's own slug
     // before downstream checks (links/health) consume it. Filename
     // and record.slug must agree; mismatch is itself a warning.
@@ -213,6 +245,82 @@ export async function validateProject(
         );
       }
     }
+    // Tier gates. A tier is a public claim about how much human work
+    // stands behind a record, so it must not outrun the data: these
+    // are errors, not warnings.
+    if (parsed.kind === "project") {
+      const editorial = parsed.editorial;
+      const tier = editorial.tier;
+      const failTier = (message: string) => {
+        errors.push({
+          code: "tier_requirements_unmet",
+          message: `${fileSlug}: ${message}`,
+          severity: "error",
+        });
+      };
+      if (tier === "reviewed" || tier === "featured") {
+        if (!editorial.reviewedAt) {
+          failTier(`tier "${tier}" requires editorial.reviewedAt`);
+        }
+        if (!editorial.reviewedBy) {
+          failTier(`tier "${tier}" requires editorial.reviewedBy`);
+        }
+        if (!editorial.verdict) {
+          failTier(`tier "${tier}" requires editorial.verdict`);
+        }
+        if (parsed.bestFor.length === 0) {
+          failTier(`tier "${tier}" requires at least one bestFor entry`);
+        }
+        if (parsed.caveats.length === 0) {
+          failTier(`tier "${tier}" requires at least one caveat`);
+        }
+        if (parsed.evidence.length === 0) {
+          failTier(`tier "${tier}" requires at least one evidence entry`);
+        }
+      }
+      if (tier === "featured") {
+        if (parsed.screenshots.length === 0) {
+          failTier('tier "featured" requires at least one screenshot');
+        }
+        if (parsed.alternatives.length === 0) {
+          failTier('tier "featured" requires at least one alternative');
+        }
+      }
+      // A review cannot have happened in the future, and a next review
+      // cannot fall before the review it follows.
+      const reviewedAt = editorial.reviewedAt;
+      if (reviewedAt && isFutureDate(reviewedAt)) {
+        failTier(`editorial.reviewedAt "${reviewedAt}" is in the future`);
+      }
+      if (
+        reviewedAt &&
+        editorial.nextReviewAt &&
+        editorial.nextReviewAt < reviewedAt
+      ) {
+        failTier(
+          `editorial.nextReviewAt "${editorial.nextReviewAt}" precedes reviewedAt "${reviewedAt}"`,
+        );
+      }
+      // Evidence ids must be unique so markdown bodies can reference
+      // a claim unambiguously.
+      const seenEvidence = new Set<string>();
+      for (const entry of parsed.evidence) {
+        if (seenEvidence.has(entry.id)) {
+          errors.push({
+            code: "duplicate_evidence_id",
+            message: `${fileSlug}: duplicate evidence id "${entry.id}"`,
+            severity: "error",
+          });
+        }
+        seenEvidence.add(entry.id);
+      }
+      // An alternative that names a record by slug must point at one
+      // that exists; cross-checked after every file is read.
+      for (const alt of parsed.alternatives) {
+        if (alt.slug) alternativeSlugRefs.push({ from: fileSlug, to: alt.slug });
+      }
+    }
+
     // Records that link to a GitHub repo need a matching health entry
     // so list/detail UIs can render staleness signals. Track here and
     // cross-check against health.yml below.
@@ -221,6 +329,15 @@ export async function validateProject(
     if (repoUrl || linksGithub) {
       slugsNeedingHealth.add(fileSlug);
     }
+  }
+
+  for (const ref of alternativeSlugRefs) {
+    if (slugs.has(ref.to)) continue;
+    warnings.push({
+      code: "unknown_alternative_record",
+      message: `${ref.from}: alternatives references unknown record "${ref.to}"`,
+      severity: "warning",
+    });
   }
 
   if (await exists(resolve(process.cwd(), config.paths.health))) {
@@ -281,6 +398,20 @@ export async function validateProject(
   }
 
   return finalize(errors, warnings, opts.strict);
+}
+
+/**
+ * True when `value` parses as a date after today. Unparseable strings
+ * are not treated as future — the schema only requires a non-empty
+ * string, and a malformed date is a separate concern from a dishonest
+ * one.
+ */
+function isFutureDate(value: string): boolean {
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return false;
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  return parsed > today.getTime();
 }
 
 function finalize(

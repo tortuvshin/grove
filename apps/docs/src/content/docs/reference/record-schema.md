@@ -192,9 +192,66 @@ health:
 | `bestFor` | `string[]` | Short bullets on what the project is good for |
 | `whyListed` | `string[]` | Curator note: why this record is included |
 | `caveats` | `string[]` | Curator note: things to be aware of |
+| `editorial` | object | Publication tier and review metadata. See [The `editorial` block](#the-editorial-block) |
+| `evidence` | array | Cited claims, each with a direct source URL and check date |
+| `alternatives` | array | What to consider instead, and why |
 | `distribution.channels` | array | Where the project ships: `docker`, `npm`, `pypi`, `website`, etc. |
 | `github.repository` | object | Live metadata from `grove sync github` (do not edit by hand) |
 | `health` | object | Auto-derived + curator-overridden health block |
+
+### The `editorial` block
+
+Says how much human work stands behind a record, so an unreviewed entry is
+never presented as a recommendation.
+
+| Field | Type | Description |
+|---|---|---|
+| `tier` | enum | `candidate` (default) \| `catalogued` \| `reviewed` \| `featured` \| `retired` |
+| `reviewedAt` | `string` | Date of the last human review |
+| `reviewedBy` | `string` | Who reviewed it |
+| `nextReviewAt` | `string` | When it falls due again |
+| `verdict` | `string` | One-line "pick this / skip this" conclusion |
+| `notFor` | `string[]` | Audiences this project does *not* suit |
+
+The default is deliberately `candidate`: a record that says nothing about its
+own review state has not been reviewed.
+
+`reviewed` and `featured` are gated by validation — see
+[Validation](/automation/validation/). A tier cannot claim more than the
+record's data supports.
+
+### The `evidence` block
+
+```yaml
+evidence:
+  - id: license
+    claim: The repository is AGPL-3.0.
+    url: https://github.com/owner/repo/blob/<sha>/LICENSE
+    sourceType: repository-file
+    checkedAt: "2026-08-16"
+    checkedBy: "@curator"
+```
+
+`sourceType` is one of `repository-file`, `documentation`, `release-notes`,
+`maintainer-issue`, `store-listing`, `pricing-page`, `independent-review`,
+`community-report`. Prefer a commit-pinned permalink over a branch path: a
+branch path silently changes meaning when the file changes. Ids must be unique
+within a record so a markdown body can cite a claim unambiguously.
+
+### The `alternatives` block
+
+```yaml
+alternatives:
+  - slug: other-record        # optional; links within this directory
+    name: Other Project
+    url: https://example.com  # used when there is no in-directory slug
+    relationship: open-source-alternative
+    note: Simpler to self-host, but no mobile client.
+```
+
+`relationship` is one of `open-source-alternative`, `proprietary-alternative`,
+`fork`, `predecessor`, `successor`, `complement`. A `slug` that does not match
+a record in the directory is a warning.
 
 ### The `health` block
 

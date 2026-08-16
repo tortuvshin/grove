@@ -295,6 +295,82 @@ const curationBlockSchema = z
   .default({ reviewed: false, labels: [], lenses: [] });
 
 // ──────────────────────────────────────────────────────────────────────
+// Editorial: publication tier, evidence, alternatives
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * Publication tier. The default is deliberately `candidate`: a record
+ * that says nothing about its own review state has not been reviewed,
+ * and presenting imported metadata as human research is the failure
+ * this field exists to prevent.
+ */
+export const editorialTierSchema = z.enum([
+  "candidate",
+  "catalogued",
+  "reviewed",
+  "featured",
+  "retired",
+]);
+
+export type EditorialTier = z.infer<typeof editorialTierSchema>;
+
+export const evidenceSourceTypeSchema = z.enum([
+  "repository-file",
+  "documentation",
+  "release-notes",
+  "maintainer-issue",
+  "store-listing",
+  "pricing-page",
+  "independent-review",
+  "community-report",
+]);
+
+/**
+ * A single cited claim. `url` should be a permalink pinned to a commit
+ * where one exists — a branch path silently changes meaning when the
+ * file changes.
+ */
+export const evidenceEntrySchema = z.object({
+  id: z.string().min(1),
+  claim: z.string().min(1),
+  url: z.string().url(),
+  sourceType: evidenceSourceTypeSchema,
+  checkedAt: z.string().min(1),
+  checkedBy: z.string().min(1),
+});
+
+/** How an alternative relates to this record, in the reader's terms. */
+export const alternativeRelationshipSchema = z.enum([
+  "open-source-alternative",
+  "proprietary-alternative",
+  "fork",
+  "predecessor",
+  "successor",
+  "complement",
+]);
+
+export const alternativeSchema = z.object({
+  /** Slug of another record in this directory, when one exists. */
+  slug: z.string().optional(),
+  name: z.string().min(1),
+  url: z.string().url().optional(),
+  relationship: alternativeRelationshipSchema,
+  note: z.string().min(1),
+});
+
+const editorialBlockSchema = z
+  .object({
+    tier: editorialTierSchema.default("candidate"),
+    reviewedAt: z.string().optional(),
+    reviewedBy: z.string().optional(),
+    nextReviewAt: z.string().optional(),
+    /** One-line "pick this / skip this" conclusion. */
+    verdict: z.string().optional(),
+    notFor: z.array(z.string()).default([]),
+  })
+  .default({ tier: "candidate", notFor: [] });
+
+// ──────────────────────────────────────────────────────────────────────
 // Resource base (shared by all blueprints)
 // ──────────────────────────────────────────────────────────────────────
 
@@ -390,6 +466,16 @@ export const projectRecordSchema = resourceBaseSchema.extend({
   bestFor: z.array(z.string()).default([]),
   whyListed: z.array(z.string()).default([]),
   caveats: z.array(z.string()).default([]),
+  /**
+   * Publication tier and review metadata. Gated by `validateProject`:
+   * `reviewed` and `featured` require the editorial fields to actually
+   * be filled in, so a tier cannot claim more than the record supports.
+   */
+  editorial: editorialBlockSchema,
+  /** Cited claims. See `evidenceEntrySchema`. */
+  evidence: z.array(evidenceEntrySchema).default([]),
+  /** What to consider instead, and why. */
+  alternatives: z.array(alternativeSchema).default([]),
   distribution: z
     .object({
       channels: z
@@ -466,6 +552,50 @@ export const resourceSchema = z.discriminatedUnion("kind", [
   resourceRecordSchema,
   entityRecordSchema,
 ]);
+
+/**
+ * Record schema per `kind`, used to answer "does this schema define
+ * this field?" without duplicating the field list.
+ */
+export const recordSchemaByKind = {
+  project: projectRecordSchema,
+  resource: resourceRecordSchema,
+  entity: entityRecordSchema,
+} as const;
+
+/**
+ * Nested blocks that are strict-strip and human-edited, so a typo in
+ * one is silently discarded exactly like an unknown top-level field.
+ * Passthrough blocks (`links`, `github`, `distribution.channels`)
+ * accept extra keys by design and are deliberately absent.
+ */
+const nestedBlockSchemas: Record<string, z.ZodObject<z.ZodRawShape>> = {
+  curation: curationBlockSchema.def.innerType as z.ZodObject<z.ZodRawShape>,
+  editorial: editorialBlockSchema.def.innerType as z.ZodObject<z.ZodRawShape>,
+  health: healthBlockSchema,
+  scores: scoreSchema,
+};
+
+/**
+ * Top-level keys the schema defines for a record `kind`.
+ *
+ * Zod objects here use the default *strip* behaviour, so a field the
+ * schema does not define parses cleanly and is then dropped before the
+ * build writes `data/generated/`. Callers use this to warn instead of
+ * losing the data silently.
+ */
+export function knownRecordKeys(kind: string): Set<string> {
+  const schema =
+    recordSchemaByKind[kind as keyof typeof recordSchemaByKind] ??
+    projectRecordSchema;
+  return new Set(Object.keys(schema.shape));
+}
+
+/** Keys defined by a nested strict-strip block, or `null` if unchecked. */
+export function knownNestedKeys(block: string): Set<string> | null {
+  const schema = nestedBlockSchemas[block];
+  return schema ? new Set(Object.keys(schema.shape)) : null;
+}
 
 export type Resource = z.infer<typeof resourceSchema>;
 
@@ -946,6 +1076,9 @@ export interface IndexProjectRecord extends IndexBase {
   bestFor: string[];
   whyListed: string[];
   caveats: string[];
+  editorial: ProjectRecord["editorial"];
+  evidence: ProjectRecord["evidence"];
+  alternatives: ProjectRecord["alternatives"];
   health: ProjectRecord["health"];
   /** Effective visibility — decisions.yml overrides win over health. */
   visibility: DecisionVisibility;
@@ -1036,6 +1169,9 @@ export function toIndexRecord(record: Resource): IndexRecord {
       bestFor: r.bestFor,
       whyListed: r.whyListed,
       caveats: r.caveats,
+      editorial: r.editorial,
+      evidence: r.evidence ?? [],
+      alternatives: r.alternatives ?? [],
       // Health surfaced alongside the record so list/detail UIs can
       // show staleness/curation tier without a second lookup.
       health: r.health,

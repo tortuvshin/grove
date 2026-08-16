@@ -184,6 +184,321 @@ describe("validateProject — happy path", () => {
   });
 });
 
+describe("validateProject — editorial tier gates", () => {
+  // A tier is a public claim about how much human work stands behind a
+  // record. These are errors rather than warnings so a record cannot
+  // ship claiming "reviewed" while carrying nothing but imported
+  // metadata.
+  const REVIEWED_OK = [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+    "bestFor: [developers evaluating self-hosted photo backup]",
+    "caveats: [requires Postgres and Redis to self-host]",
+    "editorial:",
+    "  tier: reviewed",
+    "  reviewedAt: '2020-01-01'",
+    "  reviewedBy: '@curator'",
+    "  verdict: Pick it if you can run containers.",
+    "evidence:",
+    "  - id: license",
+    "    claim: Licensed AGPL-3.0",
+    "    url: https://github.com/o/r/blob/abc123/LICENSE",
+    "    sourceType: repository-file",
+    "    checkedAt: '2020-01-01'",
+    "    checkedBy: '@curator'",
+  ];
+
+  it("accepts a reviewed record that carries the required editorial data", async () => {
+    await withTmpCwd("grove-tier-ok-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        REVIEWED_OK.join("\n"),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.errors).toEqual([]);
+      expect(result.ok).toBe(true);
+    });
+  });
+
+  it("defaults to the candidate tier, which requires nothing", async () => {
+    await withTmpCwd("grove-tier-default-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+        ].join("\n"),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+  });
+
+  it("rejects a reviewed tier with no evidence, verdict, bestFor, or caveats", async () => {
+    await withTmpCwd("grove-tier-bare-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+          "editorial: { tier: reviewed }",
+        ].join("\n"),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      const messages = result.errors
+        .filter((e) => e.code === "tier_requirements_unmet")
+        .map((e) => e.message)
+        .join(" | ");
+      expect(messages).toContain("reviewedAt");
+      expect(messages).toContain("reviewedBy");
+      expect(messages).toContain("verdict");
+      expect(messages).toContain("bestFor");
+      expect(messages).toContain("caveat");
+      expect(messages).toContain("evidence");
+    });
+  });
+
+  it("requires screenshots and alternatives for the featured tier only", async () => {
+    await withTmpCwd("grove-tier-featured-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        REVIEWED_OK.map((line) =>
+          line === "    \"  tier: reviewed\"," ? line : line,
+        )
+          .join("\n")
+          .replace("tier: reviewed", "tier: featured"),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      const messages = result.errors
+        .filter((e) => e.code === "tier_requirements_unmet")
+        .map((e) => e.message)
+        .join(" | ");
+      expect(messages).toContain("screenshot");
+      expect(messages).toContain("alternative");
+    });
+  });
+
+  it("rejects a reviewedAt in the future", async () => {
+    await withTmpCwd("grove-tier-future-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      const future = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+        .toISOString()
+        .slice(0, 10);
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        REVIEWED_OK.join("\n").replace("'2020-01-01'", `'${future}'`),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      expect(
+        result.errors.some((e) => e.message.includes("is in the future")),
+      ).toBe(true);
+    });
+  });
+
+  it("rejects a nextReviewAt that precedes reviewedAt", async () => {
+    await withTmpCwd("grove-tier-order-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        REVIEWED_OK.join("\n").replace(
+          "  verdict:",
+          "  nextReviewAt: '2019-01-01'\n  verdict:",
+        ),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      expect(result.errors.some((e) => e.message.includes("precedes"))).toBe(
+        true,
+      );
+    });
+  });
+
+  it("rejects duplicate evidence ids", async () => {
+    await withTmpCwd("grove-tier-dupe-evidence-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          ...REVIEWED_OK,
+          "  - id: license",
+          "    claim: Licensed AGPL-3.0 (duplicate id)",
+          "    url: https://github.com/o/r/blob/abc123/COPYING",
+          "    sourceType: repository-file",
+          "    checkedAt: '2020-01-01'",
+          "    checkedBy: '@curator'",
+        ].join("\n"),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      expect(
+        result.errors.some((e) => e.code === "duplicate_evidence_id"),
+      ).toBe(true);
+    });
+  });
+
+  it("warns when alternatives reference a slug that is not in the directory", async () => {
+    await withTmpCwd("grove-tier-alt-ref-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+          "alternatives:",
+          "  - slug: does-not-exist",
+          "    name: Ghost",
+          "    relationship: open-source-alternative",
+          "    note: not in this directory",
+        ].join("\n"),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(true); // a warning, not an error
+      expect(
+        result.warnings.some((w) => w.code === "unknown_alternative_record"),
+      ).toBe(true);
+    });
+  });
+});
+
+describe("validateProject — unknown fields (silent strip)", () => {
+  // Record schemas are plain z.object(), so Zod's default *strip*
+  // behaviour applies: an undefined field parses cleanly and is then
+  // dropped before the build writes data/generated/. Without a
+  // diagnostic that data loss is invisible — the record looks accepted
+  // and the field simply never appears on the site.
+  it("warns for an unknown top-level field instead of accepting it silently", async () => {
+    await withTmpCwd("grove-validate-unknown-top-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+          "verdict: this field does not exist in the schema",
+        ].join("\n"),
+      );
+
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(true); // a warning, not an error
+      const unknown = result.warnings.filter((w) => w.code === "unknown_field");
+      expect(unknown).toHaveLength(1);
+      expect(unknown[0]?.message).toContain("verdict");
+    });
+  });
+
+  it("warns for an unknown key inside a strict-strip nested block", async () => {
+    await withTmpCwd("grove-validate-unknown-nested-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [], tier: reviewed }",
+          "scores: {}",
+        ].join("\n"),
+      );
+
+      const result = await validateProject(makeConfig());
+      const unknown = result.warnings.filter((w) => w.code === "unknown_field");
+      expect(unknown).toHaveLength(1);
+      expect(unknown[0]?.message).toContain("curation.tier");
+    });
+  });
+
+  it("does not warn for extra keys in passthrough blocks", async () => {
+    await withTmpCwd("grove-validate-passthrough-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      // `links` has a URL catchall and `github` is passthrough, so
+      // extra keys there are preserved by design, not discarded.
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: { matrix: https://example.com/room }",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+        ].join("\n"),
+      );
+
+      const result = await validateProject(makeConfig());
+      expect(result.warnings.filter((w) => w.code === "unknown_field")).toEqual(
+        [],
+      );
+    });
+  });
+
+  it("strict mode: an unknown field fails validation", async () => {
+    await withTmpCwd("grove-validate-unknown-strict-", async (cwd) => {
+      await mkdir(join(cwd, "data", "records"), { recursive: true });
+      await writeFile(
+        join(cwd, "data", "records", "demo.yml"),
+        [
+          "kind: project",
+          "slug: demo",
+          "name: Demo",
+          "description: a demo",
+          "category: tools",
+          "links: {}",
+          "curation: { reviewed: false, labels: [], lenses: [] }",
+          "scores: {}",
+          "provenance: []",
+        ].join("\n"),
+      );
+
+      const result = await validateProject(makeConfig(), { strict: true });
+      expect(result.ok).toBe(false);
+      expect(result.warnings.some((w) => w.code === "unknown_field")).toBe(true);
+    });
+  });
+});
+
 describe("validateProject — silent try/catch at line 70 (missing records dir)", () => {
   it("returns a missing_records_dir error, NOT a throw, when recordsDir does not exist", async () => {
     await withTmpCwd("grove-validate-missing-", async () => {
