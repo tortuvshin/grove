@@ -1,0 +1,32 @@
+packages/core/README.md
+  s_aa41ef7963b41a::t_d43482622dad51 67
+apps/docs/src/content/docs/roadmap.md
+  s_aa41ef7963b41a::t_b9257d329a9b55 136
+packages/core/src/audit.test.ts
+  s_aa41ef7963b41a::t_dd087c43bbf26d 28
+packages/cli/README.md
+  s_aa41ef7963b41a::t_5a477143394bc6 44
+packages/cli/src/audit.ts
+  s_aa41ef7963b41a::t_35fa414f87cb6e 104
+  s_aa41ef7963b41a::t_6790ee929f4fcc 98
+packages/core/src/audit.ts
+  s_aa41ef7963b41a::t_24c731db4359dc 48-66,72
+packages/core/src/schema.ts
+  s_aa41ef7963b41a::t_97da16ea4d9ddd 768
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "45f6f1c6822387083a8fc63e25050a4af98fa65f",
+  "prompts": {},
+  "sessions": {
+    "s_aa41ef7963b41a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d86408d2-cd3a-42ec-ab1a-ab8d97b578e6",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
