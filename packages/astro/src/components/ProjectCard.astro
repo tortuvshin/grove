@@ -10,11 +10,12 @@
  *   - Default mode: the whole card is one clickable `<a>` (cursor:
  *     pointer, subtle border + surface lift on hover, no more than
  *     1–2px vertical motion).
- *   - When `secondaryLinks` are passed the root becomes an `<article>`
- *     with a stretched title link, because nesting `<a>` inside `<a>`
- *     is invalid HTML. Secondary links sit above the stretched link
+ *   - When the record has a repository the root becomes an
+ *     `<article>` with a stretched title link, because nesting `<a>`
+ *     inside `<a>` is invalid HTML. The `owner/repo` line is a real
+ *     link to the repository and sits above the stretched overlay
  *     (`relative z-10`).
- *   - App icon top-left (48px), app name + repository owner/repo,
+ *   - App icon top-left (48px), app name + clickable owner/repo,
  *     two-line description with reserved vertical space.
  *   - Footer row: stack logos on the left, stars and last-updated on
  *     the right, navigation arrow anchored bottom-right.
@@ -23,10 +24,10 @@
  * curated badge, a license tag, a `category · status` line and
  * labelled chip rows, so the same record rendered differently
  * depending on where a visitor found it. Those flags are now
- * deprecated no-ops. Platform support is likewise off the card — it is
- * reference detail and belongs on the record page (`RecordSidebar`).
- * `secondaryLinks` remains, because a footer link is navigation
- * rather than metadata.
+ * deprecated no-ops, as is `secondaryLinks` — the repository is
+ * reached through the `owner/repo` line rather than a separate footer
+ * button. Platform support is likewise off the card: it is reference
+ * detail and belongs on the record page (`RecordSidebar`).
  *
  * Data can come from a full `record` or from explicit props (adapters
  * for shapes like `CollectionEntry` pass fields directly); explicit
@@ -100,6 +101,11 @@ interface Props {
   /** @deprecated Ignored — see `showCurated`. */
   labelledChips?: boolean;
   /** Footer links; presence switches the root to `<article>` mode. */
+  /**
+   * @deprecated Ignored. The repository is reached by clicking the
+   * `owner/repo` line under the title, so cards no longer carry a
+   * separate footer link button.
+   */
   secondaryLinks?: SecondaryLink[];
   /** Eager-load the avatar (above-the-fold rows). */
   eager?: boolean;
@@ -120,7 +126,6 @@ const {
   stars: starsProp,
   pushedAt: pushedAtProp,
   stack: stackProp,
-  secondaryLinks = [],
   eager = false,
   event,
   eventSource,
@@ -172,9 +177,10 @@ const updatedLabel = formatRelative(pushedAt);
 const hasStars = starsLabel !== null && typeof stars === "number" && stars > 0;
 const hasUpdated = Boolean(pushedAt);
 
-// `<a>`-in-`<a>` is invalid HTML, so cards with secondary links render
-// as an `<article>` whose title link is stretched over the card.
-const isArticle = secondaryLinks.length > 0;
+// `<a>`-in-`<a>` is invalid HTML, and the `owner/repo` line is its own
+// link to the repository — so any card that shows one renders as an
+// `<article>` whose title link is stretched over the whole card.
+const isArticle = Boolean(repoHref && owner && repo);
 const Root = isArticle ? "article" : "a";
 const rootAttrs = isArticle ? {} : { href, "aria-label": `Open ${name}` };
 
@@ -234,7 +240,22 @@ const hasStacks = visibleStacks.length > 0;
       </h3>
       {owner && repo && (
         <p class="m-0 truncate font-mono text-[13px] text-ink-500 dark:text-ink-400">
-          {owner}<span class="opacity-60">/</span>{repo}
+          {repoHref ? (
+            <a
+              href={repoHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`${owner}/${repo} on GitHub`}
+              data-event="external_repo_click"
+              data-event-source="project_card_repo"
+              data-event-item={slug}
+              class="relative z-10 text-inherit no-underline transition-colors hover:text-ink-900 hover:underline dark:hover:text-ink-100"
+            >
+              {owner}<span class="opacity-60">/</span>{repo}
+            </a>
+          ) : (
+            <Fragment>{owner}<span class="opacity-60">/</span>{repo}</Fragment>
+          )}
         </p>
       )}
     </div>
@@ -247,22 +268,9 @@ const hasStacks = visibleStacks.length > 0;
     {description}
   </p>
 
-  {/* Footer: links · stack logos · stars/updated · arrow */}
+  {/* Footer: stack logos · stars/updated · arrow */}
   <footer class="mt-auto flex items-center justify-between gap-3 text-[12px] sm:text-[13px]">
     <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-ink-500 dark:text-ink-400">
-      {secondaryLinks.map((link) => (
-        <a
-          href={link.href}
-          {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-          data-event={link.event}
-          data-event-source={link.eventSource}
-          data-event-item={link.event ? slug : undefined}
-          class="relative z-10 inline-flex items-center gap-1 font-medium text-ink-700 no-underline transition-colors hover:text-ink-900 dark:text-ink-300 dark:hover:text-ink-100"
-        >
-          {link.label}
-          {link.external && <CardIcon name="external" />}
-        </a>
-      ))}
       {hasStacks && (
         <div class="flex items-center gap-2">
           {visibleStacks.map((stack) => (

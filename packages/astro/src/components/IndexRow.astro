@@ -6,8 +6,9 @@
  * `showChips`, `eager`) so consumer pages copied from earlier versions
  * keep working. The card itself is the same on every surface: a
  * record must not look like a different record depending on whether
- * you found it on the home page or in the browse list. The only thing
- * this adapter adds is the GitHub footer link.
+ * you found it on the home page or in the browse list. The repository
+ * is reached through the card's `owner/repo` line, so this adapter
+ * adds nothing to the card at all.
  */
 import type { IndexRecord } from "@grove-dev/core";
 import ProjectCard from "./ProjectCard.astro";
@@ -26,26 +27,11 @@ interface Props {
 
 const { record, detailHref, eager = false, class: className = "" } = Astro.props;
 
-const repoHref =
-  record.kind === "project" ? (record.repoUrl ?? record.links.github) : record.links.github;
-
-const secondaryLinks = repoHref
-  ? [
-      {
-        label: "GitHub",
-        href: repoHref,
-        external: true,
-        event: "external_repo_click",
-        eventSource: "index_row_github",
-      },
-    ]
-  : [];
 ---
 
 <ProjectCard
   record={record}
   href={detailHref}
-  secondaryLinks={secondaryLinks}
   eager={eager}
   class={className}
 />

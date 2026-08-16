@@ -20,9 +20,8 @@
  *  - `class` — extra class on the card root
  *  - `eager` — bypass lazy loading for above-the-fold avatars
  *
- * Footer links:
- *  - "View repo" — when `entry.repoHref` is set
- *  - "Visit site" — when `entry.homepageHref` is set
+ * The repository is reached through the card's `owner/repo` line;
+ * there is no separate footer link button.
  *
  * Analytics: emits `data-event="collection_item_click"` /
  * `data-event-source="collection_row"` on the card root and per-link
@@ -65,30 +64,6 @@ const detailHref =
 
 const repoHref = entry.repoHref;
 const homepageHref = entry.homepageHref;
-const secondaryLinks = [
-  ...(repoHref
-    ? [
-        {
-          label: "View repo",
-          href: repoHref,
-          external: true,
-          event: "external_repo_click",
-          eventSource: "collection_row_view_repo",
-        },
-      ]
-    : []),
-  ...(homepageHref
-    ? [
-        {
-          label: "Visit site",
-          href: homepageHref,
-          external: true,
-          event: "external_link_click",
-          eventSource: "collection_row_visit_site",
-        },
-      ]
-    : []),
-];
 ---
 
 <ProjectCard
@@ -100,7 +75,6 @@ const secondaryLinks = [
   stars={showMeta ? entry.stars : undefined}
   pushedAt={showMeta ? entry.pushedAt : undefined}
   stack={entry.stack}
-  secondaryLinks={secondaryLinks}
   eager={eager}
   event="collection_item_click"
   eventSource="collection_row"
