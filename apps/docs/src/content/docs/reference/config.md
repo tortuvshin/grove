@@ -151,6 +151,8 @@ Which blueprint this space follows. Determines the record kind
 | `description` | `string` | `undefined` | Longer description. Used for `<meta name="description">` and `llms.txt`. |
 | `url` | `string` (URL) | `undefined` | The canonical site URL. Used in `sitemap.xml` and OG tags. |
 | `repoUrl` | `string` (URL) | `undefined` | The space's GitHub repo URL. Used in the "view source" link and PR templates. |
+| `locale` | `string` (BCP-47) | `"en"` | Site language. Drives `<html lang>`, `og:locale`, and JSON-LD `inLanguage`. |
+| `twitter` | `string` | `undefined` | Twitter/X handle (e.g. `@myproject`). Emitted as `twitter:site` on every page. |
 
 ### `nav`
 
