@@ -32,34 +32,33 @@ const hasItems = items.length > 1;
 ---
 
 {hasItems && (
-  <details class="grove-toc rounded-[var(--radius-lg)] border border-ink-200 bg-card open:bg-card dark:border-ink-800">
-    <summary class="cursor-pointer list-none px-4 py-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:cursor-default lg:pointer-events-none">
+  <details class="grove-toc lg:border-0">
+    <summary class="cursor-pointer list-none pb-3 text-2xs font-semibold uppercase tracking-wider text-ink-500 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:cursor-default lg:pointer-events-none lg:pb-2">
       <span class="inline-flex items-center gap-1.5">
         <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor" class="grove-toc-chevron transition-transform lg:hidden">
           <path d="M6 4l4 4-4 4V4z" />
         </svg>
         {label}
-        <span class="ml-1 rounded-full bg-ink-100 px-1.5 py-0.5 text-[10px] font-medium text-ink-500 dark:bg-ink-800 dark:text-ink-300">
-          {items.length}
-        </span>
       </span>
     </summary>
     {/* Full list, no inner scroll — the TOC lives in the right rail
-        and every entry stays visible. h3 entries indent under their
-        h2 parents. */}
-    <ol class="grove-toc-list mt-1 list-none border-t border-ink-200 p-2 text-sm dark:border-ink-800 lg:border-t-0 lg:p-0">
+        and every entry stays visible. h3 entries indent further under
+        their h2 parents; the active state is a left-rail indicator +
+        text-color emphasis set by the script + styles.css. */}
+    <ol class="grove-toc-list list-none py-1 text-sm lg:py-0">
       {items.map((entry) => (
         <li
           class:list={[
-            "grove-toc-item border-b border-ink-100 last:border-b-0 dark:border-ink-800 lg:border-b-0 lg:py-0.5",
-            entry.depth >= 3 && "ml-4 lg:ml-3",
+            "grove-toc-item relative",
+            entry.depth >= 3 && "grove-toc-item--h3",
           ]}
         >
           <a
             href={`#${entry.id}`}
             class:list={[
-              "grove-toc-link block truncate px-3 py-2 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100 lg:px-2 lg:py-1",
-              entry.depth >= 3 && "text-[0.8125rem]",
+              "grove-toc-link block py-1.5 text-ink-500 no-underline transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100",
+              entry.depth >= 2 && "pl-3 lg:pl-4",
+              entry.depth >= 3 && "pl-6 text-[0.8125rem] lg:pl-7",
             ]}
             data-toc-link={entry.id}
           >

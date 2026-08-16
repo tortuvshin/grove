@@ -950,15 +950,25 @@
     display: block;
   }
 }
-.grove-toc-item { padding: 0; }
+/* Active item: text-color + a left-rail accent on the link's
+ * leading edge. A full pill background reads as a button, not a
+ * nav indicator, so it is reserved for hover; the rail stays put
+ * while the visitor moves between sections. */
+.grove-toc-item > .grove-toc-link {
+  position: relative;
+}
+.grove-toc-link {
+  border-left: 2px solid transparent;
+}
+.grove-toc-item--h3 > .grove-toc-link {
+  border-left-style: dashed;
+}
 .grove-toc-link[data-toc-active] {
-  background-color: var(--color-ink-100, #f0f0f0);
   color: var(--color-ink-900, #1a1a1a);
+  border-left-color: currentColor;
   font-weight: 600;
-  border-radius: 0.375rem;
 }
 .dark .grove-toc-link[data-toc-active] {
-  background-color: var(--color-ink-800, #2a2a2a);
   color: var(--color-ink-100, #f0f0f0);
 }
 
