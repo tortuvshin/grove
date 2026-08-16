@@ -1,0 +1,38 @@
+packages/cli/src/audit.ts
+  s_aa41ef7963b41a::t_492b10665da0a8 96-105
+packages/core/src/audit.ts
+  s_aa41ef7963b41a::t_c19d219bb4fd2e 48-58,60-61
+pnpm-workspace.yaml
+  s_aa41ef7963b41a::t_cb1fe33ec61294 9-12,16-17
+.github/workflows/audit.yml
+  s_aa41ef7963b41a::t_2aa98d7e11392b 64-73,77
+.github/workflows/ci.yml
+  s_aa41ef7963b41a::t_31e8e70fdfd3ed 145-151
+.github/workflows/lighthouse-audit.yml
+  s_aa41ef7963b41a::t_ea512c5488ea74 108-115
+  s_aa41ef7963b41a::t_83c13db4914556 98-102
+  s_aa41ef7963b41a::t_08e9a0b60937f6 74-75,77-80,84,89-91
+  s_aa41ef7963b41a::t_abf1294ea362f7 68-73,76,81-83,85-88,92
+  s_aa41ef7963b41a::t_91bbddcae59057 104-107
+tests/integration/grove-audit.test.ts
+  s_aa41ef7963b41a::t_63c5349e047281 43-49,52
+  s_aa41ef7963b41a::t_501bc874040825 65
+packages/core/src/audit.test.ts
+  s_aa41ef7963b41a::t_8e65c1e2dd48d6 21,23,27-29,51,53,56,59-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1b53b4b0179d0a9a60f32b821c8aa1780aad98f6",
+  "prompts": {},
+  "sessions": {
+    "s_aa41ef7963b41a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d86408d2-cd3a-42ec-ab1a-ab8d97b578e6",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
