@@ -1,0 +1,19 @@
+packages/cli/README.md
+  s_36968c37e13577::t_6627f3f0b8bd76 3-4,7,10-13,15,17-160,164-169,171-175,177,179-184,186-188,190,192-216,218-220,222,224-226,228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5257b54750b68a6b981a02e82e3480c747ccdbf8",
+  "prompts": {},
+  "sessions": {
+    "s_36968c37e13577": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c7edbca-eaac-4d39-af08-0f7ed1faff42",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
