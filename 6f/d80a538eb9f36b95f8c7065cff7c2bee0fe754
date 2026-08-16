@@ -1,0 +1,31 @@
+packages/core/src/collections-io.ts
+  s_ba7efc8838949b::t_9cd39d111687fa 1-38
+packages/astro/src/server/collections.ts
+  s_2739562f79e122::t_65f9c46c8b9911 7-10
+packages/core/src/index.ts
+  s_2739562f79e122::t_40a44551b3244c 290-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6fd80a538eb9f36b95f8c7065cff7c2bee0fe754",
+  "prompts": {},
+  "sessions": {
+    "s_2739562f79e122": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9481a03b-fd55-41b4-8c8f-9f992573e488",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
