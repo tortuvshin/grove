@@ -1,0 +1,25 @@
+packages/astro/package.json
+  s_aa41ef7963b41a::t_bf1457f28a2dfb 3
+packages/cli/package.json
+  s_aa41ef7963b41a::t_bf1457f28a2dfb 3
+packages/starlight/package.json
+  s_aa41ef7963b41a::t_bf1457f28a2dfb 3
+packages/core/package.json
+  s_aa41ef7963b41a::t_bf1457f28a2dfb 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "af7ba208dcfaaf5e6b98878b6168327de1933009",
+  "prompts": {},
+  "sessions": {
+    "s_aa41ef7963b41a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d86408d2-cd3a-42ec-ab1a-ab8d97b578e6",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
