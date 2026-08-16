@@ -16,12 +16,14 @@
  */
 
 export type LensId =
-  // Label-based (tabbed)
+  // Sort-based (tabbed)
   | "all"
+  | "recently-updated"
   | "new"
+  // Label-based
   | "hot"
   | "mature"
-  // Curator-assigned (tabbed)
+  // Curator-assigned
   | "good-to-learn"
   | "production-like"
   // Available in URL state, but not tabbed
@@ -43,6 +45,12 @@ export interface LensDef {
 
 export const LENSES: LensDef[] = [
   { id: "all", label: "All items", description: "Every item in the directory", toParams: () => ({}) },
+  {
+    id: "recently-updated",
+    label: "Actively developed",
+    description: "Every item ordered by its most recent commit",
+    toParams: () => ({ sort: "recently-updated" }),
+  },
   {
     id: "new",
     label: "Recently added",
@@ -107,18 +115,21 @@ export const LENSES: LensDef[] = [
 ];
 
 /**
- * The curated lenses shown as top-row tabs on /items. Sorting stays in the
- * dedicated sort control, so Recently added is deliberately not a tab.
- * Keep this list aligned with what the design calls for: All, signal lenses,
- * and the two curator-assigned lenses that have any matches.
+ * The curated lenses shown as top-row tabs on /items.
+ *
+ * These three are ordering views over the WHOLE directory, not filters:
+ * every item stays reachable from every tab, so a visitor can never land
+ * on an empty list. They answer the two questions a directory visitor
+ * actually has — "what's alive?" and "what's new?" — and they mirror the
+ * homepage's two record sections one-to-one.
+ *
+ * The label-based (`hot`, `mature`) and curator-assigned
+ * (`production-like`, `good-to-learn`) lenses stay in `LENSES` for URL
+ * deep-linking, but are no longer tabbed: they filter rather than order,
+ * so they can and do render empty on directories that never populate
+ * `curation.labels` / `curation.lenses`.
  */
-export const PRIMARY_LENSES: LensId[] = [
-  "all",
-  "hot",
-  "mature",
-  "production-like",
-  "good-to-learn",
-];
+export const PRIMARY_LENSES: LensId[] = ["all", "recently-updated", "new"];
 
 export function lensById(id: string | null | undefined): LensDef | undefined {
   if (!id) return undefined;
@@ -133,13 +144,22 @@ export function lensById(id: string | null | undefined): LensDef | undefined {
  */
 export function isLensActive(lensId: LensId, sp: URLSearchParams): boolean {
   if (lensId === "all") {
-    // "All" is active when no lens-shaped filter is present.
-    return !lensFromSearchParams(sp) && !sp.get("label") && !sp.get("status");
+    // "All" is the fallback view: active only when no lens-shaped filter
+    // is present AND no other lens claims the current params. Without the
+    // second check a sort-based lens (e.g. ?sort=recently-updated) would
+    // light up its own tab and "All" at the same time, since sorting
+    // touches none of the lens/label/status keys.
+    if (lensFromSearchParams(sp) || sp.get("label") || sp.get("status")) return false;
+    return !LENSES.some((l) => l.id !== "all" && matchesLensParams(l, sp));
   }
   const def = lensById(lensId);
   if (!def) return false;
-  const target = def.toParams();
-  for (const [k, v] of Object.entries(target)) {
+  return matchesLensParams(def, sp);
+}
+
+/** Whether every param a lens implies is present in `sp` with the same value. */
+function matchesLensParams(def: LensDef, sp: URLSearchParams): boolean {
+  for (const [k, v] of Object.entries(def.toParams())) {
     if (Array.isArray(v)) {
       if (sp.getAll(k).length !== v.length) return false;
       for (const item of v) if (!sp.getAll(k).includes(item)) return false;
@@ -187,9 +207,14 @@ export function lensFromSearchParams(sp: URLSearchParams): LensId | null {
 
 /**
  * Build a `href` for a lens tab. Per the single-select-view rule,
- * clicking a lens resets the "view" params (lens, label, status, page)
- * and applies only the chosen lens's params. Stack/Platform/Category/
- * License/q/sort/density filters are preserved.
+ * clicking a lens resets the "view" params (lens, label, status, sort,
+ * page) and applies only the chosen lens's params. The refinement
+ * filters — q/stack/platform/category/license/tag — are preserved, so
+ * switching view keeps whatever the visitor narrowed down to.
+ *
+ * `sort` is reset because lenses own the ordering: a stale
+ * `?sort=recently-added` left over from another tab would otherwise
+ * keep that tab active alongside the one just clicked.
  */
 export function hrefForLens(
   lensId: LensId | null | undefined,
@@ -200,6 +225,7 @@ export function hrefForLens(
   sp.delete("lens");
   sp.delete("label");
   sp.delete("status");
+  sp.delete("sort");
   sp.delete("page");
   if (lensId && lensId !== "all") {
     const def = lensById(lensId);

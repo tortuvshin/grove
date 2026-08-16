@@ -132,33 +132,29 @@ const clearFiltersHref = clearQuery ? `/${slug}?${clearQuery}` : `/${slug}`;
         <button type="submit" class={buttonClass("primary", "bare", "h-10 px-4 text-sm max-sm:min-h-11")}>Search</button>
       </form>
 
-      {/* Lens tabs: single scrollable row on mobile instead of a
-          multi-row wall of controls. */}
-      <div class="mt-4 max-md:-mx-5 max-md:overflow-x-auto max-md:px-5">
-        <div class="flex items-center gap-2 md:flex-wrap max-md:w-max">
+      {/* One toolbar row on desktop: view tabs on the left, facet
+          filters pushed to the right. On mobile the tabs become a
+          single horizontally scrolling strip and the facets collapse
+          into a full-width "Filters" button opening a bottom sheet. */}
+      <div class="mt-4 flex flex-col gap-3 pb-6 md:flex-row md:items-center">
+        <div class="max-md:-mx-5 max-md:overflow-x-auto max-md:px-5">
           <SmartLensTabs
-            class="contents"
+            class="max-md:w-max"
             currentParams={Astro.url.searchParams}
             pathPrefix={`/${slug}`}
             lensIds={PRIMARY_LENSES}
             allLabel={`All ${itemLabelPlural()}`}
           />
         </div>
-      </div>
 
-      {/* Facet filters: inline dropdown row on desktop; a single
-          "Filters" button opening a bottom-sheet dialog on mobile. */}
-      <div class="mt-3 pb-6">
-        <FilterDrawer label="Filters" activeCount={chips.length}>
-          <div class="flex flex-wrap items-center gap-2 max-md:flex-col max-md:items-stretch">
-            <RefinePanel
-              class="contents"
-              groups={facetGroups}
-              initial={filters}
-              pathPrefix={`/${slug}`}
-              hide={["sort"]}
-            />
-          </div>
+        <FilterDrawer label="Filters" activeCount={chips.length} class="md:ml-auto">
+          <RefinePanel
+            class="max-md:flex-col max-md:items-stretch"
+            groups={facetGroups}
+            initial={filters}
+            pathPrefix={`/${slug}`}
+            hide={["sort"]}
+          />
         </FilterDrawer>
       </div>
     </div>

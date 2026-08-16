@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { IndexRecord } from "./schema.js";
 import { applySort, buildFacets, filterRecords, filtersFromSearchParams } from "./directory-search.js";
-import { hrefForLens, isLensActive } from "./directory-lenses.js";
+import { hrefForLens, isLensActive, LENSES, PRIMARY_LENSES } from "./directory-lenses.js";
+import { lensDisplay } from "./directory-display.js";
 
 function record(
   slug: string,
@@ -88,12 +89,43 @@ describe("directory discovery state", () => {
       .toEqual(["newer", "older", "unreviewed"]);
   });
 
-  it("builds single-select lens links without dropping unrelated filters", () => {
+  it("builds single-select lens links that keep refinements but reset the view", () => {
+    // Refinements (q, category, stack, ...) survive a view switch; the
+    // view params — lens, label, status, sort, page — are reset, because
+    // the tabs now own ordering as well as filtering.
     const current = new URLSearchParams("q=agent&category=agents&label=new&status=quiet&page=3&sort=alphabetical");
     expect(hrefForLens("hot", current, "/projects"))
-      .toBe("/projects?q=agent&category=agents&sort=alphabetical&label=hot");
+      .toBe("/projects?q=agent&category=agents&label=hot");
+    expect(hrefForLens("all", current, "/projects"))
+      .toBe("/projects?q=agent&category=agents");
     expect(isLensActive("hot", new URL("https://example.com/projects?label=hot").searchParams)).toBe(true);
     expect(isLensActive("all", new URL("https://example.com/projects?category=agents").searchParams)).toBe(true);
+  });
+
+  it("gives a sort-based lens sole ownership of the active tab", () => {
+    // Regression guard: "all" ignores sort when deciding whether it is
+    // active, so without the cross-check both "all" and the sort-based
+    // lens would render as the current tab at the same time.
+    const sp = new URL("https://example.com/projects?sort=recently-updated").searchParams;
+    expect(isLensActive("recently-updated", sp)).toBe(true);
+    expect(isLensActive("all", sp)).toBe(false);
+
+    const added = new URL("https://example.com/projects?sort=recently-added").searchParams;
+    expect(isLensActive("new", added)).toBe(true);
+    expect(isLensActive("all", added)).toBe(false);
+
+    // A sort with no lens behind it still leaves "all" as the view.
+    const plain = new URL("https://example.com/projects?sort=alphabetical").searchParams;
+    expect(isLensActive("all", plain)).toBe(true);
+  });
+
+  it("keeps every tabbed lens renderable", () => {
+    for (const id of PRIMARY_LENSES) {
+      expect(LENSES.some((lens) => lens.id === id)).toBe(true);
+      // SmartLensTabs takes its tab text from LENS_DISPLAY, not from
+      // LensDef.label — a missing entry renders the raw id.
+      expect(lensDisplay(id)).not.toBe(id);
+    }
   });
 });
 

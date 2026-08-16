@@ -23,7 +23,87 @@ For the developer workflow that produces these entries, see
 > Working buffer for the next release. Folds into a dated `## [X.Y.Z]`
 > heading once v0.6.0 cuts. Targets are tracked in
 > [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
-> under "Next release — v0.5.0" until they ship.
+> under "Next release — v0.6.0" until they ship.
+
+---
+
+## [0.5.2] — 2026-08-16
+
+The browse page's lens tabs stop being filters and become **ordering
+views**. Every tab now shows the whole directory in a different order,
+so a visitor can never land on an empty list by clicking a tab.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`
+
+### Added
+
+- **`@grove-dev/core`:** new `recently-updated` lens, labelled
+  **"Actively developed"**, which orders the directory by
+  `github.pushedAt` (`toParams()` → `{ sort: "recently-updated" }`).
+  It joins the existing `new` lens ("Recently added") as the second
+  ordering view.
+- **`@grove-dev/astro`:** `SmartLensTabs` and `RefinePanel` accept a
+  `layout` prop (default `true`). Pass `layout={false}` when the caller
+  owns the root's layout — e.g. `layout={false} class="contents"` to
+  promote the tabs or filter triggers into the parent's flex row.
+
+### Changed
+
+- **`@grove-dev/core`:** **`PRIMARY_LENSES` is now
+  `["all", "recently-updated", "new"]`** — previously
+  `["all", "hot", "mature", "production-like", "good-to-learn"]`.
+  The label-based (`hot`, `mature`) and curator-assigned
+  (`production-like`, `good-to-learn`) lenses remain in `LENSES` and
+  still work as `?label=` / `?lens=` deep links; they are no longer
+  tabbed because they *filter* rather than *order*, and render empty
+  on any directory that does not populate `curation.labels` /
+  `curation.lenses`.
+
+  Sites that want the old tab set back can pass the ids explicitly:
+
+  ```astro
+  <SmartLensTabs
+    lensIds={["all", "hot", "mature", "production-like", "good-to-learn"]}
+    currentParams={Astro.url.searchParams}
+    pathPrefix={`/${slug}`}
+  />
+  ```
+
+- **`@grove-dev/core`:** `hrefForLens()` now also clears `sort` when
+  building a tab link. Lens tabs own the ordering, so a `sort` left
+  over from another tab would otherwise keep that tab active next to
+  the one just clicked. The refinement filters — `q`, `stack`,
+  `platform`, `category`, `license`, `tag` — are still preserved
+  across a view switch.
+
+### Fixed
+
+- **`@grove-dev/core`:** `isLensActive("all", …)` no longer reports the
+  "All" tab as active when a sort-based lens already claims the current
+  params. `"all"` had only checked `lens` / `label` / `status`, so
+  `?sort=recently-updated` lit up both "All" and "Actively developed"
+  at once.
+- **`@grove-dev/astro`:** `class="contents"` on `SmartLensTabs` and
+  `RefinePanel` silently did nothing. Both components hardcoded
+  `flex …` on their root and appended the caller's class after it;
+  because Tailwind v4 emits `.contents` *before* `.flex`, the `flex`
+  rule won at equal specificity and the element never became
+  `display: contents`. Any layout the parent expected to apply to the
+  promoted children — wrapping, gaps, `max-md:flex-col` — was
+  therefore inert. Use the new `layout={false}` prop.
+
+---
+
+## [0.5.1] — 2026-08-16
+
+### Fixed
+
+- **`@grove-dev/astro`:** the published tarball omitted `src/ui`, so
+  **every consumer build failed** with
+  `Could not resolve '../ui/button.js'` from
+  `src/components/OriginalCollection.astro`. The `exports` map already
+  declared `./ui/*`, but `files` never shipped the directory. Added
+  `src/ui` to the `files` allowlist.
 
 ---
 

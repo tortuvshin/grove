@@ -52,6 +52,7 @@ export function statusDisplay(s: string | null | undefined): string {
 // ── Lens ids (the curated tabs on /items) ────────────────────────────
 export const LENS_DISPLAY: Record<string, string> = {
   all: 'All items',
+  'recently-updated': 'Actively developed',
   new: 'Recently added',
   hot: 'Trending',
   mature: 'Established',
