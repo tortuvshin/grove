@@ -1,0 +1,20 @@
+packages/astro/src/ui/SearchField.astro
+  s_2739562f79e122::t_44786bc5844bc4 64
+  s_2739562f79e122::t_424d242637fcdf 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5455a2a7f73b9362017500dcabcc61d5edc7344b",
+  "prompts": {},
+  "sessions": {
+    "s_2739562f79e122": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9481a03b-fd55-41b4-8c8f-9f992573e488",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
