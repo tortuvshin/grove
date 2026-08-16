@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/astro",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
   "license": "MIT",
@@ -34,6 +34,7 @@
     "src/layouts",
     "src/lib",
     "src/server",
+    "src/ui",
     "src/index.ts",
     "src/styles.css",
     "README.md"
