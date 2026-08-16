@@ -24,7 +24,7 @@
  * paginate with `?page=N` on the base route.
  */
 import siteConfig from "@grove/generated/site-config.json";
-import { getDirectoryIndexModel, itemLabel, itemLabelPlural, seoTitle, taxonomy, titleCaseFirst } from "@grove-dev/astro/server";
+import { getDirectoryIndexModel, itemLabel, itemLabelPlural, taxonomy } from "@grove-dev/astro/server";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import CardGrid from "@grove-dev/astro/components/CardGrid.astro";
 import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
@@ -58,23 +58,20 @@ const {
   chips,
   clearFiltersHref,
   hrefForResultPage,
-  seo,
 } = getDirectoryIndexModel(Astro.url.searchParams, siteConfig, { page: routePage });
 
-// Page 2+ gets a distinct title and skips the ItemList JSON-LD so the
-// list markup isn't duplicated across every paginated route.
+// Page 2+ gets a distinct title so paginated routes are not a pile of
+// identical documents to a crawler.
 const title =
   page > 1
-    ? seoTitle(`Browse ${titleCaseFirst(itemLabelPlural())} — Page ${page}`, siteConfig.name)
-    : seo.title;
-const description = seo.description;
+    ? `Browse ${slug} — page ${page} — ${siteConfig.name}`
+    : `Browse ${slug} — ${siteConfig.name}`;
+const description = `A searchable directory of ${itemLabelPlural()} for ${siteConfig.name}.`;
 ---
 
 <BaseLayout
   title={title}
   description={description}
-  image={seo.image}
-  jsonLd={page > 1 ? undefined : seo.jsonLd}
   site={siteConfig}
   submitHref="/submit"
   submitLabel={`Submit ${itemLabel()}`}
