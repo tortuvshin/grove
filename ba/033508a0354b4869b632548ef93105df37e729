@@ -1,0 +1,19 @@
+packages/astro/src/server/index.ts
+  s_ba7efc8838949b::t_5c418ec65dc164 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ba033508a0354b4869b632548ef93105df37e729",
+  "prompts": {},
+  "sessions": {
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
