@@ -1,0 +1,34 @@
+apps/docs/src/content/docs/reference/cli.md
+  s_aa41ef7963b41a::t_7eb37051a7efcc 346-348
+  s_aa41ef7963b41a::t_f9d51fc2d1852f 288
+packages/core/src/schema.ts
+  s_aa41ef7963b41a::t_2507323bb47008 766-768
+packages/core/README.md
+  s_aa41ef7963b41a::t_6481f1bab065f1 48
+  s_aa41ef7963b41a::t_f88e2886f7c076 63,65-68,70
+.github/workflows/lighthouse-audit.yml
+  s_aa41ef7963b41a::t_a6ed512d9ccf20 154
+packages/cli/README.md
+  s_aa41ef7963b41a::t_321c32523da5b2 24,33,40,42-45,55
+  s_aa41ef7963b41a::t_2d6f57e8eac133 18
+packages/cli/src/audit-cli.ts
+  s_aa41ef7963b41a::t_51bb2294fa5af1 6
+apps/docs/src/content/docs/roadmap.md
+  s_aa41ef7963b41a::t_e036d07b2913ff 134-136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7e0224e0534568abb9c20a1f3297412ee00d1fef",
+  "prompts": {},
+  "sessions": {
+    "s_aa41ef7963b41a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d86408d2-cd3a-42ec-ab1a-ab8d97b578e6",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
