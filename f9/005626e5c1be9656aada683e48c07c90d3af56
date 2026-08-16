@@ -1,0 +1,19 @@
+apps/docs/wrangler.toml
+  s_aa41ef7963b41a::t_2d065df99ed3e2 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f9005626e5c1be9656aada683e48c07c90d3af56",
+  "prompts": {},
+  "sessions": {
+    "s_aa41ef7963b41a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d86408d2-cd3a-42ec-ab1a-ab8d97b578e6",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
