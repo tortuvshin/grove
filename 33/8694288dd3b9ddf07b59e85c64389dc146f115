@@ -1,0 +1,25 @@
+packages/astro/src/server/models.ts
+  s_ba7efc8838949b::t_3fba32a97dd58a 839-868
+  s_ba7efc8838949b::t_120c63a91ac201 378-380,383-385
+  s_ba7efc8838949b::t_8de8e2506b71cc 589-603
+packages/core/src/host.ts
+  s_ba7efc8838949b::t_ee853b217930cb 1-4
+apps/example/src/components/DirectoryBrowse.astro
+  s_ba7efc8838949b::t_df372ea43c9e3f 64-67,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "338694288dd3b9ddf07b59e85c64389dc146f115",
+  "prompts": {},
+  "sessions": {
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
