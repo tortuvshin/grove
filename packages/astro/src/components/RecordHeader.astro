@@ -51,7 +51,10 @@ const {
       at the row's right edge on wide viewports and wrap below on
       mobile. */}
   <div class="flex items-center gap-4">
-    {avatarSrc ? (
+    {/* Initials stay in the DOM behind the logo and are revealed by the
+        image's own `onerror` — a dead logo URL or a renamed GitHub org
+        would otherwise render the broken-image glyph. */}
+    {avatarSrc && (
       <img
         src={avatarSrc}
         alt=""
@@ -59,16 +62,18 @@ const {
         height="56"
         loading="lazy"
         decoding="async"
-        class="h-12 w-12 shrink-0 rounded-lg border border-ink-200 object-contain bg-white p-1 dark:border-ink-800 dark:bg-ink-950 sm:h-14 sm:w-14"
+        onerror="this.hidden=true;this.nextElementSibling.hidden=false"
+        class="h-12 w-12 shrink-0 rounded-lg border border-ink-200 object-contain bg-white p-1 dark:border-ink-800 sm:h-14 sm:w-14"
       />
-    ) : (
-      <span
-        aria-hidden="true"
-        class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-ink-200 bg-ink-50 text-xl font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200 sm:h-14 sm:w-14"
-      >
-        {initials || "·"}
-      </span>
     )}
+    <span
+      aria-hidden="true"
+      hidden={Boolean(avatarSrc)}
+      data-grove-card-fallback-initials
+      class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-ink-200 bg-ink-50 text-xl font-semibold text-ink-700 dark:border-ink-800 dark:bg-ink-900 dark:text-ink-200 sm:h-14 sm:w-14"
+    >
+      {initials || "·"}
+    </span>
 
     <div class="min-w-0 flex-1">
       <h1 class="m-0 text-[1.75rem] font-semibold leading-tight tracking-tight text-ink-900 dark:text-ink-100 sm:text-[2rem]">
