@@ -10,6 +10,7 @@
  *     `lib/search`)
  *   - compute taxonomy counts at build time (`lib/taxonomy-counts`)
  *   - pretty-print slugs and label/lens/sort/status ids (`lib/display`)
+ *   - resolve icon registry ids to asset paths (`lib/icon-registry`)
  *
  * All helpers are pure, dependency-free, and typed against
  * `@grove-dev/core` (specifically `ProjectRecord` for the index
@@ -23,3 +24,6 @@ export * from "./search.js";
 export * from "./taxonomy-counts.js";
 export * from "./display.js";
 export * from "./load-collections.js";
+export * from "./icon-registry.js";
+export * from "./icon-kinds.js";
+export * from "./packaged-icons.js";

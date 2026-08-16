@@ -1,27 +1,20 @@
 - id: ios
   name: iOS
-  icon: ios
 
 - id: android
   name: Android
-  icon: android
 
 - id: web
   name: Web
-  icon: web
 
 - id: macos
   name: macOS
-  icon: macos
 
 - id: windows
   name: Windows
-  icon: windows
 
 - id: linux
   name: Linux
-  icon: linux
 
 - id: desktop
   name: Desktop
-  icon: desktop

@@ -9,44 +9,74 @@ Static assets go under `public/`. Anything in `public/` is served as-is from the
 
 ```
 public/
-├── favicon.ico                 # 32×32 ICO (legacy browsers)
-├── favicon.svg                 # SVG favicon (modern browsers)
-├── apple-touch-icon.png        # 180×180 for iOS home screen
-├── logo.svg                    # header logo (default)
+├── favicon.svg                 # referenced via site.favicon in grove.config.ts
+├── logo.svg                    # referenced via site.logo in grove.config.ts
 ├── og-image.svg                # generated brand card
 ├── robots.txt                  # generated; do not edit
 ├── llms.txt                    # generated; do not edit
 └── icons/
-    └── stacks/                 # SVG stack icons
-        ├── Python.svg
-        ├── TypeScript.svg
-        └── Next.js.svg
+    ├── .grove-icons.json       # synced; do not edit
+    ├── stacks/                 # language / framework marks
+    │   ├── typescript.svg
+    │   ├── python.svg
+    │   └── rust.svg
+    └── platforms/              # ios.svg, android.svg, web.svg, …
 ```
 
 `robots.txt`, `llms.txt`, `llms-full.txt`, `og-image.svg` are **generated** — `grove check` overwrites them. Override by editing the config inputs, not the files.
 
-## Stack icons
+## Stack and platform icons
 
-The icon filename matches the stack name as it appears in `data/taxonomy/stacks.yml` and each record's `stacks[]`:
+Grove ships a vendored icon set and syncs it into `public/icons/` on every build, so the `Icon` component and the files it points at never drift apart. The filename is the taxonomy `id`, lowercased and dash-cased:
 
 ```yaml
 # data/taxonomy/stacks.yml
-- slug: typescript
+- id: typescript
   name: TypeScript
-  color: "#3178C6"
 ```
 
 ```bash
-public/icons/stacks/TypeScript.svg   # matches "TypeScript"
+public/icons/stacks/typescript.svg
 ```
 
-The `StackIcon` component looks up icons in this order:
+A handful of ids resolve through built-in aliases — `ios`, `macos`, `swiftui`, and `objective-c` all render `stacks/apple.svg`; `kmp` renders `stacks/kotlin.svg`.
 
-1. `${stackName}.svg` (exact match)
-2. Lowercase / dash-cased variants (e.g. `next-js.svg` for `Next.js`)
-3. First-letter initial fallback
+### Monochrome vs colour
 
-The default set comes from [Simple Icons](https://simpleicons.org/) (CC0) — ~100 common stacks. For a custom stack, drop a 24×24 SVG with matching stroke width.
+Each packaged icon is classified `mono` or `color`:
+
+| Kind | Examples | How it renders |
+|---|---|---|
+| `color` | React, Flutter, Python, TypeScript, Android, Docker, Go, Linux, Django | An `<img>` in the brand's own palette, with an initials chip as the error fallback |
+| `mono` | Apple, Rust, Tauri, Solidity, Deno, and every concept glyph (`web`, `desktop`, `llm`) | A CSS-masked `<span>` painted from `--grove-foreground` — solid black on light, solid white on dark |
+
+**`color` is the default.** A brand keeps its own palette even when contrast is imperfect; Grove does not trade brand colour for legibility.
+
+`mono` is reserved for marks that have no colour to lose. Apple, Rust, Tauri and Deno each publish one flat shape and present it black on light backgrounds and white on dark ones, so masking is the *faithful* rendering rather than a fallback — and it needs one file instead of a `-light`/`-dark` pair.
+
+Masking is what makes that possible at all: an SVG loaded through `<img src>` is a separate document that page CSS cannot reach, so `currentColor` inside one never resolves against the theme. A mask flips the relationship — the file supplies the shape, the page supplies the colour. Override `--grove-icon-mono` on an ancestor if you want a mark tinted rather than full-contrast.
+
+### Adding your own icon
+
+Drop a square SVG at `public/icons/stacks/<id>.svg`. Grove never overwrites a file it did not write, and any name it does not recognise renders as an `<img>` with the initials fallback — exactly as before.
+
+For a mark with no colour of its own, author it with `fill="currentColor"` and pass `kind="mono"`:
+
+```astro
+<Icon name="my-tool" category="stack" kind="mono" size={18} />
+```
+
+### Restoring the packaged set
+
+```bash
+grove icons sync           # write anything missing or unmodified
+grove icons sync --force   # discard local edits, match the packaged set exactly
+grove icons sync --check   # exit 1 if the set has drifted (for CI)
+```
+
+Ownership is tracked by sha256 in `public/icons/.grove-icons.json`. Edit an icon and Grove leaves it alone, reporting it during the build.
+
+The set is vendored from [Simple Icons](https://simpleicons.org/) and [SVG Logos](https://github.com/gilbarbara/logos), both CC0-1.0. Brand marks remain the property of their respective owners.
 
 ## Adding custom directories
 
@@ -74,11 +104,14 @@ Reference them as absolute paths:
 
 Use `src/assets/` for hero images and inline graphics processed by Astro's `<Image>`. Use `public/` for brand files, downloadable artifacts, and stack icons (which are looked up by filename at render time).
 
+Stack icons in particular have to stay in `public/`: they are referenced by a URL computed at render time, and a masked icon is loaded by CSS rather than by an `import`, so neither can go through Astro's asset pipeline.
+
 ## What NOT to put in `public/`
 
 - Records — they're YAML under `data/records/`.
 - Markdown content — long-form prose goes under `content/pages/`.
 - Generated files — `llms.txt`, `robots.txt`, `og-image.svg` are overwritten by `grove check`.
+- Synced files — `public/icons/.grove-icons.json` is written by the build; it records which icons Grove owns.
 
 ## Related
 

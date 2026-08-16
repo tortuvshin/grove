@@ -29,6 +29,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { AstroIntegration } from "astro";
 import { loadConfig, prepareDirectory } from "@grove-dev/core";
+import { syncPackagedIcons } from "./lib/packaged-icons.js";
 
 export * from "@grove-dev/core";
 
@@ -58,7 +59,7 @@ export default function groveAstro(): AstroIntegration {
   return {
     name: "@grove-dev/astro",
     hooks: {
-      "astro:config:setup": async ({ config, updateConfig, injectScript }) => {
+      "astro:config:setup": async ({ config, updateConfig, injectScript, logger }) => {
         // Alias the components/layouts source directories so
         // consumer builds can import from
         //   @grove-dev/astro/components/ProjectCard.astro
@@ -68,10 +69,33 @@ export default function groveAstro(): AstroIntegration {
         const groveConfigPath = resolve(consumerRoot, "grove.config.ts");
         if (existsSync(groveConfigPath)) {
           await prepareDirectory(consumerRoot);
-          // Preparation is the integration's only site-level side effect.
-          // Routes belong to the consumer's `src/pages`, where they remain
-          // visible, editable, and safe from future Grove syncs.
+          // Data preparation and the icon sync below are the integration's
+          // only site-level side effects. Routes belong to the consumer's
+          // `src/pages`, where they remain visible, editable, and safe from
+          // future Grove syncs.
           await loadConfig(consumerRoot);
+
+          // `Icon.astro` resolves every mark to `/icons/**` in the
+          // consumer's `public/`, so the packaged SVGs have to land there
+          // before the build asks for them. Files the consumer edited are
+          // left alone and reported.
+          const icons = await syncPackagedIcons(fileURLToPath(config.publicDir));
+          if (icons.adopted && icons.written.length > 0) {
+            // One-time migration for a site that predates the sidecar.
+            // Say so: the overwrite is safe for the scaffold set, but a
+            // pre-sidecar hand edit would show up here, and version
+            // control is what makes it recoverable.
+            logger.info(
+              `Adopted ${icons.written.length} icon(s) into public/icons/ and recorded them in ` +
+                ".grove-icons.json. Review with `git diff public/icons` if you had edited any.",
+            );
+          }
+          if (icons.skipped.length > 0) {
+            logger.warn(
+              `Kept ${icons.skipped.length} locally modified icon(s): ${icons.skipped.join(", ")}. ` +
+                "Run `grove icons sync --force` to restore the packaged versions.",
+            );
+          }
         }
         const globalCssPath = resolve(consumerRoot, "src/styles/global.css");
         const globalCssExists = existsSync(globalCssPath);

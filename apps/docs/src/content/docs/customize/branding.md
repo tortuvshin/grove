@@ -19,18 +19,27 @@ These fields flow into `<title>`, the home hero, `sitemap.xml`, `llms.txt`, the 
 
 ## Logo and favicon
 
-Drop files in `public/`:
+Drop the files in `public/`, then point at them from `site`:
+
+```ts
+site: {
+  name: "Open Apps",
+  logo: "/logo.svg",        // shown beside the site name in the header
+  favicon: "/favicon.svg",  // browser tab icon
+},
+```
 
 ```
 public/
 ├── logo.svg             # header logo (preferred)
-├── logo.png             # PNG fallback for email clients
-├── favicon.ico          # 32×32 ICO
 ├── favicon.svg          # modern browsers
+├── favicon.ico          # 32×32 ICO, for legacy browsers
 └── apple-touch-icon.png # 180×180 for iOS
 ```
 
-If you only ship one, ship `logo.svg` + `favicon.svg`.
+Both fields are optional and there is no filename convention behind them — Grove renders exactly what you point it at. Leave `logo` unset and the header shows a neutral mark next to the site name; leave `favicon` unset and the tab gets a generated square tinted with your `theme.primaryColor`.
+
+If you only ship one file, ship `logo.svg`.
 
 ## OG image
 

@@ -19,7 +19,7 @@ The scaffold ships these under `src/components/`:
 | `RecordGrid.astro` | Responsive grid wrapper |
 | `RecordDetail.astro` | Full record detail layout |
 | `Tag.astro` | Inline tag chip |
-| `StackIcon.astro` | Stack-icon-with-fallback |
+| `Icon.astro` | Stack / platform mark, theme-aware, with initials fallback |
 | `FacetSidebar.astro` | Browse-page facet filter |
 | `Pagination.astro` | Page nav for index pages |
 | `SearchBox.astro` | Client-side fuzzy search |

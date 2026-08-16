@@ -25,6 +25,75 @@ For the developer workflow that produces these entries, see
 > [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
 > under "Next release — v0.6.0" until they ship.
 
+Brand and platform icons are now **real, vendored logos** that stay
+legible in both themes. Single-color marks inherit the surrounding text
+color instead of shipping as a hand-maintained light/dark file pair, and
+the packaged set is generated from a declarative config rather than
+copied in by hand.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`
+
+### Added
+
+- **`@grove-dev/astro`:** `Icon` classifies every packaged icon as
+  `color` or `mono`. `color` is the default and every brand with a
+  palette keeps it. `mono` is reserved for marks with no colour to
+  lose — Apple, Rust, Tauri, Solidity, Deno, plus the concept glyphs —
+  which render as a CSS-masked `<span>` painted from
+  `--grove-foreground`: solid black on light, solid white on dark,
+  matching how those brands are actually presented. Override
+  `--grove-icon-mono` to tint one; pass the new `kind` prop to
+  classify a consumer-supplied mark.
+- **`@grove-dev/astro`:** the integration syncs its packaged icon set
+  into the consumer's `public/icons/` during `astro:config:setup`, so
+  the artwork arrives in the same build that starts requesting it.
+  Ownership is tracked by sha256 in `public/icons/.grove-icons.json`;
+  files you have edited are kept and reported.
+- **`@grove-dev/cli`:** `grove icons sync [--force] [--check]` — restore
+  the packaged set over local edits, or fail CI when it has drifted.
+- **`@grove-dev/core`:** `site.logo` and `site.favicon` in
+  `grove.config.ts`. Without them the header keeps its neutral mark and
+  the favicon falls back to a square tinted with `theme.primaryColor`
+  instead of a hardcoded near-black.
+- **Repo:** `pnpm icons:sync` / `pnpm icons:check`, driven by
+  `scripts/icons.config.mjs`. Artwork is vendored offline from
+  `@iconify-json/simple-icons` and `@iconify-json/logos` (both CC0-1.0);
+  concept glyphs live in `scripts/icons/local/`. `icons:check` runs in
+  CI, and `packages/astro/src/icons.test.ts` enforces the structural
+  invariants (no baked color in a mono mark, no orphan files, no
+  `<text>`, no theme-variant leftovers).
+
+### Fixed
+
+- The Apple mark rendered **white on white** in light mode and black on
+  black in dark: `apple-light.svg` was the white artwork but was served
+  when the resolved theme was `light`. The light/dark file pair and the
+  `img.src`-swapping script that drove it are both gone.
+- `currentColor` never worked in any icon. An SVG loaded through
+  `<img src>` is a separate document that page CSS cannot reach, so
+  `platforms/{chromeos,desktop,embedded}.svg` and `stacks/ionic.svg`
+  had been rendering black in dark mode since they were added.
+- `platforms/ios.svg` (solid black) and `platforms/macos.svg` (solid
+  white) were each invisible in one theme — `category="platform"` gets
+  no alias, so neither reached the Apple theme-swap.
+- `stacks/rust.svg` was white-only and `stacks/solidity.svg`
+  black-only; `stacks/tauri.svg` had no fill at all.
+- Five icons (`llm`, `sveltekit`, `django`, `node.js`, `clojurescript`)
+  embedded a `<text>` element, which renders as an illegible smudge at
+  10–18px. `llm` and `rag` were invented navy tiles rather than marks.
+- Duplicate `node.js.svg`/`nodejs.svg`, and drift between the packaged
+  icons and the `grove init` scaffold's copy — both are now generated
+  from one source and asserted byte-identical.
+
+### Removed
+
+- The dead `icon:` field in `data/taxonomy/{stacks,platforms}.yml`. It
+  serialized into `site-config.json` and was read by nothing, which
+  made it look like a supported extension point. `Icon` resolves by
+  taxonomy `id`.
+- `Icon`'s `mode` prop is now a deprecated no-op, kept for one minor
+  release so `mode="auto"` does not become a type error.
+
 ---
 
 ## [0.5.2] — 2026-08-16

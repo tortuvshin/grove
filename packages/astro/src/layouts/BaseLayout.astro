@@ -62,6 +62,10 @@ interface Site {
   };
   repoUrl?: string;
   url?: string;
+  /** Header logo path under `public/` (e.g. `/logo.svg`). */
+  logo?: string;
+  /** Favicon path under `public/` (e.g. `/favicon.svg`). */
+  favicon?: string;
   analytics?: {
     googleAnalyticsId?: string;
   };
@@ -172,8 +176,14 @@ if (themeConfig) {
 }
 const themeStyle = themeStyleParts.length > 0 ? `${themeStyleParts.join("; ")};` : undefined;
 
+// `site.favicon` points at a file the consumer owns under `public/`.
+// The fallback is a generated square — tinted with the configured
+// brand color rather than a hardcoded near-black, so an unconfigured
+// site still gets a tab mark that is recognisably its own.
+const faviconFill = (site.theme?.primaryColor ?? "#18181b").trim();
 const favicon =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2318181b'/%3E%3C/svg%3E";
+  site.favicon ??
+  `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='${encodeURIComponent(faviconFill)}'/%3E%3C/svg%3E`;
 ---
 
 <!doctype html>

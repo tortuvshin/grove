@@ -629,6 +629,18 @@ export const groveConfigSchema = z.object({
     description: z.string().optional(),
     url: z.string().url().optional(),
     repoUrl: z.string().url().optional(),
+    /**
+     * Header logo, as a path under `public/` (e.g. `/logo.svg`).
+     * Rendered beside the site name. Without it the header shows a
+     * neutral mark, which is the honest default for a site that has
+     * no logo yet.
+     */
+    logo: z.string().optional(),
+    /**
+     * Favicon, as a path under `public/` (e.g. `/favicon.svg`).
+     * Falls back to a generated square tinted with `theme.primaryColor`.
+     */
+    favicon: z.string().optional(),
   }),
 
   analytics: z

@@ -29,6 +29,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
+    "assets",
     "dist",
     "src/components",
     "src/layouts",

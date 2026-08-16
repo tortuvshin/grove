@@ -28,6 +28,8 @@ interface Site {
   description?: string;
   repoUrl?: string;
   url?: string;
+  /** Logo path under `public/` (e.g. `/logo.svg`). */
+  logo?: string;
   stats?: {
     /** Stars on this site's own source repository. */
     repositoryStars?: number;
@@ -87,10 +89,23 @@ const starsLabel =
       href="/"
       class="inline-flex min-w-0 shrink items-center gap-2 text-[0.95rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100"
     >
-      <span
-        aria-hidden="true"
-        class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100"
-      ></span>
+      {site.logo ? (
+        <img
+          src={site.logo}
+          alt=""
+          aria-hidden="true"
+          width="18"
+          height="18"
+          class="inline-block h-[18px] w-[18px] shrink-0 object-contain"
+        />
+      ) : (
+        /* No logo configured — a neutral mark is the honest default.
+           Set `site.logo` in grove.config.ts to replace it. */
+        <span
+          aria-hidden="true"
+          class="inline-block h-[18px] w-[18px] rounded bg-ink-900 dark:bg-ink-100"
+        ></span>
+      )}
       <span class="truncate">{site.name}</span>
     </a>
 

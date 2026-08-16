@@ -348,6 +348,8 @@ export async function generate(
     description: cfg.site.description ?? cfg.site.tagline,
     siteUrl: cfg.site.url ?? "https://example.com",
     repoUrl: cfg.site.repoUrl ?? "",
+    logo: cfg.site.logo,
+    favicon: cfg.site.favicon,
     nav: cfg.nav,
     footer: cfg.footer,
     submission: cfg.submission,

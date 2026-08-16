@@ -16,12 +16,17 @@
  *     (`relative z-10`).
  *   - App icon top-left (48px), app name + repository owner/repo,
  *     two-line description with reserved vertical space.
- *   - Footer row: platform logos (or labelled stack/platform chips via
- *     `labelledChips`), stars/updated/license on the right, and the
- *     navigation arrow anchored bottom-right.
- *   - Everything beyond the default home-page rendering is opt-in:
- *     `showCurated`, `showLicense`, `showCategoryStatus`,
- *     `labelledChips`, `secondaryLinks`, analytics `data-event` props.
+ *   - Footer row: stack logos on the left, stars and last-updated on
+ *     the right, navigation arrow anchored bottom-right.
+ *
+ * **The layout is fixed.** Earlier versions let list pages opt into a
+ * curated badge, a license tag, a `category · status` line and
+ * labelled chip rows, so the same record rendered differently
+ * depending on where a visitor found it. Those flags are now
+ * deprecated no-ops. Platform support is likewise off the card — it is
+ * reference detail and belongs on the record page (`RecordSidebar`).
+ * `secondaryLinks` remains, because a footer link is navigation
+ * rather than metadata.
  *
  * Data can come from a full `record` or from explicit props (adapters
  * for shapes like `CollectionEntry` pass fields directly); explicit
@@ -37,14 +42,11 @@ import {
   getOwnerAvatarUrl,
   formatRelative,
   formatStars,
-  licenseDisplay,
   nameInitials,
   projectStackIds,
-  statusDisplay,
 } from "@grove-dev/astro";
 import CardIcon from "./CardIcon.astro";
 import Icon from "./Icon.astro";
-import StackPlatformChips from "./StackPlatformChips.astro";
 
 type CardRecord = IndexRecord | Resource | ProjectRecord | IndexProjectRecord;
 
@@ -78,12 +80,24 @@ interface Props {
   status?: string;
   curated?: boolean;
   stack?: string;
+  /**
+   * @deprecated Cards render the stack, not platform support — that
+   * belongs on the record page. Accepted and ignored.
+   */
   platforms?: string[];
-  /** Opt-in extras (all default off to keep the home grid unchanged). */
+  /**
+   * @deprecated The card renders one fixed metadata set on every
+   * surface. These flags used to add a curated badge, a license tag,
+   * a `category · status` line, and labelled chip rows on list pages
+   * only, which made the same record look like a different record
+   * depending on where you found it. Accepted and ignored.
+   */
   showCurated?: boolean;
+  /** @deprecated Ignored — see `showCurated`. */
   showLicense?: boolean;
+  /** @deprecated Ignored — see `showCurated`. */
   showCategoryStatus?: boolean;
-  /** Labelled stack/platform chip rows instead of the logo strip. */
+  /** @deprecated Ignored — see `showCurated`. */
   labelledChips?: boolean;
   /** Footer links; presence switches the root to `<article>` mode. */
   secondaryLinks?: SecondaryLink[];
@@ -105,16 +119,7 @@ const {
   repoUrl: repoUrlProp,
   stars: starsProp,
   pushedAt: pushedAtProp,
-  license: licenseProp,
-  category: categoryProp,
-  status: statusProp,
-  curated: curatedProp,
   stack: stackProp,
-  platforms: platformsProp,
-  showCurated = false,
-  showLicense = false,
-  showCategoryStatus = false,
-  labelledChips = false,
   secondaryLinks = [],
   eager = false,
   event,
@@ -148,8 +153,6 @@ const initials = nameInitials(name);
 const description =
   descriptionProp ?? (record as { description?: string } | undefined)?.description ?? "";
 
-const platforms =
-  platformsProp ?? (isProject ? ((record as { platforms?: string[] }).platforms ?? []) : []);
 const stars =
   starsProp ?? (isProject ? (record as { github?: { stars?: number } }).github?.stars : undefined);
 const pushedAt =
@@ -157,35 +160,14 @@ const pushedAt =
   (isProject
     ? (record as { github?: { pushedAt?: string | null } }).github?.pushedAt
     : (record as { publishedAt?: string | null } | undefined)?.publishedAt);
-const license =
-  licenseProp ??
-  (isProject ? (record as { github?: { license?: string | null } }).github?.license : undefined);
-const category = categoryProp ?? (record as { category?: string } | undefined)?.category;
-const status =
-  statusProp ?? (isProject ? (record as { health?: { status?: string } }).health?.status : undefined);
-const curated =
-  curatedProp ??
-  Boolean(
-    (record as { curation?: { reviewed?: boolean } } | undefined)?.curation?.reviewed ||
-      (isProject &&
-        ((record as { bestFor?: string[] }).bestFor?.length ||
-          (record as { whyListed?: string[] }).whyListed?.length ||
-          (record as { caveats?: string[] }).caveats?.length)),
-  );
-
-const stackId =
-  stackProp ??
-  (isProject
-    ? projectStackIds(record as { stack?: string; stacks?: string[] })[0]
-    : undefined);
+const stackIds = stackProp
+  ? [stackProp]
+  : isProject
+    ? projectStackIds(record as { stack?: string; stacks?: string[] })
+    : [];
 
 const starsLabel = formatStars(stars);
 const updatedLabel = formatRelative(pushedAt);
-// "Unknown" is an internal placeholder, not information — suppress it
-// so card metadata never reads "Category · Unknown" to visitors.
-const rawStatusText = status ? statusDisplay(status as Parameters<typeof statusDisplay>[0]) : "";
-const statusText = rawStatusText === "Unknown" ? "" : rawStatusText;
-const licenseLabel = license ? licenseDisplay(license) : null;
 
 const hasStars = starsLabel !== null && typeof stars === "number" && stars > 0;
 const hasUpdated = Boolean(pushedAt);
@@ -196,14 +178,15 @@ const isArticle = secondaryLinks.length > 0;
 const Root = isArticle ? "article" : "a";
 const rootAttrs = isArticle ? {} : { href, "aria-label": `Open ${name}` };
 
-// Render the homepage brand strip through the shared `Icon` component
-// so brand marks come from the same `/icons/platforms/` files the
-// chip rows use. No more inline SVG strings — one source of truth.
-// `Icon` falls back to initials when an asset is missing, so the
-// strip simply renders whatever platforms the record declares.
-const visiblePlatforms = platforms.slice(0, 4);
-const platformOverflow = platforms.length - visiblePlatforms.length;
-const hasPlatforms = visiblePlatforms.length > 0;
+// The card's brand strip shows the record's STACK, not its platforms.
+// Stack is what distinguishes one card from its neighbours in a list;
+// platform support is reference detail, and it belongs on the record
+// page (`RecordSidebar`) where there is room to label it. Marks come
+// from the shared `Icon` component, which falls back to initials when
+// an asset is missing.
+const visibleStacks = stackIds.slice(0, 4);
+const stackOverflow = stackIds.length - visibleStacks.length;
+const hasStacks = visibleStacks.length > 0;
 ---
 
 <Root
@@ -254,24 +237,7 @@ const hasPlatforms = visiblePlatforms.length > 0;
           {owner}<span class="opacity-60">/</span>{repo}
         </p>
       )}
-      {showCategoryStatus && (category || statusText) && (
-        <p class="m-0 truncate text-2xs text-ink-500 dark:text-ink-400">
-          {category}
-          {category && statusText && <span class="mx-1 text-ink-300 dark:text-ink-700">·</span>}
-          {statusText}
-        </p>
-      )}
     </div>
-
-    {showCurated && curated && (
-      <span
-        class="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
-        title="Reviewed by a curator"
-      >
-        <CardIcon name="curated" />
-        curated
-      </span>
-    )}
   </header>
 
   {/* Description — two-line clamp with reserved vertical space */}
@@ -281,12 +247,7 @@ const hasPlatforms = visiblePlatforms.length > 0;
     {description}
   </p>
 
-  {/* Labelled stack/platform chip rows (opt-in; directory surfaces) */}
-  {labelledChips && (
-    <StackPlatformChips stack={stackId} platform={platforms} />
-  )}
-
-  {/* Footer: links / platform logos · meta · arrow */}
+  {/* Footer: links · stack logos · stars/updated · arrow */}
   <footer class="mt-auto flex items-center justify-between gap-3 text-[12px] sm:text-[13px]">
     <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-ink-500 dark:text-ink-400">
       {secondaryLinks.map((link) => (
@@ -302,18 +263,13 @@ const hasPlatforms = visiblePlatforms.length > 0;
           {link.external && <CardIcon name="external" />}
         </a>
       ))}
-      {!labelledChips && hasPlatforms && (
-        <div class="flex items-center gap-2.5">
-          {visiblePlatforms.map((platform) => (
-            <Icon
-              name={platform}
-              category="platform"
-              size={22}
-              title={platform}
-            />
+      {hasStacks && (
+        <div class="flex items-center gap-2">
+          {visibleStacks.map((stack) => (
+            <Icon name={stack} category="stack" size={16} title={stack} />
           ))}
-          {platformOverflow > 0 && (
-            <span class="text-[12px] text-ink-500 dark:text-ink-400">+{platformOverflow}</span>
+          {stackOverflow > 0 && (
+            <span class="text-[12px] text-ink-500 dark:text-ink-400">+{stackOverflow}</span>
           )}
         </div>
       )}
@@ -329,11 +285,6 @@ const hasPlatforms = visiblePlatforms.length > 0;
       {hasUpdated && (
         <span class="whitespace-nowrap" title={`Last updated ${pushedAt}`}>
           Updated {updatedLabel}
-        </span>
-      )}
-      {showLicense && licenseLabel && (
-        <span class="font-mono text-[10px] uppercase tracking-wide" title={`License: ${licenseLabel}`}>
-          {licenseLabel}
         </span>
       )}
       <CardIcon

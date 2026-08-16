@@ -424,6 +424,67 @@
  * Colors come from the package's `ink-*` scale via CSS variables so
  * every consumer gets the same baseline regardless of brand overrides.
  * ────────────────────────────────────────────────────────────────── */
+
+/* ──────────────────────────────────────────────────────────────────
+ * Monochrome brand marks (`Icon.astro`, kind: "mono")
+ *
+ * An SVG loaded through `<img src>` is an independent document that
+ * page CSS cannot reach, so `currentColor` inside it never resolves
+ * against the theme — it silently renders black in both modes. That
+ * is why single-color marks (Apple, Rust, Tauri, Deno, …) used to
+ * need a hand-maintained `-light`/`-dark` file pair plus a JS `src`
+ * swap, and why the pair was easy to get backwards.
+ *
+ * Masking inverts the relationship: the SVG supplies the *shape*
+ * (via its alpha channel) and the page supplies the *color* — no
+ * script and no second file.
+ *
+ * The paint is `--grove-foreground`, NOT `currentColor`. These are
+ * brand marks, and a brand mark's real presentation is solid black on
+ * light and solid white on dark — not whatever tint the surrounding
+ * chip label happens to use. Inheriting `currentColor` washed the
+ * Apple mark down to the chip's muted `ink-500`, which reads as a
+ * greyed-out logo rather than a logo. Callers that genuinely want a
+ * tinted mark can override `--grove-icon-mono`.
+ *
+ * The URL is per-icon and computed at render time, so it can never
+ * appear literally in a source file for Tailwind's extractor to find
+ * — arbitrary `mask-[url(…)]` utilities are structurally impossible
+ * here. Everything static lives in this class; only the URL travels
+ * inline, as `--grove-icon-url`.
+ * ────────────────────────────────────────────────────────────────── */
+.grove-icon-mask {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  background-color: var(--grove-icon-mono, var(--grove-foreground));
+  -webkit-mask-image: var(--grove-icon-url);
+  mask-image: var(--grove-icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* Print stylesheets drop background colors, which would erase the
+ * glyph entirely — an `<img>` would still print. */
+@media print {
+  .grove-icon-mask {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Forced-colors mode overrides `background-color`; pin it to the
+ * system text color so the mark stays visible. */
+@media (forced-colors: active) {
+  .grove-icon-mask {
+    background-color: CanvasText;
+  }
+}
+
 .grove-prose {
   font-size: 1.0625rem; /* 17px */
   line-height: 1.75;
