@@ -39,6 +39,14 @@ interface Props {
   initial: IndexFilters;
   pathPrefix?: string;
   class?: string;
+  /**
+   * Emit the default flex layout on the root. Pass `false` when the
+   * caller owns the layout — e.g. `layout={false} class="contents"` to
+   * promote the filter triggers into the parent's flex row. Without
+   * this the root's own `flex` would win over any display utility in
+   * `class`, since Tailwind emits `.contents` before `.flex`.
+   */
+  layout?: boolean;
   /** Hide the sort select (e.g. when the page renders its own). */
   hide?: Array<"sort">;
 }
@@ -48,6 +56,7 @@ const {
   initial,
   pathPrefix = "/",
   class: className = "",
+  layout = true,
   hide = [],
 } = Astro.props;
 
@@ -69,7 +78,7 @@ const groups = groupModels.map((group) => ({
 }));
 ---
 
-<div class:list={["flex flex-wrap items-center gap-2", className]} role="toolbar" aria-label="Filter items">
+<div class:list={[layout && "flex flex-wrap items-center gap-2", className]} role="toolbar" aria-label="Filter items">
     {groups.map((group) => <FilterGroupMenu {...group} />)}
 
     {!hide.includes("sort") && (
