@@ -92,45 +92,63 @@ describe("SEO + page-structure parity", () => {
       label: "collection detail (curated)",
       page: "collections/top-ai-agents/index.html",
       mustInclude: [
-        /<title>Top Open Source AI Agents<\/title>/,
+        // `seo.title` from the collection YAML wins verbatim.
+        /<title>Top Open Source AI Agents in 2026<\/title>/,
         /<meta\s+name="description"\s+content="Python-based agent frameworks and orchestration tools\."/,
         /<link\s+rel="canonical"\s+href="https:\/\/example\.com\/collections\/top-ai-agents\/"/,
         /<meta\s+property="og:title"\s+content="Top Open Source AI Agents/,
         /<meta\s+property="og:description"\s+content="Python-based agent frameworks and orchestration tools\."/,
         /<meta\s+property="og:type"\s+content="website"/,
+        // Per-collection generated OG image, not the site-wide SVG.
+        /<meta\s+property="og:image"\s+content="https:\/\/example\.com\/og\/collections\/top-ai-agents\.png"/,
+        // CollectionPage + ItemList + BreadcrumbList JSON-LD ships.
+        /"@type":\["CollectionPage","WebPage"\]/,
+        /"@type":"BreadcrumbList"/,
       ],
     },
     {
       label: "stack taxonomy page",
       page: "stacks/python/index.html",
       mustInclude: [
-        /<title>Python projects/,
+        // Distinct from the category pattern so /categories/python/
+        // and /stacks/python/ can never emit duplicate titles.
+        /<title>Projects built with Python on Grove AI Directory<\/title>/,
         /<link\s+rel="canonical"\s+href="https:\/\/example\.com\/stacks\/python\/"/,
+        /<meta\s+property="og:image"\s+content="https:\/\/example\.com\/og\/stacks\/python\.png"/,
+        /"@type":"BreadcrumbList"/,
       ],
     },
     {
       label: "category taxonomy page",
       page: "categories/agents/index.html",
       mustInclude: [
-        /<title>Agents projects/,
+        /<title>Agents projects on Grove AI Directory<\/title>/,
         /<link\s+rel="canonical"\s+href="https:\/\/example\.com\/categories\/agents\/"/,
+        /<meta\s+property="og:image"\s+content="https:\/\/example\.com\/og\/categories\/agents\.png"/,
+        /"@type":"BreadcrumbList"/,
       ],
     },
     {
       label: "license taxonomy page",
       page: "licenses/mit/index.html",
       mustInclude: [
-        /<title>MIT License projects/,
+        /<title>MIT-licensed projects on Grove AI Directory<\/title>/,
         /<link\s+rel="canonical"\s+href="https:\/\/example\.com\/licenses\/mit\/"/,
+        /<meta\s+property="og:image"\s+content="https:\/\/example\.com\/og\/licenses\/mit\.png"/,
       ],
     },
     {
       label: "record detail",
       page: "projects/crewai/index.html",
       mustInclude: [
-        /<title>CrewAI — Grove AI Directory<\/title>/,
+        // "<Name> — <descriptor> | <Site>" with the site suffix
+        // dropped automatically when the title would exceed ~65 chars.
+        /<title>CrewAI — [^<]+<\/title>/,
         /<meta\s+property="og:type"\s+content="article"/,
         /<link\s+rel="canonical"\s+href="https:\/\/example\.com\/projects\/crewai\/"/,
+        /<meta\s+property="og:image"\s+content="https:\/\/example\.com\/og\/records\/crewai\.png"/,
+        /"@type":"SoftwareSourceCode"/,
+        /"@type":"BreadcrumbList"/,
       ],
     },
   ];
