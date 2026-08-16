@@ -22,7 +22,7 @@ const { contributors: sorted, total, seo, contributorsGraphHref, showContributio
 
 <BaseLayout title={seo.title} description={seo.description} image={seo.image} jsonLd={seo.jsonLd} site={siteConfig}>
   <section class="py-12 sm:py-16">
-    <div class="mx-auto w-full max-w-container px-5 py-12 sm:px-7 sm:py-16">
+    <div class="mx-auto w-full max-w-container px-5 sm:px-7">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
         Community
       </span>
@@ -51,8 +51,8 @@ const { contributors: sorted, total, seo, contributorsGraphHref, showContributio
   </section>
 
   {sorted.length === 0 ? (
-    <section class="py-4">
-      <div class="mx-auto w-full max-w-container px-5 pb-16 sm:px-7">
+    <section class="pb-12 sm:pb-16">
+      <div class="mx-auto w-full max-w-container px-5 sm:px-7">
         <EmptyState
           title="No contributors synced yet"
           description={`Contributor profiles come from data/generated/contributors.json, written by the weekly sync-contributors workflow. Run "grove sync contributors" (or wait for the scheduled sync) and every contributor avatar lands here.`}
