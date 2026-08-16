@@ -109,7 +109,9 @@ export async function buildSiteArtifacts(
     ROBOTS_MARKER,
     `${ROBOTS_MARKER}\n${buildRobotsTxt({
       siteUrl: config.site.url ?? '',
-      disallow: ['/api/', '/internal/', '/preview/'],
+      // /submit/ is the only noindex page worth keeping crawlers out
+      // of — everything else on a Grove site is meant to be indexed.
+      disallow: ['/submit/'],
     })}`,
   );
   const ogImageWritten = await writeOwnedArtifact(

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { generate, type GenerateResult } from "./build-data.js";
+import { loadCollections } from "./collections-io.js";
 import { loadConfig } from "./config.js";
 import {
   buildLlmsFiles,
@@ -120,10 +121,39 @@ export async function prepareDirectory(
   const generatedAt = payload.generatedAt ?? new Date().toISOString();
   const records = payload.records ?? [];
 
+  const sitePayload = JSON.parse(
+    await readFile(
+      join(root, config.paths.generatedDir, "site-config.json"),
+      "utf8",
+    ),
+  ) as {
+    stats?: { totalRecords?: number; repositoryStars?: number };
+    blueprintConfig?: { labelPlural?: string };
+    taxonomy?: {
+      categories?: Array<{ id: string; name?: string }>;
+      stacks?: Array<{ id: string; name?: string }>;
+      licenses?: Array<{ id: string; name?: string }>;
+    };
+  };
+
+  const collections = await loadCollections(root);
+
   const sitemap = await buildSitemap(
     {
       generatedAt,
       items: records.map(toSitemapItem),
+      collections: collections.map((c) => ({
+        slug: c.slug,
+        index: c.seo?.index !== false,
+        ...(c.editorial?.lastReviewedAt
+          ? { lastReviewedAt: c.editorial.lastReviewedAt }
+          : {}),
+      })),
+      taxonomies: {
+        categories: (sitePayload.taxonomy?.categories ?? []).map((t) => t.id),
+        stacks: (sitePayload.taxonomy?.stacks ?? []).map((t) => t.id),
+        licenses: (sitePayload.taxonomy?.licenses ?? []).map((t) => t.id),
+      },
     },
     root,
     config,
@@ -137,15 +167,6 @@ export async function prepareDirectory(
     root,
     config,
   );
-
-  const sitePayload = JSON.parse(
-    await readFile(
-      join(root, config.paths.generatedDir, "site-config.json"),
-      "utf8",
-    ),
-  ) as {
-    stats?: { totalRecords?: number; repositoryStars?: number };
-  };
   const siteArtifacts = await buildSiteArtifacts(
     root,
     config,
