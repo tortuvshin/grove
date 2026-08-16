@@ -27,6 +27,61 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [Unreleased — browse]
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`
+
+### Added
+
+- **Browse pages are real, crawlable documents.** `/{slug}/page/2/`,
+  `/{slug}/page/3/` … are prerendered, each rendering only its own 20
+  records. The page used to print the entire directory into every
+  response and let the client hide the rest; at 300 records that was a
+  1.2 MB document. It is now ~127 kB and flat with directory size.
+  Filtered views — which exist only on the client — keep `?page=N`.
+- **`@grove-dev/core`:** `hrefForFilters`, `hrefForPage`,
+  `hrefForClearedFilters`, and `pagePathHref`. The page and the client
+  controller each carried their own copy of this URL arithmetic.
+- **`@grove-dev/astro`:** search filters as you type (150 ms debounce),
+  with a clear button and a `/` shortcut. The `Search` button is gone —
+  it was the strongest control on the page and its only job was to
+  re-submit what the visitor could already see.
+- **`@grove-dev/astro`:** applied filters are their own row of
+  removable chips with `Clear all`, and the mobile filter sheet gained
+  the same control.
+
+### Changed
+
+- **`@grove-dev/core`:** `activeFilterChips` now returns
+  `{key, value, label, href}` and takes the taxonomy, so a chip carries
+  its own remove URL and a display name. The server rendered
+  `Stack: react-native` while the client rewrote the same chip to
+  `Stack: React Native`.
+- **`@grove-dev/astro`:** the browse page dropped the lens tabs and the
+  "All projects / Every item in the directory" heading pair. The tabs
+  wrote `sort=` params, so they and the sort select were one state
+  rendered twice, and the page named the same list three times. The
+  result count is the heading now: `76 apps · sorted by … · page 2 of 4`.
+- **`@grove-dev/astro`:** the record index moved out of the HTML into
+  `/{slug}/page/records.json`, fetched on first intent (pointer or
+  focus reaching the controls) rather than inlined on every page.
+
+### Fixed
+
+- **`@grove-dev/astro`:** card and record-header logos had no `onerror`,
+  which made the initials fallback unreachable for any record with a
+  GitHub owner — a dead logo URL or a renamed org rendered the
+  browser's broken-image glyph. Both now reveal initials, the same way
+  `Icon` does.
+- **`@grove-dev/astro`:** card descriptions are trimmed on a word
+  boundary before the two-line clamp. A CSS clamp cuts at whatever
+  character the box runs out of room on, which is how a grid ended up
+  reading "…and multi-", "…and retrieval", "…an".
+- **`@grove-dev/astro`:** the disabled pagination control sat at 3.37:1
+  against the dark surface — a contrast failure, not a disabled state.
+
+---
+
 ## [0.5.5] — 2026-08-16
 
 **Packages:** `@grove-dev/core`, `@grove-dev/astro`
