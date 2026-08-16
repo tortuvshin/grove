@@ -13,7 +13,7 @@
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import CollectionPage from "../../components/CollectionPage.astro";
-import { loadCollections } from "../../lib/load-collections.js";
+import { loadCollections } from "../../server/collections.js";
 import {
   recordsToCollectionEntries,
   getCollectionPageModel,
@@ -34,12 +34,16 @@ const entries = recordsToCollectionEntries(
   (fullPayload as { records?: unknown[] }).records ?? [],
   siteConfig,
 );
-const model = getCollectionPageModel(collection, entries, collections);
+const model = getCollectionPageModel(collection, entries, collections, siteConfig);
 ---
 
 <BaseLayout
-  title={collection.seo.title ?? collection.title}
-  description={collection.seo.description ?? collection.description}
+  title={model.seo.title}
+  description={model.seo.description}
+  image={model.seo.image}
+  imageAlt={model.seo.imageAlt}
+  jsonLd={model.seo.jsonLd}
+  noindex={model.seo.noindex}
   site={siteConfig}
   type="article"
 >

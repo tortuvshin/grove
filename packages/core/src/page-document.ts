@@ -115,6 +115,10 @@ export interface SiteInput {
   orgName: string;
   orgUrl: string;
   orgLogo?: string;
+  /** BCP-47 language tag emitted as `inLanguage` (e.g. "en"). */
+  inLanguage?: string;
+  /** Absolute sameAs URLs (repo, social profiles) for the Organization. */
+  sameAs?: string[];
 }
 
 export function siteSchema(input: SiteInput): JsonLdNode[] {
@@ -126,22 +130,42 @@ export function siteSchema(input: SiteInput): JsonLdNode[] {
       url: input.url,
       name: input.name,
       ...(input.description ? { description: input.description } : {}),
+      ...(input.inLanguage ? { inLanguage: input.inLanguage } : {}),
       publisher: {
         "@type": "Organization",
         "@id": `${input.orgUrl}#org`,
         name: input.orgName,
         url: input.orgUrl,
         ...(input.orgLogo ? { logo: input.orgLogo } : {}),
+        ...(input.sameAs?.length ? { sameAs: input.sameAs } : {}),
       },
     },
   ];
+}
+
+/**
+ * Standalone BreadcrumbList node. The shared shape behind
+ * collection/record/content schemas, exported so adapters can attach
+ * breadcrumbs to pages that need nothing else (about, contributors).
+ */
+export function breadcrumbSchema(crumbs: Crumb[]): JsonLdNode {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: c.url,
+    })),
+  };
 }
 
 export interface CollectionInput {
   url: string;
   name: string;
   description: string;
-  items: Array<{ url: string; name: string }>;
+  items: Array<{ url: string; name: string; description?: string }>;
   crumbs: Crumb[];
 }
 
@@ -168,19 +192,10 @@ export function collectionSchema(input: CollectionInput): JsonLdNode[] {
       position: i + 1,
       url: item.url,
       name: item.name,
+      ...(item.description ? { description: item.description } : {}),
     })),
   };
-  const crum: JsonLdNode = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: input.crumbs.map((c, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: c.name,
-      item: c.url,
-    })),
-  };
-  return [page, list, crum];
+  return [page, list, breadcrumbSchema(input.crumbs)];
 }
 
 export interface RecordInput {
@@ -207,17 +222,7 @@ export function recordSchema(input: RecordInput): JsonLdNode[] {
     ...(isApp && input.repoUrl ? { codeRepository: input.repoUrl } : {}),
     ...(input.license ? { license: input.license } : {}),
   };
-  const crum: JsonLdNode = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: input.crumbs.map((c, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: c.name,
-      item: c.url,
-    })),
-  };
-  return [main, crum];
+  return [main, breadcrumbSchema(input.crumbs)];
 }
 
 export interface ContentInput {
@@ -241,16 +246,7 @@ export function contentSchema(input: ContentInput): JsonLdNode[] {
       author: { "@type": "Organization", name: input.author },
       ...(input.datePublished ? { datePublished: input.datePublished } : {}),
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: input.crumbs.map((c, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        name: c.name,
-        item: c.url,
-      })),
-    },
+    breadcrumbSchema(input.crumbs),
   ];
 }
 

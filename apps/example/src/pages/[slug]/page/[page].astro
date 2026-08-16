@@ -1,0 +1,32 @@
+---
+/**
+ * Browse pages 2..n — `/{slug}/page/2/`, `/{slug}/page/3/`, …
+ *
+ * Real prerendered paths rather than a `?page=` query, so every record
+ * in a large directory is reachable by a crawler and by a visitor with
+ * no JavaScript. The `/page/` segment keeps these clear of
+ * `/{slug}/{recordSlug}`, which would otherwise claim `/projects/2/`
+ * for a record slugged "2".
+ *
+ * Page 1 is the bare `/{slug}/` route — it is not duplicated here, so
+ * there is one canonical URL for the first page.
+ */
+import siteConfig from "@grove/generated/site-config.json";
+import { getDirectoryIndexModel } from "@grove-dev/astro/server";
+import DirectoryBrowse from "../../../components/DirectoryBrowse.astro";
+
+export function getStaticPaths() {
+  const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+  // Page count comes from the model, not from `stats.totalRecords` —
+  // the browse list is scoped to the blueprint's own records.
+  const { pages: count } = getDirectoryIndexModel(new URLSearchParams(), siteConfig);
+  return Array.from({ length: Math.max(0, count - 1) }, (_, index) => ({
+    params: { slug: routeSlug, page: String(index + 2) },
+    props: { routePage: index + 2 },
+  }));
+}
+
+const { routePage } = Astro.props;
+---
+
+<DirectoryBrowse routePage={routePage} />

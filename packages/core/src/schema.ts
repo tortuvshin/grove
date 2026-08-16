@@ -511,8 +511,14 @@ export const footerSchema = z
     columns: z.array(footerColumnSchema).max(3).default([]),
     copyright: z.string().optional(),
     license: z.string().optional(),
+    /**
+     * "Powered by Grove" under the footer brand block. On by default —
+     * a Grove site says so, the same way a static-site theme carries
+     * its generator. Set `false` to drop it.
+     */
+    poweredBy: z.boolean().default(true),
   })
-  .default({ columns: [] });
+  .default({ columns: [], poweredBy: true });
 
 export const submissionSchema = z
   .object({
@@ -641,6 +647,16 @@ export const groveConfigSchema = z.object({
      * Falls back to a generated square tinted with `theme.primaryColor`.
      */
     favicon: z.string().optional(),
+    /**
+     * BCP-47 language tag for the published site. Drives `<html lang>`,
+     * `og:locale`, and JSON-LD `inLanguage`.
+     */
+    locale: z.string().default("en"),
+    /**
+     * Twitter/X handle for the site (e.g. `@grove`). Emitted as
+     * `twitter:site` on every page when set.
+     */
+    twitter: z.string().optional(),
   }),
 
   analytics: z

@@ -10,6 +10,7 @@ const GENERATED_PUBLIC_NAMES = new Set([
   "sitemap.xml",
   "robots.txt",
   "og-image.svg",
+  "og",
 ]);
 const GROVE_PACKAGES = ["@grove-dev/astro", "@grove-dev/cli", "@grove-dev/core"] as const;
 

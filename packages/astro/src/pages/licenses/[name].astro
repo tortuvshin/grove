@@ -11,6 +11,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import CardGrid from "../../components/CardGrid.astro";
 import CollectionRow from "../../components/CollectionRow.astro";
 import { runCollection, type Collection, type CollectionEntry } from "@grove-dev/core";
+import { getTaxonomyPageModel } from "../../server/index.js";
 import siteConfig from "@grove/generated/site-config.json";
 
 export function getStaticPaths() {
@@ -34,19 +35,25 @@ const collection: Collection = {
   // curated `entry.licenses` array. The match is case-insensitive.
   query: { licenses: [name.toLowerCase()], excludeStatuses: ["archived"] },
   ranking: { preset: "quality" },
-  seo: { index: true, title: `${name.toUpperCase()} apps` },
+  seo: { index: true },
 };
 
 const entries: CollectionEntry[] = [];
 const result = runCollection(collection, entries);
+// Centralized SEO — same title/description/JSON-LD patterns as the
+// scaffold's taxonomy page (see `getTaxonomyPageModel`).
+const model = getTaxonomyPageModel("licenses", name, name.toUpperCase(), siteConfig);
 ---
 
 <BaseLayout
-  title={collection.seo.title ?? collection.title}
-  description={collection.description}
+  title={model.seo.title}
+  description={model.seo.description}
+  image={model.seo.image}
+  imageAlt={model.seo.imageAlt}
+  jsonLd={model.seo.jsonLd}
   site={siteConfig}
 >
-  <section class="mx-auto w-full max-w-wide px-5 py-12 sm:px-7 sm:py-16" aria-labelledby="license-title">
+  <section class="mx-auto w-full max-w-container px-5 py-12 sm:px-7 sm:py-16" aria-labelledby="license-title">
     <p class="m-0 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">License</p>
     <h1
       id="license-title"

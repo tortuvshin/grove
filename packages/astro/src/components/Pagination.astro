@@ -7,7 +7,7 @@ interface Props {
 }
 
 import { paginationPageList } from "@grove-dev/astro";
-import { buttonClass, PAGINATION_EXTRA } from "../ui/button.js";
+import { buttonClass, PAGINATION_DISABLED, PAGINATION_EXTRA } from "../ui/button.js";
 
 const { current, total, hrefFor, class: className = "" } = Astro.props;
 
@@ -24,7 +24,7 @@ const currentClass = buttonClass("selected", "sm", PAGINATION_EXTRA);
     {current > 1 ? (
       <a href={hrefFor(current - 1)} class={linkClass} rel="prev">Previous</a>
     ) : (
-      <span class={`${linkClass} pointer-events-none opacity-40`}>Previous</span>
+      <span class={`${linkClass} ${PAGINATION_DISABLED}`}>Previous</span>
     )}
 
     {pages.map((page) =>
@@ -44,7 +44,7 @@ const currentClass = buttonClass("selected", "sm", PAGINATION_EXTRA);
     {current < total ? (
       <a href={hrefFor(current + 1)} class={linkClass} rel="next">Next</a>
     ) : (
-      <span class={`${linkClass} pointer-events-none opacity-40`}>Next</span>
+      <span class={`${linkClass} ${PAGINATION_DISABLED}`}>Next</span>
     )}
   </nav>
 )}

@@ -7,7 +7,7 @@
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import CollectionIndex from "../../components/CollectionIndex.astro";
-import { loadCollections } from "../../lib/load-collections.js";
+import { loadCollections } from "../../server/collections.js";
 import {
   recordsToCollectionEntries,
   getCollectionIndexModel,
@@ -20,7 +20,7 @@ const entries = recordsToCollectionEntries(
   (fullPayload as { records?: unknown[] }).records ?? [],
   siteConfig,
 );
-const model = getCollectionIndexModel(collections, entries);
+const model = getCollectionIndexModel(collections, entries, siteConfig);
 const countNoun = {
   singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
   plural: siteConfig.blueprintConfig?.labelPlural ?? "items",
@@ -28,8 +28,10 @@ const countNoun = {
 ---
 
 <BaseLayout
-  title="Collections"
-  description="Curated and generated directories of related items."
+  title={model.seo?.title ?? "Collections"}
+  description={model.seo?.description ?? "Curated and generated directories of related items."}
+  image={model.seo?.image}
+  jsonLd={model.seo?.jsonLd}
   site={siteConfig}
 >
   <CollectionIndex model={model} headingLevel={1} countNoun={countNoun} />

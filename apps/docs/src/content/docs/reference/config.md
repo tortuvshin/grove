@@ -151,6 +151,8 @@ Which blueprint this space follows. Determines the record kind
 | `description` | `string` | `undefined` | Longer description. Used for `<meta name="description">` and `llms.txt`. |
 | `url` | `string` (URL) | `undefined` | The canonical site URL. Used in `sitemap.xml` and OG tags. |
 | `repoUrl` | `string` (URL) | `undefined` | The space's GitHub repo URL. Used in the "view source" link and PR templates. |
+| `locale` | `string` (BCP-47) | `"en"` | Site language. Drives `<html lang>`, `og:locale`, and JSON-LD `inLanguage`. |
+| `twitter` | `string` | `undefined` | Twitter/X handle (e.g. `@myproject`). Emitted as `twitter:site` on every page. |
 
 ### `nav`
 
@@ -186,6 +188,11 @@ come from each record and stay a separate many-to-many facet; add
 Configures up to three footer link columns plus the copyright and license copy.
 Each item has `label`, `href`, and optional `external: true`. When `columns` is
 empty, Grove derives useful repository links.
+
+`poweredBy` (default `true`) renders a "Powered by Grove" link under the footer
+brand block. Set it to `false` to drop the attribution. The same mark is
+available as a component — `@grove-dev/astro/components/PoweredBy.astro` — for
+placing it anywhere else on the page, including `Hero`'s `eyebrow` slot.
 
 ### `submission`
 

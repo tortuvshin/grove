@@ -7,18 +7,21 @@
 import siteConfig from "@grove/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
-import { getTaxonomyIndexModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { getTaxonomyIndexModel, getTaxonomyIndexSeo, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
 // Uncapped: the index page lists EVERY stack (the homepage grid's
 // 12-item cap is a homepage layout choice, not a data truth).
 const { stacks } = getTaxonomyIndexModel();
 const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
+const seo = getTaxonomyIndexSeo("stacks", siteConfig);
 ---
 
 <BaseLayout
-  title={`Stacks — ${siteConfig.name}`}
-  description={`Browse ${itemLabelPlural()} in ${siteConfig.name} by technology stack.`}
+  title={seo.title}
+  description={seo.description}
+  image={seo.image}
+  jsonLd={seo.jsonLd}
   site={siteConfig}
 >
   <StackGrid

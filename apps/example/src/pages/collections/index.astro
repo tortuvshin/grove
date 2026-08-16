@@ -14,15 +14,18 @@ const entries = recordsToCollectionEntries(
   (records as { records: unknown[] }).records as never,
   siteConfig,
 );
-const model = getCollectionIndexModel(collections, entries);
+const model = getCollectionIndexModel(collections, entries, siteConfig);
 const countNoun = {
   singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
   plural: siteConfig.blueprintConfig?.labelPlural ?? "items",
 };
+const seo = model.seo;
 ---
 <BaseLayout
-  title="Collections"
-  description="Curated and generated directories of related items."
+  title={seo?.title ?? "Collections"}
+  description={seo?.description ?? "Curated and generated directories of related items."}
+  image={seo?.image}
+  jsonLd={seo?.jsonLd}
   site={siteConfig}
 >
   <CollectionIndex model={model} headingLevel={1} countNoun={countNoun} />

@@ -11,6 +11,12 @@
 export { defineConfig, loadConfig } from "./config.js";
 export type { GroveConfig, GroveConfigInput } from "./schema.js";
 
+// ── Host helper ──────────────────────────────────────────────────────
+// Shared by `site-artifacts.ts` (static OG SVG) and `og-image.ts`
+// (per-page PNG cards). One implementation so the two social-card
+// surfaces never print different hosts for the same config.
+export { hostOf } from "./host.js";
+
 // ── Schemas (Zod) ─────────────────────────────────────────────────────
 // ── Slug helpers ───────────────────────────────────────────────────
 // Public because the markdown renderer in @grove-dev/astro imports
@@ -121,6 +127,8 @@ export type {
 
 // ── Config-driven public artifacts ──────────────────────────────────
 export { buildOgImageSvg, buildSiteArtifacts } from "./site-artifacts.js";
+export { buildOgImages, renderOgPng } from "./og-image.js";
+export type { OgTemplate, OgBuildInput, OgBuildResult } from "./og-image.js";
 export type {
   SiteArtifactStats,
   SiteArtifactsResult,
@@ -239,6 +247,7 @@ export type {
 export {
   definePageDocument,
   siteSchema,
+  breadcrumbSchema,
   collectionSchema,
   recordSchema,
   contentSchema,
@@ -286,3 +295,6 @@ export type {
 export { runCollection } from "./collector.js";
 export type { CollectionResult } from "./collector.js";
 export { findRelated } from "./related.js";
+
+// ── Collection IO (YAML loading from data/collections) ───────────────
+export { loadCollections } from "./collections-io.js";

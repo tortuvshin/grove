@@ -109,6 +109,14 @@ export default function groveAstro(): AstroIntegration {
                 "@grove/generated": resolve(consumerRoot, "data/generated"),
               },
             },
+            // The OG image pipeline (`@grove-dev/core`'s og-image.ts)
+            // dynamically imports satori + resvg's native binding.
+            // They only ever run in `prepareDirectory` (Node, build
+            // time) — never in page code — so keep the bundler away
+            // from the .node binary.
+            ssr: {
+              external: ["satori", "@resvg/resvg-js"],
+            },
             plugins: [
               {
                 name: "grove:consumer-global-css-resolver",

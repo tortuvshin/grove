@@ -3,6 +3,7 @@ import {
   definePageDocument,
   buildJsonLd,
   siteSchema,
+  breadcrumbSchema,
   collectionSchema,
   recordSchema,
   contentSchema,
@@ -112,6 +113,51 @@ describe("JSON-LD schemas", () => {
     });
     expect(nodes).toHaveLength(3);
     expect((nodes[1] as { numberOfItems?: number }).numberOfItems).toBe(2);
+  });
+
+  it("collectionSchema passes item descriptions through", () => {
+    const nodes = collectionSchema({
+      url: "https://example.com/c/",
+      name: "Top",
+      description: "x",
+      items: [
+        { url: "https://example.com/a/", name: "A", description: "First app" },
+        { url: "https://example.com/b/", name: "B" },
+      ],
+      crumbs: [
+        { url: "https://example.com/", name: "Home" },
+        { url: "https://example.com/c/", name: "Top" },
+      ],
+    });
+    const list = nodes[1] as { itemListElement: Array<Record<string, unknown>> };
+    expect(list.itemListElement[0]?.description).toBe("First app");
+    expect(list.itemListElement[1]).not.toHaveProperty("description");
+  });
+
+  it("siteSchema emits inLanguage and publisher sameAs when given", () => {
+    const [node] = siteSchema({
+      url: "https://example.com",
+      name: "Example",
+      orgName: "Example",
+      orgUrl: "https://example.com",
+      inLanguage: "en",
+      sameAs: ["https://github.com/example/repo"],
+    });
+    expect(node?.inLanguage).toBe("en");
+    expect((node?.publisher as { sameAs?: string[] }).sameAs).toEqual([
+      "https://github.com/example/repo",
+    ]);
+  });
+
+  it("breadcrumbSchema builds positioned ListItems", () => {
+    const node = breadcrumbSchema([
+      { url: "https://example.com/", name: "Home" },
+      { url: "https://example.com/c/", name: "C" },
+    ]);
+    expect(node["@type"]).toBe("BreadcrumbList");
+    const items = node.itemListElement as Array<{ position: number; item: string }>;
+    expect(items.map((i) => i.position)).toEqual([1, 2]);
+    expect(items[1]?.item).toBe("https://example.com/c/");
   });
 
   it("recordSchema branches on kind", () => {

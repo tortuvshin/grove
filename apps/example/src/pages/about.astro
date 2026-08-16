@@ -16,19 +16,18 @@
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import Container from "@grove-dev/astro/layouts/Container.astro";
 import siteConfig from "@grove/generated/site-config.json";
-import { getPageContentHtml, indexSlug, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { getAboutPageSeo, getPageContentHtml, indexSlug, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 import { buttonClass } from "@grove-dev/astro/ui/button";
 
 const githubUrl = siteConfig.repoUrl;
-const title = `About — ${siteConfig.name}`;
-const description = `${siteConfig.tagline} Built with Grove.`;
+const seo = getAboutPageSeo(siteConfig);
 const slug = indexSlug();
 const item = itemLabel();
 const items = itemLabelPlural();
 const pageContentHtml = getPageContentHtml("about");
 ---
 
-<BaseLayout title={title} description={description} site={siteConfig}>
+<BaseLayout title={seo.title} description={seo.description} image={seo.image} jsonLd={seo.jsonLd} site={siteConfig}>
   <Container size="narrow">
     <article class="py-12 sm:py-16">
       <nav class="text-2xs text-muted-foreground" aria-label="Breadcrumb">

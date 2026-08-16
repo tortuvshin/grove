@@ -354,32 +354,114 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
   });
 }
 
-/** Build a flat list of "active filter" chips for display + removal. */
+/** Serialize filters back to a browsable URL under `pathPrefix`. */
+export function hrefForFilters(f: IndexFilters, pathPrefix = ""): string {
+  const params = searchParamsFromFilters(f);
+  return `${pathPrefix}${params.size ? `?${params}` : ""}`;
+}
+
+/**
+ * URL for a given result page, keeping every other filter. One
+ * definition for the server render and the client rebuild — they had
+ * drifted as two hand-rolled copies.
+ */
+export function hrefForPage(f: IndexFilters, page: number, pathPrefix = ""): string {
+  return hrefForFilters({ ...f, page }, pathPrefix);
+}
+
+/** URL that drops every filter but keeps the chosen sort. */
+export function hrefForClearedFilters(f: IndexFilters, pathPrefix = ""): string {
+  return hrefForFilters({ sort: f.sort }, pathPrefix);
+}
+
+/**
+ * Path for a prerendered result page — `/projects/`, `/projects/page/2/`.
+ *
+ * The unfiltered pages of a directory are real, crawlable, no-JS pages;
+ * `?page=N` is reserved for filtered views, which only exist on the
+ * client. A directory whose pages 2..n are unreachable to a crawler is
+ * a directory whose records mostly do not exist as far as search is
+ * concerned.
+ *
+ * The `/page/` segment is load-bearing: record detail pages live at
+ * `/{slug}/{recordSlug}`, so `/projects/2/` would collide with a record
+ * whose slug is "2".
+ */
+export function pagePathHref(pathPrefix: string, page: number): string {
+  return page <= 1 ? `${pathPrefix}/` : `${pathPrefix}/page/${page}/`;
+}
+
+/** Minimal taxonomy shape needed to turn ids into display names. */
+export type TaxonomyNames = Record<string, { id: string; name: string }[] | undefined>;
+
+export interface FilterChip {
+  key: keyof IndexFilters;
+  value: string;
+  label: string;
+  /** URL that removes this one filter. */
+  href: string;
+}
+
+/** Which taxonomy file backs each filter key. `tags` live in topics.yml. */
+const CHIP_TAXONOMY_KIND: Partial<Record<keyof IndexFilters, string>> = {
+  stacks: "stacks",
+  platforms: "platforms",
+  categories: "categories",
+  tags: "topics",
+  licenses: "licenses",
+};
+
+const CHIP_PREFIX: Partial<Record<keyof IndexFilters, string>> = {
+  stacks: "Stack",
+  platforms: "Platform",
+  categories: "Category",
+  tags: "Tag",
+  licenses: "License",
+};
+
+/**
+ * Build a flat list of "active filter" chips for display + removal.
+ *
+ * Chips carry their own remove `href` and a taxonomy-resolved label.
+ * Both used to be rebuilt by every caller, and the server and the
+ * client resolved labels differently — the server showed
+ * `Stack: react-native`, the client `Stack: React Native`.
+ */
 export function activeFilterChips(
   f: IndexFilters,
-): { key: keyof IndexFilters; value: string; label: string }[] {
-  const out: { key: keyof IndexFilters; value: string; label: string }[] = [];
+  context: { taxonomy?: TaxonomyNames; pathPrefix?: string } = {},
+): FilterChip[] {
+  const { taxonomy, pathPrefix = "" } = context;
+  const out: Omit<FilterChip, "href">[] = [];
+
+  const display = (key: keyof IndexFilters, value: string): string => {
+    const kind = CHIP_TAXONOMY_KIND[key];
+    const name = kind
+      ? taxonomy?.[kind]?.find((entry) => entry.id === value)?.name
+      : undefined;
+    return `${CHIP_PREFIX[key]}: ${name ?? value}`;
+  };
 
   if (f.q && f.q.trim()) {
     out.push({ key: "q", value: "", label: `“${f.q}”` });
   }
   for (const v of f.stacks ?? []) {
-    out.push({ key: "stacks", value: v, label: `Stack: ${v}` });
+    out.push({ key: "stacks", value: v, label: display("stacks", v) });
   }
   for (const v of f.platforms ?? []) {
-    out.push({ key: "platforms", value: v, label: `Platform: ${v}` });
+    out.push({ key: "platforms", value: v, label: display("platforms", v) });
   }
   for (const v of f.categories ?? []) {
-    out.push({ key: "categories", value: v, label: `Category: ${v}` });
+    out.push({ key: "categories", value: v, label: display("categories", v) });
   }
   for (const v of f.tags ?? []) {
-    out.push({ key: "tags", value: v, label: `Tag: ${v}` });
+    out.push({ key: "tags", value: v, label: display("tags", v) });
   }
   for (const v of f.labels ?? []) {
     out.push({ key: "labels", value: v, label: labelDisplay(v) ?? v });
   }
   for (const v of f.licenses ?? []) {
-    out.push({ key: "licenses", value: v, label: `License: ${v}` });
+    out.push({ key: "licenses", value: v, label: display("licenses", v) });
   }
   if (f.lens) {
     out.push({ key: "lens", value: f.lens, label: lensDisplay(f.lens) });
@@ -396,7 +478,10 @@ export function activeFilterChips(
     }
   }
 
-  return out;
+  return out.map((chip) => ({
+    ...chip,
+    href: hrefForFilters(removeFilter(f, chip.key, chip.value), pathPrefix),
+  }));
 }
 
 /**

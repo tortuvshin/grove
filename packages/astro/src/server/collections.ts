@@ -1,8 +1,10 @@
 import type { Collection, CollectionEntry } from "@grove-dev/core";
-import { findRelated, runCollection } from "@grove-dev/core";
-import { readFile, readdir } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { parse as parseYaml } from "yaml";
+import { collectionSchema, findRelated, runCollection } from "@grove-dev/core";
+import { absoluteUrl, ogPath, type PageSeo, seoDescription, seoTitle } from "./seo.js";
+
+// Collection YAML loading lives in @grove-dev/core (it also feeds the
+// sitemap and OG-image pipelines there); re-exported for page code.
+export { loadCollections } from "@grove-dev/core";
 
 interface RouteHint {
   routeSlug?: string;
@@ -123,10 +125,12 @@ export interface CollectionPageModel {
   total: number;
   isEmpty: boolean;
   entries: CollectionEntry[];
-  /** ItemList JSON-LD block. Pass to BaseLayout as the `jsonLd` prop
-   *  so it ships in the document head and is indexable by search
-   *  engines as a list of `SoftwareApplication` items. */
+  /** CollectionPage + ItemList + BreadcrumbList JSON-LD nodes. Ships
+   *  through `seo.jsonLd`; kept here too for backward compatibility. */
   jsonLd?: unknown;
+  /** Complete head block: honors the collection's `seo.title`,
+   *  `seo.description`, and `seo.index` overrides. Pass to BaseLayout. */
+  seo: PageSeo;
   related: Array<{ slug: string; title: string; url: string }>;
 }
 
@@ -140,6 +144,9 @@ export interface CollectionIndexModel {
     count: number;
     url: string;
   }>;
+  /** Head block for the /collections/ index — present when the caller
+   *  passes a site config. */
+  seo?: PageSeo;
 }
 
 export interface CollectionTeaserModel {
@@ -151,7 +158,7 @@ export function getCollectionPageModel(
   collection: Collection,
   entries: CollectionEntry[],
   allCollections: Collection[],
-  site?: { name?: string; url?: string },
+  site?: { name?: string; url?: string; siteUrl?: string; blueprintConfig?: { labelPlural?: string } },
 ): CollectionPageModel {
   const result = runCollection(collection, entries);
   const related = findRelated(collection, allCollections, 4).map((c) => ({
@@ -159,28 +166,43 @@ export function getCollectionPageModel(
     title: c.title,
     url: `/collections/${c.slug}/`,
   }));
-  // ItemList JSON-LD. Search engines can use this to surface
-  // individual entries directly from the collection URL.
-  // Cap at 50 entries to keep the JSON-LD payload bounded;
-  // search engines don't index beyond that anyway.
-  const itemListElement = result.entries.slice(0, 50).map((entry, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    item: {
-      "@type": "SoftwareApplication",
+  const siteUrl = (site?.siteUrl ?? site?.url ?? "https://example.com").replace(/\/$/, "");
+  const siteName = site?.name ?? "";
+  const plural = site?.blueprintConfig?.labelPlural ?? "items";
+  const pageUrl = absoluteUrl(siteUrl, `collections/${collection.slug}/`);
+  // CollectionPage + ItemList + BreadcrumbList. The ItemList is capped
+  // at 50 entries to keep the payload bounded; search engines don't
+  // index list markup beyond that anyway.
+  const jsonLd = collectionSchema({
+    url: pageUrl,
+    name: collection.seo?.title ?? collection.title,
+    description: collection.seo?.description ?? collection.description,
+    items: result.entries.slice(0, 50).map((entry) => ({
+      url: entry.url.startsWith("http") ? entry.url : absoluteUrl(siteUrl, entry.url),
       name: entry.title,
-      url: entry.url,
-      description: entry.description,
-    },
-  }));
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: collection.title,
-    description: collection.description,
-    url: site?.url ? `${site.url.replace(/\/$/, "")}/collections/${collection.slug}/` : undefined,
-    numberOfItems: result.entries.length,
-    itemListElement,
+      ...(entry.description ? { description: entry.description } : {}),
+    })),
+    crumbs: [
+      { url: `${siteUrl}/`, name: "Home" },
+      { url: absoluteUrl(siteUrl, "collections/"), name: "Collections" },
+      { url: pageUrl, name: collection.title },
+    ],
+  });
+  // The curator's `seo.title` / `seo.description` overrides win
+  // verbatim; the fallback pattern advertises the list size. A
+  // collection marked `seo.index: false` renders with noindex.
+  const seo: PageSeo = {
+    title:
+      collection.seo?.title ??
+      seoTitle(`${collection.title} — ${result.entries.length} ${plural}`, siteName),
+    description: seoDescription(
+      collection.seo?.description,
+      collection.description,
+    ),
+    image: ogPath("collection", collection.slug),
+    ...(siteName ? { imageAlt: `${collection.title} — ${siteName}` } : {}),
+    jsonLd: jsonLd as unknown as Record<string, unknown>[],
+    noindex: collection.seo?.index === false,
   };
   return {
     collection: {
@@ -196,26 +218,60 @@ export function getCollectionPageModel(
     entries: result.entries,
     related,
     jsonLd,
+    seo,
   };
 }
 
 export function getCollectionIndexModel(
   collections: Collection[],
   entries: CollectionEntry[],
+  site?: { name?: string; url?: string; siteUrl?: string; blueprintConfig?: { labelPlural?: string } },
 ): CollectionIndexModel {
+  const rows = collections.map((c) => {
+    const result = runCollection(c, entries);
+    return {
+      slug: c.slug,
+      title: c.title,
+      description: c.description,
+      kind: c.kind,
+      count: result.entries.length,
+      url: `/collections/${c.slug}/`,
+    };
+  });
+  let seo: PageSeo | undefined;
+  if (site) {
+    const siteUrl = (site.siteUrl ?? site.url ?? "https://example.com").replace(/\/$/, "");
+    const siteName = site.name ?? "";
+    const plural = site.blueprintConfig?.labelPlural ?? "items";
+    const title = seoTitle("Collections", siteName);
+    const description = seoDescription(
+      undefined,
+      `${rows.length} curated and generated collections of ${plural} on ${siteName || "this site"} — hand-picked lists kept in sync with the source files.`,
+    );
+    seo = {
+      title,
+      description,
+      image: ogPath("default"),
+      jsonLd: collectionSchema({
+        url: absoluteUrl(siteUrl, "collections/"),
+        name: title,
+        description,
+        items: rows.map((row) => ({
+          url: absoluteUrl(siteUrl, row.url),
+          name: row.title,
+          ...(row.description ? { description: row.description } : {}),
+        })),
+        crumbs: [
+          { url: `${siteUrl}/`, name: "Home" },
+          { url: absoluteUrl(siteUrl, "collections/"), name: "Collections" },
+        ],
+      }) as unknown as Record<string, unknown>[],
+    };
+  }
   return {
     total: collections.length,
-    collections: collections.map((c) => {
-      const result = runCollection(c, entries);
-      return {
-        slug: c.slug,
-        title: c.title,
-        description: c.description,
-        kind: c.kind,
-        count: result.entries.length,
-        url: `/collections/${c.slug}/`,
-      };
-    }),
+    collections: rows,
+    ...(seo ? { seo } : {}),
   };
 }
 
@@ -229,33 +285,6 @@ export function getCollectionTeaserModel(
     total: full.total,
     collections: full.collections.slice(0, limit),
   };
-}
-
-/**
- * Load all `Collection` YAML files from `<cwd>/data/collections/*.yml`.
- *
- * Returns an empty array if the directory does not exist. Parse
- * errors are NOT swallowed — they surface so real problems
- * (malformed YAML, permission errors) are not hidden.
- */
-export async function loadCollections(cwd: string): Promise<Collection[]> {
-  const dir = resolve(cwd, "data/collections");
-  let files: string[];
-  try {
-    files = await readdir(dir);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw err;
-  }
-  const out: Collection[] = [];
-  for (const f of files.filter((f) => f.endsWith(".yml"))) {
-    const raw = parseYaml(await readFile(join(dir, f), "utf8"));
-    if (!raw || typeof raw !== "object") {
-      throw new Error(`Invalid collection YAML: ${f}`);
-    }
-    out.push(raw as Collection);
-  }
-  return out;
 }
 
 /**

@@ -148,8 +148,15 @@
    * grove.config.ts: BaseLayout emits `--grove-container` on <html>
    * and the token falls back to the package default when unset. */
   --container-container: var(--grove-container, 1160px);
-  --container-wide: 1400px;
-  --container-narrow: 720px;
+  /* `wide` is an opt-in escape hatch, not a second site width. It is
+     clamped to the configured container so a wide section can never
+     overhang the header, footer, and the rest of the page — every
+     shell and page template uses `max-w-container`. */
+  --container-wide: min(var(--grove-container, 1400px), 1400px);
+  /* `narrow` is the reading measure for prose pages (about, 404,
+     empty). Clamped for the same reason — a site narrower than 720px
+     should not have its prose pages spill past its own frame. */
+  --container-narrow: min(var(--grove-container, 720px), 720px);
 
   /* ── Border radius scale ──────────────────────────────────────────
    * Driven by `theme.radius` ("none" | "soft" | "round") the same
@@ -943,15 +950,25 @@
     display: block;
   }
 }
-.grove-toc-item { padding: 0; }
+/* Active item: text-color + a left-rail accent on the link's
+ * leading edge. A full pill background reads as a button, not a
+ * nav indicator, so it is reserved for hover; the rail stays put
+ * while the visitor moves between sections. */
+.grove-toc-item > .grove-toc-link {
+  position: relative;
+}
+.grove-toc-link {
+  border-left: 2px solid transparent;
+}
+.grove-toc-item--h3 > .grove-toc-link {
+  border-left-style: dashed;
+}
 .grove-toc-link[data-toc-active] {
-  background-color: var(--color-ink-100, #f0f0f0);
   color: var(--color-ink-900, #1a1a1a);
+  border-left-color: currentColor;
   font-weight: 600;
-  border-radius: 0.375rem;
 }
 .dark .grove-toc-link[data-toc-active] {
-  background-color: var(--color-ink-800, #2a2a2a);
   color: var(--color-ink-100, #f0f0f0);
 }
 

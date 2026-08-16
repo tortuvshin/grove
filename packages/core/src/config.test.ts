@@ -21,6 +21,21 @@ describe("Grove config", () => {
   });
 });
 
+describe("footer.poweredBy", () => {
+  it("defaults to on so a Grove site says it is one", () => {
+    const config = defineConfig({ site: { name: "Directory" } });
+    expect(config.footer.poweredBy).toBe(true);
+  });
+
+  it("can be turned off", () => {
+    const config = defineConfig({
+      site: { name: "Directory" },
+      footer: { poweredBy: false },
+    });
+    expect(config.footer.poweredBy).toBe(false);
+  });
+});
+
 describe("browse.facets contract", () => {
   it("preserves the configured facet order", () => {
     const config = defineConfig({

@@ -23,7 +23,6 @@ export * from "./lenses.js";
 export * from "./search.js";
 export * from "./taxonomy-counts.js";
 export * from "./display.js";
-export * from "./load-collections.js";
 export * from "./icon-registry.js";
 export * from "./icon-kinds.js";
 export * from "./packaged-icons.js";
