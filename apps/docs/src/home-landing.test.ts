@@ -23,6 +23,7 @@ describe("docs homepage (standalone Astro route)", () => {
 			"Features",
 			"Demo",
 			"Pipeline",
+			"Ownership",
 			"OpenApps",
 			"Faq",
 			"FinalCta",
@@ -37,7 +38,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		// grid → live demo → transformation diagram → production story → FAQ →
 		// gradient CTA band.
 		expect(indexAstro).toMatch(
-			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<Pipeline\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
+			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<Pipeline\s*\/>\s*<Ownership\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
 		);
 
 		// Superseded sections from earlier iterations must stay deleted.
@@ -162,23 +163,30 @@ describe("docs homepage (standalone Astro route)", () => {
 		// Micro badge + positioning line, closing phrase in the animated
 		// signature gradient.
 		expect(hero).toContain("Open source");
-		expect(hero).toContain("Build directories");
-		expect(hero).toContain("that stay useful.");
+		expect(hero).toContain("Publish structured knowledge");
+		expect(hero).toContain("that stays useful.");
 		expect(hero).toContain("text-gradient-live");
 
-		// One-sentence philosophy in user terms.
-		expect(hero).toContain("searchable, SEO-ready directory");
+		// The release line is read from package data, never retyped.
+		expect(hero).toContain("GROVE_RELEASE_LINE");
+		expect(hero).not.toMatch(/Grove v\d+\.\d+/);
+
+		// The full outcome, not just the site: outputs and maintenance both.
+		expect(hero).toContain("machine-readable outputs");
+		expect(hero).toContain("reviewable automation");
 
 		// The CLI is the primary call to action: it types on load, prints
-		// the first scaffold lines, and the copy button hands it over.
-		expect(hero).toContain("npx @grove-dev/cli init");
+		// the first scaffold lines, and the copy button hands it over. The
+		// command is the same one FinalCta offers — they disagreed before.
+		expect(hero).toContain("pnpm dlx @grove-dev/cli@latest init my-space");
 		expect(hero).toContain("Ready to grow.");
 		expect(hero).toContain("Copied");
 		expect(hero).toContain("navigator.clipboard");
-		expect(hero).not.toContain("pnpm dlx");
 		expect(hero).not.toContain("<pre");
 
-		// Secondary links point at real destinations; no triple-button row.
+		// Explicit CTAs, then quiet secondary links.
+		expect(hero).toContain("Create a Grove site");
+		expect(hero).toContain("See how it works");
 		expect(hero).toContain("View on GitHub");
 		expect(hero).toContain("Read the docs");
 		expect(hero).toContain('href="/introduction/"');
@@ -196,34 +204,50 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toContain("No database · No CMS · MIT licensed");
 	});
 
-	it("explains the product with an eight-card, plain-language feature grid", async () => {
+	it("frames the product as three outcomes: publish, distribute, maintain", async () => {
 		const features = await readComponent("Features");
 
 		expect(features).toContain('id="features"');
-		expect(features).toContain("Redefining");
-		expect(features).toContain("directory maintenance.");
+		expect(features).toContain("Publish once.");
+		expect(features).toContain("Stay useful for years.");
 
-		// Eight benefit-first cards; each maps to shipped behavior.
-		for (const title of [
-			"Ready in a minute",
-			"Search & lenses",
-			"Curated collections",
-			"Rich detail pages",
-			"Self-updating metadata",
-			"Stays healthy",
-			"One source, many outputs",
-			"Yours to own",
-		]) {
-			expect(features, title).toContain(title);
+		// The three groups, each with a concrete supporting claim.
+		for (const eyebrow of ["Publish", "Distribute", "Maintain"]) {
+			expect(features, eyebrow).toContain(`eyebrow: '${eyebrow}'`);
 		}
 
-		// User-language claims that map to real mechanisms.
-		expect(features).toContain("review queue");
+		// Claims that map to shipped behavior.
+		expect(features).toContain("Search and filters");
 		expect(features).toContain("llms.txt");
-		expect(features).toContain("No database, no CMS");
+		expect(features).toContain("queued for review");
+		expect(features).toContain("recorded with their reasons");
+
+		// The accurate replacement for the old permanence promise.
+		expect(features).toContain("Facts stay synchronized. Judgment stays reviewable.");
 
 		// No terminal output in the feature grid — it speaks user, not CLI.
 		expect(features).not.toContain("<pre");
+	});
+
+	it("states what the user owns, with the generated paths called out", async () => {
+		const ownership = await readComponent("Ownership");
+
+		expect(ownership).toContain('id="ownership"');
+		expect(ownership).toMatch(/<section[^>]+aria-labelledby=/);
+
+		// The tree distinguishes consumer-owned sources from generated output.
+		for (const path of ["data/records/", "content/records/", "grove.config.ts", "src/pages/"]) {
+			expect(ownership, path).toContain(path);
+		}
+		for (const generated of ["data/generated/", "public/sitemap.xml"]) {
+			expect(ownership, generated).toContain(generated);
+		}
+
+		// The four guarantees, stated rather than implied.
+		expect(ownership).toContain("plain files in your Git repository");
+		expect(ownership).toContain("no Grove command rewrites them");
+		expect(ownership).toContain("static HTML you can host anywhere");
+		expect(ownership).toContain("No hosted account, runtime database, or proprietary backend");
 	});
 
 	it("tells the How Grove works story as a scroll scrub that ends in the live demo", async () => {
@@ -262,6 +286,10 @@ describe("docs homepage (standalone Astro route)", () => {
 		}
 		expect(demo).toContain("Collection health");
 		expect(demo).toContain("183");
+		// The old "Fully automated. Never outdated." promised something the
+		// system cannot deliver — automation syncs facts, humans keep judgment.
+		expect(demo).not.toContain("Never outdated");
+		expect(demo).toContain("Facts synchronized. Judgment reviewable.");
 		expect(demo).toContain('id="hgw-finale"');
 
 		// The scrub is a progressive enhancement only: it gates on viewport
@@ -340,15 +368,22 @@ describe("docs homepage (standalone Astro route)", () => {
 	it("keeps the Open Apps production story with a real product screenshot", async () => {
 		const openApps = await readComponent("OpenApps");
 
-		expect(openApps).toContain("Grove grew out of maintaining Open Apps.");
+		expect(openApps).toContain("Grove was extracted from Open App Scout.");
 		expect(openApps).toContain('id="open-apps"');
 		expect(openApps).toContain("https://openappscout.com");
 
-		// A real screenshot (astro:assets) replaced the hand-built mock; the
-		// honesty caveat about the pending package migration stays.
+		// A real screenshot (astro:assets) replaced the hand-built mock.
 		expect(openApps).toContain("astro:assets");
 		expect(openApps).toContain("open-apps-home.png");
-		expect(openApps).toContain("published Grove packages");
+
+		// The consumer moved onto the published packages, so the copy claims
+		// that and nothing more. Record counts are deliberately absent: the
+		// preview screenshot is a point-in-time capture and its counters
+		// disagree with the live site, so citing figures next to it would
+		// contradict the evidence on the same screen.
+		expect(openApps).toContain("published packages");
+		expect(openApps).toContain("acceptance consumer");
+		expect(openApps).not.toMatch(/\d+ records/);
 	});
 
 	it("closes with a full-bleed gradient CTA band and a package-manager tabbed install command", async () => {
@@ -381,7 +416,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toMatch(/<section[^>]+aria-labelledby=/);
 		expect(hero).toMatch(/<h1[^>]+id=/);
 
-		for (const name of ["Features", "Demo", "Pipeline", "OpenApps", "Faq", "FinalCta"]) {
+		for (const name of ["Features", "Demo", "Pipeline", "Ownership", "OpenApps", "Faq", "FinalCta"]) {
 			const src = await readComponent(name);
 			expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
 		}
@@ -451,7 +486,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(home).toContain('rel="manifest"');
 		expect(home).toContain('rel="apple-touch-icon"');
 		// Social alt text follows the positioning brand line.
-		expect(home).toContain("Grove — Build curated directories that stay useful");
+		expect(home).toContain("Grove — Publish structured knowledge that stays useful");
 
 		// Starlight head config wires the same metadata via object literals so
 		// Starlight content pages render the same preview cards. We only assert

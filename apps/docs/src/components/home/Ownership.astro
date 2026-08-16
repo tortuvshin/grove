@@ -1,0 +1,76 @@
+---
+// "What you own" — the answer to the question every evaluator asks third,
+// right after what it does and what it costs. A Grove project is files in
+// your repository; the package supplies generators and components, not
+// custody. Deliberately plain: a tree, a short list, no animation.
+import SectionHeader from './SectionHeader.astro';
+
+const tree = [
+  { path: 'data/records/', note: 'one YAML file per record', owner: 'you' },
+  { path: 'data/taxonomy/', note: 'categories, stacks, licenses', owner: 'you' },
+  { path: 'data/collections/', note: 'curated picks, with a written why', owner: 'you' },
+  { path: 'content/records/', note: 'Markdown for long-form detail', owner: 'you' },
+  { path: 'grove.config.ts', note: 'identity, navigation, theme', owner: 'you' },
+  { path: 'src/pages/', note: 'every route, copied in and yours to edit', owner: 'you' },
+  { path: 'data/generated/', note: 'JSON payloads', owner: 'grove' },
+  { path: 'public/sitemap.xml', note: 'and robots, llms.txt, social cards', owner: 'grove' },
+];
+
+const guarantees = [
+  'Your content is plain files in your Git repository.',
+  'Your pages are copied into your project — no Grove command rewrites them.',
+  'The build output is static HTML you can host anywhere.',
+  'No hosted account, runtime database, or proprietary backend.',
+];
+---
+
+<section id="ownership" class="mx-auto max-w-6xl px-6 py-20 sm:py-24" aria-labelledby="ownership-title">
+  <SectionHeader
+    eyebrow="What you own"
+    title="Your files. Your routes. Your repository."
+    titleId="ownership-title"
+    lede="Grove supplies the engine and the components. It does not take custody of your content, and there is nothing to export if you walk away."
+  />
+
+  <div class="mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+    <div class="overflow-hidden rounded-xl border border-border bg-card">
+      <div class="flex items-center gap-2 border-b border-border px-5 py-3">
+        <span class="font-mono text-xs text-subtle">my-space/</span>
+        <span class="ml-auto flex items-center gap-3 text-[11px]">
+          <span class="flex items-center gap-1.5 text-muted">
+            <span class="size-2 rounded-full bg-accent-green" aria-hidden="true"></span> yours
+          </span>
+          <span class="flex items-center gap-1.5 text-subtle">
+            <span class="size-2 rounded-full bg-border-strong" aria-hidden="true"></span> generated
+          </span>
+        </span>
+      </div>
+      <ul class="flex flex-col divide-y divide-border/60 font-mono text-[13px]">
+        {tree.map((row) => (
+          <li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-5 py-2.5">
+            <span
+              class={`size-2 shrink-0 translate-y-[-1px] rounded-full ${row.owner === 'you' ? 'bg-accent-green' : 'bg-border-strong'}`}
+              aria-hidden="true"
+            ></span>
+            <span class={row.owner === 'you' ? 'text-fg' : 'text-subtle'}>{row.path}</span>
+            <span class="text-xs text-subtle">{row.note}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="flex flex-col justify-center">
+      <ul class="flex flex-col gap-4">
+        {guarantees.map((line) => (
+          <li class="flex items-start gap-3 text-base leading-relaxed text-muted">
+            <svg class="mt-1 size-4 shrink-0 text-accent-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+            <span>{line}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="mt-8 border-l-2 border-border-strong pl-4 text-sm leading-relaxed text-subtle">
+        The two generated paths are the only files Grove rewrites. Edit the sources; the outputs follow.
+      </p>
+    </div>
+  </div>
+</section>

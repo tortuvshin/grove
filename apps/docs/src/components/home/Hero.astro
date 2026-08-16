@@ -1,12 +1,12 @@
 ---
 // Grove hero — the landing story's first frame. A micro badge, the growing
 // mark, one headline, one sentence, and the CLI as the primary call to
-// action: on load it types `npx @grove-dev/cli init` and prints the first
+// action: on load it types the real init command and prints the first
 // scaffold lines, which the "How Grove works" story then picks up on
 // scroll. GitHub and docs step back into quiet secondary links.
 import { GROVE_RELEASE_LINE } from '../../data/packages.ts';
 
-const CLI_COMMAND = 'npx @grove-dev/cli init';
+const CLI_COMMAND = 'pnpm dlx @grove-dev/cli@latest init my-space';
 
 const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow.'];
 ---
@@ -51,10 +51,10 @@ const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow
       id="hero-title"
       class="mt-10 max-w-3xl text-balance text-5xl font-bold leading-[1.08] tracking-tight text-fg sm:text-6xl md:text-[68px]"
     >
-      Build directories <span class="text-gradient text-gradient-live">that stay useful.</span>
+      Publish structured knowledge <span class="text-gradient text-gradient-live">that stays useful.</span>
     </h1>
     <p class="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted sm:text-xl">
-      Turn plain YAML and Markdown into a searchable, SEO-ready directory that stays current as your sources change.
+      Turn YAML and Markdown in Git into searchable websites, curated views, SEO surfaces, and machine-readable outputs — then keep facts synchronized through reviewable automation.
     </p>
 
     <!-- Primary CTA: the CLI itself. Types on load, prints the scaffold,
@@ -64,7 +64,7 @@ const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow
          visible. -->
     <div
       id="hero-cli"
-      class="mt-10 w-full max-w-sm overflow-hidden rounded-lg border border-border-strong bg-surface/80 text-left font-mono shadow-2xl shadow-black/40 backdrop-blur"
+      class="mt-10 w-full max-w-xl overflow-hidden rounded-lg border border-border-strong bg-surface/80 text-left font-mono shadow-2xl shadow-black/40 backdrop-blur"
     >
       <div class="flex items-center gap-2 px-4 py-3">
         <span class="select-none text-brand-light" aria-hidden="true">$</span>
@@ -90,6 +90,21 @@ const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow
           </div>
         ))}
       </div>
+    </div>
+
+    <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+      <a
+        href="/getting-started/create-a-space/"
+        class="inline-flex w-full items-center justify-center rounded-full bg-fg px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:w-auto"
+      >
+        Create a Grove site
+      </a>
+      <a
+        href="#demo"
+        class="inline-flex w-full items-center justify-center rounded-full border border-border-strong bg-card px-6 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover sm:w-auto"
+      >
+        See how it works
+      </a>
     </div>
 
     <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
@@ -244,12 +259,12 @@ const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow
     display: inline-block;
     overflow: hidden;
     white-space: nowrap;
-    animation: hero-cli-type 1.1s steps(23) 0.9s both;
+    animation: hero-cli-type 1.4s steps(44) 0.9s both;
   }
 
   @keyframes hero-cli-type {
     from { width: 0; }
-    to { width: 23ch; }
+    to { width: 44ch; }
   }
 
   .hero-cli-cursor {

@@ -11,23 +11,25 @@ import openAppsShot from '../../assets/open-apps-home.png';
     <div>
       <SectionHeader
         eyebrow="Production reference"
-        title="Grove grew out of maintaining Open Apps."
+        title="Grove was extracted from Open App Scout."
         titleId="open-apps-title"
-        lede="Every step you just scrolled through runs in production at Open Apps: file-backed records, repository refresh, search, filters, detail pages, a sitemap, and AI-readable outputs. Grove turns that operating model into a reusable framework."
+        lede="Every step you just scrolled through runs in production there: file-backed records, repository refresh, search, filters, detail pages, a sitemap, and AI-readable outputs. Grove is that operating model, made reusable."
         maxWidth="narrow"
       />
-      <p class="mt-5 max-w-xl border-l-2 border-accent-orange/50 pl-4 text-sm leading-relaxed text-subtle">
-        The live repository still carries local versions of this logic. Migration to the published Grove packages is the next reference-space milestone.
+      <p class="mt-5 max-w-xl border-l-2 border-accent-green/50 pl-4 text-sm leading-relaxed text-subtle">
+        It now runs on the <strong class="font-medium text-muted">published packages</strong> — the same
+        <code class="font-mono text-[13px]">@grove-dev/*</code> versions on npm, consumed from outside this
+        repository. It is the acceptance consumer: a release that breaks it is a release that does not ship.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="https://openappscout.com" target="_blank" rel="noopener noreferrer" class="rounded-full bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">Explore the live space</a>
+        <a href="https://openappscout.com" target="_blank" rel="noopener noreferrer" class="rounded-full bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">Visit Open App Scout</a>
         <a href="https://github.com/tortuvshin/open-apps" target="_blank" rel="noopener noreferrer" class="rounded-full border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover">Inspect the source</a>
       </div>
     </div>
 
     <div class="relative isolate">
     <div class="grove-glow" aria-hidden="true"></div>
-    <div class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(39_183_200_/_0.2)] backdrop-blur" aria-label="Open Apps product preview">
+    <div class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(39_183_200_/_0.2)] backdrop-blur" aria-label="Open App Scout product preview">
       <div class="flex items-center gap-2 border-b border-border px-4 py-3">
         <span class="size-3 rounded-full bg-[#ff5f57]"></span><span class="size-3 rounded-full bg-[#febc2e]"></span><span class="size-3 rounded-full bg-[#28c840]"></span>
         <span class="mx-auto rounded-full border border-border bg-surface px-6 py-1 font-mono text-[11px] text-subtle">openappscout.com/apps</span>
@@ -35,7 +37,7 @@ import openAppsShot from '../../assets/open-apps-home.png';
       </div>
       <Image
         src={openAppsShot}
-        alt="Open Apps directory home page — a searchable, filterable grid of curated open-source applications"
+        alt="Open App Scout home page — a searchable, filterable grid of curated open-source applications"
         widths={[640, 960, 1280]}
         sizes="(min-width: 1024px) 640px, 100vw"
         format="webp"

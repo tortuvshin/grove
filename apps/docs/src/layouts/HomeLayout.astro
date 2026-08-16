@@ -8,8 +8,8 @@ interface Props {
 }
 
 const {
-  title = 'Grove — Build curated directories that stay useful',
-  description = 'Grove is an open-source framework for curated directories and knowledge sites: structured records and Markdown in Git, published as a fast, searchable static site with collections, lenses, automated metadata, and a built-in review workflow.',
+  title = 'Grove — Publish structured knowledge that stays useful',
+  description = 'Grove turns structured files into maintainable knowledge products — searchable websites, curated views, SEO surfaces, and machine-readable outputs — with reviewable automation that keeps them in sync.',
 } = Astro.props;
 
 const siteUrl = Astro.site?.toString() ?? 'https://withgrove.dev';
@@ -124,13 +124,13 @@ const faqJsonLd = {
     <meta property="og:image" content={ogImageUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Grove — Build curated directories that stay useful" />
+    <meta property="og:image:alt" content="Grove — Publish structured knowledge that stays useful" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
-    <meta name="twitter:image:alt" content="Grove — Build curated directories that stay useful" />
+    <meta name="twitter:image:alt" content="Grove — Publish structured knowledge that stays useful" />
 
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(softwareJsonLd)} />

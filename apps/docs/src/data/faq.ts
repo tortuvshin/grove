@@ -18,11 +18,11 @@ export interface FaqItem {
 export const FAQ_ITEMS: ReadonlyArray<FaqItem> = [
   {
     q: 'Is Grove a CMS?',
-    a: 'No. Grove is a build-time framework. Your content lives as YAML files in your repository, not in a database. There is no admin UI to maintain — editors open pull requests like any other code change, and the framework generates the static site on every merge.',
+    a: 'No. Grove is a build-time publishing system. Your content lives as YAML files in your repository, not in a database. There is no admin UI to maintain — editors open pull requests like any other code change, and the framework generates the static site on every merge.',
   },
   {
     q: 'Does it work without Astro?',
-    a: 'V1 ships the Astro adapter only. The core engine is framework-agnostic (typed schema, GitHub sync, importers, sitemap, llms.txt), so a SvelteKit or Next.js adapter is possible. A SvelteKit adapter lands in V1.1 if a real community space asks for it; see the [SvelteKit adapter status](/adapters/svelte/) and the roadmap for current status.',
+    a: 'Astro is the only renderer today. The core engine is framework-agnostic — typed schema, validation, generation, GitHub sync, importers, sitemap, llms.txt — so another renderer is possible, and a SvelteKit or Next.js adapter would ship only if a real community space needed one. No such package exists today. See the [roadmap](/roadmap/) for current status.',
   },
   {
     q: 'How is this different from an awesome-list README?',
