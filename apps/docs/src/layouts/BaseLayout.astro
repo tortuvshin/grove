@@ -40,7 +40,7 @@ const {
     breadcrumbs = [],
 } = Astro.props;
 
-const siteUrl = Astro.site?.toString() ?? 'https://grove.dev.mn';
+const siteUrl = Astro.site?.toString() ?? 'https://withgrove.dev';
 const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = new URL(ogImage, siteUrl).toString();
 

@@ -135,9 +135,9 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(existsSync(splashPath)).toBe(false);
 	});
 
-	it("uses grove.dev.mn as the canonical site URL everywhere it appears", async () => {
+	it("uses withgrove.dev as the canonical site URL everywhere it appears", async () => {
 		const config = await readFile(resolve(docsRoot, "astro.config.mjs"), "utf8");
-		expect(config).toContain("site: 'https://grove.dev.mn'");
+		expect(config).toContain("site: 'https://withgrove.dev'");
 		expect(config).not.toMatch(/site:\s*['"]https:\/\/grove\.dev['"]/);
 		expect(config).not.toMatch(/grove\.tortuvshin\.dev/);
 
@@ -145,14 +145,14 @@ describe("docs homepage (standalone Astro route)", () => {
 			resolve(docsRoot, "src/content/docs/maintainers/release-process.md"),
 			"utf8",
 		);
-		expect(release).toContain("grove.dev.mn");
+		expect(release).toContain("withgrove.dev");
 		expect(release).not.toContain("to grove.dev)");
 
 		const homeLayout = await readFile(
 			resolve(docsRoot, "src/layouts/HomeLayout.astro"),
 			"utf8",
 		);
-		expect(homeLayout).toContain("https://grove.dev.mn");
+		expect(homeLayout).toContain("https://withgrove.dev");
 		expect(homeLayout).not.toContain("https://grove.dev'");
 	});
 
@@ -391,7 +391,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		const robots = await readFile(resolve(docsRoot, "public/robots.txt"), "utf8");
 		expect(robots).toMatch(/^User-agent:\s*\*/m);
 		expect(robots).toMatch(/^Allow:\s*\//m);
-		expect(robots).toContain("https://grove.dev.mn/sitemap-index.xml");
+		expect(robots).toContain("https://withgrove.dev/sitemap-index.xml");
 
 		const manifest = JSON.parse(
 			await readFile(resolve(docsRoot, "public/manifest.json"), "utf8"),
@@ -418,7 +418,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		// All schemas reference the canonical site URL through the `siteUrl`
 		// helper. The literal fallback is asserted once; the rest are
 		// computed at build time from Astro.site.
-		expect(home).toContain("https://grove.dev.mn");
+		expect(home).toContain("https://withgrove.dev");
 		expect(home).toContain("url: siteUrl");
 		expect(home).not.toContain("'@type': 'SearchAction'");
 	});

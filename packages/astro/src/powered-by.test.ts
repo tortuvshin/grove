@@ -63,7 +63,7 @@ describe("PoweredBy", () => {
   });
 
   it("links out to the Grove site safely", () => {
-    expect(poweredBySource).toContain('href = "https://grove.dev.mn"');
+    expect(poweredBySource).toContain('href = "https://withgrove.dev"');
     expect(poweredBySource).toContain('rel="noopener noreferrer"');
   });
 
@@ -80,7 +80,7 @@ describe.skipIf(!existsSync(dist))("built output", () => {
     for (const file of htmlFiles(dist)) {
       const html = readFileSync(file, "utf8");
       expect(html, file.replace(dist, "")).toContain("Powered by");
-      expect(html, file.replace(dist, "")).toContain("https://grove.dev.mn");
+      expect(html, file.replace(dist, "")).toContain("https://withgrove.dev");
     }
   });
 });

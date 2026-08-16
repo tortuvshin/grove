@@ -260,7 +260,7 @@ day's work when the trade-off shifts.
 ## What is not in the release process
 
 - **The docs site (`apps/docs/`)** is built and deployed separately
-  (to grove.dev.mn) and does not have a version number tied to the
+  (to withgrove.dev) and does not have a version number tied to the
   `@grove-dev/*` packages. A docs change does not require a release.
 - **The example application (`apps/example/`)** is not published
   independently; `@grove-dev/cli` bundles it as the init scaffold.

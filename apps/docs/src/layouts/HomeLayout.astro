@@ -12,7 +12,7 @@ const {
   description = 'Grove is an open-source framework for curated directories and knowledge sites: structured records and Markdown in Git, published as a fast, searchable static site with collections, lenses, automated metadata, and a built-in review workflow.',
 } = Astro.props;
 
-const siteUrl = Astro.site?.toString() ?? 'https://grove.dev.mn';
+const siteUrl = Astro.site?.toString() ?? 'https://withgrove.dev';
 const canonical = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = new URL('/og-image.svg', siteUrl).toString();
 // schema.org `Organization.logo` expects a square (1:1) image. The

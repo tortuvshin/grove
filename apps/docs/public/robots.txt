@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://grove.dev.mn/sitemap-index.xml
+Sitemap: https://withgrove.dev/sitemap-index.xml

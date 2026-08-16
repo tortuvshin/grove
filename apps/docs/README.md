@@ -2,7 +2,7 @@
 
 The documentation site for [Grove](https://github.com/tortuvshin/grove), built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build) and themed with [`@grove-dev/starlight`](https://www.npmjs.com/package/@grove-dev/starlight).
 
-This site is **not** a published npm package — it's the source for <https://grove.dev.mn>. It lives in the workspace so that doc changes ship in the same PR as the code they describe.
+This site is **not** a published npm package — it's the source for <https://withgrove.dev>. It lives in the workspace so that doc changes ship in the same PR as the code they describe.
 
 ## Develop
 
@@ -69,7 +69,7 @@ source. `scripts/check-starlight-sidebar.mjs` (exposed as
 ## Deploying
 
 The site is fully static and deploys to any static host. The
-canonical host is `grove.dev.mn`. The `wrangler.toml` in this
+canonical host is `withgrove.dev`. The `wrangler.toml` in this
 directory targets Cloudflare Pages; alternative hosts (Netlify,
 Vercel, GitHub Pages) work by pointing at `apps/docs/` with the
 build command `pnpm build` and the publish directory

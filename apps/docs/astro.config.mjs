@@ -8,7 +8,7 @@ import tailwindcss from '@tailwindcss/vite';
 // This site is itself a Grove space: it uses the same record schema,
 // Astro template, and CLI workflow as any user-built space.
 export default defineConfig({
-    site: 'https://grove.dev.mn',
+    site: 'https://withgrove.dev',
     vite: {
         plugins: [tailwindcss()],
     },
@@ -70,8 +70,8 @@ export default defineConfig({
                 // og:title / og:type / og:url / og:description / twitter:card
                 // on its own — we only fill the dimensional + image pieces
                 // it leaves blank.
-                { tag: 'meta', attrs: { property: 'og:image', content: 'https://grove.dev.mn/og-image.svg' } },
-                { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://grove.dev.mn/og-image.svg' } },
+                { tag: 'meta', attrs: { property: 'og:image', content: 'https://withgrove.dev/og-image.svg' } },
+                { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://withgrove.dev/og-image.svg' } },
                 { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
                 { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
                 { tag: 'meta', attrs: { property: 'og:image:alt', content: 'Grove — The framework for community knowledge' } },
@@ -86,7 +86,7 @@ export default defineConfig({
                         '@context': 'https://schema.org',
                         '@type': 'WebSite',
                         name: 'Grove',
-                        url: 'https://grove.dev.mn',
+                        url: 'https://withgrove.dev',
                         description:
                             'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
                         inLanguage: 'en',

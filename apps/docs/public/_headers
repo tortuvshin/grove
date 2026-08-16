@@ -1,4 +1,4 @@
-# Cloudflare Pages / Workers static-assets response headers for grove.dev.mn.
+# Cloudflare Pages / Workers static-assets response headers for withgrove.dev.
 #
 # These run on EVERY request that lands on apps/docs/dist/. Source routes are
 # owned by Astro/Starlight; this file tightens what the browser is allowed
@@ -18,7 +18,7 @@
     # CSP that excludes `unsafe-inline` works once those hashes are
     # captured at build time. For now allow `unsafe-inline` for the
     # inline JSON-LD and theme bootstrap script.
-    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://grove.dev.mn; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
+    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://withgrove.dev; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
 
 # ─── HTML: never cache (so deploys ship immediately) ─────────────────────
 /
