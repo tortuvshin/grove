@@ -24,8 +24,8 @@
  * there is no separate footer link button.
  *
  * Analytics: emits `data-event="collection_item_click"` /
- * `data-event-source="collection_row"` on the card root and per-link
- * events on the footer links, so sites wire one handler in BaseLayout.
+ * `data-event-source="collection_row"` on the card root, so sites wire
+ * one handler in BaseLayout.
  */
 import type { CollectionEntry } from "@grove-dev/core";
 import ProjectCard from "./ProjectCard.astro";
@@ -63,7 +63,6 @@ const detailHref =
     : entry.url || (base ? `/${base}/${slug}` : `/${slug}`);
 
 const repoHref = entry.repoHref;
-const homepageHref = entry.homepageHref;
 ---
 
 <ProjectCard
