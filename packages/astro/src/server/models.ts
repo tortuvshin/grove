@@ -17,6 +17,7 @@ import {
   activeFilterChips,
   applySort,
   buildFacets,
+  collectionSchema,
   configuredFacetDefs,
   effectivePage,
   effectiveSort,
@@ -50,12 +51,27 @@ import {
   resourceBySlug,
   taxonomyLabel,
 } from "./directory.js";
+import {
+  absoluteUrl,
+  breadcrumbs,
+  ogPath,
+  type PageSeo,
+  recordSeoDescriptor,
+  seoDescription,
+  seoTitle,
+  titleCaseFirst,
+} from "./seo.js";
 
 export interface DirectorySiteConfig {
   name: string;
   tagline?: string;
   description?: string;
   repoUrl?: string;
+  /** Absolute site URL. `site-config.json` ships it as `siteUrl`;
+   *  `url` is accepted for hand-built configs. Used to absolutize
+   *  JSON-LD URLs (breadcrumbs, ItemList entries). */
+  siteUrl?: string;
+  url?: string;
   nav?: Array<{ label: string; href: string }>;
   browse?: {
     facets?: string[];
@@ -113,6 +129,13 @@ export interface DirectoryContributor {
   avatarUrl?: string;
   profileUrl?: string;
   contributions?: number;
+}
+
+/** Site URL used to absolutize JSON-LD links. The generated
+ *  site-config always carries `siteUrl`; the fallback mirrors
+ *  build-data's own default so both stay aligned. */
+function siteUrlOf(site?: DirectorySiteConfig): string {
+  return (site?.siteUrl ?? site?.url ?? "https://example.com").replace(/\/$/, "");
 }
 
 export function loadDirectoryContributors(root = process.cwd()): DirectoryContributor[] {
@@ -219,8 +242,23 @@ export function getHomePageModel(site: DirectorySiteConfig) {
   const { stacks: allStacks, categories } = countTaxonomies();
   const stacks = allStacks.slice(0, 12);
   const contributors = loadDirectoryContributors();
-  const description = site.description ??
-    `A searchable directory of real ${plural} — organized by stack, category, platform, license, activity, and maturity.`;
+  const description = seoDescription(
+    site.description,
+    `A searchable directory of real ${plural} — organized by stack, category, platform, license, activity, and maturity.`,
+  );
+  // "{Site} — {tagline}", but never a dangling "{Site} —" when the
+  // tagline is unset, and never a tagline that pushes the title past
+  // the ~60-char display cap.
+  const tagline = (site.tagline ?? "").trim();
+  const title =
+    tagline && `${site.name} — ${tagline}`.length <= 65
+      ? `${site.name} — ${tagline}`
+      : site.name;
+  const seo: PageSeo = {
+    title,
+    description,
+    image: ogPath("home"),
+  };
 
   return {
     slug,
@@ -232,8 +270,9 @@ export function getHomePageModel(site: DirectorySiteConfig) {
     stacks,
     categories,
     contributors,
-    title: `${site.name} — ${site.tagline ?? ""}`.trim(),
+    title,
     description,
+    seo,
     stats: {
       originalRepo: site.stats?.originalRepo ?? "",
       apps: site.stats?.totalApps ?? 0,
@@ -265,8 +304,8 @@ const TAXONOMY_KIND_FOR_DIMENSION = {
 
 /**
  * @param options.page Route-supplied page number. The browse route is
- * prerendered per page (`/projects/`, `/projects/page/2/`), so the page
- * comes from the path, not from a query string the build can never see.
+ * prerendered per page (`/projects/`, `/projects/2/`), so the page comes
+ * from the path, not from a query string the build can never see.
  */
 export function getDirectoryIndexModel(
   searchParams: URLSearchParams,
@@ -322,7 +361,40 @@ export function getDirectoryIndexModel(
   const pageCount = totalPages(sorted.length);
   const page = Math.min(Math.max(1, options.page ?? effectivePage(filters)), pageCount);
   const pathPrefix = `/${site?.blueprintConfig?.routeSlug ?? "projects"}`;
+  const siteUrl = siteUrlOf(site);
+  const siteName = site?.name ?? "";
+  const pluralTitle = titleCaseFirst(plural);
+  const facetNames = defs.map((def) => def.label.toLowerCase()).join(", ");
+  const listItems = sorted.slice(0, 50).map((record) => {
+    const r = record as { slug: string; name?: string; title?: string; description?: string };
+    return {
+      url: absoluteUrl(siteUrl, `${pathPrefix}/${r.slug}/`),
+      name: r.name ?? r.title ?? r.slug,
+      ...(r.description ? { description: r.description } : {}),
+    };
+  });
+  const seo: PageSeo = {
+    title: seoTitle(`Browse ${pluralTitle}`, siteName),
+    description: seoDescription(
+      undefined,
+      `Search and filter ${items.length} curated ${plural} on ${siteName || "this site"} — by ${facetNames || "category and stack"}.`,
+    ),
+    image: ogPath("default"),
+    jsonLd: [
+      ...collectionSchema({
+        url: absoluteUrl(siteUrl, `${pathPrefix}/`),
+        name: `Browse ${pluralTitle}`,
+        description: `All ${plural} on ${siteName || "this site"}.`,
+        items: listItems,
+        crumbs: [
+          { url: `${siteUrl}/`, name: "Home" },
+          { url: absoluteUrl(siteUrl, `${pathPrefix}/`), name: pluralTitle },
+        ],
+      }),
+    ],
+  };
   return {
+    seo,
     items,
     total: items.length,
     filters,
@@ -368,11 +440,54 @@ export function getContributorsPageModel(site: DirectorySiteConfig) {
     (b.contributions ?? 0) - (a.contributions ?? 0) || a.username.localeCompare(b.username)
   );
   const repo = site.repoUrl?.replace(/\/$/, "");
+  const siteUrl = siteUrlOf(site);
+  const title = seoTitle("Contributors", site.name);
+  const description = seoDescription(
+    undefined,
+    sorted.length > 0
+      ? `${sorted.length} people maintain ${site.name} — every entry is a file in a public repository, and these are the contributors behind it.`
+      : `The people behind ${site.name} — every entry is a file in a public repository, maintained through code, curation, and review.`,
+  );
+  const seo: PageSeo = {
+    title,
+    description,
+    image: ogPath("default"),
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": ["CollectionPage", "WebPage"],
+        "@id": `${absoluteUrl(siteUrl, "contributors/")}#page`,
+        url: absoluteUrl(siteUrl, "contributors/"),
+        name: title,
+        description,
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        numberOfItems: sorted.length,
+        itemListElement: sorted.slice(0, 50).map((c, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: {
+            "@type": "Person",
+            name: c.name ?? c.username,
+            ...(c.profileUrl ? { url: c.profileUrl } : {}),
+            ...(c.avatarUrl ? { image: c.avatarUrl } : {}),
+          },
+        })),
+      },
+      breadcrumbs(siteUrl, [
+        { path: "", name: "Home" },
+        { path: "contributors/", name: "Contributors" },
+      ]),
+    ],
+  };
   return {
     contributors: sorted,
     total: sorted.length,
-    title: `Community — ${site.name}`,
-    description: `The people who have contributed to ${site.name} through code, curation, and review.`,
+    title,
+    description,
+    seo,
     contributorsGraphHref: repo ? `${repo}/graphs/contributors` : null,
     // Surface the consumer's per-user contribution-count preference to
     // the consumer page so it can render quieter cards when the
@@ -401,10 +516,17 @@ export function getSubmissionPageModel(site: DirectorySiteConfig) {
     return match ? `${match[1]}/${match[2].replace(/\.git$/, "")}`.toLowerCase() : null;
   }).filter((value): value is string => Boolean(value));
 
+  const title = seoTitle(`Submit ${singular}`, site.name);
+  const description = seoDescription(
+    undefined,
+    `Submit a new ${singular} to ${site.name}. Every listing is a file in a public repository — open a pull request and it ships everywhere at once.`,
+  );
   return {
     singular,
-    title: `Submit ${singular} - ${site.name}`,
-    description: `Submit a new ${singular} to ${site.name}.`,
+    title,
+    description,
+    // Thin form wrapper — kept out of the index, so no OG/JSON-LD.
+    seo: { title, description, noindex: true } satisfies PageSeo,
     repoUrl: site.repoUrl ?? "https://github.com/tortuvshin/grove",
     copy: site.submission ?? {},
     fields: {
@@ -457,7 +579,14 @@ export function getRecordDetailModel(
   const isProject = record.kind === "project";
   const proj: ProjectRecord | null = project ?? null;
   const name = record.kind === "resource" ? record.title : record.name;
-  const description = record.description ?? `${name} on ${site.name}`;
+  const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
+  const categoryLabel = record.category ? taxonomyLabel("categories", record.category) : undefined;
+  // Curated summary first — it is the sentence a human wrote for this
+  // record. `description` is usually GitHub-synced and can be noisy.
+  const description = seoDescription(
+    (record.summary && record.summary.trim()) || record.description,
+    `${name}, an open-source ${categoryLabel ? `${categoryLabel} ` : ""}${singular} listed on ${site.name}.`,
+  );
   const repoUrl = proj?.repoUrl ?? record.links?.github ?? "";
   const homepageUrl = record.links?.website ?? "";
   const stacks = projectStackIds(proj);
@@ -501,17 +630,21 @@ const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
 const tags = record.tags ?? [];
 const tocBody = readContentFile(typeof record.content === "string" ? record.content : "");
 
-  let jsonLd: Record<string, unknown>;
+  const siteUrl = siteUrlOf(site);
+  const pageUrl = absoluteUrl(siteUrl, `${routeSlug}/${recordSlug}/`);
+
+  let recordLd: Record<string, unknown>;
   if (isProject && proj) {
     const sameAs = [repoUrl, homepageUrl].filter(Boolean);
     const dateCreated = record.curation?.reviewedAt;
-    jsonLd = {
+    recordLd = {
       "@context": "https://schema.org",
       "@type": "SoftwareSourceCode",
+      "@id": `${pageUrl}#record`,
       name,
       headline: name,
-      description: record.description ?? undefined,
-      url: repoUrl || homepageUrl || undefined,
+      description,
+      url: pageUrl,
       codeRepository: repoUrl || undefined,
       sameAs: sameAs.length ? sameAs : undefined,
       programmingLanguage: language ?? undefined,
@@ -537,31 +670,60 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     const schemaTypes: Record<string, string> = {
       article: "Article", book: "Book", course: "Course", podcast: "PodcastSeries", video: "VideoObject",
     };
-    jsonLd = {
+    recordLd = {
       "@context": "https://schema.org",
       "@type": schemaTypes[record.type] ?? "CreativeWork",
+      "@id": `${pageUrl}#record`,
       name,
       headline: name,
-      description: record.description || undefined,
-      url: homepageUrl || undefined,
+      description,
+      url: pageUrl,
+      ...(homepageUrl ? { sameAs: [homepageUrl] } : {}),
       author: record.author ? { "@type": "Person", name: record.author } : undefined,
       datePublished: record.publishedAt || undefined,
       keywords: record.tags?.length ? record.tags.join(", ") : undefined,
       isAccessibleForFree: true,
     };
   } else {
-    jsonLd = {
+    recordLd = {
       "@context": "https://schema.org",
       "@type": entity?.type === "person" ? "Person" : "Organization",
+      "@id": `${pageUrl}#record`,
       name,
       headline: name,
-      description: entity?.description || undefined,
-      url: homepageUrl || undefined,
+      description,
+      url: pageUrl,
+      ...(homepageUrl ? { sameAs: [homepageUrl] } : {}),
       foundingDate: entity?.founded || undefined,
       location: entity?.location || undefined,
       keywords: entity?.tags?.length ? entity.tags.join(", ") : undefined,
     };
   }
+
+  // "<Name> — <descriptor> | <Site>": the descriptor gives the search
+  // snippet a reason to exist beyond the bare project name.
+  const descriptor = recordSeoDescriptor({
+    summary: record.summary,
+    ...(categoryLabel ? { categoryLabel } : {}),
+    singular,
+  });
+  const title = seoTitle(`${name} — ${descriptor}`, site.name);
+  const pluralTitle = titleCaseFirst(site.blueprintConfig?.labelPlural ?? itemLabelPlural());
+  const jsonLd = [
+    recordLd,
+    breadcrumbs(siteUrl, [
+      { path: "", name: "Home" },
+      { path: `${routeSlug}/`, name: pluralTitle },
+      { path: `${routeSlug}/${recordSlug}/`, name },
+    ]),
+  ];
+  const seo: PageSeo = {
+    title,
+    description,
+    image: ogPath("record", recordSlug),
+    imageAlt: `${name} — ${site.name}`,
+    jsonLd,
+  };
 
   return {
     slug: routeSlug,
@@ -570,8 +732,9 @@ const tocBody = readContentFile(typeof record.content === "string" ? record.cont
     entity,
     isProject,
     name,
-    title: `${name} — ${site.name}`,
+    title,
     description,
+    seo,
     itemSingular: site.blueprintConfig?.labelSingular ?? record.kind,
     repoUrl,
     homepageUrl,
@@ -762,9 +925,192 @@ export function recordDetailPaths(site: DirectorySiteConfig) {
   }));
 }
 
+// ── Taxonomy page models ──────────────────────────────────────────
+
+export type TaxonomyPageKind = "categories" | "stacks" | "licenses";
+
+const TAXONOMY_EYEBROW: Record<TaxonomyPageKind, string> = {
+  categories: "Category",
+  stacks: "Stack",
+  licenses: "License",
+};
+
+/**
+ * View-model for a taxonomy detail page (`/categories/<id>/`,
+ * `/stacks/<id>/`, `/licenses/<id>/`). Owns the record filtering the
+ * three pages used to inline, plus the full SEO block. The three
+ * title patterns are deliberately distinct so `/categories/python/`
+ * and `/stacks/python/` never emit duplicate titles:
+ *
+ *   category: "Python projects on Open Apps"
+ *   stack:    "Projects built with Python on Open Apps"
+ *   license:  "MIT-licensed projects on Open Apps"
+ */
+export function getTaxonomyPageModel(
+  kind: TaxonomyPageKind,
+  id: string,
+  displayName: string,
+  site: DirectorySiteConfig,
+) {
+  const plural = site.blueprintConfig?.labelPlural ?? itemLabelPlural();
+  const filters: IndexFilters =
+    kind === "categories"
+      ? { categories: [id] }
+      : kind === "stacks"
+        ? { stacks: [id] }
+        : { licenses: [id] };
+  const records = filterRecords(items, filters);
+  const count = records.length;
+  const siteUrl = siteUrlOf(site);
+  const routeSlug = site.blueprintConfig?.routeSlug ?? "projects";
+  const pagePath = `${kind}/${id}/`;
+
+  // "MIT License" → "MIT" so the license title reads "MIT-licensed
+  // projects", not "MIT License-licensed projects".
+  const licenseLabel = displayName.replace(/\s+license$/i, "");
+  const main =
+    kind === "categories"
+      ? `${displayName} ${plural} on ${site.name}`
+      : kind === "stacks"
+        ? `${titleCaseFirst(plural)} built with ${displayName} on ${site.name}`
+        : `${licenseLabel}-licensed ${plural} on ${site.name}`;
+  const description = seoDescription(
+    undefined,
+    kind === "categories"
+      ? `${count} curated open-source ${plural} in the ${displayName} category on ${site.name}. Compare stars, activity, and licenses.`
+      : kind === "stacks"
+        ? `${count} curated open-source ${plural} built with ${displayName}, listed on ${site.name} with stars, activity, and license data.`
+        : `${count} open-source ${plural} under the ${displayName.match(/license/i) ? displayName : `${displayName} license`} on ${site.name}.`,
+  );
+
+  const crumbs: Array<{ path: string; name: string }> = [
+    { path: "", name: "Home" },
+    // Licenses have no index page in the scaffold, so their trail
+    // goes straight from Home to the license itself.
+    ...(kind === "licenses"
+      ? []
+      : [{ path: `${kind}/`, name: titleCaseFirst(kind) }]),
+    { path: pagePath, name: displayName },
+  ];
+  const listItems = records.slice(0, 50).map((record) => {
+    const r = record as { slug: string; name?: string; title?: string; description?: string };
+    return {
+      url: absoluteUrl(siteUrl, `${routeSlug}/${r.slug}/`),
+      name: r.name ?? r.title ?? r.slug,
+      ...(r.description ? { description: r.description } : {}),
+    };
+  });
+  const seo: PageSeo = {
+    // `main` already names the site, so seoTitle appends nothing —
+    // it still runs for the length/whitespace normalization.
+    title: seoTitle(main, site.name),
+    description,
+    image: ogPath(
+      kind === "categories" ? "category" : kind === "stacks" ? "stack" : "license",
+      id,
+    ),
+    imageAlt: `${displayName} — ${site.name}`,
+    jsonLd: [
+      ...collectionSchema({
+        url: absoluteUrl(siteUrl, pagePath),
+        name: main,
+        description,
+        items: listItems,
+        crumbs: crumbs.map((c) => ({
+          url: absoluteUrl(siteUrl, c.path),
+          name: c.name,
+        })),
+      }),
+    ],
+  };
+
+  return {
+    kind,
+    id,
+    displayName,
+    eyebrow: TAXONOMY_EYEBROW[kind],
+    records,
+    count,
+    seo,
+  };
+}
+
+/**
+ * SEO block for the `/categories/` and `/stacks/` index pages.
+ */
+export function getTaxonomyIndexSeo(
+  kind: "categories" | "stacks",
+  site: DirectorySiteConfig,
+): PageSeo {
+  const plural = site.blueprintConfig?.labelPlural ?? itemLabelPlural();
+  const { categories, stacks } = countTaxonomies();
+  const entries = kind === "categories" ? categories : stacks;
+  const sample = entries.slice(0, 3).map((entry) => entry.name).join(", ");
+  const siteUrl = siteUrlOf(site);
+  const title = seoTitle(kind === "categories" ? "Categories" : "Stacks", site.name);
+  const description = seoDescription(
+    undefined,
+    kind === "categories"
+      ? `Browse all ${entries.length} categories of ${plural} on ${site.name}${sample ? ` — from ${sample} and more` : ""}.`
+      : `Browse ${plural} on ${site.name} by technology stack — ${entries.length} stacks${sample ? ` including ${sample}` : ""}.`,
+  );
+  return {
+    title,
+    description,
+    image: ogPath("default"),
+    jsonLd: [
+      ...collectionSchema({
+        url: absoluteUrl(siteUrl, `${kind}/`),
+        name: title,
+        description,
+        items: entries.map((entry) => ({
+          url: absoluteUrl(siteUrl, `${kind}/${entry.slug}/`),
+          name: entry.name,
+        })),
+        crumbs: [
+          { url: `${siteUrl}/`, name: "Home" },
+          { url: absoluteUrl(siteUrl, `${kind}/`), name: titleCaseFirst(kind) },
+        ],
+      }),
+    ],
+  };
+}
+
+/**
+ * SEO block for the static About page.
+ */
+export function getAboutPageSeo(site: DirectorySiteConfig): PageSeo {
+  const siteUrl = siteUrlOf(site);
+  const title = seoTitle("About", site.name);
+  const description = seoDescription(
+    undefined,
+    `About ${site.name}: ${site.tagline ?? site.description ?? "a file-first knowledge site."}`,
+  );
+  return {
+    title,
+    description,
+    image: ogPath("default"),
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": ["AboutPage", "WebPage"],
+        "@id": `${absoluteUrl(siteUrl, "about/")}#page`,
+        url: absoluteUrl(siteUrl, "about/"),
+        name: title,
+        description,
+      },
+      breadcrumbs(siteUrl, [
+        { path: "", name: "Home" },
+        { path: "about/", name: "About" },
+      ]),
+    ],
+  };
+}
+
 export type DirectoryIndexModel = ReturnType<typeof getDirectoryIndexModel>;
 export type DirectoryHomeModel = ReturnType<typeof getHomePageModel>;
 export type SubmissionPageModel = ReturnType<typeof getSubmissionPageModel>;
 export type ContributorsPageModel = ReturnType<typeof getContributorsPageModel>;
 export type RecordDetailModel = NonNullable<ReturnType<typeof getRecordDetailModel>>;
+export type TaxonomyPageModel = ReturnType<typeof getTaxonomyPageModel>;
 export type { IndexFilters };

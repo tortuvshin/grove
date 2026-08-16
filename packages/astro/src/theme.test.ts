@@ -218,7 +218,7 @@ describe("Astro theme contract", () => {
     expect(baseLayoutMarkup).toContain("RADIUS_PRESETS");
     expect(baseLayoutMarkup).toContain("DENSITY_SPACING");
     expect(baseLayoutMarkup).toContain("--grove-theme-primary");
-    expect(baseLayoutMarkup).toContain('<html lang="en" style={themeStyle}>');
+    expect(baseLayoutMarkup).toContain("<html lang={site.locale ?? 'en'} style={themeStyle}>");
   });
 
   it("uses directory-wide analytics config unless a page overrides it", () => {
