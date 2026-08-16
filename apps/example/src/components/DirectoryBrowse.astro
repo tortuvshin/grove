@@ -61,13 +61,16 @@ const {
   seo,
 } = getDirectoryIndexModel(Astro.url.searchParams, siteConfig, { page: routePage });
 
-// Page 2+ gets a distinct title and skips the ItemList JSON-LD so the
-// list markup isn't duplicated across every paginated route.
+// Page 2+ gets a distinct title, a unique meta description, and skips
+// the ItemList JSON-LD so the list markup isn't duplicated across
+// every paginated route. Identical descriptions across dozens of
+// prerendered pages is a duplicate-description signal.
 const title =
   page > 1
     ? seoTitle(`Browse ${titleCaseFirst(itemLabelPlural())} — Page ${page}`, siteConfig.name)
     : seo.title;
-const description = seo.description;
+const description =
+  page > 1 ? `${seo.description} (Page ${page} of ${pages}.)` : seo.description;
 ---
 
 <BaseLayout

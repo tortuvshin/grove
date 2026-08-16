@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 
+import { hostOf } from './host.js';
 import { buildRobotsTxt } from './robots.js';
 import type { GroveConfig } from './schema.js';
 
@@ -28,15 +29,6 @@ function xml(value: string): string {
     .replaceAll("'", '&apos;');
 }
 
-function displayUrl(rawUrl?: string): string {
-  if (!rawUrl) return 'example.com';
-  try {
-    return new URL(rawUrl).host;
-  } catch {
-    return rawUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
-  }
-}
-
 function wrapText(value: string, maxLength = 54): string[] {
   const words = value.trim().split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -57,7 +49,7 @@ export function buildOgImageSvg(config: GroveConfig, stats: SiteArtifactStats = 
   // Neutral accent when no brand color is configured (the OG canvas
   // is dark, so a soft light gray reads as the brand-agnostic glow).
   const accent = xml(config.theme.primaryColor ?? "#e5e5e5");
-  const host = xml(displayUrl(config.site.url));
+  const host = xml(hostOf(config.site.url));
   const plural = xml(config.labels.plural ?? 'items');
   const count = stats.totalRecords ?? 0;
   const stars = stats.repositoryStars ?? 0;

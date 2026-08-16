@@ -11,6 +11,12 @@
 export { defineConfig, loadConfig } from "./config.js";
 export type { GroveConfig, GroveConfigInput } from "./schema.js";
 
+// ── Host helper ──────────────────────────────────────────────────────
+// Shared by `site-artifacts.ts` (static OG SVG) and `og-image.ts`
+// (per-page PNG cards). One implementation so the two social-card
+// surfaces never print different hosts for the same config.
+export { hostOf } from "./host.js";
+
 // ── Schemas (Zod) ─────────────────────────────────────────────────────
 // ── Slug helpers ───────────────────────────────────────────────────
 // Public because the markdown renderer in @grove-dev/astro imports

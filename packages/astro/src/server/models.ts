@@ -583,9 +583,22 @@ export function getRecordDetailModel(
   const categoryLabel = record.category ? taxonomyLabel("categories", record.category) : undefined;
   // Curated summary first — it is the sentence a human wrote for this
   // record. `description` is usually GitHub-synced and can be noisy.
+  // The fallback branches by record kind so entities don't read as
+  // "open-source Database org" and resources don't read as "open-source
+  // Database book" — the noun follows what the schema.org @type already
+  // implies (Person/Organization for entities, the resource subtype
+  // for resources, project noun for projects).
+  const categoryPrefix = categoryLabel ? `${categoryLabel} ` : "";
+  const fallbackSentence = isProject
+    ? `${name}, an open-source ${categoryPrefix}${singular} listed on ${site.name}.`
+    : record.kind === "entity"
+      ? entity?.type === "person"
+        ? `${name}${categoryLabel ? `, a ${categoryLabel.toLowerCase()} contributor` : ""} listed on ${site.name}.`
+        : `${name}, an open-source ${categoryPrefix}organization listed on ${site.name}.`
+      : `${name}, a ${record.type ?? "resource"}${categoryLabel ? ` in ${categoryLabel}` : ""} listed on ${site.name}.`;
   const description = seoDescription(
     (record.summary && record.summary.trim()) || record.description,
-    `${name}, an open-source ${categoryLabel ? `${categoryLabel} ` : ""}${singular} listed on ${site.name}.`,
+    fallbackSentence,
   );
   const repoUrl = proj?.repoUrl ?? record.links?.github ?? "";
   const homepageUrl = record.links?.website ?? "";
@@ -626,9 +639,9 @@ export function getRecordDetailModel(
   const languages = extras.github?.languages
     ? Object.entries(extras.github.languages).sort((a, b) => b[1] - a[1]).slice(0, 5)
     : [];
-const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
-const tags = record.tags ?? [];
-const tocBody = readContentFile(typeof record.content === "string" ? record.content : "");
+  const healthLabel = healthStatus ? statusDisplay(healthStatus) : null;
+  const tags = record.tags ?? [];
+  const tocBody = readContentFile(typeof record.content === "string" ? record.content : "");
 
   const siteUrl = siteUrlOf(site);
   const pageUrl = absoluteUrl(siteUrl, `${routeSlug}/${recordSlug}/`);
@@ -966,7 +979,11 @@ export function getTaxonomyPageModel(
   const pagePath = `${kind}/${id}/`;
 
   // "MIT License" → "MIT" so the license title reads "MIT-licensed
-  // projects", not "MIT License-licensed projects".
+  // projects", not "MIT License-licensed projects". The description
+  // uses the same stripped form ("under the MIT license") so a single
+  // displayName yields a consistent title and description — Google
+  // flags title/description fragments that disagree on whether the
+  // word "License" appears as low quality.
   const licenseLabel = displayName.replace(/\s+license$/i, "");
   const main =
     kind === "categories"
@@ -980,7 +997,7 @@ export function getTaxonomyPageModel(
       ? `${count} curated open-source ${plural} in the ${displayName} category on ${site.name}. Compare stars, activity, and licenses.`
       : kind === "stacks"
         ? `${count} curated open-source ${plural} built with ${displayName}, listed on ${site.name} with stars, activity, and license data.`
-        : `${count} open-source ${plural} under the ${displayName.match(/license/i) ? displayName : `${displayName} license`} on ${site.name}.`,
+        : `${count} open-source ${plural} under the ${licenseLabel} license on ${site.name}.`,
   );
 
   const crumbs: Array<{ path: string; name: string }> = [

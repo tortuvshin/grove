@@ -24,6 +24,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import type { GroveConfig } from "./schema.js";
+import { hostOf } from "./host.js";
 
 export type OgTemplate =
   | { kind: "home"; siteName: string; tagline?: string; host: string; metric?: string; accent?: string }
@@ -259,15 +260,6 @@ export interface OgBuildResult {
   written: number;
   skipped: number;
   failed: boolean;
-}
-
-function hostOf(rawUrl?: string): string {
-  if (!rawUrl) return "example.com";
-  try {
-    return new URL(rawUrl).host;
-  } catch {
-    return rawUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
-  }
 }
 
 const FACET_DIR: Record<"category" | "stack" | "license", string> = {
