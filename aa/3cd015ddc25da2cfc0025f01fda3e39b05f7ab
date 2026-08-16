@@ -1,0 +1,332 @@
+apps/example/public/icons/stacks/android.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/.grove-icons.json
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-9,11-13,15-40,42-47
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 10,14,41
+packages/astro/assets/icons/stacks/rust.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/bun.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/python.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/core/src/schema.ts
+  s_d8c5ea68fa53ec::t_a09c4f98b2665e 632-643
+packages/astro/src/layouts/Header.astro
+  s_d8c5ea68fa53ec::t_c0cf56145f8788 31-32
+  s_d8c5ea68fa53ec::t_e26752867de392 92-108
+apps/example/public/icons/stacks/dart.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/deno.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+scripts/icons/local/embedded.svg
+  s_d8c5ea68fa53ec::t_1328b733c62a99 1-5
+packages/astro/assets/icons/stacks/go.svg
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 1
+apps/example/public/icons/stacks/ionic.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/tensorflow.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/docs/src/content/docs/customize/branding.md
+  s_d8c5ea68fa53ec::t_65904a7af09dd9 22-30,36,40-42
+CHANGELOG.md
+  s_d8c5ea68fa53ec::t_746508d801825c 28-38,47-96
+  s_d8c5ea68fa53ec::t_3188f8a6f838e8 39-46
+packages/astro/src/components/ProjectCard.astro
+  s_d8c5ea68fa53ec::t_14a6399e68eb71 163-167
+  s_d8c5ea68fa53ec::t_6e4b4da6063657 181-189
+  s_d8c5ea68fa53ec::t_c827deb8eff80b 267
+  s_d8c5ea68fa53ec::t_c5275ab5417b60 268-269,271-272
+  s_d8c5ea68fa53ec::t_b6ab5fdf919fae 83-86
+  s_d8c5ea68fa53ec::t_95cd8a8ffff01e 266
+  s_d8c5ea68fa53ec::t_273f98376b7924 19-29
+  s_d8c5ea68fa53ec::t_00c034756973ec 88-94,96,98,100
+  s_d8c5ea68fa53ec::t_3bf473c9a59746 250
+apps/example/public/icons/stacks/python.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/platforms/app.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+apps/example/public/icons/platforms/ios.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/tensorflow.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/capacitor.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/platforms/ubuntu.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/docs/src/content/docs/customize/components.md
+  s_d8c5ea68fa53ec::t_59a7e52a9e7c77 22
+apps/example/public/icons/platforms/ubuntu.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/platforms/macos.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/flutter.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/swift.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/capacitor.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/docker.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/platforms/linux.svg
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 1
+apps/example/public/icons/stacks/mongodb.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/firebase.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/rag.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-5
+scripts/icons/local/rag.svg
+  s_d8c5ea68fa53ec::t_dfc5dfc6651f2b 1-6
+apps/example/public/icons/stacks/javascript.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+.github/workflows/ci.yml
+  s_d8c5ea68fa53ec::t_6240e64d2a7856 166-175
+packages/astro/assets/icons/stacks/mongodb.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/dart.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+scripts/icons/local/desktop.svg
+  s_d8c5ea68fa53ec::t_7cadfc750607d8 1-4
+packages/astro/assets/icons/stacks/llm.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+packages/astro/package.json
+  s_d8c5ea68fa53ec::t_b08f6ee88c22c4 32
+packages/core/src/index.ts
+  s_d8c5ea68fa53ec::t_d76a9e66228ed6 129-132
+packages/astro/src/index.ts
+  s_d8c5ea68fa53ec::t_842b37f8da815a 32
+  s_d8c5ea68fa53ec::t_aeb01039114121 62
+  s_d8c5ea68fa53ec::t_00242007d3625b 72-75,77-98
+packages/astro/src/lib/packaged-icons.ts
+  s_d8c5ea68fa53ec::t_6e4697590627d7 1-8,13-19,24-32
+  s_d8c5ea68fa53ec::t_2a0f9b9d490e99 9-12,20-23
+scripts/icons.config.mjs
+  s_d8c5ea68fa53ec::t_f561091f56af63 106
+  s_d8c5ea68fa53ec::t_dd0c4f07aa0f14 1-20,26,33-55,61,63-65,69-105,107-111
+  s_d8c5ea68fa53ec::t_929a989d1dd7bb 21-25,27-32
+  s_d8c5ea68fa53ec::t_76aa0434696e88 56-60,62
+  s_d8c5ea68fa53ec::t_f3e01ce7766007 66-68
+apps/example/public/icons/stacks/apple.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/typescript.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/firebase.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/graphql.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+scripts/icons/local/llm.svg
+  s_d8c5ea68fa53ec::t_e77bdd4739dc24 1-4
+apps/example/public/icons/stacks/go.svg
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 1
+packages/astro/assets/icons/platforms/ios.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/nodejs.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/kotlin.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/platforms/linux.svg
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 1
+packages/astro/src/styles.css
+  s_d8c5ea68fa53ec::t_4055dcf29dc918 460
+  s_d8c5ea68fa53ec::t_fe1c31d08db314 439-448
+  s_d8c5ea68fa53ec::t_69edcc586589cf 427-438,449-459,461-487
+apps/example/public/icons/stacks/solidity.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/clojure.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/rust.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/apple.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/typescript.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+scripts/icons/local/web.svg
+  s_d8c5ea68fa53ec::t_310198b95d455c 1-5
+scripts/icons/local/app.svg
+  s_d8c5ea68fa53ec::t_99a6f66c06be6d 1-4
+packages/astro/assets/icons/stacks/kotlin.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/platforms/windows.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/sveltekit.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/lib/index.ts
+  s_d8c5ea68fa53ec::t_1b55ae9d6aba4a 13
+  s_d8c5ea68fa53ec::t_3465e0e3ee8fc4 27-29
+apps/example/public/icons/platforms/android.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/platforms/embedded.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-5
+packages/astro/assets/icons/stacks/clojure.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/cli/src/index.ts
+  s_d8c5ea68fa53ec::t_7a071e4039f406 23
+  s_d8c5ea68fa53ec::t_cfe0890ab5f423 218
+packages/astro/assets/icons/stacks/react-native.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/theme.test.ts
+  s_d8c5ea68fa53ec::t_6b88724b7ab83a 19-24
+  s_d8c5ea68fa53ec::t_384ffc36c5e742 174,178-183,185-188
+  s_d8c5ea68fa53ec::t_3172b719b2fc95 157-173,175-177,184,189-197
+packages/core/src/build-data.ts
+  s_d8c5ea68fa53ec::t_b869ab71a4dab6 351-352
+packages/astro/assets/icons/stacks/java.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/llm.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+packages/astro/assets/icons/stacks/sveltekit.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/django.svg
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 1
+packages/astro/src/lib/icon-registry.ts
+  s_d8c5ea68fa53ec::t_8aadf806d51e10 17-18
+  s_d8c5ea68fa53ec::t_46afeaf1c74e01 1-9,12,25-33,48-51,53-54,56-82,88-92,94-101,103-106,108-109,111
+  s_d8c5ea68fa53ec::t_b0ddc67f184ba8 21-23
+  s_d8c5ea68fa53ec::t_2a0f9b9d490e99 10-11,24,34-42,44-47,52,55,83-87,93,102
+  s_d8c5ea68fa53ec::t_fdbbf3a596e81d 20,107,110
+  s_d8c5ea68fa53ec::t_508223428ddea7 43
+  s_d8c5ea68fa53ec::t_f8796df2b13d12 13-16,19
+scripts/sync-icons.mjs
+  s_d8c5ea68fa53ec::t_91d2edc6956a8d 223-226
+  s_d8c5ea68fa53ec::t_e7bced5d6e3c4f 199
+  s_d8c5ea68fa53ec::t_acd311ba20c187 1-198,200-222,227-253
+apps/example/public/icons/platforms/chrome.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/platforms/desktop.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-3
+packages/core/src/sync-icons.ts
+  s_d8c5ea68fa53ec::t_6fedeb87948bbb 162-167,176
+  s_d8c5ea68fa53ec::t_73c59952fa0ae4 185-188
+  s_d8c5ea68fa53ec::t_910e641c26434d 2-18,56-57,77-84,94,101,123,140,142-143,145,158,175,177-183
+  s_d8c5ea68fa53ec::t_b29d94733a5144 136
+  s_d8c5ea68fa53ec::t_bc1ec32b82e2e1 113-117
+  s_d8c5ea68fa53ec::t_2a0f9b9d490e99 20-25,61-67,98,128,144,157,168-172,191-192
+  s_d8c5ea68fa53ec::t_6fa0091dbb5112 39-44,50,54
+  s_d8c5ea68fa53ec::t_de091af8297fb9 88-93,102-112,118
+  s_d8c5ea68fa53ec::t_e2dc90cbea2bad 1,19,26-38,45-49,51-53,55,58-60,68-76,85-87,95-97,99-100,119-122,124-127,129-135,137-139,141,146-156,159-161,173-174,184,189-190,193-199
+packages/astro/assets/icons/stacks/docker.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/vue.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/cli/src/icons-cli.ts
+  s_d8c5ea68fa53ec::t_591bd980de541e 27,30-31
+  s_d8c5ea68fa53ec::t_2a0f9b9d490e99 1-4,16,19-22,24-25,37,43,55
+  s_d8c5ea68fa53ec::t_f91ec2372fe204 5-15,17-18,23,26,28-29,32-36,38-42,44-54,56-60
+apps/example/public/icons/stacks/react-native.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/platforms/embedded.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+apps/example/public/icons/stacks/tauri.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/java.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/platforms/web.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-5
+packages/astro/assets/icons/platforms/chrome.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/docs/src/content/docs/customize/assets.md
+  s_d8c5ea68fa53ec::t_81dd4a46965362 107-108
+  s_d8c5ea68fa53ec::t_3367dbad0f191b 12-13,18-23,28,30,34,39,42,44,46-49,52,54,59-62,64-79
+  s_d8c5ea68fa53ec::t_d6c0f0155b6d7e 114
+  s_d8c5ea68fa53ec::t_3629c547a3a157 50-51,53,55-58,63
+packages/astro/assets/icons/stacks/deno.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/react.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/nodejs.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/react.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/components/CollectionRow.astro
+  s_d8c5ea68fa53ec::t_9e3352d5143e24 40,42,44
+  s_d8c5ea68fa53ec::t_21938c3dad791a 15-19
+apps/example/public/icons/stacks/django.svg
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 1
+package.json
+  s_d8c5ea68fa53ec::t_b1e7424a9536dc 35-36
+  s_d8c5ea68fa53ec::t_fb227a846f026c 16-17
+packages/astro/assets/icons/stacks/flutter.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/ionic.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/platforms/app.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+apps/example/public/icons/.grove-icons.json
+  s_d8c5ea68fa53ec::t_74901154fbdc7c 1-9,11-13,15-40,42-47
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 10,14,41
+packages/astro/src/components/Icon.astro
+  s_d8c5ea68fa53ec::t_103d8c3d31827a 47
+  s_d8c5ea68fa53ec::t_b92ffcfe3f92a5 25-33
+  s_d8c5ea68fa53ec::t_dbd255e78704bf 77-78
+  s_d8c5ea68fa53ec::t_98b819d580e674 116-117
+  s_d8c5ea68fa53ec::t_0cc5eed8511e3c 118
+  s_d8c5ea68fa53ec::t_36e6557477127c 5-8,12,20-24,34-38,41-42,45-46,50-56,73-74,76,80,98,109,123,132-135,146-151,156,159-161,163-164,168,178
+  s_d8c5ea68fa53ec::t_dc378897d7a745 162
+  s_d8c5ea68fa53ec::t_fd9572474b5777 136-139
+  s_d8c5ea68fa53ec::t_a7fd8e623b526d 48
+  s_d8c5ea68fa53ec::t_68f68a4c542078 130
+  s_d8c5ea68fa53ec::t_65d5d4e2855efc 131
+apps/example/public/icons/stacks/bun.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/stacks/swift.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/javascript.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/components/IndexRow.astro
+  s_d8c5ea68fa53ec::t_ca4b4d256572ac 18
+  s_d8c5ea68fa53ec::t_35ea99c28b3279 27
+  s_d8c5ea68fa53ec::t_52a310662f93f7 7-10
+packages/astro/assets/icons/platforms/desktop.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+packages/astro/assets/icons/stacks/solidity.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/icons.test.ts
+  s_d8c5ea68fa53ec::t_142bc02cc87fa4 1-11,23-28,30-34,39-43,45-47,49-51,53-57,59-62,64-72,74-76,78-81,83-90,92-104,106-108,114-125,128-132
+  s_d8c5ea68fa53ec::t_2a0f9b9d490e99 12-22,29,35,37-38,44,48,52,58,63,73,77,82,91,105,109-113,126-127
+  s_d8c5ea68fa53ec::t_b0ddc67f184ba8 36
+apps/example/public/icons/stacks/graphql.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/tauri.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+apps/example/public/icons/platforms/web.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-4
+apps/example/public/icons/platforms/windows.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/rag.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-6
+packages/astro/assets/icons/platforms/macos.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/layouts/BaseLayout.astro
+  s_d8c5ea68fa53ec::t_82ae0f349b99f3 179-183,185-186
+  s_d8c5ea68fa53ec::t_5cffb7cbf9cd15 65-68
+packages/astro/assets/icons/stacks/vue.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/quality-gates.test.ts
+  s_d8c5ea68fa53ec::t_42c92fd334a4d3 152-179
+packages/astro/assets/icons/platforms/android.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/assets/icons/stacks/android.svg
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1
+packages/astro/src/lib/icon-kinds.ts
+  s_d8c5ea68fa53ec::t_2a0f9b9d490e99 13,16-21,23-33,35-37,39-58
+  s_d8c5ea68fa53ec::t_abfa6982b9e3fb 22,34,38
+  s_d8c5ea68fa53ec::t_6fbab1a7ac6756 1-12,14-15,59
+pnpm-lock.yaml
+  s_d8c5ea68fa53ec::t_68e266776fbcfd 22-27,681-689,4456-4465
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "aa3cd015ddc25da2cfc0025f01fda3e39b05f7ab",
+  "prompts": {},
+  "sessions": {
+    "s_d8c5ea68fa53ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75a8f456-88bc-4603-bc9c-c1729961f903",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
