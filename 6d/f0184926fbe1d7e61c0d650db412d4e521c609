@@ -1,0 +1,53 @@
+apps/example/.gitignore
+  s_ba7efc8838949b::t_c324362c83080c 16
+packages/core/src/og-image.test.ts
+  s_ba7efc8838949b::t_12b75bb9809b5f 52
+  s_ba7efc8838949b::t_48823a840da86f 95
+  s_ba7efc8838949b::t_d34e096969733b 31
+  s_ba7efc8838949b::t_42300fac08b24b 1-30,32-51,53-94,96-105
+packages/core/src/prepare.ts
+  s_2739562f79e122::t_a862c42d711e0f 5,7,19,30,38
+  s_2739562f79e122::t_0d30b73a15d323 181-273
+packages/core/src/index.ts
+  s_2739562f79e122::t_08ecebf75a3f8c 124-125
+packages/core/assets/fonts/LICENSE-Inter.txt
+  s_ba7efc8838949b::t_4ccfbd40f038b9 1-92
+packages/core/package.json
+  s_ba7efc8838949b::t_5a06b93a3e1188 45
+  s_ba7efc8838949b::t_eee71911ea3810 54,56
+packages/astro/src/index.ts
+  s_ba7efc8838949b::t_02b48dae048f17 112-119
+packages/cli/src/init.ts
+  s_ba7efc8838949b::t_ba7bae1d76d681 13
+packages/core/src/og-image.ts
+  s_ba7efc8838949b::t_3ace18ee4dc69d 239
+  s_ba7efc8838949b::t_ff5aa5ccf9a506 298
+  s_ba7efc8838949b::t_42e0f8957ed88d 203
+  s_ba7efc8838949b::t_c855e0e11ea9ea 1-202,204-218,235-236,238,240-252,256-297,299-398
+  s_ba7efc8838949b::t_7d2af48eecc0e9 219-234,237
+  s_ba7efc8838949b::t_fe64950f2b1008 253-255
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6df0184926fbe1d7e61c0d650db412d4e521c609",
+  "prompts": {},
+  "sessions": {
+    "s_2739562f79e122": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9481a03b-fd55-41b4-8c8f-9f992573e488",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
