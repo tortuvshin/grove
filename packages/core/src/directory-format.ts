@@ -48,6 +48,26 @@ export function formatRelative(iso: string | null | undefined): string {
 }
 
 /**
+ * Trim text to `max` characters on a **word boundary**, appending an
+ * ellipsis when anything was dropped.
+ *
+ * Card descriptions are also `line-clamp`ed, but a CSS clamp cuts at
+ * the character the box runs out of room on — which is how a grid ends
+ * up reading "…and multi-", "…and retrieval", "…an". Trimming first
+ * means the clamp has nothing left to cut mid-word on a normal card.
+ */
+export function truncateWords(text: string, max = 140): string {
+  const value = text.trim();
+  if (value.length <= max) return value;
+  const window = value.slice(0, max);
+  const lastSpace = window.lastIndexOf(" ");
+  // A single word longer than the budget has no boundary to cut on;
+  // the hard slice is the honest fallback.
+  const head = lastSpace > max * 0.5 ? window.slice(0, lastSpace) : window;
+  return `${head.replace(/[\s.,;:!?—-]+$/, "")}…`;
+}
+
+/**
  * Pick the singular or plural noun for a count. The plural form is
  * explicit — never derived with a naive `+"s"` — so blueprint labels
  * with irregular plurals ("entity"/"entities") render correctly.
