@@ -1,0 +1,53 @@
+apps/docs/src/content/docs/architecture/incremental-build.md
+  s_36968c37e13577::t_3059917d615058 103
+packages/astro/README.md
+  s_36968c37e13577::t_57825dc4204aeb 19,165
+apps/docs/src/docs-config.test.ts
+  s_36968c37e13577::t_f0d5511650e2a7 23,29-31,33-36,40,42,49-69
+  s_36968c37e13577::t_5875320d61655d 74-87,113-114,143-151
+  s_36968c37e13577::t_e9689a381a0d44 70
+apps/docs/src/content/docs/starlight/plugin-author-guide.md
+  s_36968c37e13577::t_3059917d615058 1-164
+apps/docs/src/content/docs/faq.md
+  s_36968c37e13577::t_3059917d615058 48
+apps/docs/src/content/docs/introduction.md
+  s_36968c37e13577::t_c9ca64467129e1 21,31-35,37,53-54,57-59
+  s_36968c37e13577::t_6d1228250d0b8c 60
+apps/docs/src/content/docs/starlight/plugin-api.md
+  s_36968c37e13577::t_3059917d615058 1-174
+packages/starlight/components/overrides/PageTitle.astro
+  s_36968c37e13577::t_ce22999dd52129 16-18,34
+scripts/check-starlight-sidebar.mjs
+  s_36968c37e13577::t_97f98d0ae05aa6 47-57,61,96,104
+apps/docs/src/components/home/Footer.astro
+  s_36968c37e13577::t_3059917d615058 9
+apps/docs/src/content/docs/starlight/index.md
+  s_36968c37e13577::t_1db25f7e463850 1-70
+apps/docs/astro.config.mjs
+  s_36968c37e13577::t_c9ca64467129e1 8-11
+  s_36968c37e13577::t_b4463e1e89844a 111-116,118,121-123,129,131-137,141,143-146,150,152-158,165,167,174,187,189,191,193-194,198-202,204-214,218,220-221,225-226,230
+apps/docs/src/components/Header.astro
+  s_36968c37e13577::t_3059917d615058 21-22
+apps/docs/src/content/docs/outputs/overview.md
+  s_36968c37e13577::t_c9ca64467129e1 48
+apps/docs/src/content/docs/reference/api-core.md
+  s_36968c37e13577::t_3059917d615058 173
+packages/starlight/README.md
+  s_36968c37e13577::t_190822cf7eb5fb 80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "093f9dc25fb2b168406a5ac6426b7946e6b62fae",
+  "prompts": {},
+  "sessions": {
+    "s_36968c37e13577": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c7edbca-eaac-4d39-af08-0f7ed1faff42",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
