@@ -33,7 +33,7 @@
 # before any wrangler command runs. Update the Root directory to
 # `apps/docs` to fix it.
 
-name = "grove-docs"
+name = "grove"
 compatibility_date = "2026-06-11"
 
 [assets]
