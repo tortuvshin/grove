@@ -1,0 +1,48 @@
+apps/docs/public/robots.txt
+  s_aa41ef7963b41a::t_fcae487323ba9c 4
+apps/docs/public/_headers
+  s_aa41ef7963b41a::t_d5426cd1315782 21
+  s_aa41ef7963b41a::t_2b02df4bd74543 1
+apps/docs/README.md
+  s_aa41ef7963b41a::t_495cc7184d2d7d 5
+  s_aa41ef7963b41a::t_322dd9a4e2b556 72
+apps/docs/public/og-image.svg
+  s_aa41ef7963b41a::t_009700200659f6 28
+packages/astro/src/components/PoweredBy.astro
+  s_aa41ef7963b41a::t_7777dbc4667edb 27
+packages/starlight/package.json
+  s_aa41ef7963b41a::t_439b8b040864ab 12
+apps/docs/src/home-landing.test.ts
+  s_aa41ef7963b41a::t_944a428a8cbf70 138,140,148,155
+  s_aa41ef7963b41a::t_3b41cfa3866ac3 394
+  s_aa41ef7963b41a::t_746a4761ef20aa 421
+apps/docs/src/layouts/BaseLayout.astro
+  s_aa41ef7963b41a::t_d0667630922ba2 43
+apps/docs/src/content/docs/maintainers/release-process.md
+  s_aa41ef7963b41a::t_a591904a3dec95 263
+apps/docs/astro.config.mjs
+  s_aa41ef7963b41a::t_49b00f3d02facf 89
+  s_aa41ef7963b41a::t_3b8caebc213e41 11
+  s_aa41ef7963b41a::t_1700f2acdac96f 73-74
+packages/astro/src/powered-by.test.ts
+  s_aa41ef7963b41a::t_87c1e8fd01b8b5 66
+  s_aa41ef7963b41a::t_5d934f9e2b13f0 83
+apps/docs/src/layouts/HomeLayout.astro
+  s_aa41ef7963b41a::t_9e5e9193f86416 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "01b21bb77d24e680bbb76a4c114887d08b85d6ea",
+  "prompts": {},
+  "sessions": {
+    "s_aa41ef7963b41a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d86408d2-cd3a-42ec-ab1a-ab8d97b578e6",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
