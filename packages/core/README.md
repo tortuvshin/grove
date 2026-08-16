@@ -1,46 +1,109 @@
 # `@grove-dev/core`
 
-The framework-free engine behind Grove directories.
+The framework-free engine for Grove. It owns configuration, schemas,
+validation, the data build pipeline, and every maintenance routine
+Grove uses to keep generated outputs in sync with file-backed sources.
 
-Core owns:
+Use it when you need to:
 
-- `grove.config.ts` loading and validation
-- project, resource, entity, taxonomy, health, and decision schemas
-- YAML validation and normalized generated records
-- GitHub repository and contributor metadata
-- cleanup reports
-- sitemap and `llms.txt` generation
-- the unified `prepareDirectory()` pipeline used by Astro and the CLI
+- load and validate a `grove.config.ts`
+- generate normalized JSON datasets, `sitemap.xml`, `robots.txt`,
+  `llms.txt`, `llms-full.txt`, and Open Graph images
+- refresh GitHub repository and community metadata
+- classify record health and write the human-review cleanup report
+- build a custom integration on top of the same pipeline Astro uses
+
+Application-facing code should normally use `@grove-dev/astro`. Direct
+imports from Core are useful for config, tooling, and custom
+integrations.
+
+## Install
+
+```bash
+pnpm add @grove-dev/core
+```
+
+Requires Node.js `>=22.12.0`.
+
+## Entry points
+
+| Import | Purpose |
+| --- | --- |
+| `@grove-dev/core` | Full engine. Config, build pipeline, schemas, generators, maintenance routines. Server and Node only. |
+| `@grove-dev/core/directory` | Browser-safe subpath. Filtering, sorting, facets, display labels, and lens URL helpers without config or filesystem dependencies. |
 
 ```ts
 import { defineConfig, prepareDirectory } from "@grove-dev/core";
-```
-
-Core contains no UI or framework adapter. Application-facing code should normally use `@grove-dev/astro`; direct Core imports are useful for config, tooling, and custom integrations.
-
-Browser controllers that need the shared discovery rules should use the browser-safe subpath. It exposes filtering, sorting, facets, display labels, and lens URL helpers without pulling config loading or filesystem dependencies into the client bundle.
-
-```ts
 import { filterRecords, hrefForLens } from "@grove-dev/core/directory";
 ```
 
-```bash
-pnpm --filter @grove-dev/core check
-pnpm --filter @grove-dev/core test
+## What Core owns
+
+- **Configuration.** `defineConfig`, `loadConfig`, and `GroveConfig` types.
+- **Schemas.** Resource, entity, taxonomy, decision, override, and health
+  records validated with Zod.
+- **Generation.** The unified `prepareDirectory()` pipeline plus
+  `buildSitemap`, `buildLlmsTxt` / `buildLlmsFullTxt`,
+  `buildSiteArtifacts`, and `buildOgImages`.
+- **Validation.** `validateProject` runs against the loaded config and
+  reports issues with severity and code.
+- **Maintenance.** `syncContributors`, GitHub metadata refresh
+  (`fetchGithubMetadata`, `buildGithubSyncPatch`), and
+  `cleanupStale` / `pickCleanupCandidates`.
+- **Browser helpers.** Re-exports from `./directory-*` modules:
+  filtering, sorting, scoring, formatting, facets, lenses, taxonomy,
+  and lens-aware search.
+
+## Typical usage
+
+```ts
+import {
+  defineConfig,
+  loadConfig,
+  prepareDirectory,
+  validateProject,
+} from "@grove-dev/core";
+
+// Define and load configuration
+export default defineConfig({
+  site: { /* ... */ },
+  sources: { /* ... */ },
+  facets: { /* ... */ },
+});
+
+const config = await loadConfig();
+
+// Validate sources before generating
+const result = await validateProject(config);
+if (!result.ok) {
+  for (const issue of result.issues) {
+    console.error(`[${issue.severity}] ${issue.code}: ${issue.message}`);
+  }
+}
+
+// Run the unified generation pipeline
+const prepared = await prepareDirectory();
 ```
+
+`prepareDirectory()` is the same routine Astro runs before
+`astro dev`, `astro check`, and `astro build`. Calling it directly is
+the right choice for custom tooling, CI checks, or non-Astro hosts.
 
 ## Audit contract
 
-`@grove-dev/core` defines the page-manifest contract that `grove audit` consumes. An audit block is declared in `grove.config.ts` and lists the pages the CLI will run Lighthouse against.
+Core defines the page-manifest contract that `grove audit` consumes.
+An `audit` block in `grove.config.ts` lists the pages the CLI will run
+Lighthouse against.
 
 ### Page types
 
-Every entry in `audit.pages[]` must declare one of seven `PageType` values:
+Every entry in `audit.pages[]` must declare one of seven `PageType`
+values:
 
 | Type | Meaning |
 | --- | --- |
 | `home` | The site's landing page. |
-| `directory` | The searchable/filterable index of records. |
+| `directory` | The searchable, filterable index of records. |
 | `collection` | A taxonomy or facet landing page. |
 | `record` | An individual record detail page. |
 | `content` | A long-form content page (about, blog post, etc.). |
@@ -60,14 +123,19 @@ interface PageManifestEntry {
 
 ### Default budget
 
-The audit enforces Lighthouse "good" thresholds — Google's standard quality gate — across every score category and metric:
+The audit enforces Lighthouse "good" thresholds — Google's standard
+quality gate — across every score category and metric:
 
-- **Score categories** (`performance`, `accessibility`, `best-practices`, `seo`) ≥ 0.9
+- **Score categories** (`performance`, `accessibility`,
+  `best-practices`, `seo`) ≥ 0.9
 - **LCP** ≤ 2500 ms
 - **CLS** ≤ 0.25
 - **TBT** ≤ 200 ms
 
-The default is 3 runs per page/profile (mobile + desktop) aggregated by median. `grove audit` returns a non-zero exit code on any violation, making it a drop-in CI check. Run with `--runs N` (clamped to `[1, 5]`) to tune the variance/noise trade-off.
+The default is 3 runs per page and profile (mobile + desktop)
+aggregated by median. `grove audit` returns a non-zero exit code on
+any violation, making it a drop-in CI check. Run with `--runs N`
+(clamped to `[1, 5]`) to tune the variance/noise trade-off.
 
 ### Minimal example
 
@@ -88,4 +156,13 @@ export default defineConfig({
 });
 ```
 
-MIT
+## Develop Core
+
+```bash
+pnpm --filter @grove-dev/core check
+pnpm --filter @grove-dev/core test
+```
+
+## License
+
+[MIT](../../LICENSE) © Grove contributors.

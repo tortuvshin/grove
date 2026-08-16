@@ -1,83 +1,49 @@
-# @grove-dev/starlight
+# `@grove-dev/starlight`
 
-Grove Starlight is a theme plugin for Astro Starlight that powers the
-Grove documentation site (`apps/docs/`). It ships component overrides,
-a layered CSS theme, and an Expressive Code integration so that
-Starlight renders pages in the same visual language as Grove-powered
-directories.
+The Starlight theme and documentation integration used by Grove.
+It powers the Grove documentation site (`apps/docs/`) and is
+available as a Starlight plugin for any documentation project that
+wants the same visual language as Grove-powered sites.
 
-## Features
+The plugin registers component overrides for the header, sidebar,
+page frame, hero, footer, search, table of contents, pagination,
+and Markdown content. It appends a layered CSS theme with light and
+dark mode values and configures Expressive Code so code blocks
+match the rest of the site.
 
-- Starlight plugin API integration.
-- Custom overrides for header, sidebar, page frame, hero, footer, search, table of contents, pagination, and Markdown content.
-- Token-based, layered CSS theme with light and dark mode values.
-- Styled built-in Starlight components including hero splashes, cards, link cards, asides, badges, tabs, steps, file trees, and link buttons.
-
-## Installation
+## Install
 
 ```bash
-npm install @grove-dev/starlight
+pnpm add @grove-dev/starlight
 ```
 
-With Bun:
+Requires Node.js `>=22.12.0`, Astro `>=5.0.0`, and
+`@astrojs/starlight >=0.38.3`.
 
-```bash
-bun add @grove-dev/starlight
-```
-
-## Usage
+## Use the plugin
 
 Add the plugin inside the Starlight integration:
 
 ```js
 // astro.config.mjs
-import { defineConfig } from 'astro/config';
-import starlight from '@astrojs/starlight';
-import grove from '@grove-dev/starlight';
+import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+import grove from "@grove-dev/starlight";
 
 export default defineConfig({
   integrations: [
     starlight({
-      title: 'My Docs',
+      title: "My Docs",
       plugins: [grove()],
     }),
   ],
 });
 ```
 
-The plugin registers Grove's component overrides, appends the theme
-CSS files, and configures Expressive Code.
+The plugin registers Grove's component overrides, appends the
+theme CSS files, and configures Expressive Code.
 
-## Attribution
-
-This theme recreates the design of the documentation site for
-[shadcn/ui](https://ui.shadcn.com/).
-
-It uses [adrian-ub/starlight-theme-black](https://github.com/adrian-ub/starlight-theme-black)
-as a base, which brought an earlier shadcn/ui-inspired design to Astro
-Starlight.
-
-## Docs Schema
-
-To use Grove's splash-page frontmatter fields with type checking,
-extend the Starlight docs schema:
-
-```ts
-// src/content.config.ts
-import { defineCollection } from 'astro:content';
-import { docsLoader } from '@astrojs/starlight/loaders';
-import { docsSchema } from '@astrojs/starlight/schema';
-import { ExtendDocsSchema } from '@grove-dev/starlight/schema';
-
-export const collections = {
-  docs: defineCollection({
-    loader: docsLoader(),
-    schema: docsSchema({ extend: ExtendDocsSchema }),
-  }),
-};
-```
-
-## Plugin Options
+## Plugin options
 
 ```ts
 type GroveStarlightUserConfig = {
@@ -93,20 +59,38 @@ type Link = {
 };
 ```
 
-Example:
-
 ```js
 grove({
   navLinks: [
-    { label: 'Docs', link: '/introduction/' },
-    { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
+    { label: "Docs", link: "/introduction/" },
+    { label: "GitHub", link: "https://github.com/tortuvshin/grove" },
   ],
   footerText:
-    'Built with [Grove Starlight](https://github.com/tortuvshin/grove/tree/main/packages/starlight).',
+    "Built with [Grove Starlight](https://github.com/tortuvshin/grove/tree/main/packages/starlight).",
 });
 ```
 
-## Splash Pages
+## Extend the docs schema
+
+To use Grove's splash-page frontmatter fields with type checking,
+extend the Starlight docs schema:
+
+```ts
+// src/content.config.ts
+import { defineCollection } from "astro:content";
+import { docsLoader } from "@astrojs/starlight/loaders";
+import { docsSchema } from "@astrojs/starlight/schema";
+import { ExtendDocsSchema } from "@grove-dev/starlight/schema";
+
+export const collections = {
+  docs: defineCollection({
+    loader: docsLoader(),
+    schema: docsSchema({ extend: ExtendDocsSchema }),
+  }),
+};
+```
+
+## Splash pages
 
 Use Starlight's `template: splash` and set `hero.layout`:
 
@@ -141,7 +125,7 @@ Import user-facing components from `@grove-dev/starlight/components`:
 
 ```astro
 ---
-import { ContainerSection, Dropdown, LinkButton } from '@grove-dev/starlight/components';
+import { ContainerSection, Dropdown, LinkButton } from "@grove-dev/starlight/components";
 ---
 
 <ContainerSection width="lg">
@@ -167,30 +151,29 @@ import { ContainerSection, Dropdown, LinkButton } from '@grove-dev/starlight/com
 
 ### `LinkButton`
 
-Props:
-
-- `href`: anchor destination.
-- `variant`: `primary`, `secondary`, or `minimal`.
-- `size`: `2xs`, `xs`, `sm`, `md`, or `lg`.
+- `href` — anchor destination.
+- `variant` — `primary`, `secondary`, or `minimal`.
+- `size` — `2xs`, `xs`, `sm`, `md`, or `lg`.
 - Other anchor attributes are forwarded.
 
 ### `ContainerSection`
 
-Props:
-
-- `width`: `sm`, `md`, `lg`, or `xl`.
+- `width` — `sm`, `md`, `lg`, or `xl`.
 
 ### `Dropdown`
 
-Compound menu component exported as `Dropdown.Root`, `Dropdown.Trigger`, `Dropdown.Content`, `Dropdown.Item`, `Dropdown.Label`, `Dropdown.Separator`, and `Dropdown.Shortcut`.
+Compound menu component exported as `Dropdown.Root`,
+`Dropdown.Trigger`, `Dropdown.Content`, `Dropdown.Item`,
+`Dropdown.Label`, `Dropdown.Separator`, and `Dropdown.Shortcut`.
 
 Useful props:
 
-- `Dropdown.Root`: `openOnHover`, `closeDelay`.
-- `Dropdown.Trigger`: `asChild`, `variant`, `size`.
-- `Dropdown.Content`: `side`, `align`, `sideOffset`, `animationDuration`.
-- `Dropdown.Item`: `as`, `inset`, `disabled`.
-- `Dropdown.Label`: `inset`.
+- `Dropdown.Root` — `openOnHover`, `closeDelay`.
+- `Dropdown.Trigger` — `asChild`, `variant`, `size`.
+- `Dropdown.Content` — `side`, `align`, `sideOffset`,
+  `animationDuration`.
+- `Dropdown.Item` — `as`, `inset`, `disabled`.
+- `Dropdown.Label` — `inset`.
 
 ## Styling
 
@@ -204,6 +187,22 @@ Override theme tokens from your app CSS:
 }
 ```
 
+## Attribution
+
+This theme recreates the design of the documentation site for
+[shadcn/ui](https://ui.shadcn.com/).
+
+It uses
+[adrian-ub/starlight-theme-black](https://github.com/adrian-ub/starlight-theme-black)
+as a base, which brought an earlier shadcn/ui-inspired design to
+Astro Starlight.
+
+## Develop Starlight
+
+```bash
+pnpm --filter @grove-dev/starlight test
+```
+
 ## License
 
-MIT
+[MIT](../../LICENSE) © Grove contributors.
