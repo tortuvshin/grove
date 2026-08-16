@@ -66,6 +66,10 @@ interface Site {
   logo?: string;
   /** Favicon path under `public/` (e.g. `/favicon.svg`). */
   favicon?: string;
+  /** BCP-47 language tag (e.g. "en"). Drives `<html lang>` and og:locale. */
+  locale?: string;
+  /** Twitter/X handle (e.g. "@grove") — emitted as twitter:site. */
+  twitter?: string;
   analytics?: {
     googleAnalyticsId?: string;
   };
@@ -99,6 +103,11 @@ interface Props {
   type?: 'website' | 'article' | 'profile';
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Open Graph / Twitter image path (e.g. "/og/records/foo.png").
+   * Defaults to the site-wide /og-image.svg inside <Seo />. */
+  image?: string;
+  /** Alt text for the OG/Twitter image. */
+  imageAlt?: string;
   /** Optional Google Analytics 4 Measurement ID (e.g. "G-XXXXXX"). */
   gaId?: string;
   /** Path used for JSON-LD `SearchAction` target. Defaults to "/items". */
@@ -116,6 +125,8 @@ const {
   type,
   noindex,
   jsonLd,
+  image,
+  imageAlt,
   gaId,
   searchPath,
   submitLabel,
@@ -187,7 +198,7 @@ const favicon =
 ---
 
 <!doctype html>
-<html lang="en" style={themeStyle}>
+<html lang={site.locale ?? 'en'} style={themeStyle}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -235,6 +246,8 @@ const favicon =
       type={type}
       noindex={noindex}
       jsonLd={jsonLd}
+      {...(image ? { image } : {})}
+      imageAlt={imageAlt}
       site={site}
       searchPath={directoryPath}
     />
