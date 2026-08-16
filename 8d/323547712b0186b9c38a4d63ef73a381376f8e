@@ -1,0 +1,34 @@
+packages/core/src/page-document.test.ts
+  s_ba7efc8838949b::t_e4ed3ded4c98be 6
+  s_ba7efc8838949b::t_1a9fd238bb707a 118-161
+  s_ba7efc8838949b::t_a2918f69161e31 162
+packages/core/src/build-data.ts
+  s_ba7efc8838949b::t_1d7173cb3cacaa 353-354
+packages/core/src/index.ts
+  s_ba7efc8838949b::t_83034e61b97cc0 242
+packages/core/src/schema.ts
+  s_ba7efc8838949b::t_295598a69a0eb4 650-659
+packages/core/src/audit.ts
+  s_ba7efc8838949b::t_6eda9702297668 68-72
+packages/core/src/page-document.ts
+  s_ba7efc8838949b::t_68d384613f5268 195,198
+  s_ba7efc8838949b::t_63f361493aee56 249
+  s_ba7efc8838949b::t_03c452a5c1dc71 118-121,133,140,146-163,168
+  s_ba7efc8838949b::t_eeecf763c9d878 225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8d323547712b0186b9c38a4d63ef73a381376f8e",
+  "prompts": {},
+  "sessions": {
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
