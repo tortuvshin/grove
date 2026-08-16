@@ -52,7 +52,7 @@ type Link = {
 grove({
   navLinks: [
     { label: 'Docs', link: '/introduction/' },
-    { label: 'API', link: '/reference/plugin-api/' },
+    { label: 'API', link: '/starlight/plugin-api/' },
     {
       label: 'GitHub',
       link: 'https://github.com/tortuvshin/grove',
@@ -160,7 +160,7 @@ starlight({
       docs: { includeAiUtilities: true },
       navLinks: [
         { label: 'Docs', link: '/introduction/' },
-        { label: 'Showcase', link: '/showcase/starlight-components/' },
+        { label: 'Showcase', link: '/starlight/components/' },
         { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
       ],
     }),

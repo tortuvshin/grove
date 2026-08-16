@@ -77,7 +77,7 @@ grove({
   ],
 
   docs: {
-    // Adds an "AI tools" menu beside each page title. Default: false.
+    // Adds a "Use with AI" menu beside each page title. Default: false.
     includeAiUtilities: true,
   },
 

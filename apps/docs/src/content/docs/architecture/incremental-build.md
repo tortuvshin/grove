@@ -100,4 +100,4 @@ The plugin is `apply: 'serve'` so it never runs in production builds.
 
 - [Astro integration hooks](https://docs.astro.build/en/reference/integrations-reference/)
 - [Vite plugin API](https://vite.dev/guide/api-plugin)
-- [Plugin author guide](/reference/plugin-author-guide/)
+- [Plugin author guide](/starlight/plugin-author-guide/)

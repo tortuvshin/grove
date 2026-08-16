@@ -20,33 +20,70 @@ describe("docs Astro config", () => {
     expect(config).not.toContain("./src/styles/custom.css");
   });
 
-  it("declares 12 sidebar sections matching the IA redesign", async () => {
+  it("orders the sidebar as one learning path", async () => {
     const config = await readFile(
       resolve(repoRoot, "apps/docs/astro.config.mjs"),
       "utf8",
     );
 
+    // The old grouping was by artifact kind — Sources, Generated Outputs,
+    // Automation — which reads as a table of contents for the codebase.
+    // These are ordered by what a reader needs next.
     const sectionLabels = [
-      "Introduction",
-      "Getting Started",
-      "Records & Blueprints",
-      "Sources",
-      "Generated Outputs",
+      "Start here",
+      "Build a knowledge site",
+      "Publish everywhere",
+      "Keep it useful",
       "Customize",
-      "Automation",
       "Deployment",
       "Reference",
-      "Architecture",
-      "FAQ",
+      "Starlight theme",
       "Project",
+      "Maintainers",
     ];
     for (const label of sectionLabels) {
       expect(config, `sidebar section "${label}" missing`).toContain(
         `label: '${label}'`,
       );
     }
+
+    // Order matters as much as membership: a reader scanning the sidebar
+    // should meet them in this sequence.
+    const positions = sectionLabels.map((l) => config.indexOf(`label: '${l}'`));
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  });
+
+  it("keeps the Starlight theme and maintainer docs out of the main path", async () => {
+    const config = await readFile(
+      resolve(repoRoot, "apps/docs/astro.config.mjs"),
+      "utf8",
+    );
+
+    // Both are real documentation, but neither is what someone evaluating
+    // Grove came to read — the theme showcase in particular made the
+    // product look like an Astro theme.
+    for (const label of ["Starlight theme", "Maintainers", "Deployment"]) {
+      const at = config.indexOf(`label: '${label}'`);
+      const collapsedAt = config.indexOf("collapsed: true", at);
+      expect(collapsedAt, `"${label}" should be collapsed`).toBeGreaterThan(at);
+      expect(collapsedAt - at).toBeLessThan(200);
+    }
   });
 });
+
+/**
+ * The files Astro will actually resolve for a sidebar slug.
+ *
+ * A section landing page is idiomatically `<section>/index.md`, which
+ * Starlight routes at `/<section>/`. Checking only `<slug>.md` reports a
+ * false orphan for the file and a false missing-slug for the section.
+ */
+const candidatesFor = (slug: string) => [
+  `${slug}.md`,
+  `${slug}.mdx`,
+  `${slug}/index.md`,
+  `${slug}/index.mdx`,
+];
 
 describe("docs sidebar coverage", () => {
   async function* walk(dir: string): AsyncGenerator<string> {
@@ -73,8 +110,8 @@ describe("docs sidebar coverage", () => {
     const navLinks = [...config.matchAll(navRe)].map((m) => m[1]);
 
     const referenced = new Set([
-      ...slugs.flatMap((slug) => [`${slug}.md`, `${slug}.mdx`]),
-      ...navLinks.flatMap((slug) => [`${slug}.md`, `${slug}.mdx`]),
+      ...slugs.flatMap(candidatesFor),
+      ...navLinks.flatMap(candidatesFor),
     ]);
 
     const orphans: string[] = [];
@@ -103,17 +140,15 @@ describe("docs sidebar coverage", () => {
     const missing: string[] = [];
     for (const slug of slugs) {
       if (slug.startsWith("http")) continue;
-      const md = join(docsRoot, `${slug}.md`);
-      const mdx = join(docsRoot, `${slug}.mdx`);
-      try {
-        await stat(md);
-      } catch {
-        try {
-          await stat(mdx);
-        } catch {
-          missing.push(slug);
-        }
-      }
+      const found = await Promise.all(
+        candidatesFor(slug).map((rel) =>
+          stat(join(docsRoot, rel)).then(
+            () => true,
+            () => false,
+          ),
+        ),
+      );
+      if (!found.some(Boolean)) missing.push(slug);
     }
 
     expect(

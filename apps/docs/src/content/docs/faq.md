@@ -45,7 +45,7 @@ Any static host. See [GitHub Pages](/deployment/github-pages/), [Cloudflare](/de
 
 Three extension points:
 
-1. **Astro integration** — runs alongside `@grove-dev/astro`. See [Plugin author guide](/reference/plugin-author-guide/).
+1. **Astro integration** — runs alongside `@grove-dev/astro`. See [Plugin author guide](/starlight/plugin-author-guide/).
 2. **Vite plugin** — dev-only augmentations.
 3. **Starlight plugin** — extends the docs site.
 

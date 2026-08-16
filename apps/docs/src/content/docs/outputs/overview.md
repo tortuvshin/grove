@@ -45,7 +45,7 @@ Grove turns your source files (YAML records, taxonomy, decisions, Markdown bodie
 |---|---|---|
 | `robots.txt` | `/robots.txt` | Crawler directives |
 | `og-image.svg` | `/og-image.svg` | Default social preview (1200×630) |
-| JSON-LD per page | inline `<script>` | Google rich results |
+| JSON-LD per page | inline `<script>` | Machine-readable page metadata |
 
 ## Per-record artifacts
 

@@ -18,7 +18,7 @@ A single YAML record in `data/records/<slug>.yml` becomes, all at once:
 | A page on your site | Visitors browsing the directory |
 | An entry in `sitemap.xml` | Search engines |
 | An entry in `llms.txt` | AI assistants and crawlers |
-| A JSON-LD `SoftwareSourceCode` block | Google rich results |
+| A JSON-LD `SoftwareSourceCode` block | Search engines and structured-data consumers |
 | An OG image preview | Slack, LinkedIn, Discord |
 | A row in `data/generated/records.json` | Anything consuming your dataset |
 
@@ -28,11 +28,13 @@ The same loop applies to taxonomy, decisions, collections, and content pages. Fi
 
 Every Grove space is built around one of three blueprints:
 
-- **[project-directory](/blueprints/project-directory/)** — open-source projects (default).
-- **[resource-hub](/blueprints/resource-hub/)** — articles, tutorials, videos, papers.
-- **[ecosystem-map](/blueprints/ecosystem-map/)** — organizations, people, working groups.
+| Blueprint | For | Schema | Default UI |
+|---|---|---|---|
+| **[project-directory](/blueprints/project-directory/)** | Open-source projects (default) | Stable | Stable |
+| **[resource-hub](/blueprints/resource-hub/)** | Articles, tutorials, videos, papers | Stable | Experimental |
+| **[ecosystem-map](/blueprints/ecosystem-map/)** | Organizations, people, working groups | Stable | Experimental |
 
-Each blueprint has its own JSON-LD type, lens semantics, and visible-by-default fields. The same renderer serves all three.
+Each blueprint has its own JSON-LD type, lens semantics, and visible-by-default fields, and the same renderer serves all three. `project-directory` is the polished end-to-end default; the other two validate and generate correctly but reuse its page templates rather than shipping tuned ones.
 
 ## How it works
 
@@ -48,9 +50,13 @@ pnpm dev
 # 3. Edit records
 $EDITOR data/records/<slug>.yml
 
-# 4. Deploy
-pnpm build && pnpm exec astro deploy
+# 4. Build the static site
+pnpm build
 ```
+
+`pnpm build` writes `dist/`. Deploying it is your host's job — see
+[Deployment](/deployment/overview/) for GitHub Pages, Cloudflare, Netlify,
+and self-hosted recipes.
 
 The CLI copies the example Astro space (`apps/example/`), wires up `@grove-dev/astro`, and runs `pnpm install`. The dev server starts at `http://localhost:4321`. Every record change shows up after a rebuild.
 

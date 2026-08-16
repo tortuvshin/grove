@@ -16,7 +16,7 @@ It is composition primitives, not a locked theme. Every route lives in your
 | It gives you | It does not give you |
 | --- | --- |
 | An integration that prepares generated data before `dev` and `build` | Routes — you own every file in `src/pages` |
-| 33 components, 7 layouts, 6 UI primitives | A fixed page composition |
+| 36 components, 7 layouts, 6 UI primitives | A fixed page composition |
 | Server view-models that assemble page props | Business logic — filtering, scoring, and lenses live in `@grove-dev/core` |
 | Design tokens and a stylesheet | Your brand — override tokens in `src/styles/global.css` |
 | SEO wiring from a single `PageDocument` | Content — that stays in `data/` and `content/` |
@@ -162,6 +162,7 @@ import BaseLayout from '@grove-dev/astro/layouts/BaseLayout.astro';
 | **Layout / shell** | `BaseLayout`, `Container`, `Header`, `Footer`, `SectionHeader`, `Seo`, `ThemeToggle` |
 | **Browse / search** | `DirectoryIndexClient`, `RefinePanel`, `FilterGroupMenu`, `FilterOptions`, `SmartLensTabs`, `Pagination`, `IndexRow`, `CardGrid` |
 | **Record detail** | `RecordHeader`, `RecordSection`, `RecordSidebar`, `EditorialSummary`, `MarkdownBody`, `TableOfContents`, `LanguageBreakdown`, `StackPlatformChips` |
+| **Editorial evidence** | `EditorialVerdict`, `EvidenceLedger`, `AlternativesTable` — the review tier behind a record, the cited sources for its claims, and what to consider instead |
 | **Cards** | `ProjectCard`, `CardIcon`, `Icon` |
 | **Collections / taxonomy** | `CollectionCard`, `CollectionIndex`, `CollectionPage`, `CollectionRow`, `CollectionTeaser`, `OriginalCollection`, `CategoryGrid`, `StackGrid` |
 | **Community** | `ContributorsGrid`, `SubmissionClient` |

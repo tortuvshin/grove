@@ -161,4 +161,4 @@ Document the extension in your README; users opt in by importing your `defineCon
 
 - [Astro integration reference](https://docs.astro.build/en/reference/integrations-reference/)
 - [Vite plugin API](https://vite.dev/guide/api-plugin)
-- [Plugin API (Starlight)](/reference/plugin-api/)
+- [Plugin API (Starlight)](/starlight/plugin-api/)

@@ -44,12 +44,21 @@ const navLinks = [...src.matchAll(navLinkRe)].map((m) => m[1]);
 // External URLs (if any ever appear) are filtered out.
 const localSlugs = slugs.filter((s) => !s.startsWith("http"));
 
+// The file candidates Astro will actually resolve for a slug. A section
+// landing page is idiomatically `<section>/index.md`, and Starlight routes
+// that at `/<section>/` — so checking only `<slug>.md` reports a false
+// missing file for every section index.
+const candidatesFor = (slug) => [
+    `${slug}.md`,
+    `${slug}.mdx`,
+    `${slug}/index.md`,
+    `${slug}/index.mdx`,
+];
+
 let missing = 0;
 const missingList = [];
 for (const slug of localSlugs) {
-    const md = resolve(docsRoot, `${slug}.md`);
-    const mdx = resolve(docsRoot, `${slug}.mdx`);
-    if (!existsSync(md) && !existsSync(mdx)) {
+    if (!candidatesFor(slug).some((rel) => existsSync(resolve(docsRoot, rel)))) {
         console.error(`[sidebar-check] missing file for slug: ${slug}`);
         missingList.push(slug);
         missing++;
@@ -84,7 +93,7 @@ if (checkOrphans) {
 
     // Files referenced by sidebar slugs (relative path without extension).
     const referencedFiles = new Set(
-        localSlugs.map((slug) => `${slug}.md`).concat(localSlugs.map((slug) => `${slug}.mdx`)),
+        localSlugs.flatMap(candidatesFor),
     );
 
     // Files referenced by navLinks: '/introduction/' → 'introduction.md'.
@@ -92,8 +101,7 @@ if (checkOrphans) {
         if (!link.startsWith("/")) continue;
         const slug = link.replace(/^\//, "").replace(/\/$/, "");
         if (slug) {
-            referencedFiles.add(`${slug}.md`);
-            referencedFiles.add(`${slug}.mdx`);
+            for (const rel of candidatesFor(slug)) referencedFiles.add(rel);
         }
     }
 

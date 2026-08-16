@@ -5,8 +5,10 @@ import grove from '@grove-dev/starlight';
 import tailwindcss from '@tailwindcss/vite';
 
 // Grove docs — the canonical Astro/Starlight site for the project.
-// This site is itself a Grove space: it uses the same record schema,
-// Astro template, and CLI workflow as any user-built space.
+// This is a Starlight site themed with @grove-dev/starlight. It is *not*
+// a Grove record space: it has no grove.config.ts, no data/records, and
+// does not run the publishing pipeline. The landing page at "/" is a
+// standalone Astro route; Starlight owns everything else.
 export default defineConfig({
     site: 'https://withgrove.dev',
     vite: {
@@ -106,73 +108,70 @@ export default defineConfig({
                 },
             ],
             sidebar: [
+                // One learning path, ordered by what a reader needs next:
+                // understand it, build with it, publish it, keep it useful,
+                // make it yours, look things up. The Starlight theme is a
+                // separate product surface and lives in its own group;
+                // maintainer process is collapsed so it never competes with
+                // user documentation.
                 {
-                    label: 'Introduction',
+                    label: 'Start here',
                     items: [
                         { label: 'Introduction', slug: 'introduction' },
-                        { label: 'Philosophy', slug: 'concepts/philosophy' },
-                    ],
-                },
-                {
-                    label: 'Getting Started',
-                    items: [
-                        { label: 'Create a project directory', slug: 'getting-started/create-a-space' },
-                        { label: 'Add your first project', slug: 'getting-started/add-your-first-project' },
+                        { label: 'How Grove works', slug: 'concepts/philosophy' },
+                        { label: 'Create a space', slug: 'getting-started/create-a-space' },
+                        { label: 'Add your first record', slug: 'getting-started/add-your-first-project' },
                         { label: 'Configure your space', slug: 'getting-started/configure' },
                         { label: 'Deploy your site', slug: 'getting-started/deploy' },
                     ],
                 },
                 {
-                    label: 'Records & Blueprints',
+                    label: 'Build a knowledge site',
                     items: [
-                        { label: 'Project directory', slug: 'blueprints/project-directory' },
-                        { label: 'Resource hub', slug: 'blueprints/resource-hub' },
-                        { label: 'Ecosystem map', slug: 'blueprints/ecosystem-map' },
-                        { label: 'Author a record', slug: 'sources/records' },
-                    ],
-                },
-                {
-                    label: 'Sources',
-                    items: [
-                        { label: 'Taxonomy files', slug: 'sources/taxonomy-files' },
+                        { label: 'Records', slug: 'sources/records' },
+                        { label: 'Rich content pages', slug: 'sources/content-pages' },
+                        { label: 'Taxonomy', slug: 'sources/taxonomy-files' },
                         { label: 'Curated collections', slug: 'sources/collections' },
-                        { label: 'Decisions', slug: 'sources/decisions' },
-                        { label: 'Content pages', slug: 'sources/content-pages' },
-                        { label: 'Health classification', slug: 'sources/health-classification' },
+                        { label: 'Blueprint: project directory', slug: 'blueprints/project-directory' },
+                        { label: 'Blueprint: resource hub', slug: 'blueprints/resource-hub' },
+                        { label: 'Blueprint: ecosystem map', slug: 'blueprints/ecosystem-map' },
                     ],
                 },
                 {
-                    label: 'Generated Outputs',
+                    label: 'Publish everywhere',
                     items: [
-                        { label: 'Overview', slug: 'outputs/overview' },
-                        { label: 'LLM-oriented', slug: 'outputs/llm' },
-                        { label: 'SEO & social', slug: 'outputs/seo' },
+                        { label: 'Generated outputs', slug: 'outputs/overview' },
+                        { label: 'SEO and social', slug: 'outputs/seo' },
                         { label: 'Site metadata', slug: 'outputs/site-meta' },
+                        { label: 'LLM-oriented outputs', slug: 'outputs/llm' },
+                    ],
+                },
+                {
+                    label: 'Keep it useful',
+                    items: [
+                        { label: 'Validation', slug: 'automation/validation' },
+                        { label: 'GitHub metadata', slug: 'automation/github-metadata' },
+                        { label: 'Sync deep-dive', slug: 'automation/sync-github-deep-dive' },
+                        { label: 'Health classification', slug: 'sources/health-classification' },
+                        { label: 'Decisions and overrides', slug: 'sources/decisions' },
+                        { label: 'Scheduled maintenance', slug: 'automation/scheduled' },
+                        { label: 'Community submissions', slug: 'automation/submissions' },
                     ],
                 },
                 {
                     label: 'Customize',
                     items: [
                         { label: 'Branding', slug: 'customize/branding' },
-                        { label: 'Theme', slug: 'customize/theme' },
+                        { label: 'Theme tokens', slug: 'customize/theme' },
                         { label: 'Components', slug: 'customize/components' },
-                        { label: 'Custom pages', slug: 'customize/pages' },
+                        { label: 'Page composition', slug: 'customize/pages' },
                         { label: 'Template customization', slug: 'customize/template-customization' },
                         { label: 'Images and assets', slug: 'customize/assets' },
                     ],
                 },
                 {
-                    label: 'Automation',
-                    items: [
-                        { label: 'GitHub metadata', slug: 'automation/github-metadata' },
-                        { label: 'Sync deep-dive', slug: 'automation/sync-github-deep-dive' },
-                        { label: 'Community submissions', slug: 'automation/submissions' },
-                        { label: 'Validation', slug: 'automation/validation' },
-                        { label: 'Scheduled maintenance', slug: 'automation/scheduled' },
-                    ],
-                },
-                {
                     label: 'Deployment',
+                    collapsed: true,
                     items: [
                         { label: 'Overview', slug: 'deployment/overview' },
                         { label: 'GitHub Pages', slug: 'deployment/github-pages' },
@@ -185,48 +184,50 @@ export default defineConfig({
                     label: 'Reference',
                     items: [
                         { label: 'Configuration', slug: 'reference/config' },
-                        { label: 'Project record', slug: 'reference/record-schema' },
+                        { label: 'Record schema', slug: 'reference/record-schema' },
                         { label: 'CLI', slug: 'reference/cli' },
-                        { label: 'Programmatic API', slug: 'reference/api-core' },
+                        { label: 'Core API', slug: 'reference/api-core' },
                         { label: 'Astro components', slug: 'reference/components' },
-                        { label: 'Plugin API', slug: 'reference/plugin-api' },
-                        { label: 'Plugin author guide', slug: 'reference/plugin-author-guide' },
+                        { label: 'Renderer status', slug: 'reference/frameworks' },
                         { label: 'Migration guide', slug: 'reference/migration' },
-                        { label: 'Framework status', slug: 'reference/frameworks' },
+                        { label: 'Incremental build (proposed)', slug: 'architecture/incremental-build' },
+                        { label: 'FAQ', slug: 'faq' },
                     ],
                 },
                 {
-                    label: 'Architecture',
+                    // A separate product: a Starlight theme, not the Grove
+                    // publishing pipeline. Grouping it with the product docs
+                    // made Grove read as an Astro theme.
+                    label: 'Starlight theme',
+                    collapsed: true,
                     items: [
-                        { label: 'Incremental build', slug: 'architecture/incremental-build' },
-                    ],
-                },
-                {
-                    label: 'FAQ',
-                    items: [
-                        { slug: 'faq' },
-                    ],
-                },
-                {
-                    label: 'Showcase',
-                    items: [
-                        { label: 'Splash pages', slug: 'showcase/splash-pages' },
-                        { label: 'Banner layout', slug: 'showcase/splash/banner' },
-                        { label: 'Centered layout', slug: 'showcase/splash/centered' },
-                        { label: 'Centered-top layout', slug: 'showcase/splash/centered-top' },
-                        { label: 'Split-left layout', slug: 'showcase/splash/split-left' },
-                        { label: 'Split-right layout', slug: 'showcase/splash/split-right' },
-                        { label: 'Starlight components', slug: 'showcase/starlight-components' },
-                        { label: 'Typography', slug: 'showcase/typography' },
+                        { label: 'Overview', slug: 'starlight' },
+                        { label: 'Plugin API', slug: 'starlight/plugin-api' },
+                        { label: 'Plugin author guide', slug: 'starlight/plugin-author-guide' },
+                        { label: 'Components', slug: 'starlight/components' },
+                        { label: 'Typography', slug: 'starlight/typography' },
+                        { label: 'Splash pages', slug: 'starlight/splash-pages' },
+                        { label: 'Splash: banner', slug: 'starlight/splash/banner' },
+                        { label: 'Splash: centered', slug: 'starlight/splash/centered' },
+                        { label: 'Splash: centered-top', slug: 'starlight/splash/centered-top' },
+                        { label: 'Splash: split-left', slug: 'starlight/splash/split-left' },
+                        { label: 'Splash: split-right', slug: 'starlight/splash/split-right' },
                     ],
                 },
                 {
                     label: 'Project',
                     items: [
                         { label: 'Roadmap', slug: 'roadmap' },
+                        { label: 'Built with Grove', slug: 'open-apps' },
+                    ],
+                },
+                {
+                    label: 'Maintainers',
+                    collapsed: true,
+                    items: [
                         { label: 'Contributing', slug: 'maintainers/contributing' },
                         { label: 'Governance', slug: 'maintainers/governance' },
-                        { label: 'CI & quality', slug: 'maintainers/ci-quality' },
+                        { label: 'CI and quality', slug: 'maintainers/ci-quality' },
                         { label: 'Release process', slug: 'maintainers/release-process' },
                         { label: 'Security', slug: 'maintainers/security' },
                     ],

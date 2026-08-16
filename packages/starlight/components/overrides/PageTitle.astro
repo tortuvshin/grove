@@ -13,6 +13,9 @@ const {
 const { title, description } = data;
 const incudeAIMenu = userConfig.docs?.includeAiUtilities ?? false;
 
+// The link carries the page's URL and a prompt — never the page content.
+// Nothing is requested until the reader clicks; the assistant fetches the
+// page itself if it can.
 const encode = (url: string, text: string) => `https://${url}=${encodeURIComponent(text)}`;
 const aiText = `I'm looking at: ${Astro.url}.\nHelp me understand how to use it. Be ready to explain concepts, give examples, or help debug based on it.`;
 const openAIUrl = encode('chatgpt.com?q', aiText);
@@ -28,7 +31,7 @@ const claudeUrl = encode('claude.ai/new?q', aiText);
                 incudeAIMenu && (
                     <Dropdown>
                         <DropdownTrigger variant="secondary" size="sm">
-                            AI tools
+                            Use with AI
                             <span
                                 data-slot="separator"
                                 style="display: inline-block; width: 1px; height: 50%; background-color: var(--foreground); opacity: 0.1;"

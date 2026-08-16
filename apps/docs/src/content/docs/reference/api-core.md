@@ -170,4 +170,4 @@ const tier = scoreTier(70); // { tier: "top", color: "#16a34a" }
 - [Configuration reference](/reference/config/)
 - [Record schema](/reference/record-schema/)
 - [CLI reference](/reference/cli/)
-- [Plugin author guide](/reference/plugin-author-guide/)
+- [Plugin author guide](/starlight/plugin-author-guide/)
