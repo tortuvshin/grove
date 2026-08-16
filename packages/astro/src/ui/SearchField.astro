@@ -55,13 +55,13 @@ const {
     placeholder={placeholder}
     autocomplete="off"
     data-search-input
-    class="peer h-10 w-full rounded-md border border-input bg-background py-2 pl-9 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 [&::-webkit-search-cancel-button]:appearance-none"
+    class="peer h-10 w-full rounded-md border border-input bg-background py-2 pl-9 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 [&::-webkit-search-cancel-button]:appearance-none"
   />
   {shortcut && (
     <kbd
       data-search-hint
       aria-hidden="true"
-      class="pointer-events-none absolute right-10 top-1/2 hidden h-6 w-6 -translate-y-1/2 select-none items-center justify-center rounded-md border border-border bg-secondary font-mono text-[11px] leading-none text-muted-foreground peer-focus:!hidden peer-not-placeholder-shown:hidden sm:inline-flex"
+      class="pointer-events-none absolute right-2 top-1/2 hidden h-6 w-6 -translate-y-1/2 select-none items-center justify-center rounded-md border border-border bg-secondary font-mono text-[11px] leading-none text-muted-foreground peer-focus:!hidden peer-not-placeholder-shown:hidden sm:inline-flex"
       >/</kbd
     >
   )}
