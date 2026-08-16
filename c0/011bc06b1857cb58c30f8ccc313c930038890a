@@ -1,0 +1,23 @@
+packages/astro/src/components/SmartLensTabs.astro
+  s_610dad34975967::t_3cd8067ac56f65 60-61
+  s_610dad34975967::t_990e51545b91e8 26-33,44
+packages/astro/src/components/RefinePanel.astro
+  s_610dad34975967::t_f345805861b99b 81
+  s_610dad34975967::t_e29bbe3a74143d 42-49,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c0011bc06b1857cb58c30f8ccc313c930038890a",
+  "prompts": {},
+  "sessions": {
+    "s_610dad34975967": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e489a4e1-27ab-402e-ba58-cdfea08257b1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
