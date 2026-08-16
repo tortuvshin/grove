@@ -1,33 +1,48 @@
-# @grove-dev/starlight
+# `@grove-dev/starlight`
 
-Grove Starlight is a theme plugin for Astro Starlight that powers the
-Grove documentation site (`apps/docs/`). It ships component overrides,
-a layered CSS theme, and an Expressive Code integration so that
-Starlight renders pages in the same visual language as Grove-powered
-directories.
+A theme plugin for [Astro Starlight](https://starlight.astro.build) that
+recreates the [shadcn/ui](https://ui.shadcn.com/) documentation design —
+component overrides, a layered token-based CSS theme, styled Expressive Code,
+and a few extra content components.
 
-## Features
+It powers <https://withgrove.dev>, but it is **not** part of Grove's
+publishing pipeline.
 
-- Starlight plugin API integration.
-- Custom overrides for header, sidebar, page frame, hero, footer, search, table of contents, pagination, and Markdown content.
-- Token-based, layered CSS theme with light and dark mode values.
-- Styled built-in Starlight components including hero splashes, cards, link cards, asides, badges, tabs, steps, file trees, and link buttons.
+## Relationship to Grove
 
-## Installation
+This package is optional and independent. It shares the Grove name and visual
+language, nothing else:
+
+- It does **not** require `@grove-dev/core`, `@grove-dev/astro`, or
+  `@grove-dev/cli`, and does not depend on any of them.
+- It knows nothing about records, blueprints, taxonomy, or `grove.config.ts`.
+- You can use it on any Starlight site, and you can build a Grove space
+  without it.
+
+If you are here for Grove's file-first publishing system, you want
+[`@grove-dev/core`](https://www.npmjs.com/package/@grove-dev/core) and
+[`@grove-dev/astro`](https://www.npmjs.com/package/@grove-dev/astro) instead.
+
+## Compatibility
+
+| Requirement | Supported |
+| --- | --- |
+| Node.js | ≥ 22.12 |
+| Astro | ≥ 5.0 |
+| `@astrojs/starlight` | ≥ 0.38.3 |
+
+Verified against Astro 7 and Starlight 0.41.
+
+## Install
 
 ```bash
-npm install @grove-dev/starlight
+npm  install @grove-dev/starlight
+pnpm add     @grove-dev/starlight
+yarn add     @grove-dev/starlight
+bun  add     @grove-dev/starlight
 ```
 
-With Bun:
-
-```bash
-bun add @grove-dev/starlight
-```
-
-## Usage
-
-Add the plugin inside the Starlight integration:
+## Setup
 
 ```js
 // astro.config.mjs
@@ -45,22 +60,52 @@ export default defineConfig({
 });
 ```
 
-The plugin registers Grove's component overrides, appends the theme
-CSS files, and configures Expressive Code.
+The plugin registers the component overrides, appends the theme CSS, and
+configures Expressive Code with matching code-block styling.
 
-## Attribution
+## Options
 
-This theme recreates the design of the documentation site for
-[shadcn/ui](https://ui.shadcn.com/).
+Every option is optional.
 
-It uses [adrian-ub/starlight-theme-black](https://github.com/adrian-ub/starlight-theme-black)
-as a base, which brought an earlier shadcn/ui-inspired design to Astro
-Starlight.
+```ts
+grove({
+  // Extra links in the site header.
+  navLinks: [
+    { label: 'Docs', link: '/introduction/' },
+    { label: 'GitHub', link: 'https://github.com/…',
+      attrs: { target: '_blank', rel: 'noopener noreferrer' } },
+  ],
 
-## Docs Schema
+  docs: {
+    // Adds an "AI tools" menu beside each page title. Default: false.
+    includeAiUtilities: true,
+  },
 
-To use Grove's splash-page frontmatter fields with type checking,
-extend the Starlight docs schema:
+  // Markdown; replaces the default attribution line in the footer.
+  footerText: 'Built with care.',
+});
+```
+
+| Option | Type | Default |
+| --- | --- | --- |
+| `navLinks` | `{ label, link, attrs?, badge? }[]` | — |
+| `docs.includeAiUtilities` | `boolean` | `false` |
+| `footerText` | `string` (Markdown) | The upstream attribution line |
+
+### What `includeAiUtilities` does
+
+It renders a dropdown next to the page title with links to ChatGPT and Claude.
+Each link is a URL-encoded query containing **the page's URL and a short
+prompt** — for example, `I'm looking at: https://example.com/page. Help me
+understand how to use it.`
+
+Page content is **not** transmitted. Nothing is sent anywhere until a reader
+clicks; there is no telemetry, no request on page load, and the assistant
+fetches the page itself if it can. Off by default.
+
+## Content schema
+
+Extend the docs collection to unlock the hero options:
 
 ```ts
 // src/content.config.ts
@@ -77,124 +122,72 @@ export const collections = {
 };
 ```
 
-## Plugin Options
+This adds `hero.layout` and an optional `hero.announcement`:
 
-```ts
-type GroveStarlightUserConfig = {
-  navLinks?: Link[];
-  footerText?: string;
-};
-
-type Link = {
-  label: string | Record<string, string>;
-  link: string;
-  badge?: string;
-  attrs?: Record<string, string | number | boolean | undefined>;
-};
-```
-
-Example:
-
-```js
-grove({
-  navLinks: [
-    { label: 'Docs', link: '/introduction/' },
-    { label: 'GitHub', link: 'https://github.com/tortuvshin/grove' },
-  ],
-  footerText:
-    'Built with [Grove Starlight](https://github.com/tortuvshin/grove/tree/main/packages/starlight).',
-});
-```
-
-## Splash Pages
-
-Use Starlight's `template: splash` and set `hero.layout`:
-
-```md
+```yaml
 ---
-title: Developer Portal
-description: API docs, examples, and integration guides.
+title: My Project
 template: splash
 hero:
   layout: split-left
   announcement:
-    text: Version 2.0 is ready
-    link: /guides/getting-started/
-  actions:
-    - text: Get started
-      link: /guides/getting-started/
-      icon: right-arrow
+    text: v2.0 is out
+    link: /blog/v2/
 ---
 ```
 
-Available layouts:
+## Splash layouts
 
-- `centered`
-- `centered-top`
-- `split-left`
-- `split-right`
-- `banner`
+`hero.layout` accepts five values:
+
+| Value | Arrangement |
+| --- | --- |
+| `centered` *(default)* | Text above, image below |
+| `centered-top` | Image above, text below |
+| `split-left` | Text left, image right |
+| `split-right` | Text right, image left |
+| `banner` | Full-width banner |
 
 ## Components
 
-Import user-facing components from `@grove-dev/starlight/components`:
-
 ```astro
 ---
-import { ContainerSection, Dropdown, LinkButton } from '@grove-dev/starlight/components';
+import { Card, ContainerSection, Dropdown, LinkButton } from '@grove-dev/starlight/components';
 ---
 
 <ContainerSection width="lg">
   <h2>Build better docs</h2>
-  <p>Use Grove sections on splash pages and custom MDX content.</p>
   <LinkButton href="/introduction/">Get started</LinkButton>
 </ContainerSection>
+```
 
+- **`LinkButton`** — `href`, `variant` (`primary` | `secondary` | `minimal`),
+  `size` (`2xs` | `xs` | `sm` | `md` | `lg`); other anchor attributes are
+  forwarded.
+- **`ContainerSection`** — `width` (`sm` | `md` | `lg` | `xl`).
+- **`Card`** — a styled content card.
+- **`Dropdown`** — a compound menu: `Dropdown.Root`, `.Trigger`, `.Content`,
+  `.Item`, `.Label`, `.Separator`, `.Shortcut`.
+
+```astro
 <Dropdown.Root>
   <Dropdown.Trigger variant="secondary">Theme actions</Dropdown.Trigger>
   <Dropdown.Content align="start">
-    <Dropdown.Label>Documentation</Dropdown.Label>
-    <Dropdown.Item as="a" href="/guides/getting-started/">
-      Getting Started
-    </Dropdown.Item>
     <Dropdown.Item as="a" href="/guides/theming/">
-      Customize Theme
+      Customize theme
       <Dropdown.Shortcut>CSS</Dropdown.Shortcut>
     </Dropdown.Item>
   </Dropdown.Content>
 </Dropdown.Root>
 ```
 
-### `LinkButton`
+Useful props: `Dropdown.Root` — `openOnHover`, `closeDelay`;
+`.Trigger` — `asChild`, `variant`, `size`; `.Content` — `side`, `align`,
+`sideOffset`, `animationDuration`; `.Item` — `as`, `inset`, `disabled`.
 
-Props:
+## Theming
 
-- `href`: anchor destination.
-- `variant`: `primary`, `secondary`, or `minimal`.
-- `size`: `2xs`, `xs`, `sm`, `md`, or `lg`.
-- Other anchor attributes are forwarded.
-
-### `ContainerSection`
-
-Props:
-
-- `width`: `sm`, `md`, `lg`, or `xl`.
-
-### `Dropdown`
-
-Compound menu component exported as `Dropdown.Root`, `Dropdown.Trigger`, `Dropdown.Content`, `Dropdown.Item`, `Dropdown.Label`, `Dropdown.Separator`, and `Dropdown.Shortcut`.
-
-Useful props:
-
-- `Dropdown.Root`: `openOnHover`, `closeDelay`.
-- `Dropdown.Trigger`: `asChild`, `variant`, `size`.
-- `Dropdown.Content`: `side`, `align`, `sideOffset`, `animationDuration`.
-- `Dropdown.Item`: `as`, `inset`, `disabled`.
-- `Dropdown.Label`: `inset`.
-
-## Styling
-
-Override theme tokens from your app CSS:
+Override tokens from your own CSS, loaded after the plugin's:
 
 ```css
 :root {
@@ -203,6 +196,67 @@ Override theme tokens from your app CSS:
   --container-max-width: 1440px;
 }
 ```
+
+The theme ships light and dark values for every token and follows Starlight's
+theme selector, so both modes work without extra configuration. Overrides
+respect `prefers-reduced-motion`, and the component overrides preserve
+Starlight's landmarks, heading order, and focus behaviour.
+
+## Overrides and upgrade risk
+
+The plugin claims **16** Starlight component overrides:
+
+`ThemeSelect`, `PageFrame`, `Header`, `SiteTitle`, `Sidebar`,
+`TwoColumnContent`, `ContentPanel`, `PageTitle`, `MarkdownContent`, `Hero`,
+`Footer`, `SocialIcons`, `Pagination`, `Search`, `TableOfContents`,
+`PageSidebar`.
+
+Two consequences worth knowing before you adopt it:
+
+1. **If you already override one of these**, the plugin skips it and logs a
+   warning naming the file to render manually — your override wins, but the
+   theme may look inconsistent at that seam.
+2. **Starlight internals are not a stable API.** A Starlight minor that
+   restructures any overridden component can break this theme before it breaks
+   an unthemed site. Pin Starlight and upgrade it deliberately.
+
+Each override is importable directly, e.g.
+`@grove-dev/starlight/components/overrides/Header.astro`.
+
+## Exports
+
+| Specifier | Contents |
+| --- | --- |
+| `@grove-dev/starlight` | The plugin (default export) |
+| `@grove-dev/starlight/schema` | `ExtendDocsSchema`, `heroLayoutSchema` |
+| `@grove-dev/starlight/components` | `Card`, `ContainerSection`, `Dropdown`, `LinkButton` |
+| `@grove-dev/starlight/components/overrides/*.astro` | The 16 overrides |
+| `@grove-dev/starlight/styles/base` · `/layers` · `/theme` | Theme CSS layers |
+
+## Attribution and licensing
+
+This package is distributed under the MIT License and derives from:
+
+- **[adrian-ub/starlight-theme-black](https://github.com/adrian-ub/starlight-theme-black)**
+  — the earlier shadcn/ui-inspired Starlight theme this work is based on.
+- **[lucas-labs](https://github.com/lucas-labs)** — the port of that design to
+  Astro Starlight, which this package adapts.
+- **[shadcn/ui](https://ui.shadcn.com/)** (MIT) — the original design language.
+
+> **⚠️ Licensing verification is outstanding.** The upstream repository URL
+> recorded in
+> [`THIRD_PARTY_LICENSES.md`](./THIRD_PARTY_LICENSES.md) is malformed and the
+> upstream license text has not been reproduced. Until that is resolved, treat
+> this package's third-party attribution as **incomplete**: the credits above
+> are accurate as far as they go, but the compatibility check that would let
+> Grove assert clean redistribution has not been performed. See
+> `THIRD_PARTY_LICENSES.md` for the open items.
+
+## Links
+
+[Documentation](https://withgrove.dev/starlight/) ·
+[Issues](https://github.com/tortuvshin/grove/issues) ·
+[Changelog](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md)
 
 ## License
 
