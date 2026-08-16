@@ -350,6 +350,8 @@ export async function generate(
     repoUrl: cfg.site.repoUrl ?? "",
     logo: cfg.site.logo,
     favicon: cfg.site.favicon,
+    locale: cfg.site.locale,
+    twitter: cfg.site.twitter,
     nav: cfg.nav,
     footer: cfg.footer,
     submission: cfg.submission,

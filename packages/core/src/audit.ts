@@ -65,6 +65,11 @@ export function evaluateBudget(
 
   const violations: BudgetViolation[] = [];
   for (const key of SCORE_KEYS) {
+    // Empty-state fixtures ship with `noindex` on purpose, and
+    // Lighthouse's SEO category fails its is-crawlable audit on any
+    // noindex page — so the SEO score can never reach 1 there. The
+    // other three categories still apply in full.
+    if (key === "seo" && page.type === "empty") continue;
     if (result.scores[key] < budget.scores[key]) {
       violations.push({ page, profile: result.profile, category: "score", name: key, expected: budget.scores[key], actual: result.scores[key] });
     }

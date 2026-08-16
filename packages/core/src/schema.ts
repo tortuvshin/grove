@@ -647,6 +647,16 @@ export const groveConfigSchema = z.object({
      * Falls back to a generated square tinted with `theme.primaryColor`.
      */
     favicon: z.string().optional(),
+    /**
+     * BCP-47 language tag for the published site. Drives `<html lang>`,
+     * `og:locale`, and JSON-LD `inLanguage`.
+     */
+    locale: z.string().default("en"),
+    /**
+     * Twitter/X handle for the site (e.g. `@grove`). Emitted as
+     * `twitter:site` on every page when set.
+     */
+    twitter: z.string().optional(),
   }),
 
   analytics: z

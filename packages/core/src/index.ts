@@ -239,6 +239,7 @@ export type {
 export {
   definePageDocument,
   siteSchema,
+  breadcrumbSchema,
   collectionSchema,
   recordSchema,
   contentSchema,
