@@ -1,0 +1,23 @@
+packages/core/src/directory-format.ts
+  s_4625cfde0eb40d::t_e7ea93074fd90d 51-69
+  s_4625cfde0eb40d::t_2b04c5aaddc60f 50
+packages/core/src/directory-format.test.ts
+  s_4625cfde0eb40d::t_2325ca32121c15 2,21-49
+  s_4625cfde0eb40d::t_120a5539ce7d43 50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "095ed31d6f07b1d69dc052a5242bfb277cecb006",
+  "prompts": {},
+  "sessions": {
+    "s_4625cfde0eb40d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9f7d875b-2913-4da6-a02e-102bb2ad84bb",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
