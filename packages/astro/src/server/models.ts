@@ -27,6 +27,11 @@ import {
   formatStars,
   getOwnerAndRepoFromRepoUrl,
   getOwnerAvatarUrl,
+  hasAnyFilter,
+  hrefForClearedFilters,
+  hrefForFilters,
+  pagePathHref,
+  paginate,
   projectStackIds,
   readingMetrics,
   readContentFile,
@@ -258,7 +263,16 @@ const TAXONOMY_KIND_FOR_DIMENSION = {
   licenses: "licenses",
 } as const;
 
-export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: DirectorySiteConfig) {
+/**
+ * @param options.page Route-supplied page number. The browse route is
+ * prerendered per page (`/projects/`, `/projects/page/2/`), so the page
+ * comes from the path, not from a query string the build can never see.
+ */
+export function getDirectoryIndexModel(
+  searchParams: URLSearchParams,
+  site?: DirectorySiteConfig,
+  options: { page?: number } = {},
+) {
   const filters = filtersFromSearchParams(searchParams);
   // Taxonomy YAML owns option order: the generated arrays preserve
   // file/`order:` position, so their id sequence IS the display order.
@@ -306,7 +320,8 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
   const sort = effectiveSort(filters);
   const sorted = applySort(filterRecords(items, filters), sort);
   const pageCount = totalPages(sorted.length);
-  const page = Math.min(effectivePage(filters), pageCount);
+  const page = Math.min(Math.max(1, options.page ?? effectivePage(filters)), pageCount);
+  const pathPrefix = `/${site?.blueprintConfig?.routeSlug ?? "projects"}`;
   return {
     items,
     total: items.length,
@@ -316,9 +331,27 @@ export function getDirectoryIndexModel(searchParams: URLSearchParams, site?: Dir
     searchPlaceholder,
     sort,
     sorted,
+    /**
+     * The records this page actually renders. The page used to print
+     * every record and let the client hide the rest, so the DOM and the
+     * HTML both scaled with the whole directory.
+     */
+    pageItems: paginate(sorted, page),
     pages: pageCount,
     page,
-    chips: activeFilterChips(filters),
+    pathPrefix,
+    /**
+     * Plain pages are real paths; anything the URL narrows or reorders
+     * stays a query. `sort` counts: every `/page/N/` document is built
+     * with the default sort, so paging out of `?sort=most-starred` onto
+     * one would re-sort the list mid-journey.
+     */
+    hrefForResultPage: (target: number) =>
+      hasAnyFilter(filters) || filters.sort
+        ? hrefForFilters({ ...filters, page: target }, pathPrefix)
+        : pagePathHref(pathPrefix, target),
+    clearFiltersHref: hrefForClearedFilters(filters, pathPrefix),
+    chips: activeFilterChips(filters, { taxonomy: site?.taxonomy, pathPrefix }),
     clientItemsJson: JSON.stringify(items).replace(/</g, "\\u003c"),
   };
 }

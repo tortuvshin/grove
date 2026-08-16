@@ -90,11 +90,36 @@ describe("default Astro route configuration", () => {
       "utf8",
     );
 
-    expect(listClient).toContain('id="grove-index-data"');
+    // The record index is fetched, not inlined: a paginated page must
+    // not carry the whole directory in its HTML.
+    expect(listClient).toContain("/page/records.json");
+    expect(listClient).not.toContain('id="grove-index-data"');
+    expect(listClient).toContain('id="grove-index-config"');
     expect(listClient).toContain("function applyClientFilters()");
     expect(listClient).toContain('from "@grove-dev/core/directory"');
     expect(listClient).toContain("PAGE_SIZE,");
     expect(listClient).toContain("filterRecords(items, filters)");
+  });
+
+  it("keeps prerendered pages on real navigations", async () => {
+    // `/{slug}/` and `/{slug}/page/N/` are documents, not states: page
+    // 2's "Previous" link, "Clear all", and the header's own Browse
+    // link all point at a different document. Adopting those in place
+    // left page 2's records rendered under the page-1 URL. Only a URL
+    // that carries a query — which no prerendered page has — is ours.
+    const listClient = await readFile(
+      resolve(import.meta.dirname, "components/DirectoryIndexClient.astro"),
+      "utf8",
+    );
+
+    expect(listClient).toContain("if (!isListUrl || !url.search) return;");
+    // The skip link lives on this same path; a hash is never ours.
+    expect(listClient).toContain("if (url.hash) return;");
+    // Sort is a client view too: every `/page/N/` document is built
+    // with the default sort.
+    expect(listClient).toContain(
+      "const isClientView = () => hasAnyFilter(filters) || Boolean(filters.sort);",
+    );
   });
 
   it("recomputes facet intersection counts from the live query string", async () => {

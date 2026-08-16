@@ -58,6 +58,15 @@ export function buttonClass(
 export const PAGINATION_EXTRA = "min-w-9 px-2 py-1.5 text-2xs";
 
 /**
+ * The dead end of a pagination row — "Previous" on page 1.
+ *
+ * Dimming to `opacity-40` put it at 3.37:1 against the dark surface,
+ * which is a contrast failure, not a disabled state. 60% still reads
+ * as unavailable and clears 4.5:1.
+ */
+export const PAGINATION_DISABLED = "pointer-events-none opacity-60";
+
+/**
  * Facet filter trigger (the "Stack: Any" dropdown buttons). Includes
  * the `grove-filter-trigger` hook class because the client script
  * reassigns the whole className when the active state changes — the

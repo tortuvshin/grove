@@ -110,13 +110,22 @@ const groups = groupModels.map((group) => ({
         }
       });
     }
+    // A directory controller (DirectoryIndexClient) can adopt the URL
+    // in place and re-render without a reload; it signals that by
+    // cancelling the event. Anywhere else — a taxonomy page, no
+    // controller on the page at all — this falls back to navigating,
+    // so the panel keeps working on its own.
+    function go(url) {
+      const event = new CustomEvent("grove:navigate", { detail: { url }, cancelable: true });
+      if (document.dispatchEvent(event)) location.assign(url);
+    }
     function navigate(group, values) {
       const params = new URLSearchParams(location.search);
       const key = keys[group.dataset.filterGroupKey];
       params.delete(key);
       params.delete("page");
       values.forEach((value) => params.append(key, value));
-      location.assign(params.toString() ? `${pathPrefix}?${params}` : pathPrefix);
+      go(params.toString() ? `${pathPrefix}?${params}` : pathPrefix);
     }
     groups.forEach((group) => {
       const trigger = group.querySelector(".grove-filter-trigger");
@@ -153,7 +162,7 @@ const groups = groupModels.map((group) => ({
       const params = new URLSearchParams(location.search);
       params.set("sort", event.target.value);
       params.delete("page");
-      location.assign(params.toString() ? `${pathPrefix}?${params}` : pathPrefix);
+      go(params.toString() ? `${pathPrefix}?${params}` : pathPrefix);
     });
   })();
 </script>

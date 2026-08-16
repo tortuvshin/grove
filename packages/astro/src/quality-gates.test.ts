@@ -25,6 +25,14 @@ const root = resolve(import.meta.dirname, "../../..");
 const example = resolve(root, "apps/example");
 const dist = resolve(example, "dist");
 
+/**
+ * Every rendered page a visitor or a crawler can land on.
+ *
+ * Machine surfaces are excluded by their own `noindex` — the browse
+ * page's card source (`/{slug}/page/cards/`) is a fragment the client
+ * fetches, with no shell, no heading, and nothing to index. Anything
+ * that opts out of the index also opts out of the page gates below.
+ */
 function htmlFiles(dir: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -33,6 +41,7 @@ function htmlFiles(dir: string): string[] {
       if (entry.name === "_astro") continue;
       out.push(...htmlFiles(full));
     } else if (entry.name.endsWith(".html")) {
+      if (/name="robots"[^>]*content="[^"]*noindex/.test(readFileSync(full, "utf8"))) continue;
       out.push(full);
     }
   }
@@ -190,6 +199,39 @@ describe.skipIf(!existsSync(dist))("built-output quality gates", () => {
         );
       }
       expect(frames.length, file).toBeGreaterThan(0);
+    }
+  });
+
+  it("paginates the browse route into real, crawlable pages", () => {
+    // The browse page renders one page of records, not the whole
+    // directory: pages 2..n are their own documents so a large
+    // directory is reachable without JavaScript and by a crawler.
+    const records = JSON.parse(
+      readFileSync(join(dist, "projects/page/records.json"), "utf8"),
+    ) as unknown[];
+    const pageCount = Math.max(1, Math.ceil(records.length / 20));
+    const browse = readFileSync(join(dist, "projects/index.html"), "utf8");
+    const cardsOnPage = (browse.match(/<li class="m-0 p-0" data-record-slug=/g) ?? []).length;
+    expect(cardsOnPage).toBe(Math.min(20, records.length));
+
+    for (let page = 2; page <= pageCount; page += 1) {
+      expect(existsSync(join(dist, `projects/page/${page}/index.html`)), `page ${page}`).toBe(true);
+    }
+    // …and no page beyond the last one.
+    expect(existsSync(join(dist, `projects/page/${pageCount + 1}/index.html`))).toBe(false);
+  });
+
+  it("serves one card source the client can filter against", () => {
+    // Filtering happens on the client and can surface any record, so
+    // the cards it needs come from a page rendered by the same
+    // component — never from card markup rebuilt in JavaScript.
+    const records = JSON.parse(
+      readFileSync(join(dist, "projects/page/records.json"), "utf8"),
+    ) as { slug: string }[];
+    const cards = readFileSync(join(dist, "projects/page/cards/index.html"), "utf8");
+    expect(cards).toContain('id="grove-index-cards"');
+    for (const record of records) {
+      expect(cards, record.slug).toContain(`data-record-slug="${record.slug}"`);
     }
   });
 

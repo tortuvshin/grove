@@ -1,0 +1,50 @@
+---
+/**
+ * Card source for client-side filtering — `/{slug}/page/cards/`.
+ *
+ * Every record's card, rendered once by the same component the browse
+ * page uses, as a bare fragment with no layout.
+ *
+ * Why it exists: browse pages prerender only their own 20 records, so
+ * the page a visitor lands on is small and crawlable. Filtering happens
+ * on the client and can surface any record in the directory, so the
+ * controller needs cards it was not given. Fetching them from here —
+ * lazily, once, after the page is interactive — keeps the card markup
+ * to a single definition instead of a second one written in JavaScript.
+ *
+ * `noindex`: this is a machine surface. Every record it contains is
+ * already indexable through the paginated browse pages and its own
+ * detail page.
+ */
+import siteConfig from "@grove/generated/site-config.json";
+import { getDirectoryIndexModel } from "@grove-dev/astro/server";
+import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
+
+export function getStaticPaths() {
+  const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+  return [{ params: { slug: routeSlug } }];
+}
+
+const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+const { sorted } = getDirectoryIndexModel(new URLSearchParams(), siteConfig);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{`${slug} card source`}</title>
+  </head>
+  <body>
+    <ul id="grove-index-cards">
+      {sorted.map((item) => (
+        <li class="m-0 p-0" data-record-slug={item.slug}>
+          <IndexRow
+            record={item as Parameters<typeof IndexRow>[0]["record"]}
+            detailHref={`/${slug}/${item.slug}`}
+          />
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>

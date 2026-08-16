@@ -41,7 +41,7 @@ describe("button class builders", () => {
       "utf8",
     );
     const serverPage = readFileSync(
-      resolve(import.meta.dirname, "../../../../apps/example/src/pages/[slug]/index.astro"),
+      resolve(import.meta.dirname, "../../../../apps/example/src/components/DirectoryBrowse.astro"),
       "utf8",
     );
     expect(clientSource).toContain("chipClass()");

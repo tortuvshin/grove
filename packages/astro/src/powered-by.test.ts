@@ -31,6 +31,7 @@ const poweredByTemplate = poweredBySource.slice(
   poweredBySource.indexOf("---", 3) + 3,
 );
 
+/** Indexable pages only — `noindex` machine surfaces carry no shell. */
 function htmlFiles(dir: string): string[] {
   const out: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -39,6 +40,7 @@ function htmlFiles(dir: string): string[] {
       if (entry.name === "_astro") continue;
       out.push(...htmlFiles(full));
     } else if (entry.name.endsWith(".html")) {
+      if (/name="robots"[^>]*content="[^"]*noindex/.test(readFileSync(full, "utf8"))) continue;
       out.push(full);
     }
   }

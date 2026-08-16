@@ -24,8 +24,13 @@ describe("grove init", () => {
     expect(await readFile(join(target, "src/pages/index.astro"), "utf8")).toContain(
       "getHomePageModel(siteConfig)",
     );
-    expect(await readFile(join(target, "src/pages/[slug]/index.astro"), "utf8")).toContain(
-      "getDirectoryIndexModel(Astro.url.searchParams, siteConfig)",
+    // The browse body is shared by the two routes that render it —
+    // `/{slug}/` and `/{slug}/page/{n}/` — so it lives in a component.
+    expect(await readFile(join(target, "src/components/DirectoryBrowse.astro"), "utf8")).toContain(
+      "getDirectoryIndexModel(Astro.url.searchParams, siteConfig,",
+    );
+    expect(await readFile(join(target, "src/pages/[slug]/page/[page].astro"), "utf8")).toContain(
+      "routePage: index + 2",
     );
     expect(await readFile(join(target, "README.md"), "utf8")).toContain(
       "consumer-owned Astro pages",
