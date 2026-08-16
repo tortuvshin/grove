@@ -375,9 +375,14 @@ export function getDirectoryIndexModel(
   });
   const seo: PageSeo = {
     title: seoTitle(`Browse ${pluralTitle}`, siteName),
+    // Build the page-aware description BEFORE seoDescription truncates,
+    // so the page suffix fits inside the 160-char cap rather than
+    // pushing the sentence over and getting clipped mid-word.
     description: seoDescription(
       undefined,
-      `Search and filter ${items.length} curated ${plural} on ${siteName || "this site"} — by ${facetNames || "category and stack"}.`,
+      page > 1
+        ? `Browse page ${page} of ${pages} — ${items.length} curated ${plural} on ${siteName || "this site"}, filtered by ${facetNames || "category and stack"}.`
+        : `Search and filter ${items.length} curated ${plural} on ${siteName || "this site"} — by ${facetNames || "category and stack"}.`,
     ),
     image: ogPath("default"),
     jsonLd: [
@@ -581,21 +586,21 @@ export function getRecordDetailModel(
   const name = record.kind === "resource" ? record.title : record.name;
   const singular = site.blueprintConfig?.labelSingular ?? itemLabel();
   const categoryLabel = record.category ? taxonomyLabel("categories", record.category) : undefined;
-  // Curated summary first — it is the sentence a human wrote for this
-  // record. `description` is usually GitHub-synced and can be noisy.
-  // The fallback branches by record kind so entities don't read as
-  // "open-source Database org" and resources don't read as "open-source
-  // Database book" — the noun follows what the schema.org @type already
-  // implies (Person/Organization for entities, the resource subtype
-  // for resources, project noun for projects).
-  const categoryPrefix = categoryLabel ? `${categoryLabel} ` : "";
-  const fallbackSentence = isProject
-    ? `${name}, an open-source ${categoryPrefix}${singular} listed on ${site.name}.`
-    : record.kind === "entity"
-      ? entity?.type === "person"
-        ? `${name}${categoryLabel ? `, a ${categoryLabel.toLowerCase()} contributor` : ""} listed on ${site.name}.`
-        : `${name}, an open-source ${categoryPrefix}organization listed on ${site.name}.`
-      : `${name}, a ${record.type ?? "resource"}${categoryLabel ? ` in ${categoryLabel}` : ""} listed on ${site.name}.`;
+  // Fallback sentence when neither a curated summary nor a GitHub
+  // description is available. The noun follows the schema.org @type
+  // implied by `record.kind` so entities don't read as "open-source
+  // Database project" and resources use their subtype (article, book,
+  // etc.). Curated summary wins over `record.description` because the
+  // latter is usually GitHub-synced and noisy.
+  const fallbackSentence = recordFallbackSentence({
+    name,
+    kind: record.kind,
+    entityType: entity?.type,
+    resourceType: record.type,
+    categoryLabel,
+    singular,
+    siteName: site.name,
+  });
   const description = seoDescription(
     (record.summary && record.summary.trim()) || record.description,
     fallbackSentence,
@@ -829,6 +834,36 @@ export function getRecordDetailModel(
     readingMetrics: tocBody ? readingMetrics(tocBody.body) : { wordCount: 0, minutes: 1 },
     jsonLd,
   };
+}
+
+/**
+ * Fallback meta description when neither a curated summary nor a
+ * GitHub description is available. Noun follows the schema.org
+ * @type implied by `kind` so an entity never reads as
+ * "an open-source Database project".
+ */
+function recordFallbackSentence(input: {
+  name: string;
+  kind: "project" | "resource" | "entity";
+  entityType?: string;
+  resourceType?: string;
+  categoryLabel?: string;
+  singular: string;
+  siteName: string;
+}): string {
+  const category = input.categoryLabel;
+  const listed = `listed on ${input.siteName}.`;
+  if (input.kind === "entity") {
+    if (input.entityType === "person") {
+      return `${input.name}${category ? `, a ${category.toLowerCase()} contributor` : ""} ${listed}`;
+    }
+    return `${input.name}, an open-source ${category ? `${category} ` : ""}organization ${listed}`;
+  }
+  if (input.kind === "resource") {
+    const type = input.resourceType ?? "resource";
+    return `${input.name}, a ${type}${category ? ` in ${category}` : ""} ${listed}`;
+  }
+  return `${input.name}, an open-source ${category ? `${category} ` : ""}${input.singular} ${listed}`;
 }
 
 // ── Sidebar predicates ────────────────────────────────────────────
