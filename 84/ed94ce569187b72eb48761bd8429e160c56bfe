@@ -1,0 +1,31 @@
+packages/core/src/directory-display.ts
+  s_610dad34975967::t_4b059b2204f5f1 55
+packages/core/src/directory-lenses.ts
+  s_610dad34975967::t_637b064c6891f1 210-217
+  s_610dad34975967::t_88866aa1423d1a 49-53
+  s_610dad34975967::t_1167f84b577fdc 19,21,23
+  s_610dad34975967::t_ced7ae7fd53428 26
+  s_610dad34975967::t_9475199a03511e 118-130,132
+  s_610dad34975967::t_7647f9637f7aa3 147-153,157-162
+  s_610dad34975967::t_a6ade2fdfa82a1 228
+  s_610dad34975967::t_41bbf843d4ecb0 48
+packages/core/src/directory-search.test.ts
+  s_610dad34975967::t_7f46c466491ab1 4-5
+  s_610dad34975967::t_083a51c4188f14 92-95,98-100,104-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "84ed94ce569187b72eb48761bd8429e160c56bfe",
+  "prompts": {},
+  "sessions": {
+    "s_610dad34975967": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e489a4e1-27ab-402e-ba58-cdfea08257b1",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
