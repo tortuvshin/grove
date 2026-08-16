@@ -187,6 +187,11 @@ Configures up to three footer link columns plus the copyright and license copy.
 Each item has `label`, `href`, and optional `external: true`. When `columns` is
 empty, Grove derives useful repository links.
 
+`poweredBy` (default `true`) renders a "Powered by Grove" link under the footer
+brand block. Set it to `false` to drop the attribution. The same mark is
+available as a component — `@grove-dev/astro/components/PoweredBy.astro` — for
+placing it anywhere else on the page, including `Hero`'s `eyebrow` slot.
+
 ### `submission`
 
 Customizes the default submit page without forking it. `eyebrow`, `title`, and

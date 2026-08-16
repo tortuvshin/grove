@@ -27,6 +27,40 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.5.5] — 2026-08-16
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`
+
+### Added
+
+- **`@grove-dev/astro`:** `PoweredBy` — a "Powered by Grove" link with
+  the Grove mark, rendered under the footer brand block. The mark is
+  **inlined**, not served through `<img src>`: an SVG loaded as its own
+  document cannot see page CSS, so `currentColor` would never resolve
+  there — the same trap the packaged icon set fell into before 0.5.3.
+  Inlined, it inherits the surrounding text colour and follows the
+  site's theme toggle.
+- **`@grove-dev/core`:** `footer.poweredBy` in `grove.config.ts`,
+  default `true`. Set it to `false` to drop the attribution.
+- **`@grove-dev/astro`:** `Hero` now exposes a named `eyebrow` slot.
+  The current dot + text stays as the fallback, so nothing changes
+  until a consumer fills it — useful for putting `PoweredBy` (or a
+  release badge) on the eyebrow line without forking the component.
+
+### Changed
+
+- **`@grove-dev/astro`:** the header, the footer, and the stack,
+  category, and license templates were pinned to a hardcoded 1400px
+  while page content followed `theme.containerWidth`. On any site that
+  configured a narrower container the shell overhung the body — 1400 vs
+  1152 on a `72rem` site — and browse-style pages disagreed with the
+  homepage. Every shell and page template now uses the configured
+  container, so a site has **one** width. `Container`'s `size="wide"`
+  survives as an opt-in but is clamped to the configured container, so
+  a wide section can no longer overhang the shell.
+
+---
+
 ## [0.5.4] — 2026-08-16
 
 **Packages:** `@grove-dev/astro`

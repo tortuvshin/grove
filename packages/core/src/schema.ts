@@ -511,8 +511,14 @@ export const footerSchema = z
     columns: z.array(footerColumnSchema).max(3).default([]),
     copyright: z.string().optional(),
     license: z.string().optional(),
+    /**
+     * "Powered by Grove" under the footer brand block. On by default —
+     * a Grove site says so, the same way a static-site theme carries
+     * its generator. Set `false` to drop it.
+     */
+    poweredBy: z.boolean().default(true),
   })
-  .default({ columns: [] });
+  .default({ columns: [], poweredBy: true });
 
 export const submissionSchema = z
   .object({

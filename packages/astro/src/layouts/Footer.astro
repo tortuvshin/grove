@@ -12,6 +12,7 @@
  * so consumers can customize the order and copy. Defaults are
  * provided so the footer still renders if no extra data is supplied.
  */
+import PoweredBy from "../components/PoweredBy.astro";
 
 interface NavItem {
   label: string;
@@ -34,6 +35,8 @@ interface Site {
     columns?: FooterColumn[];
     copyright?: string;
     license?: string;
+    /** "Powered by Grove" under the brand block. Defaults to on. */
+    poweredBy?: boolean;
   };
   stats?: {
     totalApps?: number;
@@ -62,6 +65,11 @@ interface Props {
   copyrightHolder?: string;
   /** License line under the bar (e.g. "Content under CC BY-SA 4.0."). */
   licenseLine?: string;
+  /**
+   * "Powered by Grove" under the brand block. Falls back to
+   * `site.footer.poweredBy`, which defaults to on.
+   */
+  poweredBy?: boolean;
   /** Extra class for the outer footer element. */
   class?: string;
 }
@@ -75,8 +83,11 @@ const {
   itemsLabel = "items",
   copyrightHolder,
   licenseLine,
+  poweredBy,
   class: className = "",
 } = Astro.props;
+
+const showPoweredBy = poweredBy ?? site.footer?.poweredBy ?? true;
 
 const year = new Date().getFullYear();
 const holder = copyrightHolder ?? site.footer?.copyright ?? site.name;
@@ -124,7 +135,7 @@ const resolvedLicenseLine = licenseLine ?? site.footer?.license;
   ]}
 >
   <div
-    class="mx-auto grid w-full max-w-wide grid-cols-2 gap-8 px-5 py-12 md:grid-cols-4 sm:px-7"
+    class="mx-auto grid w-full max-w-container grid-cols-2 gap-8 px-5 py-12 md:grid-cols-4 sm:px-7"
   >
     <div class="col-span-2 md:col-span-1">
       <div
@@ -166,6 +177,11 @@ const resolvedLicenseLine = licenseLine ?? site.footer?.license;
           )}
         </p>
       )}
+      {showPoweredBy && (
+        <p class="mt-4 m-0 text-[0.8125rem] text-ink-500 dark:text-ink-400">
+          <PoweredBy size={16} />
+        </p>
+      )}
     </div>
 
     {columns.map((column) => (
@@ -194,7 +210,7 @@ const resolvedLicenseLine = licenseLine ?? site.footer?.license;
 
   <div class="border-t border-ink-200 dark:border-ink-800">
     <div
-      class="mx-auto flex w-full max-w-wide flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
+      class="mx-auto flex w-full max-w-container flex-wrap items-center gap-3 px-5 py-4 text-2xs text-ink-500 sm:px-7 dark:text-ink-400"
     >
       <span>© {year} {holder}{resolvedLicenseLine ? `. ${resolvedLicenseLine}` : "."}</span>
       {gh && (

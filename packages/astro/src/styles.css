@@ -148,7 +148,11 @@
    * grove.config.ts: BaseLayout emits `--grove-container` on <html>
    * and the token falls back to the package default when unset. */
   --container-container: var(--grove-container, 1160px);
-  --container-wide: 1400px;
+  /* `wide` is an opt-in escape hatch, not a second site width. It is
+     clamped to the configured container so a wide section can never
+     overhang the header, footer, and the rest of the page — every
+     shell and page template uses `max-w-container`. */
+  --container-wide: min(var(--grove-container, 1400px), 1400px);
   --container-narrow: 720px;
 
   /* ── Border radius scale ──────────────────────────────────────────

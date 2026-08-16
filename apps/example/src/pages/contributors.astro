@@ -22,7 +22,7 @@ const { contributors: sorted, total, title, description, contributorsGraphHref, 
 
 <BaseLayout title={title} description={description} site={siteConfig}>
   <section class="py-12 sm:py-16">
-    <div class="mx-auto w-full max-w-wide px-5 py-12 sm:px-7 sm:py-16">
+    <div class="mx-auto w-full max-w-container px-5 py-12 sm:px-7 sm:py-16">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
         Community
       </span>
@@ -64,7 +64,7 @@ const { contributors: sorted, total, title, description, contributorsGraphHref, 
     </section>
   ) : (
     <section class="py-12 sm:py-16" aria-label="Contributors list">
-      <div class="mx-auto w-full max-w-wide px-5 pb-16 sm:px-7">
+      <div class="mx-auto w-full max-w-container px-5 pb-16 sm:px-7">
         <ul
           class="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
           aria-label="Contributors"
