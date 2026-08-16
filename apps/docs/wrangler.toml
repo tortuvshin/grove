@@ -1,23 +1,37 @@
 # Cloudflare Workers static-assets configuration for the Grove docs site.
 #
-# The docs is a static Astro site that builds to ./dist. The build pipeline
-# runs `npm run build` (from the Cloudflare dashboard), then invokes
-# `wrangler deploy` to upload the result. This file configures that deploy
-# step in the Workers-with-Assets schema.
+# The docs site is a fully static Astro build that emits `dist/`. The
+# Cloudflare build environment runs `wrangler deploy` (the Workers CLI,
+# not `wrangler pages deploy`), so the `[assets]` schema below is the
+# correct shape — wrangler uploads `./dist` as static assets attached to
+# a Worker.
 #
-# This file also (and more importantly) prevents wrangler's automatic Astro
-# detection. Without it, `runAutoConfig` downloads @astrojs/cloudflare and
-# injects it into astro.config.mjs; the adapter's vite plugin transitively
-# requires `prismjs` (a devDependency of @astrojs/cloudflare, not bundled
-# with it), producing:
+# Why this file is here at all:
+#
+# Without it, wrangler's `runAutoConfig` downloads `@astrojs/cloudflare`
+# and injects it into `astro.config.mjs`. The adapter's vite plugin
+# transitively requires `prismjs` (a devDependency of
+# `@astrojs/cloudflare`, not bundled with it), producing:
 #
 #   Cannot find package 'prismjs' imported from
 #   .../@astrojs/cloudflare/dist/vite-plugin-prism.js
 #
-# The `pages_build_output_dir` field was tried first, but the build env
-# runs `wrangler deploy` (Workers CLI), not `wrangler pages deploy` (Pages
-# CLI), so wrangler rejects the Pages schema. The [assets] block below is
-# the Workers-with-Assets equivalent for deploying a static directory.
+# Pages schema (`pages_build_output_dir`) was tried first, but wrangler
+# rejects the Pages schema when the build env runs `wrangler deploy`
+# instead of `wrangler pages deploy`. The two schemas are mutually
+# exclusive — pick one per project.
+#
+# Cloudflare Dashboard settings that go with this file:
+#
+#   Root directory:  apps/docs          (after the 2026-07-23 refactor
+#                                       moved docs/ → apps/docs/)
+#   Build command:   pnpm build
+#   Build output:    dist
+#
+# If the Dashboard's Root directory points at the pre-refactor `docs/`
+# path, the clone step fails with "Failed: root directory not found"
+# before any wrangler command runs. Update the Root directory to
+# `apps/docs` to fix it.
 
 name = "grove-docs"
 compatibility_date = "2026-06-11"
