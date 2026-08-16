@@ -1,0 +1,25 @@
+packages/astro/package.json
+  s_610dad34975967::t_7dfd1aee9f01da 3
+packages/cli/package.json
+  s_610dad34975967::t_de3e0bb7ce7052 3
+packages/core/package.json
+  s_610dad34975967::t_c742469fa0b573 3
+packages/starlight/package.json
+  s_610dad34975967::t_ad024eeb558027 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e1f6050de9adb2105def032dab017db299baa57e",
+  "prompts": {},
+  "sessions": {
+    "s_610dad34975967": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e489a4e1-27ab-402e-ba58-cdfea08257b1",
+        "model": "unknown"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
