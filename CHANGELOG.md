@@ -25,11 +25,36 @@ For the developer workflow that produces these entries, see
 > [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
 > under "Next release — v0.6.0" until they ship.
 
+---
+
+## [0.5.4] — 2026-08-16
+
+**Packages:** `@grove-dev/astro`
+
+### Fixed
+
+- **`@grove-dev/astro`:** icon `<img>` elements now carry an explicit
+  CSS size, not just `width`/`height` attributes. The vendored SVGs
+  ship a `viewBox` and no intrinsic size, so the browser re-derived the
+  box once one loaded and the row reflowed — Lighthouse reports it as
+  "media element lacking an explicit size".
+- **Repo:** `grove-audit.test.ts` matched both the `integration` and
+  `integration-audit` vitest projects, so `pnpm test` ran the Lighthouse
+  gate twice at once — two `astro preview` servers racing for port 4321
+  and two Chrome instances competing for CPU. The audit asserts a
+  perfect 100 against a 0.05 CLS budget, which only holds on an
+  unloaded machine, so the pair starved each other and one failed at
+  random. The audit now runs once, after the other integration work.
+
+---
+
+## [0.5.3] — 2026-08-16
+
 Brand and platform icons are now **real, vendored logos** that stay
-legible in both themes. Single-color marks inherit the surrounding text
-color instead of shipping as a hand-maintained light/dark file pair, and
-the packaged set is generated from a declarative config rather than
-copied in by hand.
+legible in both themes. Marks with no colour of their own are painted
+black on light and white on dark instead of shipping as a
+hand-maintained light/dark file pair, and the packaged set is generated
+from a declarative config rather than copied in by hand.
 
 **Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`
 
