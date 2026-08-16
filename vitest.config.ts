@@ -75,6 +75,14 @@ export default defineConfig({
           name: 'integration',
           root: './tests/integration',
           include: ['**/*.{test,spec}.ts'],
+          // `grove-audit.test.ts` has its own project below. Without
+          // this exclude it matched BOTH, so `pnpm test` ran it twice
+          // concurrently — two `astro preview` servers racing for port
+          // 4321, and two Lighthouse runs competing for CPU. The audit
+          // asserts a perfect 100 with a 0.05 CLS budget, so the pair
+          // starved each other and one failed at random. Deterministic
+          // failure, non-deterministic victim.
+          exclude: ['**/grove-audit.test.ts'],
           // Integration tests are slow; give them room.
           testTimeout: 60_000,
           hookTimeout: 60_000,
@@ -99,6 +107,14 @@ export default defineConfig({
           include: ['tests/integration/grove-audit.test.ts'],
           timeout: 600_000,
           fileParallelism: false,
+          // Lighthouse asserts a perfect 100 with a 0.05 CLS budget,
+          // which only holds on an unloaded machine. Run this project
+          // after the others — the `grove init` smoke above spawns an
+          // install and a full site build, and sharing a CPU with it
+          // pushes the browse page over the budget. The shift it then
+          // reports is real but pre-existing; contention just makes it
+          // visible, so co-scheduling turns a perf gate into a coin flip.
+          sequence: { groupOrder: 2 },
         },
       },
     ],
