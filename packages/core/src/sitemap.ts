@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { type GroveConfig, loadConfig } from "./config.js";
+import { totalPages } from "./directory-search.js";
 
 export interface SitemapEntry {
   loc: string;
@@ -91,8 +92,24 @@ export async function buildSitemap(
     priority: 0.9,
   });
 
-  for (const item of input.items) {
-    if (item.visibility === "hide" || item.visibility === "remove") continue;
+  const listed = input.items.filter(
+    (item) => item.visibility !== "hide" && item.visibility !== "remove",
+  );
+
+  // Browse pages 2..n. They are prerendered documents, and on a large
+  // directory they are the path a crawler takes to every record that is
+  // not on page 1 — leaving them out is the one thing that would make
+  // paginating them pointless.
+  for (let page = 2; page <= totalPages(listed.length); page += 1) {
+    entries.push({
+      loc: `${siteUrl}/${indexSlug}/page/${page}/`,
+      lastmod: input.generatedAt,
+      changefreq: "daily",
+      priority: 0.6,
+    });
+  }
+
+  for (const item of listed) {
     const lastmod = item.lastCommitAt ?? item.addedAt ?? input.generatedAt;
     entries.push({
       loc: `${siteUrl}/${indexSlug}/${item.slug}`,
