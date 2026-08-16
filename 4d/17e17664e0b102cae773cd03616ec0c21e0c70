@@ -1,0 +1,32 @@
+apps/example/src/components/DirectoryBrowse.astro
+  s_ba7efc8838949b::t_0d864b012ff374 64-67,72-73
+packages/core/src/host.ts
+  s_ba7efc8838949b::t_87b2c02a79f1ea 1-19
+packages/core/src/site-artifacts.ts
+  s_ba7efc8838949b::t_377f5ea640516d 52
+  s_ba7efc8838949b::t_b87f94315f77be 4
+packages/core/src/index.ts
+  s_ba7efc8838949b::t_48c3c1d49c45d2 14-19
+packages/astro/src/server/models.ts
+  s_ba7efc8838949b::t_421d599ae5fbc1 642-644
+  s_ba7efc8838949b::t_971580d81e2941 586-598,601
+  s_ba7efc8838949b::t_8766b49c8670c2 982-986,1000
+packages/core/src/og-image.ts
+  s_ba7efc8838949b::t_cb7d7e4b406a96 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "4d17e17664e0b102cae773cd03616ec0c21e0c70",
+  "prompts": {},
+  "sessions": {
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
