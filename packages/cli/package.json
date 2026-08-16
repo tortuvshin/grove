@@ -2,7 +2,7 @@
   "name": "@grove-dev/cli",
   "version": "0.6.1",
   "type": "module",
-  "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
+  "description": "The grove command — create a Grove space and run every operation that keeps it useful: check, sync, cleanup, import, collections, README, audit.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -11,9 +11,12 @@
     "grove",
     "cli",
     "scaffold",
-    "directory",
-    "community",
-    "knowledge"
+    "static-site",
+    "yaml",
+    "markdown",
+    "automation",
+    "maintenance",
+    "lighthouse"
   ],
   "homepage": "https://github.com/tortuvshin/grove#readme",
   "repository": {

@@ -40,13 +40,13 @@ function run(command: string, args: string[], cwd = process.cwd()): Promise<void
 
 program
   .name("grove")
-  .description("Build and maintain a Grove-powered directory.")
+  .description("Publish and maintain a Grove space — structured files in, maintainable outputs out.")
   .version(readCliVersion());
 
 program
   .command("init")
   .argument("[directory]", "directory to create", ".")
-  .description("Create a complete Grove directory from the official site.")
+  .description("Create a complete Grove space from the canonical scaffold.")
   .option("--no-install", "skip pnpm install")
   .option("--no-git", "skip git init")
   .action(async (directory: string, options: { install: boolean; git: boolean }) => {
@@ -87,7 +87,7 @@ program
 program
   .command("sync")
   .argument("<target>", "github | contributors")
-  .description("Refresh GitHub metadata owned by Grove.")
+  .description("Refresh machine-owned GitHub metadata. Editorial fields are never touched.")
   .option("--limit <count>", "limit records to sync", Number)
   .option("--strict", "fail if any GitHub record cannot be refreshed")
   .action(async (target: string, options: { limit?: number; strict?: boolean }) => {

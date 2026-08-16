@@ -2,20 +2,24 @@
   "name": "@grove-dev/core",
   "version": "0.6.1",
   "type": "module",
-  "description": "Headless engine for Grove: resource schema, config, importers, validators, taxonomy, sitemap, llms.txt, and the data build pipeline.",
+  "description": "Headless engine for Grove — schemas, validation, generation, synchronization, collections, SEO artifacts, health, decisions, and importers. No UI.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
   },
   "keywords": [
     "grove",
-    "directory",
-    "curated",
-    "community",
-    "knowledge",
-    "zod",
+    "static-site",
     "yaml",
-    "cli"
+    "markdown",
+    "structured-data",
+    "schema",
+    "validation",
+    "seo",
+    "sitemap",
+    "llms-txt",
+    "json-ld",
+    "zod"
   ],
   "homepage": "https://github.com/tortuvshin/grove#readme",
   "repository": {

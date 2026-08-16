@@ -2,7 +2,7 @@
   "name": "@grove-dev/astro",
   "version": "0.6.1",
   "type": "module",
-  "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
+  "description": "The Astro renderer for Grove — integration, layouts, components, and server view-models for publishing structured files.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -10,10 +10,12 @@
   "keywords": [
     "grove",
     "astro",
-    "ui",
-    "directory",
+    "astro-integration",
+    "astro-component",
     "components",
-    "static-site"
+    "static-site",
+    "structured-data",
+    "seo"
   ],
   "homepage": "https://github.com/tortuvshin/grove#readme",
   "repository": {

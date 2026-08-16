@@ -2,7 +2,7 @@
   "name": "@grove-dev/starlight",
   "version": "0.6.1",
   "type": "module",
-  "description": "Grove's theme for Starlight (the Astro native documentation site generator)",
+  "description": "A shadcn/ui-inspired theme plugin for Astro Starlight — component overrides, a layered token theme, and styled Expressive Code.",
   "author": "grove-dev",
   "license": "MIT",
   "engines": {
@@ -69,5 +69,15 @@
   },
   "scripts": {
     "test": "cd ../.. && pnpm exec vitest run --project starlight"
-  }
+  },
+  "keywords": [
+    "astro",
+    "starlight",
+    "starlight-plugin",
+    "starlight-theme",
+    "shadcn",
+    "documentation",
+    "theme",
+    "withastro"
+  ]
 }
