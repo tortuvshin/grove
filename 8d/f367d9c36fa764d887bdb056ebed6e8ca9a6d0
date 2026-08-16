@@ -1,0 +1,33 @@
+packages/astro/src/pages/stacks/[name].astro
+  s_ba7efc8838949b::t_31b94191bbe6dc 20
+  s_ba7efc8838949b::t_c755d20d31aece 41,51-53,57-61
+packages/astro/src/pages/licenses/[name].astro
+  s_ba7efc8838949b::t_46cc0216116328 38,43-45,49-53
+  s_ba7efc8838949b::t_170bddd7a54ba4 14
+packages/astro/src/pages/collections/index.astro
+  s_ba7efc8838949b::t_f2518150f5dced 23,31-34
+  s_ba7efc8838949b::t_fb7afaf1e32a65 10
+packages/astro/src/pages/categories/[name].astro
+  s_ba7efc8838949b::t_19b0d199eb7625 14,35,45-47,51-55
+packages/astro/src/page-parity.test.ts
+  s_ba7efc8838949b::t_03c6e5a7f9e5e8 95-96,102-106,113-115,117-118,125,127-128,135,137,144-146,149-151
+packages/astro/src/pages/collections/[slug].astro
+  s_ba7efc8838949b::t_fb7afaf1e32a65 16
+  s_ba7efc8838949b::t_106da8c5262156 37,41-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8df367d9c36fa764d887bdb056ebed6e8ca9a6d0",
+  "prompts": {},
+  "sessions": {
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
