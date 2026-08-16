@@ -287,3 +287,6 @@ export type {
 export { runCollection } from "./collector.js";
 export type { CollectionResult } from "./collector.js";
 export { findRelated } from "./related.js";
+
+// ── Collection IO (YAML loading from data/collections) ───────────────
+export { loadCollections } from "./collections-io.js";

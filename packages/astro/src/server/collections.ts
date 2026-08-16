@@ -4,6 +4,10 @@ import { readFile, readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 
+// Collection YAML loading lives in @grove-dev/core (it also feeds the
+// sitemap and OG-image pipelines there); re-exported for page code.
+export { loadCollections } from "@grove-dev/core";
+
 interface RouteHint {
   routeSlug?: string;
   blueprintConfig?: { routeSlug?: string };
@@ -229,33 +233,6 @@ export function getCollectionTeaserModel(
     total: full.total,
     collections: full.collections.slice(0, limit),
   };
-}
-
-/**
- * Load all `Collection` YAML files from `<cwd>/data/collections/*.yml`.
- *
- * Returns an empty array if the directory does not exist. Parse
- * errors are NOT swallowed — they surface so real problems
- * (malformed YAML, permission errors) are not hidden.
- */
-export async function loadCollections(cwd: string): Promise<Collection[]> {
-  const dir = resolve(cwd, "data/collections");
-  let files: string[];
-  try {
-    files = await readdir(dir);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
-    throw err;
-  }
-  const out: Collection[] = [];
-  for (const f of files.filter((f) => f.endsWith(".yml"))) {
-    const raw = parseYaml(await readFile(join(dir, f), "utf8"));
-    if (!raw || typeof raw !== "object") {
-      throw new Error(`Invalid collection YAML: ${f}`);
-    }
-    out.push(raw as Collection);
-  }
-  return out;
 }
 
 /**

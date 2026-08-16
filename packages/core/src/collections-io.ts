@@ -1,7 +1,12 @@
+/**
+ * Collection IO — loads `Collection` YAML files from disk. Kept apart
+ * from `collections.ts` so the query/ranking engine stays pure and
+ * importable in non-Node contexts.
+ */
 import { readFile, readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
-import type { Collection } from "@grove-dev/core";
+import type { Collection } from "./collections.js";
 
 /**
  * Load all `Collection` YAML files from `<cwd>/data/collections/*.yml`.
