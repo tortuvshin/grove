@@ -1,0 +1,63 @@
+packages/astro/src/server/collections.ts
+  s_2739562f79e122::t_fde432baccbf6d 161,169-181,183-205,221,228,230-270,273-274
+  s_2739562f79e122::t_9dd27e0c2e638a 2-3
+  s_2739562f79e122::t_ab9e382984f661 128-129,131-133,147-149
+packages/astro/src/server/seo.ts
+  s_ba7efc8838949b::t_351fb2ef7a41ee 41
+  s_ba7efc8838949b::t_5798a96170c42c 1-40,42-141
+packages/astro/src/server/models.ts
+  s_ba7efc8838949b::t_e203c4ab7c0419 134-138
+  s_ba7efc8838949b::t_e1eb60535ab69b 519-523,526-529
+  s_ba7efc8838949b::t_d6ebb36b73b0f1 364-395,397
+  s_ba7efc8838949b::t_dfbc2509bcfea3 688,691,694-696
+  s_ba7efc8838949b::t_dc2b7b15e5fafd 139,928-967,971-975,977-982,984-1108
+  s_ba7efc8838949b::t_97bf3020a54b4e 447-449
+  s_ba7efc8838949b::t_08af95ea43914a 968-970,976,983
+  s_ba7efc8838949b::t_56f56d6b7fe7f7 633-636,640,643,646-647
+  s_ba7efc8838949b::t_f0df21fb16cc7a 1115
+  s_4625cfde0eb40d::t_57201c087144cd 307-308
+  s_ba7efc8838949b::t_690c7de64ddde8 443-446,450-484,488-490
+  s_ba7efc8838949b::t_1e643cff93033f 20
+  s_ba7efc8838949b::t_326651fac95c7c 245-261,273,275
+  s_ba7efc8838949b::t_eeedc8d4b68693 582-589
+  s_ba7efc8838949b::t_c16ee3c832bef7 673,676,679-681
+  s_ba7efc8838949b::t_d2b580aa00d149 54-63,70-74
+  s_ba7efc8838949b::t_ee3133ce90db2d 703-727,735,737
+  s_ba7efc8838949b::t_f74be2190aa938 140,1109
+packages/astro/src/server/seo.test.ts
+  s_ba7efc8838949b::t_cf516514c8ec27 1-123
+packages/astro/src/theme.test.ts
+  s_ba7efc8838949b::t_370fc5faa5464b 221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a0e0e773d353fc1c5042944b16db24187c83aa5f",
+  "prompts": {},
+  "sessions": {
+    "s_2739562f79e122": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9481a03b-fd55-41b4-8c8f-9f992573e488",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_4625cfde0eb40d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9f7d875b-2913-4da6-a02e-102bb2ad84bb",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
