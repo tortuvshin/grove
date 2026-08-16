@@ -1,0 +1,20 @@
+CHANGELOG.md
+  s_2739562f79e122::t_69b0ecfb535d29 23,25,29,31-39,43-82,90-95,99-110,127-145,158-171
+  s_2739562f79e122::t_9cee144e6832ef 172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "af6664a9caeee4b34f26c8e6ea1929733777848b",
+  "prompts": {},
+  "sessions": {
+    "s_2739562f79e122": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9481a03b-fd55-41b4-8c8f-9f992573e488",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
