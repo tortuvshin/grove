@@ -7,16 +7,19 @@
 import siteConfig from "@grove/generated/site-config.json";
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
-import { getTaxonomyIndexModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { getTaxonomyIndexModel, getTaxonomyIndexSeo, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
 const { categories } = getTaxonomyIndexModel();
 const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
+const seo = getTaxonomyIndexSeo("categories", siteConfig);
 ---
 
 <BaseLayout
-  title={`Categories — ${siteConfig.name}`}
-  description={`Browse every category of ${itemLabelPlural()} in ${siteConfig.name}.`}
+  title={seo.title}
+  description={seo.description}
+  image={seo.image}
+  jsonLd={seo.jsonLd}
   site={siteConfig}
 >
   <CategoryGrid

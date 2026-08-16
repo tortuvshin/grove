@@ -23,11 +23,15 @@ const entries = recordsToCollectionEntries(
   (records as { records: unknown[] }).records as never,
   siteConfig,
 );
-const model = getCollectionPageModel(collection, entries, collections);
+const model = getCollectionPageModel(collection, entries, collections, siteConfig);
 ---
 <BaseLayout
-  title={model.collection.title}
-  description={model.collection.description}
+  title={model.seo.title}
+  description={model.seo.description}
+  image={model.seo.image}
+  imageAlt={model.seo.imageAlt}
+  jsonLd={model.seo.jsonLd}
+  noindex={model.seo.noindex}
   site={siteConfig}
 >
   <CollectionPage

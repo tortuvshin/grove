@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import { filterRecords } from "@grove-dev/core";
-import indexPayload from "@grove/generated/records.index.json";
+import { getTaxonomyPageModel, itemLabelPlural } from "@grove-dev/astro/server";
 import siteConfig from "@grove/generated/site-config.json";
 import TaxonomyList from "../../components/TaxonomyList.astro";
 
@@ -15,28 +14,22 @@ export function getStaticPaths() {
 
 const { displayName } = Astro.props;
 const name = Astro.params.name;
-const indexRecords = (indexPayload as { records: unknown[] }).records as never;
-const licenseRecords = filterRecords(indexRecords, {
-  licenses: [name],
-}) as Array<{
-  slug: string;
-  name?: string;
-  title?: string;
-  description?: string;
-  repoUrl?: string;
-}>;
+const model = getTaxonomyPageModel("licenses", name, displayName, siteConfig);
 ---
 
 <BaseLayout
-  title={`${displayName} projects`}
-  description={`Open-source projects licensed under ${displayName}.`}
+  title={model.seo.title}
+  description={model.seo.description}
+  image={model.seo.image}
+  imageAlt={model.seo.imageAlt}
+  jsonLd={model.seo.jsonLd}
   site={siteConfig}
 >
   <TaxonomyList
     name={name}
     eyebrow="License"
     displayName={displayName}
-    lede={`Browse open-source projects in this directory licensed under ${displayName}.`}
-    records={licenseRecords}
+    lede={`Browse ${itemLabelPlural()} in this directory licensed under ${displayName}.`}
+    records={model.records}
   />
 </BaseLayout>

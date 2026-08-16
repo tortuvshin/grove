@@ -26,15 +26,17 @@ const detail = getRecordDetailModel(
   Astro.params.slug ?? dirSlug,
 );
 if (!detail) return Astro.redirect(`/${dirSlug}`);
-const { record, name, title, description, itemSingular, jsonLd } = detail;
+const { record, itemSingular, seo } = detail;
 ---
 
 <BaseLayout
-  title={title}
-  description={description}
+  title={seo.title}
+  description={seo.description}
+  image={seo.image}
+  imageAlt={seo.imageAlt}
   site={siteConfig}
   type="article"
-  jsonLd={jsonLd}
+  jsonLd={seo.jsonLd}
   submitHref="/submit"
   submitLabel={`Submit ${itemSingular}`}
 >

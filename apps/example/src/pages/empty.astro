@@ -10,7 +10,7 @@ import siteConfig from "@grove/generated/site-config.json";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
 ---
-<BaseLayout title="No results" description="Empty state fixture." site={siteConfig}>
+<BaseLayout title={`No results | ${siteConfig.name}`} description="Empty state fixture." site={siteConfig} noindex>
   <section class="py-16 sm:py-24">
     <div class="mx-auto w-full max-w-narrow px-5 sm:px-7">
       <h1 class="sr-only">No results</h1>

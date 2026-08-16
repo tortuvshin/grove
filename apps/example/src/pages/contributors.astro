@@ -16,11 +16,11 @@ import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
 import EmptyState from "@grove-dev/astro/ui/EmptyState.astro";
 import { getContributorsPageModel } from "@grove-dev/astro/server";
 
-const { contributors: sorted, total, title, description, contributorsGraphHref, showContributionCount } =
+const { contributors: sorted, total, seo, contributorsGraphHref, showContributionCount } =
   getContributorsPageModel(siteConfig);
 ---
 
-<BaseLayout title={title} description={description} site={siteConfig}>
+<BaseLayout title={seo.title} description={seo.description} image={seo.image} jsonLd={seo.jsonLd} site={siteConfig}>
   <section class="py-12 sm:py-16">
     <div class="mx-auto w-full max-w-container px-5 py-12 sm:px-7 sm:py-16">
       <span class="text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
