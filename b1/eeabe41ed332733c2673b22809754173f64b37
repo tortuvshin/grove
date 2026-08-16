@@ -1,0 +1,21 @@
+packages/astro/README.md
+  s_36968c37e13577::t_db644dff751b9c 19,84-86
+  s_36968c37e13577::t_8e2bb28fdef031 3-4,6-18,20-34,37-39,44-83,87-123,125-231,238-245
+  s_36968c37e13577::t_ae6ecda1868e98 246
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b1eeabe41ed332733c2673b22809754173f64b37",
+  "prompts": {},
+  "sessions": {
+    "s_36968c37e13577": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c7edbca-eaac-4d39-af08-0f7ed1faff42",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
