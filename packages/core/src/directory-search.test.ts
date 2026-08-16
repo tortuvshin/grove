@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { IndexRecord } from "./schema.js";
-import { applySort, buildFacets, filterRecords, filtersFromSearchParams } from "./directory-search.js";
+import {
+  activeFilterChips,
+  applySort,
+  buildFacets,
+  filterRecords,
+  filtersFromSearchParams,
+  hrefForClearedFilters,
+  hrefForPage,
+  pagePathHref,
+} from "./directory-search.js";
 import { hrefForLens, isLensActive, LENSES, PRIMARY_LENSES } from "./directory-lenses.js";
 import { lensDisplay } from "./directory-display.js";
 
@@ -317,5 +326,63 @@ describe("license filter", () => {
     const licenseCounts = new Map(facets.licenses.map((entry) => [entry.value, entry.count]));
     expect(licenseCounts.get("mit")).toBe(3);
     expect(licenseCounts.get("apache-2.0")).toBe(1);
+  });
+});
+
+describe("browsable URLs", () => {
+  it("keeps unfiltered pages on real paths, and filtered ones on ?page", () => {
+    // Pages 2..n of an unfiltered directory are prerendered documents;
+    // a filtered view exists only on the client, so it stays a query.
+    expect(pagePathHref("/projects", 1)).toBe("/projects/");
+    expect(pagePathHref("/projects", 3)).toBe("/projects/page/3/");
+    expect(hrefForPage({ stacks: ["python"] }, 3, "/projects")).toBe(
+      "/projects?stack=python&page=3",
+    );
+    // Defaults never reach the URL.
+    expect(hrefForPage({ stacks: ["python"] }, 1, "/projects")).toBe("/projects?stack=python");
+  });
+
+  it("clears every filter but the chosen sort", () => {
+    expect(
+      hrefForClearedFilters({ q: "agents", stacks: ["python"], sort: "most-starred" }, "/projects"),
+    ).toBe("/projects?sort=most-starred");
+    expect(hrefForClearedFilters({ q: "agents", stacks: ["python"] }, "/projects")).toBe(
+      "/projects",
+    );
+  });
+});
+
+describe("active filter chips", () => {
+  const taxonomy = {
+    stacks: [{ id: "react-native", name: "React Native" }],
+    categories: [{ id: "agents", name: "Agents" }],
+  };
+
+  it("resolves ids to taxonomy display names", () => {
+    // The server rendered `Stack: react-native` while the client
+    // rewrote the same chip to `Stack: React Native`. One definition.
+    const [chip] = activeFilterChips({ stacks: ["react-native"] }, { taxonomy });
+    expect(chip.label).toBe("Stack: React Native");
+  });
+
+  it("falls back to the raw id when the taxonomy has no entry", () => {
+    const [chip] = activeFilterChips({ stacks: ["unlisted"] }, { taxonomy });
+    expect(chip.label).toBe("Stack: unlisted");
+  });
+
+  it("carries the URL that removes just that filter", () => {
+    const chips = activeFilterChips(
+      { stacks: ["react-native"], categories: ["agents"] },
+      { taxonomy, pathPrefix: "/apps" },
+    );
+    const stack = chips.find((chip) => chip.key === "stacks");
+    expect(stack?.href).toBe("/apps?category=agents");
+    const category = chips.find((chip) => chip.key === "categories");
+    expect(category?.href).toBe("/apps?stack=react-native");
+  });
+
+  it("sends a removal back to page 1", () => {
+    const [chip] = activeFilterChips({ stacks: ["react-native"], page: 4 }, { pathPrefix: "/apps" });
+    expect(chip.href).toBe("/apps");
   });
 });
