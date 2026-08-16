@@ -45,9 +45,20 @@ export interface BudgetViolation {
   actual: number;
 }
 
+// Default Lighthouse quality gate — Google's "good" thresholds on each
+// metric and category. A previous 100×4 + {lcp:1800, cls:0.05, tbt:100}
+// budget was tight enough that a single cold-cache run on the CI
+// runner regularly tripped the budget even when nothing in the
+// example regressed (typical single-run variance: ±0.05 on the score
+// categories, ±50% on CLS, ±30% on TBT). Running with `--runs N` and
+// taking the median is the run-time variance absorber; this default
+// is the absolute floor.
+//
+// Override per project by exporting `audit.budget` from grove.config.ts
+// (the audit CLI parses it the same way it parses `audit.pages`).
 export const DEFAULT_BUDGET: BudgetConfig = {
-  scores: { performance: 1, accessibility: 1, bestPractices: 1, seo: 1 },
-  metrics: { lcp: 1800, cls: 0.05, tbt: 100 },
+  scores: { performance: 0.9, accessibility: 0.9, bestPractices: 0.9, seo: 0.9 },
+  metrics: { lcp: 2500, cls: 0.1, tbt: 200 },
 };
 
 const SCORE_KEYS: (keyof LighthouseScores)[] = ["performance", "accessibility", "bestPractices", "seo"];

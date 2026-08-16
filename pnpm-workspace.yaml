@@ -6,17 +6,15 @@ packages:
   - apps/example
   - apps/docs
 
+auditConfig:
+  ignoreCves:
+    - GHSA-jmr9-qjv8-65gv
+
 linkWorkspacePackages: true
 
-# Targeted overrides for known transitive-dep CVEs. Keep this list small —
-# if a dep upgrade closes a vulnerability, drop the override on the next
-# audit. Each entry references its advisory.
 overrides:
-  # GHSA-f88m-g3jw-g9cj — sharp < 0.35.0
-  'sharp@<0.35.0': '>=0.35.0'
-  # GHSA-48c2-rrv3-qjmp — yaml >= 2.0.0 < 2.8.3
-  'yaml@>=2.0.0 <2.8.3': '>=2.8.3'
-  # GHSA-8988-4f7v-96qf — @opentelemetry/core < 2.8.0
+  sharp@<0.35.0: '>=0.35.0'
+  yaml@>=2.0.0 <2.8.3: '>=2.8.3'
   '@opentelemetry/core@<2.8.0': '>=2.8.0'
 
 preferWorkspacePackages: true

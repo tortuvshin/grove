@@ -61,8 +61,17 @@ jobs:
 
       - name: Audit production deps
         # `pnpm audit --prod --audit-level=high` fails the job on high/critical.
-        run: pnpm audit --prod --audit-level=high
+        # GHSA-jmr9-qjv8-65gv (extract-zip <=2.0.1 unvalidated symlink path
+        # traversal) is a transitive dep via
+        # lighthouse>puppeteer-core>@puppeteer/browsers>extract-zip. The
+        # GHSA lists `Patched versions: None` — no upstream release yet.
+        # The vulnerable path only triggers when puppeteer downloads a
+        # browser archive; this repo ships a system-installed chromium and
+        # never invokes that codepath, so we explicitly ignore the
+        # advisory. Remove the `--ignore` once extract-zip publishes a fix
+        # (tracking issue: GHSA-jmr9-qjv8-65gv).
+        run: pnpm audit --prod --audit-level=high --ignore GHSA-jmr9-qjv8-65gv
 
       - name: Audit dev deps
         continue-on-error: true
-        run: pnpm audit --audit-level=high
+        run: pnpm audit --audit-level=high --ignore GHSA-jmr9-qjv8-65gv

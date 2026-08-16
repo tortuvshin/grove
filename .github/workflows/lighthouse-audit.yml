@@ -65,14 +65,54 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @grove-dev/core --filter @grove-dev/cli --filter @grove-dev/astro -r build
       - run: pnpm --dir apps/example build
+      - name: Start astro preview server
+        # The audit hits `http://127.0.0.1:4321` (grove.config.ts → audit.baseUrl).
+        # Without a server, lighthouse returns a result with all categories/audits
+        # missing and every score collapses to 0 / Infinity, producing 82 false
+        # budget violations. `astro preview` defaults to IPv6 `[::1]`; force IPv4
+        # to match the audit target. Mirrors the boot in tests/integration/grove-audit.test.ts.
+        # `nohup ... &` detaches the child from the step's shell so it survives
+        # past the step's exit and the runner doesn't kill it on the next step.
+        run: |
+          nohup pnpm --dir apps/example preview --host 127.0.0.1 --port 4321 \
+            > /tmp/astro-preview.log 2>&1 &
+          PREVIEW_PID=$!
+          echo "Started astro preview (pid=${PREVIEW_PID})"
+          for i in {1..60}; do
+            if curl -fsS -o /dev/null http://127.0.0.1:4321/; then
+              echo "Preview server is up after ${i}s"
+              echo "PREVIEW_PID=${PREVIEW_PID}" >> $GITHUB_ENV
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Preview server did not come up within 60s; log:" >&2
+          cat /tmp/astro-preview.log >&2 || true
+          kill "${PREVIEW_PID}" 2>/dev/null || true
+          exit 1
       - name: Run grove audit
         # The CLI exits non-zero on any budget violation. Pin the audit job's
         # success on that exit code so a Lighthouse regression blocks merges
         # once this workflow is added to the repo's branch-protection
         # required-checks (Settings → Branches → Branch protection rules →
-        # "Require status checks to pass before merging").
-        run: node ../../packages/cli/dist/index.js audit --runs 1 --json lighthouse-report.json --junit lighthouse-junit.xml
+        # "Require status checks to pass before merging"). Runs 3 samples per
+        # page and aggregates by median (the audit-cli default); a single
+        # sample lands within ~0.05 of 1.0 even on a clean tree, which is
+        # well inside the variance the budget allows.
+        run: node ../../packages/cli/dist/index.js audit --runs 3 --json lighthouse-report.json --junit lighthouse-junit.xml
         working-directory: apps/example
+      - name: Stop preview server
+        if: always()
+        # Tear down the backgrounded `astro preview` started above so the
+        # runner doesn't carry a dangling node process past job cleanup.
+        # Use the captured PID when present; fall back to pkill in case the
+        # env var didn't survive (e.g. the preview started before $GITHUB_ENV
+        # was written into).
+        run: |
+          if [ -n "${PREVIEW_PID:-}" ]; then
+            kill "${PREVIEW_PID}" 2>/dev/null || true
+          fi
+          pkill -f 'astro preview' 2>/dev/null || true
       - uses: actions/upload-artifact@v5
         if: always()
         with:

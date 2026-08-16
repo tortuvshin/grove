@@ -93,7 +93,16 @@ export async function runAudit(opts: AuditCliOptions): Promise<number> {
     }
     return 1;
   }
-  process.stdout.write(`\n✓ ${results.length} page/profile combinations passed 100×4\n`);
+  // The scorecard message used to claim "100×4" (perfect on every
+  // category). The default budget now targets Google's "good"
+  // thresholds (0.9 / lcp 2500 / cls 0.1 / tbt 200), so the literal
+  // claim no longer matches reality. Describe the actual budget in
+  // the message so consumers and the unit test regex don't drift from
+  // the code that enforces it.
+  process.stdout.write(
+    `\n✓ ${results.length} page/profile combinations passed the budget ` +
+      `(scores ≥ 0.9, lcp ≤ 2500ms, cls ≤ 0.1, tbt ≤ 200ms)\n`,
+  );
   return 0;
 }
 

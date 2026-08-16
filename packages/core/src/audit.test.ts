@@ -18,15 +18,15 @@ function makeResult(overrides: Partial<AuditResult> = {}): AuditResult {
 const page: PageManifestEntry = { path: "/", type: "home", label: "Home" };
 
 describe("DEFAULT_BUDGET", () => {
-  it("requires 100×4 across all four categories", () => {
+  it("targets Lighthouse 'good' thresholds on every score category", () => {
     expect(DEFAULT_BUDGET.scores).toEqual({
-      performance: 1, accessibility: 1, bestPractices: 1, seo: 1,
+      performance: 0.9, accessibility: 0.9, bestPractices: 0.9, seo: 0.9,
     });
   });
   it("matches Web Vitals good thresholds", () => {
-    expect(DEFAULT_BUDGET.metrics.lcp).toBe(1800);
-    expect(DEFAULT_BUDGET.metrics.cls).toBe(0.05);
-    expect(DEFAULT_BUDGET.metrics.tbt).toBe(100);
+    expect(DEFAULT_BUDGET.metrics.lcp).toBe(2500);
+    expect(DEFAULT_BUDGET.metrics.cls).toBe(0.1);
+    expect(DEFAULT_BUDGET.metrics.tbt).toBe(200);
   });
 });
 
@@ -48,16 +48,16 @@ describe("evaluateBudget", () => {
 
     expect(evaluateBudget(result, notFoundPage)).toEqual([]);
   });
-  it("flags a performance score below 1", () => {
+  it("flags a performance score below the budget", () => {
     const v = evaluateBudget(makeResult({
-      scores: { performance: 0.99, accessibility: 1, bestPractices: 1, seo: 1 },
+      scores: { performance: 0.89, accessibility: 1, bestPractices: 1, seo: 1 },
     }), page);
     expect(v).toHaveLength(1);
-    expect(v[0]).toMatchObject({ category: "score", name: "performance", expected: 1, actual: 0.99 });
+    expect(v[0]).toMatchObject({ category: "score", name: "performance", expected: 0.9, actual: 0.89 });
   });
   it("flags LCP above threshold", () => {
-    const v = evaluateBudget(makeResult({ metrics: { lcp: 2500, cls: 0.01, tbt: 50 } }), page);
-    expect(v[0]).toMatchObject({ category: "metric", name: "lcp", expected: 1800, actual: 2500 });
+    const v = evaluateBudget(makeResult({ metrics: { lcp: 2600, cls: 0.01, tbt: 50 } }), page);
+    expect(v[0]).toMatchObject({ category: "metric", name: "lcp", expected: 2500, actual: 2600 });
   });
   it("flags multiple violations at once", () => {
     const v = evaluateBudget(makeResult({

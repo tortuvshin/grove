@@ -142,6 +142,13 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # `pnpm icons:check` (via `scripts/sync-icons.mjs`) imports the
+      # `@iconify-json/*` packages at the repo root. Without an
+      # `install` step this lint job fails with
+      # `Error: @iconify-json/logos is not installed — run pnpm install`.
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
       - name: Check for stray .DS_Store
         run: |
           if find . -name '.DS_Store' -not -path './node_modules/*' -not -path './*/node_modules/*' -print -quit | grep -q .; then

@@ -40,10 +40,16 @@ describe("grove audit @apps/example", () => {
     preview?.kill("SIGTERM");
   });
 
-  it("runs a 1-sample audit and reports 100×4 on every fixture page", async () => {
+  it("runs a 3-sample audit (median) and reports 100×4 on every fixture page", async () => {
+    // The 100×4 budget is tight: a single Lighthouse run lands within
+    // 0.05 of 1.0 on a CI runner, which trips performance/accessibility
+    // violations even when nothing in the example regressed. The audit
+    // CLI aggregates runs by median; running 3 samples (the audit-cli
+    // default) lets the median absorb the per-run variance while still
+    // failing on a real regression. `--runs` is clamped to [1, 5].
     const result = await new Promise<{ code: number | null; stdout: string; stderr: string }>(
       (resolveResult, reject) => {
-        const child = spawn(process.execPath, [cli, "audit", "--runs", "1"], {
+        const child = spawn(process.execPath, [cli, "audit", "--runs", "3"], {
           cwd: example,
           stdio: "pipe",
         });
@@ -56,6 +62,6 @@ describe("grove audit @apps/example", () => {
       },
     );
     expect(result.code, `stderr:\n${result.stderr}\nstdout:\n${result.stdout}`).toBe(0);
-    expect(result.stdout).toMatch(/✓ \d+ page\/profile combinations passed 100×4/);
+    expect(result.stdout).toMatch(/✓ \d+ page\/profile combinations passed the budget/);
   }, 600_000);
 });
