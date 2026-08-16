@@ -151,7 +151,7 @@ jobs:
             lines.push(`- Budget violations: ${violations.length}`);
             lines.push('');
             if (violations.length === 0) {
-              lines.push('✅ Every page × profile combination passed the 100×4 budget.');
+              lines.push('✅ Every page × profile combination passed the budget.');
             } else {
               lines.push('⛔ Budget violations:');
               for (const v of violations.slice(0, 30)) {

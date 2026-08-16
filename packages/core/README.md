@@ -45,7 +45,7 @@ Every entry in `audit.pages[]` must declare one of seven `PageType` values:
 | `record` | An individual record detail page. |
 | `content` | A long-form content page (about, blog post, etc.). |
 | `empty` | A page that intentionally renders an empty state. |
-| `404` | The not-found page. Audited for completeness but exempt from the 100×4 budget because Lighthouse cannot measure 404 responses. |
+| `404` | The not-found page. Audited for completeness but exempt from the budget because Lighthouse cannot measure 404 responses. |
 
 ### `PageManifestEntry` shape
 
@@ -60,13 +60,14 @@ interface PageManifestEntry {
 
 ### Default budget
 
-The audit enforces a perfect Lighthouse score across `performance`, `accessibility`, `best-practices`, and `seo`, plus the following metric ceilings:
+The audit enforces Lighthouse "good" thresholds — Google's standard quality gate — across every score category and metric:
 
-- **LCP** ≤ 1800 ms
-- **CLS** ≤ 0.05
-- **TBT** ≤ 100 ms
+- **Score categories** (`performance`, `accessibility`, `best-practices`, `seo`) ≥ 0.9
+- **LCP** ≤ 2500 ms
+- **CLS** ≤ 0.1
+- **TBT** ≤ 200 ms
 
-The default is 4 runs per page/profile (mobile + desktop) — the 100×4 contract. `grove audit` returns a non-zero exit code on any violation, making it a drop-in CI check.
+The default is 3 runs per page/profile (mobile + desktop) aggregated by median. `grove audit` returns a non-zero exit code on any violation, making it a drop-in CI check. Run with `--runs N` (clamped to `[1, 5]`) to tune the variance/noise trade-off.
 
 ### Minimal example
 

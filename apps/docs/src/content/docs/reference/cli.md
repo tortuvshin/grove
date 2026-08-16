@@ -285,7 +285,7 @@ hide records — that is a curator's call, made via `decisions.yml`.
 ## `grove audit`
 
 Run Lighthouse against every page declared in `grove.config.ts`'s
-`audit.pages[]` manifest and enforce the default 100×4 score budget.
+`audit.pages[]` manifest and enforce the default quality budget.
 Implemented in `packages/cli/src/audit-cli.ts`; the runtime in
 `packages/cli/src/audit.ts`.
 
@@ -343,9 +343,9 @@ path. On Linux, `--no-sandbox` is added automatically. `--headless=new
   [mobile] /projects/coolify/ score.performance: expected 1, got 0.92
 ```
 
-**Final line:** `✓ N page/profile combinations passed 100×4` or `✗ N
-budget violation(s)` with a list of each violation. Exit code is 1
-when any violation is found, otherwise 0.
+**Final line:** `✓ N page/profile combinations passed the budget` or
+`✗ N budget violation(s)` with a list of each violation. Exit code is
+1 when any violation is found, otherwise 0.
 
 **Example:**
 

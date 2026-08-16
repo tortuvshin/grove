@@ -3,7 +3,7 @@ import { runAudit } from "./audit.js";
 
 export function buildAuditCommand(): Command {
   return new Command("audit")
-    .description("Run Lighthouse 100×4 against every page in grove.config.ts audit.pages[].")
+    .description("Run Lighthouse against every page in grove.config.ts audit.pages[] and enforce the default quality budget.")
     .option("--base-url <url>", "Override audit.baseUrl from grove.config.ts")
     .option("--mobile", "Mobile profile only")
     .option("--desktop", "Desktop profile only")

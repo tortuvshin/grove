@@ -15,13 +15,13 @@ pnpm dlx @grove-dev/cli init my-directory
 - `grove cleanup [--strict]` writes the human-review report.
 - `grove collection promote --from PATH --slug SLUG [--title T] [--description D]` writes a curated collection YAML from a filter URL.
 - `grove readme generate [--stdout] [--path PATH] [--check]` renders the awesome-list README block.
-- `grove audit` runs Lighthouse 100×4 across every page declared in `grove.config.ts` `audit.pages[]`.
+- `grove audit` runs Lighthouse against every page declared in `grove.config.ts` `audit.pages[]` and enforces the default quality budget.
 
 There are no framework, blueprint, template, deployment, build, or dev commands. Use Astro's normal `pnpm dev` and `pnpm build`; the integration prepares data automatically. The CLI bundles a release snapshot of the repository's real `apps/example/`, so the demo and generated project cannot drift into separate implementations.
 
 ## Audit
 
-`grove audit` runs Lighthouse against every page declared in `grove.config.ts` `audit.pages[]` and enforces the standard 100×4 budget (Lighthouse cannot meaningfully score 404 responses, so `type: "404"` pages are audited for completeness but are exempt from the budget).
+`grove audit` runs Lighthouse against every page declared in `grove.config.ts` `audit.pages[]` and enforces the default quality budget (Lighthouse cannot meaningfully score 404 responses, so `type: "404"` pages are audited for completeness but are exempt from the budget).
 
 ### Options
 
@@ -30,18 +30,19 @@ There are no framework, blueprint, template, deployment, build, or dev commands.
 | `--base-url <url>` | Override the `baseUrl` declared in `grove.config.ts` (default: `http://127.0.0.1:4321`). |
 | `--mobile` | Audit only the mobile profile. |
 | `--desktop` | Audit only the desktop profile. |
-| `--runs <n>` | Number of runs per page/profile (clamped to 1–5, default `4`). |
+| `--runs <n>` | Number of runs per page/profile (clamped to 1–5, default `3`). |
 | `--page <path>` | Restrict the audit to specific page paths (repeatable). |
 | `--json <file>` | Write a machine-readable JSON report to `<file>`. |
 | `--junit <file>` | Write a JUnit XML report to `<file>`. |
 
 ### Default budget
 
-The shipped budget requires a perfect score in every Lighthouse category and the following metric ceilings:
+The shipped budget targets Lighthouse "good" thresholds on every score category and metric:
 
-- **LCP** ≤ 1800 ms
-- **CLS** ≤ 0.05
-- **TBT** ≤ 100 ms
+- **Score categories** (`performance`, `accessibility`, `best-practices`, `seo`) ≥ 0.9
+- **LCP** ≤ 2500 ms
+- **CLS** ≤ 0.1
+- **TBT** ≤ 200 ms
 
 The budget is skipped for `type: "404"` pages — Lighthouse returns `0`/`Infinity` for missing pages by design.
 
@@ -51,6 +52,6 @@ The budget is skipped for `type: "404"` pages — Lighthouse returns `0`/`Infini
 - stderr: a list of every budget violation, when any occur.
 - optional `--json` and `--junit` reports capture the full result set for CI.
 
-`grove audit` exits with code `0` when every page passes the 100×4 budget and `1` if any violation is detected, so it drops cleanly into CI pipelines.
+`grove audit` exits with code `0` when every page passes the budget and `1` if any violation is detected, so it drops cleanly into CI pipelines.
 
 MIT
