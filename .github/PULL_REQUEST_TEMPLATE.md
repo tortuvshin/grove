@@ -28,13 +28,11 @@ Fill out the sections below. Delete any that don't apply — partial is better t
 ## Packages touched
 
 - [ ] `@grove-dev/core`
-- [ ] `@grove-dev/ui`
-- [ ] `@grove-dev/cli`
 - [ ] `@grove-dev/astro`
-- [ ] `@grove-dev/nextjs`
-- [ ] `@grove-dev/svelte`
+- [ ] `@grove-dev/cli`
+- [ ] `@grove-dev/starlight`
 - [ ] `apps/docs/`
-- [ ] `examples/`
+- [ ] `apps/example/`
 - [ ] Other: <!-- describe -->
 
 ## Public API change?

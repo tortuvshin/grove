@@ -4,6 +4,8 @@
 // action: on load it types `npx @grove-dev/cli init` and prints the first
 // scaffold lines, which the "How Grove works" story then picks up on
 // scroll. GitHub and docs step back into quiet secondary links.
+import { GROVE_RELEASE_LINE } from '../../data/packages.ts';
+
 const CLI_COMMAND = 'npx @grove-dev/cli init';
 
 const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow.'];
@@ -24,7 +26,7 @@ const cliOutput = ['Created grove.config.ts', 'Created content/', 'Ready to grow
       href="/roadmap/"
       class="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3.5 py-1 text-xs font-medium text-muted backdrop-blur transition-colors hover:border-border-strong hover:text-fg"
     >
-      Grove v0.5
+      Grove {GROVE_RELEASE_LINE}
       <span class="text-border-strong" aria-hidden="true">·</span>
       Open source
     </a>

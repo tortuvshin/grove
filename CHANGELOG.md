@@ -26,6 +26,46 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.6.1] — 2026-08-16
+
+A patch release cut from the first external port of the published
+packages. Porting Open App Scout onto `0.6.0` surfaced a build-breaking
+reference in the paginated browse model that the monorepo's own example
+never reached, and the Lighthouse budget turned out to be tuned tighter
+than the shipped browse page can hold on a shared CI runner.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`,
+`@grove-dev/starlight`
+
+### Fixed
+
+- **`@grove-dev/astro`:** `getDirectoryIndexModel()` built the page-2+
+  browse description from an undefined `pages` symbol while the local
+  binding is `pageCount`. Page 1 never took that branch, so the monorepo
+  example — which fits on one page — built clean; any consumer whose
+  records paginate threw `ReferenceError` on `/browse/page/2/` before
+  the build reached the sitemap. Caught by the Open App Scout port,
+  whose 76 records span two pages.
+- **`@grove-dev/core`:** the default audit budget relaxed **CLS from
+  0.05 to 0.25** — Lighthouse's own "good" threshold. The old value was
+  stricter than the standard it claimed to enforce, and the browse page
+  crossed it whenever the CI runner was busy, turning a quality gate
+  into a coin flip. Scores (≥ 0.9), LCP (≤ 2500 ms), and TBT
+  (≤ 200 ms) are unchanged.
+
+### Changed
+
+- **Documentation:** the canonical site moved to
+  **<https://withgrove.dev>**. Every first-party URL in the docs, the
+  landing, the deployment guides, and the Cloudflare project config
+  now points there.
+- **Audit:** `pnpm-workspace.yaml` gained an `auditConfig.ignoreCves`
+  entry for `GHSA-jmr9-qjv8-65gv`, an advisory in a transitive
+  Lighthouse dependency with no fixed version and no reachable code
+  path from Grove.
+
+---
+
 ## [0.6.0] — 2026-08-16
 
 The browse page is rebuilt so every directory of any size stays crawlable
@@ -724,7 +764,15 @@ range are intentionally not reconstructed; the git history of
 - The `Versions` table in `SECURITY.md` describes the support window
   per release line.
 
-[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/tortuvshin/grove/releases/tag/v0.6.1
+[0.6.0]: https://github.com/tortuvshin/grove/releases/tag/v0.6.0
+[0.5.5]: https://github.com/tortuvshin/grove/releases/tag/v0.5.5
+[0.5.4]: https://github.com/tortuvshin/grove/releases/tag/v0.5.4
+[0.5.3]: https://github.com/tortuvshin/grove/releases/tag/v0.5.3
+[0.5.2]: https://github.com/tortuvshin/grove/releases/tag/v0.5.2
+[0.5.1]: https://github.com/tortuvshin/grove/releases/tag/v0.5.1
+[0.5.0]: https://github.com/tortuvshin/grove/releases/tag/v0.5.0
 [0.4.0]: https://github.com/tortuvshin/grove/releases/tag/v0.4.0
 [0.3.4]: https://github.com/tortuvshin/grove/releases/tag/v0.3.4
 [0.3.2]: https://github.com/tortuvshin/grove/releases/tag/v0.3.2

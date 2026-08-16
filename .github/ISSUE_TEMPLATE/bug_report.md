@@ -43,7 +43,7 @@ If the bug only happens with a specific data file, paste a minimal `data/records
 - **Node.js version** — `node -v`
 - **pnpm version** — `pnpm -v`
 - **OS** — macOS / Linux / Windows (WSL?)
-- **Framework adapter** (if relevant) — `@grove-dev/astro`, `@grove-dev/nextjs`, `@grove-dev/svelte`
+- **Package(s)** (if relevant) — `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`, `@grove-dev/starlight`
 
 ### Anything else?
 

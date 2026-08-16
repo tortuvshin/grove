@@ -3,9 +3,59 @@ title: Migration guide
 description: Version upgrade guide — breaking changes between Grove releases and how to handle them.
 ---
 
-This page tracks breaking changes between Grove releases and the migration steps required.
+This page tracks breaking changes between Grove releases and the migration
+steps required. The current release is **`0.6.1`** — see the
+[roadmap](/roadmap/) for what ships in it and
+[`CHANGELOG.md`](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md)
+for the full per-version history.
 
-## 0.5.0-next.2 → next (planned)
+## 0.6.0 → 0.6.1
+
+**No required changes.** A patch release; both fixes are behaviour
+corrections with no API surface change.
+
+- `@grove-dev/astro` — paginated browse routes (`/{slug}/page/2/` and
+  beyond) built a description from an undefined symbol and threw
+  `ReferenceError` during the build. If your directory fits on one page
+  you were never affected. No action needed beyond upgrading.
+- `@grove-dev/core` — the default audit budget relaxed CLS from `0.05`
+  to `0.25`, Lighthouse's own "good" threshold. If you pinned a stricter
+  CLS in `grove.config.ts` `audit.budget`, your value still wins.
+
+## 0.5.x → 0.6.0
+
+**No required changes** for existing sites, but two behaviours changed
+enough to be worth knowing.
+
+### Page models return a `seo` block
+
+Every `@grove-dev/astro` page model now returns `{ seo: PageSeo, … }`.
+Layouts that previously accepted `title` / `description` / `image` /
+`jsonLd` props continue to work — `BaseLayout` forwards both shapes —
+but `seo.*` is the canonical API. Custom layouts should migrate.
+
+### Browse pages are prerendered per page
+
+`/{slug}/page/2/`, `/{slug}/page/3/`, … are now real prerendered
+documents rendering only their own 20 records, instead of one document
+containing the whole catalogue. Filtered views, which exist only on the
+client, keep `?page=N`. If you hand-wrote a browse route, regenerate it
+from the scaffold or add the `page/[page].astro` route.
+
+### JSON-LD is validated in dev
+
+`validateJsonLd` logs malformed structured data to the dev console with
+a backtrace. It is dev-only and never fails a production build.
+
+---
+
+## Historical
+
+The sections below predate the `0.6.x` line and are kept for anyone
+upgrading from a `0.5.0` pre-release. They do **not** describe current
+behaviour.
+
+## 0.5.0-next.2 → 0.5.0 (historical)
 
 ### Blueprint kind
 
@@ -39,7 +89,7 @@ The `description` and `color` fields are now optional. Existing files continue t
 
 The `match` predicate now supports `scoreFloor`. Existing files without `match` continue to render the curated collection as a static list.
 
-## 0.5.0-next.1 → 0.5.0-next.2
+## 0.5.0-next.1 → 0.5.0-next.2 (historical)
 
 ### Renamed fields
 

@@ -25,7 +25,7 @@ A `.grove/cache/manifest.json` records per-file hashes and pipeline-stage output
 ```json
 {
   "version": 1,
-  "schemaVersion": "0.5.0-next.2",
+  "schemaVersion": 1,
   "files": {
     "data/records/ollama.yml": {
       "hash": "sha256:...",

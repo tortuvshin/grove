@@ -67,7 +67,7 @@ pnpm dlx @grove-dev/cli@latest init [directory] [--no-install] [--no-git]
 | `--no-git` | Skip `git init` after scaffolding. |
 
 Omit `[directory]` to scaffold into the current directory (which must
-be empty). The scaffolder does not ask prompts in `0.5.0-next.2` — the
+be empty). The scaffolder does not ask prompts in `0.6.1` — the
 blueprint and integrations are chosen by editing `grove.config.ts`
 after scaffold.
 

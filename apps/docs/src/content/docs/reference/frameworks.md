@@ -5,11 +5,11 @@ description: Which renderers Grove supports today, and which are planned for a f
 
 | Framework | Status | Description |
 | --- | --- | --- |
-| **Astro** | **Stable** | The only `0.5.0-next.2` renderer. `@grove-dev/astro` is the integration; the Astro scaffold is the source for `grove init`. |
+| **Astro** | **Stable** | The only renderer. `@grove-dev/astro` is the integration; the Astro scaffold is the source for `grove init`. |
 | **SvelteKit** | **Planned** | No package or template exists. Will land in V1.1 only if a real community space asks for it. |
 | **Next.js** | **Planned** | No package or template exists. Same status as SvelteKit. |
 
-The Astro renderer is the only renderer in `0.5.0-next.2`. `pnpm dev` and
+Astro is the only renderer in `0.6.1`. `pnpm dev` and
 `pnpm build` invoke `astro dev` and `astro build`; the
 `@grove-dev/astro` integration prepares the generated JSON before
 each renderer run.
@@ -23,6 +23,6 @@ the current V1.1 backlog.
 
 Earlier versions of this page listed Next.js and SvelteKit as
 "coming soon" with skeleton workspaces in the monorepo. As of
-`0.5.0-next.2` those packages have been removed from the workspace. If you
+`0.6.1` those packages do not exist in the workspace. If you
 see a docs page or release note that still references them, file a
 PR — the canonical story is the table above.

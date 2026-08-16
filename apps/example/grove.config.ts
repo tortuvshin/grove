@@ -97,7 +97,7 @@ export default defineConfig({
   readme: {
     title: "Awesome Open-Source AI Tools",
     tagline: "Hand-picked tools worth running, studying, and extending.",
-    url: "https://open-apps.dev.mn",
+    url: "https://openappscout.com",
     browseLabel: "Browse the catalog →",
     intro: [
       "## Why this list",

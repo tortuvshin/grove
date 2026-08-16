@@ -1,84 +1,77 @@
 ---
 title: Roadmap
-description: Grove's shipping status — what `0.5.0-next.2` ships today, what is planned, and what is out of scope.
+description: Grove's shipping status — what 0.6.1 ships today, what is planned, and what is explicitly out of scope.
 ---
 
-> Grove ships in waves. Each wave ends with something a community can
-> use. This page reflects the **shipping state**, not the wave narrative.
+> This page reflects Grove's **shipping state**. Everything under
+> "Shipped" is in the published packages today. Everything below it is
+> a plan, and plans move.
 
 ## How to read this
 
 The roadmap is grouped by status, not by chronology:
 
-- **Shipped — `0.5.0-next.2`** — available in the current pre-release.
-  The four published packages are pinned at `0.5.0-next.2`; nine CLI
-  commands and 37 Astro components are live.
-- **Closing for v0.5.0** — the items below that still need to land
-  before the stable cut. Dates are not set.
-- **Later — directional** — will happen only if real spaces need it.
-- **Out of scope** — explicit non-goals we will not build.
+- **Shipped — `0.6.1`** — in the published packages right now.
+- **Next release** — scoped items expected in the following version.
+- **Later — directional** — will happen only if a real Grove space needs it.
+- **Out of scope** — explicit non-goals that will not be built.
 
-For the per-version changelog, see
+For the per-version history, see
 [`CHANGELOG.md`](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md)
-at the repo root.
+at the repository root.
 
 ---
 
-## Shipped — `0.5.0-next.2`
-
-The current pre-release. The four published packages are pinned at
-`0.5.0-next.2`; nine CLI commands and 37 Astro components ship.
+## Shipped — `0.6.1`
 
 ### Packages
 
-Four packages on npm under the `@grove-dev/*` scope. **All four are
-public** and pinned at `0.5.0-next.2`. `@grove-dev/ui`, `@grove-dev/svelte`,
-and `@grove-dev/nextjs` do **not** exist in the workspace and have
-never been published.
+Four packages on npm under the `@grove-dev/*` scope. All four are
+public and versioned in lockstep at `0.6.1`.
 
-| Package                | Version          | Role                                                                                                            |
-| ---------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
-| `@grove-dev/core`      | `0.5.0-next.2`   | Schema, config, importers, validators, taxonomy, sync, build pipeline, awesome-list README generator, audit     |
-| `@grove-dev/cli`       | `0.5.0-next.2`   | `init`, `check`, `sync github`, `sync contributors`, `cleanup`, `audit`, `import`, `collection promote`, `readme generate` |
-| `@grove-dev/astro`     | `0.5.0-next.2`   | The V1 renderer — 37 components, 7 layouts, server view-models                                                  |
-| `@grove-dev/starlight` | `0.5.0-next.2`   | Documentation site plugin (this site)                                                                           |
+| Package                | Version | Role                                                                                                                     |
+| ---------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `@grove-dev/core`      | `0.6.1` | Headless engine — config, schemas, validation, generation, synchronization, collections, SEO artifacts, health, decisions, importers |
+| `@grove-dev/astro`     | `0.6.1` | The supported renderer — integration, layouts, components, server view-models                                            |
+| `@grove-dev/cli`       | `0.6.1` | `init`, `check`, `sync`, `cleanup`, `import`, `collection promote`, `readme generate`, `icons sync`, `audit`             |
+| `@grove-dev/starlight` | `0.6.1` | Optional Starlight documentation theme (this site)                                                                       |
 
-### Frameworks
+`@grove-dev/ui`, `@grove-dev/svelte`, and `@grove-dev/nextjs` do **not**
+exist in the workspace and have never been published. Older documents in
+the repository that mention them are historical.
 
-| Framework    | Status                                                                       |
-| ------------ | ---------------------------------------------------------------------------- |
-| Astro        | **V1 supported.** Astro is the only renderer; `pnpm dev` and `pnpm build`     |
-|              | invoke `astro dev` / `astro build` and the `@grove-dev/astro` integration.   |
-| SvelteKit    | **Not shipped.** No `@grove-dev/svelte` package exists. The scaffold only     |
-|              | emits an Astro project; "Svelte" / "SvelteKit" does not appear anywhere.      |
-| Next.js      | **Not shipped.** No `@grove-dev/nextjs` package exists.                       |
+### Renderers
+
+| Renderer  | Status                                                                                                     |
+| --------- | ---------------------------------------------------------------------------------------------------------- |
+| Astro     | **Supported.** The only renderer. `pnpm dev` / `pnpm build` invoke `astro dev` / `astro build` through the `@grove-dev/astro` integration. |
+| SvelteKit | **Not shipped.** No package exists.                                                                          |
+| Next.js   | **Not shipped.** No package exists.                                                                          |
 
 ### Blueprints
 
-A blueprint binds a `kind` to a schema, a default route, and the
-filters a space exposes. Records are a discriminated `Resource` union.
+A blueprint binds a `kind` to a schema, a default route, and the filters
+a space exposes. Records are a discriminated `Resource` union.
 
-| Blueprint           | `kind`     | Schema  | Polished default pages |
-| ------------------- | ---------- | :-----: | :--------------------: |
-| `project-directory` | `project`  | ✅      | ✅ (`project-directory` template) |
-| `resource-hub`      | `resource` | ✅      | Schema valid, list/detail routes exposed via `routes.directory`. |
-| `ecosystem-map`     | `entity`   | ✅      | Schema valid, list/detail routes exposed via `routes.directory`. |
+| Blueprint           | `kind`     | Schema | Default UI   | Notes                                                                        |
+| ------------------- | ---------- | ------ | ------------ | ---------------------------------------------------------------------------- |
+| `project-directory` | `project`  | Stable | Stable       | The polished end-to-end default; every page template is tuned for it.        |
+| `resource-hub`      | `resource` | Stable | Experimental | Schema validates and records generate; pages reuse the project-directory templates. |
+| `ecosystem-map`     | `entity`   | Stable | Experimental | Schema validates and records generate; pages reuse the project-directory templates. |
 
-### CLI commands
-
-The complete `0.5.0-next.2` surface — nine top-level + sub commands:
+### CLI surface
 
 ```
 grove init [directory] [--no-install] [--no-git]
 grove check [--strict]
-grove sync github [--limit N] [--strict]
-grove sync contributors
+grove sync <github|contributors> [--limit N] [--strict]
 grove cleanup [--strict]
-grove audit [--base-url URL] [--mobile|--desktop] [--runs N]
-            [--page PATH]… [--json FILE] [--junit FILE]
-grove import <source>           # GitHub URL, raw README URL, or local path
+grove import <source>
 grove collection promote --from PATH --slug SLUG [--title T] [--description D]
 grove readme generate [--stdout] [--path PATH] [--check]
+grove icons sync [--force]
+grove audit [--base-url URL] [--mobile|--desktop] [--runs N]
+            [--page PATH]… [--json FILE] [--junit FILE]
 ```
 
 See the [CLI reference](/reference/cli/) for the full options, reads,
@@ -86,144 +79,124 @@ writes, and exit codes of each command.
 
 ### Generated outputs
 
-Every `grove check` produces:
+`grove check` (and every `astro dev` / `astro build`, through the
+integration) produces:
 
 - `data/generated/records.full.json` — every record, every field.
 - `data/generated/records.index.json` — slim projection for list pages.
 - `data/generated/records.json` — alias for `records.full.json`.
 - `data/generated/site-config.json` — site name, tagline, nav, theme,
   taxonomy, integrations, repo stats.
-- `data/generated/cleanup-report.json` — when `grove cleanup` runs.
-- `data/generated/contributors.json` + `repo-stats.json` — when
-  `grove sync contributors` runs.
 - `public/sitemap.xml`, `public/robots.txt` — search-engine surface.
-- `public/llms.txt`, `public/llms-full.txt` — AI-readable surface.
-- `public/og-image.svg` — re-emitted when the marker comment is present.
+- `public/llms.txt`, `public/llms-full.txt` — LLM-oriented surface.
+- `public/og/*.png` — per-record, per-collection, per-taxonomy social
+  cards, content-hashed so unchanged pages skip the rasterizer.
+
+Other commands add: `data/generated/cleanup-report.json` (`grove cleanup`),
+and `data/generated/contributors.json` + `repo-stats.json`
+(`grove sync contributors`).
+
+### SEO surface
+
+Every page declares a `PageDocument`; the framework emits title,
+description, canonical, Open Graph, Twitter, and JSON-LD from that one
+declaration. See [SEO & social](/outputs/seo/).
+
+JSON-LD is emitted as valid structured metadata. It is **not** a
+guarantee of Google rich results — search engines decide what to render.
 
 ### Schema constraints
 
 - One YAML file = one record. The filename (minus `.yml`) is the
-  canonical slug. Multi-record files are a V2 feature.
-- `kind` must match the blueprint of the site that owns the record
+  canonical slug. Multi-record files are a future feature.
+- `kind` must match the blueprint of the space that owns the record
   (`project`, `resource`, or `entity`).
 - Records without `health` are allowed for `resource-hub` and
-  `ecosystem-map` blueprints; their effective visibility is the
-  top-level `visibility` field, defaulting to `keep`.
-- The V1 public surface of `@grove-dev/core` is exactly what
-  `packages/core/src/index.ts` re-exports; everything else
-  (`IndexRecord`, `loadRecords`, `unwrap*`, etc.) is internal.
-
-### What `0.5.0-next.2` already includes
-
-The following items are already in the codebase; the stable `0.5.0`
-cut is the version line where they ship together.
-
-- **`grove import`** — wraps the `importAwesomeList` +
-  `writeImportedRecords` parser as a CLI command so contributors can
-  run `grove import https://github.com/<owner>/awesome-<topic>` and
-  land `data/records/<slug>.yml` files tagged `source: { type: "import" }`.
-- **`grove collection promote`** — promotes a filter URL
-  (e.g. `/browse?stack=flutter&category=finance`) into a curated
-  `data/collections/<slug>.yml` with `kind: curated`,
-  `ranking.preset: quality`, and `excludeStatuses: [archived]`.
-- **`grove readme generate`** — renders the awesome-list README
-  block between `<!-- grove-readme:start -->` /
-  `<!-- grove-readme:end -->` sentinels; supports `--stdout`,
-  `--path`, and `--check` for CI.
-- **`grove audit`** — runs Lighthouse against the `audit.pages[]`
-  manifest in `grove.config.ts` and enforces the default quality
-  budget (Lighthouse "good" thresholds: scores ≥ 0.9, lcp ≤ 2500ms,
-  cls ≤ 0.25, tbt ≤ 200ms).
-- **Internal-link lint** — `scripts/check-starlight-internal-links.mjs`
-  walks every Markdown / MDX file under `apps/docs/src/content/docs/`
-  and asserts each `/path/` target resolves to a real file; wired
-  into `pnpm docs:check`.
+  `ecosystem-map`; their effective visibility is the top-level
+  `visibility` field, defaulting to `keep`.
+- The public surface of `@grove-dev/core` is exactly what
+  `packages/core/src/index.ts` re-exports.
 
 ---
 
-## Closing for v0.5.0
+## Next release
 
-A short list of items still to land before the stable cut. Everything
-in this section is scoped; the stable `0.5.0` ships when the list is
-empty.
+Scoped items expected in the version after `0.6.1`. Dates are not set.
 
-### Lighthouse audit on every PR
+### Lighthouse audit on every relevant PR
 
-`.github/workflows/lighthouse-audit.yml` today runs on changes to
+`.github/workflows/lighthouse-audit.yml` runs today on changes to
 `packages/{core,cli,astro}/**` or `apps/example/**` and on a weekly
-cron. `v0.5.0` will run it on every PR that touches the audit
-manifest or `apps/example/`, posting the scorecard as a check run.
+cron. The next release runs it on every PR that touches the audit
+manifest or the example app, posting the scorecard as a check run.
 
-### Close-out of verified audit findings
+### Explicit public API snapshot
 
-The internal post-launch audit catalogue lists verified recommendations
-that the shipped surface still does not address — rasterising the OG
-image to PNG, third-party-action SHA pinning, OIDC trusted publishing,
-and so on. `v0.5.0` will land as many as fit before the cut.
-Anything left over graduates to `v0.5.x` patches or `v0.6.0`; every
-item is enumerated either way so the catalogue shrinks on every
-release.
+`@grove-dev/core` and `@grove-dev/astro` still use broad `export *`
+re-exports in places. The next release narrows them to deliberate named
+exports with a snapshot test, so an accidental surface change is caught
+before it is published.
+
+### External consumer verification
+
+Grove releases should be tested against at least one consumer outside
+the monorepo before publishing. See
+[Built with Grove](/open-apps/) for the current state of that work.
 
 ---
 
 ## Later — directional
 
-These are real conversations the project will have. Each one happens
-only if at least one Grove-powered space needs it.
+These are real conversations the project will have. Each happens only if
+at least one Grove-powered space needs it.
 
-### Spaces dashboard (read-only)
+### Polished `resource-hub` and `ecosystem-map` defaults
 
-A static page that lists every known Grove-powered space. Each space
-reports its URL, blueprint, and a one-line description via a JSON file
-in its own repo. **No central database. No scraping. No auth.** Just
-curated links.
+Both blueprints validate and emit JSON today, but the shipped list and
+detail templates are tuned for `project-directory`. Reference templates
+will ship when a consumer space needs them.
+
+### Spaces index (read-only)
+
+A static page listing known Grove-powered spaces. Each space reports its
+URL, blueprint, and a one-line description via a JSON file in its own
+repository. No central database, no scraping, no auth.
 
 ### AI-assisted curation (gated)
 
 An optional CLI pass that suggests topics, tags, and descriptions for
-uncurated records. **Always a suggestion, never a write.** Humans
-approve. The CLI never modifies `data/records/*.yml` without a human
-review step.
+uncurated records. Always a suggestion, never a write — the CLI would
+not modify `data/records/*.yml` without a human review step.
 
 ### Federation (only if asked)
 
-A space can import resources from another space (read-only). A "Grove
-network" view aggregates featured resources from many spaces. No
-central write authority — each space keeps its own source of truth.
+A space imports resources from another space, read-only. No central
+write authority; each space keeps its own source of truth.
 
-### Multi-record YAML files (`recordsBundleSchema`)
+### Multi-record YAML files
 
-V2 schema behind `recordsBundleSchema` so a single YAML file can
-carry a `records: [...]` array. Today this is explicitly a V2 feature.
+A single YAML file carrying a `records: [...]` array, behind
+`recordsBundleSchema`.
 
-### SvelteKit and Next.js adapters (deferred from v0.5.0)
+### SvelteKit and Next.js adapters
 
-`@grove-dev/svelte` and `@grove-dev/nextjs` would graduate from
-"planned" to "shipped" if a real community space needs one. Today no
-such demand exists, so no scaffolding or templates are committed.
-Deferred from v0.5.0 to avoid scope creep.
-
-### Polished `resource-hub` and `ecosystem-map` defaults (deferred from v0.5.0)
-
-Today both blueprints validate and emit JSON, but the polished list /
-detail page templates that ship with the Astro renderer are tuned for
-`project-directory`. Deferred from v0.5.0; reference templates will
-ship when a consumer site needs them.
+Would graduate from "not shipped" only if a real community space needs
+one. No such demand exists today, so no scaffolding or templates are
+committed.
 
 ---
 
 ## Out of scope — explicit non-goals
 
-These are not roadmap items. If a contributor proposes any of them,
-the answer is no, and "no" is the design decision.
+These are not roadmap items. If a contributor proposes one, the answer
+is no, and "no" is the design decision.
 
-- **A hosted Grove SaaS.** The framework repo is not a marketing site.
+- **A hosted Grove SaaS.** Grove is a library and a CLI, not a service.
 - **A database, CMS, or admin dashboard.** Data lives in files.
 - **A plugin marketplace.** The engine is small enough to fork.
-- **Real-time collaboration.** PRs are the collaboration layer.
-- **Auth, paywalls, private spaces.** Every space is public.
-- **Replacing `awesome-*` repos.** Grove runs alongside them, not
-  against them.
+- **Real-time collaboration.** Pull requests are the collaboration layer.
+- **Auth, paywalls, private spaces.** Generated output is static and public.
+- **Replacing `awesome-*` repositories.** Grove runs alongside them.
 - **Tying the data model to GitHub.** GitHub is one optional signal,
   not the spine.
 
@@ -232,9 +205,5 @@ the answer is no, and "no" is the design decision.
 ## How to influence the roadmap
 
 - **File an issue** describing a real gap you hit while running Grove.
-  Real-space findings drive real roadmap changes — see
-  [CONTRIBUTING.md](https://github.com/tortuvshin/grove/blob/main/CONTRIBUTING.md).
-- **Open a PR** with a focused change. Focused changes land faster.
-- **Read the audit.** An internal post-launch audit catalogues verified
-  issues, deferred items, and breaking changes that would be needed
-  for V1.1+. It is the working backlog.
+  See [CONTRIBUTING.md](https://github.com/tortuvshin/grove/blob/main/CONTRIBUTING.md).
+- **Open a pull request** with a focused change. Focused changes land faster.

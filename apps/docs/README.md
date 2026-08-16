@@ -37,7 +37,6 @@ apps/docs/
 │   └── content.config.ts   # Starlight content collection config
 ├── public/                 # static files served at the site root
 ├── MILESTONES.md           # historical V0 milestone log
-├── PRODUCT.md              # full product reference
 ├── RELEASING.md            # operational release doc
 ├── SUPPORT.md              # where to ask questions
 ├── vision.md               # why Grove exists (historical)

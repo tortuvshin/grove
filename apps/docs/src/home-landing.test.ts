@@ -342,7 +342,7 @@ describe("docs homepage (standalone Astro route)", () => {
 
 		expect(openApps).toContain("Grove grew out of maintaining Open Apps.");
 		expect(openApps).toContain('id="open-apps"');
-		expect(openApps).toContain("https://open-apps.dev.mn");
+		expect(openApps).toContain("https://openappscout.com");
 
 		// A real screenshot (astro:assets) replaced the hand-built mock; the
 		// honesty caveat about the pending package migration stays.

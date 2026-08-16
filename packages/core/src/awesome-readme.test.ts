@@ -10,7 +10,7 @@ const baseInput = {
   site: {
     name: "Open Apps",
     description: "Open-source apps worth running.",
-    url: "https://open-apps.dev.mn",
+    url: "https://openappscout.com",
   },
   categories: [
     { id: "agents", name: "Agents" },
