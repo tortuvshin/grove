@@ -1,0 +1,21 @@
+apps/docs/src/content/docs/outputs/seo.md
+  s_ba7efc8838949b::t_9b928e624fdc9a 6-24,28,36-37,42-43,46,56,61,71,73-83,85,87,89,91,93-101,103,109,111-113,117-118,125
+apps/docs/src/content/docs/reference/config.md
+  s_ba7efc8838949b::t_c42f72b0331534 154-155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "005a79c32da955a3fe9681c984b3e7cc257580dc",
+  "prompts": {},
+  "sessions": {
+    "s_ba7efc8838949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a3e3f932-2836-4d78-8dff-41e0dac46d3e",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
