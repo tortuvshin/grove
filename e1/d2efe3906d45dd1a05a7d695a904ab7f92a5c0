@@ -1,0 +1,29 @@
+packages/astro/src/components/CollectionRow.astro
+  s_d8c5ea68fa53ec::t_78bec011565b60 23-24
+packages/astro/src/components/ProjectCard.astro
+  s_d8c5ea68fa53ec::t_878576cd4712f7 183
+  s_d8c5ea68fa53ec::t_0b5e7912a7bfef 180-182
+  s_d8c5ea68fa53ec::t_0e412c7b36c01a 243-258
+  s_d8c5ea68fa53ec::t_180e0763881daf 271
+  s_d8c5ea68fa53ec::t_711e779083de05 104-108
+  s_d8c5ea68fa53ec::t_ceb347e567e828 13-16,18
+  s_d8c5ea68fa53ec::t_0a7c50b19812b8 27-30
+packages/astro/src/components/IndexRow.astro
+  s_d8c5ea68fa53ec::t_ace2f56fa380e4 9-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e1d2efe3906d45dd1a05a7d695a904ab7f92a5c0",
+  "prompts": {},
+  "sessions": {
+    "s_d8c5ea68fa53ec": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "75a8f456-88bc-4603-bc9c-c1729961f903",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
