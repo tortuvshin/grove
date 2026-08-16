@@ -20,25 +20,66 @@ For the developer workflow that produces these entries, see
 
 ## [Unreleased]
 
-> Working buffer for the next release. Folds into a dated `## [X.Y.Z]`
-> heading once v0.6.0 cuts. Targets are tracked in
+> Working buffer for the next release. Targets are tracked in
 > [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
-> under "Next release — v0.6.0" until they ship.
+> under "Next release" until they ship.
 
 ---
 
-## [Unreleased — browse]
+## [0.6.0] — 2026-08-16
 
-**Packages:** `@grove-dev/core`, `@grove-dev/astro`
+The browse page is rebuilt so every directory of any size stays crawlable
+without the client paying for the whole catalogue, and the **SEO surface**
+lifts to the level the schema always implied — every page declares a
+`PageDocument`, the framework emits a complete `<head>` (title,
+description, canonical, OG, Twitter, JSON-LD) from one source, and the
+per-page OG image moves from a single site-wide SVG to per-record PNG
+cards rendered on the build.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`
 
 ### Added
 
-- **Browse pages are real, crawlable documents.** `/{slug}/page/2/`,
-  `/{slug}/page/3/` … are prerendered, each rendering only its own 20
-  records. The page used to print the entire directory into every
-  response and let the client hide the rest; at 300 records that was a
-  1.2 MB document. It is now ~127 kB and flat with directory size.
-  Filtered views — which exist only on the client — keep `?page=N`.
+- **`@grove-dev/core`:** the JSON-LD registry — `siteSchema`,
+  `breadcrumbSchema`, `collectionSchema`, `recordSchema`, `contentSchema`,
+  `definePageDocument`, `buildJsonLd`, and a dev-time `validateJsonLd`.
+  Every page in a Grove project declares a `PageDocument`; the framework
+  emits all SEO metadata from one source instead of two (layout-side plus
+  model-side) that drifted apart.
+- **`@grove-dev/core`:** `site.locale`, `site.twitter.handle`,
+  `site.image`, and `site.imageAlt` in `grove.config.ts`. `locale` feeds
+  the JSON-LD site schema's `inLanguage`; twitter and image flow through
+  the head block.
+- **`@grove-dev/core`:** per-page OG image pipeline — `buildOgImages()`
+  rasterizes every record, collection, and taxonomy page to a 1200×630
+  PNG via satori + resvg, written under `public/og/` with a content-hash
+  manifest so unchanged pages skip the rasterizer on rebuild.
+- **`@grove-dev/core`:** Inter Regular + Inter SemiBold vendored as
+  package assets so the OG rasterizer produces sharp glyphs without a
+  network fetch.
+- **`@grove-dev/core`:** the sitemap now lists collections, taxonomies,
+  and every static page with trailing slashes (`build.format: 'directory'`).
+  It matches the URLs the visitor actually sees and is no longer a
+  separate hand-maintained fragment.
+- **`@grove-dev/core`:** collection YAML loading moves here as
+  `loadCollections()`. The sitemap, the OG-image pipeline, and the page
+  server now read `data/collections/*.yml` from one implementation
+  instead of three.
+- **`@grove-dev/astro`:** `server/seo` — `seoTitle()`, `seoDescription()`,
+  `titleCaseFirst()`, `recordSeoDescriptor()`, `ogPath()`, `absoluteUrl()`,
+  `breadcrumbs()`, plus the `PageSeo` shape. Every page model exposes a
+  `seo` block these helpers populate; `BaseLayout` consumes it verbatim.
+- **`@grove-dev/astro`:** `Seo` and `BaseLayout` integrate the new SEO
+  config — site locale, twitter handle, OG image override, image alt,
+  JSON-LD registry. A dev-only `validateJsonLd` check fails fast on
+  malformed structured data before it ships.
+- **`@grove-dev/astro`:** browse pages are real, crawlable documents.
+  `/{slug}/page/2/`, `/{slug}/page/3/` … are prerendered, each rendering
+  only its own 20 records. The page used to print the entire directory
+  into every response and let the client hide the rest; at 300 records
+  that was a 1.2 MB document. It is now ~127 kB and flat with directory
+  size. Filtered views — which exist only on the client — keep
+  `?page=N`.
 - **`@grove-dev/core`:** `hrefForFilters`, `hrefForPage`,
   `hrefForClearedFilters`, and `pagePathHref`. The page and the client
   controller each carried their own copy of this URL arithmetic.
@@ -46,12 +87,27 @@ For the developer workflow that produces these entries, see
   with a clear button and a `/` shortcut. The `Search` button is gone —
   it was the strongest control on the page and its only job was to
   re-submit what the visitor could already see.
-- **`@grove-dev/astro`:** applied filters are their own row of
-  removable chips with `Clear all`, and the mobile filter sheet gained
-  the same control.
+- **`@grove-dev/astro`:** applied filters are their own row of removable
+  chips with `Clear all`, and the mobile filter sheet gained the same
+  control.
+- **`Repo / docs:** the SEO surface is documented at
+  `apps/docs/src/content/docs/outputs/seo.md` so the schema, the
+  per-page model, and the configuration all live next to each other.
 
 ### Changed
 
+- **`@grove-dev/astro`:** every scaffold page consumes the new `seo`
+  blocks. Bare `<title>` / `<meta name="description">` defaults
+  disappear.
+- **`@grove-dev/astro`:** SEO helpers tightened; the duplicate `hostOf`
+  (one in core, one in astro) collapses to `@grove-dev/core/host.js` so
+  the static OG SVG and the per-page PNG rasterizer print the same host
+  for the same config.
+- **`@grove-dev/astro`:** page-level descriptions are computed in the
+  page model (`getHomepageModel`, `getDirectoryIndexModel`, etc.)
+  instead of in the layout. The model owns copy; the layout owns markup.
+  `recordFallbackSentence` is shared so `Sites`, an empty record
+  description, and the homepage fallback don't drift.
 - **`@grove-dev/core`:** `activeFilterChips` now returns
   `{key, value, label, href}` and takes the taxonomy, so a chip carries
   its own remove URL and a display name. The server rendered
@@ -68,6 +124,25 @@ For the developer workflow that produces these entries, see
 
 ### Fixed
 
+- **`@grove-dev/astro`:** the TOC active-item state drops its pill
+  background in favour of a left-rail accent and the count chip is
+  removed from the eyebrow. A flat list reads as navigation, not as a
+  stack of buttons.
+- **`@grove-dev/astro`:** the browse search field's `/` hint used to
+  float 10px from the input's trailing edge and the input reserved
+  `pr-16` (64px) of right-zone. It now anchors at `right-2` to match
+  the clear button, and the input only reserves `pr-10`, so the
+  placeholder reads up to the chip without pushing the layout.
+- **`@grove-dev/example`:** the contributors page header no longer
+  double-pads — the section already carries `py-12 sm:py-16`, and the
+  inner div contributed another vertical block before any content ran.
+- **`@grove-dev/example`:** the browse page (`/{slug}`) suppresses its
+  JSON-LD until the SEO helpers are reachable. Previously it emitted an
+  empty `PageDocument` placeholder.
+- **`@grove-dev/core`:** `audit --profile=desktop` reported zero
+  violations on a directory that previously left an empty
+  `PageManifestEntry` for the empty route — a false-positive "everything
+  passed" that masked the missing entry from the manifest.
 - **`@grove-dev/astro`:** card and record-header logos had no `onerror`,
   which made the initials fallback unreachable for any record with a
   GitHub owner — a dead logo URL or a renamed org rendered the
@@ -79,6 +154,21 @@ For the developer workflow that produces these entries, see
   reading "…and multi-", "…and retrieval", "…an".
 - **`@grove-dev/astro`:** the disabled pagination control sat at 3.37:1
   against the dark surface — a contrast failure, not a disabled state.
+
+### Migration
+
+- **No required changes.** The head block still reads `BASE_URL` and
+  `SITE_NAME`. If a consumer relied on `site.twitter: { handle: '…' }`
+  not flowing into the home JSON-LD, see the new `site.twitter.handle`
+  config key.
+- **Dev-only validation:** `validateJsonLd` logs the offending node to
+  the dev console with a backtrace. Previous builds only learned about
+  malformed structured data from Google Search Console's structured-data
+  report, which arrives weeks after the bad node ships.
+- **`@grove-dev/astro` consumers:** every page model now returns
+  `{ seo: PageSeo, … }`. Layouts that previously accepted `title` /
+  `description` / `image` / `jsonLd` props continue to work — `BaseLayout`
+  forwards both shapes — but the canonical API is `seo.*`.
 
 ---
 
