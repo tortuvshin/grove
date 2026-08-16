@@ -16,6 +16,12 @@ const iconMarkup = readFileSync(
   resolve(import.meta.dirname, "components/Icon.astro"),
   "utf8",
 );
+// Name resolution lives in lib/ so the icon tests can assert on the
+// exact aliases the component applies instead of reimplementing them.
+const iconRegistry = readFileSync(
+  resolve(import.meta.dirname, "lib/icon-registry.ts"),
+  "utf8",
+);
 const themeToggleMarkup = readFileSync(
   resolve(import.meta.dirname, "layouts/ThemeToggle.astro"),
   "utf8",
@@ -148,8 +154,47 @@ describe("Astro theme contract", () => {
     expect(iconMarkup).toContain("onerror=");
     expect(iconMarkup).not.toContain("bundledIcons");
     expect(iconMarkup).toContain("availableIcons === undefined");
-    expect(iconMarkup).toContain('"native-ios": "apple"');
-    expect(iconMarkup).toContain('kmp: "kotlin"');
+    expect(iconRegistry).toContain('"native-ios": "apple"');
+    expect(iconRegistry).toContain('kmp: "kotlin"');
+  });
+
+  it("classifies icons by kind without gating on a bundled list", () => {
+    // `ICON_KINDS` says HOW a packaged icon is painted, never WHETHER
+    // it exists. A name it has never heard of must still reach the
+    // `<img>` + initials path, or every consumer shipping their own
+    // SVG under `public/icons/` breaks silently. The `bundledIcons`
+    // guard predates the kind map and still holds: no package-side
+    // availability list.
+    expect(iconMarkup).toContain("ICON_KINDS[");
+    expect(iconMarkup).toMatch(/ICON_KINDS\[asset\.key\] \?\? "color"/);
+    expect(iconMarkup).toMatch(/effectiveKind === "mono"/);
+    expect(iconMarkup).not.toContain("bundledIcons");
+  });
+
+  it("paints monochrome marks from the foreground token, not a JS src swap", () => {
+    // The old model shipped `{name}-light.svg` / `{name}-dark.svg` and
+    // swapped `img.src` from an inline script — which shipped inverted
+    // for the one icon it was wired to. Masking makes the page own the
+    // color, so light/dark falls out with no script.
+    //
+    // The paint must be `--grove-foreground`, never `currentColor`: a
+    // brand mark reads as black-on-light / white-on-dark, and
+    // inheriting the surrounding chip's muted `ink-500` turns the
+    // Apple logo into a greyed-out smudge.
+    expect(astroTheme).toContain(".grove-icon-mask");
+    expect(astroTheme).toContain(
+      "background-color: var(--grove-icon-mono, var(--grove-foreground))",
+    );
+    expect(astroTheme).not.toMatch(/\.grove-icon-mask[^}]*background-color:\s*currentColor/);
+    expect(astroTheme).toContain("mask-image: var(--grove-icon-url)");
+    expect(astroTheme).toContain("-webkit-mask-image: var(--grove-icon-url)");
+    // Backgrounds are dropped in print and overridden in forced-colors;
+    // without these the mark disappears in both.
+    expect(astroTheme).toContain("print-color-adjust: exact");
+    expect(astroTheme).toContain("background-color: CanvasText");
+    expect(iconMarkup).not.toContain("data-grove-icon-light");
+    expect(iconMarkup).not.toContain("MutationObserver");
+    expect(iconMarkup).not.toContain("resolvedTheme");
   });
 
   it("gives the theme control and glyph explicit accessible dimensions", () => {

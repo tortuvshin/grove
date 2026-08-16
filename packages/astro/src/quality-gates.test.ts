@@ -149,4 +149,32 @@ describe.skipIf(!existsSync(dist))("built-output quality gates", () => {
     const empty = readFileSync(join(dist, "empty/index.html"), "utf8");
     expect(empty).toContain("data-grove-empty-state");
   });
+
+  it("points every icon reference at a file that shipped", () => {
+    // The end-to-end "no invisible icon" gate. A masked `<span>` has no
+    // `onerror`, so a URL with no file behind it renders as a silent
+    // blank — this is the assertion that would have caught the
+    // inverted Apple pair.
+    let checked = 0;
+    for (const file of htmlFiles(dist)) {
+      const html = readFileSync(file, "utf8");
+      const referenced = [
+        ...html.matchAll(/--grove-icon-url:\s*url\('([^']+)'\)/g),
+        ...html.matchAll(/<img[^>]+src="(\/icons\/[^"]+)"/g),
+      ].map((match) => match[1]);
+      for (const url of referenced) {
+        expect(existsSync(join(dist, url)), `${file} → ${url}`).toBe(true);
+        checked += 1;
+      }
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  it("ships no theme-swap leftovers in built markup", () => {
+    for (const file of htmlFiles(dist)) {
+      const html = readFileSync(file, "utf8");
+      expect(html, file).not.toContain("data-grove-icon-light");
+      expect(html, file).not.toContain("data-grove-icon-dark");
+    }
+  });
 });

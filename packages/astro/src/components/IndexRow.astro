@@ -4,10 +4,11 @@
  *
  * Keeps the historical public props (`record`, `detailHref`,
  * `showChips`, `eager`) so consumer pages copied from earlier versions
- * keep working, while the visual language is now identical to every
- * other card surface. The directory extras — curated badge, license,
- * category · status line, labelled stack/platform chips, and the
- * GitHub footer link — are enabled via `ProjectCard`'s opt-in props.
+ * keep working. The card itself is the same on every surface: a
+ * record must not look like a different record depending on whether
+ * you found it on the home page or in the browse list. The repository
+ * is reached through the card's `owner/repo` line, so this adapter
+ * adds nothing to the card at all.
  */
 import type { IndexRecord } from "@grove-dev/core";
 import ProjectCard from "./ProjectCard.astro";
@@ -15,7 +16,7 @@ import ProjectCard from "./ProjectCard.astro";
 interface Props {
   record: IndexRecord;
   detailHref: string;
-  /** Whether to show stack/platform chips. Default true. */
+  /** @deprecated Ignored — the card renders one fixed layout. */
   showChips?: boolean;
   /** Set true on the first 1-2 rows of a list to bypass lazy
    * loading for the above-the-fold avatars. Pair with
@@ -24,32 +25,13 @@ interface Props {
   class?: string;
 }
 
-const { record, detailHref, showChips = true, eager = false, class: className = "" } = Astro.props;
+const { record, detailHref, eager = false, class: className = "" } = Astro.props;
 
-const repoHref =
-  record.kind === "project" ? (record.repoUrl ?? record.links.github) : record.links.github;
-
-const secondaryLinks = repoHref
-  ? [
-      {
-        label: "GitHub",
-        href: repoHref,
-        external: true,
-        event: "external_repo_click",
-        eventSource: "index_row_github",
-      },
-    ]
-  : [];
 ---
 
 <ProjectCard
   record={record}
   href={detailHref}
-  showCurated
-  showLicense
-  showCategoryStatus
-  labelledChips={showChips}
-  secondaryLinks={secondaryLinks}
   eager={eager}
   class={className}
 />

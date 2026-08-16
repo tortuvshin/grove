@@ -13,6 +13,8 @@
     "build": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r build && pnpm --dir apps/example build",
     "check": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r check && pnpm --dir apps/example check",
     "docs:check": "node scripts/check-starlight-sidebar.mjs && node scripts/check-starlight-internal-links.mjs",
+    "icons:sync": "node scripts/sync-icons.mjs",
+    "icons:check": "node scripts/sync-icons.mjs --check",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
@@ -30,6 +32,8 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@biomejs/biome": "^2.5.8",
+    "@iconify-json/logos": "^1.2.13",
+    "@iconify-json/simple-icons": "^1.2.93",
     "@types/node": "^25.9.2",
     "@vitest/coverage-v8": "^4.1.9",
     "typescript": "^6.0.3",

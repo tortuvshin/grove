@@ -163,3 +163,13 @@ jobs:
         # Sibling to `scripts/check-starlight-sidebar.mjs`; together they
         # implement the v0.5.0 "Strict internal-link lint" roadmap item.
         run: pnpm docs:check
+
+      - name: Icon set is regenerable
+        # The committed SVGs must be exactly what `scripts/sync-icons.mjs`
+        # produces from `scripts/icons.config.mjs`. Catches a hand-edited
+        # icon, a stale `pnpm icons:sync`, and drift between the packaged
+        # set and the `grove init` scaffold's copy. The structural
+        # invariants (no baked colors in a mono mark, no orphan files)
+        # run in `pnpm test`; this is the byte-for-byte check that needs
+        # the Iconify devDependencies.
+        run: pnpm icons:check

@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/astro",
-  "version": "0.5.2",
+  "version": "0.5.4",
   "type": "module",
   "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
   "license": "MIT",
@@ -29,6 +29,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
+    "assets",
     "dist",
     "src/components",
     "src/layouts",

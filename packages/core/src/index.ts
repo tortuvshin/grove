@@ -126,6 +126,10 @@ export type {
   SiteArtifactsResult,
 } from "./site-artifacts.js";
 
+// ── Packaged icon assets ────────────────────────────────────────────
+export { syncIconAssets } from "./sync-icons.js";
+export type { IconSyncOptions, IconSyncResult } from "./sync-icons.js";
+
 // ── Cleanup ──────────────────────────────────────────────────────────
 export { pickCleanupCandidates, cleanupStale } from "./decisions.js";
 export type { CleanupCandidate, CleanupReport } from "./decisions.js";

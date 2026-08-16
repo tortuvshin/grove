@@ -12,19 +12,20 @@
  *  - `href` — full detail URL; wins over `routeSlug`
  *  - `routeSlug` — blueprint slug (e.g. "projects"); details derived
  *    as `/${routeSlug}/${slug}` when `href` is not provided
- *  - `showChips` — render platform + stack chip row (default true)
- *  - `showMeta` — render stars/updated/license metadata (default true)
- *  - `showLabel` — render the curated/category label (default true)
+ *  - `showChips`, `showLabel` — deprecated no-ops. The card renders
+ *    one fixed layout everywhere, so a record cannot look like a
+ *    different record depending on the page it appears on.
+ *  - `showMeta` — still honoured: it controls whether the *data*
+ *    (stars, last-updated) is passed in at all, not how it is drawn
  *  - `class` — extra class on the card root
  *  - `eager` — bypass lazy loading for above-the-fold avatars
  *
- * Footer links:
- *  - "View repo" — when `entry.repoHref` is set
- *  - "Visit site" — when `entry.homepageHref` is set
+ * The repository is reached through the card's `owner/repo` line;
+ * there is no separate footer link button.
  *
  * Analytics: emits `data-event="collection_item_click"` /
- * `data-event-source="collection_row"` on the card root and per-link
- * events on the footer links, so sites wire one handler in BaseLayout.
+ * `data-event-source="collection_row"` on the card root, so sites wire
+ * one handler in BaseLayout.
  */
 import type { CollectionEntry } from "@grove-dev/core";
 import ProjectCard from "./ProjectCard.astro";
@@ -35,8 +36,11 @@ interface Props {
   href?: string;
   /** Blueprint route slug; detail URL = `/${routeSlug}/${slug}`. */
   routeSlug?: string;
+  /** @deprecated Ignored — the card renders one fixed layout. */
   showChips?: boolean;
+  /** Pass stars / last-updated through to the card. Default true. */
   showMeta?: boolean;
+  /** @deprecated Ignored — see `showChips`. */
   showLabel?: boolean;
   eager?: boolean;
   class?: string;
@@ -46,9 +50,7 @@ const {
   entry,
   href: hrefProp,
   routeSlug,
-  showChips = true,
   showMeta = true,
-  showLabel = true,
   eager = false,
   class: className = "",
 } = Astro.props;
@@ -61,33 +63,6 @@ const detailHref =
     : entry.url || (base ? `/${base}/${slug}` : `/${slug}`);
 
 const repoHref = entry.repoHref;
-const homepageHref = entry.homepageHref;
-const curated = Boolean(entry.curationScore || (entry.activityScore && entry.activityScore > 0.5));
-
-const secondaryLinks = [
-  ...(repoHref
-    ? [
-        {
-          label: "View repo",
-          href: repoHref,
-          external: true,
-          event: "external_repo_click",
-          eventSource: "collection_row_view_repo",
-        },
-      ]
-    : []),
-  ...(homepageHref
-    ? [
-        {
-          label: "Visit site",
-          href: homepageHref,
-          external: true,
-          event: "external_link_click",
-          eventSource: "collection_row_visit_site",
-        },
-      ]
-    : []),
-];
 ---
 
 <ProjectCard
@@ -98,17 +73,7 @@ const secondaryLinks = [
   repoUrl={repoHref}
   stars={showMeta ? entry.stars : undefined}
   pushedAt={showMeta ? entry.pushedAt : undefined}
-  license={showMeta ? (entry.license ?? null) : null}
-  category={entry.categories?.[0]}
-  status={entry.status}
-  curated={curated}
   stack={entry.stack}
-  platforms={entry.platform ?? []}
-  showCurated={showLabel}
-  showLicense={showMeta}
-  showCategoryStatus={showLabel}
-  labelledChips={showChips}
-  secondaryLinks={secondaryLinks}
   eager={eager}
   event="collection_item_click"
   eventSource="collection_row"
