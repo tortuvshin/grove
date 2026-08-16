@@ -121,6 +121,8 @@ export type {
 
 // ── Config-driven public artifacts ──────────────────────────────────
 export { buildOgImageSvg, buildSiteArtifacts } from "./site-artifacts.js";
+export { buildOgImages, renderOgPng } from "./og-image.js";
+export type { OgTemplate, OgBuildInput, OgBuildResult } from "./og-image.js";
 export type {
   SiteArtifactStats,
   SiteArtifactsResult,

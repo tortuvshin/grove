@@ -13,6 +13,7 @@ public/llms-full.txt
 public/sitemap.xml
 public/robots.txt
 public/og-image.svg
+public/og/
 coverage/
 .tmp-test/
 *.log

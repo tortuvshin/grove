@@ -2,7 +2,9 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { generate, type GenerateResult } from "./build-data.js";
+import type { CollectionEntry } from "./collections.js";
 import { loadCollections } from "./collections-io.js";
+import { runCollection } from "./collector.js";
 import { loadConfig } from "./config.js";
 import {
   buildLlmsFiles,
@@ -14,6 +16,7 @@ import {
   type SitemapInput,
   type SitemapResult,
 } from "./sitemap.js";
+import { buildOgImages, type OgBuildResult } from "./og-image.js";
 import {
   buildSiteArtifacts,
   type SiteArtifactsResult,
@@ -24,6 +27,7 @@ export interface PrepareDirectoryResult {
   sitemap: SitemapResult;
   llms: LlmsResult;
   siteArtifacts: SiteArtifactsResult;
+  ogImages: OgBuildResult;
 }
 
 type GeneratedRecord = {
@@ -31,6 +35,7 @@ type GeneratedRecord = {
   name?: string;
   title?: string;
   description?: string;
+  summary?: string;
   category?: string;
   stack?: string;
   visibility?: string;
@@ -173,5 +178,97 @@ export async function prepareDirectory(
     sitePayload.stats,
   );
 
-  return { generated, sitemap, llms, siteArtifacts };
+  // ── Per-page OG images ────────────────────────────────────────────
+  // Everything below is derived data for social cards; a wrong count
+  // in a caption is acceptable, a failed build is not (buildOgImages
+  // is internally non-fatal).
+  const visible = records.filter((r) => {
+    const visibility = r.health?.visibility ?? r.visibility;
+    return visibility !== "hide" && visibility !== "remove";
+  });
+  const licenseOf = (r: GeneratedRecord) =>
+    r.github?.license ?? r.github?.repository?.license?.spdx_id ?? undefined;
+  const countBy = (pick: (r: GeneratedRecord) => string | undefined) => {
+    const counts = new Map<string, number>();
+    for (const r of visible) {
+      const id = pick(r)?.toLowerCase();
+      if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return counts;
+  };
+  const categoryCounts = countBy((r) => r.category);
+  const stackCounts = countBy((r) => r.stack);
+  const licenseCounts = countBy(licenseOf);
+  // Lightweight CollectionEntry mapping — enough for the collection
+  // engine's query filter, so the OG caption's count matches the page.
+  const collectionEntries: CollectionEntry[] = visible.map((r) => {
+    const status = r.health?.visibility ?? r.visibility;
+    const stars = r.github?.stars ?? r.github?.repository?.stargazers_count;
+    const pushedAt =
+      r.lastCommitAt ?? r.github?.pushedAt ?? r.github?.repository?.pushed_at;
+    const license = licenseOf(r);
+    return {
+      slug: r.slug,
+      title: r.name ?? r.title ?? r.slug,
+      description: r.description ?? "",
+      url: `/${r.slug}/`,
+      ...(r.stack !== undefined ? { stack: r.stack } : {}),
+      ...(license !== undefined ? { license } : {}),
+      ...(status !== undefined ? { status } : {}),
+      ...(stars !== undefined ? { stars } : {}),
+      ...(pushedAt != null ? { pushedAt } : {}),
+      ...(r.category ? { categories: [r.category] } : {}),
+    };
+  });
+  const taxonomyJobs = [
+    ...(sitePayload.taxonomy?.categories ?? []).map((t) => ({
+      facet: "category" as const,
+      id: t.id,
+      label: t.name ?? t.id,
+      count: categoryCounts.get(t.id.toLowerCase()) ?? 0,
+    })),
+    ...(sitePayload.taxonomy?.stacks ?? []).map((t) => ({
+      facet: "stack" as const,
+      id: t.id,
+      label: t.name ?? t.id,
+      count: stackCounts.get(t.id.toLowerCase()) ?? 0,
+    })),
+    ...(sitePayload.taxonomy?.licenses ?? []).map((t) => ({
+      facet: "license" as const,
+      id: t.id,
+      label: t.name ?? t.id,
+      count: licenseCounts.get(t.id.toLowerCase()) ?? 0,
+    })),
+  ];
+  const categoryNames = new Map(
+    (sitePayload.taxonomy?.categories ?? []).map((t) => [t.id.toLowerCase(), t.name ?? t.id]),
+  );
+  const ogImages = await buildOgImages(root, config, {
+    records: visible.map((r) => {
+      const descriptor = r.summary ?? r.description;
+      const stars = r.github?.stars ?? r.github?.repository?.stargazers_count;
+      const category = r.category
+        ? categoryNames.get(r.category.toLowerCase()) ?? r.category
+        : undefined;
+      return {
+        slug: r.slug,
+        name: r.name ?? r.title ?? r.slug,
+        ...(descriptor ? { descriptor } : {}),
+        ...(stars !== undefined ? { stars } : {}),
+        ...(category ? { category } : {}),
+      };
+    }),
+    collections: collections.map((c) => ({
+      slug: c.slug,
+      title: c.seo?.title ?? c.title,
+      count: runCollection(c, collectionEntries).entries.length,
+    })),
+    taxonomies: taxonomyJobs,
+    ...(sitePayload.stats ? { stats: sitePayload.stats } : {}),
+    ...(sitePayload.blueprintConfig?.labelPlural
+      ? { noun: sitePayload.blueprintConfig.labelPlural }
+      : {}),
+  });
+
+  return { generated, sitemap, llms, siteArtifacts, ogImages };
 }

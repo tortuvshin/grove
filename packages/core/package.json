@@ -42,6 +42,7 @@
   },
   "files": [
     "dist",
+    "assets",
     "README.md"
   ],
   "scripts": {
@@ -50,7 +51,9 @@
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/core"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "jiti": "^2.6.1",
+    "satori": "^0.29.0",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   }
