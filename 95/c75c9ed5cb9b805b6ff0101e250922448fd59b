@@ -1,0 +1,42 @@
+packages/starlight/package.json
+  s_36968c37e13577::t_94e4d34c7eb599 25-27,33,35
+packages/core/LICENSE
+  s_36968c37e13577::t_94e4d34c7eb599 1-21
+tests/integration/package-contents.test.ts
+  s_36968c37e13577::t_48fec688d6a2c4 1-92
+packages/astro/LICENSE
+  s_36968c37e13577::t_94e4d34c7eb599 1-21
+packages/starlight/LICENSE
+  s_36968c37e13577::t_94e4d34c7eb599 1-21
+packages/astro/package.json
+  s_36968c37e13577::t_94e4d34c7eb599 32-33,37
+  s_36968c37e13577::t_925b8a65db4506 42-43
+packages/core/package.json
+  s_36968c37e13577::t_94e4d34c7eb599 44-45,47
+packages/cli/LICENSE
+  s_36968c37e13577::t_94e4d34c7eb599 1-21
+tests/integration/docs-truth.test.ts
+  s_36968c37e13577::t_529b6ad294be35 110
+tests/integration/readme-truth.test.ts
+  s_36968c37e13577::t_24390de5ce5158 1-14,16-102,111-114,116-133,156-181
+  s_36968c37e13577::t_2278d1699c4cb9 103-110,115
+  s_36968c37e13577::t_13250e61026bb6 15,134-155
+packages/cli/package.json
+  s_36968c37e13577::t_94e4d34c7eb599 41-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "95c75c9ed5cb9b805b6ff0101e250922448fd59b",
+  "prompts": {},
+  "sessions": {
+    "s_36968c37e13577": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c7edbca-eaac-4d39-af08-0f7ed1faff42",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
