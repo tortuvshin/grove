@@ -107,7 +107,7 @@ function currentSurface(): string[] {
  * only when its line does not also disclaim it.
  */
 const DISCLAIMED =
-	/do(es)? \*?\*?not\*?\*? exist|never been published|no longer resolves|was replaced by|retired|historical/i;
+	/do(es)? \*?\*?not\*?\*? exist|never (been )?published|no longer resolves|was replaced by|retired|historical|deleted from the workspace/i;
 
 /**
  * `file:line` for every line matching `pattern` without a disclaimer.

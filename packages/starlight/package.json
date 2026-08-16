@@ -22,16 +22,17 @@
     "access": "public"
   },
   "files": [
+    "LICENSE",
+    "README.md",
+    "THIRD_PARTY_LICENSES.md",
     "components",
     "core",
-    "styles",
     "global.d.ts",
     "index.ts",
     "schema.ts",
+    "styles",
     "user-components.ts",
-    "virtual.d.ts",
-    "README.md",
-    "THIRD_PARTY_LICENSES.md"
+    "virtual.d.ts"
   ],
   "exports": {
     ".": "./index.ts",

@@ -29,16 +29,18 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
+    "LICENSE",
+    "README.md",
     "assets",
     "dist",
     "src/components",
+    "src/index.ts",
     "src/layouts",
     "src/lib",
     "src/server",
-    "src/ui",
-    "src/index.ts",
     "src/styles.css",
-    "README.md"
+    "src/ui",
+    "!src/**/*.test.ts"
   ],
   "exports": {
     ".": {
