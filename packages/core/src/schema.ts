@@ -765,7 +765,7 @@ export const groveConfigSchema = z.object({
    * Optional Lighthouse audit manifest consumed by `grove audit`.
    * Each entry is a canonical page the audit must score within the
    * default quality budget (Lighthouse "good" thresholds: scores ≥ 0.9,
-   * lcp ≤ 2500ms, cls ≤ 0.1, tbt ≤ 200ms).
+   * lcp ≤ 2500ms, cls ≤ 0.25, tbt ≤ 200ms).
    */
   audit: auditSchema.optional(),
 

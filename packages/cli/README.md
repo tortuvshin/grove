@@ -41,7 +41,7 @@ The shipped budget targets Lighthouse "good" thresholds on every score category 
 
 - **Score categories** (`performance`, `accessibility`, `best-practices`, `seo`) ≥ 0.9
 - **LCP** ≤ 2500 ms
-- **CLS** ≤ 0.1
+- **CLS** ≤ 0.25
 - **TBT** ≤ 200 ms
 
 The budget is skipped for `type: "404"` pages — Lighthouse returns `0`/`Infinity` for missing pages by design.

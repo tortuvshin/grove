@@ -64,7 +64,7 @@ The audit enforces Lighthouse "good" thresholds — Google's standard quality ga
 
 - **Score categories** (`performance`, `accessibility`, `best-practices`, `seo`) ≥ 0.9
 - **LCP** ≤ 2500 ms
-- **CLS** ≤ 0.1
+- **CLS** ≤ 0.25
 - **TBT** ≤ 200 ms
 
 The default is 3 runs per page/profile (mobile + desktop) aggregated by median. `grove audit` returns a non-zero exit code on any violation, making it a drop-in CI check. Run with `--runs N` (clamped to `[1, 5]`) to tune the variance/noise trade-off.

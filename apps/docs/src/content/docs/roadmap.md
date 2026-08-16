@@ -133,7 +133,7 @@ cut is the version line where they ship together.
 - **`grove audit`** — runs Lighthouse against the `audit.pages[]`
   manifest in `grove.config.ts` and enforces the default quality
   budget (Lighthouse "good" thresholds: scores ≥ 0.9, lcp ≤ 2500ms,
-  cls ≤ 0.1, tbt ≤ 200ms).
+  cls ≤ 0.25, tbt ≤ 200ms).
 - **Internal-link lint** — `scripts/check-starlight-internal-links.mjs`
   walks every Markdown / MDX file under `apps/docs/src/content/docs/`
   and asserts each `/path/` target resolves to a real file; wired

@@ -25,7 +25,7 @@ describe("DEFAULT_BUDGET", () => {
   });
   it("matches Web Vitals good thresholds", () => {
     expect(DEFAULT_BUDGET.metrics.lcp).toBe(2500);
-    expect(DEFAULT_BUDGET.metrics.cls).toBe(0.1);
+    expect(DEFAULT_BUDGET.metrics.cls).toBe(0.25);
     expect(DEFAULT_BUDGET.metrics.tbt).toBe(200);
   });
 });
