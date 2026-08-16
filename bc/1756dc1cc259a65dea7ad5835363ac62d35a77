@@ -1,0 +1,21 @@
+packages/astro/src/styles.css
+  s_2739562f79e122::t_a669f44cedf57a 953-965,968
+packages/astro/src/components/TableOfContents.astro
+  s_2739562f79e122::t_eeb7ac4ce41cf3 35-36,45-48,52-53,59-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "bc1756dc1cc259a65dea7ad5835363ac62d35a77",
+  "prompts": {},
+  "sessions": {
+    "s_2739562f79e122": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9481a03b-fd55-41b4-8c8f-9f992573e488",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
