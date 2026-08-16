@@ -153,7 +153,10 @@
      overhang the header, footer, and the rest of the page — every
      shell and page template uses `max-w-container`. */
   --container-wide: min(var(--grove-container, 1400px), 1400px);
-  --container-narrow: 720px;
+  /* `narrow` is the reading measure for prose pages (about, 404,
+     empty). Clamped for the same reason — a site narrower than 720px
+     should not have its prose pages spill past its own frame. */
+  --container-narrow: min(var(--grove-container, 720px), 720px);
 
   /* ── Border radius scale ──────────────────────────────────────────
    * Driven by `theme.radius` ("none" | "soft" | "round") the same

@@ -170,6 +170,29 @@ describe.skipIf(!existsSync(dist))("built-output quality gates", () => {
     expect(checked).toBeGreaterThan(0);
   });
 
+  it("frames every route at the one configured container width", () => {
+    // The shell and the page frames drifted apart once: the header and
+    // footer sat at a hardcoded 1400px, record pages at 1240px, and the
+    // rest followed `theme.containerWidth`. A site with a configured
+    // container then had its header overhang its own body. Page frames
+    // are `max-w-container`; `wide` and hardcoded pixel frames are not
+    // page frames.
+    for (const file of htmlFiles(dist)) {
+      const html = readFileSync(file, "utf8");
+      // `mx-auto w-full max-w-*` is the frame convention. A centered
+      // measure (`mx-auto max-w-xl` on a paragraph) is not a frame.
+      const frames = [
+        ...html.matchAll(/mx-auto[^"]*?\bw-full\b[^"]*?\bmax-w-(\S+?)[\s"]/g),
+      ].map((match) => match[1]);
+      for (const frame of frames) {
+        expect(["container", "narrow"], `${file} → max-w-${frame}`).toContain(
+          frame,
+        );
+      }
+      expect(frames.length, file).toBeGreaterThan(0);
+    }
+  });
+
   it("ships no theme-swap leftovers in built markup", () => {
     for (const file of htmlFiles(dist)) {
       const html = readFileSync(file, "utf8");
