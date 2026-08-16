@@ -381,7 +381,7 @@ export function getDirectoryIndexModel(
     description: seoDescription(
       undefined,
       page > 1
-        ? `Browse page ${page} of ${pages} — ${items.length} curated ${plural} on ${siteName || "this site"}, filtered by ${facetNames || "category and stack"}.`
+        ? `Browse page ${page} of ${pageCount} — ${items.length} curated ${plural} on ${siteName || "this site"}, filtered by ${facetNames || "category and stack"}.`
         : `Search and filter ${items.length} curated ${plural} on ${siteName || "this site"} — by ${facetNames || "category and stack"}.`,
     ),
     image: ogPath("default"),
