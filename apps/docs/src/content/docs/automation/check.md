@@ -1,9 +1,9 @@
 ---
-title: Validation
-description: grove check runs on every pull request through GitHub Actions. It catches schema errors before they merge.
+title: grove check
+description: Validate records, regenerate artifacts, and run astro check — the single CI gate for every change.
 ---
 
-`grove check` is the V1 single-command entry point for validation. It runs in CI on every pull request and catches schema errors, cross-reference errors, and broken taxonomy values before they merge.
+`grove check` is the single-command entry point for validation. It runs in CI on every pull request and catches schema errors, cross-reference errors, and broken taxonomy values before they merge.
 
 ## Run it
 
@@ -116,10 +116,10 @@ When the record schema changes between versions, `grove check --strict` flags ol
 
 ```
 [check] 1 warning:
-  - data/records/legacy.yml: "health" field is deprecated, use "health_classification"
+  - data/records/legacy.yml: "sortPriority" replaced deprecated "pin"; consider updating
 ```
 
-To migrate automatically, run `grove migrate` (planned for V1.1; for now, the migration is hand-rolled and documented in [Migration guide](/reference/migration/)).
+There is no automatic `grove migrate` command. Deprecated fields are mapped for one release with a warning (e.g., `pin` → `sortPriority`); curators apply the rename in their next PR. See the [Migration guide](/reference/migration/) for the current state of deprecated fields.
 
 ## Continuous integration
 
@@ -153,4 +153,4 @@ A green CI means the PR is safe to merge from a structural standpoint. The revie
 
 - [CLI reference — `grove check`](/reference/cli/#grove-check) — full flag reference
 - [Record schema](/reference/record-schema/) — the schema validation enforces
-- [Author a record](/sources/records/) — how to write a record that passes
+- [Author a record](/content/author-a-record/) — how to write a record that passes

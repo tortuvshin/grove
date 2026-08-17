@@ -2,6 +2,8 @@
 dist/
 # generated types
 .astro/
+# migration audit folder (deleted after the documentation rebuild batch 8)
+docs-audit/
 
 # dependencies
 node_modules/

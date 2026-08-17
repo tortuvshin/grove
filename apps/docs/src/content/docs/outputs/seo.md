@@ -1,125 +1,95 @@
 ---
 title: SEO & social
-description: sitemap.xml, robots.txt, JSON-LD, and the OG image pipeline — everything search engines and social platforms consume.
+description: sitemap.xml, robots.txt, JSON-LD, Open Graph, Twitter card.
 ---
 
-Grove emits a complete SEO layer out of the box: a full-coverage `sitemap.xml`, `robots.txt`, a consistent title/description pattern per page type, page-specific JSON-LD, and a **generated 1200×630 PNG OG image for every page**. This page covers each artifact.
+# SEO & social
 
-## Title patterns
+Every page in a Grove build emits the standard SEO surfaces. There's no consumer-side plug-in or template fork required for this; `definePageDocument` from `@grove-dev/core` is the source of truth.
 
-Every page's `<title>` flows through one helper (`seoTitle` in `@grove-dev/astro/server`), so the separator, the site-name suffix, and the ~60-char length cap can never drift between pages:
+## What's emitted per page
 
-| Page | Pattern | Example |
-|---|---|---|
-| Home | `{Site} — {tagline}` | `Open Apps — Real open-source apps` |
-| Browse | `Browse {Plural} \| {Site}` | `Browse Projects \| Open Apps` |
-| Record detail | `{Name} — {descriptor} \| {Site}` | `Immich — Self-hosted photo backup \| Open Apps` |
-| Category | `{Label} {plural} on {Site}` | `Python projects on Open Apps` |
-| Stack | `{Plural} built with {Label} on {Site}` | `Projects built with Python on Open Apps` |
-| License | `{Label}-licensed {plural} on {Site}` | `MIT-licensed projects on Open Apps` |
-| Collection | `seo.title` **verbatim**, or `{title} — {count} {plural} \| {Site}` | `Top Open Source Flutter Apps in 2026` |
+| Element | Source |
+|---|---|
+| `<title>` | Page frontmatter / per-page title from the data model |
+| `<meta name="description">` | Page frontmatter |
+| `<link rel="canonical">` | `site.url` + page path |
+| `<meta property="og:*">` | `definePageDocument` (title, url, description, image, dimensions) |
+| `<meta name="twitter:*">` | Same |
+| `<script type="application/ld+json">` | `buildJsonLd` from `definePageDocument` |
 
-The record descriptor is the curated summary's first clause when it fits a title, otherwise a generated `Open-source {category} {singular}` phrase. Category and stack pages deliberately use different sentence shapes so `/categories/python/` and `/stacks/python/` never emit duplicate titles. The site suffix is dropped automatically when it would push the title past ~65 characters.
-
-Collections are first-class SEO surfaces: `seo.title` and `seo.description` from the collection YAML win verbatim, and `seo.index: false` renders the page with `noindex` and removes it from the sitemap.
+The Starlight docs site additionally emits `WebSite` JSON-LD on every page (publisher metadata, language, description). The consumer's home page can override with `definePageDocument({...})` for richer types.
 
 ## `sitemap.xml`
 
-A `<urlset>` listing every indexable URL — home, the browse index and its paginated pages, every record, every collection (indexable only), category/stack/license landing pages, about, and contributors. Built by `buildSitemap` (`packages/core/src/sitemap.ts`). Every `loc` carries a trailing slash to match the pages' canonical URLs (`build.format: 'directory'`).
+Lives at `/sitemap.xml`. Built by `buildSitemap()` from `packages/core/src/sitemap.ts`.
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://example.com/</loc><lastmod>2026-08-14</lastmod></url>
-  <url><loc>https://example.com/projects/</loc><lastmod>...</lastmod></url>
-  <url><loc>https://example.com/projects/ollama/</loc><lastmod>...</lastmod></url>
-  <url><loc>https://example.com/collections/top-ai-agents/</loc><lastmod>...</lastmod></url>
-  <url><loc>https://example.com/categories/agents/</loc><lastmod>...</lastmod></url>
-  ...
-</urlset>
-```
+- Every static page is included.
+- Filter URLs (`/browse?...`) are included when `isIndexableFilterPath()` returns true (i.e., the path resolves to a non-empty result set).
+- `lastmod` is set when the page depends on a YAML/Markdown file with a known mtime; otherwise today's date.
 
-Noindex routes (`/submit/`, `/404`, `/empty/`) are never listed. Collection `lastmod` comes from `editorial.lastReviewedAt` when present.
-
-### Sitemap index (planned)
-
-For sites with >45,000 URLs, [sitemaps.org](https://www.sitemaps.org/protocol.html) requires splitting. Grove exports `buildSitemapIndex` (`packages/core/src/sitemap.ts`) but it's not yet wired into the pipeline. The plan:
-
-- When `urlCount > 45,000`: emit `sitemap-index.xml` pointing at:
-  - `sitemaps/records.xml` (record detail pages, gzipped)
-  - `sitemaps/taxonomies.xml` (taxonomy landing pages)
-  - `sitemaps/pages.xml` (about, contributors, submit, 404, content pages)
-- Update `robots.txt` to point at `sitemap-index.xml`.
+A single sitemap is emitted — there is no separate `sitemap-index.xml` and there are no `sitemap-<n>.xml` shards. Sites with thousands of pages still fit comfortably in one file.
 
 ## `robots.txt`
 
-Generated by `buildRobotsTxt` (`packages/core/src/robots.ts`). Includes ownership markers and is written through `writeOwnedArtifact` (only rewritten while the marker is present). Default body:
+Lives at `/robots.txt`. Built by `buildRobotsTxt()` from `packages/core/src/robots.ts`.
 
-```
+The first time the file is emitted, it includes a sentinel:
+
+```text
+<!-- grove-generated: edit this file to take ownership -->
 User-agent: *
 Allow: /
-Disallow: /submit/
 Sitemap: https://example.com/sitemap.xml
 ```
 
-### Cloudflare Content Signals (planned)
+After you edit, the sentinel disappears and Grove stops regenerating the file. Consumers can implement `Allow: /disallow-pattern-here` rules.
 
-Add `Content-Signal: search=yes, ai-train=no, ai-input=yes` to the `User-agent: *` block.
+## OG cards
 
-## JSON-LD per page
+Grove renders PNG social cards at `/og/<page>.png` using satori (in `packages/core/src/og-image.ts:buildOgImages + renderOgPng`). Cover variants:
 
-Every page emits the site-wide identity graph — a `WebSite`+`Organization` node with `@id` linking, `inLanguage` (from `site.locale`), a `SearchAction` targeting the browse page, and `sameAs` from `site.repoUrl` — built by `siteSchema` (`packages/core/src/page-document.ts`). On top of that, each page type ships its own nodes:
+- `og/home.png` — home page.
+- `og/default.png` — default for any page without a specific card.
+- `og/records/<slug>.png` — per record.
+- `og/collections/<slug>.png` — per collection.
+- `og/categories/<id>.png`, `og/stacks/<id>.png`, `og/licenses/<id>.png` — per facet landing.
 
-| Page type | Schema.org nodes |
+The full map is written to `data/generated/og-manifest.json`.
+
+The OG render is non-fatal: a failure on one page doesn't break the build. The Starlight docs site also embeds a fallback `<meta property="og:image" content="https://example.com/og-image.svg">` so pages without a per-page PNG still share a card.
+
+## JSON-LD types
+
+Per-page types via `definePageDocument`:
+
+| Page | JSON-LD type |
 |---|---|
-| Browse index | `CollectionPage` + `ItemList` (first 50 records) + `BreadcrumbList` |
-| Record (project) | `SoftwareSourceCode` (stars, license, languages, dates) + `BreadcrumbList` |
-| Record (resource) | `Article` / `Book` / `Course` / `PodcastSeries` / `VideoObject` + `BreadcrumbList` |
-| Record (entity) | `Organization` / `Person` + `BreadcrumbList` |
-| Category / stack / license | `CollectionPage` + `ItemList` of matching records + `BreadcrumbList` |
-| Collections index | `CollectionPage` + `ItemList` of collections + `BreadcrumbList` |
-| Collection detail | `CollectionPage` + `ItemList` with per-item descriptions + `BreadcrumbList` |
-| About | `AboutPage` + `BreadcrumbList` |
-| Contributors | `CollectionPage` + `ItemList` of `Person` nodes + `BreadcrumbList` |
+| Home | `WebSite` (with optional `publisher` + `inLanguage`) |
+| Collection | `CollectionPage` (with `mainEntity: ItemList` of records) |
+| Record (`project`) | `SoftwareSourceCode` (with `name`, `description`, `url`, `license`, `programmingLanguage`, `creator`) |
+| Record (`resource`) | `Article` or `MediaObject` (depending on `type`) |
+| Record (`entity`) | `Organization` |
+| Content pages | `WebPage` |
 
-All URLs in JSON-LD are absolute and match the page canonicals. In dev, `validateJsonLd` runs over every page's nodes and warns about malformed output (relative URLs, missing `@context`, duplicate `@id`s). SearchAction is omitted for sites using Starlight's client-side search overlay (no real `/search?q=` route) — Google's Rich Results Test flags unreachable targets as invalid.
+Every page passes through `validateJsonLd()` at build time. Malformed JSON-LD fails `grove check`.
 
-## OG images
+## Twitter cards
 
-Every page gets a **generated 1200×630 PNG**, produced at build time by `buildOgImages` (`packages/core/src/og-image.ts`) using [satori](https://github.com/vercel/satori) (layout → SVG) and [`@resvg/resvg-js`](https://github.com/yisibl/resvg-js) (SVG → PNG). PNG matters because Facebook's Sharing Debugger won't reliably cache SVG, and LinkedIn/Slack handle SVG inconsistently.
+`twitter:card` defaults to `summary_large_image` when an OG image is present, falling back to `summary`. `twitter:site` is set from `site.twitter` in `grove.config.ts` when configured.
 
-Output layout under `public/og/`:
+## What is NOT emitted
 
-```
-og/home.png                  # home page
-og/default.png               # index + utility pages
-og/records/<slug>.png        # one per record (name, summary, stars, category)
-og/collections/<slug>.png    # one per collection (title, item count)
-og/categories/<id>.png       # one per category
-og/stacks/<id>.png           # one per stack
-og/licenses/<id>.png         # one per license
-```
+- **AMP pages** — not in scope.
+- **`hreflang` alternates** — multi-language is not a current Grove capability.
+- **`news:sitemap`** — out of scope.
+- **`xhtml:link`** — not in scope.
+- **JSON-LD `BreadcrumbList`** — implemented (`breadcrumbSchema`) but only emitted by consumers who wire it. Default is to skip the breadcrumb JSON-LD.
 
-Templates use `theme.primaryColor` as the accent and bundle the Inter typeface (OFL), so cards match the site's brand without a network fetch. A content-hash manifest (`data/generated/og-manifest.json`) regenerates only images whose input changed, keeping incremental builds fast. The pipeline is non-fatal: if the native rasterizer is unavailable, the build logs a warning and pages fall back to the static `og-image.svg` (still generated by `buildOgImageSvg` in `packages/core/src/site-artifacts.ts`).
+## See also
 
-## `<head>` tags emitted by Grove
-
-Every page receives:
-
-- `<title>` and `<meta name=description>` (unique per page, pattern-driven)
-- Canonical URL
-- `<meta name="robots">` — `index,follow,max-image-preview:large` by default, `noindex,nofollow` on opt-in pages
-- Open Graph: `og:type`, `og:url`, `og:title`, `og:description`, `og:image` (+ width/height/alt), `og:site_name`, `og:locale` (from `site.locale`)
-- Twitter Card: `summary_large_image`, plus `twitter:site` when `site.twitter` is set
-- Theme color (light + dark variants)
-- Inline SVG favicon
-- `<link rel="sitemap" href="/sitemap.xml">`
-- `<link rel="alternate" type="text/plain" href="/llms.txt">`
-- `<html lang>` from `site.locale`
-
-## Related
-
-- [Overview of all outputs](/outputs/overview/)
-- [LLM-oriented outputs](/outputs/llm/)
-- [Site metadata](/outputs/site-meta/)
-- [ogp.me spec](https://ogp.me/)
+- [Outputs overview](/outputs/overview/) — every artifact.
+- [Site metadata](/outputs/site-meta/) — what's emitted vs consumer-owned (theme-color, manifest).
+- [`packages/core/src/page-document.ts`](https://github.com/tortuvshin/grove) — `definePageDocument` and the JSON-LD registry.
+- [`packages/core/src/sitemap.ts`](https://github.com/tortuvshin/grove) — sitemap implementation.
+- [`packages/core/src/og-image.ts`](https://github.com/tortuvshin/grove) — OG card implementation.

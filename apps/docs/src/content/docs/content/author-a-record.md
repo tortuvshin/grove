@@ -3,7 +3,7 @@ title: Author a record
 description: How a contributor writes a new YAML record, from "I found an app" to "it's on the site".
 ---
 
-If you want the minimum viable record, see [Add your first project](/getting-started/add-your-first-project/) first. Come back here when your record needs to be more than a stub.
+If you want the minimum viable record, see [Author your first record](/getting-started/first-record/) first. Come back here when your record needs to be more than a stub.
 
 The companion [Record schema reference](/reference/record-schema/) lists every field; this guide covers *deciding* which fields matter.
 
@@ -11,7 +11,7 @@ The companion [Record schema reference](/reference/record-schema/) lists every f
 
 When you sit down to add a record, answer these in order:
 
-1. **What blueprint is this site?** Look at `grove.config.ts`. V1 ships three:
+1. **What blueprint is this site?** Look at `grove.config.ts`. The three blueprints are:
    - `project-directory` → `kind: project`
    - `resource-hub` → `kind: resource`
    - `ecosystem-map` → `kind: entity`
@@ -120,7 +120,7 @@ members: 30
 
 **Using an inconsistent `slug`.** The slug is the filename minus `.yml`. If `slug: prisma-vs-drizzle` is in `prisma.yml`, the URL is `/resources/prisma-vs-drizzle/` but the file is `prisma.yml` — confusing for the next contributor.
 
-**Editing the `health` block by hand.** Auto-derived from GitHub metadata on every sync run. Hand edits get overwritten. If you disagree with the auto-derived health, write a [decision](/sources/decisions/).
+**Editing the `health` block by hand.** Auto-derived from GitHub metadata on every sync run. Hand edits get overwritten. If you disagree with the auto-derived health, write a [decision](/content/decisions/).
 
 **Adding a `category` with no other records.** It saves, but until the second record joins, it shows up as a one-record section in the index. Add the second record in the same PR.
 
@@ -130,4 +130,4 @@ members: 30
 2. `pnpm dev` (or `pnpm build`) — see the record on the site.
 3. Open a PR. The CI workflow runs `grove check` plus `astro build`. If `integrations.github` is enabled, `sync-github.yml` enriches the record with live metadata.
 
-See [Health classification](/sources/health-classification/) for what to do when CI flags a record as stale.
+See [Health classification](/content/health-classification/) for what to do when CI flags a record as stale.

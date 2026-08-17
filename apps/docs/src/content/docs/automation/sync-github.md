@@ -1,5 +1,5 @@
 ---
-title: GitHub metadata
+title: Sync GitHub metadata
 description: Keep stars, forks, last-pushed dates, license, and language fresh automatically through scheduled GitHub Actions.
 ---
 

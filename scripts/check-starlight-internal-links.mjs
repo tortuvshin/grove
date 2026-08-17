@@ -28,6 +28,25 @@ import { fileURLToPath } from "node:url";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
 
+// Parse the Starlight `redirects:` block from astro.config.mjs so cross-
+// links that point at moved or merged URLs are accepted when the
+// destination file exists. Without this the link check would report
+// every "old → new" cross-reference as broken during the migration.
+const astroConfig = readFileSync(resolve(repoRoot, "apps/docs/astro.config.mjs"), "utf8");
+const redirectsBlockMatch = astroConfig.match(/redirects:\s*\{([\s\S]*?)\n\s{12}\}/);
+const redirectMap = new Map();
+if (redirectsBlockMatch) {
+  const inner = redirectsBlockMatch[1];
+  for (const m of inner.matchAll(/['"]([^'"]+)['"]\s*:\s*['"]([^'"]+)['"]/g)) {
+    redirectMap.set(normalize(m[1]), normalize(m[2]));
+  }
+}
+function normalize(p) {
+  if (!p.startsWith("/")) p = `/${p}`;
+  if (!p.endsWith("/")) p = `${p}/`;
+  return p;
+}
+
 // Recursively walk `docsRoot` and emit every `.md`/`.mdx` path.
 function walkMd(dir) {
   const out = [];
@@ -90,6 +109,15 @@ function resolveLink(url, knownHomepages = new Set(["/"])) {
   // Drop fragment + query.
   const pathOnly = u.split("#")[0].split("?")[0];
   if (pathOnly === "" || pathOnly === "/") return { external: false, exists: true };
+
+  // Honor the Starlight `redirects:` block from astro.config.mjs.
+  // The destination file is the canonical truth; if it exists on disk,
+  // the link is considered valid even though the source path was moved.
+  const normalized = normalize(pathOnly);
+  if (redirectMap.has(normalized)) {
+    const dest = redirectMap.get(normalized);
+    if (resolveLink(dest).exists) return { external: false, exists: dest };
+  }
 
   // Trailing-slash normalization: try both `path/index.md` and
   // `path.md` to match Starlight's `format: 'directory'` build.

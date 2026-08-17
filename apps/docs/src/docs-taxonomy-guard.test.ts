@@ -14,7 +14,7 @@ const repoRoot = resolve(import.meta.dirname, "../../..");
 describe("taxonomy docs match the implementation", () => {
   const taxonomyDocPath = resolve(
     repoRoot,
-    "apps/docs/src/content/docs/sources/taxonomy-files.md",
+    "apps/docs/src/content/docs/content/taxonomy-files.md",
   );
   const configDocPath = resolve(
     repoRoot,

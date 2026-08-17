@@ -3,8 +3,8 @@ title: Record schema
 description: The discriminated Resource union — every kind, every field, every default. The schema `grove check` validates and generates against.
 ---
 
-Grove V1 ships a discriminated `Resource` union with three concrete
-shapes, bound 1:1 to the three [blueprints](/blueprints/project-directory/):
+Grove is built around a discriminated `Resource` union with three concrete
+shapes, bound 1:1 to the three [blueprints](/concepts/blueprints/):
 
 - `kind: 'project'` — `project-directory` blueprint
 - `kind: 'resource'` — `resource-hub` blueprint
@@ -285,8 +285,10 @@ links:
 
 ## Related docs
 
-- **[Blueprints](/blueprints/project-directory/)** — which `kind` goes with
+- **[Three blueprints](/concepts/blueprints/)** — which `kind` goes with
   which blueprint.
 - **[grove.config.ts](/reference/config/)** — site config.
 - **[CLI](/reference/cli/)** — `grove check` validates and
   generates against this schema.
+- **[Author a record](/content/author-a-record/)** — the editorial workflow that produces a record.
+- **Source: [`packages/core/src/schema.ts`](https://github.com/tortuvshin/grove)** — the canonical schema.
