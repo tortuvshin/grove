@@ -1,0 +1,19 @@
+apps/docs/src/docs-config.test.ts
+  s_3c2051f37590d0::t_26bcbf6930da74 23,31-32,35-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c97b2158e5c1c127712157bfcfde504833971542",
+  "prompts": {},
+  "sessions": {
+    "s_3c2051f37590d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5fab7447-0cd3-45a4-9e66-1f63d0d55749",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
