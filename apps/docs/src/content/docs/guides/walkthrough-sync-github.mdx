@@ -3,124 +3,187 @@ title: "Walkthrough: sync GitHub metadata"
 description: Enrich every record with live stars, forks, language, topics, and the auto-derived health block, end-to-end.
 ---
 
-By the end of this walkthrough every record that has a `repoUrl` will have a populated `github.*` block and a derived `health.*` block. The walkthrough assumes you have at least one record with `repoUrl` set. If not, complete [Walkthrough: add your first record](/guides/walkthrough-add-record/) first.
+import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-> **Heads up:** this walkthrough requires a GitHub personal access token (PAT). Without one, the sync command fails with a clear auth error. You can complete the rest of the walkthrough up to step 3 with no token; step 4 onwards requires one.
+<Aside type="caution" title="Requires a GITHUB_TOKEN">
+  By the end of this walkthrough every record that has a `repoUrl` will have a populated `github.*` block and a derived `health.*` block. The walkthrough assumes you have at least one record with `repoUrl` set. If not, complete [Walkthrough: add your first record](/guides/walkthrough-add-record/) first. Without a GitHub personal access token (PAT), the sync command fails with a clear auth error. You can complete the rest of the walkthrough up to step 3 with no token; step 4 onwards requires one.
+</Aside>
 
-## 1. Create a GitHub token
+<Steps>
 
-Go to **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens**. Create a token with:
+1. ## Create a GitHub token
 
-- **Resource owner:** your own user (or the org that owns the repos)
-- **Repository access:** "Public Repositories (read-only)"
-- **Permissions:**
-  - `Metadata: Read-only`
-  - `Contents: Read-only`
+   Go to **GitHub → Settings → Developer settings → Personal access tokens**. Pick the token type that matches your account:
 
-The minimum scopes are `public_repo` (classic token) or the fine-grained equivalents above.
+   <Tabs syncKey="token">
+     <TabItem label="Fine-grained" icon="setting">
+       Create a token under **Fine-grained tokens** with:
 
-## 2. Add the token to `.env`
+       - **Resource owner:** your own user (or the org that owns the repos)
+       - **Repository access:** "Public Repositories (read-only)"
+       - **Permissions:**
+         - `Metadata: Read-only`
+         - `Contents: Read-only`
+     </TabItem>
+     <TabItem label="Classic" icon="document">
+       Create a token under **Tokens (classic)** with the minimum scope:
 
-```bash
-echo 'GITHUB_TOKEN=ghp_…' >> .env
-```
+       - **`public_repo`** — read public repositories (stars, forks, languages, topics, license).
 
-Grove reads `.env` automatically via the Astro integration. **Do not commit it.** Add `.env` to your `.gitignore` if it isn't there.
+       This is the only scope required for the sync. Do not grant extra scopes unless you have a specific reason.
+     </TabItem>
+   </Tabs>
 
-```bash
-git status .env   # confirm it's ignored
-```
+2. ## Add the token to `.env`
 
-## 3. Enable the GitHub integration
+   ```bash
+   echo 'GITHUB_TOKEN=ghp_…' >> .env
+   ```
 
-Open `grove.config.ts` and enable the GitHub integration:
+   <Aside type="caution" title="Never commit this">
+     Grove reads `.env` automatically via the Astro integration. **Do not commit it.** Add `.env` to your `.gitignore` if it isn't there.
+   </Aside>
 
-```ts
-integrations: {
-  github: {
-    metadata: true,     // refresh stars, forks, language, topics, license
-    contributors: true, // aggregate contributor counts
-  },
-}
-```
+   ```bash
+   git status .env   # confirm it's ignored
+   ```
 
-The dev server picks up the config change after a restart. Kill `pnpm dev` and re-run it.
+3. ## Enable the GitHub integration
 
-## 4. Run the sync
+   Open `grove.config.ts` and enable the GitHub integration:
 
-```bash
-pnpm exec grove sync github
-```
+   ```ts title="grove.config.ts"
+   integrations: {
+     github: {
+       metadata: true,     // refresh stars, forks, language, topics, license
+       contributors: true, // aggregate contributor counts
+     },
+   }
+   ```
 
-The command walks every record, calls the GitHub REST API for the repo at `repoUrl`, and writes back into the record YAML:
+   The dev server picks up the config change after a restart. Kill `pnpm dev` and re-run it.
 
-- `github.repository` — the raw REST shape (id, full_name, default_branch, html_url, ...).
-- `github.languages` — language breakdown with byte counts.
-- `github.sync` — `{ syncedAt, source }` provenance.
+4. ## Run the sync
 
-It also computes `health.*` from the GitHub signals (last-pushed date, archive flag, stars, etc.).
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:notebook">
+       ```bash
+       pnpm exec grove sync github
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:notebook">
+       ```bash
+       npx grove sync github
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:notebook">
+       ```bash
+       bunx grove sync github
+       ```
+     </TabItem>
+   </Tabs>
 
-**What you should see:** the command prints the records it processed and the new sync timestamp. If a record has a missing `repoUrl`, it's skipped with a clear warning.
+   The command walks every record, calls the GitHub REST API for the repo at `repoUrl`, and writes back into the record YAML:
 
-## 5. Inspect the new fields
+   - `github.repository` — the raw REST shape (id, full_name, default_branch, html_url, ...).
+   - `github.languages` — language breakdown with byte counts.
+   - `github.sync` — `{ syncedAt, source }` provenance.
 
-Open any record that has a `repoUrl`:
+   It also computes `health.*` from the GitHub signals (last-pushed date, archive flag, stars, etc.).
 
-```yaml
-kind: project
-name: astro
-repoUrl: https://github.com/withastro/astro
-github:
-  repository:
-    id: 79145104
-    full_name: withastro/astro
-    html_url: https://github.com/withastro/astro
-    stargazers_count: 51234
-    archived: false
-  languages:
-    TypeScript: 87123123
-  sync:
-    syncedAt: "2026-04-01T10:23:00Z"
-    source: api.github.com
-health:
-  status: active
-  maturity: useful
-  tier: curated
-  visibility: keep
-  cleanupCandidate: false
-  confidence: high
-  reasons:
-    - 51234-stars
-    - last-commit-2026-03
-```
+   <Aside type="note" title="What you should see">
+     the command prints the records it processed and the new sync timestamp. If a record has a missing `repoUrl`, it's skipped with a clear warning.
+   </Aside>
 
-If `stargazers_count >= 500`, the record is automatically promoted to `tier: curated`. The threshold is checked every sync — there's no editor override.
+5. ## Inspect the new fields
 
-## 6. Commit and open the PR
+   Open any record that has a `repoUrl`:
 
-```bash
-git add data/records/*.yml
-git commit -m "Sync GitHub metadata"
-git push
-```
+   ```yaml title="data/records/astro.yml"
+   kind: project
+   name: astro
+   repoUrl: https://github.com/withastro/astro
+   github:
+     repository:
+       id: 79145104
+       full_name: withastro/astro
+       html_url: https://github.com/withastro/astro
+       stargazers_count: 51234
+       archived: false
+     languages:
+       TypeScript: 87123123
+     sync:
+       syncedAt: "2026-04-01T10:23:00Z"
+       source: api.github.com
+   health:
+     status: active
+     maturity: useful
+     tier: curated
+     visibility: keep
+     cleanupCandidate: false
+     confidence: high
+     reasons:
+       - 51234-stars
+       - last-commit-2026-03
+   ```
 
-**What you should see:** the diff is contained to `github.*` and `health.*` blocks. Review the diff to make sure no curator content was overwritten — the merge contract guarantees that curator additions outside the sync surface survive a re-run, but a quick review confirms it.
+   If `stargazers_count >= 500`, the record is automatically promoted to `tier: curated`. The threshold is checked every sync — there's no editor override.
 
-## Schedule the sync
+   <FileTree>
+   - data
+     - records
+       - **astro.yml** _(gained `github.*` and `health.*` blocks after sync)_
+       - other-record.yml
+   - grove.config.ts
+   - package.json
+   </FileTree>
 
-Don't run `grove sync github` by hand every week. The scaffold ships a `.github/workflows/sync-github.yml` that runs weekly and commits any changes back to the repository:
+6. ## Commit and open the PR
 
-```yaml
-# .github/workflows/sync-github.yml (already in the scaffold)
-on:
-  schedule:
-    - cron: "0 6 * * 1"   # every Monday at 06:00 UTC
-  workflow_dispatch:
-```
+   ```bash
+   git add data/records/*.yml
+   git commit -m "Sync GitHub metadata"
+   git push
+   ```
 
-Add a `GITHUB_TOKEN` repository secret in **Settings → Secrets → Actions** for the workflow to use. The default token has read access; for higher rate limits, create a dedicated PAT and add it as `GROVE_GITHUB_TOKEN`.
+   <Aside type="note" title="What you should see">
+     the diff is contained to `github.*` and `health.*` blocks. Review the diff to make sure no curator content was overwritten — the merge contract guarantees that curator additions outside the sync surface survive a re-run, but a quick review confirms it.
+   </Aside>
 
-## Next steps
+</Steps>
 
-- [Triage health signals →](/content/health-classification/) — what to do when the report flags records as stale.
-- [Cleanup report →](/automation/cleanup/) — the monthly triage report.
+<Aside type="tip" title="Schedule the sync">
+  Don't run `grove sync github` by hand every week. The scaffold ships a `.github/workflows/sync-github.yml` that runs weekly and commits any changes back to the repository:
+
+  ```yaml
+  # .github/workflows/sync-github.yml (already in the scaffold)
+  on:
+    schedule:
+      - cron: "0 6 * * 1"   # every Monday at 06:00 UTC
+    workflow_dispatch:
+  ```
+
+  Add a `GITHUB_TOKEN` repository secret in **Settings → Secrets → Actions** for the workflow to use. The default token has read access; for higher rate limits, create a dedicated PAT and add it as `GROVE_GITHUB_TOKEN`.
+</Aside>
+
+<div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
+  <LinkButton href="/content/health-classification/" variant="primary" icon="right-arrow">
+    Triage health signals
+  </LinkButton>
+  <LinkButton href="/automation/cleanup/" variant="minimal" icon="document">
+    Cleanup report
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Triage health signals"
+    description="What to do when the report flags records as stale, archived, or low-confidence."
+    href="/content/health-classification/"
+  />
+  <LinkCard
+    title="Cleanup report"
+    description="The monthly triage report that summarizes which records to archive, deprecate, or re-curate."
+    href="/automation/cleanup/"
+  />
+</CardGrid>

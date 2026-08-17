@@ -3,9 +3,11 @@ title: Content pages
 description: Standalone Markdown pages that aren't records or collections.
 ---
 
-# Content pages
+import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard } from '@astrojs/starlight/components';
 
+<Aside type="note" title="What a content page is">
 Grove content pages are standalone Markdown files at `content/pages/<slug>.md`. They're for content that isn't a record, a collection, or a curated list — about pages, contributing pages, essays, glossary entries, "how we curate," etc.
+</Aside>
 
 A content page is a Markdown file with two responsibilities the framework adds automatically:
 
@@ -49,23 +51,39 @@ The framework emits the same `WebSite` JSON-LD, OG image, and Twitter card as fo
 
 ## When to write a content page
 
-- About / manifestos / contributing guides.
-- Editorial introductions to a directory section.
-- Glossary entries that don't fit any record.
-- Indexes that group multiple collections by editorial intent.
+<CardGrid stagger>
+  <Card title="About pages" icon="document">
+    About / manifestos / contributing guides — the kind of pages that explain *who runs this site* and *why it's organized this way*.
+  </Card>
+  <Card title="Editorial introductions" icon="seti:notebook">
+    Editorial introductions to a directory section — the human-readable frame around a collection of records.
+  </Card>
+  <Card title="Glossary entries" icon="open-book">
+    Glossary entries that don't fit any record — terms and concepts worth defining without attaching them to a specific entry.
+  </Card>
+  <Card title="Editorial indexes" icon="list-format">
+    Indexes that group multiple collections by editorial intent — pages that pull together collections into a curated narrative.
+  </Card>
+</CardGrid>
 
-What a content page is NOT:
-
+<Aside type="caution" title="What a content page is NOT">
 - A disguised record. If it has a slug, an avatar, a category, a tag, and a description, it should be a record.
 - A static landing page — those live in the consumer's `src/pages/index.astro` and can use any Astro component.
+</Aside>
 
 ## Routing
 
 The consumer wires content pages into routes under `src/pages/`. A common pattern:
 
-- `content/pages/about.md` → `src/pages/about.astro` renders it at `/about/`.
-- `content/pages/contributing.md` → `src/pages/contributing.astro` renders it at `/contributing/`.
-- Multiple pages sharing a layout → `src/pages/[slug].astro` reads the slug from the URL and looks up the matching `content/pages/<slug>.md`.
+<FileTree>
+- src/pages/
+  - about.astro         renders `content/pages/about.md` at `/about/`
+  - contributing.astro  renders `content/pages/contributing.md` at `/contributing/`
+  - '[slug].astro'      reads the slug from the URL and looks up `content/pages/<slug>.md`
+- content/pages/
+  - about.md
+  - contributing.md
+</FileTree>
 
 The Astro integration does not own content pages' routes. They are consumer-owned.
 
@@ -76,22 +94,60 @@ The Astro integration does not own content pages' routes. They are consumer-owne
 
 ## Frontmatter fields
 
-| Field | Type | Description |
-|---|---|---|
-| `title` | string | Page title (and `<h1>`). |
-| `description` | string | Used in `<meta name=description>` and OG. |
-| `slug` | string | URL slug; defaults to the filename. |
-| `template` | string | Default `page`. |
-| `hero` | object | Hero block — layout, title, subtitle, image. |
+<CardGrid>
+  <Card title="title">
+    **Type:** `string`
+
+    Page title (and `<h1>`).
+  </Card>
+  <Card title="description">
+    **Type:** `string`
+
+    Used in `<meta name=description>` and OG.
+  </Card>
+  <Card title="slug">
+    **Type:** `string`
+
+    URL slug; defaults to the filename.
+  </Card>
+  <Card title="template">
+    **Type:** `string`
+
+    Default `page`.
+  </Card>
+  <Card title="hero">
+    **Type:** `object`
+
+    Hero block — layout, title, subtitle, image.
+  </Card>
+</CardGrid>
 
 ## Markdown allowlist
 
 Content pages are sanitized with the **narrow** allowlist:
 
-- Standard markdown (headings, lists, links, emphasis)
-- Fenced code blocks (no inline styles)
-- Tables
-- Blockquotes
-- Images from allowed hosts (configured in `grove.config.ts`)
+<CardGrid stagger>
+  <Card title="Allowed" icon="star">
+    - Standard markdown (headings, lists, links, emphasis)
+    - Fenced code blocks (no inline styles)
+    - Tables
+    - Blockquotes
+    - Images from allowed hosts (configured in `grove.config.ts`)
+  </Card>
+  <Card title="Stripped" icon="warning">
+    Inline styles, scripts, and arbitrary iframes are stripped. For richer formatting, use a record's `content/records/<slug>.md`, which uses the wider allowlist.
+  </Card>
+</CardGrid>
 
-Inline styles, scripts, and arbitrary iframes are stripped. For richer formatting, use a record's `content/records/<slug>.md`, which uses the wider allowlist.
+<LinkButton href="/customize/components/" variant="primary" icon="right-arrow">
+  Customize components
+</LinkButton>
+<LinkButton href="https://github.com/withgrove/docs" variant="minimal" icon="external">
+  GitHub
+</LinkButton>
+
+<CardGrid>
+  <LinkCard title="Custom pages" href="/customize/pages/" description="How consumers wire routes for the records, collections, and content pages the framework produces." />
+  <LinkCard title="Customize components" href="/customize/components/" description="MarkdownBody, MarkdownLayout, and their props." />
+  <LinkCard title="Author a record" href="/content/author-a-record/" description="The day-to-day authoring walkthrough." />
+</CardGrid>

@@ -3,76 +3,174 @@ title: Quickstart
 description: Get a Grove site running in under ten minutes.
 ---
 
+import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
 # Quickstart
 
 The fastest path to a working Grove site. The full tutorial lives in [Getting Started](/getting-started/scaffold/).
 
 ## Prerequisites
 
-- Node `>=22.12.0`
-- pnpm `10.12.1` (or any compatible Node package manager)
+<Aside type="note" title="Before you begin">
+  - Node `>=22.12.0`
+  - pnpm `10.12.1` (or any compatible Node package manager)
+</Aside>
 
-## 1. Scaffold a space
+<Steps>
 
-```bash
-pnpm dlx @grove-dev/cli@latest init my-space
-cd my-space
-```
+1. ## Scaffold a space
 
-The CLI copies the canonical Astro template (`apps/example/`), rewrites `package.json` and `grove.config.ts` so `site.name` and the `name:` field match your directory, and runs `pnpm install`.
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm dlx @grove-dev/cli@latest init my-space
+       cd my-space
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npx @grove-dev/cli@latest init my-space
+       cd my-space
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       bunx @grove-dev/cli@latest init my-space
+       cd my-space
+       ```
+     </TabItem>
+   </Tabs>
 
-## 2. Start the dev server
+   The CLI copies the canonical Astro template (`apps/example/`), rewrites `package.json` and `grove.config.ts` so `site.name` and the `name:` field match your directory, and runs `pnpm install`.
 
-```bash
-pnpm dev
-```
+2. ## Start the dev server
 
-The site runs at `http://localhost:4321`. The Astro integration runs `prepareDirectory()` on every dev/build cycle, so record edits show up after a rebuild.
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm dev
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npm run dev
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       bun run dev
+       ```
+     </TabItem>
+   </Tabs>
 
-## 3. Replace the sample record
+   The site runs at `http://localhost:4321`. The Astro integration runs `prepareDirectory()` on every dev/build cycle, so record edits show up after a rebuild.
 
-The scaffold ships with six sample records under `data/records/`. Delete or rewrite them.
+3. ## Replace the sample record
 
-```bash
-rm data/records/ollama.yml
-rm content/records/ollama.md
-$EDITOR data/records/my-record.yml
-$EDITOR content/records/my-record.md
-```
+   The scaffold ships with six sample records under `data/records/`. Delete or rewrite them.
 
-A minimal record looks like:
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       rm data/records/ollama.yml
+       rm content/records/ollama.md
+       $EDITOR data/records/my-record.yml
+       $EDITOR content/records/my-record.md
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       rm data/records/ollama.yml
+       rm content/records/ollama.md
+       $EDITOR data/records/my-record.yml
+       $EDITOR content/records/my-record.md
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       rm data/records/ollama.yml
+       rm content/records/ollama.md
+       $EDITOR data/records/my-record.yml
+       $EDITOR content/records/my-record.md
+       ```
+     </TabItem>
+   </Tabs>
 
-```yaml
-kind: project
-name: my-project
-description: One-line summary of what my-project does.
-repoUrl: https://github.com/me/my-project
-stacks: [typescript]
-licenses: [mit]
-```
+   <FileTree>
+   - my-space
+     - data
+       - records
+         - **my-project.yml**
+     - content
+       - records
+         - **my-project.md**
+   </FileTree>
 
-`name` and the field set come from the **kind** (here, `project` — the default blueprint is `project-directory`). See [Author a record](/content/author-a-record/) for the full schema and many more examples.
+   A minimal record looks like:
 
-## 4. Validate and build
+   ```yaml title="data/records/my-project.yml"
+   kind: project
+   name: my-project
+   description: One-line summary of what my-project does.
+   repoUrl: https://github.com/me/my-project
+   stacks: [typescript]
+   licenses: [mit]
+   ```
 
-```bash
-pnpm exec grove check
-pnpm build
-```
+   `name` and the field set come from the **kind** (here, `project` — the default blueprint is `project-directory`). See [Author a record](/content/author-a-record/) for the full schema and many more examples.
 
-`grove check` validates records, regenerates every artifact under `data/generated/` and `public/`, and runs `astro check`. `pnpm build` is the production build (Astro with your static adapter).
+4. ## Validate and build
 
-The deployable site is in `dist/`. Any static host serves it.
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm exec grove check
+       pnpm build
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npx grove check
+       npm run build
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       bunx grove check
+       bun run build
+       ```
+     </TabItem>
+   </Tabs>
 
-## 5. Deploy
+   `grove check` validates records, regenerates every artifact under `data/generated/` and `public/`, and runs `astro check`. `pnpm build` is the production build (Astro with your static adapter).
 
-The default scaffold ships with a GitHub Pages workflow (`.github/workflows/deploy.yml`). Before you push, preview the production build locally:
+   The deployable site is in `dist/`. Any static host serves it.
 
-```bash
-pnpm build && pnpm preview
-```
+5. ## Deploy
 
-When you're ready to ship, follow the [Deploy your site →](/deployment/overview/) guide — it covers GitHub Pages, Cloudflare, Netlify, and self-hosted setups.
+   The default scaffold ships with a GitHub Pages workflow (`.github/workflows/deploy.yml`). Before you push, preview the production build locally:
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm build && pnpm preview
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npm run build && npm run preview
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       bun run build && bun run preview
+       ```
+     </TabItem>
+   </Tabs>
+
+   When you're ready to ship, follow the [Deploy your site →](/deployment/overview/) guide — it covers GitHub Pages, Cloudflare, Netlify, and self-hosted setups.
+
+</Steps>
 
 ## What just happened
 
@@ -84,9 +182,36 @@ When you're ready to ship, follow the [Deploy your site →](/deployment/overvie
 
 ## Common follow-ups
 
-- Add a [taxonomy entry](/content/taxonomy-files/) and use it as a `category` on a record.
-- Create a [collection](/content/collections/) by adding a `data/collections/<slug>.yml` or by running `grove collection promote`.
-- Enable [GitHub sync](/automation/sync-github/) so each record grows a `github.*` block automatically.
-- Replace the OG card with your own artwork in `public/og-image.svg` (edit it; the sentinel keeps your version).
+<CardGrid>
+  <LinkCard
+    title="Add taxonomy"
+    description="Add a taxonomy entry and use it as a category on a record."
+    href="/content/taxonomy-files/"
+  />
+  <LinkCard
+    title="Create a collection"
+    description="Add a data/collections/<slug>.yml or run `grove collection promote`."
+    href="/content/collections/"
+  />
+  <LinkCard
+    title="Enable GitHub sync"
+    description="Each record grows a `github.*` block automatically."
+    href="/automation/sync-github/"
+  />
+  <LinkCard
+    title="Custom OG artwork"
+    description="Edit `public/og-image.svg`; the sentinel keeps your version."
+    href="/start-here/quickstart/"
+  />
+</CardGrid>
 
 The full tutorial continues at [Scaffold a space](/getting-started/scaffold/).
+
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/start-here/quickstart/" variant="primary" icon="rocket">
+    Get started
+  </LinkButton>
+  <LinkButton href="https://github.com/grv-labs/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>

@@ -3,38 +3,70 @@ title: Deploy
 description: How to ship the static site produced by `astro build` to any static host.
 ---
 
-The Astro build produces a fully static site. The build output is in `dist/` after `pnpm build`. There is no server runtime — every host that serves static files works.
+import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip">
+  The Astro build produces a fully static site. The build output is in `dist/` after `pnpm build`. There is no server runtime — every host that serves static files works.
+</Aside>
 
 ## Build command
 
-```bash
-pnpm build
-```
+<Steps>
 
-Runs `pnpm exec grove check` (validate, generate, sitemap, llms, robots, og-image, astro check), then `astro build`. The site is now a folder of HTML, CSS, JS, and JSON.
+1. Run the build:
 
-## Environment variables
+    ```bash
+    pnpm build
+    ```
 
-- **`SITE_URL`** — canonical URL the build uses for absolute links in `sitemap.xml`, OG tags, and JSON-LD. Defaults to `https://example.com`. Set this to your production URL in the host's build environment.
-- **`GITHUB_TOKEN`** — only needed if `grove sync github` runs as part of the build. Most sites keep sync as a separate scheduled workflow.
+    Runs `pnpm exec grove check` (validate, generate, sitemap, llms, robots, og-image, astro check), then `astro build`. The site is now a folder of HTML, CSS, JS, and JSON.
 
-The build is fully static; no runtime secrets required.
+2. Set the environment variables for the production host:
+
+    - **`SITE_URL`** — canonical URL the build uses for absolute links in `sitemap.xml`, OG tags, and JSON-LD. Defaults to `https://example.com`. Set this to your production URL in the host's build environment.
+    - **`GITHUB_TOKEN`** — only needed if `grove sync github` runs as part of the build. Most sites keep sync as a separate scheduled workflow.
+
+    The build is fully static; no runtime secrets required.
+
+</Steps>
 
 ## Provider comparison
 
-| Provider | Difficulty | Adapter | Best for |
-|---|---|---|---|
-| [GitHub Pages](/deployment/github-pages/) | Easiest | None | Open-source repos, project pages |
-| [Cloudflare Pages](/deployment/cloudflare/) | Easy | None | Fast edge cache, custom domains |
-| [Cloudflare Workers-with-Assets](/deployment/cloudflare/#workers-with-assets-canonical-pattern) | Medium | None | Bypasses `@astrojs/cloudflare` `prismjs` issue |
-| [Netlify](/deployment/netlify/) | Easy | None | PR previews, edge functions |
-| [Self-hosted](/deployment/self-hosted/) | Medium | None | Own infrastructure (nginx, Caddy, S3) |
+<CardGrid>
+  <Card title="GitHub Pages" icon="external">
+    <Badge text="Easiest" variant="success" size="small" />
+    No adapter. Best for open-source repos and project pages.
+    [Deploy to GitHub Pages →](/deployment/github-pages/)
+  </Card>
+  <Card title="Cloudflare Pages" icon="cloud">
+    <Badge text="Easy" variant="tip" size="small" />
+    No adapter. Fast edge cache, custom domains.
+    [Deploy to Cloudflare →](/deployment/cloudflare/)
+  </Card>
+  <Card title="Cloudflare Workers-with-Assets" icon="cloud">
+    <Badge text="Medium" variant="note" size="small" />
+    No adapter. Bypasses `@astrojs/cloudflare` `prismjs` issue.
+    [Workers-with-Assets pattern →](/deployment/cloudflare/#workers-with-assets-canonical-pattern)
+  </Card>
+  <Card title="Netlify" icon="external">
+    <Badge text="Easy" variant="tip" size="small" />
+    No adapter. PR previews, edge functions.
+    [Deploy to Netlify →](/deployment/netlify/)
+  </Card>
+  <Card title="Self-hosted" icon="setting">
+    <Badge text="Medium" variant="note" size="small" />
+    No adapter. Own infrastructure (nginx, Caddy, S3).
+    [Self-hosted guide →](/deployment/self-hosted/)
+  </Card>
+</CardGrid>
 
 All providers run `pnpm build` and serve `dist/`. Differences are in CI setup, headers, and edge features.
 
 ## Pre-deploy checklist
 
 Before you point your domain at a new deploy:
+
+<Steps>
 
 1. `pnpm build` succeeds locally.
 2. `dist/index.html` exists and contains your site name.
@@ -44,15 +76,29 @@ Before you point your domain at a new deploy:
 6. `SITE_URL` is set in the host's environment, not hardcoded.
 7. `pnpm preview` shows the site the way you expect.
 
+</Steps>
+
 ## Continuous deployment
 
 The scaffold ships a `deploy.yml` GitHub Actions workflow that builds and deploys on every push to `main`. The other workflows:
 
-- `ci.yml` — runs `grove check` + `astro build` on every PR.
-- `sync-github.yml` — weekly cron, refreshes stars/languages/last-pushed.
-- `sync-contributors.yml` — weekly cron, aggregates contributor data.
-- `cleanup.yml` — monthly cron, produces the triage report.
-- `readme.yml` — weekly cron, regenerates the README block.
+<CardGrid>
+  <Card title="ci.yml" icon="document">
+    Runs `grove check` + `astro build` on every PR.
+  </Card>
+  <Card title="sync-github.yml" icon="document">
+    Weekly cron, refreshes stars/languages/last-pushed.
+  </Card>
+  <Card title="sync-contributors.yml" icon="document">
+    Weekly cron, aggregates contributor data.
+  </Card>
+  <Card title="cleanup.yml" icon="document">
+    Monthly cron, produces the triage report.
+  </Card>
+  <Card title="readme.yml" icon="document">
+    Weekly cron, regenerates the README block.
+  </Card>
+</CardGrid>
 
 See [Scheduled maintenance](/automation/scheduled/) for cadence and triggers.
 
@@ -69,7 +115,34 @@ The `preview` script serves `dist/` on a local port. Walk through every page, ch
 
 ## Related
 
-- [GitHub Pages](/deployment/github-pages/)
-- [Cloudflare](/deployment/cloudflare/)
-- [Netlify](/deployment/netlify/)
-- [Self-hosted](/deployment/self-hosted/)
+<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+  <LinkButton href="/getting-started/configure/" variant="primary" icon="setting">
+    Configure
+  </LinkButton>
+  <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="GitHub Pages"
+    description="Zero-config deploys for open-source repos. Ships with deploy.yml."
+    href="/deployment/github-pages/"
+  />
+  <LinkCard
+    title="Cloudflare"
+    description="Pages or Workers-with-Assets. Fast edge cache, custom domains."
+    href="/deployment/cloudflare/"
+  />
+  <LinkCard
+    title="Netlify"
+    description="PR previews and edge functions."
+    href="/deployment/netlify/"
+  />
+  <LinkCard
+    title="Self-hosted"
+    description="nginx, Caddy, or S3."
+    href="/deployment/self-hosted/"
+  />
+</CardGrid>

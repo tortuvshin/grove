@@ -3,7 +3,11 @@ title: Maintain health signals
 description: How to triage stale, archived, and unknown records, and what each health status means.
 ---
 
+import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="Should I trust this entry?">
 Health signals answer one question for the visitor of your directory: **"Should I trust this entry?"** A record with `status: active` and `tier: curated` says "yes, this is current and well-maintained". A record with `status: archived` says "the maintainer archived the upstream repo". A record with `status: unknown` says "we have no GitHub data — proceed with caution".
+</Aside>
 
 This guide is for site maintainers triaging the periodic cleanup report. If you're a contributor adding a single record, see [Author a record](/content/author-a-record/).
 
@@ -23,18 +27,84 @@ auto-derived value, write a [decision](/concepts/decisions/).
 
 Ten enum values; six are derived from GitHub metadata, four are editor-only. The implementation is `packages/core/src/health.ts::classifyHealth` (the single source of truth).
 
-| Status | When | Source | Action |
-|---|---|---|---|
-| `active` | Repo pushed within the last 183 days | derived | Leave alone |
-| `mature` | `active` + ≥ 500 stars + recent release or clear license | derived | Promote to `featured` via curation labels if not already |
-| `stale` | Last commit 184–548 days ago (6–18 months) | derived | Decide: still relevant? |
-| `inactive` | Last commit > 730 days ago (24+ months) | derived | Add a `historical` or `remove` decision |
-| `archived` | GitHub repo is archived | derived | Add a `hide` or `historical` decision |
-| `unknown` | No GitHub metadata at all (e.g., the project is not on GitHub) | derived (no-data fallback) | Add metadata or write a decision explaining why we list it |
-| `historical` | Editor-set; record is kept for reference, not promotion | decision-only | — |
-| `needs_review` | Editor-set; human review pending | decision-only | — |
-| `quiet` | Editor-set; "watch this one" | decision-only | — |
-| `unavailable` | Editor-set; the upstream record could not be refreshed (404 / rate-limit / private) | decision-only | Treat like `archived` for visibility |
+<CardGrid>
+  <Card title="active">
+    <Badge text="derived" variant="success" size="small" />
+
+    **When:** Repo pushed within the last 183 days.
+
+    **Source:** Derived from GitHub metadata.
+
+    **Action:** Leave alone.
+  </Card>
+  <Card title="mature">
+    <Badge text="derived" variant="success" size="small" />
+
+    **When:** `active` + ≥ 500 stars + recent release or clear license.
+
+    **Source:** Derived from GitHub metadata.
+
+    **Action:** Promote to `featured` via curation labels if not already.
+  </Card>
+  <Card title="stale">
+    <Badge text="derived" variant="success" size="small" />
+
+    **When:** Last commit 184–548 days ago (6–18 months).
+
+    **Source:** Derived from GitHub metadata.
+
+    **Action:** Decide: still relevant?
+  </Card>
+  <Card title="inactive">
+    <Badge text="derived" variant="success" size="small" />
+
+    **When:** Last commit > 730 days ago (24+ months).
+
+    **Source:** Derived from GitHub metadata.
+
+    **Action:** Add a `historical` or `remove` decision.
+  </Card>
+  <Card title="archived">
+    <Badge text="derived" variant="success" size="small" />
+
+    **When:** GitHub repo is archived.
+
+    **Source:** Derived from GitHub metadata.
+
+    **Action:** Add a `hide` or `historical` decision.
+  </Card>
+  <Card title="unknown">
+    <Badge text="derived" variant="success" size="small" />
+
+    **When:** No GitHub metadata at all (e.g., the project is not on GitHub).
+
+    **Source:** Derived (no-data fallback).
+
+    **Action:** Add metadata or write a decision explaining why we list it.
+  </Card>
+  <Card title="historical">
+    <Badge text="decision-only" variant="caution" size="small" />
+
+    Editor-set; record is kept for reference, not promotion.
+  </Card>
+  <Card title="needs_review">
+    <Badge text="decision-only" variant="caution" size="small" />
+
+    Editor-set; human review pending.
+  </Card>
+  <Card title="quiet">
+    <Badge text="decision-only" variant="caution" size="small" />
+
+    Editor-set; "watch this one".
+  </Card>
+  <Card title="unavailable">
+    <Badge text="decision-only" variant="caution" size="small" />
+
+    Editor-set; the upstream record could not be refreshed (404 / rate-limit / private).
+
+    **Action:** Treat like `archived` for visibility.
+  </Card>
+</CardGrid>
 
 The four decision-only values (`historical`, `needs_review`, `quiet`, `unavailable`) are not produced by `grove sync github`. If you see them in a record's `health.status`, it means someone wrote a `decisions.yml` entry that set it. See [Manage decisions](/concepts/decisions/).
 
@@ -42,25 +112,39 @@ The four decision-only values (`historical`, `needs_review`, `quiet`, `unavailab
 
 Four values, derived from stars and `status`.
 
-- `curated` — ≥ 500 stars. The record goes to the top of the index. The only signal that triggers `curated` is star count — there is no "active months" rule in the code.
-- `listed` — ≥ 50 stars. The default tier for established projects.
-- `experimental` — fewer than 50 stars. Not a punishment — it means "we don't have enough data to vouch for this yet".
-- `hidden` — status is `archived` or `inactive`. The record is still in the data, but the index does not list it. (Not `archived/unavailable` — `unavailable` is an editor-only status and does not drive `hidden` on its own.)
+<CardGrid>
+  <Card title="curated" icon="star">
+    ≥ 500 stars. The record goes to the top of the index. The only signal that triggers `curated` is star count — there is no "active months" rule in the code.
+  </Card>
+  <Card title="listed">
+    ≥ 50 stars. The default tier for established projects.
+  </Card>
+  <Card title="experimental">
+    Fewer than 50 stars. Not a punishment — it means "we don't have enough data to vouch for this yet".
+  </Card>
+  <Card title="hidden">
+    Status is `archived` or `inactive`. The record is still in the data, but the index does not list it. (Not `archived/unavailable` — `unavailable` is an editor-only status and does not drive `hidden` on its own.)
+  </Card>
+</CardGrid>
 
 `curated` vs `listed` is purely a function of stars. Promotion isn't an editor decision; it's a function of the project's adoption. If you want to *override* the tier, use a decision.
 
 ## The cleanupCandidate flag
 
+<Aside type="note" title="When cleanupCandidate is true">
 `cleanupCandidate: true` is the "this record needs a human look" flag. It's `true` when:
 
 - `status` is `stale`, `archived`, `inactive`, or `unavailable`, **or**
 - `status` is `unknown` and the record has no GitHub data
 
 The `grove cleanup` command filters by this flag and writes a report. The `cleanup.yml` workflow runs this on a monthly cron and posts the report as a workflow artifact. Pull the artifact, walk the list, write decisions for the records that need an explicit verdict.
+</Aside>
 
 ## A triage session
 
 When the cleanup report lands, work through it in this order. Don't try to handle all 200 candidates in one PR — break it into batches of 10-20.
+
+<Steps>
 
 1. **Open `data/generated/cleanup-report.json`.** Sort by `staleReason`. `github_archived` and `github_unavailable` records are usually batchable — they all need a `hide` or `remove` decision with the same justification.
 
@@ -74,17 +158,39 @@ When the cleanup report lands, work through it in this order. Don't try to handl
 
 6. **Run `grove check` to refresh the index**, then `pnpm dev` to spot-check that the records still render correctly. The `health.visibility` field controls the index list, so a typo here can hide 20 records at once.
 
+</Steps>
+
 ## When signals lie
 
 The signals are heuristics. Three common cases where they get it wrong:
 
-- **"No commits in 18 months" but the project is feature-complete.** A library at 1.0 with a stable API has every right to be quiet. Don't auto-`hide` these. Mark them `mature` in `scores.maturity` and write a `keep` decision.
-- **"Fewer than 50 stars" but it's a brand-new launch.** `experimental` is correct — the tier reflects "we don't have adoption data yet", not "this is bad". Don't write a decision to override the tier; let it climb as stars arrive.
-- **"The GitHub repo was transferred"**. The sync step will see the new owner and the new push dates. If the project is the same project under new stewardship, just let it sync. If the new owner is unrelated, treat it as `unavailable` and remove.
+<Aside type="caution" title="No commits in 18 months but the project is feature-complete">
+A library at 1.0 with a stable API has every right to be quiet. Don't auto-`hide` these. Mark them `mature` in `scores.maturity` and write a `keep` decision.
+</Aside>
+
+<Aside type="caution" title="Fewer than 50 stars but it's a brand-new launch">
+`experimental` is correct — the tier reflects "we don't have adoption data yet", not "this is bad". Don't write a decision to override the tier; let it climb as stars arrive.
+</Aside>
+
+<Aside type="caution" title="The GitHub repo was transferred">
+The sync step will see the new owner and the new push dates. If the project is the same project under new stewardship, just let it sync. If the new owner is unrelated, treat it as `unavailable` and remove.
+</Aside>
 
 ## Confidence
 
 `confidence` is `low`, `medium`, or `high`. It's `low` when there's no GitHub metadata at all. It's `medium` when GitHub metadata exists but the record is missing other signals (e.g., a license). It's `high` when the GitHub data is complete (full name, license, recent activity).
+
+<CardGrid>
+  <Card title="low" icon="warning">
+    No GitHub metadata at all.
+  </Card>
+  <Card title="medium">
+    GitHub metadata exists but the record is missing other signals (e.g., a license).
+  </Card>
+  <Card title="high" icon="star">
+    The GitHub data is complete (full name, license, recent activity).
+  </Card>
+</CardGrid>
 
 Low confidence doesn't mean the record is bad — it means "we're guessing, not measuring". A `low`-confidence record that's been around for two years and still has community traction is fine; the heuristic just can't see it.
 
@@ -100,6 +206,7 @@ See [Sync GitHub metadata](/automation/sync-github-deep-dive/) for the upstream 
 
 ## How overrides work
 
+<Aside type="tip" title="Priority chain for effective visibility">
 `health` is computed each sync, but the **effective visibility** is the union of `health.visibility` and the record's top-level `visibility` plus any `decisions.yml` entry. The highest-priority signal wins:
 
 1. `data/decisions.yml` (most explicit; curator decision).
@@ -107,3 +214,17 @@ See [Sync GitHub metadata](/automation/sync-github-deep-dive/) for the upstream 
 3. `health.visibility` (derived from GitHub).
 
 A curator who wants a record visible regardless of GitHub status sets `visibility: keep` on the record. A curator who wants a record hidden regardless of GitHub status sets `visibility: hide` or adds a `decisions.yml` entry.
+</Aside>
+
+<LinkButton href="/automation/sync-github-deep-dive/" variant="primary" icon="right-arrow">
+  Sync GitHub deep dive
+</LinkButton>
+<LinkButton href="https://github.com/withgrove/docs" variant="minimal" icon="external">
+  GitHub
+</LinkButton>
+
+<CardGrid>
+  <LinkCard title="Sync GitHub metadata" href="/automation/sync-github-deep-dive/" description="The upstream data the signals are computed from." />
+  <LinkCard title="Manage decisions" href="/concepts/decisions/" description="Curator overrides for visibility, rename-slug, sort priority." />
+  <LinkCard title="Author a record" href="/content/author-a-record/" description="The day-to-day authoring walkthrough." />
+</CardGrid>

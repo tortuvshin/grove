@@ -3,132 +3,210 @@ title: Author a record
 description: How a contributor writes a new YAML record, from "I found an app" to "it's on the site".
 ---
 
-If you want the minimum viable record, see [Author your first record](/getting-started/first-record/) first. Come back here when your record needs to be more than a stub.
+import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The companion [Record schema reference](/reference/record-schema/) lists every field; this guide covers *deciding* which fields matter.
+<Aside type="note" title="New to authoring records?">
+  If you want the minimum viable record, see [Author your first record](/getting-started/first-record/) first. Come back here when your record needs to be more than a stub.
+
+  The companion [Record schema reference](/reference/record-schema/) lists every field; this guide covers *deciding* which fields matter.
+</Aside>
 
 ## The decision tree
 
 When you sit down to add a record, answer these in order:
 
-1. **What blueprint is this site?** Look at `grove.config.ts`. The three blueprints are:
+<Steps>
+
+1. **What blueprint is this site?**
+
+   Look at `grove.config.ts`. The three blueprints are:
    - `project-directory` → `kind: project`
    - `resource-hub` → `kind: resource`
    - `ecosystem-map` → `kind: entity`
 
    Your record's `kind` must match.
 
-2. **Does a record already exist?** `grep -r "repoUrl: " data/records/` or check the live site's index. If yes, edit the existing one.
+2. **Does a record already exist?**
 
-3. **What is the canonical URL?** For projects, that's the GitHub repo. Set `repoUrl` (not just `links.github` — `repoUrl` is the single source of truth for stars, contributors, and the "view repo" CTA).
+   `grep -r "repoUrl: " data/records/` or check the live site's index. If yes, edit the existing one.
 
-4. **Is it worth listing?** If you have to ask, list it. The health block will demote it to `experimental` tier; promotion to `curated` happens when stars and maintenance signals accumulate.
+3. **What is the canonical URL?**
 
-5. **What category?** Pick the closest match. New categories are easy to add but show up as orphans until a second record joins.
+   For projects, that's the GitHub repo. Set `repoUrl` (not just `links.github` — `repoUrl` is the single source of truth for stars, contributors, and the "view repo" CTA).
 
-## Anatomy of a project record
+4. **Is it worth listing?**
 
-The shape you'll write 90% of the time:
+   If you have to ask, list it. The health block will demote it to `experimental` tier; promotion to `curated` happens when stars and maintenance signals accumulate.
 
-```yaml
-kind: project
-slug: astro
-name: Astro
-description: |
-  Astro is a web framework for content-driven sites.
-category: frameworks
-tags: [web, static-site]
-repoUrl: https://github.com/withastro/astro
-logoUrl: https://avatars.githubusercontent.com/u/79145104
-projectType: framework
-stack: typescript
-stacks: [typescript, go]
-platforms: [web]
-difficulty: intermediate
-codebaseSize: large
-bestFor:
-  - content sites
-  - docs sites
-whyListed:
-  - Strong content collections model
-  - First-class MDX support
-caveats:
-  - Newer than Next.js; smaller plugin ecosystem
-```
+5. **What category?**
 
-### Field guide
+   Pick the closest match. New categories are easy to add but show up as orphans until a second record joins.
 
-`projectType` — `real-app`, `production`, `reference`, `library`, `tool`, `demo`, `template`, `historical`. Pick the closest, not the most flattering.
+</Steps>
 
-`stack` vs `stacks` — `stack` is a single string for "primary language". `stacks` is an array of all languages.
+## Anatomy of each record kind
 
-`difficulty` — `beginner` (clone/install/dev in 5 min), `intermediate` (some setup), `advanced` (a day of reading).
+The shape you'll write depends on the site blueprint. Pick the tab that matches `grove.config.ts`:
 
-`codebaseSize` — `small` (under 10k LoC), `medium`, `large`, `huge`. Editorial; set reader expectations.
+<Tabs syncKey="kind">
+  <TabItem label="Project" icon="seti:notebook">
+    The shape you'll write 90% of the time (for `project-directory` blueprints):
 
-`bestFor` — what someone should reach for this for. 1-3 short phrases.
+    ```yaml title="data/records/project.yml"
+    kind: project
+    slug: astro
+    name: Astro
+    description: |
+      Astro is a web framework for content-driven sites.
+    category: frameworks
+    tags: [web, static-site]
+    repoUrl: https://github.com/withastro/astro
+    logoUrl: https://avatars.githubusercontent.com/u/79145104
+    projectType: framework
+    stack: typescript
+    stacks: [typescript, go]
+    platforms: [web]
+    difficulty: intermediate
+    codebaseSize: large
+    bestFor:
+      - content sites
+      - docs sites
+    whyListed:
+      - Strong content collections model
+      - First-class MDX support
+    caveats:
+      - Newer than Next.js; smaller plugin ecosystem
+    ```
 
-`whyListed` — the editor's case for inclusion. Different from `bestFor` ("what the project is good at") — `whyListed` says why the editor thinks it belongs in *this* directory.
+    ### Field guide
 
-`caveats` — what to watch out for. Empty is fine.
+    `projectType` — `real-app`, `production`, `reference`, `library`, `tool`, `demo`, `template`, `historical`. Pick the closest, not the most flattering.
 
-## Anatomy of a resource record
+    `stack` vs `stacks` — `stack` is a single string for "primary language". `stacks` is an array of all languages.
 
-For the `resource-hub` blueprint. Note: `title` (not `name`), `type`, `topic`.
+    `difficulty` — `beginner` (clone/install/dev in 5 min), `intermediate` (some setup), `advanced` (a day of reading).
 
-```yaml
-kind: resource
-slug: prisma-vs-drizzle
-title: Prisma vs Drizzle — an honest comparison
-description: A side-by-side look at the two TypeScript ORMs
-type: comparison
-topic: databases
-related:
-  - prisma-overview
-  - drizzle-overview
-publishedAt: 2025-09-15
-author: jane@example.com
-```
+    `codebaseSize` — `small` (under 10k LoC), `medium`, `large`, `huge`. Editorial; set reader expectations.
 
-`type` — `guide`, `comparison`, `link`, `explainer`, `tool`, `video`, `article`, `course`, `book`, `podcast`, `other`.
+    `bestFor` — what someone should reach for this for. 1-3 short phrases.
 
-`topic` — free-form. Match existing topics; new ones show up as one-record topics until another joins.
+    `whyListed` — the editor's case for inclusion. Different from `bestFor` ("what the project is good at") — `whyListed` says why the editor thinks it belongs in *this* directory.
 
-`related` — slugs of other records. Renders a "related" block on the detail page.
+    `caveats` — what to watch out for. Empty is fine.
+  </TabItem>
+  <TabItem label="Resource" icon="open-book">
+    For the `resource-hub` blueprint. Note: `title` (not `name`), `type`, `topic`.
 
-## Anatomy of an entity record
+    ```yaml title="data/records/resource.yml"
+    kind: resource
+    slug: prisma-vs-drizzle
+    title: Prisma vs Drizzle — an honest comparison
+    description: A side-by-side look at the two TypeScript ORMs
+    type: comparison
+    topic: databases
+    related:
+      - prisma-overview
+      - drizzle-overview
+    publishedAt: 2025-09-15
+    author: jane@example.com
+    ```
 
-For the `ecosystem-map` blueprint. Records of *organizations*, not products.
+    `type` — `guide`, `comparison`, `link`, `explainer`, `tool`, `video`, `article`, `course`, `book`, `podcast`, `other`.
 
-```yaml
-kind: entity
-slug: mozilla-foundation
-name: Mozilla Foundation
-description: Nonprofit that promotes a healthy internet
-type: organization
-founded: 2003
-location:
-  - US
-members: 30
-```
+    `topic` — free-form. Match existing topics; new ones show up as one-record topics until another joins.
 
-`type` — `company`, `organization`, `community`, `school`, `university`, `research-lab`, `agency`, `service`, `product`, `person`, `other`.
+    `related` — slugs of other records. Renders a "related" block on the detail page.
+  </TabItem>
+  <TabItem label="Entity" icon="info">
+    For the `ecosystem-map` blueprint. Records of *organizations*, not products.
+
+    ```yaml title="data/records/entity.yml"
+    kind: entity
+    slug: mozilla-foundation
+    name: Mozilla Foundation
+    description: Nonprofit that promotes a healthy internet
+    type: organization
+    founded: 2003
+    location:
+      - US
+    members: 30
+    ```
+
+    `type` — `company`, `organization`, `community`, `school`, `university`, `research-lab`, `agency`, `service`, `product`, `person`, `other`.
+  </TabItem>
+</Tabs>
 
 ## Common mistakes
 
-**Setting only `links.github`, not `repoUrl`.** The health block, star count, and "view repo" button all use `repoUrl`. If you set only `links.github`, every GitHub-derived field is empty until `grove sync github` runs and the missing `repoUrl` warning shows up.
+<Aside type="caution" title="Setting only `links.github`, not `repoUrl`">
+  The health block, star count, and "view repo" button all use `repoUrl`. If you set only `links.github`, every GitHub-derived field is empty until `grove sync github` runs and the missing `repoUrl` warning shows up.
+</Aside>
 
-**Using an inconsistent `slug`.** The slug is the filename minus `.yml`. If `slug: prisma-vs-drizzle` is in `prisma.yml`, the URL is `/resources/prisma-vs-drizzle/` but the file is `prisma.yml` — confusing for the next contributor.
+<Aside type="caution" title="Using an inconsistent `slug`">
+  The slug is the filename minus `.yml`. If `slug: prisma-vs-drizzle` is in `prisma.yml`, the URL is `/resources/prisma-vs-drizzle/` but the file is `prisma.yml` — confusing for the next contributor.
+</Aside>
 
-**Editing the `health` block by hand.** Auto-derived from GitHub metadata on every sync run. Hand edits get overwritten. If you disagree with the auto-derived health, write a [decision](/content/decisions/).
+<Aside type="caution" title="Editing the `health` block by hand">
+  Auto-derived from GitHub metadata on every sync run. Hand edits get overwritten. If you disagree with the auto-derived health, write a [decision](/content/decisions/).
+</Aside>
 
-**Adding a `category` with no other records.** It saves, but until the second record joins, it shows up as a one-record section in the index. Add the second record in the same PR.
+<Aside type="caution" title="Adding a `category` with no other records">
+  It saves, but until the second record joins, it shows up as a one-record section in the index. Add the second record in the same PR.
+</Aside>
 
 ## After you write the record
 
-1. `pnpm exec grove check` — validates against the Zod schema, generates the JSON payloads, runs `astro check`.
-2. `pnpm dev` (or `pnpm build`) — see the record on the site.
-3. Open a PR. The CI workflow runs `grove check` plus `astro build`. If `integrations.github` is enabled, `sync-github.yml` enriches the record with live metadata.
+<Steps>
+
+1. Run the validator.
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm exec grove check
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npx grove check
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       bunx grove check
+       ```
+     </TabItem>
+   </Tabs>
+
+   Validates against the Zod schema, generates the JSON payloads, runs `astro check`.
+
+2. See the record on the site.
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm dev
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npm run dev
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:bun">
+       ```bash
+       bun run dev
+       ```
+     </TabItem>
+   </Tabs>
+
+   Use `pnpm build` for the production build.
+
+3. Open a PR.
+
+   The CI workflow runs `grove check` plus `astro build`. If `integrations.github` is enabled, `sync-github.yml` enriches the record with live metadata.
+
+</Steps>
 
 See [Health classification](/content/health-classification/) for what to do when CI flags a record as stale.
 
@@ -136,7 +214,20 @@ See [Health classification](/content/health-classification/) for what to do when
 
 The fields below are valid for any record regardless of `kind`. They come from `packages/core/src/schema.ts:resourceBaseSchema`; each kind is a `z.object().extend()` of that base.
 
-```yaml
+<FileTree>
+- packages
+  - core
+    - src
+      - schema.ts
+        - **resourceBaseSchema**
+        - **projectRecordSchema**
+        - **resourceRecordSchema**
+        - **entityRecordSchema**
+        - **resourceSchema**
+        - **recordsFileSchema**
+</FileTree>
+
+```yaml title="packages/core/src/schema.ts:resourceBaseSchema"
 # resourceBaseSchema fields
 slug: my-record                            # matches filename; kebab-case by convention
 description: One-line summary.             # default: ""
@@ -186,7 +277,7 @@ In addition to the base, each blueprint's `kind` adds its own fields:
 
 **`kind: project`** (the default scaffold):
 
-```yaml
+```yaml title="packages/core/src/schema.ts:projectRecordSchema"
 projectType: tool                          # real-app, production, reference, library, tool, demo, template, historical
 stack: python                              # (legacy single stack)
 stacks: [python, typescript]               # preferred for new records
@@ -218,7 +309,7 @@ health:                                    # auto-derived by classifyHealth()
 
 **`kind: resource`** (resource-hub blueprint):
 
-```yaml
+```yaml title="packages/core/src/schema.ts:resourceRecordSchema"
 title: "An article title"
 type: guide                                # guide, comparison, link, explainer, tool, video, article, course, book, podcast, other
 topic: knowledge-management
@@ -229,7 +320,7 @@ author: "Author Name"
 
 **`kind: entity`** (ecosystem-map blueprint):
 
-```yaml
+```yaml title="packages/core/src/schema.ts:entityRecordSchema"
 name: "My Organization"
 type: organization                         # company, organization, community, school, university, research-lab, agency, service, product, person, other
 founded: "2026-01-01"
@@ -245,3 +336,35 @@ parent: parent-org-slug                    # optional parent entity
 - **Tag and categorize** — set `category`, `tags`, `stacks`, `platforms`, `licenses` from the matching `data/taxonomy/*.yml`.
 - **Curate** — set `curation.{reviewed,reviewedBy,lables,lenses}`, `scores.*`, or `visibility`.
 - **Add screenshots** — list `screenshots: [{ src, alt, source?, width?, height? }]`.
+
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/getting-started/configure/" variant="primary" icon="setting">
+    Configure
+  </LinkButton>
+  <LinkButton href="https://github.com/grv-labs/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Record schema reference"
+    description="Every field, every constraint, in one place."
+    href="/reference/record-schema/"
+  />
+  <LinkCard
+    title="Taxonomy files"
+    description="Author categories, stacks, platforms, topics, licenses, and distribution channels."
+    href="/content/taxonomy-files/"
+  />
+  <LinkCard
+    title="Health classification"
+    description="How `health` is computed and what to do when CI flags a record as stale."
+    href="/content/health-classification/"
+  />
+  <LinkCard
+    title="Decisions"
+    description="Override auto-derived health or visibility with an editorial decision."
+    href="/content/decisions/"
+  />
+</CardGrid>

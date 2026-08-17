@@ -3,29 +3,90 @@ title: Add your first project
 description: Write a YAML record, save it, and see it render in your local directory.
 ---
 
-Create `data/records/my-project.yml`. The filename (minus `.yml`) is the
-canonical slug and appears in URLs.
+import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
 
-```yaml
-kind: project
-name: My Project
-slug: my-project
-description: A short description of what the project does and who it is for.
-category: developer-tools
-tags: [open-source, typescript]
-repoUrl: https://github.com/example/project
-links:
-  website: https://example.com
-  github: https://github.com/example/project
-bestFor: [Team workflow, Quick start]
-whyListed: [Active maintenance, Clean API]
-caveats: []
-visibility: keep
-```
+<Aside type="tip" title="5 minutes from YAML to a rendered page">
+  Write a single record file (`data/records/my-project.yml`), save it, and watch the dev server render it as a project detail page at `/projects/<slug>/`. Three actions: create the file, validate, push.
+</Aside>
 
-Save the file. The dev server picks it up immediately and the project
-appears in your local directory at
-`http://localhost:4321/projects/my-project/`.
+<Aside type="note" title="Prerequisites">
+  - Node `>=22.12.0`
+  - pnpm `10.12.1` (or a compatible Node package manager — npm and bun tabs work too)
+  - A scaffolded Grove space with `pnpm dev` running locally — see [Scaffold a space](/getting-started/scaffold/).
+</Aside>
+
+<Steps>
+
+1. ### Create the record
+
+   Create `data/records/my-project.yml`. The filename (minus `.yml`) is the canonical slug and appears in URLs.
+
+   ```yaml title="data/records/my-project.yml"
+   kind: project
+   name: My Project
+   slug: my-project
+   description: A short description of what the project does and who it is for.
+   category: developer-tools
+   tags: [open-source, typescript]
+   repoUrl: https://github.com/example/project
+   links:
+     website: https://example.com
+     github: https://github.com/example/project
+   bestFor: [Team workflow, Quick start]
+   whyListed: [Active maintenance, Clean API]
+   caveats: []
+   visibility: keep
+   ```
+
+   <Aside type="note" title="What you should see">
+     Save the file. The dev server picks it up immediately and the project appears in your local directory at `http://localhost:4321/projects/my-project/`.
+   </Aside>
+
+2. ### Validate the record
+
+   Run the full pipeline at any time:
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:notebook">
+       ```bash
+       pnpm exec grove check
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:notebook">
+       ```bash
+       npx grove check
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:notebook">
+       ```bash
+       bunx grove check
+       ```
+     </TabItem>
+   </Tabs>
+
+   <Aside type="note" title="What you should see">
+     You should see `[grove] 1 records prepared; sitemap and llms files updated.` and an `astro check` summary. If a field is wrong, the error points to the file and field name. Fix and re-run.
+
+     `grove check` is the only command you need for day-to-day validation — it bundles `validate`, generation, sitemap, llms, robots, og-image, and `astro check` into a single invocation.
+
+     Validation also runs automatically on every pull request through the `.github/workflows/ci.yml` workflow (which calls `grove check`).
+   </Aside>
+
+3. ### Publish
+
+   When you're happy with the record:
+
+   ```bash
+   git add data/records/my-project.yml
+   git commit -m "Add My Project"
+   git push
+   ```
+
+   <Aside type="note" title="What you should see">
+     Open a pull request. Validation runs in CI. A maintainer reviews and merges. Grove rebuilds the site and deploys.
+   </Aside>
+
+</Steps>
 
 ## Required fields
 
@@ -48,41 +109,26 @@ For the `project-directory` blueprint (`kind: project`):
 
 The full schema is in [Project record reference](/reference/record-schema/).
 
-## Validation
-
-Run the full pipeline at any time:
-
-```bash
-pnpm exec grove check
-```
-
-You should see `[grove] 1 records prepared; sitemap and llms files
-updated.` and an `astro check` summary. If a field is wrong, the
-error points to the file and field name. Fix and re-run.
-
-`grove check` is the only command you need for day-to-day validation
-— it bundles `validate`, generation, sitemap, llms, robots, og-image,
-and `astro check` into a single invocation.
-
-Validation also runs automatically on every pull request through the
-`.github/workflows/ci.yml` workflow (which calls `grove check`).
-
-## Publishing
-
-When you're happy with the record:
-
-```bash
-git add data/records/my-project.yml
-git commit -m "Add My Project"
-git push
-```
-
-Open a pull request. Validation runs in CI. A maintainer reviews and
-merges. Grove rebuilds the site and deploys.
-
 ## Next steps
 
-- **[Deploy your site →](/deployment/overview/)** — push to GitHub
-  and ship it.
-- **[Configure your space →](/getting-started/configure/)** — branding, theme,
-  taxonomy.
+<CardGrid>
+  <LinkCard
+    title="Deploy your site"
+    description="Push to GitHub and ship it."
+    href="/deployment/overview/"
+  />
+  <LinkCard
+    title="Configure your space"
+    description="Branding, theme, taxonomy."
+    href="/getting-started/configure/"
+  />
+</CardGrid>
+
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/getting-started/configure/" variant="primary" icon="setting">
+    Configure
+  </LinkButton>
+  <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>

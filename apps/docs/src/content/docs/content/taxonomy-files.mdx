@@ -3,108 +3,126 @@ title: Taxonomy files
 description: How to author categories, stacks, platforms, topics, licenses, and distribution channels in your Grove space.
 ---
 
-Taxonomy files live under `data/taxonomy/` and shape how visitors filter, search, and navigate your space. Grove reads six fixed taxonomy files; each one is a YAML list of named entries with display metadata.
+import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Taxonomy YAML owns the option **values, display names, and display order**. Which dimensions actually appear as browse filters — and the order of the filter groups themselves — is decided by `browse.facets` in `grove.config.ts` (see [Configuration reference](/reference/config/)).
+<Aside type="note" title="What taxonomy files do">
+  Taxonomy files live under `data/taxonomy/` and shape how visitors filter, search, and navigate your space. Grove reads six fixed taxonomy files; each one is a YAML list of named entries with display metadata.
+
+  Taxonomy YAML owns the option **values, display names, and display order**. Which dimensions actually appear as browse filters — and the order of the filter groups themselves — is decided by `browse.facets` in `grove.config.ts` (see [Configuration reference](/reference/config/)).
+</Aside>
 
 ## File layout
 
-```
-data/taxonomy/
-├── categories.yml           # top-level grouping (e.g., "ai", "web", "cli")
-├── stacks.yml               # programming-language or framework stacks
-├── platforms.yml            # deployment platforms or ecosystems
-├── topics.yml               # curated tag vocabulary for the Tag filter
-├── licenses.yml             # software licenses
-└── distribution-channels.yml # distribution surfaces (npm, PyPI, Homebrew, etc.)
-```
+<FileTree>
+- data
+  - taxonomy
+    - categories.yml           # top-level grouping (e.g., "ai", "web", "cli")
+    - stacks.yml               # programming-language or framework stacks
+    - platforms.yml            # deployment platforms or ecosystems
+    - topics.yml               # curated tag vocabulary for the Tag filter
+    - licenses.yml             # software licenses
+    - distribution-channels.yml # distribution surfaces (npm, PyPI, Homebrew, etc.)
+</FileTree>
 
 Only these six filenames are read. Files with other names in `data/taxonomy/` are ignored — there is no custom-taxonomy mechanism in V1.
 
-## `categories.yml`
+## The six taxonomy files
 
-```yaml
-- id: ai
-  name: AI & ML
-  description: Agent frameworks, model servers, and ML tooling.
-- id: web
-  name: Web
-  description: Frameworks and tooling for the browser.
-```
+<Tabs syncKey="taxonomy">
+  <TabItem label="categories.yml" icon="seti:notebook">
+    ```yaml title="data/taxonomy/categories.yml"
+    - id: ai
+      name: AI & ML
+      description: Agent frameworks, model servers, and ML tooling.
+    - id: web
+      name: Web
+      description: Frameworks and tooling for the browser.
+    ```
 
-**Used by:** the Category browse filter and homepage/category pages. Records reference an entry through their flat `category` field.
+    **Used by:** the Category browse filter and homepage/category pages. Records reference an entry through their flat `category` field.
+  </TabItem>
+  <TabItem label="stacks.yml" icon="seti:default">
+    ```yaml title="data/taxonomy/stacks.yml"
+    - id: python
+      name: Python
+      color: "#3776AB"
+    - id: typescript
+      name: TypeScript
+      color: "#3178C6"
+    ```
 
-## `stacks.yml`
+    **Used by:** the Stack browse filter, stack pages, and stack chips. Records reference entries through `stack` (primary) and `stacks` (supporting).
+  </TabItem>
+  <TabItem label="platforms.yml" icon="rocket">
+    ```yaml title="data/taxonomy/platforms.yml"
+    - id: web
+      name: Web
+    - id: ios
+      name: iOS
+    - id: android
+      name: Android
+    ```
 
-```yaml
-- id: python
-  name: Python
-  color: "#3776AB"
-- id: typescript
-  name: TypeScript
-  color: "#3178C6"
-```
+    **Used by:** the Platform browse filter. Records reference entries through `platforms`.
+  </TabItem>
+  <TabItem label="topics.yml" icon="star">
+    ```yaml title="data/taxonomy/topics.yml"
+    - id: agents
+      name: Agents
+    - id: self-host
+      name: Self-hosted
+    ```
 
-**Used by:** the Stack browse filter, stack pages, and stack chips. Records reference entries through `stack` (primary) and `stacks` (supporting).
+    **Used by:** the Tag browse filter. When `topics.yml` exists, only the curated ids listed here appear in the Tag dropdown (with their display names); tags on records that aren't listed remain searchable and visible on record pages. When the file is absent, every raw record tag appears in the dropdown.
+  </TabItem>
+  <TabItem label="licenses.yml" icon="document">
+    ```yaml title="data/taxonomy/licenses.yml"
+    - id: mit
+      name: MIT License
+      url: https://opensource.org/licenses/MIT
+    - id: apache-2.0
+      name: Apache License 2.0
+      url: https://www.apache.org/licenses/LICENSE-2.0
+    ```
 
-## `platforms.yml`
+    **Used by:** the License browse filter and license pages. Records reference entries through `licenses` (lowercase SPDX-style ids); records without a curated value fall back to the GitHub-synced license.
+  </TabItem>
+  <TabItem label="distribution-channels.yml" icon="external">
+    ```yaml title="data/taxonomy/distribution-channels.yml"
+    - id: npm
+      name: npm
+      url: https://www.npmjs.com/
+    - id: pypi
+      name: PyPI
+      url: https://pypi.org/
+    ```
 
-```yaml
-- id: web
-  name: Web
-- id: ios
-  name: iOS
-- id: android
-  name: Android
-```
-
-**Used by:** the Platform browse filter. Records reference entries through `platforms`.
-
-## `topics.yml`
-
-```yaml
-- id: agents
-  name: Agents
-- id: self-host
-  name: Self-hosted
-```
-
-**Used by:** the Tag browse filter. When `topics.yml` exists, only the curated ids listed here appear in the Tag dropdown (with their display names); tags on records that aren't listed remain searchable and visible on record pages. When the file is absent, every raw record tag appears in the dropdown.
-
-## `licenses.yml`
-
-```yaml
-- id: mit
-  name: MIT License
-  url: https://opensource.org/licenses/MIT
-- id: apache-2.0
-  name: Apache License 2.0
-  url: https://www.apache.org/licenses/LICENSE-2.0
-```
-
-**Used by:** the License browse filter and license pages. Records reference entries through `licenses` (lowercase SPDX-style ids); records without a curated value fall back to the GitHub-synced license.
-
-## `distribution-channels.yml`
-
-```yaml
-- id: npm
-  name: npm
-  url: https://www.npmjs.com/
-- id: pypi
-  name: PyPI
-  url: https://pypi.org/
-```
-
-**Used by:** per-record `distribution.channels`.
+    **Used by:** per-record `distribution.channels`.
+  </TabItem>
+</Tabs>
 
 ## Authoring conventions
 
-- **`id`** is the canonical identifier used in `data/records/*.yml`; URLs derive from it. Entries without an `id` and `name` are skipped.
-- **`name`** is the human-readable label shown in filters, chips, and taxonomy pages.
-- **File position is display order.** Filter options render in the order entries appear in the file; an explicit numeric **`order`** field overrides file position when present.
-- **`description`** (optional) is carried into the generated site config for taxonomy landing pages.
-- **`color`** (optional, `stacks.yml`) is used by stack chips.
-- **`url`** (optional) links the entry to an upstream definition.
+<CardGrid stagger>
+  <Card title="id" icon="pencil">
+    **`id`** is the canonical identifier used in `data/records/*.yml`; URLs derive from it. Entries without an `id` and `name` are skipped.
+  </Card>
+  <Card title="name" icon="seti:notebook">
+    **`name`** is the human-readable label shown in filters, chips, and taxonomy pages.
+  </Card>
+  <Card title="order" icon="list-format">
+    **File position is display order.** Filter options render in the order entries appear in the file; an explicit numeric **`order`** field overrides file position when present.
+  </Card>
+  <Card title="description" icon="info">
+    **`description`** (optional) is carried into the generated site config for taxonomy landing pages.
+  </Card>
+  <Card title="color" icon="setting">
+    **`color`** (optional, `stacks.yml`) is used by stack chips.
+  </Card>
+  <Card title="url" icon="external">
+    **`url`** (optional) links the entry to an upstream definition.
+  </Card>
+</CardGrid>
 
 ## Related
 
@@ -115,19 +133,20 @@ Only these six filenames are read. Files with other names in `data/taxonomy/` ar
 
 ## Why `id` and not `slug`
 
-Earlier versions of the codebase used `slug:` as the identifier key. The loader was changed to require `id:` because:
+<Aside type="tip" title="Why the loader was changed">
+  Earlier versions of the codebase used `slug:` as the identifier key. The loader was changed to require `id:` because:
 
-- Every taxonomy entry has multiple identifiers in real life (SPDX for licenses, language codes for stacks, OS names for platforms). `id:` keeps the structure open to `spdx_id` and similar secondary keys without re-reading the same `slug:`.
-- A slug implies a URL; an id is just an identifier. The taxonomy files don't need URLs and the loader shouldn't pretend they do.
+  - Every taxonomy entry has multiple identifiers in real life (SPDX for licenses, language codes for stacks, OS names for platforms). `id:` keeps the structure open to `spdx_id` and similar secondary keys without re-reading the same `slug:`.
+  - A slug implies a URL; an id is just an identifier. The taxonomy files don't need URLs and the loader shouldn't pretend they do.
 
-A vitest at `apps/docs/src/docs-taxonomy-guard.test.ts` rejects any docs example that uses `slug:` and asserts every tutorial example uses `id:`.
+  A vitest at `apps/docs/src/docs-taxonomy-guard.test.ts` rejects any docs example that uses `slug:` and asserts every tutorial example uses `id:`.
+</Aside>
 
 ## Reference: canonical facet ids
 
 `browse.facets` in `grove.config.ts` accepts a strict subset of these dimensions:
 
-```ts
-// packages/core/src/directory-facets.ts
+```ts title="packages/core/src/directory-facets.ts"
 export const FACET_IDS = [
   "category",
   "stack",
@@ -138,3 +157,35 @@ export const FACET_IDS = [
 ```
 
 A typo in `browse.facets` fails config parsing immediately. The intended facet shape lives in `FACET_IDS`; the docs test (`docs-taxonomy-guard.test.ts`) imports this array and asserts no docs example adds an unknown facet id.
+
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/getting-started/configure/" variant="primary" icon="setting">
+    Configure
+  </LinkButton>
+  <LinkButton href="https://github.com/grv-labs/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Author a record"
+    description="How a contributor writes a new YAML record."
+    href="/content/author-a-record/"
+  />
+  <LinkCard
+    title="Configuration reference"
+    description="Every field in grove.config.ts, including browse.facets."
+    href="/reference/config/"
+  />
+  <LinkCard
+    title="Curated collections"
+    description="Group records into named collections with their own landing pages."
+    href="/concepts/collections/"
+  />
+  <LinkCard
+    title="Getting started"
+    description="Scaffold a new Grove space and write your first record."
+    href="/getting-started/scaffold/"
+  />
+</CardGrid>

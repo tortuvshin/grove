@@ -3,13 +3,26 @@ title: Netlify
 description: Deploy a Grove space to Netlify with zero configuration.
 ---
 
+import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="Netlify as a deploy target">
+  Netlify shines for static sites with PR previews, branch deploys, and edge functions. No Astro adapter is required for fully static Grove spaces — the build output in `dist/` is the default publish directory.
+</Aside>
+
 Grove spaces deploy to Netlify with no adapter required. Astro's static output (`dist/`) is the default Netlify publish directory.
+
+<Aside type="note" title="Prerequisites">
+  - A Netlify account (the free tier works).
+  - A Grove space that builds to `dist/` via `pnpm build`.
+  - Node 24 (set via `NODE_VERSION=24` env var or `netlify.toml`).
+  - Optional: a custom domain you control for production hosting.
+</Aside>
 
 ## Configuration
 
 `netlify.toml` at the project root:
 
-```toml
+```toml title="netlify.toml"
 [build]
   command = "pnpm exec grove check && pnpm build"
   publish = "dist"
@@ -25,13 +38,30 @@ The `grove check` command validates config and emits `data/generated/*.json`, si
 
 ## Build settings
 
-- **Build command:** `pnpm exec grove check && pnpm build`
-- **Publish directory:** `dist`
-- **Node version:** 24 (set via `NODE_VERSION=24` env var or `netlify.toml`)
+<Steps>
+
+1. **Build command:** `pnpm exec grove check && pnpm build`
+2. **Publish directory:** `dist`
+3. **Node version:** 24 (set via `NODE_VERSION=24` env var or `netlify.toml`)
+
+   <Aside type="note" title="What you should see">
+     Netlify's build log shows `grove check` running first (emitting `data/generated/*.json`, sitemap, llms, robots, og-image) before `astro build` produces `dist/`.
+   </Aside>
+
+</Steps>
 
 ## Custom domain
 
-Add the domain in the Netlify admin panel. Update `site.url` in `grove.config.ts` to match.
+<Steps>
+
+1. Add the domain in the Netlify admin panel.
+2. Update `site.url` in `grove.config.ts` to match.
+
+</Steps>
+
+<Aside type="note" title="What you should see">
+  Netlify issues a Let's Encrypt certificate automatically once DNS points at the assigned hostname.
+</Aside>
 
 ## Headers and redirects
 
@@ -41,8 +71,19 @@ Use `_headers` and `_redirects` in `public/` for static rules, or `netlify.toml`
 
 Optional — Astro's `output: 'hybrid'` mode allows per-route SSR via Netlify Edge Functions. Most Grove spaces don't need this.
 
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/deployment/github-pages/" variant="secondary" icon="document">
+    GitHub Pages
+  </LinkButton>
+  <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
 ## Related
 
-- [GitHub Pages](/deployment/github-pages/)
-- [Cloudflare](/deployment/cloudflare/)
-- [Self-hosted](/deployment/self-hosted/)
+<CardGrid>
+  <LinkCard title="GitHub Pages" href="/deployment/github-pages/" description="Easiest deploy — copy two bundled workflows into .github/workflows/." />
+  <LinkCard title="Cloudflare" href="/deployment/cloudflare/" description="Cloudflare Pages or Workers-with-Assets for edge-cached deploys." />
+  <LinkCard title="Self-hosted" href="/deployment/self-hosted/" description="Run the dist/ output on Nginx, Caddy, Apache, or S3 + CloudFront." />
+</CardGrid>

@@ -3,100 +3,157 @@ title: "Walkthrough: curate a collection"
 description: Turn a browse filter into a named, ranked, curator-owned page that lives at /collections/<slug>/.
 ---
 
-By the end of this walkthrough you will have a curated page at `/collections/<slug>/` that lists every record matching a query you chose. This is the most common curator action: turning "I noticed these belong together" into a permanent page.
+import { Aside, Card, CardGrid, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-Assumes the dev server is running (`pnpm dev`) and you've completed [Walkthrough: add your first record](/guides/walkthrough-add-record/).
+<Aside type="tip" title="Promote a filter to a named page in 5 minutes">
+  By the end of this walkthrough you will have a curated page at `/collections/<slug>/` that lists every record matching a query you chose. This is the most common curator action: turning "I noticed these belong together" into a permanent page.
+</Aside>
 
-## 1. Find the filter you want to promote
+<Aside type="note" title="Prerequisites">
+  Assumes the dev server is running (`pnpm dev`) and you've completed [Walkthrough: add your first record](/guides/walkthrough-add-record/).
+</Aside>
 
-Open your site in the browser and use the browse filters on `/browse`. Combine them until the result is the list you want to keep. The filters compose: pick a category, a stack, a platform — any combination.
+<Steps>
 
-The filter expression ends up in the URL:
+1. ## Find the filter you want to promote
 
-```text
-http://localhost:4321/browse?stack=typescript&category=ai-tools
-```
+   Open your site in the browser and use the browse filters on `/browse`. Combine them until the result is the list you want to keep. The filters compose: pick a category, a stack, a platform — any combination.
 
-**What you should see:** a list of records matching the combined filters. This is what your collection will become.
+   The filter expression ends up in the URL:
 
-## 2. Promote the filter to a collection
+   ```text
+   http://localhost:4321/browse?stack=typescript&category=ai-tools
+   ```
 
-In another terminal (the dev server can keep running):
+   <Aside type="note" title="What you should see">
+     a list of records matching the combined filters. This is what your collection will become.
+   </Aside>
 
-```bash
-pnpm exec grove collection promote \
-  --from '/browse?stack=typescript&category=ai-tools' \
-  --slug typescript-ai-tools \
-  --title 'TypeScript AI tools'
-```
+2. ## Promote the filter to a collection
 
-The command:
+   In another terminal (the dev server can keep running):
 
-- Parses `--from` with `URLSearchParams` (handles `&`, `=`, `+`, percent-encoding).
-- Writes `data/collections/typescript-ai-tools.yml` with `kind: curated`, a `query` block derived from the URL params, and `ranking.preset: 'quality'`.
-- Creates the directory if it didn't exist.
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:notebook">
+       ```bash
+       pnpm exec grove collection promote \
+         --from '/browse?stack=typescript&category=ai-tools' \
+         --slug typescript-ai-tools \
+         --title 'TypeScript AI tools'
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:notebook">
+       ```bash
+       npx grove collection promote \
+         --from '/browse?stack=typescript&category=ai-tools' \
+         --slug typescript-ai-tools \
+         --title 'TypeScript AI tools'
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:notebook">
+       ```bash
+       bunx grove collection promote \
+         --from '/browse?stack=typescript&category=ai-tools' \
+         --slug typescript-ai-tools \
+         --title 'TypeScript AI tools'
+       ```
+     </TabItem>
+   </Tabs>
 
-**What you should see:** the new file appears in your editor with a populated `query` block.
+   The command:
 
-## 3. Add editorial metadata
+   - Parses `--from` with `URLSearchParams` (handles `&`, `=`, `+`, percent-encoding).
+   - Writes `data/collections/typescript-ai-tools.yml` with `kind: curated`, a `query` block derived from the URL params, and `ranking.preset: 'quality'`.
+   - Creates the directory if it didn't exist.
 
-Open `data/collections/typescript-ai-tools.yml` and add the curator-owned fields:
+   <Aside type="note" title="What you should see">
+     the new file appears in your editor with a populated `query` block.
+   </Aside>
 
-```yaml
-slug: typescript-ai-tools
-kind: curated
-title: TypeScript AI tools
-description: |
-  TypeScript-first agent frameworks, model servers, and AI tooling
-  we'd reach for today. Hand-curated and reviewed quarterly.
-query:
-  stacks: [typescript]
-  categories: [ai-tools, agent-frameworks]
-  excludeStatuses: [archived]
-ranking:
-  preset: quality
-seo:
-  title: TypeScript AI tools
-  description: TypeScript-first AI tooling we'd reach for today.
-  index: true
-editorial:
-  reviewer: maintainer-name
-  reviewedAt: "2026-04-01"
-  notes: Re-curated for the 2026 launch.
-```
+3. ## Add editorial metadata
 
-**What you should see:** the dev server hot-reloads the collection page at `/collections/typescript-ai-tools/` with the new description, the editorial reviewer block, and the new ranking.
+   Open `data/collections/typescript-ai-tools.yml` and add the curator-owned fields:
 
-## 4. Validate the collection
+   ```yaml title="data/collections/typescript-ai-tools.yml"
+   slug: typescript-ai-tools
+   kind: curated
+   title: TypeScript AI tools
+   description: |
+     TypeScript-first agent frameworks, model servers, and AI tooling
+     we'd reach for today. Hand-curated and reviewed quarterly.
+   query:
+     stacks: [typescript]
+     categories: [ai-tools, agent-frameworks]
+     excludeStatuses: [archived]
+   ranking:
+     preset: quality
+   seo:
+     title: TypeScript AI tools
+     description: TypeScript-first AI tooling we'd reach for today.
+     index: true
+   editorial:
+     reviewer: maintainer-name
+     reviewedAt: "2026-04-01"
+     notes: Re-curated for the 2026 launch.
+   ```
 
-```bash
-pnpm exec grove check
-```
+   <Aside type="note" title="What you should see">
+     the dev server hot-reloads the collection page at `/collections/typescript-ai-tools/` with the new description, the editorial reviewer block, and the new ranking.
+   </Aside>
 
-**What you should see:** zero errors. The collection's query is validated against the canonical facet ids; typos in `stacks` or `categories` fail immediately.
+4. ## Validate the collection
 
-## 5. See the curated page
+   ```bash
+   pnpm exec grove check
+   ```
 
-Visit `http://localhost:4321/collections/typescript-ai-tools/`. The page shows:
+   <Aside type="note" title="What you should see">
+     zero errors. The collection's query is validated against the canonical facet ids; typos in `stacks` or `categories` fail immediately.
+   </Aside>
 
-- The title and description.
-- The ranked list of records.
-- The "Last reviewed" badge from `editorial.reviewedAt`.
-- The per-record detail links.
+5. ## See the curated page
 
-Visit `http://localhost:4321/collections/` to see the index of all collections — your new one appears here too.
+   Visit `http://localhost:4321/collections/typescript-ai-tools/`. The page shows:
 
-## 6. Commit and open the PR
+   - The title and description.
+   - The ranked list of records.
+   - The "Last reviewed" badge from `editorial.reviewedAt`.
+   - The per-record detail links.
 
-```bash
-git add data/collections/typescript-ai-tools.yml
-git commit -m "Curate typescript-ai-tools collection"
-git push
-```
+   Visit `http://localhost:4321/collections/` to see the index of all collections — your new one appears here too.
 
-**What you should see:** the CI workflow runs `grove check`. After merge, the collection appears on the live site.
+6. ## Commit and open the PR
 
-## Next steps
+   ```bash
+   git add data/collections/typescript-ai-tools.yml
+   git commit -m "Curate typescript-ai-tools collection"
+   git push
+   ```
 
-- [Curate with decisions →](/concepts/decisions/) — override visibility for individual records.
-- [Walkthrough: sync GitHub metadata →](/guides/walkthrough-sync-github/) — enrich every record with live data.
+   <Aside type="note" title="What you should see">
+     the CI workflow runs `grove check`. After merge, the collection appears on the live site.
+   </Aside>
+
+</Steps>
+
+<div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
+  <LinkButton href="/guides/walkthrough-sync-github/" variant="primary" icon="right-arrow">
+    Next walkthrough: sync GitHub metadata
+  </LinkButton>
+  <LinkButton href="https://github.com/withgrove/grove" variant="minimal" icon="external">
+    Grove on GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Curate with decisions"
+    description="Override visibility for individual records when curation needs a different verdict than the rules."
+    href="/concepts/decisions/"
+  />
+  <LinkCard
+    title="Sync GitHub metadata"
+    description="Enrich every record with live stars, forks, language, topics, and an auto-derived health block."
+    href="/guides/walkthrough-sync-github/"
+  />
+</CardGrid>

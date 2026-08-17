@@ -3,9 +3,13 @@ title: Collections
 description: Curated or query-driven groupings of records.
 ---
 
+import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
 # Collections
 
-A collection is a curator-managed grouping at `data/collections/<slug>.yml`. Collections are how a Grove site surfaces **reasoned views** over the record set: "Top Flutter finance apps", "Reading list for new contributors", "Stable, well-tested tools only."
+<Aside type="tip" title="What a collection is">
+  A collection is a curator-managed grouping at `data/collections/<slug>.yml`. Collections are how a Grove site surfaces **reasoned views** over the record set: "Top Flutter finance apps", "Reading list for new contributors", "Stable, well-tested tools only."
+</Aside>
 
 A collection is different from a lens in two ways:
 
@@ -14,18 +18,30 @@ A collection is different from a lens in two ways:
 
 ## Two kinds
 
-```yaml
-kind: curated         # default — query + ranking
-kind: ranked          # explicit list of record ids
-```
+<Tabs syncKey="kind">
+  <TabItem label="curated" icon="seti:notebook">
+    ```yaml
+    # data/collections/<slug>.yml
+    kind: curated         # default — query + ranking
+    ```
 
-`kind: curated` is what `grove collection promote --from /browse?... --slug <s>` produces. The collection's `query` block describes facet filters and matchers; the entries are computed at build time.
+    `kind: curated` is what `grove collection promote --from /browse?... --slug <s>` produces. The collection's `query` block describes facet filters and matchers; the entries are computed at build time.
+  </TabItem>
 
-`kind: ranked` is the escape hatch when the editorial intent can't reduce to a query — for example, "the six records we'd want anyone to see first." The collection file lists every record id by hand.
+  <TabItem label="ranked" icon="list-format">
+    ```yaml
+    # data/collections/<slug>.yml
+    kind: ranked          # explicit list of record ids
+    ```
+
+    `kind: ranked` is the escape hatch when the editorial intent can't reduce to a query — for example, "the six records we'd want anyone to see first." The collection file lists every record id by hand.
+  </TabItem>
+</Tabs>
 
 ## Shape
 
 ```yaml
+# data/collections/<slug>.yml
 slug: top-flutter
 kind: curated
 title: Top Flutter apps
@@ -46,17 +62,46 @@ editorial:
   notes: Re-curated for the 2026 launch.
 ```
 
-| Field | Purpose |
-|---|---|
-| `slug` | The collection's slug — used in `/collections/<slug>/` URLs. |
-| `kind` | `curated` (default) or `ranked`. |
-| `title` | Display title; defaults to humanized slug when omitted. |
-| `description` | Long description for the collection page. |
-| `query` | Facet filters and matchers (`stacks`, `categories`, `platforms`, `excludeStatuses`). |
-| `query.match` | Optional `tags.all`, `tags.any`, `tags.none` arrays for tag-set filtering. |
-| `ranking.preset` | One of `quality`, `freshness`, `popularity`, or `custom`. |
-| `seo.title` / `seo.description` / `seo.index` | Overrides the page's OG title and JSON-LD description; `seo.index: false` adds `<meta name="robots" content="noindex">`. |
-| `editorial.reviewer` / `editorial.reviewedAt` / `editorial.notes` | Provenance metadata for the collection. |
+<CardGrid>
+  <Card title="slug">
+    The collection's slug — used in `/collections/<slug>/` URLs.
+  </Card>
+
+  <Card title="kind">
+    <Badge text="curated" variant="default" />
+    <Badge text="ranked" variant="default" />
+
+    `curated` (default) or `ranked`.
+  </Card>
+
+  <Card title="title">
+    Display title; defaults to humanized slug when omitted.
+  </Card>
+
+  <Card title="description">
+    Long description for the collection page.
+  </Card>
+
+  <Card title="query">
+    Facet filters and matchers (`stacks`, `categories`, `platforms`, `excludeStatuses`).
+  </Card>
+
+  <Card title="query.match">
+    Optional `tags.all`, `tags.any`, `tags.none` arrays for tag-set filtering.
+  </Card>
+
+  <Card title="ranking.preset">
+    One of `quality`, `freshness`, `popularity`, or `custom`.
+  </Card>
+
+  <Card title="seo.title / seo.description / seo.index">
+    Overrides the page's OG title and JSON-LD description; `seo.index: false` adds `<meta name="robots" content="noindex">`.
+  </Card>
+
+  <Card title="editorial.reviewer / editorial.reviewedAt / editorial.notes">
+    Provenance metadata for the collection.
+  </Card>
+</CardGrid>
 
 A `kind: ranked` collection replaces `query` with an explicit list:
 
@@ -77,19 +122,35 @@ seo:
 
 The fastest way to create a collection is to land on a browse URL — `/browse?stack=flutter&category=finance` — and promote it:
 
-```bash
-pnpm exec grove collection promote \
-  --from '/browse?stack=flutter&category=finance' \
-  --slug top-finance-flutter \
-  --title 'Top Flutter finance apps'
-```
+<Steps>
+1. Run the promote command from the repo root. The `--from` URL is parsed with `URLSearchParams` (handles `&`, `=`, `+`, percent-encoded correctly).
 
-The command:
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="rocket">
+       ```bash
+       pnpm exec grove collection promote \
+         --from '/browse?stack=flutter&category=finance' \
+         --slug top-finance-flutter \
+         --title 'Top Flutter finance apps'
+       ```
+     </TabItem>
 
-1. Parses `--from` with `URLSearchParams` (handles `&`, `=`, `+`, percent-encoded correctly).
-2. Writes `data/collections/<slug>.yml` with `kind: curated`, `query` derived from the params, `ranking.preset: 'quality'`, `excludeStatuses: ['archived']`.
-3. Creates the directory tree if it doesn't exist.
+     <TabItem label="npm" icon="rocket">
+       ```bash
+       npx grove collection promote \
+         --from '/browse?stack=flutter&category=finance' \
+         --slug top-finance-flutter \
+         --title 'Top Flutter finance apps'
+       ```
+     </TabItem>
+   </Tabs>
+
+2. Grove writes `data/collections/<slug>.yml` with `kind: curated`, `query` derived from the params, `ranking.preset: 'quality'`, `excludeStatuses: ['archived']`.
+
+3. The directory tree is created if it doesn't exist.
+
 4. **Does not** pre-fill a description; the curator adds one.
+</Steps>
 
 `--from` is required, `--slug` is required, `--title` and `--description` are optional.
 
@@ -113,7 +174,9 @@ A content page is for prose. A collection is for "I want a page that lists and s
 
 ## How matching works
 
-`match.any.tags` and `match.any.categories` are OR-ed together. A record qualifies if it has any tag in `match.any.tags` **or** any category in `match.any.categories`. Combine with `scoreFloor` to gate by quality.
+<Aside type="note" title="Match semantics">
+  `match.any.tags` and `match.any.categories` are OR-ed together. A record qualifies if it has any tag in `match.any.tags` **or** any category in `match.any.categories`. Combine with `scoreFloor` to gate by quality.
+</Aside>
 
 If a record was added after the collection was created and now matches the predicate, it appears automatically — no re-authoring needed.
 
@@ -121,7 +184,56 @@ If a record was added after the collection was created and now matches the predi
 
 For each collection Grove emits:
 
-- A landing page at `/collections/<slug>/`
-- A curated subset of the homepage's *featured* lens when `order: featured`
-- JSON-LD `ItemList` schema with one `SoftwareApplication` per record
-- An entry in `llms.txt` and the sitemap
+<CardGrid>
+  <Card title="Landing page">
+    A landing page at `/collections/<slug>/`.
+  </Card>
+
+  <Card title="Homepage featured lens">
+    A curated subset of the homepage's *featured* lens when `order: featured`.
+  </Card>
+
+  <Card title="ItemList JSON-LD">
+    JSON-LD `ItemList` schema with one `SoftwareApplication` per record.
+  </Card>
+
+  <Card title="Sitemap and llms.txt">
+    An entry in `llms.txt` and the sitemap.
+  </Card>
+</CardGrid>
+
+## Next steps
+
+<LinkButton href="/content/collections/" variant="primary" icon="right-arrow">
+  Curate a collection
+</LinkButton>
+
+<LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+  GitHub
+</LinkButton>
+
+<CardGrid>
+  <LinkCard
+    title="Curated collections"
+    href="/content/collections/"
+    description="File shape and worked examples for data/collections/<slug>.yml."
+  />
+
+  <LinkCard
+    title="Promote a filter to a collection"
+    href="/discovery/promote/"
+    description="The grove collection promote workflow."
+  />
+
+  <LinkCard
+    title="packages/core/src/collections.ts"
+    href="https://github.com/tortuvshin/grove"
+    description="Query and ranking implementation in the core package."
+  />
+
+  <LinkCard
+    title="Decisions and curation"
+    href="/concepts/decisions/"
+    description="Curator overrides — visibility, sort priority, rename, label."
+  />
+</CardGrid>

@@ -3,6 +3,12 @@ title: Cloudflare
 description: Deploy a Grove space to Cloudflare Pages or Workers-with-Assets.
 ---
 
+import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="Cloudflare as a deploy target">
+  Cloudflare serves static assets at the edge with very low latency. Cloudflare Pages is the conventional static-site target; Workers-with-Assets is the pattern the canonical Grove docs site uses because it bypasses a `prismjs` resolution issue with `@astrojs/cloudflare`.
+</Aside>
+
 Two deployment targets on Cloudflare work with Grove:
 
 1. **Cloudflare Pages** — the conventional static-site target.
@@ -10,43 +16,138 @@ Two deployment targets on Cloudflare work with Grove:
 
 This page covers both, with emphasis on the second since it's the path the maintainers use.
 
+<Aside type="note" title="Prerequisites">
+  - A Cloudflare account (the free tier works).
+  - A Grove space that builds to `dist/` via `pnpm build`.
+  - For Workers-with-Assets: a `[build]` block in `wrangler.toml` that runs `pnpm build` before upload.
+  - For Workers-with-Assets: bypass `@astrojs/cloudflare` in your build pipeline (this pattern doesn't use the adapter).
+</Aside>
+
 ## Cloudflare Pages
 
 Standard `wrangler pages deploy dist` flow. `apps/docs` was originally configured this way; the configuration was migrated to Workers-with-Assets because the `@astrojs/cloudflare` adapter pulled in `prismjs` for SSR-only code paths even when the site is fully static, which caused build-time resolution failures on certain `pnpm` versions.
 
-```toml
-# wrangler.toml
-name = "grove"
-pages_build_output_dir = "./dist"
-compatibility_date = "2024-09-01"
-```
+<Steps>
+
+1. Add a `wrangler.toml` at the project root:
+
+   ```toml title="wrangler.toml"
+   name = "grove"
+   pages_build_output_dir = "./dist"
+   compatibility_date = "2024-09-01"
+   ```
+
+   <Aside type="note" title="What you should see">
+     Wrangler reads `pages_build_output_dir` and uploads the contents of `dist/` to the Pages edge.
+   </Aside>
+
+2. Deploy with the Pages CLI:
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm dlx wrangler pages deploy dist
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npx wrangler pages deploy dist
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="bun">
+       ```bash
+       bunx wrangler pages deploy dist
+       ```
+     </TabItem>
+   </Tabs>
+
+   <Aside type="note" title="What you should see">
+     A Pages project URL is printed by the CLI; the deploy becomes live at the edge in seconds.
+   </Aside>
+
+</Steps>
 
 ## Workers-with-Assets (canonical pattern)
 
-```toml
-# wrangler.toml
-name = "grove-docs"
-compatibility_date = "2024-09-01"
-main = "./dist/_worker.js/index.js"
-assets = { directory = "./dist", binding = "ASSETS" }
-[build]
-command = "pnpm build"
-```
+<Steps>
+
+1. Add a `wrangler.toml` at the project root:
+
+   ```toml title="wrangler.toml"
+   name = "grove-docs"
+   compatibility_date = "2024-09-01"
+   main = "./dist/_worker.js/index.js"
+   assets = { directory = "./dist", binding = "ASSETS" }
+   [build]
+   command = "pnpm build"
+   ```
+
+   <Aside type="note" title="What you should see">
+     Wrangler recognises the `[build]` block and runs `pnpm build` before upload.
+   </Aside>
+
+2. Build and deploy:
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:pnpm">
+       ```bash
+       pnpm build
+       pnpm dlx wrangler deploy
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:npm">
+       ```bash
+       npm run build
+       npx wrangler deploy
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="bun">
+       ```bash
+       bun run build
+       bunx wrangler deploy
+       ```
+     </TabItem>
+   </Tabs>
+
+   <Aside type="note" title="What you should see">
+     `dist/_worker.js/` (the Workers entry) and `dist/` (the static asset directory) are both uploaded.
+   </Aside>
+
+</Steps>
 
 Astro's `output: 'static'` build emits `dist/_worker.js/` (the Workers entry) and `dist/` (the static asset directory). Wrangler uploads both.
 
 ## Caveats
 
-- **`prismjs` resolution** — when using `@astrojs/cloudflare`, even fully static builds resolve `prismjs`. The Workers-with-Assets pattern bypasses this because the build doesn't pull in `@astrojs/cloudflare` at all.
-- **Custom domain** — Cloudflare Pages handles CNAME setup automatically; Workers-with-Assets require manual route configuration.
-- **Headers** — set custom headers (cache-control, security) in `public/_headers` for Cloudflare Pages or in the Worker fetch handler for Workers-with-Assets.
+<Aside type="caution" title="prismjs resolution">
+  When using `@astrojs/cloudflare`, even fully static builds resolve `prismjs`. The Workers-with-Assets pattern bypasses this because the build doesn't pull in `@astrojs/cloudflare` at all.
+</Aside>
+
+<Aside type="caution" title="Custom domain">
+  Cloudflare Pages handles CNAME setup automatically; Workers-with-Assets require manual route configuration.
+</Aside>
+
+<Aside type="caution" title="Headers">
+  Set custom headers (cache-control, security) in `public/_headers` for Cloudflare Pages or in the Worker fetch handler for Workers-with-Assets.
+</Aside>
 
 ## Why the docs site uses Workers-with-Assets
 
 `apps/docs/astro.config.mjs` was migrated to Workers-with-Assets after a series of intermittent `prismjs` resolution failures on `pnpm install`. The pattern is more verbose but eliminates the class of bug entirely. The trade-off is that it bypasses Astro's Cloudflare adapter, which means no SSR route helpers — acceptable because the docs site is fully static.
 
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/deployment/self-hosted/" variant="secondary" icon="setting">
+    Self-hosted
+  </LinkButton>
+  <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
 ## Related
 
-- [GitHub Pages](/deployment/github-pages/)
-- [Netlify deployment](/deployment/netlify/)
-- [Self-hosted](/deployment/self-hosted/)
+<CardGrid>
+  <LinkCard title="GitHub Pages" href="/deployment/github-pages/" description="Easiest deploy — copy two bundled workflows into .github/workflows/." />
+  <LinkCard title="Netlify" href="/deployment/netlify/" description="Zero-config static hosting with PR previews and edge functions." />
+  <LinkCard title="Self-hosted" href="/deployment/self-hosted/" description="Run the dist/ output on Nginx, Caddy, Apache, or S3 + CloudFront." />
+</CardGrid>

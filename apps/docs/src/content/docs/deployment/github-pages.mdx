@@ -3,7 +3,11 @@ title: GitHub Pages
 description: Deploy a Grove space to GitHub Pages with the bundled ci.yml and deploy.yml workflows.
 ---
 
-Grove spaces deploy to GitHub Pages with zero configuration beyond copying the two bundled workflows into `.github/workflows/`.
+import { Aside, CardGrid, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="Recommended">
+  Grove spaces deploy to GitHub Pages with zero configuration beyond copying the two bundled workflows into `.github/workflows/`. It is the default deploy target because every Grove repo already lives on GitHub.
+</Aside>
 
 ## Prerequisites
 
@@ -15,7 +19,7 @@ Grove spaces deploy to GitHub Pages with zero configuration beyond copying the t
 
 The template ships `.github/workflows/deploy.yml`:
 
-```yaml
+```yaml title=".github/workflows/deploy.yml"
 name: Deploy to GitHub Pages
 on:
   push:
@@ -48,6 +52,55 @@ jobs:
 
 The `build` job runs `grove check` first (validates and generates `data/generated/*.json`, sitemap, llms files, robots, og-image), then `pnpm build` to produce the Astro static output.
 
+## Deploy procedure
+
+<Steps>
+
+1. Push your Grove space to a new GitHub repository:
+
+    <Tabs syncKey="shell">
+      <TabItem label="bash">
+        ```bash
+        git init
+        git add .
+        git commit -m "Initial commit"
+        git branch -M main
+        git remote add origin https://github.com/your-username/your-repo.git
+        git push -u origin main
+        ```
+      </TabItem>
+      <TabItem label="fish">
+        ```fish
+        git init
+        git add .
+        git commit -m "Initial commit"
+        git branch -M main
+        git remote add origin https://github.com/your-username/your-repo.git
+        git push -u origin main
+        ```
+      </TabItem>
+      <TabItem label="PowerShell">
+        ```powershell
+        git init
+        git add .
+        git commit -m "Initial commit"
+        git branch -M main
+        git remote add origin https://github.com/your-username/your-repo.git
+        git push -u origin main
+        ```
+      </TabItem>
+    </Tabs>
+
+    <Aside type="note" title="What you should see">
+      The Actions tab shows a new `Deploy to GitHub Pages` workflow run within seconds of the push. The run starts in queued/running state and reports a green checkmark once the deploy job completes.
+    </Aside>
+
+2. Enable GitHub Pages in repository settings (Settings → Pages) with source = "GitHub Actions".
+
+3. Wait for the workflow to complete. The first deploy typically takes 1–2 minutes; subsequent pushes reuse cached dependencies and finish faster.
+
+</Steps>
+
 ## Custom domain
 
 Add a `CNAME` file at `public/CNAME` containing your domain. Grove's `site.url` in `grove.config.ts` must match.
@@ -64,6 +117,29 @@ To deploy under a subpath (e.g., `https://username.github.io/repo-name/`), set `
 
 ## Related
 
-- [Cloudflare deployment](/deployment/cloudflare/)
-- [Netlify deployment](/deployment/netlify/)
-- [Self-hosted](/deployment/self-hosted/)
+<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+  <LinkButton href="/deployment/cloudflare/" variant="secondary" icon="cloud">
+    Cloudflare
+  </LinkButton>
+  <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Cloudflare"
+    description="Pages or Workers-with-Assets. Fast edge cache, custom domains."
+    href="/deployment/cloudflare/"
+  />
+  <LinkCard
+    title="Netlify"
+    description="PR previews and edge functions."
+    href="/deployment/netlify/"
+  />
+  <LinkCard
+    title="Self-hosted"
+    description="nginx, Caddy, or S3."
+    href="/deployment/self-hosted/"
+  />
+</CardGrid>

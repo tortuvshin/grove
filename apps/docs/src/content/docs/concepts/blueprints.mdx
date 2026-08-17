@@ -3,15 +3,33 @@ title: Three blueprints
 description: Three schemas, one default scaffold, no init-time choice.
 ---
 
+import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+
 # Three blueprints
 
-Grove has three blueprints — `project-directory`, `resource-hub`, `ecosystem-map` — each binding a site to a single record kind. The blueprint is set in `grove.config.ts` (`blueprint: "project-directory"` by default) and is never picked at init time. `grove init` always scaffolds the `project-directory` flavor.
+<Aside type="note" title="What a blueprint is">
+  A blueprint binds a Grove site to a single record `kind` — `project`, `resource`, or `entity` — and the schema, defaults, and labels that go with it. The blueprint is set in `grove.config.ts` (`blueprint: "project-directory"` by default) and is never picked at init time. `grove init` always scaffolds the `project-directory` flavor.
+</Aside>
 
-| Blueprint | Record `kind` | Default scaffold contents |
-|---|---|---|
-| `project-directory` | `project` | The shipped scaffold at `apps/example/` — open-source tools, agents, libraries, infrastructure |
-| `resource-hub` | `resource` | Articles, guides, podcasts, videos, papers |
-| `ecosystem-map` | `entity` | Companies, communities, research labs, agencies, people |
+Grove has three blueprints — `project-directory`, `resource-hub`, `ecosystem-map` — each binding a site to a single record kind.
+
+<CardGrid stagger>
+  <Card title="project-directory" icon="seti:notebook">
+    Record kind: <Badge text="project" variant="default" size="small" />
+
+    Default scaffold contents: the shipped scaffold at `apps/example/` — open-source tools, agents, libraries, infrastructure.
+  </Card>
+  <Card title="resource-hub" icon="seti:default">
+    Record kind: <Badge text="resource" variant="note" size="small" />
+
+    Default scaffold contents: articles, guides, podcasts, videos, papers.
+  </Card>
+  <Card title="ecosystem-map" icon="list-format">
+    Record kind: <Badge text="entity" variant="tip" size="small" />
+
+    Default scaffold contents: companies, communities, research labs, agencies, people.
+  </Card>
+</CardGrid>
 
 ## Why no init-time picker
 
@@ -21,7 +39,7 @@ The plan is not to add more blueprints or a "choose your blueprint" picker. The 
 
 ## Switching blueprints
 
-```ts
+```ts title="grove.config.ts"
 // grove.config.ts — change this to switch.
 export default defineConfig({
   blueprint: "resource-hub",
@@ -40,45 +58,45 @@ Switching is rare and intentional. Most sites pick one blueprint and stay.
 
 Every record kind shares the [resource base](/concepts/records/) — slug, description, summary, sourceDescription, category, tags, links, content, source, curation, scores, visibility — and adds kind-specific fields:
 
-### `project` (`project-directory`)
+<Tabs syncKey="kind">
+  <TabItem label="project" icon="seti:notebook">
+    ```yaml title="data/records/my-project.yml"
+    kind: project
+    name: my-project
+    description: One-line summary.
+    repoUrl: https://github.com/me/my-project
+    stacks: [typescript]
+    platforms: [web]
+    licenses: [mit]
+    bestFor: ["Self-hosting", "Experiments"]
+    whyListed: ["Maintainable", "Documented"]
+    ```
 
-```yaml
-kind: project
-name: my-project
-description: One-line summary.
-repoUrl: https://github.com/me/my-project
-stacks: [typescript]
-platforms: [web]
-licenses: [mit]
-bestFor: ["Self-hosting", "Experiments"]
-whyListed: ["Maintainable", "Documented"]
-```
+    Project-specific fields: `name`, `projectType`, `stack`, `stacks`, `platforms`, `licenses`, `difficulty`, `codebaseSize`, `repoUrl`, `logoUrl`, `screenshots`, `bestFor`, `whyListed`, `caveats`, `distribution.channels`, `github.*`, `health.*`. Full reference at [Record schema](/reference/record-schema/).
+  </TabItem>
+  <TabItem label="resource" icon="seti:default">
+    ```yaml title="data/records/my-resource.yml"
+    kind: resource
+    title: "A guide to writing knowledge bases"
+    type: guide
+    topic: knowledge-management
+    related: [another-resource-slug]
+    ```
 
-Project-specific fields: `name`, `projectType`, `stack`, `stacks`, `platforms`, `licenses`, `difficulty`, `codebaseSize`, `repoUrl`, `logoUrl`, `screenshots`, `bestFor`, `whyListed`, `caveats`, `distribution.channels`, `github.*`, `health.*`. Full reference at [Record schema](/reference/record-schema/).
+    Resource-specific fields: `title`, `type` (one of `guide`, `comparison`, `link`, `explainer`, `tool`, `video`, `article`, `course`, `book`, `podcast`, `other`), `topic`, `related`, `publishedAt`, `author`.
+  </TabItem>
+  <TabItem label="entity" icon="list-format">
+    ```yaml title="data/records/grove-foundation.yml"
+    kind: entity
+    name: Grove Foundation
+    type: organization
+    founded: "2026-01-01"
+    location: "Ulaanbaatar, MN"
+    ```
 
-### `resource` (`resource-hub`)
-
-```yaml
-kind: resource
-title: "A guide to writing knowledge bases"
-type: guide
-topic: knowledge-management
-related: [another-resource-slug]
-```
-
-Resource-specific fields: `title`, `type` (one of `guide`, `comparison`, `link`, `explainer`, `tool`, `video`, `article`, `course`, `book`, `podcast`, `other`), `topic`, `related`, `publishedAt`, `author`.
-
-### `entity` (`ecosystem-map`)
-
-```yaml
-kind: entity
-name: Grove Foundation
-type: organization
-founded: "2026-01-01"
-location: "Ulaanbaatar, MN"
-```
-
-Entity-specific fields: `name`, `type` (one of `company`, `organization`, `community`, `school`, `university`, `research-lab`, `agency`, `service`, `product`, `person`, `other`), `founded`, `location`, `members`, `parent`.
+    Entity-specific fields: `name`, `type` (one of `company`, `organization`, `community`, `school`, `university`, `research-lab`, `agency`, `service`, `product`, `person`, `other`), `founded`, `location`, `members`, `parent`.
+  </TabItem>
+</Tabs>
 
 ## What blueprint controls
 
@@ -92,11 +110,35 @@ What it does **not** control:
 - The site shell, navigation, components, layouts, theme — those come from your Astro project.
 - The build pipeline — every blueprint runs through the same `prepareDirectory()` + Astro build.
 
+## Which blueprint should I pick?
+
+<Aside type="tip" title="Decision rule of thumb">
+  Pick the blueprint whose **record `kind`** matches the entity you keep wanting to add. If most rows are "things you can install or fork", pick `project-directory`. If most rows are "things you read", pick `resource-hub`. If most rows are "organizations or people in a space", pick `ecosystem-map`. Mixing kinds under one blueprint is not supported — switch the blueprint instead.
+</Aside>
+
+<CardGrid>
+  <LinkCard
+    title="Curating tools / agents / libraries?"
+    description="Each row is a runnable thing with a repo and a stack. Use project-directory."
+    href="/concepts/blueprints/#project-project-directory"
+  />
+  <LinkCard
+    title="Curating articles / guides / podcasts?"
+    description="Each row is something to read, watch, or listen to. Use resource-hub."
+    href="/concepts/blueprints/#resource-resource-hub"
+  />
+  <LinkCard
+    title="Mapping orgs / people / communities?"
+    description="Each row is an actor in a space, with founding dates and members. Use ecosystem-map."
+    href="/concepts/blueprints/#entity-ecosystem-map"
+  />
+</CardGrid>
+
 ## A worked example
 
 A directory of open-source AI tools uses `project-directory`:
 
-```yaml
+```yaml title="data/records/ollama.yml"
 # data/records/ollama.yml
 kind: project
 name: Ollama
@@ -111,7 +153,7 @@ whyListed: ["Easy install", "Active releases", "Good docs"]
 
 A research-collection site uses `resource-hub`:
 
-```yaml
+```yaml title="data/records/attention-is-all-you-need.yml"
 # data/records/attention-is-all-you-need.yml
 kind: resource
 title: "Attention Is All You Need"
@@ -123,7 +165,7 @@ publishedAt: "2017-06-12"
 
 An ecosystem map of the Mongolian open-source community uses `ecosystem-map`:
 
-```yaml
+```yaml title="data/records/grove-foundation.yml"
 # data/records/grove-foundation.yml
 kind: entity
 name: Grove Foundation
@@ -134,7 +176,36 @@ location: "Ulaanbaatar, MN"
 
 Same Grove. Same build. Different `kind`, different schema, different lenses.
 
-## See also
+## Next steps
 
-- [Reference: record schema](/reference/record-schema/) — every field, every kind.
-- [Reference: `grove.config.ts`](/reference/config/) — `blueprint`, `routes`, `labels`.
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/reference/config/" variant="primary" icon="right-arrow">
+    Configure
+  </LinkButton>
+  <LinkButton href="https://github.com/withgrove/docs" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Reference: record schema"
+    description="Every field, every kind."
+    href="/reference/record-schema/"
+  />
+  <LinkCard
+    title="Reference: grove.config.ts"
+    description="blueprint, routes, labels."
+    href="/reference/config/"
+  />
+  <LinkCard
+    title="Author a record"
+    description="How to write YAML and long-form content for any blueprint."
+    href="/content/author-a-record/"
+  />
+  <LinkCard
+    title="Concept: records"
+    description="The shared resource base every kind extends."
+    href="/concepts/records/"
+  />
+</CardGrid>

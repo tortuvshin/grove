@@ -3,15 +3,19 @@ title: Configure your space
 description: How to set the name, blueprint, theme, and integrations for your Grove space through grove.config.ts.
 ---
 
+import { Aside, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
+
 # Configure your space
 
-`grove.config.ts` is the single source of truth for your space. Edit it to change the site name, blueprint, theme, browse facets, integrations, and navigation. Every field is validated against the Zod schema at build time — a typo fails the build immediately with a clear message.
+<Aside type="note" title="What grove.config.ts does">
+  `grove.config.ts` is the single source of truth for your space. Edit it to change the site name, blueprint, theme, browse facets, integrations, and navigation. Every field is validated against the Zod schema at build time — a typo fails the build immediately with a clear message.
+</Aside>
 
 ## The file in one view
 
 The full shape, with sensible defaults:
 
-```ts
+```ts title="grove.config.ts"
 import { defineConfig } from "@grove-dev/core";
 
 export default defineConfig({
@@ -45,113 +49,171 @@ export default defineConfig({
 
 The full field reference is in **[grove.config.ts reference](/reference/config/)**.
 
-## Blueprint
+<Steps>
 
-The blueprint decides what `kind` your records use and which templates render them:
+1. ### Blueprint
 
-| Blueprint | Record kind | Use case |
-|---|---|---|
-| `project-directory` | `project` | Curated catalog of open-source projects, libraries, agents, or tools. (Default scaffold.) |
-| `resource-hub` | `resource` | Articles, podcasts, videos, courses, comparisons. |
-| `ecosystem-map` | `entity` | Companies, agencies, foundations, communities. |
+   The blueprint decides what `kind` your records use and which templates render them:
 
-```ts
-blueprint: "resource-hub"   // toggle the site to a resource hub
-```
+   | Blueprint | Record kind | Use case |
+   |---|---|---|
+   | `project-directory` | `project` | Curated catalog of open-source projects, libraries, agents, or tools. (Default scaffold.) |
+   | `resource-hub` | `resource` | Articles, podcasts, videos, courses, comparisons. |
+   | `ecosystem-map` | `entity` | Companies, agencies, foundations, communities. |
 
-The blueprint and the record `kind` must match — a `kind: project` record on an `ecosystem-map` site fails validation. See [Three blueprints](/concepts/blueprints/) for the full comparison.
+   ```ts
+   blueprint: "resource-hub"   // toggle the site to a resource hub
+   ```
 
-## Site identity
+   The blueprint and the record `kind` must match — a `kind: project` record on an `ecosystem-map` site fails validation. See [Three blueprints](/concepts/blueprints/) for the full comparison.
 
-These four fields flow into `<title>`, OG cards, canonical URLs, and JSON-LD:
+2. ### Site identity
 
-```ts
-site: {
-  name: "My Directory",
-  tagline: "A focused list of tools we trust.",
-  url: "https://mydir.dev",
-  repoUrl: "https://github.com/me/mydir",
-}
-```
+   These four fields flow into `<title>`, OG cards, canonical URLs, and JSON-LD:
 
-- `site.url` is the canonical base for every record's `<link rel="canonical">` and `og:url`. **If you omit it, OG tags resolve to `https://example.com`** and search engines treat every page as the canonical version.
-- `site.repoUrl` is used by the GitHub integration for star/fork enrichment.
-- `site.description` is optional but recommended — it populates the site-wide JSON-LD.
+   ```ts
+   site: {
+     name: "My Directory",
+     tagline: "A focused list of tools we trust.",
+     url: "https://mydir.dev",
+     repoUrl: "https://github.com/me/mydir",
+   }
+   ```
 
-## Theme tokens
+   - `site.url` is the canonical base for every record's `<link rel="canonical">` and `og:url`. **If you omit it, OG tags resolve to `https://example.com`** and search engines treat every page as the canonical version.
+   - `site.repoUrl` is used by the GitHub integration for star/fork enrichment.
+   - `site.description` is optional but recommended — it populates the site-wide JSON-LD.
 
-Tweak the visual feel without writing CSS:
+3. ### Theme tokens
 
-```ts
-theme: {
-  primaryColor: "#0ea5e9",
-  radius: "soft",          // "none" | "sharp" | "soft" | "pill"
-  density: "comfortable",  // "compact" | "comfortable" | "spacious"
-  containerWidth: "80rem", // any CSS length
-}
-```
+   Tweak the visual feel without writing CSS:
 
-See [Theme tokens](/customize/theme/) for the full list of tokens and what each controls.
+   ```ts
+   theme: {
+     primaryColor: "#0ea5e9",
+     radius: "soft",          // "none" | "sharp" | "soft" | "pill"
+     density: "comfortable",  // "compact" | "comfortable" | "spacious"
+     containerWidth: "80rem", // any CSS length
+   }
+   ```
 
-## Browse facets
+   See [Theme tokens](/customize/theme/) for the full list of tokens and what each controls.
 
-`browse.facets` chooses which dimensions appear as filters on `/browse` and in what order:
+4. ### Browse facets
 
-```ts
-browse: {
-  facets: ["category", "stack", "platform", "tags", "license"],
-}
-```
+   `browse.facets` chooses which dimensions appear as filters on `/browse` and in what order:
 
-Only the canonical facet ids are accepted. **A typo fails config parsing immediately with a list of accepted ids.** See [Organize with taxonomy](/content/taxonomy-files/) for the taxonomy file shape each facet reads from.
+   ```ts
+   browse: {
+     facets: ["category", "stack", "platform", "tags", "license"],
+   }
+   ```
 
-## Integrations
+   Only the canonical facet ids are accepted. **A typo fails config parsing immediately with a list of accepted ids.**
 
-Toggle which automated behaviors are enabled:
+   <CardGrid>
+     <Card title="category">
+       Top-level grouping sourced from `data/taxonomy/categories.yml`. One per record.
+     </Card>
+     <Card title="stack">
+       Tech-stack chips sourced from `data/taxonomy/stacks.yml`. Multiple per record.
+     </Card>
+     <Card title="platform">
+       Platform filter chips sourced from `data/taxonomy/platforms.yml`.
+     </Card>
+     <Card title="tags">
+       Free-form labels for filtering. Multiple per record; not backed by a taxonomy file.
+     </Card>
+     <Card title="license">
+       License chips sourced from `data/taxonomy/licenses.yml`. Multiple per record.
+     </Card>
+   </CardGrid>
 
-```ts
-integrations: {
-  github: {
-    metadata: true,     // refresh stars, forks, language, topics, license
-    contributors: true, // aggregate contributor counts
-  },
-}
-```
+   See [Organize with taxonomy](/content/taxonomy-files/) for the taxonomy file shape each facet reads from.
 
-`metadata: true` requires a `GITHUB_TOKEN` in `.env`. See [Sync GitHub metadata](/automation/sync-github/) for setup.
+5. ### Integrations
 
-## Navigation
+   Toggle which automated behaviors are enabled:
 
-Define the header nav. Each entry has a label and an href:
+   ```ts
+   integrations: {
+     github: {
+       metadata: true,     // refresh stars, forks, language, topics, license
+       contributors: true, // aggregate contributor counts
+     },
+   }
+   ```
 
-```ts
-nav: [
-  { label: "Home",   href: "/" },
-  { label: "Browse", href: "/projects" },
-  { label: "About",  href: "/about" },
-]
-```
+   `metadata: true` requires a `GITHUB_TOKEN` in `.env`. See [Sync GitHub metadata](/automation/sync-github/) for setup.
 
-The order of entries is render order. Use `external: true` for off-site links.
+6. ### Navigation
+
+   Define the header nav. Each entry has a label and an href:
+
+   ```ts
+   nav: [
+     { label: "Home",   href: "/" },
+     { label: "Browse", href: "/projects" },
+     { label: "About",  href: "/about" },
+   ]
+   ```
+
+   The order of entries is render order. Use `external: true` for off-site links.
+
+</Steps>
 
 ## After editing
 
 Config is read at boot, not hot-reloaded. After any change:
 
+<Steps>
+
 1. **Restart `pnpm dev`** — config changes don't apply until the next server boot.
 2. **Run `pnpm exec grove check`** — validates the new config against the Zod schema and surfaces typos.
 3. **Run `pnpm build`** — confirms the production build accepts it.
+
+</Steps>
 
 If you want config changes picked up without a manual restart, use the Astro `--watch` flag.
 
 ## Common mistakes
 
-- **`site.url` not set** → OG tags resolve to `https://example.com`, JSON-LD `url` is wrong.
-- **`blueprint` set but record `kind` mismatched** → `grove check` fails every record with a kind error.
-- **Custom facet id** (e.g. `"categories"`) → fails with a list of accepted ids (`category`, `stack`, `platform`, `tags`, `license`).
-- **`integrations.github.metadata: true` without `GITHUB_TOKEN`** → `grove sync github` fails with a clear auth error; the build itself still succeeds.
+<Aside type="caution" title="site.url not set">
+  OG tags resolve to `https://example.com`, JSON-LD `url` is wrong.
+</Aside>
+
+<Aside type="caution" title="blueprint set but record kind mismatched">
+  `grove check` fails every record with a kind error.
+</Aside>
+
+<Aside type="caution" title="Custom facet id (e.g. `categories`)">
+  Fails with a list of accepted ids (`category`, `stack`, `platform`, `tags`, `license`).
+</Aside>
+
+<Aside type="caution" title="integrations.github.metadata: true without GITHUB_TOKEN">
+  `grove sync github` fails with a clear auth error; the build itself still succeeds.
+</Aside>
 
 ## Next steps
 
-- [Deploy your site →](/deployment/overview/) — pick a host and ship it.
-- [Full reference →](/reference/config/) — every field, every type, every default.
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/deployment/overview/" variant="primary" icon="rocket">
+    Deploy
+  </LinkButton>
+  <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Deploy your site"
+    description="Pick a host and ship it."
+    href="/deployment/overview/"
+  />
+  <LinkCard
+    title="Full reference"
+    description="Every field, every type, every default."
+    href="/reference/config/"
+  />
+</CardGrid>

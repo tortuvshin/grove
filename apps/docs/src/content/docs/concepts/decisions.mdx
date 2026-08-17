@@ -3,7 +3,13 @@ title: Decisions and curation
 description: Curator overrides — visibility, sort priority, rename, label.
 ---
 
+import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
 # Decisions and curation
+
+<Aside type="tip" title="Curators are the source of authority">
+  Curators shape how a Grove space presents its records through two surfaces. The decisions file is the single source of truth across the whole site for overrides — it carries reviewer identity, timestamps, and reasons that the record-level fields do not.
+</Aside>
 
 Curators shape how a Grove space presents its records through two surfaces:
 
@@ -16,14 +22,43 @@ The record-level fields are usually enough. `data/decisions.yml` is for the case
 
 `visibility` is the canonical signal for "should the visitor see this record?"
 
-| Value | Effect |
-|---|---|
-| `highlight` | Promote in listings, summary cards, and lens outputs. |
-| `keep` | Default. Listed normally. |
-| `needs_review` | Listed but flagged. Detail pages show a review banner. |
-| `hide` | Excluded from listings and search. Direct links still resolve. |
-| `remove` | Excluded from listings, search, and detail pages. The record YAML remains in git. |
-| `historical` | Listed but de-emphasized. The lens for "historical" surfaces these in a dedicated section. |
+<CardGrid>
+  <Card title="highlight">
+    <Badge text="highlight" variant="default" />
+
+    Promote in listings, summary cards, and lens outputs.
+  </Card>
+
+  <Card title="keep">
+    <Badge text="keep" variant="default" />
+
+    Default. Listed normally.
+  </Card>
+
+  <Card title="needs_review">
+    <Badge text="needs_review" variant="caution" />
+
+    Listed but flagged. Detail pages show a review banner.
+  </Card>
+
+  <Card title="hide">
+    <Badge text="hide" variant="caution" />
+
+    Excluded from listings and search. Direct links still resolve.
+  </Card>
+
+  <Card title="remove">
+    <Badge text="remove" variant="danger" />
+
+    Excluded from listings, search, and detail pages. The record YAML remains in git.
+  </Card>
+
+  <Card title="historical">
+    <Badge text="historical" variant="note" />
+
+    Listed but de-emphasized. The lens for "historical" surfaces these in a dedicated section.
+  </Card>
+</CardGrid>
 
 `remove` and `hide` differ in one way: `remove` takes the record out of detail-page URLs too (a direct link resolves but the page renders a tombstone). `hide` keeps the detail page addressable.
 
@@ -37,25 +72,41 @@ Use `data/decisions.yml` when:
 - The override includes `reason` plus `reviewedBy` / `reviewedAt`, which the record's `visibility:` doesn't carry.
 - The override changes `renameSlug` (used by `routes.item`) or `sortPriority` for a single record without rewriting it.
 
-```yaml
-# data/decisions.yml
-- id: my-record
-  decision:
-    visibility: hide
-    reason: Archived in 2024; awaiting re-launch announcement.
-    reviewedBy: maintainer-name
-    reviewedAt: "2026-04-01"
-- id: another-record
-  decision:
+<Tabs syncKey="where">
+  <TabItem label="Record" icon="document">
+    Add `visibility:` directly to the record's YAML when you want one record hidden or highlighted. This is the common case.
+
+    ```yaml
+    # data/records/<slug>.yml
     visibility: highlight
-    sortPriority: 1
-    renameSlug: feature-record
-    reason: Reviewed and re-curated for the 2026 launch.
-```
+    ```
+  </TabItem>
+
+  <TabItem label="Decisions file" icon="setting">
+    Use `data/decisions.yml` when you want one file to carry the override along with `reason`, `reviewedBy`, and `reviewedAt` — fields the record's `visibility:` doesn't carry.
+
+    ```yaml
+    # data/decisions.yml
+    - id: my-record
+      decision:
+        visibility: hide
+        reason: Archived in 2024; awaiting re-launch announcement.
+        reviewedBy: maintainer-name
+        reviewedAt: "2026-04-01"
+    - id: another-record
+      decision:
+        visibility: highlight
+        sortPriority: 1
+        renameSlug: feature-record
+        reason: Reviewed and re-curated for the 2026 launch.
+    ```
+  </TabItem>
+</Tabs>
 
 ## `data/decisions.yml` shape
 
 ```yaml
+# data/decisions.yml
 # data/decisions.yml accepts either a list or { decisions: [...] }
 - id: <record-slug>
   decision:
@@ -71,12 +122,31 @@ Each entry must include `id` (matching a record `slug`) and `decision.visibility
 
 `curation.labels` is a curator-applied tagging system that's independent of `tags`. Labels drive lenses:
 
-| Label | Effect |
-|---|---|
-| `featured` | Surfaces in the `featured` lens. |
-| `hot` | Surfaces in the `hot` lens (high recent activity). |
-| `new` | Surfaces in the `new` lens. |
-| `mature` | Surfaces in the `mature` lens. |
+<CardGrid>
+  <Card title="featured">
+    <Badge text="featured" variant="default" />
+
+    Surfaces in the `featured` lens.
+  </Card>
+
+  <Card title="hot">
+    <Badge text="hot" variant="caution" />
+
+    Surfaces in the `hot` lens (high recent activity).
+  </Card>
+
+  <Card title="new">
+    <Badge text="new" variant="tip" />
+
+    Surfaces in the `new` lens.
+  </Card>
+
+  <Card title="mature">
+    <Badge text="mature" variant="success" />
+
+    Surfaces in the `mature` lens.
+  </Card>
+</CardGrid>
 
 Lenses compose; a single record can carry several labels.
 
@@ -86,9 +156,17 @@ Lenses compose; a single record can carry several labels.
 
 ## What curators should never do
 
-- Don't edit generated files under `data/generated/`. They are pure output.
-- Don't manually set `health.*` — let `grove sync github` write it. You CAN override `health.visibility` via a record-level `visibility:` if the auto-derived value is wrong.
-- Don't delete a record to "remove" it. Use `visibility: remove` instead. Git history preserves the record.
+<Aside type="danger" title="Never edit generated files">
+  Don't edit generated files under `data/generated/`. They are pure output.
+</Aside>
+
+<Aside type="danger" title="Never manually set health fields">
+  Don't manually set `health.*` — let `grove sync github` write it. You CAN override `health.visibility` via a record-level `visibility:` if the auto-derived value is wrong.
+</Aside>
+
+<Aside type="danger" title="Never delete a record to remove it">
+  Don't delete a record to "remove" it. Use `visibility: remove` instead. Git history preserves the record.
+</Aside>
 
 ## See also
 
@@ -113,6 +191,16 @@ The minimal shape, hand-authored in `data/decisions.yml`:
 
 Each entry needs `slug` (matching a record) and at least one override field. `reason` is a curator note and is not surfaced publicly by default.
 
+<CardGrid>
+  <Card title="Fields reference">
+    Reference table for the flat-list form fields used in `data/decisions.yml`.
+  </Card>
+
+  <Card title="Conflict resolution">
+    When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibility: keep` but decision says `hide`), the decision wins.
+  </Card>
+</CardGrid>
+
 ### Fields reference
 
 | Field | Type | Description |
@@ -125,3 +213,39 @@ Each entry needs `slug` (matching a record) and at least one override field. `re
 | `reason` | string | Curator note; not surfaced publicly by default. |
 
 When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibility: keep` but decision says `hide`), the decision wins.
+
+## Next steps
+
+<LinkButton href="/content/decisions/" variant="primary" icon="right-arrow">
+  Build collections
+</LinkButton>
+
+<LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
+  GitHub
+</LinkButton>
+
+<CardGrid>
+  <LinkCard
+    title="Decisions file"
+    href="/content/decisions/"
+    description="File shape and examples for data/decisions.yml."
+  />
+
+  <LinkCard
+    title="Health classification"
+    href="/content/health-classification/"
+    description="The health.* block and cleanupCandidate: true."
+  />
+
+  <LinkCard
+    title="Collections"
+    href="/concepts/collections/"
+    description="Curated or query-driven groupings of records."
+  />
+
+  <LinkCard
+    title="Curation labels and lenses"
+    href="/concepts/curation-labels/"
+    description="How labels drive featured, hot, new, and mature lenses."
+  />
+</CardGrid>

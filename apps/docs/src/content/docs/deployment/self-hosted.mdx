@@ -3,94 +3,211 @@ title: Self-hosted
 description: Run the static build output on any HTTP server — Nginx, Caddy, Apache, GitHub Pages, S3 + CloudFront.
 ---
 
-Grove emits a fully static `dist/` directory. Any HTTP server that can serve files can host a Grove space. This page covers the recommended setups for common servers.
+import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Nginx
+<Aside type="tip" title="One dist/, many hosts">
+  Grove emits a fully static `dist/` directory. Any HTTP server that can serve files can host a Grove space — S3 + CloudFront, nginx, Caddy, Apache, or your own CDN. Pick the host you already operate; the build output does not care.
+</Aside>
 
-```nginx
-server {
-    listen 80;
-    server_name example.com;
-    root /var/www/grove/dist;
-    index index.html;
+This page covers the recommended setups for common servers.
 
-    # Astro static output uses path-based routing
-    location / {
-        try_files $uri $uri/ $uri.html /404.html;
-    }
+<Steps>
 
-    # Long cache for hashed assets
-    location /_astro/ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
+1. ## Build the site
 
-    # Security headers
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-}
-```
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:notebook">
+       ```bash
+       pnpm exec grove check
+       pnpm build
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:notebook">
+       ```bash
+       npx grove check
+       npm run build
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:notebook">
+       ```bash
+       bunx grove check
+       bun run build
+       ```
+     </TabItem>
+   </Tabs>
 
-## Caddy
+   <Aside type="note" title="What you should see">
+     `pnpm build` writes a fully static site to `dist/`. Every record, collection, page, sitemap, `llms.txt`, and OG image is on disk — no server runtime needed.
+   </Aside>
 
-```caddy
-example.com {
-    root * /var/www/grove/dist
-    encode gzip zstd
-    try_files {path} {path}.html /404.html
+2. ## Nginx
 
-    @assets path /_astro/*
-    header @assets Cache-Control "public, max-age=31536000, immutable"
-}
-```
+   ```nginx title="/etc/nginx/sites-available/grove.conf"
+   server {
+       listen 80;
+       server_name example.com;
+       root /var/www/grove/dist;
+       index index.html;
 
-Caddy's automatic HTTPS via Let's Encrypt makes this the lowest-friction option for self-hosters.
+       # Astro static output uses path-based routing
+       location / {
+           try_files $uri $uri/ $uri.html /404.html;
+       }
 
-## Apache
+       # Long cache for hashed assets
+       location /_astro/ {
+           expires 1y;
+           add_header Cache-Control "public, immutable";
+       }
 
-```apache
-<VirtualHost *:80>
-    ServerName example.com
-    DocumentRoot /var/www/grove/dist
-    <Directory /var/www/grove/dist>
-        AllowOverride All
-    </Directory>
-</VirtualHost>
-```
+       # Security headers
+       add_header X-Content-Type-Options "nosniff" always;
+       add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+   }
+   ```
 
-With `.htaccess`:
+   <Aside type="note" title="What you should see">
+     `try_files` falls back to `404.html` so deep links like `/projects/<slug>/` resolve without a server-side router. Hashed assets under `/_astro/` are cached for a year with `immutable`; everything else uses the default cache policy.
+   </Aside>
 
-```apache
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ /$1.html [L]
+3. ## Caddy
 
-<IfModule mod_expires.c>
-    ExpiresByType application/javascript "access plus 1 year"
-    ExpiresByType text/css "access plus 1 year"
-</IfModule>
-```
+   ```text title="/etc/caddy/Caddyfile"
+   example.com {
+       root * /var/www/grove/dist
+       encode gzip zstd
+       try_files {path} {path}.html /404.html
 
-## S3 + CloudFront
+       @assets path /_astro/*
+       header @assets Cache-Control "public, max-age=31536000, immutable"
+   }
+   ```
 
-```bash
-aws s3 sync dist/ s3://example.com --delete
-aws cloudfront create-invalidation --distribution-id E123 --paths "/*"
-```
+   Caddy's automatic HTTPS via Let's Encrypt makes this the lowest-friction option for self-hosters.
 
-Set bucket website hosting to redirect unknown paths to `/404.html`.
+   <Aside type="note" title="What you should see">
+     Caddy fetches and renews the Let's Encrypt certificate on first request. `try_files` mirrors the nginx pattern; `encode gzip zstd` covers both classic and modern browsers without extra config.
+   </Aside>
 
-## Local preview
+4. ## Apache
 
-```bash
-pnpm exec grove check
-pnpm build
-pnpm exec serve dist
-```
+   ```apache title="/etc/apache2/sites-available/grove.conf"
+   <VirtualHost *:80>
+       ServerName example.com
+       DocumentRoot /var/www/grove/dist
+       <Directory /var/www/grove/dist>
+           AllowOverride All
+       </Directory>
+   </VirtualHost>
+   ```
 
-## Related
+   With `.htaccess`:
 
-- [GitHub Pages](/deployment/github-pages/)
-- [Cloudflare](/deployment/cloudflare/)
-- [Netlify](/deployment/netlify/)
+   ```apache title="/var/www/grove/dist/.htaccess"
+   RewriteEngine On
+   RewriteCond %{REQUEST_FILENAME} !-f
+   RewriteCond %{REQUEST_FILENAME} !-d
+   RewriteRule ^(.*)$ /$1.html [L]
+
+   <IfModule mod_expires.c>
+       ExpiresByType application/javascript "access plus 1 year"
+       ExpiresByType text/css "access plus 1 year"
+   </IfModule>
+   ```
+
+   <Aside type="caution" title="Common pitfalls">
+     - `mod_rewrite` must be enabled (`a2enmod rewrite`) and `AllowOverride All` must be set in the `<Directory>` block — without it, the `.htaccess` is silently ignored.
+     - `.htaccess` is shipped inside `dist/` if `public/.htaccess` exists in your space; make sure the build emits it.
+     - The `<IfModule mod_expires.c>` block is a no-op without `mod_expires` — enable it (`a2enmod expires`) for the asset cache headers.
+   </Aside>
+
+5. ## S3 + CloudFront
+
+   <Tabs syncKey="shell">
+     <TabItem label="Sync and invalidate" icon="rocket">
+       ```bash
+       aws s3 sync dist/ s3://example.com --delete
+       aws cloudfront create-invalidation --distribution-id E123 --paths "/*"
+       ```
+     </TabItem>
+     <TabItem label="Bucket website config" icon="setting">
+       ```bash
+       aws s3 website s3://example.com \
+         --index-document index.html \
+         --error-document 404.html
+       ```
+     </TabItem>
+   </Tabs>
+
+   Set bucket website hosting to redirect unknown paths to `/404.html`.
+
+   <Aside type="caution" title="Common pitfalls">
+     - The CloudFront invalidation is required after every deploy — S3 has no native cache, but the edge does.
+     - The `--delete` flag on `aws s3 sync` removes stale files from the bucket; without it, removed records keep serving from edge caches until invalidation propagates.
+     - The S3 website endpoint only supports HTTP; serve TLS through CloudFront.
+   </Aside>
+
+   <Aside type="note" title="What you should see">
+     `dist/` is mirrored to `s3://example.com`, the distribution invalidates every path, and the next request resolves through CloudFront to your updated `dist/`.
+   </Aside>
+
+6. ## Local preview
+
+   <Tabs syncKey="pkg">
+     <TabItem label="pnpm" icon="seti:notebook">
+       ```bash
+       pnpm exec grove check
+       pnpm build
+       pnpm exec serve dist
+       ```
+     </TabItem>
+     <TabItem label="npm" icon="seti:notebook">
+       ```bash
+       npx grove check
+       npm run build
+       npx serve dist
+       ```
+     </TabItem>
+     <TabItem label="bun" icon="seti:notebook">
+       ```bash
+       bunx grove check
+       bun run build
+       bunx serve dist
+       ```
+     </TabItem>
+   </Tabs>
+
+   <Aside type="note" title="What you should see">
+     `serve` (or any static-file server) listens on a local port and renders the production build exactly as your host will. Walk through every page before pushing.
+   </Aside>
+
+</Steps>
+
+## Other providers
+
+<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+  <LinkButton href="/deployment/cloudflare/" variant="secondary" icon="external">
+    Cloudflare
+  </LinkButton>
+  <LinkButton href="https://github.com/withgrove/docs" variant="minimal" icon="external">
+    GitHub
+  </LinkButton>
+</div>
+
+<CardGrid>
+  <LinkCard
+    title="Cloudflare"
+    description="Pages or Workers-with-Assets — the maintainers use Workers-with-Assets on apps/docs/."
+    href="/deployment/cloudflare/"
+  />
+  <LinkCard
+    title="GitHub Pages"
+    description="Zero-config deploys with the bundled ci.yml and deploy.yml workflows."
+    href="/deployment/github-pages/"
+  />
+  <LinkCard
+    title="Netlify"
+    description="Zero-config deploys with PR previews and edge functions on demand."
+    href="/deployment/netlify/"
+  />
+</CardGrid>
