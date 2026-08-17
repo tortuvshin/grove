@@ -1,0 +1,82 @@
+apps/docs/src/content/docs/start-here/mental-model.md
+  s_3c2051f37590d0::t_3a764dc3461879 88-99
+apps/docs/src/content/docs/concepts/files-canonical.md
+  s_3c2051f37590d0::t_07b9e8bee6fcbd 52-80
+apps/docs/src/content/docs/concepts/static-deployment.md
+  s_3c2051f37590d0::t_889c60e2b86758 21-44
+apps/docs/src/content/docs/concepts/content-pages.md
+  s_3c2051f37590d0::t_b12f1ca501ab78 76-97
+apps/docs/src/content/docs/getting-started/install-cli.md
+  s_3c2051f37590d0::t_de9e74905657b6 8,13,15-31,37-46,51-72,75-139
+apps/docs/src/content/docs/guides/walkthrough-sync-github.md
+  s_3c2051f37590d0::t_ad9faa34c3e95a 1-126
+apps/docs/src/content/docs/content/author-a-record.md
+  s_3c2051f37590d0::t_7d34d31b72f3af 133-247
+apps/docs/src/content/docs/automation/sync-github-deep-dive.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 102
+apps/docs/src/content/docs/concepts/collections.md
+  s_3c2051f37590d0::t_d288d824f3d9cd 113-127
+apps/docs/src/content/docs/automation/submissions.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 184,186
+apps/docs/src/content/docs/automation/sync-github.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 188-189
+apps/docs/src/content/docs/getting-started/first-record.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 85
+apps/docs/src/content/docs/guides/walkthrough-add-record.md
+  s_3c2051f37590d0::t_5379c2a3e3e124 1-72
+apps/docs/src/content/docs/project/faq.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 58
+apps/docs/astro.config.mjs
+  s_3c2051f37590d0::t_8831803bf80f94 172-175,177
+  s_3c2051f37590d0::t_017587ce9f985e 153-154,159,162,164-171,182-183,185-187,198,203,205-214,218-219,221-232,237-241,245,249
+  s_3df4a7aabd4ea3::t_5a9ac5e3a5f6d6 12-16,20-24,28,33-50
+  s_3c2051f37590d0::t_550a996706dee3 17-19,25-27,29-32
+apps/docs/src/content/docs/start-here/quickstart.md
+  s_3c2051f37590d0::t_0ee0a45b4a648f 69-75
+apps/docs/src/content/docs/reference/config.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 178
+apps/docs/src/content/docs/concepts/decisions.md
+  s_3c2051f37590d0::t_f9fd02f095606d 97-127
+apps/docs/src/content/docs/getting-started/scaffold.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 76,78
+apps/docs/src/content/docs/deployment/overview.md
+  s_3c2051f37590d0::t_822232af554be7 59-69
+apps/docs/src/content/docs/getting-started/configure.md
+  s_3c2051f37590d0::t_eafd428144ecee 6-12,22-24,27,30-33,36,38-42,46-157
+apps/docs/src/content/docs/content/health-classification.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 8,19,39
+  s_3c2051f37590d0::t_c29965763292d7 100-109
+apps/docs/src/content/docs/guides/walkthrough-curate-collection.md
+  s_3c2051f37590d0::t_31c457e51a6349 1-102
+apps/docs/src/content/docs/reference/components.mdx
+  s_3c2051f37590d0::t_28ad35cdd2f87a 113
+apps/docs/src/content/docs/maintainers/contributing.md
+  s_3c2051f37590d0::t_28ad35cdd2f87a 10
+apps/docs/src/content/docs/content/taxonomy-files.md
+  s_3c2051f37590d0::t_473cffcd816e0b 115-140
+  s_3c2051f37590d0::t_28ad35cdd2f87a 112-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "404e7d4a609c272368ffe44eda03ebcb6834a726",
+  "prompts": {},
+  "sessions": {
+    "s_3c2051f37590d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5fab7447-0cd3-45a4-9e66-1f63d0d55749",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_3df4a7aabd4ea3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "634cb5cf-68ae-418f-bc8c-a7d68ec4c17f",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
