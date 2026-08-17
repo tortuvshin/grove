@@ -20,7 +20,7 @@ describe("docs Astro config", () => {
     expect(config).not.toContain("./src/styles/custom.css");
   });
 
-  it("declares 11 sidebar sections matching the IA redesign", async () => {
+  it("declares 7 sidebar sections matching the IA redesign", async () => {
     const config = await readFile(
       resolve(repoRoot, "apps/docs/astro.config.mjs"),
       "utf8",
@@ -28,16 +28,12 @@ describe("docs Astro config", () => {
 
     const sectionLabels = [
       "Start here",
-      "Getting Started",
-      "Core Concepts",
-      "Content",
-      "Collections & Discovery",
-      "Automation & Maintenance",
-      "Outputs & Publishing",
+      "Guides",
+      "Walkthroughs",
       "Customize",
-      "Deployment",
       "Reference",
-      "Project",
+      "Advanced",
+      "Resources",
     ];
     for (const label of sectionLabels) {
       expect(config, `sidebar section "${label}" missing`).toContain(
