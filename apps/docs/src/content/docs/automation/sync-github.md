@@ -185,7 +185,7 @@ pnpm dev                # inspect the record detail pages
 
 ## Related
 
-- [Health classification](/sources/health-classification/) — what `health.status` means and how it's derived
-- [Decisions](/sources/decisions/) — overriding auto-derived health signals
+- [Health classification](/content/health-classification/) — what `health.status` means and how it's derived
+- [Decisions](/concepts/decisions/) — overriding auto-derived health signals
 - [Scheduled maintenance](/automation/scheduled/) — the workflow that runs this on a cron
 - [CLI reference — `grove sync github`](/reference/cli/#grove-sync-github) — full flag reference

@@ -55,7 +55,7 @@ Not yet. `i18n:setup` hooks are scaffolded in the Starlight plugin but commented
 
 ## How are stars and freshness computed?
 
-Stars come from the GitHub API (`fetchGithubMetadata`). Freshness uses `github.pushedAt`. Health classification (`active`/`stale`/`inactive`) is computed from these in `packages/core/src/health.ts`. See [Health classification](/sources/health-classification/).
+Stars come from the GitHub API (`fetchGithubMetadata`). Freshness uses `github.pushedAt`. Health classification (`active`/`stale`/`inactive`) is computed from these in `packages/core/src/health.ts`. See [Health classification](/content/health-classification/).
 
 ## What is `llms.txt`?
 

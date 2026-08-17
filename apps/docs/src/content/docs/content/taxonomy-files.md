@@ -109,6 +109,32 @@ Only these six filenames are read. Files with other names in `data/taxonomy/` ar
 ## Related
 
 - [Configuration reference → `browse.facets`](/reference/config/)
-- [Curated collections](/sources/collections/)
-- [Author a record](/sources/records/)
-- [Getting started → Create a space](/getting-started/create-a-space/) (legacy path)
+- [Curated collections](/concepts/collections/)
+- [Author a record](/content/author-a-record/)
+- [Getting started → Create a space](/getting-started/scaffold/) (legacy path)
+
+## Why `id` and not `slug`
+
+Earlier versions of the codebase used `slug:` as the identifier key. The loader was changed to require `id:` because:
+
+- Every taxonomy entry has multiple identifiers in real life (SPDX for licenses, language codes for stacks, OS names for platforms). `id:` keeps the structure open to `spdx_id` and similar secondary keys without re-reading the same `slug:`.
+- A slug implies a URL; an id is just an identifier. The taxonomy files don't need URLs and the loader shouldn't pretend they do.
+
+A vitest at `apps/docs/src/docs-taxonomy-guard.test.ts` rejects any docs example that uses `slug:` and asserts every tutorial example uses `id:`.
+
+## Reference: canonical facet ids
+
+`browse.facets` in `grove.config.ts` accepts a strict subset of these dimensions:
+
+```ts
+// packages/core/src/directory-facets.ts
+export const FACET_IDS = [
+  "category",
+  "stack",
+  "platform",
+  "tags",
+  "license",
+] as const;
+```
+
+A typo in `browse.facets` fails config parsing immediately. The intended facet shape lives in `FACET_IDS`; the docs test (`docs-taxonomy-guard.test.ts`) imports this array and asserts no docs example adds an unknown facet id.

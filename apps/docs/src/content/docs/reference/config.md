@@ -175,7 +175,7 @@ only. Unknown ids, plural spellings, and duplicates fail config validation
 instead of being silently dropped.
 
 Option values, display names, and option order come from
-`data/taxonomy/*.yml` (see [Taxonomy files](/sources/taxonomy-files/)). Tags
+`data/taxonomy/*.yml` (see [Taxonomy files](/content/taxonomy-files/)). Tags
 come from each record and stay a separate many-to-many facet; add
 `data/taxonomy/topics.yml` to curate which tags the Tag filter offers.
 

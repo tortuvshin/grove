@@ -99,7 +99,7 @@ A record has drifted when its `github.repository.pushed_at` is older than the re
 - The repo was transferred to a new owner
 - The repo was deleted and the URL now 404s
 
-The cleanup step (`grove cleanup`, see [Maintain health signals](/sources/health-classification/)) flags all of these. If the report has a sudden spike in `archived` or `unavailable` candidates, check the upstream before writing decisions — sometimes it's a transfer, and the new owner is actively maintaining the project.
+The cleanup step (`grove cleanup`, see [Maintain health signals](/content/health-classification/)) flags all of these. If the report has a sudden spike in `archived` or `unavailable` candidates, check the upstream before writing decisions — sometimes it's a transfer, and the new owner is actively maintaining the project.
 
 ## Scheduled sync
 

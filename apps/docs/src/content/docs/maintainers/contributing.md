@@ -7,7 +7,7 @@ This page is the contributor's path. The maintainer's path is in
 [Governance](/maintainers/governance/).
 
 The mechanics of writing a record are in
-[Author a record](/sources/records/). This page covers the
+[Author a record](/content/author-a-record/). This page covers the
 *editorial* side: what a reviewer is looking for, what's likely to be
 rejected, and how to write a PR that lands on the first try.
 

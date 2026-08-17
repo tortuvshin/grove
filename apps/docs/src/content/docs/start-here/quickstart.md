@@ -66,7 +66,13 @@ The deployable site is in `dist/`. Any static host serves it.
 
 ## 5. Deploy
 
-The default scaffold ships with a GitHub Pages workflow (`.github/workflows/deploy.yml`). To deploy elsewhere, see [Deployment](/deployment/overview/).
+The default scaffold ships with a GitHub Pages workflow (`.github/workflows/deploy.yml`). Before you push, preview the production build locally:
+
+```bash
+pnpm build && pnpm preview
+```
+
+When you're ready to ship, follow the [Deploy your site →](/deployment/overview/) guide — it covers GitHub Pages, Cloudflare, Netlify, and self-hosted setups.
 
 ## What just happened
 

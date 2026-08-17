@@ -181,7 +181,7 @@ The whole round-trip from issue-opened to record-live is usually under a week; f
 
 ## Related
 
-- [Author a record](/sources/records/) — the YAML schema a contributor needs
+- [Author a record](/content/author-a-record/) — the YAML schema a contributor needs
 - [Validation](/automation/validation/) — what `grove check` enforces
-- [Health classification](/sources/health-classification/) — the post-merge enrichment that follows
+- [Health classification](/content/health-classification/) — the post-merge enrichment that follows
 - [Contributor path](/maintainers/contributing/) — what a contributor sees

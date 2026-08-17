@@ -82,7 +82,7 @@ merges. Grove rebuilds the site and deploys.
 
 ## Next steps
 
-- **[Deploy your site →](/getting-started/deploy/)** — push to GitHub
+- **[Deploy your site →](/deployment/overview/)** — push to GitHub
   and ship it.
 - **[Configure your space →](/getting-started/configure/)** — branding, theme,
   taxonomy.

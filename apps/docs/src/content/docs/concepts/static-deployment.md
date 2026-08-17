@@ -18,6 +18,30 @@ Everything under `dist/` after `pnpm build`:
 - **`public/icons/**`** — the packaged icon set, with per-file ownership preserved.
 - **`manifest.json`** — referenced by the Starlight docs site via `<link rel="manifest">`. Consumers provide their own; the default scaffold does not.
 
+A typical `dist/` after `pnpm build` looks like this (abridged):
+
+```text
+dist/
+├── index.html                            # homepage
+├── projects/
+│   ├── index.html                        # project directory index
+│   └── <slug>/
+│       └── index.html                    # one per record
+├── collections/
+│   ├── index.html                        # collections index
+│   └── <slug>/index.html                 # one per collection
+├── data/
+│   ├── records.json                      # full record list (searchable)
+│   ├── records.full.json                 # record + body content
+│   └── site-config.json                  # identity, nav, facets
+├── sitemap.xml
+├── robots.txt
+├── llms.txt
+├── llms-full.txt
+├── og/<page>.png                         # satori-rendered OG cards
+└── _astro/                               # hashed CSS / JS
+```
+
 The build is deterministic: the same source files plus the same `grove.config.ts` produce the same output. There is no clock-dependent content unless the curator puts time strings in their data.
 
 ## Where the build runs

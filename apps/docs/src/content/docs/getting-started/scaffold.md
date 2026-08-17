@@ -73,7 +73,7 @@ after scaffold.
 
 ## Next steps
 
-- **[Add your first project →](/getting-started/add-your-first-project/)**
+- **[Add your first project →](/getting-started/first-record/)**
   — write a YAML record and see it appear.
-- **[Deploy your site →](/getting-started/deploy/)** — push to GitHub
+- **[Deploy your site →](/deployment/overview/)** — push to GitHub
   and ship it.

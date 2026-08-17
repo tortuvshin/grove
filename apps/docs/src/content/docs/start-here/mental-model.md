@@ -85,3 +85,15 @@ The scaffold ships with an Astro project at `src/pages/**`. Every consumer of Gr
 - **Do** edit `data/records/*.yml`, `data/taxonomy/*.yml`, `data/decisions.yml`, and `grove.config.ts`. These are yours.
 - **Do** check `data/generated/cleanup-report.json` to see what the maintenance loop flagged.
 - **Do** take ownership of `public/robots.txt` by editing it; Grove keeps your edits after the first run.
+
+## Inspect the three tiers
+
+The three tiers are visible in any scaffolded space. From the project root:
+
+```bash
+ls data/records/                        # author-owned YAML, hand-edited
+ls data/generated/                      # derived JSON, regenerated every build
+cat data/records/astro.yml | grep github  # refreshed facts (machine-written)
+```
+
+The first command lists files you edit. The second lists files `grove check` regenerates. The third greps a record's `github.*` block — populated by `grove sync github` and overwritten on the next run.

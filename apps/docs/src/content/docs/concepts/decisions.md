@@ -94,3 +94,34 @@ Lenses compose; a single record can carry several labels.
 
 - [Decisions file](/content/decisions/) — file shape and examples.
 - [Health classification](/content/health-classification/) — the `health.*` block and `cleanupCandidate: true`.
+
+## Worked example
+
+The minimal shape, hand-authored in `data/decisions.yml`:
+
+```yaml
+# data/decisions.yml — flat list form
+- slug: ollama
+  visibility: hide
+  reason: archived-upstream
+- slug: langchain
+  sortPriority: 100
+  pin: true
+- slug: llamaindex
+  renameSlug: llama-index
+```
+
+Each entry needs `slug` (matching a record) and at least one override field. `reason` is a curator note and is not surfaced publicly by default.
+
+### Fields reference
+
+| Field | Type | Description |
+|---|---|---|
+| `slug` | string | Original slug from the source record. |
+| `visibility` | `"keep"` \| `"hide"` | Force show/hide. |
+| `sortPriority` | number | Higher numbers float to the top. |
+| `pin` | boolean | Pin to the top of any list it appears in. |
+| `renameSlug` | string | Override the slug used in URLs (rare; use sparingly). |
+| `reason` | string | Curator note; not surfaced publicly by default. |
+
+When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibility: keep` but decision says `hide`), the decision wins.

@@ -110,3 +110,18 @@ A content page is for prose. A collection is for "I want a page that lists and s
 - [Curated collections](/content/collections/) — file shape and worked examples.
 - [Promote a filter to a collection](/discovery/promote/) — the `grove collection promote` workflow.
 - [`packages/core/src/collections.ts`](https://github.com/tortuvshin/grove) — query and ranking implementation.
+
+## How matching works
+
+`match.any.tags` and `match.any.categories` are OR-ed together. A record qualifies if it has any tag in `match.any.tags` **or** any category in `match.any.categories`. Combine with `scoreFloor` to gate by quality.
+
+If a record was added after the collection was created and now matches the predicate, it appears automatically — no re-authoring needed.
+
+## Generated outputs
+
+For each collection Grove emits:
+
+- A landing page at `/collections/<slug>/`
+- A curated subset of the homepage's *featured* lens when `order: featured`
+- JSON-LD `ItemList` schema with one `SoftwareApplication` per record
+- An entry in `llms.txt` and the sitemap

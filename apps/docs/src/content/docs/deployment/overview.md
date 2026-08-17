@@ -56,6 +56,17 @@ The scaffold ships a `deploy.yml` GitHub Actions workflow that builds and deploy
 
 See [Scheduled maintenance](/automation/scheduled/) for cadence and triggers.
 
+## Local preview
+
+Before pushing to a host, preview the production build locally:
+
+```bash
+pnpm build
+pnpm preview
+```
+
+The `preview` script serves `dist/` on a local port. Walk through every page, check every filter, click every link before you push.
+
 ## Related
 
 - [GitHub Pages](/deployment/github-pages/)

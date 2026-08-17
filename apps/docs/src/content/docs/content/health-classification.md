@@ -5,7 +5,7 @@ description: How to triage stale, archived, and unknown records, and what each h
 
 Health signals answer one question for the visitor of your directory: **"Should I trust this entry?"** A record with `status: active` and `tier: curated` says "yes, this is current and well-maintained". A record with `status: archived` says "the maintainer archived the upstream repo". A record with `status: unknown` says "we have no GitHub data — proceed with caution".
 
-This guide is for site maintainers triaging the periodic cleanup report. If you're a contributor adding a single record, see [Author a record](/sources/records/).
+This guide is for site maintainers triaging the periodic cleanup report. If you're a contributor adding a single record, see [Author a record](/content/author-a-record/).
 
 ## Where the health data comes from
 
@@ -16,7 +16,7 @@ There is one place health data lives:
 The health block in the record is the source of truth at render
 time. Don't hand-edit it — `grove sync github` will overwrite any
 manual changes on its next run. If you want to *override* the
-auto-derived value, write a [decision](/sources/decisions/).
+auto-derived value, write a [decision](/concepts/decisions/).
 (`data/health.yml` is a legacy format the validator no longer parses.)
 
 ## The status enum
@@ -36,7 +36,7 @@ Ten enum values; six are derived from GitHub metadata, four are editor-only. The
 | `quiet` | Editor-set; "watch this one" | decision-only | — |
 | `unavailable` | Editor-set; the upstream record could not be refreshed (404 / rate-limit / private) | decision-only | Treat like `archived` for visibility |
 
-The four decision-only values (`historical`, `needs_review`, `quiet`, `unavailable`) are not produced by `grove sync github`. If you see them in a record's `health.status`, it means someone wrote a `decisions.yml` entry that set it. See [Manage decisions](/sources/decisions/).
+The four decision-only values (`historical`, `needs_review`, `quiet`, `unavailable`) are not produced by `grove sync github`. If you see them in a record's `health.status`, it means someone wrote a `decisions.yml` entry that set it. See [Manage decisions](/concepts/decisions/).
 
 ## The tier enum
 
@@ -97,3 +97,13 @@ If you want a record to surface better in the index:
 - **The record is `hidden` but you want it back?** It got `hidden` because `status` is `archived` or `inactive`. Resolve the underlying status first (most often: the upstream repo came back to life). The next sync will reclassify it.
 
 See [Sync GitHub metadata](/automation/sync-github-deep-dive/) for the upstream data the signals are computed from.
+
+## How overrides work
+
+`health` is computed each sync, but the **effective visibility** is the union of `health.visibility` and the record's top-level `visibility` plus any `decisions.yml` entry. The highest-priority signal wins:
+
+1. `data/decisions.yml` (most explicit; curator decision).
+2. The record's top-level `visibility`.
+3. `health.visibility` (derived from GitHub).
+
+A curator who wants a record visible regardless of GitHub status sets `visibility: keep` on the record. A curator who wants a record hidden regardless of GitHub status sets `visibility: hide` or adds a `decisions.yml` entry.

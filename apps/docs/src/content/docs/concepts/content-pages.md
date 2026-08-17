@@ -73,3 +73,25 @@ The Astro integration does not own content pages' routes. They are consumer-owne
 
 - [Custom pages](/customize/pages/) — how consumers wire routes for the records, collections, and content pages the framework produces.
 - [Customize components](/customize/components/) — `MarkdownBody`, `MarkdownLayout`, and their props.
+
+## Frontmatter fields
+
+| Field | Type | Description |
+|---|---|---|
+| `title` | string | Page title (and `<h1>`). |
+| `description` | string | Used in `<meta name=description>` and OG. |
+| `slug` | string | URL slug; defaults to the filename. |
+| `template` | string | Default `page`. |
+| `hero` | object | Hero block — layout, title, subtitle, image. |
+
+## Markdown allowlist
+
+Content pages are sanitized with the **narrow** allowlist:
+
+- Standard markdown (headings, lists, links, emphasis)
+- Fenced code blocks (no inline styles)
+- Tables
+- Blockquotes
+- Images from allowed hosts (configured in `grove.config.ts`)
+
+Inline styles, scripts, and arbitrary iframes are stripped. For richer formatting, use a record's `content/records/<slug>.md`, which uses the wider allowlist.
