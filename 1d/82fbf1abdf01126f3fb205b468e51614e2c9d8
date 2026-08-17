@@ -1,0 +1,25 @@
+apps/docs/astro.config.mjs
+  s_3c2051f37590d0::t_92d63b5ab57f75 85-88,97-109
+  s_3c2051f37590d0::t_c3f84a31d9ffef 5
+  s_3c2051f37590d0::t_1c5bca8b5ea60a 110
+apps/docs/package.json
+  s_3c2051f37590d0::t_ec7bfd4bb51a63 19
+pnpm-lock.yaml
+  s_3c2051f37590d0::t_109ba2147eeceb 58-60,3446-3451,8005-8008
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1d82fbf1abdf01126f3fb205b468e51614e2c9d8",
+  "prompts": {},
+  "sessions": {
+    "s_3c2051f37590d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5fab7447-0cd3-45a4-9e66-1f63d0d55749",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
