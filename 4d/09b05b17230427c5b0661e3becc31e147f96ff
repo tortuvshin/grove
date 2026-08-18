@@ -1,0 +1,42 @@
+apps/docs/src/home-landing.test.ts
+  s_82d0e4d0ab8ba0::t_578840b07f0965 75,103-104,109-110
+biome.json
+  s_82d0e4d0ab8ba0::t_500f7726999df3 40-44
+apps/docs/src/docs-style-boundary.test.ts
+  s_82d0e4d0ab8ba0::t_578840b07f0965 1-122
+apps/docs/src/styles/global.css
+  s_82d0e4d0ab8ba0::t_578840b07f0965 1,3-8,10-27,30-33,36-46,72
+.github/CODEOWNERS
+  s_dfc67cbee8de42::t_962f3751e1ff5a 52-54
+apps/docs/src/styles/home.css
+  s_82d0e4d0ab8ba0::t_578840b07f0965 1-18,21-22,48-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "4d09b05b17230427c5b0661e3becc31e147f96ff",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_82d0e4d0ab8ba0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b29421f-913b-4647-8afa-dbfe14fab10e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_dfc67cbee8de42": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e04ec081-fbf8-46c1-97e8-6d0c0a50736a",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
