@@ -49,9 +49,9 @@
 /packages/astro/templates/**            @tortuvshin
 /packages/astro/test/**                 @tortuvshin
 
-# Starlight docs-site theme — credited to lucode/lucas-labs upstream
-# (see packages/starlight/THIRD_PARTY_LICENSES.md), so changes to the
-# component overrides or theme tokens deserve a deliberate review.
+# Starlight docs-site theme — maintained by grove, forked from the
+# lucode/lucas-labs upstream (see packages/starlight/THIRD_PARTY_LICENSES.md).
+# Changes to the component overrides or theme tokens deserve a deliberate review.
 /packages/starlight/**                  @tortuvshin
 /apps/docs/**                            @tortuvshin
 /apps/example/**                         @tortuvshin

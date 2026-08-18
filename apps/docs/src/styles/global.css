@@ -1,217 +1,50 @@
-/* Grove global stylesheet.
+/* Grove docs — global stylesheet.
  *
- * The block below mirrors @astrojs/starlight/style/props.css verbatim so
- * every --sl-* variable used in our custom Astro pages (landing + showcase
- * hub) resolves to the exact value the Starlight docs render with. If the
- * Starlight theme is updated, copy the new props.css over the block below.
+ * Scope: the Starlight-rendered docs surface only. It is loaded exclusively
+ * through `customCss` in astro.config.mjs, so nothing here reaches the
+ * landing page at `/` — that route is a standalone Astro build with its own
+ * stylesheet (src/styles/home.css) and its own theme. The two surfaces share
+ * no tokens, no reset, and no CSS bundle; neither is allowed to constrain the
+ * other's design.
  *
- * We also import Starlight's reset.css and util.css via the package's
- * installed path (the @astrojs/starlight package.json does not export
- * these directly, so we point at the resolved file inside node_modules).
- */
-@import '../../node_modules/@astrojs/starlight/style/reset.css';
-@import '../../node_modules/@astrojs/starlight/style/util.css';
-@import '../../node_modules/@astrojs/starlight/style/markdown.css';
+ * The @grove-dev/starlight theme package supplies all docs-wide design tokens
+ * (the cascade layers, --gray-*, --sl-color-*, the variant styling for
+ * Cards / Asides / Badges, etc.). Starlight already injects its own reset,
+ * util, and markdown stylesheets on every content page, so this file only
+ * carries what those two do not.
+ *
+ * Keep it thin. */
 
-@layer starlight.base {
-	:root,
-	::backdrop {
-		/* Colors (dark mode) */
-		--sl-color-white: hsl(0, 0%, 100%);
-		--sl-color-gray-1: hsl(224, 20%, 94%);
-		--sl-color-gray-2: hsl(224, 6%, 77%);
-		--sl-color-gray-3: hsl(224, 6%, 56%);
-		--sl-color-gray-4: hsl(224, 7%, 36%);
-		--sl-color-gray-5: hsl(224, 10%, 23%);
-		--sl-color-gray-6: hsl(224, 14%, 16%);
-		--sl-color-black: hsl(224, 10%, 10%);
-
-		--sl-hue-orange: 41;
-		--sl-color-orange-low: hsl(var(--sl-hue-orange), 39%, 22%);
-		--sl-color-orange: hsl(var(--sl-hue-orange), 82%, 63%);
-		--sl-color-orange-high: hsl(var(--sl-hue-orange), 82%, 87%);
-		--sl-hue-green: 101;
-		--sl-color-green-low: hsl(var(--sl-hue-green), 39%, 22%);
-		--sl-color-green: hsl(var(--sl-hue-green), 82%, 63%);
-		--sl-color-green-high: hsl(var(--sl-hue-green), 82%, 80%);
-		--sl-hue-blue: 234;
-		--sl-color-blue-low: hsl(var(--sl-hue-blue), 54%, 20%);
-		--sl-color-blue: hsl(var(--sl-hue-blue), 100%, 60%);
-		--sl-color-blue-high: hsl(var(--sl-hue-blue), 100%, 87%);
-		--sl-hue-purple: 281;
-		--sl-color-purple-low: hsl(var(--sl-hue-purple), 39%, 22%);
-		--sl-color-purple: hsl(var(--sl-hue-purple), 82%, 63%);
-		--sl-color-purple-high: hsl(var(--sl-hue-purple), 82%, 89%);
-		--sl-hue-red: 339;
-		--sl-color-red-low: hsl(var(--sl-hue-red), 39%, 22%);
-		--sl-color-red: hsl(var(--sl-hue-red), 82%, 63%);
-		--sl-color-red-high: hsl(var(--sl-hue-red), 82%, 87%);
-
-		--sl-color-accent-low: hsl(224, 54%, 20%);
-		--sl-color-accent: hsl(224, 100%, 60%);
-		--sl-color-accent-high: hsl(224, 100%, 85%);
-
-		--sl-color-text: var(--sl-color-gray-2);
-		--sl-color-text-accent: var(--sl-color-accent-high);
-		--sl-color-text-invert: var(--sl-color-accent-low);
-		--sl-color-bg: var(--sl-color-black);
-		--sl-color-bg-nav: var(--sl-color-gray-6);
-		--sl-color-bg-sidebar: var(--sl-color-gray-6);
-		--sl-color-bg-inline-code: var(--sl-color-gray-5);
-		--sl-color-bg-accent: var(--sl-color-accent-high);
-		--sl-color-hairline-light: var(--sl-color-gray-5);
-		--sl-color-hairline: var(--sl-color-gray-6);
-		--sl-color-hairline-shade: var(--sl-color-black);
-
-		--sl-color-backdrop-overlay: hsla(223, 13%, 10%, 0.66);
-
-		/* Shadows (dark mode) */
-		--sl-shadow-sm: 0px 1px 1px hsla(0, 0%, 0%, 0.12), 0px 2px 1px hsla(0, 0%, 0%, 0.24);
-		--sl-shadow-md: 0px 8px 4px hsla(0, 0%, 0%, 0.08), 0px 5px 2px hsla(0, 0%, 0%, 0.08),
-			0px 3px 2px hsla(0, 0%, 0%, 0.12), 0px 1px 1px hsla(0, 0%, 0%, 0.15);
-		--sl-shadow-lg: 0px 25px 7px hsla(0, 0%, 0%, 0.03), 0px 16px 6px hsla(0, 0%, 0%, 0.1),
-			0px 9px 5px hsla(223, 13%, 10%, 0.33), 0px 4px 4px hsla(0, 0%, 0%, 0.75),
-			0px 4px 2px hsla(0, 0%, 0%, 0.25);
-
-		/* Text size and line height */
-		--sl-text-2xs: 0.75rem;
-		--sl-text-xs: 0.8125rem;
-		--sl-text-sm: 0.875rem;
-		--sl-text-base: 1rem;
-		--sl-text-lg: 1.125rem;
-		--sl-text-xl: 1.25rem;
-		--sl-text-2xl: 1.5rem;
-		--sl-text-3xl: 1.8125rem;
-		--sl-text-4xl: 2.1875rem;
-		--sl-text-5xl: 2.625rem;
-		--sl-text-6xl: 4rem;
-
-		--sl-text-body: var(--sl-text-base);
-		--sl-text-body-sm: var(--sl-text-xs);
-		--sl-text-code: var(--sl-text-sm);
-		--sl-text-code-sm: var(--sl-text-xs);
-		--sl-text-h1: var(--sl-text-4xl);
-		--sl-text-h2: var(--sl-text-3xl);
-		--sl-text-h3: var(--sl-text-2xl);
-		--sl-text-h4: var(--sl-text-xl);
-		--sl-text-h5: var(--sl-text-lg);
-
-		--sl-line-height: 1.75;
-		--sl-line-height-headings: 1.2;
-
-		--sl-font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-			'Noto Sans', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-			'Noto Color Emoji';
-		--sl-font-system-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-			'Courier New', monospace;
-
-		/* Key layout values */
-		--sl-nav-height: 3.5rem;
-		--sl-nav-pad-x: 1rem;
-		--sl-nav-pad-y: 0.75rem;
-		--sl-mobile-toc-height: 3rem;
-		--sl-sidebar-width: 18.75rem;
-		--sl-sidebar-pad-x: 1rem;
-		--sl-content-width: 45rem;
-		--sl-content-pad-x: 1rem;
-		--sl-content-gap-y: 1rem;
-		--sl-menu-button-size: 2rem;
-
-		/* Border radii (Starlight default values) */
-		--sl-border-radius: 0.5rem;
-		--sl-border-radius-lg: 1rem;
-	}
-
-	:root[data-theme='light'],
-	[data-theme='light'] ::backdrop {
-		--sl-color-white: hsl(224, 10%, 10%);
-		--sl-color-gray-1: hsl(224, 14%, 16%);
-		--sl-color-gray-2: hsl(224, 10%, 23%);
-		--sl-color-gray-3: hsl(224, 7%, 36%);
-		--sl-color-gray-4: hsl(224, 6%, 56%);
-		--sl-color-gray-5: hsl(224, 6%, 77%);
-		--sl-color-gray-6: hsl(224, 20%, 94%);
-		--sl-color-gray-7: hsl(224, 19%, 97%);
-		--sl-color-black: hsl(0, 0%, 100%);
-
-		--sl-color-orange-high: hsl(var(--sl-hue-orange), 80%, 25%);
-		--sl-color-orange: hsl(var(--sl-hue-orange), 90%, 60%);
-		--sl-color-orange-low: hsl(var(--sl-hue-orange), 90%, 88%);
-		--sl-color-green-high: hsl(var(--sl-hue-green), 80%, 22%);
-		--sl-color-green: hsl(var(--sl-hue-green), 90%, 46%);
-		--sl-color-green-low: hsl(var(--sl-hue-green), 85%, 90%);
-		--sl-color-blue-high: hsl(var(--sl-hue-blue), 80%, 30%);
-		--sl-color-blue: hsl(var(--sl-hue-blue), 90%, 60%);
-		--sl-color-blue-low: hsl(var(--sl-hue-blue), 88%, 90%);
-		--sl-color-purple-high: hsl(var(--sl-hue-purple), 90%, 30%);
-		--sl-color-purple: hsl(var(--sl-hue-purple), 90%, 60%);
-		--sl-color-purple-low: hsl(var(--sl-hue-purple), 80%, 90%);
-		--sl-color-red-high: hsl(var(--sl-hue-red), 80%, 30%);
-		--sl-color-red: hsl(var(--sl-hue-red), 90%, 60%);
-		--sl-color-red-low: hsl(var(--sl-hue-red), 80%, 90%);
-
-		--sl-color-accent-high: hsl(234, 80%, 30%);
-		--sl-color-accent: hsl(234, 90%, 60%);
-		--sl-color-accent-low: hsl(234, 88%, 90%);
-
-		--sl-color-text-accent: var(--sl-color-accent);
-		--sl-color-text-invert: var(--sl-color-black);
-		--sl-color-bg-nav: var(--sl-color-gray-7);
-		--sl-color-bg-sidebar: var(--sl-color-bg);
-		--sl-color-bg-inline-code: var(--sl-color-gray-6);
-		--sl-color-bg-accent: var(--sl-color-accent);
-		--sl-color-hairline-light: var(--sl-color-gray-6);
-		--sl-color-hairline-shade: var(--sl-color-gray-6);
-
-		--sl-color-backdrop-overlay: hsla(225, 9%, 36%, 0.66);
-
-		--sl-shadow-sm: 0px 1px 1px hsla(0, 0%, 0%, 0.06), 0px 2px 1px hsla(0, 0%, 0%, 0.06);
-		--sl-shadow-md: 0px 8px 4px hsla(0, 0%, 0%, 0.03), 0px 5px 2px hsla(0, 0%, 0%, 0.03),
-			0px 3px 2px hsla(0, 0%, 0%, 0.06), 0px 1px 1px hsla(0, 0%, 0%, 0.06);
-		--sl-shadow-lg: 0px 25px 7px rgba(0, 0, 0, 0.01), 0px 16px 6px hsla(0, 0%, 0%, 0.03),
-			0px 9px 5px hsla(223, 13%, 10%, 0.08), 0px 4px 4px hsla(0, 0%, 0%, 0.16),
-			0px 4px 2px hsla(0, 0%, 0%, 0.04);
-	}
-
-	@media (min-width: 50em) {
-		:root {
-			--sl-nav-height: 4rem;
-			--sl-nav-pad-x: 1.5rem;
-			--sl-text-h1: var(--sl-text-5xl);
-			--sl-text-h2: var(--sl-text-4xl);
-			--sl-text-h3: var(--sl-text-3xl);
-			--sl-text-h4: var(--sl-text-2xl);
-		}
-	}
+/* Docs success/health accent. Starlight's stock green is a loud, fully
+ * saturated hue that reads as a highlight rather than a status: it shows up on
+ * card icons, success badges, and `:::tip` asides, where it out-shouts the
+ * neutral docs palette from @grove-dev/starlight. Toning the chroma down keeps
+ * the success/warn semantics readable without turning green into an accent
+ * colour the docs never otherwise use. */
+:root[data-theme='dark'] {
+	--green-low: oklch(28% 0.03 152);
+	--green: oklch(74% 0.08 152);
+	--green-high: oklch(88% 0.06 152);
 }
 
-/* Layout-level tokens that are *not* in Starlight: container widths.
- * The custom pages keep Starlight's `--sl-content-width` (45rem) for the
- * readable column and use a wider value only for the hero. */
-:root {
-	--g-container: var(--sl-content-width);
-	--g-container-wide: 72rem;
-	--g-container-narrow: 35rem;
+:root[data-theme='light'] {
+	--green-low: oklch(96% 0.025 152);
+	--green: oklch(48% 0.1 152);
+	--green-high: oklch(35% 0.06 152);
 }
 
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-}
-
-html,
+/* Bare-element defaults for the docs surface. Starlight's reset.css already
+ * covers box-sizing, margins, body font/colour/background/line-height, and
+ * `code`, so only what it leaves alone is declared here:
+ *
+ *  - `body`: the two typography declarations Starlight's reset omits, kept so
+ *    Firefox/macOS smoothing and legibility-tuned rendering stay as they were.
+ *  - `a`: Starlight styles links per component and inside
+ *    `.sl-markdown-content`, but ships no bare `a` reset — without this,
+ *    any anchor outside those scopes falls back to browser blue + underline.
+ *  - headings: markdown.css only styles `.sl-markdown-content :is(h1 to h6)`,
+ *    so headings rendered by page chrome need these here. */
 body {
-	margin: 0;
-	padding: 0;
-}
-
-body {
-	font-family: var(--sl-font-system);
-	background: var(--sl-color-bg);
-	color: var(--sl-color-text);
-	line-height: var(--sl-line-height);
-	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
 }
@@ -231,38 +64,9 @@ h4 {
 	line-height: var(--sl-line-height-headings);
 }
 
-p {
-	margin: 0;
-}
-
-code,
-pre {
-	font-family: var(--sl-font-system-mono);
-}
-
 /* `img, svg { display: block }` and `max-width: 100%` are already declared
  * by Starlight's reset.css and markdown.css inside cascade layers. Re-declaring
  * them at the top level of this stylesheet gives them higher cascade priority
  * than `@layer starlight.utils { .light\:sl-hidden { display: none } }`, which
  * silently breaks the dual dark/light logo swap in the site header. The rule
- * is intentionally omitted here — see BaseLayout.astro for the same note. */
-
-.g-container {
-	max-width: var(--g-container);
-	margin-inline: auto;
-	padding-inline: 1.5rem;
-}
-
-.g-container-wide {
-	max-width: var(--g-container-wide);
-}
-
-.g-container-narrow {
-	max-width: var(--g-container-narrow);
-	margin-inline: auto;
-	padding-inline: 1.5rem;
-}
-
-main {
-	min-height: 60vh;
-}
+ * is intentionally omitted here. */

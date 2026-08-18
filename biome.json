@@ -37,6 +37,11 @@
       "semicolons": "always"
     }
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "json": {
     "formatter": {
       "indentWidth": 2,

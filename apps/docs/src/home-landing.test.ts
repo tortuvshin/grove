@@ -72,6 +72,7 @@ describe("docs homepage (standalone Astro route)", () => {
 
 		// Pulls in only the standalone stylesheet — no Starlight tokens
 		// (the home uses components/home/Header.astro, which is Tailwind-only).
+		// The full boundary is enforced in docs-style-boundary.test.ts.
 		expect(layoutSource).toContain("import '../styles/home.css'");
 		expect(layoutSource).not.toContain("import '../styles/global.css'");
 		expect(layoutSource).not.toContain("Sidebar");
@@ -99,14 +100,14 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(homeCss).toContain("linear-gradient(120deg, #7dd3d8 8%, #27b7c8 58%, #4ac987 96%)");
 		expect(homeCss).not.toMatch(/#646cff|#41d1ff|#bd34fe/i);
 
-		// Same font story as the docs (Starlight defaults): the system stack,
-		// no webfont imports.
+		// The landing page's own font decision: the system stack, no webfont
+		// imports, so the first paint is never blocked on a font request.
 		expect(homeCss).toContain("--font-sans: ui-sans-serif");
 		expect(homeCss).toContain("--font-mono: ui-monospace");
 		expect(homeCss).not.toMatch(/@fontsource|fraunces|@font-face/i);
 
-		// Radius ladder matches the docs standard
-		// (packages/starlight/styles/base.css, --radius: 0.625rem).
+		// The landing page's own radius ladder. Not derived from the docs
+		// theme -- the two surfaces are independent (docs-style-boundary.test.ts).
 		expect(homeCss).toMatch(/--radius-lg:\s*0\.625rem/);
 		expect(homeCss).toMatch(/--radius-2xl:\s*0\.875rem/);
 
