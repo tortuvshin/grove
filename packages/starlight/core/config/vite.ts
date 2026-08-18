@@ -1,13 +1,13 @@
 import type { ViteUserConfig } from 'astro';
-import type { LucodeStarlightConfig } from './schemas';
+import type { GroveStarlightConfig } from './schemas';
 
-export function vitePlugin(config: LucodeStarlightConfig): VitePlugin {
-    const moduleId = 'virtual:lucode-starlight-config';
+export function vitePlugin(config: GroveStarlightConfig): VitePlugin {
+    const moduleId = 'virtual:grove-starlight-config';
     const resolvedModuleId = `\0${moduleId}`;
     const moduleContent = `export default ${JSON.stringify(config)}`;
 
     return {
-        name: 'vite-plugin-lucode-starlight',
+        name: 'vite-plugin-grove-starlight',
         load(id) {
             return id === resolvedModuleId ? moduleContent : undefined;
         },

@@ -9,9 +9,9 @@ description: Type-level reference for the @grove-dev/starlight plugin used by Gr
 import grove from '@grove-dev/starlight';
 ```
 
-> The plugin's default export is also still importable as `lucode` for
-> back-compat with V0 docs that pre-date the Grove rebrand. New code
-> should import as `grove`.
+> The plugin's default export is importable as `grove` for direct use.
+> Earlier V0 docs imported the package under its pre-rebrand name; that
+> alias was removed in the Grove rebrand.
 
 Use the default export inside Starlight's `plugins` array:
 
@@ -30,9 +30,6 @@ type GroveStarlightUserConfig = {
   footerText?: string;
   warnOverrides?: boolean;
 };
-
-/** @deprecated Use GroveStarlightUserConfig. */
-type LucodeStarlightUserConfig = GroveStarlightUserConfig;
 ```
 
 ### `navLinks`
@@ -109,9 +106,6 @@ type GroveDocsFrontmatter = {
   };
 };
 
-/** @deprecated Use GroveDocsFrontmatter. */
-type LucodeDocsFrontmatter = GroveDocsFrontmatter;
-
 type ShadcnAction = {
   text: string;
   link: string;
@@ -126,7 +120,7 @@ type ShadcnAction = {
 ## Package Exports
 
 ```ts
-import lucode from '@grove-dev/starlight';
+import grove from '@grove-dev/starlight';
 import { ExtendDocsSchema } from '@grove-dev/starlight/schema';
 import { ContainerSection, LinkButton } from '@grove-dev/starlight/components';
 ```

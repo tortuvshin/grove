@@ -21,18 +21,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "components",
-    "core",
-    "styles",
-    "global.d.ts",
-    "index.ts",
-    "schema.ts",
-    "user-components.ts",
-    "virtual.d.ts",
-    "README.md",
-    "THIRD_PARTY_LICENSES.md"
-  ],
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema.ts",
@@ -59,14 +47,10 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
-    "@astrojs/starlight": ">=0.38.3",
-    "astro": ">=5.0.0"
+    "@astrojs/starlight": ">=0.41.4"
   },
   "dependencies": {
     "@pagefind/default-ui": "^1.5.2",
     "marked": "^18.0.2"
-  },
-  "scripts": {
-    "test": "cd ../.. && pnpm exec vitest run --project starlight"
   }
 }

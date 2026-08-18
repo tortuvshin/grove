@@ -1,14 +1,30 @@
 ---
-import userConfig from 'virtual:lucode-starlight-config';
+import { AstroError } from 'astro/errors';
+import { marked } from 'marked';
+import userConfig from 'virtual:grove-starlight-config';
+import starlightConfig from 'virtual:starlight/user-config';
+import { createLocaleLookup, resolveLocalizedString } from '../../core/i18n';
 import Drawer from './parts/Drawer.astro';
 
-const { hasSidebar } = Astro.locals.starlightRoute;
+const { hasSidebar, lang, locale } = Astro.locals.starlightRoute;
 
-// `footerText` is a plain string from the consumer's `astro.config.mjs`.
-// Astro auto-escapes interpolated text, so emitting it directly is safe
-// and avoids the XSS sink that `marked.parseInline` + `set:html` would
-// create. Consumers who want rich formatting should render Markdown in
-// their own component instead of leaning on this slot.
+const localeKeys = createLocaleLookup({
+    lang,
+    locale: Astro.currentLocale ?? locale,
+    defaultLang: starlightConfig.defaultLocale?.lang,
+    defaultLocale: starlightConfig.defaultLocale?.locale,
+});
+
+let footerText: string;
+
+try {
+    footerText = resolveLocalizedString(userConfig.footerText, localeKeys);
+} catch (error) {
+    throw new AstroError(
+        error instanceof Error ? error.message : 'Invalid footerText localization.',
+        'Update the Grove config so footerText includes a key for the default language.'
+    );
+}
 ---
 
 <div data-slot="layout">
@@ -39,7 +55,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     </main>
 
     <footer>
-        <div data-slot="footer-text">{userConfig.footerText}</div>
+        <div data-slot="footer-text" set:html={marked.parseInline(footerText)} />
     </footer>
 </div>
 

@@ -1,4 +1,4 @@
-@layer lucode {
+@layer grove {
     /* theme */
     :root {
         --tracking-tight: -0.025em;
@@ -10,6 +10,7 @@
         --radius: 0.625rem;
         --header-height: calc(var(--spacing) * 14);
         --sidebar-width: 18rem;
+        --content-max-width: 40rem;
         --container-max-width: 1600px;
 
         /* starlight color mappings */
@@ -54,6 +55,7 @@
         --muted-foreground: var(--gray-3);
         --accent: var(--gray-5);
         --accent-foreground: var(--foreground);
+        --destructive: var(--red);
         --border: var(--gray-6);
         --input: var(--gray-8);
         --ring: var(--gray-4);
@@ -330,11 +332,6 @@
     /* built-in Starlight Cards and LinkCards */
     .sl-markdown-content .card-grid {
         gap: 1rem;
-        grid-auto-rows: 1fr;
-    }
-
-    .sl-markdown-content .card-grid > * {
-        height: 100%;
     }
 
     .sl-markdown-content :is(.card, .sl-link-card) {
@@ -344,7 +341,6 @@
         background-color: var(--code-background);
         box-shadow: none;
         transition: background-color 0.15s;
-        height: 100%;
     }
 
     .sl-markdown-content :is(.card, .sl-link-card):hover {

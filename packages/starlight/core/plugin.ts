@@ -3,30 +3,32 @@ import { override, COMPONENT_OVERRIDES } from './config/override';
 import { expressiveCode } from './config/expresive-code';
 import { vitePlugin } from './config/vite';
 import {
-    LucodeStarlightConfigSchema,
-    type LucodeStarlightConfig,
-    type LucodeStarlightUserConfig,
+    GroveStarlightConfigSchema,
+    type GroveStarlightConfig,
+    type GroveStarlightUserConfig,
 } from './config/schemas';
 
-const parseConfig = (userConfig?: LucodeStarlightUserConfig): LucodeStarlightConfig => {
-    const parsedConfig = LucodeStarlightConfigSchema.safeParse(userConfig ?? {});
+const parseConfig = (userConfig?: GroveStarlightUserConfig): GroveStarlightConfig => {
+    const parsedConfig = GroveStarlightConfigSchema.safeParse(userConfig ?? {});
 
     if (!parsedConfig.success) {
         throw new Error(
-            `The provided plugin configuration for @grove-dev/starlight is invalid.\n${parsedConfig.error.issues.map((issue) => issue.message).join('\n')}`
+            `The provided plugin configuration for grove-starlight is invalid.\n${parsedConfig.error.issues.map((issue) => issue.message).join('\n')}`
         );
     }
 
     return parsedConfig.data;
 };
 
-const plugin = (userConfig?: LucodeStarlightUserConfig): StarlightPlugin =>
+const plugin = (userConfig: GroveStarlightUserConfig = {}): StarlightPlugin =>
     ({
-        name: '@grove-dev/starlight',
+        name: 'grove-starlight',
         hooks: {
             'config:setup': ({ config, logger, updateConfig, addIntegration }) => {
+                const pluginConfig = parseConfig(userConfig);
+
                 updateConfig({
-                    components: override(config, COMPONENT_OVERRIDES, logger),
+                    components: override(config, pluginConfig, COMPONENT_OVERRIDES, logger),
                     customCss: [
                         ...(config.customCss ?? []),
                         '@grove-dev/starlight/styles/layers',
@@ -37,11 +39,11 @@ const plugin = (userConfig?: LucodeStarlightUserConfig): StarlightPlugin =>
                 });
 
                 addIntegration({
-                    name: '@grove-dev/starlight/integration',
+                    name: 'grove-starlight-integration',
                     hooks: {
                         'astro:config:setup': ({ updateConfig }) => {
                             updateConfig({
-                                vite: { plugins: [vitePlugin(parseConfig(userConfig))] },
+                                vite: { plugins: [vitePlugin(pluginConfig)] },
                             });
                         },
                     },
