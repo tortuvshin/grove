@@ -1,0 +1,110 @@
+packages/starlight/components/overrides/parts/NavBar.astro
+  s_dfc67cbee8de42::t_1de70153550953 2
+  s_dfc67cbee8de42::t_e890191b7f261e 5,9,11-16,28-29
+packages/starlight/styles/layers.css
+  s_dfc67cbee8de42::t_82352df4ce3dae 1
+packages/starlight/styles/theme.css
+  s_dfc67cbee8de42::t_a4ecd9eb06884e 1
+  s_dfc67cbee8de42::t_50ac7b73b56eb9 19
+packages/starlight/styles/base.css
+  s_dfc67cbee8de42::t_8e46030ca4ca94 1
+  s_dfc67cbee8de42::t_44ed7449981240 13,58
+packages/starlight/components/overrides/PageFrame.astro
+  s_dfc67cbee8de42::t_bcd53189413dd3 4
+  s_dfc67cbee8de42::t_4082aa9ba1a9da 25
+  s_dfc67cbee8de42::t_d3b28683dbd629 2-3
+  s_dfc67cbee8de42::t_c5c01880a1cf9a 5-6
+  s_dfc67cbee8de42::t_6cf906f09eb889 22-24
+  s_dfc67cbee8de42::t_1fc9ccd91f832b 26-27
+  s_dfc67cbee8de42::t_d11dbbb35219a1 9,11-21,58
+packages/starlight/core/plugin.ts
+  s_dfc67cbee8de42::t_fb8a146f53698d 6-8,11-12,16,23,25,28-29,31,42
+  s_dfc67cbee8de42::t_587c0dc9863b0d 46
+packages/starlight/core/config/vite.ts
+  s_dfc67cbee8de42::t_d785373728edd2 2,4-5,10
+packages/starlight/components/overrides/ThemeSelect.astro
+  s_dfc67cbee8de42::t_2ea46d9fe6c42d 52
+  s_dfc67cbee8de42::t_04f1970dc4aafc 140-141
+  s_dfc67cbee8de42::t_faca61c2ac0f55 5
+packages/starlight/package.json
+  h_62cffde5d182b0 50
+packages/starlight/components/overrides/PageTitle.astro
+  s_dfc67cbee8de42::t_947e8701127571 4
+packages/starlight/components/overrides/parts/Drawer.astro
+  s_dfc67cbee8de42::t_f5b754a35850b6 2
+  s_dfc67cbee8de42::t_7fbfce10d83035 3
+  s_dfc67cbee8de42::t_4dac7900437b0c 5-7,10-16,37
+apps/docs/src/content/docs/reference/plugin-api.md
+  s_dfc67cbee8de42::t_ee7bda7237f250 12-14
+  s_dfc67cbee8de42::t_19eb406ed22c8c 123
+packages/starlight/core/config/override.ts
+  s_dfc67cbee8de42::t_c5211881b71e00 3,29
+  s_dfc67cbee8de42::t_9216f46f2588c1 43
+  s_dfc67cbee8de42::t_8baa7784cb37c1 40-42
+  s_dfc67cbee8de42::t_80dc560a0ddbba 44-45
+  s_dfc67cbee8de42::t_98f6075c95ce2e 38-39
+packages/starlight/core/config/schemas.ts
+  s_dfc67cbee8de42::t_bba2236e327d1c 73
+  s_dfc67cbee8de42::t_8cbe07ce816581 77-78
+  s_dfc67cbee8de42::t_c27841105eb431 49
+  s_dfc67cbee8de42::t_b0619274b635de 50
+  s_dfc67cbee8de42::t_31cd900e6888ee 21,23-26,29-35,58-68,70
+packages/starlight/core/config/docs-schema.ts
+  s_dfc67cbee8de42::t_027264409118a3 48-52
+  s_dfc67cbee8de42::t_17372cbae7df2a 8-13
+  s_dfc67cbee8de42::t_6067a6d21972cb 56
+  s_dfc67cbee8de42::t_2f2abe944cedaa 5-7
+  s_dfc67cbee8de42::t_55b64c94046cb7 14-16,45-47
+  s_dfc67cbee8de42::t_b049cf7f8c95d9 53-55
+  s_dfc67cbee8de42::t_50c39645fe81ca 57-58
+  s_dfc67cbee8de42::t_35ea475b3b5a02 1-4,17-44
+packages/starlight/virtual.d.ts
+  s_dfc67cbee8de42::t_5197d9736cd42d 1-3
+packages/starlight/components/custom/LinkButton.astro
+  h_62cffde5d182b0 4-16,18,20,24-28,35,37,44-48,50-57,62,67-69,71-76,78-83,85-89,91-107,109-111,113-118,120-122,124-129,131-133,137-142,145-150,153-159,162-167,170-175,178-184
+packages/starlight/components/custom/dropdown/DropdownContent.astro
+  h_62cffde5d182b0 62,137-156,158-176
+packages/starlight/components/custom/dropdown/DropdownItem.astro
+  h_62cffde5d182b0 56-61
+packages/starlight/components/custom/dropdown/DropdownTrigger.astro
+  h_62cffde5d182b0 3,11
+packages/starlight/components/overrides/Hero.astro
+  h_62cffde5d182b0 5,10-21,24,26-28,36-43,48,78,82,101-102
+packages/starlight/components/overrides/PageSidebar.astro
+  h_62cffde5d182b0 19
+packages/starlight/components/overrides/Sidebar.astro
+  h_62cffde5d182b0 2,14-17
+packages/starlight/components/overrides/SocialIcons.astro
+  h_62cffde5d182b0 35-37
+packages/starlight/components/overrides/TwoColumnContent.astro
+  h_62cffde5d182b0 45
+packages/starlight/components/overrides/parts/SidebarSublist.astro
+  h_62cffde5d182b0 2-3,5,12,20,29-42,82-135
+packages/starlight/core/i18n.ts
+  h_62cffde5d182b0 1-11,13,15-18,20-27,29-31,33-37,39-51,53-168,170-175
+packages/starlight/core/sidebar.ts
+  h_62cffde5d182b0 1-22
+packages/starlight/schema.ts
+  h_62cffde5d182b0 2-6,27-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d3b4ed8f119f1899401d11529440a2affdc5b2b0",
+  "prompts": {},
+  "humans": {
+    "h_62cffde5d182b0": {
+      "author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_dfc67cbee8de42": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e04ec081-fbf8-46c1-97e8-6d0c0a50736a",
+        "model": "MiniMax-M3"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
