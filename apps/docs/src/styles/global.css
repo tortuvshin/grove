@@ -33,36 +33,21 @@
 	--green-high: oklch(35% 0.06 152);
 }
 
-/* Bare-element defaults for the docs surface. Starlight's reset.css already
- * covers box-sizing, margins, body font/colour/background/line-height, and
- * `code`, so only what it leaves alone is declared here:
+/* No unlayered element rules live here.
  *
- *  - `body`: the two typography declarations Starlight's reset omits, kept so
- *    Firefox/macOS smoothing and legibility-tuned rendering stay as they were.
- *  - `a`: Starlight styles links per component and inside
- *    `.sl-markdown-content`, but ships no bare `a` reset — without this,
- *    any anchor outside those scopes falls back to browser blue + underline.
- *  - headings: markdown.css only styles `.sl-markdown-content :is(h1 to h6)`,
- *    so headings rendered by page chrome need these here. */
-body {
-	-moz-osx-font-smoothing: grayscale;
-	text-rendering: optimizeLegibility;
-}
-
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
-h1,
-h2,
-h3,
-h4 {
-	margin: 0;
-	font-weight: 700;
-	letter-spacing: -0.015em;
-	line-height: var(--sl-line-height-headings);
-}
+ * Layer order is `@layer starlight, grove` (packages/starlight/styles/layers.css),
+ * and unlayered CSS outranks every layer regardless of specificity. The element
+ * resets this file used to carry — `a { color: inherit }`, `h1..h4`, `body`,
+ * `* { box-sizing }` — belonged to the deleted BaseLayout chrome, and while they
+ * sat here unlayered they silently overrode the theme: `a { color: inherit }`
+ * beat `@layer starlight.components .sl-link-button.primary { color: ... }`,
+ * leaving primary LinkButtons with near-invisible label text, and
+ * `* { box-sizing: border-box }` beat the grove layer's deliberate
+ * `content-box` on card icons.
+ *
+ * Anything added here must be either a custom-property override (safe: those
+ * cascade through the theme's own layered rules, like the green above) or an
+ * explicitly layered rule. Never a bare element selector. */
 
 /* `img, svg { display: block }` and `max-width: 100%` are already declared
  * by Starlight's reset.css and markdown.css inside cascade layers. Re-declaring

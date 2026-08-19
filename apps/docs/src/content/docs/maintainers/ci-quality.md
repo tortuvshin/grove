@@ -84,4 +84,4 @@ Neither Dependabot nor Renovate is configured. Renovate is the recommended choic
 - [Contributing](/maintainers/contributing/)
 - [Security](/maintainers/security/)
 - [Release process](/maintainers/release-process/)
-- [Roadmap](/roadmap/)
+- [Roadmap](/project/roadmap/)

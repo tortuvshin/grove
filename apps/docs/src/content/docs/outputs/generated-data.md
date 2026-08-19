@@ -3,8 +3,6 @@ title: Generated data files
 description: JSON datasets and review artifacts written under data/generated/.
 ---
 
-# Generated data files
-
 `data/generated/` is rewritten on every `grove check` (or every Astro build). The contents are reproducible from the source files plus `grove.config.ts`. Don't edit by hand; **do** consume them.
 
 ## Files

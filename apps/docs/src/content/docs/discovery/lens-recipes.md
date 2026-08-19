@@ -3,8 +3,6 @@ title: Lens recipes
 description: Reusable, opinionated views over the record set.
 ---
 
-# Lens recipes
-
 A lens is an opinionated view over the record set, computed at build time. Grove ships four built-in lenses — `featured`, `hot`, `new`, `mature` — and supports custom lenses through `@grove-dev/core`'s programmatic API.
 
 ## Built-in lenses

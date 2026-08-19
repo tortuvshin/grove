@@ -3,8 +3,6 @@ title: Generate README
 description: Render an awesome-list formatted README block bounded by sentinels.
 ---
 
-# Generate README
-
 `grove readme generate` renders a `sindresorhus/awesome`-style README from the same record stream used by `llms.txt`. The command writes it between `<!-- grove-readme:start -->` and `<!-- grove-readme:end -->` sentinels in `README.md`. Text outside the sentinel block survives untouched.
 
 ## Sentinel block

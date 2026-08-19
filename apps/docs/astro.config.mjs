@@ -14,12 +14,20 @@ export default defineConfig({
     // by Astro at build time and served as 301s by the static host.
     redirects: {
         '/concepts/philosophy/':            '/start-here/why-grove/',
+        // Mental model was folded into the files-are-canonical page, which
+        // now carries the full three-tier breakdown.
+        '/start-here/mental-model/':        '/concepts/files-canonical/',
         '/concepts/records/':               '/content/author-a-record/',
         '/concepts/taxonomy/':              '/content/taxonomy-files/',
         '/concepts/health/':                '/content/health-classification/',
-        '/blueprints/project-directory/':   '/concepts/blueprints/',
-        '/blueprints/resource-hub/':        '/concepts/blueprints/',
-        '/blueprints/ecosystem-map/':       '/concepts/blueprints/',
+        // The "three blueprints" page was retired: only `project-directory`
+        // is supported today, so the docs no longer teach the other two.
+        // These legacy URLs now land on the schema reference, which states
+        // the `kind` each blueprint accepts without promoting the feature.
+        '/blueprints/project-directory/':   '/reference/record-schema/',
+        '/blueprints/resource-hub/':        '/reference/record-schema/',
+        '/blueprints/ecosystem-map/':       '/reference/record-schema/',
+        '/concepts/blueprints/':            '/reference/record-schema/',
         '/sources/records/':                '/content/author-a-record/',
         '/sources/taxonomy-files/':         '/content/taxonomy-files/',
         '/sources/collections/':            '/concepts/collections/',
@@ -144,51 +152,97 @@ export default defineConfig({
                     }),
                 },
             ],
+            // Sections are ordered by reader intent: understand it, build
+            // with it, automate it, ship it, then look things up. Sidebar
+            // groups are decoupled from file paths (Starlight resolves items
+            // by `slug`), so regrouping here never changes a URL.
             sidebar: [
                 {
                     label: 'Start here',
                     items: [
                         { label: 'Introduction', slug: 'introduction' },
                         { label: 'Quickstart', slug: 'start-here/quickstart' },
-                        { label: 'Mental model', slug: 'start-here/mental-model' },
                         { label: 'Why Grove', slug: 'start-here/why-grove' },
-                        { label: 'Glossary', slug: 'start-here/glossary' },
+                        { label: 'Files are canonical', slug: 'concepts/files-canonical' },
                     ],
                 },
                 {
+                    // 16 how-to pages would be unreadable as a flat list, so
+                    // they are grouped by the job the reader is doing.
                     label: 'Guides',
                     items: [
-                        { label: 'Scaffold a space', slug: 'getting-started/scaffold' },
-                        { label: 'Install the CLI', slug: 'getting-started/install-cli' },
-                        { label: 'Author your first record', slug: 'getting-started/first-record' },
-                        { label: 'Add a record', slug: 'content/author-a-record' },
-                        { label: 'Organize with taxonomy', slug: 'content/taxonomy-files' },
-                        { label: 'Curate with decisions', slug: 'concepts/decisions' },
-                        { label: 'Build collections', slug: 'concepts/collections' },
-                        { label: 'Add content pages', slug: 'concepts/content-pages' },
-                        { label: 'Triage health signals', slug: 'content/health-classification' },
-                        { label: 'Configure your space', slug: 'getting-started/configure' },
+                        {
+                            label: 'Set up',
+                            items: [
+                                { label: 'Install the CLI', slug: 'getting-started/install-cli' },
+                                { label: 'Scaffold a space', slug: 'getting-started/scaffold' },
+                                { label: 'Configure your space', slug: 'getting-started/configure' },
+                            ],
+                        },
+                        {
+                            label: 'Author',
+                            items: [
+                                { label: 'Author your first record', slug: 'getting-started/first-record' },
+                                { label: 'Walkthrough: add a record', slug: 'guides/walkthrough-add-record' },
+                                { label: 'Add a record', slug: 'content/author-a-record' },
+                                { label: 'Organize with taxonomy', slug: 'content/taxonomy-files' },
+                                { label: 'Add content pages', slug: 'concepts/content-pages' },
+                            ],
+                        },
+                        {
+                            label: 'Curate',
+                            items: [
+                                { label: 'Curate with decisions', slug: 'concepts/decisions' },
+                                { label: 'Build collections', slug: 'concepts/collections' },
+                                { label: 'Walkthrough: curate a collection', slug: 'guides/walkthrough-curate-collection' },
+                                { label: 'Triage health signals', slug: 'content/health-classification' },
+                                { label: 'Browse pages', slug: 'discovery/browse' },
+                                { label: 'Lens recipes', slug: 'discovery/lens-recipes' },
+                                { label: 'Promote a filter to a collection', slug: 'discovery/promote' },
+                            ],
+                        },
+                        {
+                            // These two read as framework-contributor docs
+                            // because of their `maintainers/` path, but both
+                            // are written for the person running a Grove-powered
+                            // directory — a reader, not a Grove contributor.
+                            label: 'Run your directory',
+                            items: [
+                                { label: 'Contributing', slug: 'maintainers/contributing' },
+                                { label: 'Governance', slug: 'maintainers/governance' },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    label: 'Automation',
+                    items: [
+                        { label: 'grove check', slug: 'automation/check' },
+                        { label: 'Sync GitHub metadata', slug: 'automation/sync-github' },
+                        { label: 'Sync GitHub deep-dive', slug: 'automation/sync-github-deep-dive' },
+                        { label: 'Walkthrough: sync GitHub', slug: 'guides/walkthrough-sync-github' },
+                        { label: 'Sync contributors', slug: 'automation/sync-contributors' },
+                        { label: 'Scheduled workflows', slug: 'automation/scheduled' },
+                        { label: 'Cleanup report', slug: 'automation/cleanup' },
+                        { label: 'Audit', slug: 'automation/audit' },
+                        { label: 'Generate README', slug: 'automation/readme' },
+                        { label: 'Community submissions', slug: 'automation/submissions' },
+                        { label: 'GitHub workflows', slug: 'outputs/workflows' },
+                    ],
+                },
+                {
+                    label: 'Deploy',
+                    items: [
                         { label: 'Deploy your site', slug: 'deployment/overview' },
+                        { label: 'Static deployment', slug: 'concepts/static-deployment' },
                         { label: 'GitHub Pages', slug: 'deployment/github-pages' },
                         { label: 'Cloudflare', slug: 'deployment/cloudflare' },
                         { label: 'Netlify', slug: 'deployment/netlify' },
                         { label: 'Self-hosted', slug: 'deployment/self-hosted' },
-                        { label: 'Three blueprints', slug: 'concepts/blueprints' },
-                        { label: 'Files are canonical', slug: 'concepts/files-canonical' },
-                        { label: 'Static deployment', slug: 'concepts/static-deployment' },
                     ],
                 },
                 {
-                    label: 'Walkthroughs',
-                    collapsed: true,
-                    items: [
-                        { label: 'Add your first record', slug: 'guides/walkthrough-add-record' },
-                        { label: 'Curate a collection', slug: 'guides/walkthrough-curate-collection' },
-                        { label: 'Sync GitHub metadata', slug: 'guides/walkthrough-sync-github' },
-                    ],
-                },
-                {
-                    label: 'Customize',
+                    label: 'Customization',
                     items: [
                         { label: 'Theme tokens', slug: 'customize/theme' },
                         { label: 'Branding', slug: 'customize/branding' },
@@ -200,53 +254,49 @@ export default defineConfig({
                     ],
                 },
                 {
+                    // Grove's core promise is one source producing many
+                    // outputs, so these get their own section rather than
+                    // being buried at the bottom of Reference.
+                    label: 'Outputs',
+                    items: [
+                        { label: 'Files & outputs', slug: 'outputs/overview' },
+                        { label: 'LLM & AI surfaces', slug: 'outputs/llm' },
+                        { label: 'SEO & social', slug: 'outputs/seo' },
+                        { label: 'Site metadata', slug: 'outputs/site-meta' },
+                        { label: 'Generated data files', slug: 'outputs/generated-data' },
+                    ],
+                },
+                {
                     label: 'Reference',
                     items: [
                         { label: 'grove.config.ts', slug: 'reference/config' },
                         { label: 'Record schema', slug: 'reference/record-schema' },
                         { label: 'CLI reference', slug: 'reference/cli' },
                         { label: 'Astro components', slug: 'reference/components' },
-                        { label: 'Files & outputs', slug: 'outputs/overview' },
-                        { label: 'LLM & AI surfaces', slug: 'outputs/llm' },
-                        { label: 'SEO & social', slug: 'outputs/seo' },
-                        { label: 'Site metadata', slug: 'outputs/site-meta' },
-                        { label: 'Generated data files', slug: 'outputs/generated-data' },
-                        { label: 'GitHub workflows', slug: 'outputs/workflows' },
+                        { label: 'Migration guide', slug: 'reference/migration' },
+                        { label: 'Glossary', slug: 'start-here/glossary' },
                     ],
                 },
                 {
-                    label: 'Advanced',
+                    label: 'Extend',
                     collapsed: true,
                     items: [
-                        { label: 'Sync GitHub metadata', slug: 'automation/sync-github' },
-                        { label: 'Sync GitHub deep-dive', slug: 'automation/sync-github-deep-dive' },
-                        { label: 'Sync contributors', slug: 'automation/sync-contributors' },
-                        { label: 'Scheduled workflows', slug: 'automation/scheduled' },
-                        { label: 'Cleanup report', slug: 'automation/cleanup' },
-                        { label: 'Audit', slug: 'automation/audit' },
-                        { label: 'Generate README', slug: 'automation/readme' },
-                        { label: 'Community submissions', slug: 'automation/submissions' },
-                        { label: 'grove check', slug: 'automation/check' },
-                        { label: 'Browse pages', slug: 'discovery/browse' },
-                        { label: 'Lens recipes', slug: 'discovery/lens-recipes' },
-                        { label: 'Promote a filter to a collection', slug: 'discovery/promote' },
                         { label: 'Programmatic API', slug: 'reference/api-core' },
                         { label: 'Plugin API', slug: 'reference/plugin-api' },
                         { label: 'Plugin author guide', slug: 'reference/plugin-author-guide' },
-                        { label: 'Migration guide', slug: 'reference/migration' },
-                        { label: 'Contributing as a reviewer', slug: 'maintainers/contributing' },
-                        { label: 'Governance', slug: 'maintainers/governance' },
-                        { label: 'CI & quality', slug: 'maintainers/ci-quality' },
-                        { label: 'Release process', slug: 'maintainers/release-process' },
-                        { label: 'Security', slug: 'maintainers/security' },
                     ],
                 },
                 {
-                    label: 'Resources',
+                    // Grove's own engineering process — for people working on
+                    // the framework, not on a site built with it. Roadmap and
+                    // FAQ are reachable from the top nav instead.
+                    label: 'Project',
+                    collapsed: true,
                     items: [
-                        { label: 'Roadmap', slug: 'project/roadmap' },
-                        { label: 'FAQ', slug: 'project/faq' },
                         { label: 'Architecture', slug: 'project/architecture' },
+                        { label: 'CI & quality', slug: 'maintainers/ci-quality' },
+                        { label: 'Release process', slug: 'maintainers/release-process' },
+                        { label: 'Security', slug: 'maintainers/security' },
                     ],
                 },
             ],

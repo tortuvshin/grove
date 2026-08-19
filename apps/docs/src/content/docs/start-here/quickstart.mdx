@@ -3,110 +3,39 @@ title: Quickstart
 description: Get a Grove site running in under ten minutes.
 ---
 
-import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
 
 # Quickstart
 
-The fastest path to a working Grove site. The full tutorial lives in [Getting Started](/getting-started/scaffold/).
+The fastest path to a working Grove site — five commands, minimal explanation. For the full walkthrough, with what each step does and why, see [Getting started](/getting-started/scaffold/).
 
 ## Prerequisites
 
 <Aside type="note" title="Before you begin">
   - Node `>=22.12.0`
-  - pnpm `10.12.1` (or any compatible Node package manager)
+  - pnpm `10.12.1` (or any compatible Node package manager — swap `pnpm`/`pnpm dlx` below for `npm`/`npx` or `bun`/`bunx`)
 </Aside>
 
 <Steps>
 
 1. ## Scaffold a space
 
-   <Tabs syncKey="pkg">
-     <TabItem label="pnpm" icon="seti:pnpm">
-       ```bash
-       pnpm dlx @grove-dev/cli@latest init my-space
-       cd my-space
-       ```
-     </TabItem>
-     <TabItem label="npm" icon="seti:npm">
-       ```bash
-       npx @grove-dev/cli@latest init my-space
-       cd my-space
-       ```
-     </TabItem>
-     <TabItem label="bun" icon="seti:bun">
-       ```bash
-       bunx @grove-dev/cli@latest init my-space
-       cd my-space
-       ```
-     </TabItem>
-   </Tabs>
-
-   The CLI copies the canonical Astro template (`apps/example/`), rewrites `package.json` and `grove.config.ts` so `site.name` and the `name:` field match your directory, and runs `pnpm install`.
+   ```bash
+   pnpm dlx @grove-dev/cli@latest init my-space
+   cd my-space
+   ```
 
 2. ## Start the dev server
 
-   <Tabs syncKey="pkg">
-     <TabItem label="pnpm" icon="seti:pnpm">
-       ```bash
-       pnpm dev
-       ```
-     </TabItem>
-     <TabItem label="npm" icon="seti:npm">
-       ```bash
-       npm run dev
-       ```
-     </TabItem>
-     <TabItem label="bun" icon="seti:bun">
-       ```bash
-       bun run dev
-       ```
-     </TabItem>
-   </Tabs>
+   ```bash
+   pnpm dev
+   ```
 
-   The site runs at `http://localhost:4321`. The Astro integration runs `prepareDirectory()` on every dev/build cycle, so record edits show up after a rebuild.
+   Open `http://localhost:4321` — the site renders with six sample records.
 
 3. ## Replace the sample record
 
-   The scaffold ships with six sample records under `data/records/`. Delete or rewrite them.
-
-   <Tabs syncKey="pkg">
-     <TabItem label="pnpm" icon="seti:pnpm">
-       ```bash
-       rm data/records/ollama.yml
-       rm content/records/ollama.md
-       $EDITOR data/records/my-record.yml
-       $EDITOR content/records/my-record.md
-       ```
-     </TabItem>
-     <TabItem label="npm" icon="seti:npm">
-       ```bash
-       rm data/records/ollama.yml
-       rm content/records/ollama.md
-       $EDITOR data/records/my-record.yml
-       $EDITOR content/records/my-record.md
-       ```
-     </TabItem>
-     <TabItem label="bun" icon="seti:bun">
-       ```bash
-       rm data/records/ollama.yml
-       rm content/records/ollama.md
-       $EDITOR data/records/my-record.yml
-       $EDITOR content/records/my-record.md
-       ```
-     </TabItem>
-   </Tabs>
-
-   <FileTree>
-   - my-space
-     - data
-       - records
-         - **my-project.yml**
-     - content
-       - records
-         - **my-project.md**
-   </FileTree>
-
-   A minimal record looks like:
+   Edit or replace a file under `data/records/`:
 
    ```yaml title="data/records/my-project.yml"
    kind: project
@@ -117,70 +46,28 @@ The fastest path to a working Grove site. The full tutorial lives in [Getting St
    licenses: [mit]
    ```
 
-   `name` and the field set come from the **kind** (here, `project` — the default blueprint is `project-directory`). See [Author a record](/content/author-a-record/) for the full schema and many more examples.
+   See [Add your first project](/getting-started/first-record/) for the full field reference.
 
 4. ## Validate and build
 
-   <Tabs syncKey="pkg">
-     <TabItem label="pnpm" icon="seti:pnpm">
-       ```bash
-       pnpm exec grove check
-       pnpm build
-       ```
-     </TabItem>
-     <TabItem label="npm" icon="seti:npm">
-       ```bash
-       npx grove check
-       npm run build
-       ```
-     </TabItem>
-     <TabItem label="bun" icon="seti:bun">
-       ```bash
-       bunx grove check
-       bun run build
-       ```
-     </TabItem>
-   </Tabs>
-
-   `grove check` validates records, regenerates every artifact under `data/generated/` and `public/`, and runs `astro check`. `pnpm build` is the production build (Astro with your static adapter).
+   ```bash
+   pnpm exec grove check
+   pnpm build
+   ```
 
    The deployable site is in `dist/`. Any static host serves it.
 
 5. ## Deploy
 
-   The default scaffold ships with a GitHub Pages workflow (`.github/workflows/deploy.yml`). Before you push, preview the production build locally:
+   ```bash
+   pnpm build && pnpm preview
+   ```
 
-   <Tabs syncKey="pkg">
-     <TabItem label="pnpm" icon="seti:pnpm">
-       ```bash
-       pnpm build && pnpm preview
-       ```
-     </TabItem>
-     <TabItem label="npm" icon="seti:npm">
-       ```bash
-       npm run build && npm run preview
-       ```
-     </TabItem>
-     <TabItem label="bun" icon="seti:bun">
-       ```bash
-       bun run build && bun run preview
-       ```
-     </TabItem>
-   </Tabs>
-
-   When you're ready to ship, follow the [Deploy your site →](/deployment/overview/) guide — it covers GitHub Pages, Cloudflare, Netlify, and self-hosted setups.
+   Preview the production build locally, then follow the [Deploy your site →](/deployment/overview/) guide — it covers GitHub Pages, Cloudflare, Netlify, and self-hosted setups.
 
 </Steps>
 
-## What just happened
-
-- **`my-space/grove.config.ts`** — the configuration you edit to add navigation, branding, audit pages, integrations.
-- **`my-space/data/records/`** — your records. One YAML file per record.
-- **`my-space/data/taxonomy/`** — your vocabularies for filters and labels.
-- **`my-space/src/pages/`** — your routes. Consumer-owned.
-- **`my-space/public/`** — generated HTML, JSON, sitemap, OG images. Sentinel-owned files are marked.
-
-## Common follow-ups
+## Next
 
 <CardGrid>
   <LinkCard
@@ -201,14 +88,12 @@ The fastest path to a working Grove site. The full tutorial lives in [Getting St
   <LinkCard
     title="Custom OG artwork"
     description="Edit `public/og-image.svg`; the sentinel keeps your version."
-    href="/start-here/quickstart/"
+    href="/customize/branding/"
   />
 </CardGrid>
 
-The full tutorial continues at [Scaffold a space](/getting-started/scaffold/).
-
 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-  <LinkButton href="/start-here/quickstart/" variant="primary" icon="rocket">
+  <LinkButton href="/getting-started/scaffold/" variant="primary" icon="rocket">
     Get started
   </LinkButton>
   <LinkButton href="https://github.com/grv-labs/grove" variant="minimal" icon="external">

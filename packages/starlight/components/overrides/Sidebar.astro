@@ -20,6 +20,39 @@ const { sidebar } = Astro.locals.starlightRoute;
     </div>
 </div>
 
+{/*
+  Bring the current page's entry into view inside the sidebar's own scroll
+  container. SidebarPersister keeps the scroll position across navigations, but
+  on a fresh load (or the first visit to a deep page) the sidebar starts at the
+  top, so an entry far down the list renders off-screen with no hint that it is
+  selected. Only the container is scrolled -- never the page -- and only when
+  the entry is actually outside the visible band.
+*/}
+<script is:inline data-astro-rerun>
+    (() => {
+        const reveal = () => {
+            const container = document.querySelector('.container-sidebar');
+            const current = container?.querySelector('[aria-current="page"]');
+            if (!container || !current) return;
+
+            const view = container.getBoundingClientRect();
+            const entry = current.getBoundingClientRect();
+            if (entry.top >= view.top && entry.bottom <= view.bottom) return;
+
+            const offset =
+                entry.top - view.top - container.clientHeight / 2 + entry.height / 2;
+            // Instant, not smooth: this positions the sidebar for the page
+            // being loaded, so it should already be correct on first paint
+            // rather than animating into place while the reader looks at it.
+            container.scrollTop += offset;
+        };
+
+        // Runs after SidebarPersister has restored any stored scroll position.
+        requestAnimationFrame(reveal);
+        document.addEventListener('astro:page-load', () => requestAnimationFrame(reveal));
+    })();
+</script>
+
 <style>
     .sidebar {
         scrollbar-width: none;

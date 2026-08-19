@@ -3,8 +3,6 @@ title: Browse pages
 description: Filter, lens, and search over the indexed record set.
 ---
 
-# Browse pages
-
 The browse surface is URL-driven: every facet combination has a canonical URL. Visitors land there from filter menus; `grove collection promote --from /browse?...` turns a URL into a curated collection YAML.
 
 Three ingredients make the browse work:
@@ -88,7 +86,7 @@ The command:
 2. Writes `data/collections/<slug>.yml` with `kind: curated`, the matching `query` block, `ranking.preset: 'quality'`, and `excludeStatuses: ['archived']`.
 3. Leaves the rest of the collection (description, ranking overrides, SEO copy) for the curator.
 
-See [Promote a filter to a collection](/discovery/promote/) and the [Curated collections](/content/collections/) reference for more.
+See [Promote a filter to a collection](/discovery/promote/) and the [Curated collections](/concepts/collections/) reference for more.
 
 ## Customizing the browse UI
 

@@ -3,8 +3,6 @@ title: Scheduled maintenance
 description: The cadence that keeps a Grove site fresh without day-to-day maintainer intervention.
 ---
 
-# Scheduled maintenance
-
 Grove ships six workflow files under `.github/workflows/` that you can enable right after `grove init`. They keep external facts current, surface stale records for review, and regenerate the README block — without you writing any cron expressions yourself.
 
 For the full inventory, see [GitHub workflows](/outputs/workflows/). This page covers the **cadence** and the lifecycle.

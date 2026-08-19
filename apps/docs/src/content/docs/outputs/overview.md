@@ -1,9 +1,7 @@
 ---
-title: Overview
+title: Outputs overview
 description: Every artifact Grove generates from your source files — human-facing pages, machine-readable feeds, SEO assets, and LLM-oriented outputs.
 ---
-
-# Outputs overview
 
 Grove turns your source files (YAML records, taxonomy, decisions, Markdown bodies) into a coordinated set of outputs. Each output exists for a specific consumer: humans browsing the site, search engines indexing it, AI assistants reading it, social platforms previewing it.
 

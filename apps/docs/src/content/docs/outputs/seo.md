@@ -3,8 +3,6 @@ title: SEO & social
 description: sitemap.xml, robots.txt, JSON-LD, Open Graph, Twitter card.
 ---
 
-# SEO & social
-
 Every page in a Grove build emits the standard SEO surfaces. There's no consumer-side plug-in or template fork required for this; `definePageDocument` from `@grove-dev/core` is the source of truth.
 
 ## What's emitted per page

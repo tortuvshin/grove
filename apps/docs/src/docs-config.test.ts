@@ -20,7 +20,7 @@ describe("docs Astro config", () => {
     expect(config).not.toContain("./src/styles/custom.css");
   });
 
-  it("declares 7 sidebar sections matching the IA redesign", async () => {
+  it("declares 9 sidebar sections matching the IA redesign", async () => {
     const config = await readFile(
       resolve(repoRoot, "apps/docs/astro.config.mjs"),
       "utf8",
@@ -29,15 +29,35 @@ describe("docs Astro config", () => {
     const sectionLabels = [
       "Start here",
       "Guides",
-      "Walkthroughs",
-      "Customize",
+      "Automation",
+      "Deploy",
+      "Customization",
+      "Outputs",
       "Reference",
-      "Advanced",
-      "Resources",
+      "Extend",
+      "Project",
     ];
     for (const label of sectionLabels) {
       expect(config, `sidebar section "${label}" missing`).toContain(
         `label: '${label}'`,
+      );
+    }
+  });
+
+  /**
+   * "Walkthroughs" was indistinguishable from "Guides", "Advanced" was a
+   * junk drawer mixing three audiences, and "Resources" held nav-bar
+   * duplicates. Comparable docs sites name sections by subject instead.
+   */
+  it("no longer declares the retired catch-all sections", async () => {
+    const config = await readFile(
+      resolve(repoRoot, "apps/docs/astro.config.mjs"),
+      "utf8",
+    );
+
+    for (const label of ["Walkthroughs", "Advanced", "Resources", "Customize"]) {
+      expect(config, `retired section "${label}" still present`).not.toContain(
+        `label: '${label}',`,
       );
     }
   });

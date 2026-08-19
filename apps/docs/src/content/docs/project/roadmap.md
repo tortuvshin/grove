@@ -58,11 +58,14 @@ never been published.
 A blueprint binds a `kind` to a schema, a default route, and the
 filters a space exposes. Records are a discriminated `Resource` union.
 
-| Blueprint           | `kind`     | Schema  | Polished default pages |
-| ------------------- | ---------- | :-----: | :--------------------: |
-| `project-directory` | `project`  | ✅      | ✅ (`project-directory` template) |
-| `resource-hub`      | `resource` | ✅      | Schema valid, list/detail routes exposed via `routes.directory`. |
-| `ecosystem-map`     | `entity`   | ✅      | Schema valid, list/detail routes exposed via `routes.directory`. |
+| Blueprint           | `kind`     | Status |
+| ------------------- | ---------- | ------ |
+| `project-directory` | `project`  | ✅ Shipped — the only supported blueprint. `grove init` always scaffolds it. |
+
+The schema also defines `resource-hub` (`kind: resource`) and
+`ecosystem-map` (`kind: entity`), but neither is a supported
+blueprint yet — there's no scaffold, template, or documented
+authoring path for them. See [Later — directional](#later--directional).
 
 ### CLI commands
 
@@ -104,11 +107,8 @@ Every `grove check` produces:
 
 - One YAML file = one record. The filename (minus `.yml`) is the
   canonical slug. Multi-record files are a V2 feature.
-- `kind` must match the blueprint of the site that owns the record
-  (`project`, `resource`, or `entity`).
-- Records without `health` are allowed for `resource-hub` and
-  `ecosystem-map` blueprints; their effective visibility is the
-  top-level `visibility` field, defaulting to `keep`.
+- `kind` must match the blueprint of the site that owns the record.
+  Today that means `kind: project`, the only supported blueprint.
 - The V1 public surface of `@grove-dev/core` is exactly what
   `packages/core/src/index.ts` re-exports; everything else
   (`IndexRecord`, `loadRecords`, `unwrap*`, etc.) is internal.
@@ -203,12 +203,14 @@ carry a `records: [...]` array. Today this is explicitly a V2 feature.
 such demand exists, so no scaffolding or templates are committed.
 Deferred from v0.5.0 to avoid scope creep.
 
-### Polished `resource-hub` and `ecosystem-map` defaults (deferred from v0.5.0)
+### `resource-hub` and `ecosystem-map` blueprints (deferred from v0.5.0)
 
-Today both blueprints validate and emit JSON, but the polished list /
-detail page templates that ship with the Astro renderer are tuned for
-`project-directory`. Deferred from v0.5.0; reference templates will
-ship when a consumer site needs them.
+The `resourceRecordSchema` and `entityRecordSchema` shapes exist in
+`packages/core/src/schema.ts`, but neither is a supported blueprint:
+there's no `grove init` scaffold, no list/detail page templates, and
+no documented authoring path. Turning them into real blueprints —
+scaffold, routes, templates — is deferred from v0.5.0; it will happen
+when a consumer site needs one.
 
 ---
 

@@ -334,6 +334,24 @@
         gap: 1rem;
     }
 
+    /* Starlight sizes the two-up grid as `1fr 1fr`, which is really
+       `minmax(auto, 1fr)`: a track can never shrink below the min-content
+       width of what it holds. A card full of long inline code -- file paths
+       like `data/generated/records.full.json` -- therefore pushes its track
+       past half the content column, and the second card lands outside the
+       article, on top of the table of contents. `minmax(0, 1fr)` lets the
+       tracks shrink, and `anywhere` (not `break-word`, which does not affect
+       intrinsic sizing) lets the code inside them wrap to fit. */
+    @media (min-width: 50rem) {
+        .sl-markdown-content .card-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .sl-markdown-content :is(.card, .sl-link-card) :is(code, a) {
+        overflow-wrap: anywhere;
+    }
+
     .sl-markdown-content :is(.card, .sl-link-card) {
         border: 0;
         border-radius: calc(var(--radius) + 0.25rem);

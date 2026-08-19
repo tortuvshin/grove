@@ -23,7 +23,7 @@ The validator runs in this order; the first failure stops the run:
 1. **Config load** — `grove.config.ts` parses and validates against the Zod schema. A misspelled field or wrong type fails here.
 2. **YAML parse** — every `data/records/*.yml` is parseable YAML.
 3. **Schema validation** — each record matches its blueprint's Zod schema (see [Record schema](/reference/record-schema/)):
-   - `kind` matches the space's `blueprint` (`project` for `project-directory`, `resource` for `resource-hub`, `entity` for `ecosystem-map`).
+   - `kind` matches the space's `blueprint`. `project-directory` is the only supported blueprint today, so `kind` must be `project`.
    - Required fields are present (`slug`, `kind`, `name`, `description`, `category`).
    - Enum values are valid (`projectType`, `category`, `tags`, etc.).
    - URL fields are well-formed (`repoUrl`, `homepageUrl`, `logoUrl`, `links.*`).

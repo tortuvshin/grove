@@ -4,15 +4,17 @@ description: The discriminated Resource union — every kind, every field, every
 ---
 
 Grove is built around a discriminated `Resource` union with three concrete
-shapes, bound 1:1 to the three [blueprints](/concepts/blueprints/):
+shapes:
 
-- `kind: 'project'` — `project-directory` blueprint
-- `kind: 'resource'` — `resource-hub` blueprint
-- `kind: 'entity'` — `ecosystem-map` blueprint
+- `kind: 'project'` — the `project-directory` blueprint. **The only
+  blueprint supported today** — `grove init` always scaffolds it.
+- `kind: 'resource'` — reserved for a future `resource-hub` blueprint.
+- `kind: 'entity'` — reserved for a future `ecosystem-map` blueprint.
 
 Every record inherits a **shared base** and adds a kind-specific
 extension. The CLI rejects records whose `kind` does not match the
-space's `blueprint` in `grove.config.ts`.
+space's `blueprint` in `grove.config.ts`. In practice that means
+`kind: project` for every record in a Grove space today.
 
 **Convention:** one file per record, named `<slug>.yml`. The file
 name is the canonical slug. The build pipeline enforces
@@ -218,77 +220,20 @@ can be overridden by curator decisions in `data/decisions.yml`.
 `cleanupCandidate: true` for human review; the curator decides
 whether to keep, hide, mark historical, or remove.
 
-## `ResourceRecord` (`kind: resource`)
+## `ResourceRecord` and `EntityRecord` (`kind: resource`, `kind: entity`)
 
-For the `resource-hub` blueprint. For curating pieces of content:
-
-```yaml
-kind: resource
-slug: choosing-a-database
-title: How to choose a database for your side project
-type: guide                     # guide | comparison | link | explainer | tool | video | article | course | book | podcast | other
-topic: databases                # the high-level topic
-description: A practical decision tree for picking a database.
-category: engineering
-tags: [database, postgresql, sqlite]
-links:
-  website: https://example.com/db-chooser
-related:                        # slugs of related resources
-  - postgres-vs-sqlite
-  - understanding-indexes
-publishedAt: "2024-08-01"
-author: Jane Doe
-```
-
-### Resource-specific fields
-
-| Field | Type | Description |
-|---|---|---|
-| `title` | `string` (required) | The resource's title |
-| `type` | enum (required) | `guide` \| `comparison` \| `link` \| `explainer` \| `tool` \| `video` \| `article` \| `course` \| `book` \| `podcast` \| `other` |
-| `topic` | `string` (required) | High-level topic (e.g. `databases`, `deployment`, `career`) |
-| `related` | `string[]` | Slugs of related resources |
-| `publishedAt` | `string` (date) | Publication date |
-| `author` | `string` | Author name |
-
-## `EntityRecord` (`kind: entity`)
-
-For the `ecosystem-map` blueprint. For curating organizations
-and people:
-
-```yaml
-kind: entity
-slug: mn-ai-community
-name: Mongolia AI Community
-type: community                  # company | organization | community | school | university | research-lab | agency | service | product | person | other
-description: A community of AI practitioners in Mongolia.
-category: community
-tags: [ai, mongolia, community]
-founded: "2023-04-15"
-location: Ulaanbaatar, Mongolia
-members: 250
-parent: mn-tech-scene            # slug of a parent entity
-links:
-  website: https://example.com/mn-ai
-```
-
-### Entity-specific fields
-
-| Field | Type | Description |
-|---|---|---|
-| `name` | `string` (required) | The entity's name |
-| `type` | enum (required) | `company` \| `organization` \| `community` \| `school` \| `university` \| `research-lab` \| `agency` \| `service` \| `product` \| `person` \| `other` |
-| `founded` | `string` (date) | Founding date (ISO) |
-| `location` | `string` | Free-form location (city, country, "Remote", etc.) |
-| `members` | `number` (int ≥ 0) | Member count, if applicable |
-| `parent` | `string` | Slug of a parent entity (for sub-communities) |
+The Zod schema also defines `resourceRecordSchema` (`kind: resource`)
+and `entityRecordSchema` (`kind: entity`), for the `resource-hub` and
+`ecosystem-map` blueprints respectively. **Neither blueprint is
+supported yet** — `grove init` cannot scaffold them, and there is no
+documented authoring path for these kinds. Only `kind: project`
+(the `project-directory` blueprint) is supported today; see
+[`ProjectRecord`](#projectrecord-kind-project) above.
 
 ## Related docs
 
-- **[Three blueprints](/concepts/blueprints/)** — which `kind` goes with
-  which blueprint.
+- **[Author a record](/content/author-a-record/)** — the editorial workflow that produces a record.
 - **[grove.config.ts](/reference/config/)** — site config.
 - **[CLI](/reference/cli/)** — `grove check` validates and
   generates against this schema.
-- **[Author a record](/content/author-a-record/)** — the editorial workflow that produces a record.
 - **Source: [`packages/core/src/schema.ts`](https://github.com/tortuvshin/grove)** — the canonical schema.

@@ -5,8 +5,6 @@ description: Why Grove starts and ends with source files.
 
 import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
 
-# Files are canonical
-
 Every piece of truth in a Grove space lives in a file a human can edit. The build pipeline reads them; every generated artifact (HTML pages, JSON datasets, sitemap, OG images, `llms.txt`) is derived.
 
 <Aside type="note" title="The single rule">
@@ -57,19 +55,62 @@ If those costs are too high, a different tool is the right tool. Files-first is 
 
 ## The three-tier model
 
-Files in a Grove space fall into one of three tiers. The [Mental model](/start-here/mental-model/) page walks each tier with examples.
+Every file in a Grove space falls into exactly one of three tiers. Knowing which tier a
+file is in tells you whether you may edit it.
 
 <CardGrid stagger>
   <Card title="Author-owned" icon="pencil">
-    Files humans edit by hand. These are the source of truth.
+    Files a human edits by hand, in an editor, in a pull request:
+
+    - **Records** — `data/records/<slug>.yml`. One typed entity per file.
+    - **Markdown bodies** — `content/records/<slug>.md`. Optional long-form content.
+    - **Taxonomy** — `data/taxonomy/*.yml`. Six controlled vocabularies.
+    - **Decisions** — `data/decisions.yml`. Curator overrides for visibility and sort priority.
+    - **Collections** — `data/collections/<slug>.yml`. Curated or ranked groupings.
+    - **Content pages** — `content/pages/<slug>.md`. Standalone pages that aren't a record.
+    - **Configuration** — `grove.config.ts`. Identity, routes, facets, theme, integrations.
+
+    PR review is the change-of-record. Editors don't log in.
   </Card>
+
   <Card title="Derived" icon="setting">
-    Files Grove regenerates on every build. Treat them as disposable.
+    Files Grove writes on every build. Disposable and reproducible:
+
+    - HTML pages — `/`, `/projects/`, `/projects/<slug>/`, `/collections/<slug>/`, and the rest.
+    - JSON datasets — `data/generated/records.full.json`, `records.index.json`,
+      `records.json`, `site-config.json`.
+    - `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt`.
+    - `public/og/<page>.png` — satori-rendered social cards.
+    - The README block bounded by `<!-- grove-readme:start/end -->` — text outside
+      the sentinels survives untouched.
+
+    Every derived artifact is a pure function of the source files plus `grove.config.ts`.
+    Never hand-edit them; `grove check` overwrites the diff.
   </Card>
+
   <Card title="Refreshed facts" icon="rocket">
-    Fields that `grove sync github` writes into author-owned files.
+    Fields that machines re-write but humans never edit:
+
+    - `github.{stars,forks,language,topics,license,...}` — refreshed by `grove sync github`.
+    - `health.{status,maturity,tier,visibility,cleanupCandidate,...}` — derived from
+      GitHub signals plus the freshness rules in `packages/core/src/health.ts`.
+    - `data/generated/contributors.json` and `data/generated/repo-stats.json` —
+      aggregated by `grove sync contributors`.
+
+    These blocks live inside author-owned files but are owned by Grove. The merge
+    contract guarantees curator edits outside the sync surface survive a re-run.
   </Card>
 </CardGrid>
+
+<Aside type="tip" title="The central rule">
+**Machines refresh facts. Maintainers make editorial decisions.**
+
+`grove sync github` writes `github.*` and `health.*`. `grove cleanup` writes a triage
+report. Neither deletes a record, changes `visibility`, or alters curator prose.
+
+Decisions about which records to keep, hide, demote, or surface live in the record YAML
+itself or in `data/decisions.yml`.
+</Aside>
 
 ## What you'll edit day-to-day
 
@@ -115,23 +156,23 @@ pnpm exec grove check
 If validation passes, the derived tier (`data/generated/`, `public/og/`, etc.) is up-to-date with your sources.
 
 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-  <LinkButton href="/start-here/mental-model/" variant="primary" icon="open-book">
-    Mental model
+  <LinkButton href="/content/author-a-record/" variant="primary" icon="open-book">
+    Author a record
   </LinkButton>
-  <LinkButton href="https://github.com/withgrove/grove/tree/main/starters/minimal" variant="minimal" icon="external">
+  <LinkButton href="https://github.com/tortuvshin/grove/tree/main/apps/example" variant="minimal" icon="external">
     Minimal starter on GitHub
   </LinkButton>
 </div>
 
 <CardGrid>
   <LinkCard
-    title="Mental model"
-    description="Walk through the three tiers with concrete examples of each file type."
-    href="/start-here/mental-model/"
+    title="Author a record"
+    description="Put the author-owned tier to work — write your first record YAML."
+    href="/content/author-a-record/"
   />
   <LinkCard
     title="Minimal starter"
     description="The smallest possible Grove space — clone it and run `grove check`."
-    href="https://github.com/withgrove/grove/tree/main/starters/minimal"
+    href="https://github.com/tortuvshin/grove/tree/main/apps/example"
   />
 </CardGrid>

@@ -3,8 +3,6 @@ title: Sync contributors
 description: Aggregate per-repository contributor counts into data/generated/.
 ---
 
-# Sync contributors
-
 `grove sync contributors` aggregates contributor counts across the GitHub repositories your records reference, writing `data/generated/contributors.json` and `data/generated/repo-stats.json`. The Astro integration surfaces the result on the `/contributors/` page.
 
 ## Prerequisites

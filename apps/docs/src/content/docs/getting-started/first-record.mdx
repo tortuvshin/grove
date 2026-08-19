@@ -83,7 +83,7 @@ import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tab
    ```
 
    <Aside type="note" title="What you should see">
-     Open a pull request. Validation runs in CI. A maintainer reviews and merges. Grove rebuilds the site and deploys.
+     Open a pull request. CI runs `grove check` plus `astro build` to validate the change. A maintainer reviews and merges; Grove rebuilds the site and deploys. If `integrations.github` is enabled, the scheduled `sync-github.yml` workflow enriches the record with live stars, language, and last-pushed data on its next run — see [Sync GitHub metadata](/automation/sync-github/).
    </Aside>
 
 </Steps>

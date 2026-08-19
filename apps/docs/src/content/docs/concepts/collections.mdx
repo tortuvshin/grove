@@ -5,8 +5,6 @@ description: Curated or query-driven groupings of records.
 
 import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
-# Collections
-
 <Aside type="tip" title="What a collection is">
   A collection is a curator-managed grouping at `data/collections/<slug>.yml`. Collections are how a Grove site surfaces **reasoned views** over the record set: "Top Flutter finance apps", "Reading list for new contributors", "Stable, well-tested tools only."
 </Aside>
@@ -168,7 +166,6 @@ A content page is for prose. A collection is for "I want a page that lists and s
 
 ## See also
 
-- [Curated collections](/content/collections/) — file shape and worked examples.
 - [Promote a filter to a collection](/discovery/promote/) — the `grove collection promote` workflow.
 - [`packages/core/src/collections.ts`](https://github.com/tortuvshin/grove) — query and ranking implementation.
 
@@ -204,7 +201,7 @@ For each collection Grove emits:
 
 ## Next steps
 
-<LinkButton href="/content/collections/" variant="primary" icon="right-arrow">
+<LinkButton href="/guides/walkthrough-curate-collection/" variant="primary" icon="right-arrow">
   Curate a collection
 </LinkButton>
 
@@ -214,9 +211,9 @@ For each collection Grove emits:
 
 <CardGrid>
   <LinkCard
-    title="Curated collections"
-    href="/content/collections/"
-    description="File shape and worked examples for data/collections/<slug>.yml."
+    title="Walkthrough: curate a collection"
+    href="/guides/walkthrough-curate-collection/"
+    description="Build a collection end to end with grove collection promote."
   />
 
   <LinkCard

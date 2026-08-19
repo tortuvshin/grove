@@ -3,8 +3,6 @@ title: LLM-oriented outputs
 description: llms.txt and llms-full.txt — the formats AI assistants expect.
 ---
 
-# LLM-oriented outputs
-
 Grove emits two files for AI assistants: `llms.txt` (concise) and `llms-full.txt` (verbose). Both follow the `llms.txt` proposal — a markdown file with an `H1` title, a blockquote summary, and an `H2 per section`.
 
 The "LLM-ready" framing in earlier Grove docs is replaced with the more precise framing here: Grove emits these two formats and no others. There is no separate `ai.txt`, no JSON Feed variant, no MCP manifest, no structured catalog. Those are different surfaces — use them when they make sense, but don't expect them as part of the framework.

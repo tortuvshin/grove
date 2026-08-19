@@ -3,8 +3,6 @@ title: GitHub workflows
 description: Scheduled sync, audit, cleanup, and readme jobs.
 ---
 
-# GitHub workflows
-
 The default scaffold ships six workflows under `.github/workflows/`. They keep `health.*`, `cleanup-report.json`, contributor data, and `README.md` fresh without human intervention. Every workflow is `workflow_dispatch`-able for on-demand runs.
 
 ## The shipped workflows

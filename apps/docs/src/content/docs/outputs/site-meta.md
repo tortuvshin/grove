@@ -3,8 +3,6 @@ title: Site metadata
 description: theme-color, manifest, and the difference between emitted and consumer-owned metadata.
 ---
 
-# Site metadata
-
 This page covers the small set of metadata Grove actively emits and the things consumers provide themselves.
 
 ## What's emitted today

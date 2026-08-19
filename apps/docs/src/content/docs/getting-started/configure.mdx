@@ -53,19 +53,18 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
 
 1. ### Blueprint
 
-   The blueprint decides what `kind` your records use and which templates render them:
-
-   | Blueprint | Record kind | Use case |
-   |---|---|---|
-   | `project-directory` | `project` | Curated catalog of open-source projects, libraries, agents, or tools. (Default scaffold.) |
-   | `resource-hub` | `resource` | Articles, podcasts, videos, courses, comparisons. |
-   | `ecosystem-map` | `entity` | Companies, agencies, foundations, communities. |
+   `blueprint` decides what `kind` your records use and which templates render them. **`project-directory` is the only supported value today** — `grove init` always scaffolds it, and its records are `kind: project`:
 
    ```ts
-   blueprint: "resource-hub"   // toggle the site to a resource hub
+   blueprint: "project-directory"
    ```
 
-   The blueprint and the record `kind` must match — a `kind: project` record on an `ecosystem-map` site fails validation. See [Three blueprints](/concepts/blueprints/) for the full comparison.
+   The Zod schema also defines a `resource-hub` and an `ecosystem-map`
+   blueprint (`kind: resource` and `kind: entity`), but neither has a
+   supported scaffold or template yet — see the
+   [roadmap](/roadmap/#later--directional). The blueprint and the record
+   `kind` must match. See [Record schema](/reference/record-schema/) for
+   the fields `kind: project` accepts.
 
 2. ### Site identity
 
@@ -182,8 +181,8 @@ If you want config changes picked up without a manual restart, use the Astro `--
   OG tags resolve to `https://example.com`, JSON-LD `url` is wrong.
 </Aside>
 
-<Aside type="caution" title="blueprint set but record kind mismatched">
-  `grove check` fails every record with a kind error.
+<Aside type="caution" title="`kind` other than `project`">
+  `grove check` fails every record with a kind error — `project-directory` is the only supported blueprint, so every record's `kind` must be `project`.
 </Aside>
 
 <Aside type="caution" title="Custom facet id (e.g. `categories`)">

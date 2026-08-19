@@ -3,8 +3,6 @@ title: Promote a filter to a collection
 description: Use grove collection promote to save a browse URL as curated YAML.
 ---
 
-# Promote a filter to a collection
-
 The `grove collection promote` command is the fastest path from "I clicked through to a filter URL" to "I have a curated collection page that lays out the same records in editorial form."
 
 ## Workflow
@@ -107,6 +105,6 @@ You can. Many curators do, for `--kind: ranked` collections or for collections w
 
 ## See also
 
-- [Curated collections](/content/collections/) — file shape and worked examples.
+- [Curated collections](/concepts/collections/) — file shape and worked examples.
 - [Browse pages](/discovery/browse/) — the URL shape.
 - [Lens recipes](/discovery/lens-recipes/) — when to use a lens vs a collection.

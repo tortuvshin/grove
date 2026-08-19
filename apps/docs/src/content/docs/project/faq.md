@@ -21,7 +21,7 @@ No. Grove is fully file-first. Records, taxonomy, collections, decisions — eve
 
 ## How does Grove compare to Hugo / Jekyll / Eleventy?
 
-- **Hugo** is faster but assumes a single content type. Grove is opinionated about *structured* content with blueprints and taxonomy.
+- **Hugo** is faster but assumes a single content type. Grove is opinionated about *structured* content, with a Zod-validated record schema and taxonomy.
 - **Jekyll** is simpler but lacks built-in LLM-oriented outputs and a curated-collection concept.
 - **Eleventy** is more flexible but provides less structure; you'd build what Grove gives you out of the box.
 
@@ -29,13 +29,9 @@ No. Grove is fully file-first. Records, taxonomy, collections, decisions — eve
 
 Grove is not a CMS. There's no admin UI, no live preview, no workflow engine. Curation happens in Git: PRs review changes, GitHub Actions sync metadata. This is a deliberate choice — see the [architecture guardrails](/concepts/philosophy/#what-grove-is-not).
 
-## What are the 3 blueprints?
+## What blueprint does Grove use?
 
-- **project-directory** — open-source projects (default).
-- **resource-hub** — articles, tutorials, videos, papers.
-- **ecosystem-map** — organizations, people, working groups.
-
-Each blueprint has its own JSON-LD type and lens semantics.
+`project-directory` — a curated catalog of open-source projects, libraries, agents, or tools. It's the only supported blueprint today; `grove init` always scaffolds it, and every record is `kind: project`. The schema also defines `resource-hub` and `ecosystem-map` blueprints for non-project content, but neither has a supported scaffold yet — see the [roadmap](/roadmap/#later--directional).
 
 ## How do I deploy?
 
@@ -63,7 +59,7 @@ A site-level index file designed to be ingested by AI assistants. Spec: <https:/
 
 ## Can I use Grove for non-directory content?
 
-Yes. The `resource-hub` and `ecosystem-map` blueprints are for non-directory use cases. If your content doesn't fit any of the three blueprints, you can author `content/pages/*.md` for free-form Markdown pages and build custom Astro components. The data layer (`@grove-dev/core`) is reusable beyond the directory use case.
+Only `project-directory` is a supported blueprint today, so `data/records/*.yml` is scoped to `kind: project`. For content that doesn't fit a project directory, author `content/pages/*.md` for free-form Markdown pages and build custom Astro components. The data layer (`@grove-dev/core`) is reusable beyond the directory use case.
 
 ## What's the license?
 

@@ -494,7 +494,7 @@ describe("docs homepage (standalone Astro route)", () => {
 
 	it("hosts the introduction page at /introduction/ with the Getting Started sidebar trimmed", async () => {
 		// The intro file moved out of getting-started/ so it renders at the root.
-		expect(existsSync(resolve(docsRoot, "src/content/docs/introduction.md"))).toBe(true);
+		expect(existsSync(resolve(docsRoot, "src/content/docs/introduction.mdx"))).toBe(true);
 		expect(
 			existsSync(resolve(docsRoot, "src/content/docs/getting-started/introduction.md")),
 		).toBe(false);

@@ -107,14 +107,9 @@ grove import ./inbox/README.md
 
 **Behavior:**
 
-- For `project-directory` spaces, each record gets `name`,
-  `description`, `category`, `tags`, and `links` from the
-  source. `stack`, `stacks`, `platforms`, `projectType` are left
-  empty for curators to fill in.
-- For `resource-hub` spaces, each record gets `title`, `type:
-  "link"`, `topic` (set from the category), and `links`.
-- For `ecosystem-map` spaces, each record gets `name`, `type:
-  "other"`, and `links`.
+- Each record gets `name`, `description`, `category`, `tags`, and
+  `links` from the source. `stack`, `stacks`, `platforms`, and
+  `projectType` are left empty for curators to fill in.
 
 **Common errors:**
 
@@ -497,6 +492,88 @@ grove readme generate            # write README.md
 grove readme generate --check    # CI gate
 grove readme generate --stdout   # preview in the terminal
 grove readme generate --path docs/README.md
+```
+
+## `grove icons sync`
+
+Copy the packaged icon set into `public/icons/`. Implementation in
+`packages/cli/src/icons-cli.ts`; the copy logic in
+`packages/core/src/sync-icons.ts`.
+
+`@grove-dev/astro` already runs this same sync into `public/icons/`
+on every build, so most sites never need to invoke it directly. The
+command exists as an explicit escape hatch for two cases the
+automatic build-time sync deliberately does not handle: restoring an
+icon you hand-edited (`--force`), and failing CI when the packaged
+set has drifted from what's on disk (`--check`).
+
+**Syntax:** `grove icons sync [options]`
+
+**Options:**
+
+| Option | Description | Default |
+|---|---|---|
+| `--force` | Overwrite locally modified icons and drop extras (files no longer in the packaged set) | off |
+| `--check` | Report drift without writing; exit 1 if anything is stale | off |
+
+**Reads:**
+
+- The packaged icon set under the CLI's own scaffold source
+  (`public/icons/` inside the resolved scaffold — the installed
+  `@grove-dev/cli` package's bundled `site/` directory, or, in the
+  monorepo, `apps/example/`).
+- `public/icons/.grove-icons.json` in the current directory — the
+  sha256 manifest of files Grove previously wrote, used to tell a
+  consumer-edited file from an untouched one.
+
+**Writes** (default mode, no flags):
+
+- `public/icons/<name>.svg` — one file per icon that is missing or
+  unchanged since the last sync; overwritten to match the packaged
+  version.
+- `public/icons/.grove-icons.json` — manifest of every file Grove
+  owns and its hash.
+- Icons you have hand-edited are **left alone** — Grove detects the
+  edit via the hash mismatch and skips the file.
+
+**With `--force`:** every packaged icon is written regardless of
+local edits, and files under `icons/{stacks,platforms}` that are not
+in the packaged set are deleted (`prune` is implied by `--force`).
+
+**With `--check`:** nothing is written; the command only reports.
+
+**Output (default mode):**
+
+```
+[icons] 3 written, 0 removed, 1 kept
+  kept (locally modified): stacks/flutter.svg
+Run `grove icons sync --force` to restore the packaged versions.
+```
+
+**Output (`--check` mode):**
+
+```
+[icons] up to date
+```
+
+or, when drift exists:
+
+```
+  stale:    stacks/flutter.svg
+  extra:    stacks/old-icon.svg
+  modified: platforms/ios.svg
+[icons] out of date — run `grove icons sync`
+```
+
+`--check` exits 1 whenever any file is stale, extra, or
+locally modified; 0 when everything matches.
+
+**Example:**
+
+```bash
+grove icons sync             # default: match packaged set, preserve edits
+grove icons sync --force     # overwrite everything; prune icons not in packaged set
+grove icons sync --check     # CI gate: exit 1 when drift is detected
 ```
 
 ---

@@ -3,8 +3,6 @@ title: Audit
 description: Lighthouse scoring against audit.pages[] with the default quality budget.
 ---
 
-# Audit
-
 `grove audit` runs Lighthouse against every page listed in `grove.config.ts` → `audit.pages[]` and asserts each score against the framework's default quality budget. Pages can opt into or out of profiles via flags; output can be JSON or JUnit for CI integration.
 
 ## Prerequisites

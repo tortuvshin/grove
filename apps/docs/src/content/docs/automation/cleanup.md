@@ -3,8 +3,6 @@ title: Cleanup report
 description: Surface records that need human review without deleting them.
 ---
 
-# Cleanup report
-
 `grove cleanup` reads the current record set, classifies candidates, and writes `data/generated/cleanup-report.json`. **The command never deletes records.** It surfaces a triage list; curators act via the record YAML or `data/decisions.yml`.
 
 ## Prerequisites
@@ -82,5 +80,5 @@ The cleanup-report is a **read-only** signal. Re-running `grove cleanup` produce
 ## See also
 
 - [Health classification](/content/health-classification/) — the `health` block schema.
-- [Decisions file](/content/decisions/) — the curator override surface.
+- [Decisions file](/concepts/decisions/) — the curator override surface.
 - [GitHub workflows](/outputs/workflows/) — the monthly `cleanup.yml` schedule.

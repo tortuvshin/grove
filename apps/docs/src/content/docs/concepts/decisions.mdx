@@ -5,8 +5,6 @@ description: Curator overrides — visibility, sort priority, rename, label.
 
 import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
-# Decisions and curation
-
 <Aside type="tip" title="Curators are the source of authority">
   Curators shape how a Grove space presents its records through two surfaces. The decisions file is the single source of truth across the whole site for overrides — it carries reviewer identity, timestamps, and reasons that the record-level fields do not.
 </Aside>
@@ -170,7 +168,6 @@ Lenses compose; a single record can carry several labels.
 
 ## See also
 
-- [Decisions file](/content/decisions/) — file shape and examples.
 - [Health classification](/content/health-classification/) — the `health.*` block and `cleanupCandidate: true`.
 
 ## Worked example
@@ -216,7 +213,7 @@ When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibi
 
 ## Next steps
 
-<LinkButton href="/content/decisions/" variant="primary" icon="right-arrow">
+<LinkButton href="/concepts/collections/" variant="primary" icon="right-arrow">
   Build collections
 </LinkButton>
 
@@ -226,9 +223,9 @@ When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibi
 
 <CardGrid>
   <LinkCard
-    title="Decisions file"
-    href="/content/decisions/"
-    description="File shape and examples for data/decisions.yml."
+    title="Build collections"
+    href="/concepts/collections/"
+    description="Group records into curated and ranked collections."
   />
 
   <LinkCard
@@ -244,8 +241,8 @@ When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibi
   />
 
   <LinkCard
-    title="Curation labels and lenses"
-    href="/concepts/curation-labels/"
-    description="How labels drive featured, hot, new, and mature lenses."
+    title="Lens recipes"
+    href="/discovery/lens-recipes/"
+    description="How curation labels drive the featured, hot, new, and mature lenses."
   />
 </CardGrid>

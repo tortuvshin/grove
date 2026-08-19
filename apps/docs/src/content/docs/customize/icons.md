@@ -3,8 +3,6 @@ title: Icons
 description: The packaged icon set and grove icons sync.
 ---
 
-# Icons
-
 `@grove-dev/astro` ships an icon set under `public/icons/`. The Astro integration runs the same `sync` automatically on every build, so most sites never need to interact with it directly.
 
 ## What `sync` does
