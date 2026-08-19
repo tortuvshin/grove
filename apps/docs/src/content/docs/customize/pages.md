@@ -74,18 +74,30 @@ Render it from an Astro wrapper:
 
 ```astro
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getPageContentHtml } from "@grove-dev/astro";
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import Container from "@grove-dev/astro/layouts/Container.astro";
+import { getPageContentHtml } from "@grove-dev/astro/server";
+import siteConfig from "@grove/generated/site-config.json";
 
-const { html, frontmatter } = getPageContentHtml("methodology");
+const html = getPageContentHtml("methodology");
 ---
 
-<BaseLayout title={frontmatter.title} description={frontmatter.description}>
-  <article set:html={html} />
+<BaseLayout title="Methodology" description="How entries are chosen." site={siteConfig}>
+  <Container>
+    {html && <article set:html={html} />}
+  </Container>
 </BaseLayout>
 ```
 
 The Markdown file is rendered to HTML at build time and embedded in the page.
+
+:::caution[Frontmatter is not passed through]
+`getPageContentHtml(page)` returns `string | null` — the rendered HTML, or `null` when
+no matching file exists (`packages/astro/src/server/directory.ts:751`). It does **not**
+return an object, and it does not hand you the frontmatter: the frontmatter block is
+stripped and discarded during rendering. Set the page title and description on
+`BaseLayout` yourself, as the example above does.
+:::
 
 ## When Markdown isn't enough
 

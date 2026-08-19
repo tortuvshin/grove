@@ -6,12 +6,12 @@ description: How to set the name, blueprint, theme, and integrations for your Gr
 import { Aside, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
 
 <Aside type="note" title="What grove.config.ts does">
-  `grove.config.ts` is the single source of truth for your space. Edit it to change the site name, blueprint, theme, browse facets, integrations, and navigation. Every field is validated against the Zod schema at build time — a typo fails the build immediately with a clear message.
+  `grove.config.ts` is the single source of truth for your space. Edit it to change the site name, blueprint, theme, browse facets, integrations, and navigation. Every field is validated against the Zod schema when the config loads — a typo fails immediately with a clear message.
 </Aside>
 
 ## The file in one view
 
-The full shape, with sensible defaults:
+A filled-in example, covering the fields you'll touch most:
 
 ```ts title="grove.config.ts"
 import { defineConfig } from "@grove-dev/core";
@@ -60,7 +60,7 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
    The Zod schema also defines a `resource-hub` and an `ecosystem-map`
    blueprint (`kind: resource` and `kind: entity`), but neither has a
    supported scaffold or template yet — see the
-   [roadmap](/roadmap/#later--directional). The blueprint and the record
+   [roadmap](/project/roadmap/#later--directional). The blueprint and the record
    `kind` must match. See [Record schema](/reference/record-schema/) for
    the fields `kind: project` accepts.
 
@@ -78,7 +78,7 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
    ```
 
    - `site.url` is the canonical base for every record's `<link rel="canonical">` and `og:url`. **If you omit it, OG tags resolve to `https://example.com`** and search engines treat every page as the canonical version.
-   - `site.repoUrl` is used by the GitHub integration for star/fork enrichment.
+   - `site.repoUrl` points at *your site's* repository — it drives the submit-a-record page's "open a pull request" link, the contributors page, and the `sync contributors` fallback. Per-record stars/forks come from each record's own `repoUrl` field, not this one.
    - `site.description` is optional but recommended — it populates the site-wide JSON-LD.
 
 3. ### Theme tokens
@@ -88,7 +88,7 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
    ```ts
    theme: {
      primaryColor: "#0ea5e9",
-     radius: "soft",          // "none" | "sharp" | "soft" | "pill"
+     radius: "soft",          // "none" | "soft" | "round"
      density: "comfortable",  // "compact" | "comfortable" | "spacious"
      containerWidth: "80rem", // any CSS length
    }
@@ -98,7 +98,7 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
 
 4. ### Browse facets
 
-   `browse.facets` chooses which dimensions appear as filters on `/browse` and in what order:
+   `browse.facets` chooses which dimensions appear as filters on the browse page (`/projects/` by default) and in what order:
 
    ```ts
    browse: {
@@ -137,11 +137,12 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
      github: {
        metadata: true,     // refresh stars, forks, language, topics, license
        contributors: true, // aggregate contributor counts
+       health: true,       // derive health.status from the fetched metadata
      },
    }
    ```
 
-   `metadata: true` requires a `GITHUB_TOKEN` in `.env`. See [Sync GitHub metadata](/automation/sync-github/) for setup.
+   None of these strictly require a `GITHUB_TOKEN` — `sync github` and `sync contributors` fall back to GitHub's unauthenticated API (60 requests/hour) and, if that's exhausted, an HTML scrape. Set `GITHUB_TOKEN` in `.env` to raise the rate limit and skip the fallback. See [Sync GitHub metadata](/automation/sync-github/) for setup.
 
 6. ### Navigation
 
@@ -155,7 +156,7 @@ The full field reference is in **[grove.config.ts reference](/reference/config/)
    ]
    ```
 
-   The order of entries is render order. Use `external: true` for off-site links.
+   The order of entries is render order. Each entry is just `label` and `href` — point `href` at a full URL for an off-site link. (The `external: true` flag exists on `footer.columns[].items`, not on top-level `nav`.)
 
 </Steps>
 
@@ -171,8 +172,6 @@ Config is read at boot, not hot-reloaded. After any change:
 
 </Steps>
 
-If you want config changes picked up without a manual restart, use the Astro `--watch` flag.
-
 ## Common mistakes
 
 <Aside type="caution" title="site.url not set">
@@ -180,7 +179,7 @@ If you want config changes picked up without a manual restart, use the Astro `--
 </Aside>
 
 <Aside type="caution" title="`kind` other than `project`">
-  `grove check` fails every record with a kind error — `project-directory` is the only supported blueprint, so every record's `kind` must be `project`.
+  `project-directory` is the only supported blueprint, and its records must be `kind: project`. A record with `kind: resource` or `kind: entity` fails Zod validation — it's parsed against that kind's schema instead, which requires fields (`title`/`type`/`topic`, or `name`/`type`) a project record doesn't have.
 </Aside>
 
 <Aside type="caution" title="Custom facet id (e.g. `categories`)">
@@ -188,7 +187,7 @@ If you want config changes picked up without a manual restart, use the Astro `--
 </Aside>
 
 <Aside type="caution" title="integrations.github.metadata: true without GITHUB_TOKEN">
-  `grove sync github` fails with a clear auth error; the build itself still succeeds.
+  Not an error — `sync github` still runs against GitHub's unauthenticated API, rate-limited to 60 requests/hour, with an HTML-scrape fallback if that's exhausted. The build always succeeds either way; set `GITHUB_TOKEN` if syncing hits the rate limit.
 </Aside>
 
 ## Next steps

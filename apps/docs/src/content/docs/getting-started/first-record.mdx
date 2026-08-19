@@ -3,7 +3,7 @@ title: Add your first project
 description: Write a YAML record, save it, and see it render in your local directory.
 ---
 
-import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="5 minutes from YAML to a rendered page">
   Write a single record file (`data/records/my-project.yml`), save it, and watch the dev server render it as a project detail page at `/projects/<slug>/`. Three actions: create the file, validate, push.
@@ -83,7 +83,7 @@ import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tab
    ```
 
    <Aside type="note" title="What you should see">
-     Open a pull request. CI runs `grove check` plus `astro build` to validate the change. A maintainer reviews and merges; Grove rebuilds the site and deploys. If `integrations.github` is enabled, the scheduled `sync-github.yml` workflow enriches the record with live stars, language, and last-pushed data on its next run — see [Sync GitHub metadata](/automation/sync-github/).
+     Open a pull request. CI runs `grove check` plus `pnpm build` to validate the change. A maintainer reviews and merges; Grove rebuilds the site and deploys. If `integrations.github` is enabled, the scheduled `sync-github.yml` workflow runs `grove sync github` weekly and opens its own pull request with live stars, language, and last-pushed data — see [Sync GitHub metadata](/automation/sync-github/).
    </Aside>
 
 </Steps>
@@ -94,10 +94,10 @@ For the `project-directory` blueprint (`kind: project`):
 
 | Field          | Required | What it is |
 | -------------- | -------- | ---------- |
-| `kind`         | yes      | Must be `project` for the `project-directory` blueprint. |
+| `kind`         | auto     | Grove fills in `project` for you if you omit it — it always matches the `project-directory` blueprint. Real records write it anyway, for clarity. |
 | `name`         | yes      | Human-readable name. Shown in cards and headings. |
-| `slug`         | yes      | The record's unique id. The filename is canonical; the `slug` field must match. |
-| `description`  | yes      | One-sentence summary. Shown in lists and search snippets. |
+| `slug`         | yes      | Must be a non-empty string in the file, but the build always uses the filename as the canonical slug — a mismatch only produces a warning, not a failure. Keep them the same to avoid confusing the next contributor. |
+| `description`  | optional | One-sentence summary. Shown in lists and search snippets. Defaults to an empty string if omitted — write one anyway. |
 | `category`     | optional | One of your taxonomy categories. Defaults to `uncategorized`. |
 | `tags`         | optional | Free-form labels for filtering. |
 | `repoUrl`      | optional | Canonical GitHub URL. Powers `grove sync github`. |

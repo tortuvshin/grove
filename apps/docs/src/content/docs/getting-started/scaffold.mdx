@@ -5,16 +5,15 @@ description: Scaffold a new Grove space with the CLI, step by step — the full 
 
 import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
+This is the long-form version of the [quickstart](/start-here/quickstart/)'s scaffold-and-first-run steps — what `grove init` actually does, what lands on disk, and why. If you already know the CLI and just want the commands, use the quickstart instead.
+
 <Aside type="tip" title="What `grove init` produces">
-  A complete Astro project: a directory layout with `data/records/`, `data/taxonomy/`, `data/collections/`, `grove.config.ts`, `astro.config.mjs`, GitHub workflow templates, and a sample site you can run with `pnpm dev`. The CLI copies the canonical Astro template, rewrites `package.json` and `grove.config.ts` so `site.name` and the `name:` field match your directory, and runs `pnpm install`.
+  A complete Astro project: a directory layout with `data/records/`, `data/taxonomy/`, `data/collections/`, `grove.config.ts`, `astro.config.mjs`, GitHub workflow templates, and a sample site you can run with `pnpm dev`. The CLI copies the canonical Astro template, rewrites `package.json` (name and Grove dependency versions) and `grove.config.ts` (site name) to match your directory, then runs `pnpm install` and `git init` — unless you pass `--no-install` or `--no-git`.
 </Aside>
 
 ## Requirements
 
-<Aside type="note" title="Prerequisites">
-  - **Node.js** `>=22.12.0` (every Grove package and `apps/example` declare this in `engines`).
-  - **pnpm** `10.12.1` — install via `corepack enable && corepack prepare pnpm@10.12.1 --activate`.
-</Aside>
+See [Install the CLI](/getting-started/install-cli/) for the Node and pnpm versions Grove needs, and how to verify your toolchain before continuing.
 
 ## Create the project
 
@@ -44,31 +43,33 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Tabs, Tab
      A new `my-directory/` folder on disk, populated with `data/`, `public/`, `src/`, `.github/`, `grove.config.ts`, and `astro.config.mjs`. The CLI prints a short summary of what was copied and modified.
    </Aside>
 
-2. ## Install dependencies
+2. ## Confirm dependencies are installed
+
+   `grove init` already ran `pnpm install` for you as its last step — you don't need to run it again unless you passed `--no-install`. `cd` in and check:
 
    <Tabs syncKey="pkg">
      <TabItem label="pnpm" icon="pnpm">
        ```bash
        cd my-directory
-       pnpm install
+       pnpm install   # only needed if you passed --no-install
        ```
      </TabItem>
      <TabItem label="npm" icon="npm">
        ```bash
        cd my-directory
-       npm install
+       npm install    # only needed if you passed --no-install
        ```
      </TabItem>
      <TabItem label="bun" icon="bun">
        ```bash
        cd my-directory
-       bun install
+       bun install     # only needed if you passed --no-install
        ```
      </TabItem>
    </Tabs>
 
    <Aside type="note" title="What you should see">
-     `node_modules/` populated, `pnpm-lock.yaml` (or equivalent) generated, no `ELIFECYCLE` errors. If you used `--no-install`, this is the step that pulls everything in.
+     `node_modules/` already populated from the `init` run. Re-running install is safe — it's a no-op if nothing changed, and it's what pulls everything in if you used `--no-install`.
    </Aside>
 
 3. ## Start the dev server
@@ -105,18 +106,21 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Tabs, Tab
 - my-directory/
   - data/
     - records/ directory entries (one YAML per record)
-    - taxonomy/ categories / stacks / platforms
+    - taxonomy/ categories, stacks, platforms, licenses, topics
     - collections/ curated collections
-    - decisions.yml curator visibility overrides
-    - overrides.yml manual record patches
-    - generated/ build output (gitignored; rebuilt by grove check)
-  - public/ robots.txt, og-image.svg, llms.txt, sitemap.xml
+    - health.yml per-record health/maturity signals
+    - generated/ build output (gitignored except contributors.json and repo-stats.json; rebuilt by grove check)
+  - content/
+    - records/ optional long-form Markdown body per record
+  - public/
+    - icons/, logo.svg kept from the template
+    - robots.txt, og-image.svg, llms.txt, sitemap.xml, og/ written on first build (gitignored)
   - src/
-    - pages/ home, browse, [slug], submit, 404
+    - pages/ home, [slug]/ (browse + record detail), categories/, stacks/, licenses/, collections/, submit, 404
     - components/ override any default Astro component
     - styles/global.css
   - .github/
-    - workflows/ ci, cleanup, deploy, sync-github, sync-contributors
+    - workflows/ ci, cleanup, deploy, readme, sync-github, sync-contributors
     - ISSUE_TEMPLATE/
   - grove.config.ts site config (blueprint, site, theme, integrations)
   - astro.config.mjs
@@ -135,7 +139,7 @@ Three files matter most:
     Your directory entries. One YAML file per record. Edit these to add or change projects.
   </Card>
   <Card title="data/taxonomy/" icon="list-format">
-    Categories, stacks, and platforms. Edit these to control the filters and labels on browse pages.
+    Categories, stacks, platforms, licenses, and topics. Edit these to control the filters and labels on browse pages.
   </Card>
   <Card title="data/collections/" icon="document">
     Curated collections — manually grouped views over your records.
@@ -147,7 +151,7 @@ Three files matter most:
     Your routes and UI customization. Override any default Astro component here.
   </Card>
   <Card title=".github/workflows/" icon="rocket">
-    CI, cleanup, deploy, sync-github, and sync-contributors workflows ready to go.
+    CI, cleanup, deploy, readme, sync-github, and sync-contributors workflows ready to go.
   </Card>
 </CardGrid>
 

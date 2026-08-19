@@ -16,23 +16,25 @@ A collection is different from a lens in two ways:
 
 ## Two kinds
 
+`CollectionKind` is `"curated" | "generated"` (`packages/core/src/collections.ts:21`). Both kinds have the exact same shape — a `query` and a `ranking` — and are resolved the same way at build time: `runCollection` filters the record set with `query` and orders the result with `ranking` (`packages/core/src/collector.ts:12-17`). There is no field for hand-listing record ids; `kind` only changes the eyebrow label the collection page renders (`packages/astro/src/pages/collections/[slug].astro:52`: `"Curated collection"` vs `"Generated collection"`).
+
 <Tabs syncKey="kind">
   <TabItem label="curated" icon="seti:notebook">
     ```yaml
     # data/collections/<slug>.yml
-    kind: curated         # default — query + ranking
+    kind: curated
     ```
 
-    `kind: curated` is what `grove collection promote --from /browse?... --slug <s>` produces. The collection's `query` block describes facet filters and matchers; the entries are computed at build time.
+    `kind: curated` is what `grove collection promote --from /browse?... --slug <s>` produces (`packages/cli/src/collection-cli.ts:24`). Use it for a hand-curated slice a maintainer built by narrowing a browse view.
   </TabItem>
 
-  <TabItem label="ranked" icon="list-format">
+  <TabItem label="generated" icon="list-format">
     ```yaml
     # data/collections/<slug>.yml
-    kind: ranked          # explicit list of record ids
+    kind: generated
     ```
 
-    `kind: ranked` is the escape hatch when the editorial intent can't reduce to a query — for example, "the six records we'd want anyone to see first." The collection file lists every record id by hand.
+    `kind: generated` is for a collection assembled more mechanically — a broad query with no manual browse-and-promote step behind it. It runs through the identical `query`/`ranking` pipeline; only the page's eyebrow text differs.
   </TabItem>
 </Tabs>
 
@@ -49,15 +51,15 @@ query:
   categories: [productivity, finance]
   excludeStatuses: [archived]
 ranking:
-  preset: quality         # quality | freshness | popularity | custom
+  preset: quality         # quality | active | curated | recency | stars
 seo:
   title: Top Flutter apps
   description: Hand-picked Flutter projects.
   index: true
 editorial:
-  reviewer: maintainer-name
-  reviewedAt: "2026-04-01"
-  notes: Re-curated for the 2026 launch.
+  introduction: A short intro shown above the list.
+  selectionNote: Re-curated for the 2026 launch.
+  lastReviewedAt: "2026-04-01"
 ```
 
 <CardGrid>
@@ -67,54 +69,35 @@ editorial:
 
   <Card title="kind">
     <Badge text="curated" variant="default" />
-    <Badge text="ranked" variant="default" />
+    <Badge text="generated" variant="default" />
 
-    `curated` (default) or `ranked`.
+    `curated` or `generated` (`packages/core/src/collections.ts:21`). Both run through the same `query`/`ranking` pipeline; `kind` only changes the eyebrow label the collection page renders.
   </Card>
 
   <Card title="title">
-    Display title; defaults to humanized slug when omitted.
+    Required display title (`packages/core/src/collections.ts:59`). `grove collection promote` defaults it to a humanized slug when `--title` isn't passed (`packages/cli/src/collection-cli.ts:25`); the YAML loader itself applies no default.
   </Card>
 
   <Card title="description">
-    Long description for the collection page.
+    Required long description for the collection page (`packages/core/src/collections.ts:60`).
   </Card>
 
   <Card title="query">
-    Facet filters and matchers (`stacks`, `categories`, `platforms`, `excludeStatuses`).
-  </Card>
-
-  <Card title="query.match">
-    Optional `tags.all`, `tags.any`, `tags.none` arrays for tag-set filtering.
+    Facet filters: `stacks`, `platforms`, `categories`, `licenses`, `kinds`, `excludeStatuses`, `minStars`, `minForks`, `q` (`packages/core/src/collections.ts:25-37`).
   </Card>
 
   <Card title="ranking.preset">
-    One of `quality`, `freshness`, `popularity`, or `custom`.
+    One of `quality`, `active`, `curated`, `recency`, or `stars` (`packages/core/src/collections.ts:23`).
   </Card>
 
   <Card title="seo.title / seo.description / seo.index">
-    Overrides the page's OG title and JSON-LD description; `seo.index: false` adds `<meta name="robots" content="noindex">`.
+    Overrides the page's OG title and JSON-LD description; `seo.index: false` adds `<meta name="robots" content="noindex">` (`packages/astro/src/server/collections.ts:205`).
   </Card>
 
-  <Card title="editorial.reviewer / editorial.reviewedAt / editorial.notes">
-    Provenance metadata for the collection.
+  <Card title="editorial.introduction / editorial.selectionNote / editorial.lastReviewedAt">
+    Optional editorial intro, selection note, and last-reviewed date (`packages/core/src/collections.ts:44-48`).
   </Card>
 </CardGrid>
-
-A `kind: ranked` collection replaces `query` with an explicit list:
-
-```yaml
-slug: stable-only
-kind: ranked
-title: Six records we'd show anyone
-description: Hand-picked for stability and active maintenance.
-records:
-  - slug: well-known-project-a
-  - slug: well-known-project-b
-  - slug: well-known-project-c
-seo:
-  index: true
-```
 
 ## `grove collection promote`
 

@@ -1,6 +1,6 @@
 ---
 title: Decisions and curation
-description: Curator overrides — visibility, sort priority, rename, label.
+description: Curator overrides — visibility, curation labels, and lenses.
 ---
 
 import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
@@ -11,7 +11,7 @@ import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tab
 
 Curators shape how a Grove space presents its records through two surfaces:
 
-1. **The record's own YAML** — `curation.{reviewed,reviewedBy,reviewedAt,notes,labels,lenses}`, plus `visibility`, `scores`, and the optional `health` block.
+1. **The record's own YAML** — `curation.{reviewed,reviewedBy,reviewedAt,notes,labels,lenses}` and `scores`.
 2. **`data/decisions.yml`** — site-level overrides keyed by record id. Each entry changes how one record is presented.
 
 The record-level fields are usually enough. `data/decisions.yml` is for the cases where a curator wants one source of truth across the whole site rather than editing many records.
@@ -24,7 +24,7 @@ The record-level fields are usually enough. `data/decisions.yml` is for the case
   <Card title="highlight">
     <Badge text="highlight" variant="default" />
 
-    Promote in listings, summary cards, and lens outputs.
+    Listed, marked for editorial emphasis. No automatic sort boost — pair it with a collection or a lens if you want it surfaced first.
   </Card>
 
   <Card title="keep">
@@ -36,7 +36,7 @@ The record-level fields are usually enough. `data/decisions.yml` is for the case
   <Card title="needs_review">
     <Badge text="needs_review" variant="caution" />
 
-    Listed but flagged. Detail pages show a review banner.
+    A record marked for human attention. Not a lens or a UI-level filter — nothing excludes or highlights it automatically.
   </Card>
 
   <Card title="hide">
@@ -48,40 +48,45 @@ The record-level fields are usually enough. `data/decisions.yml` is for the case
   <Card title="remove">
     <Badge text="remove" variant="danger" />
 
-    Excluded from listings, search, and detail pages. The record YAML remains in git.
+    Excluded from listings and search, same as `hide`. Signals the record shouldn't come back. The record YAML remains in git.
   </Card>
 
   <Card title="historical">
     <Badge text="historical" variant="note" />
 
-    Listed but de-emphasized. The lens for "historical" surfaces these in a dedicated section.
+    A record kept for reference, not promotion. Like `needs_review`, this is a status you set — it isn't a filter or a lens on its own.
   </Card>
 </CardGrid>
 
-`remove` and `hide` differ in one way: `remove` takes the record out of detail-page URLs too (a direct link resolves but the page renders a tombstone). `hide` keeps the detail page addressable.
+`hide` and `remove` behave identically for the record's own detail page — a direct link resolves normally either way; there is no tombstone. Both are excluded, the same way, from listings, search, the sitemap, and llms output. The difference between them is intent, not mechanics: `remove` signals the record shouldn't be listed anywhere going forward, `hide` is often temporary.
 
 ## What lives on the record vs in `data/decisions.yml`
 
-Use the record's `visibility:` for the common case — you want a single record hidden or highlighted.
+`curation.labels`, `curation.lenses`, and `curation.notes` are editorial judgement that belongs on the record itself — edit `data/records/<slug>.yml` directly for these.
+
+Visibility is different for project records (the only blueprint Grove ships today). The index reads a project's effective visibility from `health.visibility`, not from a top-level `visibility:` key on the record — so adding `visibility: highlight` to the top of a project record's YAML has no effect on what's listed. Don't hand-edit `health.*` either — see [Health classification](/content/health-classification/). Use `data/decisions.yml` instead: a decision's `visibility` is folded into the record's effective `health.visibility` when the site is built.
 
 Use `data/decisions.yml` when:
 
+- You want to change what a project record's listing visibility resolves to.
 - The override should be visible at a glance, in one file, rather than scattered across records.
-- The override includes `reason` plus `reviewedBy` / `reviewedAt`, which the record's `visibility:` doesn't carry.
-- The override changes `renameSlug` (used by `routes.item`) or `sortPriority` for a single record without rewriting it.
+- The override needs `reason` plus `reviewedBy` / `reviewedAt` — metadata a record's own YAML has no field for.
 
 <Tabs syncKey="where">
   <TabItem label="Record" icon="document">
-    Add `visibility:` directly to the record's YAML when you want one record hidden or highlighted. This is the common case.
+    Curation labels, lenses, and notes are editorial judgement — edit them directly on the record.
 
     ```yaml
     # data/records/<slug>.yml
-    visibility: highlight
+    curation:
+      labels: [hot]
+      lenses: [good-to-learn]
+      notes: Strong docs; recommend for the learning lens.
     ```
   </TabItem>
 
   <TabItem label="Decisions file" icon="setting">
-    Use `data/decisions.yml` when you want one file to carry the override along with `reason`, `reviewedBy`, and `reviewedAt` — fields the record's `visibility:` doesn't carry.
+    Use `data/decisions.yml` to override a record's effective visibility, with `reason`, `reviewedBy`, and `reviewedAt` carried alongside it.
 
     ```yaml
     # data/decisions.yml
@@ -94,8 +99,6 @@ Use `data/decisions.yml` when:
     - id: another-record
       decision:
         visibility: highlight
-        sortPriority: 1
-        renameSlug: feature-record
         reason: Reviewed and re-curated for the 2026 launch.
     ```
   </TabItem>
@@ -118,39 +121,39 @@ Each entry must include `id` (matching a record `slug`) and `decision.visibility
 
 ## Curation labels
 
-`curation.labels` is a curator-applied tagging system that's independent of `tags`. Labels drive lenses:
+`curation.labels` is a curator-applied tagging system that's independent of `tags`. The accepted values are `new`, `hot`, `mature`, and `featured`:
 
 <CardGrid>
-  <Card title="featured">
-    <Badge text="featured" variant="default" />
-
-    Surfaces in the `featured` lens.
-  </Card>
-
   <Card title="hot">
     <Badge text="hot" variant="caution" />
 
-    Surfaces in the `hot` lens (high recent activity).
-  </Card>
-
-  <Card title="new">
-    <Badge text="new" variant="tip" />
-
-    Surfaces in the `new` lens.
+    Has a dedicated lens: `?lens=hot` (equivalently `?label=hot`) filters to records carrying this label.
   </Card>
 
   <Card title="mature">
     <Badge text="mature" variant="success" />
 
-    Surfaces in the `mature` lens.
+    Has a dedicated lens: `?lens=mature` (equivalently `?label=mature`) filters to records carrying this label.
+  </Card>
+
+  <Card title="new">
+    <Badge text="new" variant="tip" />
+
+    No dedicated lens. Filterable directly via `?label=new`, and renders as a "Recently added" badge.
+  </Card>
+
+  <Card title="featured">
+    <Badge text="featured" variant="default" />
+
+    No dedicated lens. Filterable directly via `?label=featured`, and renders as a "Featured" badge.
   </Card>
 </CardGrid>
 
-Lenses compose; a single record can carry several labels.
+A record can carry several labels. None of the four labels are computed automatically — a curator applies them by hand in `curation.labels`. See [Lens recipes](/discovery/lens-recipes/) for the full lens list.
 
 ## Scores
 
-`scores.{activity,maturity,learning,contribution,docs,overall}` is a 0-100 scale per axis. The framework uses `overall` as the default ranking when no other sort is selected. The framework also derives a `tier` from these scores in some cases (e.g., `health.tier: curated` requires `overall >= 80`).
+`scores.{activity,maturity,learning,contribution,docs,overall}` is a 0-100 scale per axis. The framework uses `overall` as the default ranking when no other sort is selected.
 
 ## What curators should never do
 
@@ -159,57 +162,32 @@ Lenses compose; a single record can carry several labels.
 </Aside>
 
 <Aside type="danger" title="Never manually set health fields">
-  Don't manually set `health.*` — let `grove sync github` write it. You CAN override `health.visibility` via a record-level `visibility:` if the auto-derived value is wrong.
+  Don't manually set `health.*`. To change a record's effective visibility, write a `data/decisions.yml` entry instead — it overrides `health.visibility` without touching the rest of the health block.
 </Aside>
 
 <Aside type="danger" title="Never delete a record to remove it">
-  Don't delete a record to "remove" it. Use `visibility: remove` instead. Git history preserves the record.
+  Don't delete a record to "remove" it. Add a `data/decisions.yml` entry with `decision.visibility: remove` instead. The record YAML stays in git; only the effective visibility changes.
 </Aside>
 
 ## See also
 
 - [Health classification](/content/health-classification/) — the `health.*` block and `cleanupCandidate: true`.
 
-## Worked example
+## Fields reference
 
-The minimal shape, hand-authored in `data/decisions.yml`:
+`data/decisions.yml` accepts a list of entries, or `{ decisions: [...] }` wrapping the same list. Each entry:
 
-```yaml
-# data/decisions.yml — flat list form
-- slug: ollama
-  visibility: hide
-  reason: archived-upstream
-- slug: langchain
-  sortPriority: 100
-  pin: true
-- slug: llamaindex
-  renameSlug: llama-index
-```
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | yes | Matches a record's `slug`. |
+| `decision.visibility` | `highlight` \| `keep` \| `needs_review` \| `hide` \| `remove` \| `historical` | yes | Overrides the record's effective visibility. |
+| `decision.reason` | string | yes | Curator note; not surfaced publicly by default. |
+| `decision.reviewedBy` | string | no | Who made the call. |
+| `decision.reviewedAt` | string | no | ISO timestamp. |
 
-Each entry needs `slug` (matching a record) and at least one override field. `reason` is a curator note and is not surfaced publicly by default.
+There is no `sortPriority`, `pin`, or `renameSlug` field — `decision.visibility` is the only lever a decision has over what's rendered.
 
-<CardGrid>
-  <Card title="Fields reference">
-    Reference table for the flat-list form fields used in `data/decisions.yml`.
-  </Card>
-
-  <Card title="Conflict resolution">
-    When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibility: keep` but decision says `hide`), the decision wins.
-  </Card>
-</CardGrid>
-
-### Fields reference
-
-| Field | Type | Description |
-|---|---|---|
-| `slug` | string | Original slug from the source record. |
-| `visibility` | `"keep"` \| `"hide"` | Force show/hide. |
-| `sortPriority` | number | Higher numbers float to the top. |
-| `pin` | boolean | Pin to the top of any list it appears in. |
-| `renameSlug` | string | Override the slug used in URLs (rare; use sparingly). |
-| `reason` | string | Curator note; not surfaced publicly by default. |
-
-When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibility: keep` but decision says `hide`), the decision wins.
+When a decision and a record's own state disagree (e.g., the record has no `health` block but the decision says `hide`), the decision wins — it's folded into the record's effective `health.visibility` before the site is built.
 
 ## Next steps
 
@@ -235,14 +213,8 @@ When decisions conflict with `data/records/<slug>.yml` (e.g., record has `visibi
   />
 
   <LinkCard
-    title="Collections"
-    href="/concepts/collections/"
-    description="Curated or query-driven groupings of records."
-  />
-
-  <LinkCard
     title="Lens recipes"
     href="/discovery/lens-recipes/"
-    description="How curation labels drive the featured, hot, new, and mature lenses."
+    description="How curation labels drive the hot and mature lenses."
   />
 </CardGrid>

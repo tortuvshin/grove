@@ -3,7 +3,7 @@ title: Author a record
 description: How a contributor writes a new YAML record, from "I found an app" to "it's on the site".
 ---
 
-import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, CardGrid, FileTree, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="note" title="New to authoring records?">
   If you want the minimum viable record, see [Author your first record](/getting-started/first-record/) first. Come back here when your record needs to be more than a stub.
@@ -23,11 +23,11 @@ When you sit down to add a record, answer these in order:
 
 2. **What is the canonical URL?**
 
-   For projects, that's the GitHub repo. Set `repoUrl` (not just `links.github` — `repoUrl` is the single source of truth for stars, contributors, and the "view repo" CTA).
+   For projects, that's the GitHub repo. Set `repoUrl` — `grove sync github` and the contributors sync both fall back to `links.github` when it's unset, but the detail page's "view repo" button and avatar fallback read `repoUrl` directly, so set it explicitly rather than relying on the fallback.
 
 3. **Is it worth listing?**
 
-   If you have to ask, list it. The health block will demote it to `experimental` tier; promotion to `curated` happens when stars and maintenance signals accumulate.
+   If you have to ask, list it. `classifyHealth()` starts new records at `experimental` tier; it promotes to `listed` at 50+ GitHub stars, and to `curated` once stars reach 500 and maintenance signals (a recent release or a clear license) are present.
 
 4. **What category?**
 
@@ -49,7 +49,7 @@ category: frameworks
 tags: [web, static-site]
 repoUrl: https://github.com/withastro/astro
 logoUrl: https://avatars.githubusercontent.com/u/79145104
-projectType: framework
+projectType: library
 stack: typescript
 stacks: [typescript, go]
 platforms: [web]
@@ -84,15 +84,15 @@ caveats:
 ## Common mistakes
 
 <Aside type="caution" title="Setting only `links.github`, not `repoUrl`">
-  The health block, star count, and "view repo" button all use `repoUrl`. If you set only `links.github`, every GitHub-derived field is empty until `grove sync github` runs and the missing `repoUrl` warning shows up.
+  `grove sync github` will still run — it falls back to `links.github` when `repoUrl` is unset. But the record's own `repoUrl` field is what the "view repo" button and the GitHub-avatar fallback on the detail page read directly. Leave it unset and those stay empty even after a successful sync. Set `repoUrl` on the record.
 </Aside>
 
 <Aside type="caution" title="Using an inconsistent `slug`">
-  The slug is the filename minus `.yml`. If `slug: prisma-vs-drizzle` is in `prisma.yml`, the URL is `/resources/prisma-vs-drizzle/` but the file is `prisma.yml` — confusing for the next contributor.
+  The slug is the filename minus `.yml`. If `slug: prisma-vs-drizzle` is in `prisma.yml`, the build still publishes it at `/resources/prisma-vs-drizzle/` — the filename always wins — but `grove check` prints a mismatch warning, and it's confusing for the next contributor. Keep them the same.
 </Aside>
 
-<Aside type="caution" title="Editing the `health` block by hand">
-  Auto-derived from GitHub metadata on every sync run. Hand edits get overwritten. If you disagree with the auto-derived health, write a [decision](/concepts/decisions/).
+<Aside type="caution" title="Editing the `github` or `health` block by hand">
+  Both are machine-written by `grove sync github`. Hand edits get overwritten on the next sync. If you disagree with the derived health, write a [decision](/concepts/decisions/) instead of editing `health` directly.
 </Aside>
 
 <Aside type="caution" title="Adding a `category` with no other records">
@@ -149,7 +149,7 @@ caveats:
 
 3. Open a PR.
 
-   The CI workflow runs `grove check` plus `astro build`. If `integrations.github` is enabled, `sync-github.yml` enriches the record with live metadata.
+   The CI workflow runs `grove check` plus `pnpm build`. If `integrations.github` is enabled, the weekly `sync-github.yml` workflow runs `grove sync github` and opens its own pull request with live metadata.
 
 </Steps>
 
@@ -176,8 +176,8 @@ The fields below are valid for any record regardless of `kind`. They come from `
 # resourceBaseSchema fields
 slug: my-record                            # matches filename; kebab-case by convention
 description: One-line summary.             # default: ""
-summary: Curator-written lead paragraph.    # optional; rendered above sourceDescription
-sourceDescription: Original-from-GitHub.   # optional; preserved against curator edits
+summary: Curator-written lead paragraph.    # optional; rendered above `description` when set
+sourceDescription: Original-from-GitHub.   # optional; the GitHub-sourced description, kept separate from `description`
 category: ai-tools                          # taxonomy category id; default: "uncategorized"
 tags: [llm, agent]                          # default: []
 links:                                      # default: {}
@@ -203,7 +203,7 @@ scores:                                     # default {}
   overall: 0..100
 ```
 
-The slug must match the filename. `kind` is `project` for every record today — `grove init` always scaffolds the `project-directory` blueprint, the only one currently supported. `category` must be a valid id from `data/taxonomy/categories.yml` (otherwise the record fails to validate).
+The slug must match the filename. `kind` is `project` for every record today — `grove init` always scaffolds the `project-directory` blueprint, the only one currently supported. `category` should be a valid id from `data/taxonomy/categories.yml`; an unknown id doesn't fail `grove check` — it prints an `unknown_taxonomy_value` warning — but it fails the build under `grove check --strict`, which CI does not currently run.
 
 ### Where the schema lives
 
@@ -221,9 +221,10 @@ The slug must match the filename. `kind` is `project` for every record today —
 In addition to the base, `kind: project` — the only supported kind today — adds its own fields:
 
 ```yaml title="packages/core/src/schema.ts:projectRecordSchema"
+name: My Project                           # required; not part of the shared base
 projectType: tool                          # real-app, production, reference, library, tool, demo, template, historical
-stack: python                              # (legacy single stack)
-stacks: [python, typescript]               # preferred for new records
+stack: python                              # single string; the canonical browse/filter taxonomy
+stacks: [python, typescript]               # supporting/all languages; open-ended, not filtered
 platforms: [web]
 licenses: [mit]
 difficulty: intermediate                   # beginner, intermediate, advanced
@@ -252,10 +253,10 @@ health:                                    # auto-derived by classifyHealth()
 
 ### What you'll do day-to-day
 
-- **Add a record** — create `data/records/<slug>.yml` with at least `kind`, `name`, `description`.
+- **Add a record** — create `data/records/<slug>.yml` with at least `name`; `slug` must be present in the file too, though the filename always wins, and `kind` is filled in for you.
 - **Add a Markdown body** — create `content/records/<slug>.md` and set `content:` to its relative path.
 - **Tag and categorize** — set `category`, `tags`, `stacks`, `platforms`, `licenses` from the matching `data/taxonomy/*.yml`.
-- **Curate** — set `curation.{reviewed,reviewedBy,lables,lenses}`, `scores.*`, or `visibility`.
+- **Curate** — set `curation.{reviewed,reviewedBy,labels,lenses}`, `scores.*`, or `visibility`.
 - **Add screenshots** — list `screenshots: [{ src, alt, source?, width?, height? }]`.
 
 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>

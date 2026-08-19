@@ -3,7 +3,7 @@ title: Taxonomy files
 description: How to author categories, stacks, platforms, topics, licenses, and distribution channels in your Grove space.
 ---
 
-import { Aside, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="note" title="What taxonomy files do">
   Taxonomy files live under `data/taxonomy/` and shape how visitors filter, search, and navigate your space. Grove reads six fixed taxonomy files; each one is a YAML list of named entries with display metadata.
@@ -114,10 +114,10 @@ Only these six filenames are read. Files with other names in `data/taxonomy/` ar
     **File position is display order.** Filter options render in the order entries appear in the file; an explicit numeric **`order`** field overrides file position when present.
   </Card>
   <Card title="description" icon="info">
-    **`description`** (optional) is carried into the generated site config for taxonomy landing pages.
+    **`description`** (optional) passes through into the generated site config along with `id` and `name`; no bundled taxonomy page renders it yet.
   </Card>
   <Card title="color" icon="setting">
-    **`color`** (optional, `stacks.yml`) is used by stack chips.
+    **`color`** (optional, `stacks.yml`) passes through into the generated taxonomy JSON alongside `id` and `name`; no bundled component renders it yet.
   </Card>
   <Card title="url" icon="external">
     **`url`** (optional) links the entry to an upstream definition.
@@ -129,7 +129,7 @@ Only these six filenames are read. Files with other names in `data/taxonomy/` ar
 - [Configuration reference → `browse.facets`](/reference/config/)
 - [Curated collections](/concepts/collections/)
 - [Author a record](/content/author-a-record/)
-- [Getting started → Create a space](/getting-started/scaffold/) (legacy path)
+- [Scaffold a space](/getting-started/scaffold/)
 
 ## Why `id` and not `slug`
 
@@ -156,7 +156,7 @@ export const FACET_IDS = [
 ] as const;
 ```
 
-A typo in `browse.facets` fails config parsing immediately. The intended facet shape lives in `FACET_IDS`; the docs test (`docs-taxonomy-guard.test.ts`) imports this array and asserts no docs example adds an unknown facet id.
+A typo in `browse.facets` fails config parsing immediately. The intended facet shape lives in `FACET_IDS`; the docs test (`docs-taxonomy-guard.test.ts`) imports this array and asserts the [Configuration reference](/reference/config/)'s facet list matches it exactly.
 
 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
   <LinkButton href="/getting-started/configure/" variant="primary" icon="setting">

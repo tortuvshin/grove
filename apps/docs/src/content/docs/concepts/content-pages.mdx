@@ -6,48 +6,57 @@ description: Standalone Markdown pages that aren't records or collections.
 import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard } from '@astrojs/starlight/components';
 
 <Aside type="note" title="What a content page is">
-Grove content pages are standalone Markdown files at `content/pages/<slug>.md`. They're for content that isn't a record, a collection, or a curated list — about pages, contributing pages, essays, glossary entries, "how we curate," etc.
+A Grove content page is a Markdown file at `content/pages/<name>.md` (the directory is `paths.pagesDir` in `grove.config.ts`, default `content/pages`). It's for prose that isn't a record, a collection, or a curated list — an about page, a contributing guide, a methodology write-up, a glossary entry.
 </Aside>
 
-A content page is a Markdown file with two responsibilities the framework adds automatically:
+## How it differs from a record
 
-1. **Frontmatter** that the framework reads (`title`, `description`, `socialImage`).
-2. **A `PageDocument`** that produces OG, Twitter, and JSON-LD headers.
+A record (`data/records/<slug>.yml`) is structured data: a `kind`, a `category`, taxonomy references, optionally a `content/records/<slug>.md` body attached to it. It gets a generated detail page, appears in browse filters, and can be synced from GitHub.
 
-Curators don't write the JSON-LD. `definePageDocument` from `@grove-dev/core` generates it from the frontmatter and the surrounding context.
+A content page is just Markdown. It has no `kind`, no taxonomy, no generated route of its own — a `.astro` file under `src/pages/` decides where it renders and supplies its own title, description, and SEO.
 
-## Shape
+## How it renders
 
-```yaml
+Grove doesn't auto-route content pages. Each one is wired up by a small, consumer-owned Astro page that reads the Markdown and decides what to do with it. The one pre-wired example in the CLI scaffold is the About page:
+
+```astro title="src/pages/about.astro"
 ---
-title: About this site
-description: A short note on what we curate and why.
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import siteConfig from "@grove/generated/site-config.json";
+import { getPageContentHtml } from "@grove-dev/astro/server";
+
+const pageContentHtml = getPageContentHtml("about");
 ---
 
-This is the body. Plain Markdown. The framework renders it as an Astro page
-with the surrounding layout (`src/pages/about.astro` or equivalent).
+<BaseLayout title="About" description="About this site" site={siteConfig}>
+  {pageContentHtml ? (
+    <section class="grove-prose" set:html={pageContentHtml} />
+  ) : (
+    <p>Default fallback copy, hard-coded in this page.</p>
+  )}
+</BaseLayout>
 ```
 
-The page is referenced from a route the consumer authors:
+`getPageContentHtml(name)` (exported from `@grove-dev/astro/server`) looks for `content/pages/<name>.md`, strips any leading frontmatter block, renders the remaining Markdown, and sanitizes it. It returns the HTML string, or `null` if the file doesn't exist — which is why `about.astro` falls back to hard-coded copy when no `content/pages/about.md` is present. `grove init` doesn't scaffold that file; adding one is opt-in.
 
-```astro
----
-// src/pages/about.astro
-import MarkdownBody from "@grove-dev/astro/components/MarkdownBody.astro";
-import { definePageDocument } from "@grove-dev/core";
-import aboutMarkdown from "../../content/pages/about.md?raw";
+<Aside type="caution" title="Frontmatter isn't read automatically">
+  You can put a `---` frontmatter block at the top of the Markdown file for your own reference, but `getPageContentHtml` strips it and never parses it. Nothing derives the page's `<title>`, meta description, or OG image from it — the wrapping `.astro` page supplies those explicitly, the same as any other Astro page. Any `title:`/`description:` you write in the frontmatter is just a note to yourself.
+</Aside>
 
-const pageDoc = definePageDocument({
-  type: "content",
-  path: "/about/",
-  identity: { title: "About this site", description: "A short note on what we curate and why." },
-  discovery: { siteName: "My Space", siteUrl: "https://example.com" },
-});
----
-<MarkdownBody content={aboutMarkdown} pageDoc={pageDoc} />
-```
+Want more than one content page? Copy the pattern: write `content/pages/<name>.md`, then a matching `src/pages/<name>.astro` that calls `getPageContentHtml("<name>")`. See [Custom pages](/customize/pages/) for the full walkthrough, including the Astro-page and generated-record alternatives.
 
-The framework emits the same `WebSite` JSON-LD, OG image, and Twitter card as for records.
+## Markdown allowlist
+
+Content pages are sanitized with a narrower allowlist than record bodies — the pipeline is shared (Markdown → sanitize-html), but a page author's Markdown gets a more conservative prose-only tag set:
+
+<CardGrid stagger>
+  <Card title="Allowed" icon="star">
+    Headings `h1`–`h4`, paragraphs, `br`/`hr`, lists, `strong`/`em`/`b`/`i`/`u`/`s`/`del`, links, `code`/`pre`, blockquotes, images.
+  </Card>
+  <Card title="Not allowed here" icon="warning">
+    Tables, `div`, task-list checkboxes, `details`/`summary`, and inline styles are all stripped — they're part of the wider allowlist used for a record's `content/records/<slug>.md` body, not the content-page allowlist. Images aren't restricted to a host allowlist; only the URL scheme is checked (`http`, `https`, or `data`).
+  </Card>
+</CardGrid>
 
 ## When to write a content page
 
@@ -73,81 +82,29 @@ The framework emits the same `WebSite` JSON-LD, OG image, and Twitter card as fo
 
 ## Routing
 
-The consumer wires content pages into routes under `src/pages/`. A common pattern:
-
 <FileTree>
 - src/pages/
-  - about.astro         renders `content/pages/about.md` at `/about/`
-  - contributing.astro  renders `content/pages/contributing.md` at `/contributing/`
-  - '[slug].astro'      reads the slug from the URL and looks up `content/pages/<slug>.md`
+  - about.astro         renders `content/pages/about.md` at `/about/` (pre-wired by the CLI scaffold)
 - content/pages/
   - about.md
-  - contributing.md
 </FileTree>
 
-The Astro integration does not own content pages' routes. They are consumer-owned.
+The Astro integration doesn't own content pages' routes — they're consumer-owned. Beyond the pre-wired `about.astro`, adding a page means writing both the Markdown file and its `.astro` wrapper yourself.
 
 ## See also
 
-- [Custom pages](/customize/pages/) — how consumers wire routes for the records, collections, and content pages the framework produces.
-- [Customize components](/customize/components/) — `MarkdownBody`, `MarkdownLayout`, and their props.
+- [Custom pages](/customize/pages/) — the full how-to: Astro pages, Markdown content pages, and generated record pages side by side.
+- [Customize components](/customize/components/) — overriding default components.
 
-## Frontmatter fields
-
-<CardGrid>
-  <Card title="title">
-    **Type:** `string`
-
-    Page title (and `<h1>`).
-  </Card>
-  <Card title="description">
-    **Type:** `string`
-
-    Used in `<meta name=description>` and OG.
-  </Card>
-  <Card title="slug">
-    **Type:** `string`
-
-    URL slug; defaults to the filename.
-  </Card>
-  <Card title="template">
-    **Type:** `string`
-
-    Default `page`.
-  </Card>
-  <Card title="hero">
-    **Type:** `object`
-
-    Hero block — layout, title, subtitle, image.
-  </Card>
-</CardGrid>
-
-## Markdown allowlist
-
-Content pages are sanitized with the **narrow** allowlist:
-
-<CardGrid stagger>
-  <Card title="Allowed" icon="star">
-    - Standard markdown (headings, lists, links, emphasis)
-    - Fenced code blocks (no inline styles)
-    - Tables
-    - Blockquotes
-    - Images from allowed hosts (configured in `grove.config.ts`)
-  </Card>
-  <Card title="Stripped" icon="warning">
-    Inline styles, scripts, and arbitrary iframes are stripped. For richer formatting, use a record's `content/records/<slug>.md`, which uses the wider allowlist.
-  </Card>
-</CardGrid>
-
-<LinkButton href="/customize/components/" variant="primary" icon="right-arrow">
-  Customize components
+<LinkButton href="/customize/pages/" variant="primary" icon="right-arrow">
+  Custom pages
 </LinkButton>
 <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
   GitHub
 </LinkButton>
 
 <CardGrid>
-  <LinkCard title="Custom pages" href="/customize/pages/" description="How consumers wire routes for the records, collections, and content pages the framework produces." />
+  <LinkCard title="Custom pages" href="/customize/pages/" description="Astro pages, Markdown content pages, and generated record pages." />
   <LinkCard title="Customize components" href="/customize/components/" description="MarkdownBody, MarkdownLayout, and their props." />
   <LinkCard title="Author a record" href="/content/author-a-record/" description="The day-to-day authoring walkthrough." />
 </CardGrid>

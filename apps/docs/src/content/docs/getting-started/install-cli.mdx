@@ -3,7 +3,7 @@ title: "Install the CLI"
 description: "Prerequisites and one-time setup for the @grove-dev/cli toolchain."
 ---
 
-import { Aside, Card, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 The Grove CLI (`@grove-dev/cli`) is the single tool you use to scaffold a space, validate records, and sync GitHub metadata. You don't need to install anything permanently — `pnpm dlx` fetches the latest on every run.
 
@@ -146,17 +146,22 @@ grove --version
 grove --help
 ```
 
-Expected output (excerpt):
+Expected output (excerpt — the version number and column widths vary by release):
 
 ```text
-grove 0.x.y
+$ grove --version
+0.x.y
 
-Usage: grove <command> [options]
+$ grove --help
+Usage: grove [options] [command]
 
 Commands:
-  init <name>           Scaffold a new space from the canonical template
-  check                 Validate records and regenerate outputs
-  sync github           Refresh GitHub metadata for every record
+  init [options] [directory]   Create a complete Grove directory from the official site.
+  check [options]              Validate data, generate artifacts, and run Astro checks.
+  sync [options] <target>      Refresh GitHub metadata owned by Grove.
+  cleanup [options]            Write a report of records that need human review.
+  collection                   Curated collection management
+  readme                       Generate an awesome-list formatted README from data/records/.
   ...
 ```
 
@@ -188,6 +193,8 @@ For global installs, pick your package manager:
 
 ## Troubleshooting
 
+### `command not found: grove`
+
 <Aside type="caution" title="`command not found: grove`">
   The global install put the binary somewhere not on your `PATH`. Find where:
 
@@ -204,6 +211,8 @@ For global installs, pick your package manager:
   Or just use Path A (`pnpm dlx`) and skip the global install.
 </Aside>
 
+### Node version is too old
+
 <Aside type="caution" title="Node version is too old">
   If you see `engine 'node' is incompatible with this package`, your Node is below `22.12.0`. Install a newer one:
 
@@ -213,6 +222,8 @@ For global installs, pick your package manager:
   node --version        # confirm v22.12.0+
   ```
 </Aside>
+
+### `EACCES` on global install
 
 <Aside type="caution" title="`EACCES` on global install">
   macOS / Linux global installs sometimes hit a permissions error. Two fixes:
