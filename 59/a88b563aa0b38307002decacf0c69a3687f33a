@@ -1,0 +1,61 @@
+apps/docs/src/content/docs/concepts/collections.mdx
+  s_75aa02f6d0f279::t_db34d746ea26d7 197-198
+apps/docs/src/content/docs/reference/api-core.md
+  s_75aa02f6d0f279::t_37ad9d63555713 83-85
+apps/docs/src/content/docs/automation/check.md
+  s_75aa02f6d0f279::t_158e0f35d6afb3 39-41
+  s_75aa02f6d0f279::t_4696a15fec82b4 65-66,68-70,73-74,78-79,82
+apps/docs/src/content/docs/outputs/site-meta.md
+  s_75aa02f6d0f279::t_e2c1001361d500 35
+apps/docs/src/content/docs/concepts/static-deployment.mdx
+  s_75aa02f6d0f279::t_0bfae3c6ba797c 45-48
+  s_75aa02f6d0f279::t_f57f9a60f99cd3 103
+  s_3f41f015b5961a::t_fe270d9b28a498 21
+apps/docs/src/content/docs/project/faq.md
+  s_75aa02f6d0f279::t_6e2caef325ca35 58
+apps/docs/src/content/docs/outputs/overview.md
+  s_75aa02f6d0f279::t_b7e4c622217c17 46
+  s_75aa02f6d0f279::t_b8000c1657c5b1 58
+  s_75aa02f6d0f279::t_a4e001a33d9594 93
+apps/docs/src/content/docs/outputs/seo.md
+  s_75aa02f6d0f279::t_674302c9188a0c 48
+apps/docs/src/content/docs/start-here/glossary.mdx
+  s_75aa02f6d0f279::t_e3a0dbf6a7988d 56
+  s_75aa02f6d0f279::t_17472470180a31 60
+apps/docs/src/content/docs/outputs/llm.md
+  s_75aa02f6d0f279::t_5c539c86cbc4c9 83,85,87
+  s_75aa02f6d0f279::t_2499585b257611 6
+  s_75aa02f6d0f279::t_e299e5686dc286 12,15,17,19-21,23,25,28,32,35,37-38,40,42,44-45,47,49-51,53-62,69
+  s_75aa02f6d0f279::t_bf7714c78a7bec 79
+apps/docs/src/content/docs/maintainers/contributing.md
+  s_75aa02f6d0f279::t_8c428e125146bf 177-199
+apps/docs/src/content/docs/discovery/browse.md
+  s_75aa02f6d0f279::t_4752ae9e2b1063 70
+apps/docs/src/content/docs/reference/cli.md
+  s_75aa02f6d0f279::t_f8622467424caf 157
+  s_75aa02f6d0f279::t_cb39a0079d63b9 149-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "59a88b563aa0b38307002decacf0c69a3687f33a",
+  "prompts": {},
+  "sessions": {
+    "s_3f41f015b5961a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-afd0d19171dd5dafa",
+        "model": "unknown"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
