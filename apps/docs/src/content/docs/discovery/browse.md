@@ -67,7 +67,7 @@ Search results respect visibility: records with `visibility: hide` or `visibilit
 
 ## Filter URLs and SEO
 
-The Astro integration generates per-filter-URL `og/<filter-hash>.png` cards so each filter page has its own share preview. The `sitemap.xml` excludes empty-result filter URLs (as a quality gate — empty pages shouldn't be discoverable) but every non-empty filter URL is included.
+Filter (`/browse?...`) pages do not get their own OG card — `buildOgImages()` only renders `home`, `default`, `records/<slug>`, `collections/<slug>`, `categories/<id>`, `stacks/<id>`, and `licenses/<id>` (`packages/core/src/og-image.ts:299-346`), so a filter page falls back to `og/default.png`. The `sitemap.xml` excludes empty-result filter URLs (as a quality gate — empty pages shouldn't be discoverable) but every non-empty filter URL is included.
 
 ## How a filter URL becomes a collection
 

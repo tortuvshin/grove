@@ -80,9 +80,9 @@ A single `sitemap.xml` is emitted. There is no separate sitemap index. Filter UR
 ```ts
 import { buildLlmsTxt, buildLlmsFullTxt, buildLlmsFiles } from "@grove-dev/core";
 
-const short = buildLlmsTxt(records, siteConfig);     // 5–20 KB
-const full = buildLlmsFullTxt(records, siteConfig);   // includes long-form bodies
-const both = buildLlmsFiles(records, siteConfig);     // returns { short, full }
+const short = buildLlmsTxt(input, config);      // constant-size site header; no per-record content
+const full = buildLlmsFullTxt(input, config);   // one index line + one detail section per record
+const both = await buildLlmsFiles(input, cwd, config); // writes both files, returns { txtPath, fullPath, indexed }
 ```
 
 The two-file `llms.txt` family is the framework's machine-readable surface. See [LLM-oriented outputs](/outputs/llm/) for the format.

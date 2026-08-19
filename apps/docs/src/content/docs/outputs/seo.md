@@ -45,7 +45,7 @@ After you edit, the sentinel disappears and Grove stops regenerating the file. C
 
 ## OG cards
 
-Grove renders PNG social cards at `/og/<page>.png` using satori (in `packages/core/src/og-image.ts:buildOgImages + renderOgPng`). Cover variants:
+Grove renders PNG social cards under `/og/` using satori plus `@resvg/resvg-js` (in `packages/core/src/og-image.ts:299-346`), at build time — not on demand, not SSR. Cover variants:
 
 - `og/home.png` — home page.
 - `og/default.png` — default for any page without a specific card.

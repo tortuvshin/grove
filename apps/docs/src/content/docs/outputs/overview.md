@@ -43,7 +43,7 @@ record defaults the schema reserves for future blueprints.
 | Output | URL / path | Consumer |
 |---|---|---|
 | `sitemap.xml` | `/sitemap.xml` | Search engines |
-| `llms.txt` | `/llms.txt` | AI assistants (concise index) |
+| `llms.txt` | `/llms.txt` | AI assistants (constant-size site header + counts, no per-record content) |
 | `llms-full.txt` | `/llms-full.txt` | AI assistants (verbose) |
 | `records.full.json` | `/data/generated/records.full.json` | Any tooling — full record set |
 | `records.index.json` | `/data/generated/records.index.json` | Slim visible-only index |
@@ -55,7 +55,7 @@ record defaults the schema reserves for future blueprints.
 | `og-manifest.json` | `/data/generated/og-manifest.json` | Map of every OG card written |
 | `robots.txt` | `/robots.txt` | Crawlers |
 | `og-image.svg` | `/og-image.svg` | Sentinel-owned fallback OG image |
-| `og/<page>.png` | `/og/<page>.png` | Per-page satori-rendered social cards |
+| `og/home.png`, `og/default.png`, `og/records/<slug>.png`, `og/collections/<slug>.png`, `og/categories/<id>.png`, `og/stacks/<id>.png`, `og/licenses/<id>.png` | `/og/...` (namespaced by page type) | Satori-rendered social cards |
 | `icons/**` | `/icons/**` | The packaged icon set |
 | `README.md` sentinel block | `<!-- grove-readme:start/end -->` | Replaces the bounded block in your README.md |
 
@@ -90,7 +90,7 @@ If a feature you need isn't on this list, look at the [Roadmap](/project/roadmap
 |---|---|
 | `data/generated/*` | Every `grove check` and every Astro build (the Astro integration runs `prepareDirectory()` on every `astro:config:setup`). |
 | `public/{sitemap,llms*,robots,og-image}.*` | Same — every build. |
-| `public/og/<page>.png` | Every build. Satori-rendered, non-fatal on render error. |
+| `public/og/**` (namespaced: `home.png`, `default.png`, `records/<slug>.png`, `collections/<slug>.png`, `categories/<id>.png`, `stacks/<id>.png`, `licenses/<id>.png`) | Every build. Satori-rendered, non-fatal on render error. |
 | `public/icons/**` | Every Astro build (run by the integration) — or explicitly via `grove icons sync`. |
 | `data/generated/contributors.json` | Explicit `grove sync contributors` run. |
 | `data/generated/cleanup-report.json` | Explicit `grove cleanup` run. |

@@ -3,63 +3,70 @@ title: LLM-oriented outputs
 description: llms.txt and llms-full.txt — the formats AI assistants expect.
 ---
 
-Grove emits two files for AI assistants: `llms.txt` (concise) and `llms-full.txt` (verbose). Both follow the `llms.txt` proposal — a markdown file with an `H1` title, a blockquote summary, and an `H2 per section`.
+Grove emits two files for AI assistants: `llms.txt` (concise) and `llms-full.txt` (verbose). Both are Markdown, in the spirit of the `llms.txt` proposal, though neither follows it byte-for-byte — see the exact formats below.
 
 The "LLM-ready" framing in earlier Grove docs is replaced with the more precise framing here: Grove emits these two formats and no others. There is no separate `ai.txt`, no JSON Feed variant, no MCP manifest, no structured catalog. Those are different surfaces — use them when they make sense, but don't expect them as part of the framework.
 
 ## `llms.txt` (concise)
 
-Lives at `/llms.txt`. About 5–20 KB depending on record count.
+Lives at `/llms.txt`. Built by `buildLlmsTxt()` (`packages/core/src/llms.ts:102-122`). It carries no per-record content at all — only the site header and counts — so its size is essentially constant (a few hundred bytes) regardless of how many records the space holds:
 
 ```markdown
-# Site Title
+# {site.name}
 
-> One-paragraph description from site.description.
+{site.description ?? site.tagline}
 
-## Records
+Directory: {siteUrl}/{indexSlug}
+Records indexed: {N}
+Categories: {N}
 
-- [Record A](https://example.com/projects/a/): short description.
-- [Record B](https://example.com/projects/b/): short description.
-...
+## Usage
 
-## Optional
+Use /llms-full.txt for record-level details. Prefer detail pages for citations.
 ```
 
-The header section is `site` from `grove.config.ts`:
-
-- `H1` = `site.name`
-- Blockquote = `site.tagline` (or first 200 chars of `site.description`)
-- Curated collections get their own `## H2` section after Records.
+There is no `## Records` section and no per-record links in `llms.txt` — those live in `llms-full.txt` instead. Curated collections do not get a section here either; `llms.txt` only ever emits the block above (`packages/core/src/llms.ts:108-119`).
 
 ## `llms-full.txt` (verbose)
 
-Lives at `/llms-full.txt`. Sized to include every record's full description plus its long-form markdown body when `content:` is set.
+Lives at `/llms-full.txt`. Built by `buildLlmsFullTxt()` (`packages/core/src/llms.ts:155-180`). This is the file that carries records — one index line per visible record, then one detail section per record:
 
 ```markdown
-# Site Title
+# {site.name} — full directory
 
-> One-paragraph description.
+> Generated {generatedAt} from {N} records.
+> Source: {siteUrl}/{indexSlug} · Regenerate with `pnpm build`.
 
-## Records
+Each section below mirrors one record detail page.
+
+## Index
+
+- [Record A](#record-a) — Category · Stack · 42★ — short description
+- [Record B](#record-b) — Category · Stack · 7★ — short description
+
+## {Plural label, e.g. "Projects"}
 
 ### Record A
 
-Record A in section Category.
+Record A's description.
 
-Homepage: https://example.com/projects/a/
-License: MIT
-Description: ...
-
-#### Full content
-
-[content/records/a.md verbatim]
+- slug: record-a
+- category: Category
+- stack: Stack
+- stars: 42
+- license: MIT
+- repo: https://github.com/example/record-a
+- homepage: https://example.com
+- url: {siteUrl}/{indexSlug}/record-a
+- lastCommit: 2026-01-01
+- added: 2025-01-01
 
 ### Record B
 
 ...
 ```
 
-The full format includes license, languages, and any other field that would help an assistant summarize the record.
+Each detail section (`buildDetailSection`, `packages/core/src/llms.ts:75-100`) lists description, slug, category, stack, stars, and — only when present on the record — license, repo, homepage, url, lastCommit, and added. There is no separate "Full content" block sourced from `content:` Markdown bodies in the build pipeline: `prepareDirectory` never populates the optional `detail` field the function supports (`packages/core/src/prepare.ts:74-104`), so that block never appears in a real build's output.
 
 ## Generation
 
@@ -69,21 +76,15 @@ There's no separate command — the framework regenerates them at build time. To
 
 ## How records are filtered
 
-`buildLlmsFiles` respects `visibility`:
-
-- `keep` and `highlight` — included.
-- `needs_review` — included with a marker.
-- `hide` — excluded.
-- `remove` — excluded from listings; the link still resolves but the page is a tombstone.
-- `historical` — included but tagged.
+Both `buildLlmsTxt` and `buildLlmsFullTxt` filter out any record whose `visibility` is `hide` or `remove` (`packages/core/src/llms.ts:105-107,156-158`); every other value (`keep`, `highlight`, `needs_review`, `historical`) is included identically — the functions don't add a marker or tag for any visibility state.
 
 ## How the file size scales
 
-A site with N records produces an `llms.txt` of roughly `1 KB + 200 bytes × N`. A 1,000-record site produces about 200 KB of `llms.txt`.
+`llms.txt` does not scale with record count — it's the constant-size header block above, regardless of how many records the space holds (`packages/core/src/llms.ts:108-119`).
 
-`llms-full.txt` scales with the body's markdown length. A site with long-form bodies across all records produces a file roughly 10× larger than `llms.txt`.
+`llms-full.txt` scales with record count: one index line plus one detail section per visible record (`packages/core/src/llms.ts:160-163`).
 
-There is no maximum size limit. If your `llms.txt` exceeds a few megabytes, consider splitting content by category or moving the long-form body to consumer-owned pages.
+There is no maximum size limit enforced anywhere in the pipeline.
 
 ## How consumers read these files
 

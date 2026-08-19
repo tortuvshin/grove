@@ -174,24 +174,26 @@ criteria are all different.
 ## CI gates for framework contributors
 
 If you are opening a PR against `@grove-dev/core`, `@grove-dev/cli`,
-`@grove-dev/astro`, or `@grove-dev/starlight`, the framework's
-[CI quality gates](/maintainers/ci-quality/) apply. These include:
+`@grove-dev/astro`, or `@grove-dev/starlight`, a different set of
+gates applies. What actually blocks a merge today, from
+`.github/workflows/ci.yml`:
 
-- **Biome** for lint and formatting — `pnpm lint` must pass.
-- **Vitest + Codecov** for unit tests — coverage must not drop
-  below the configured threshold.
-- **lychee** for link checking — broken internal links fail CI.
-- **Lighthouse CI** (for the example app) — performance,
-  accessibility, best-practices, and SEO budgets must hold.
-- **Renovate** for dependency updates — weekly automated PRs;
-  maintainers merge after review.
-- **`dependency-review-action`** for new dependencies — fails on
-  known vulnerabilities, license violations, or fresh packages.
+- **Build** — every workspace package builds.
+- **Unit tests** — `pnpm test` (Vitest) must pass.
+- **Scaffold test** — `pnpm test:scaffold` verifies `grove init`
+  produces a working space.
+- **Repo hygiene** — no committed `.DS_Store`, no stray
+  `workspace:*` in published package manifests, `pnpm docs:check`
+  (docs contract, sidebar orphans, internal links), and a check
+  that the committed icon set is exactly what the sync script
+  regenerates.
 
-A PR that fails any of these gates is blocked from merging. See
-[CI quality](/maintainers/ci-quality/) for the full configuration
-and rationale.
+Lighthouse budgets run in a separate workflow when a PR touches
+the core packages or `apps/example`.
 
-The contributor path for a *record* (this page) does not run
-Biome or Vitest; the gates are `grove check --strict` and
-`pnpm build` only.
+[CI & quality](/maintainers/ci-quality/) covers the full
+configuration, including the tooling that is configured in the
+repo but not yet enforced in CI.
+
+The contributor path for a *record* (this page) runs none of
+these; its gate is `grove check --strict`.

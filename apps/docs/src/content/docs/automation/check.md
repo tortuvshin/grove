@@ -35,12 +35,10 @@ The validator runs in this order; the first failure stops the run:
 9. **Overrides** — every entry in `data/overrides.yml` applies cleanly to the matching record (no type mismatches).
 10. **Collections** — every `data/collections/*.yml` has a valid `query` predicate that matches at least one record (warnings if empty).
 11. **Body paths** — every `content:` path resolves to an existing Markdown file.
-12. **Sitemap** — every visible record has a unique URL that the sitemap can include.
-13. **LLMs** — `llms.txt` is well-formed, doesn't exceed 50KB, and links to all records.
-14. **Robots** — `robots.txt` is well-formed and contains a `Sitemap:` directive.
-15. **OG image** — `public/og-image.svg` exists, is 1200×630, and is parseable.
 
-If a `astro check` passes, the build is good to go.
+`validateProject` (`packages/core/src/validate.ts`) does not check `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, or `og-image.svg` — those files aren't validated at all; `grove check` just regenerates them unconditionally via `prepareDirectory()` after the checks above pass, then runs `astro check`.
+
+If `astro check` passes, the build is good to go.
 
 ## Severity levels
 
@@ -64,31 +62,24 @@ For CI on a mature directory, use `--strict` to keep drift out.
 
 ## Reading the output
 
+Each issue is printed as `[severity] code: message`, one line per issue (`packages/cli/src/index.ts:72-74`). A clean run with a couple of warnings looks like this:
+
 ```
-[check] 247 records loaded
-[check] 3 warnings:
-  - data/records/coolify.yml: description is 247 chars (recommended: under 200)
-  - data/records/cal-com.yml: links.github differs from repoUrl (kept repoUrl)
-  - data/collections/empty.yml: no records match the query
-[check] ✓ validation passed
-[check] sitemap.xml updated
-[check] llms.txt updated (247 records, 38.2KB)
-[check] llms-full.txt updated (1.4MB)
-[check] robots.txt updated
-[check] og-image.svg updated
-[check] ✓ 247 records prepared; sitemap and llms files updated.
+[warning] unknown_taxonomy_value: coolify: category "devtools" is not defined in data/taxonomy/categories.yml
+[warning] slug_mismatch: cal-com: record slug "cal-com-v2" does not match filename
+[grove] 247 records prepared; sitemap and llms files updated.
 ```
+
+The final `[grove] ...` line only prints once validation passes without a blocking failure — it comes from `prepareDirectory()` regenerating every artifact (`packages/cli/src/index.ts:80-83`), not from a per-file "updated" log. There is no separate line for `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, or `og-image.svg` individually.
 
 Failures look like:
 
 ```
-[check] 2 errors:
-  - data/records/cool-tool.yml: invalid projectType "demo-app" (expected: real-app | production | reference | library | tool | demo | template | historical)
-  - data/records/old.yml: slug "old" duplicates data/records/old-v1.yml
-[check] ✗ validation failed (exit 1)
+[error] duplicate_slug: Duplicate record slug: old
+[error] zod_error: cool-tool: projectType Invalid enum value
 ```
 
-Each error points at the file and the field. Fix and re-run.
+The command then exits with code 1 and does not print a summary line. Each error points at the file and the field. Fix and re-run.
 
 ## What it does NOT check
 

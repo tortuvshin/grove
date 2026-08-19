@@ -194,8 +194,8 @@ For each collection Grove emits:
     JSON-LD `ItemList` schema with one `SoftwareApplication` per record.
   </Card>
 
-  <Card title="Sitemap and llms.txt">
-    An entry in `llms.txt` and the sitemap.
+  <Card title="Sitemap and OG card">
+    A `/collections/<slug>/` entry in the sitemap (`packages/core/src/sitemap.ts:156-164`) and a namespaced `og/collections/<slug>.png` social card. Collections do not get an entry in `llms.txt` or `llms-full.txt` — those files only ever cover the site header and the record set (`packages/core/src/llms.ts`).
   </Card>
 </CardGrid>
 

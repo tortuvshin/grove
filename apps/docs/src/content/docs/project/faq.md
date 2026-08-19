@@ -55,7 +55,7 @@ Stars come from the GitHub API (`fetchGithubMetadata`). Freshness uses `github.p
 
 ## What is `llms.txt`?
 
-A site-level index file designed to be ingested by AI assistants. Spec: <https://llmstxt.org>. Grove emits `llms.txt` (≤10 KB index) and `llms-full.txt` (per-record sections). See [LLM-oriented outputs](/outputs/llm/).
+A site-level index file designed to be ingested by AI assistants. Spec: <https://llmstxt.org>. Grove emits `llms.txt` (a constant-size site header — name, description, directory link, record/category counts, no per-record content) and `llms-full.txt` (an index line plus a detail section per record). See [LLM-oriented outputs](/outputs/llm/).
 
 ## Can I use Grove for non-directory content?
 

@@ -146,15 +146,15 @@ sitemap, `llms.txt`, `robots.txt`, and `og-image.svg`.
 - `data/generated/records.json` — alias for `records.full.json`.
 - `data/generated/site-config.json` — site name, tagline, nav, theme.
 - `public/sitemap.xml` — sitemap of every visible record.
-- `public/llms.txt` — one-line-per-record LLM index.
-- `public/llms-full.txt` — full record bodies concatenated.
+- `public/llms.txt` — constant-size site header (name, description, directory link, counts); no per-record content.
+- `public/llms-full.txt` — one index line plus one detail section per visible record.
 - `public/robots.txt` — robots policy with filter-URL guard.
 - `public/og-image.svg` — brand-coloured OG card.
 
 **Output:**
 
 ```
-[check] <N> records prepared; sitemap and llms files updated.
+[grove] <N> records prepared; sitemap and llms files updated.
 ```
 
 **Example:**

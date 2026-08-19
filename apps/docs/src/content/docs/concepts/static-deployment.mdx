@@ -18,7 +18,7 @@ Everything under `dist/` after `pnpm build`:
 - **HTML pages** — every route's static output (`/`, `/projects/`, `/projects/<slug>/`, `/collections/<slug>/`, etc.).
 - **JSON datasets** — `records.json` and others under `data/generated/`, copied into the build.
 - **`sitemap.xml`**, **`robots.txt`**, **`llms.txt`**, **`llms-full.txt`** — emitted to `public/` then copied into the build.
-- **`public/og/<page>.png`** — satori-rendered OG cards.
+- **`public/og/**`** — satori-rendered OG cards, namespaced by page type (`home.png`, `default.png`, `records/<slug>.png`, `collections/<slug>.png`, `categories/<id>.png`, `stacks/<id>.png`, `licenses/<id>.png`).
 - **`public/icons/**`** — the packaged icon set, with per-file ownership preserved.
 - **`manifest.json`** — referenced by the Starlight docs site via `<link rel="manifest">`. Consumers provide their own; the default scaffold does not.
 
@@ -42,7 +42,10 @@ A typical `dist/` after `pnpm build` looks like this (abridged):
   - robots.txt
   - llms.txt
   - llms-full.txt
-  - og/\<page\>.png             # satori-rendered OG cards
+  - og/                         # satori-rendered OG cards
+    - home.png
+    - records/\<slug\>.png       # one per record
+    - collections/\<slug\>.png   # one per collection
   - _astro/                     # hashed CSS / JS
 </FileTree>
 
@@ -97,7 +100,7 @@ For any host:
 - Every `og:url` and Twitter `url` meta tag.
 - `og-image.svg` host references.
 - The OG card manifest (`og-manifest.json`).
-- The `llms.txt` link block.
+- The `Directory:` line in `llms.txt`.
 
 If you change `site.url`, rebuild — there's no other source of truth for the URL.
 
