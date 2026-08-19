@@ -1,0 +1,96 @@
+apps/docs/src/content/docs/customize/pages.md
+  s_75aa02f6d0f279::t_8b468bb615ed1d 94,100
+  s_75aa02f6d0f279::t_421d149d442d9e 77-80,82,85-88,95-99
+  s_75aa02f6d0f279::t_32b2f4be036020 101
+apps/docs/src/content/docs/content/health-classification.mdx
+  s_75aa02f6d0f279::t_6b6bfc01dce21c 159
+  s_75aa02f6d0f279::t_ce672187e34e28 172,179,182,192-194,196,200-201,203
+  s_75aa02f6d0f279::t_f14f8d49c8ebdf 98-105
+  s_75aa02f6d0f279::t_2cf1aa0525f320 207,215
+  s_75aa02f6d0f279::t_79c7a7fe40f893 16,18,25,38,40,45,49,52-57,59,66,73,75,78,80,83,85,88,90,96
+  s_75aa02f6d0f279::t_3c16e435cf7c91 131,133,142,144,146,148,150
+  s_75aa02f6d0f279::t_5e9476f9326655 21-22
+  s_75aa02f6d0f279::t_46351e88534a29 97
+apps/docs/src/content/docs/concepts/decisions.mdx
+  s_75aa02f6d0f279::t_641798db89d146 14
+  s_75aa02f6d0f279::t_4653ffa580b985 169
+  s_75aa02f6d0f279::t_99538506562939 124,127-128,130,133-134,136,142,145-146,148,152,156,165
+  s_75aa02f6d0f279::t_22c6d54daea530 39,57
+  s_75aa02f6d0f279::t_0b05dd29bd7f20 51
+  s_75aa02f6d0f279::t_e487e9c7d1b1bf 3
+  s_75aa02f6d0f279::t_dc78c1dd644305 27
+  s_75aa02f6d0f279::t_4153b043950a96 61,65-67,71,73,77,81-84,89
+  s_75aa02f6d0f279::t_b1a16511cb89ba 176,178,180-186,188,190,218
+apps/docs/src/content/docs/content/author-a-record.mdx
+  s_75aa02f6d0f279::t_ee5e848cdb8e89 26,30
+  s_75aa02f6d0f279::t_bb9f5c4f645852 52
+  s_75aa02f6d0f279::t_95c34a2b2a8c95 87,91,94-95
+  s_75aa02f6d0f279::t_11c182f3f08724 6
+  s_75aa02f6d0f279::t_567da3f3a40d5e 224,226-227
+  s_75aa02f6d0f279::t_93d27645461e3f 206
+  s_75aa02f6d0f279::t_3f8b1dae5ce536 152
+  s_75aa02f6d0f279::t_10800b6fbd127f 179-180
+  s_75aa02f6d0f279::t_d49d3a4a70d9b0 256,259
+apps/docs/src/content/docs/getting-started/configure.mdx
+  s_75aa02f6d0f279::t_551cea9841b60c 140,145
+  s_75aa02f6d0f279::t_de1d9512af228b 81
+  s_75aa02f6d0f279::t_61862c7fcebb75 182,190
+  s_75aa02f6d0f279::t_44fb7b41a23377 9,14
+  s_75aa02f6d0f279::t_84ae2e1c29343a 63
+  s_75aa02f6d0f279::t_c110bb36263656 101
+  s_75aa02f6d0f279::t_e74c64727ad8d8 91
+  s_75aa02f6d0f279::t_acad28b05b57ba 159
+apps/docs/src/content/docs/getting-started/first-record.mdx
+  s_75aa02f6d0f279::t_7e2838861d0f65 86
+  s_75aa02f6d0f279::t_c4cab6b0bb8f0f 97,99-100
+  s_75aa02f6d0f279::t_994a58ab345932 6
+apps/docs/src/content/docs/discovery/browse.md
+  s_75aa02f6d0f279::t_4816dd75598198 6,8,10-12,16,19,25-27,30,32,34,45,47,49,53,58-64,66,68,72,75-76,82-84
+apps/docs/src/content/docs/concepts/content-pages.mdx
+  s_75aa02f6d0f279::t_4bb5ab23c42d6c 9,12,14,16,18,20-22,24-28,31-37,40,42-50,52-59,87,92,96-97,99-100,107,110
+apps/docs/src/content/docs/getting-started/install-cli.mdx
+  s_75aa02f6d0f279::t_c4a7bec3edefdb 149,152-153,155-156,159-164
+  s_75aa02f6d0f279::t_59e6a661ba4e1b 196-197,214-215,226
+  s_75aa02f6d0f279::t_14ec11a2621b43 6
+  s_75aa02f6d0f279::t_a042d13c80fd8c 227
+apps/docs/src/content/docs/concepts/collections.mdx
+  s_75aa02f6d0f279::t_db13c75973461a 19-20,25,28,31,34,37
+  s_75aa02f6d0f279::t_dc3562003d3368 72,74,78,82,86,90,94,97-98
+  s_75aa02f6d0f279::t_cba6ffbaaa4954 54,60-62
+apps/docs/src/content/docs/getting-started/scaffold.mdx
+  s_75aa02f6d0f279::t_891f755361ecee 8
+  s_75aa02f6d0f279::t_4668ab24a907a6 109,111-117,119,123,142,154
+  s_75aa02f6d0f279::t_ec8c7e13cde83c 46-48,54,60,66,72
+  s_75aa02f6d0f279::t_f7581c5ebaf0ea 16
+  s_75aa02f6d0f279::t_401bae31cb0dba 9,11
+apps/docs/src/content/docs/discovery/promote.md
+  s_75aa02f6d0f279::t_849ffc6cc127cc 45
+  s_75aa02f6d0f279::t_720e041c799e10 61,64,69
+  s_75aa02f6d0f279::t_c286fa07768e81 84-85,87,93-95
+  s_75aa02f6d0f279::t_cbf4fa62e1141e 102
+apps/docs/src/content/docs/content/taxonomy-files.mdx
+  s_75aa02f6d0f279::t_c830bfab273acd 117
+  s_75aa02f6d0f279::t_8611aeac1fe84f 120
+  s_75aa02f6d0f279::t_93844362f91d48 132
+  s_75aa02f6d0f279::t_3b8e1aab93ec9f 159
+  s_75aa02f6d0f279::t_6074cf5788c184 6
+apps/docs/src/content/docs/discovery/lens-recipes.md
+  s_75aa02f6d0f279::t_336440ef5aaa98 6,24-32,36,40-42,44,46,48-49,51,57-58
+  s_75aa02f6d0f279::t_66358c9d28bbdd 10-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a776698ba00f277f02c89a0599c99997b1ea446c",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
