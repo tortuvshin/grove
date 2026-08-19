@@ -155,10 +155,10 @@ A content page is for prose. A collection is for "I want a page that lists and s
 ## How matching works
 
 <Aside type="note" title="Match semantics">
-  `match.any.tags` and `match.any.categories` are OR-ed together. A record qualifies if it has any tag in `match.any.tags` **or** any category in `match.any.categories`. Combine with `scoreFloor` to gate by quality.
+  `filterEntries` ANDs every query field you set: a record must satisfy `stacks`, `platforms`, `categories`, `licenses`, `kinds`, `excludeStatuses`, `minStars`, `minForks`, and `q` all at once. Within a single array field (`platforms`, `categories`, `licenses`) a record matches if it has *any* of the listed values (`packages/core/src/collections.ts:95-142`).
 </Aside>
 
-If a record was added after the collection was created and now matches the predicate, it appears automatically — no re-authoring needed.
+If a record was added after the collection was created and now matches the query, it appears automatically at the next build — no re-authoring needed.
 
 ## Generated outputs
 
@@ -167,10 +167,6 @@ For each collection Grove emits:
 <CardGrid>
   <Card title="Landing page">
     A landing page at `/collections/<slug>/`.
-  </Card>
-
-  <Card title="Homepage featured lens">
-    A curated subset of the homepage's *featured* lens when `order: featured`.
   </Card>
 
   <Card title="ItemList JSON-LD">
