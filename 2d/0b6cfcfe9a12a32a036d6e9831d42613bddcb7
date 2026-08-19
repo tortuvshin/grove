@@ -1,0 +1,19 @@
+apps/docs/src/content/docs/concepts/collections.mdx
+  s_75aa02f6d0f279::t_8c6d336ff0c12b 158,161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "2d0b6cfcfe9a12a32a036d6e9831d42613bddcb7",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
