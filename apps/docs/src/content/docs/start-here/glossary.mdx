@@ -39,8 +39,8 @@ This page is the single source of truth for Grove terminology. When a term first
     | Term | Definition |
     |---|---|
     | **decision** | A curator override in `data/decisions.yml` keyed by record id. Changes visibility, sort priority, rename-slug, etc. |
-    | **collection** | A grouping in `data/collections/<slug>.yml`. Either `kind: curated` (a query + ranking) or `kind: ranked` (an explicit list). |
-    | **lens** | An opinionated build-time view over the record set. Built-in: `featured`, `hot`, `new`, `mature`. |
+    | **collection** | A grouping in `data/collections/<slug>.yml`, always a `query` + `ranking` pair. `kind` is `curated` or `generated` — both run the same query/ranking pipeline; `kind` only changes the page's eyebrow label. |
+    | **lens** | An opinionated build-time view over the record set. 12 built-in lenses: `all`, `recently-updated`, `new`, `hot`, `mature`, `production-like`, `good-to-learn`, `beginner-friendly`, `contribution-ready`, `launches`, `actively-developed`, `needs-maintainer` (`packages/core/src/directory-lenses.ts:46`). Not the same as a curation label — `featured` is a label, not a lens. |
   </Card>
 </CardGrid>
 

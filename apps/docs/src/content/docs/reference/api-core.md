@@ -13,7 +13,7 @@ The package exports `@grove-dev/core` (named exports) and `@grove-dev/core/direc
 
 ```ts
 import { defineConfig, loadConfig } from "@grove-dev/core";
-import { filterEntries, LENSES, scoreTier } from "@grove-dev/core/directory";
+import { filterRecords, LENSES, lensById } from "@grove-dev/core/directory";
 ```
 
 The Astro integration imports these same modules to render record index, taxonomy tables, and collection pages.
@@ -37,10 +37,10 @@ export default defineConfig({
 `loadConfig` reads `grove.config.ts` from disk using `jiti`:
 
 ```ts
-const config = await loadConfig({ cwd: "/path/to/space" });
+const config = await loadConfig("/path/to/space");
 ```
 
-The function is async. It throws when the file is missing or invalid; the CLI wraps the throw in a pointed error.
+`loadConfig(cwd = process.cwd(), configPath = "grove.config.ts")` is async (`packages/core/src/config.ts:18`). It throws when the file is missing or invalid; the CLI wraps the throw in a pointed error.
 
 ## Generation
 
@@ -48,10 +48,10 @@ The function is async. It throws when the file is missing or invalid; the CLI wr
 import { generate } from "@grove-dev/core";
 
 // Read records from data/records/*.yml, write data/generated/*.json
-const result = await generate({ cwd: "/path/to/space" });
+const result = await generate("/path/to/space");
 ```
 
-`generate()` writes `records.full.json`, `records.index.json`, `records.json`, and `site-config.json` under `data/generated/`. The `result` object is the `GenerateResult` type with `totalRecords`, `byKind`, `byStack`, and the resolved payloads.
+`generate(cwd = process.cwd(), config?)` writes `records.full.json`, `records.index.json`, `records.json`, and `site-config.json` under `data/generated/` (`packages/core/src/build-data.ts:166`). The `result` object is the `GenerateResult` type with `totalRecords`, `byKind`, `byStack`, and the resolved payloads.
 
 ## Pipeline
 
@@ -59,21 +59,28 @@ const result = await generate({ cwd: "/path/to/space" });
 import { prepareDirectory } from "@grove-dev/core";
 
 // Full pipeline: loadConfig → generate → buildSitemap → buildLlmsFiles → buildSiteArtifacts → buildOgImages
-await prepareDirectory({ cwd: "/path/to/space" });
+await prepareDirectory("/path/to/space");
 ```
 
-`prepareDirectory()` is the single entry point used by both the CLI (`grove check`) and the Astro integration. It runs every emit step in the right order. Pass `cwd` to operate on a project other than `process.cwd()`.
+`prepareDirectory(cwd = process.cwd())` is the single entry point used by both the CLI (`grove check`) and the Astro integration (`packages/core/src/prepare.ts:114`). It runs every emit step in the right order.
 
 ## Sitemap
 
 ```ts
 import { buildSitemap, buildSitemapXml } from "@grove-dev/core";
 
-const sitemap = buildSitemap(records, siteConfig);          // object form
-const xml = buildSitemapXml(records, siteConfig);            // string form, written to public/sitemap.xml
+// buildSitemap builds the entries AND writes public/sitemap.xml for you
+const { path, urlCount } = await buildSitemap(
+  { generatedAt: new Date().toISOString(), items, collections },
+  "/path/to/space",
+);
+
+// buildSitemapXml is the pure string-builder buildSitemap calls internally,
+// exported for callers that already have a SitemapEntry[] and want the XML only
+const xml = buildSitemapXml(entries);
 ```
 
-A single `sitemap.xml` is emitted. There is no separate sitemap index. Filter URLs are included when they resolve to a non-empty result set.
+`buildSitemap(input: SitemapInput, cwd?, config?)` (`packages/core/src/sitemap.ts:96`) is async and writes the file; `buildSitemapXml(entries: SitemapEntry[])` (`packages/core/src/sitemap.ts:69`) is synchronous and does not write anything. A single `sitemap.xml` is emitted. There is no separate sitemap index.
 
 ## llms.txt
 
@@ -92,25 +99,27 @@ The two-file `llms.txt` family is the framework's machine-readable surface. See 
 ```ts
 import { buildRobotsTxt, buildOgImageSvg, buildSiteArtifacts } from "@grove-dev/core";
 
-const robots = buildRobotsTxt(siteConfig);
+const robots = buildRobotsTxt({ siteUrl: siteConfig.site.url ?? "" });
 const ogSvg = buildOgImageSvg(siteConfig);
-const { robots, ogImageSvg } = await buildSiteArtifacts({ siteConfig, publicDir: "public" });
+const { robotsPath, ogImagePath, robotsWritten, ogImageWritten } = await buildSiteArtifacts(
+  "/path/to/space",
+  siteConfig,
+);
 ```
 
-`buildSiteArtifacts()` writes `robots.txt` and `og-image.svg` to `public/`. Both are sentinel-owned: the first emission includes a `<!-- grove-generated: edit this file to take ownership -->` marker; subsequent runs honor user edits.
+`buildSiteArtifacts(cwd, config, stats?)` writes `robots.txt` and `og-image.svg` under `config.paths.publicDir` (`packages/core/src/site-artifacts.ts:91-113`). Both are sentinel-owned: the first emission prepends a `# grove-generated: edit this file to take ownership` marker to `robots.txt` and a `<!-- grove-generated: edit this file to take ownership -->` marker to `og-image.svg`; subsequent runs honor user edits.
 
 ## OG cards (PNG)
 
 ```ts
 import { buildOgImages, renderOgPng } from "@grove-dev/core";
 
-const result = await buildOgImages({
-  cwd: "/path/to/space",
-  publicDir: "public",
-  generatedDir: "data/generated",
+const result = await buildOgImages("/path/to/space", siteConfig, {
+  records,
+  collections,
+  taxonomies,
 });
-// result.files: ['home.png', 'records/ollama.png', 'collections/top-ai.png', ...]
-// result.manifest: writes data/generated/og-manifest.json
+// result: { written, skipped, failed } — also writes data/generated/og-manifest.json
 ```
 
 Renders per-page PNGs via satori + resvg. Non-fatal — a render failure on one page doesn't break the build.
@@ -144,19 +153,29 @@ The command `grove readme generate` is `buildAwesomeReadme` + `injectAwesomeRead
 ## JSON-LD
 
 ```ts
-import { definePageDocument, buildJsonLd, validateJsonLd } from "@grove-dev/core";
+import { buildJsonLd, definePageDocument, validateJsonLd } from "@grove-dev/core";
+
+// buildJsonLd is overloaded per page kind — this branch takes a RecordInput
+const structuredData = buildJsonLd({
+  url: "https://example.com/projects/ollama/",
+  name: "Ollama",
+  description: "Run LLMs locally.",
+  kind: "application",
+  repoUrl: "https://github.com/ollama/ollama",
+  crumbs: [{ url: "https://example.com/", name: "Home" }],
+});
 
 const doc = definePageDocument({
-  type: "record",
-  record: myRecord,
-  site: siteConfig,
-  url: "https://example.com/projects/ollama/",
+  identity: { type: "record", canonical: new URL("https://example.com/projects/ollama/"), language: "en" },
+  metadata: { title: "Ollama", description: "Run LLMs locally.", robots: "index,follow", openGraph, twitter },
+  structuredData,
+  discovery: { includeInSitemap: true, includeInLlms: true, relatedLinks: [] },
 });
-const jsonLd = buildJsonLd(doc);
-const { valid, errors } = validateJsonLd(jsonLd);
+
+const issues = validateJsonLd(doc.structuredData);
 ```
 
-`definePageDocument` is the source for every page's OG, Twitter, and JSON-LD. The `type` enum is `home | directory | collection | record | content | empty | 404`.
+`definePageDocument(input: PageDocument): PageDocument` (`packages/core/src/page-document.ts:90`) validates and returns the full page contract — `identity`, `metadata`, `structuredData`, `discovery`. `PageIdentity.type` is `home | directory | collection | record | content | empty | 404`. `buildJsonLd` is a separate, overloaded builder for the `structuredData` array itself — it takes a `SiteInput | CollectionInput | RecordInput | ContentInput`, not a `PageDocument` (`packages/core/src/page-document.ts:253-260`). `validateJsonLd(nodes)` returns a `JsonLdValidationIssue[]` directly — an empty array means the graph is valid (`packages/core/src/page-document.ts:278`).
 
 ## Schemas
 
@@ -212,10 +231,10 @@ import {
   buildGithubSyncPatch,
 } from "@grove-dev/core";
 
-const { owner, repo } = parseGithubRepoUrl("https://github.com/ollama/ollama");
-const metadata = await fetchGithubMetadata(owner, repo, { auth: process.env.GITHUB_TOKEN });
+const ref = parseGithubRepoUrl("https://github.com/ollama/ollama"); // { owner, repo } | undefined
+const metadata = await fetchGithubMetadata(ref, process.env.GITHUB_TOKEN);
 const enriched = await enrichFromGithubHtml("https://github.com/ollama/ollama");
-const patch = buildGithubSyncPatch(metadata);
+const patch = buildGithubSyncPatch(metadata, existingRecord.github);
 ```
 
 The token-free HTML fallback (`enrichFromGithubHtml`) fetches the public GitHub page, parses it, and returns `homepage`, `license`, `language`, `topics` — only fields the REST API didn't reach.
@@ -247,7 +266,7 @@ import {
 } from "@grove-dev/core";
 
 const toc = extractToc(markdownBody);
-const content = readContentFile(record, paths);
+const content = readContentFile(contentPath, candidatePaths);
 ```
 
 These read and shape the `content/records/<slug>.md` body that accompanies a record. Pure helpers; safe to import from server-only contexts.
@@ -285,7 +304,7 @@ Writes `data/generated/contributors.json` and `data/generated/repo-stats.json`. 
 ```ts
 import { classifyHealth } from "@grove-dev/core";
 
-const healthBlock = classifyHealth(record, githubSignal);
+const entry = classifyHealth(record.slug, githubSignal); // { id, health }
 ```
 
 `classifyHealth` is the function `grove sync github` runs per record. Exposed for custom importer flows that need to compute the `health` block without doing a full sync.
@@ -300,40 +319,41 @@ import {
   findRelated,
   loadCollections,
   LENSES,
+  lensById,
   scoreTier,
 } from "@grove-dev/core";
 
-const filtered = filterEntries(records, { match: { "tags.any": ["agent"] } });
+const filtered = filterEntries(records, { stacks: ["flutter"], excludeStatuses: ["archived"] });
 const ranked = rankEntries(filtered, { preset: "quality" });
-const result = runCollection(loadedCollection, records, siteConfig);
-const related = findRelated(record, records);
-const collections = loadCollections({ cwd });
-const lens = LENSES.featured(records, 6);
-const tier = scoreTier(record);
+const result = runCollection(loadedCollection, records);
+const related = findRelated(loadedCollection, allCollections, 3);
+const collections = await loadCollections(cwd);
+const lens = lensById("hot");
+const tier = scoreTier(record.curationScore ?? 0);
 ```
 
-These are the building blocks of every curated page. The collection runner pre-resolves entries and ranking so the page render is a pure read.
+`filterEntries`/`rankEntries` take a `CollectionQuery`/`CollectionRanking` (`packages/core/src/collections.ts:25-42`). `runCollection(collection, entries)` filters and ranks in one call (`packages/core/src/collector.ts:12`). `findRelated(target, all, limit)` finds other collections with overlapping query facets — it operates on collections, not records (`packages/core/src/related.ts:3`). `LENSES` is a plain array of lens definitions; `lensById(id)` looks one up by id (`packages/core/src/directory-lenses.ts:46,134-137`) — there is no `LENSES.<id>()` call form. `scoreTier(n)` buckets a 0-100 score into a 0-4 tier (`packages/core/src/directory-scores.ts:22`). These are the building blocks of every curated page — the collection runner pre-resolves entries and ranking so the page render is a pure read.
 
 ## Audit budget
 
 ```ts
 import { evaluateBudget, DEFAULT_BUDGET } from "@grove-dev/core";
 
-const result = evaluateBudget(lighthouseScores, DEFAULT_BUDGET);
-if (!result.passed) {
-  console.error(result.violations);
+const violations = evaluateBudget(auditResult, pageManifestEntry, DEFAULT_BUDGET);
+if (violations.length > 0) {
+  console.error(violations);
 }
 ```
 
-`DEFAULT_BUDGET` is the framework's quality threshold (Lighthouse "good" ranges for performance, accessibility, best-practices, SEO, LCP, CLS, TBT). `evaluateBudget` is what `grove audit` uses to set `process.exitCode`.
+`evaluateBudget(result: AuditResult, page: PageManifestEntry, budget?)` returns a `BudgetViolation[]` directly — an empty array means the page passed (`packages/core/src/audit.ts:78-105`). `DEFAULT_BUDGET` is the framework's quality threshold (Lighthouse "good" ranges for performance, accessibility, best-practices, SEO, LCP, CLS, TBT). `evaluateBudget` is what `grove audit` uses to set `process.exitCode`.
 
 ## Cleanup candidates
 
 ```ts
 import { cleanupStale, pickCleanupCandidates } from "@grove-dev/core";
 
-await cleanupStale({ cwd: process.cwd() });
-// writes data/generated/cleanup-report.json
+const { report, path } = await cleanupStale(process.cwd());
+// writes data/generated/cleanup-report.json and returns { report, path }
 ```
 
 These never delete records. The output is a triage list; curators act.
