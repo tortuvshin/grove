@@ -1,0 +1,35 @@
+apps/docs/src/content/docs/content/health-classification.mdx
+  s_75aa02f6d0f279::t_daf3af3ccd5d8f 205,219,227
+apps/docs/src/content/docs/getting-started/scaffold.mdx
+  s_75aa02f6d0f279::t_daf3af3ccd5d8f 175
+apps/docs/src/content/docs/content/author-a-record.mdx
+  s_75aa02f6d0f279::t_c6ca790621eaaf 265
+apps/docs/src/content/docs/guides/walkthrough-curate-collection.mdx
+  s_75aa02f6d0f279::t_daf3af3ccd5d8f 13
+apps/docs/src/content/docs/start-here/quickstart.mdx
+  s_75aa02f6d0f279::t_daf3af3ccd5d8f 97
+apps/docs/src/content/docs/outputs/overview.md
+  s_75aa02f6d0f279::t_e45b9642da7181 38-40
+apps/docs/astro.config.mjs
+  s_75aa02f6d0f279::t_99faeba8ddf9b1 43-48
+apps/docs/src/content/docs/guides/walkthrough-sync-github.mdx
+  s_75aa02f6d0f279::t_daf3af3ccd5d8f 9
+apps/docs/src/content/docs/maintainers/contributing.md
+  s_75aa02f6d0f279::t_daf3af3ccd5d8f 128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e4e9e91a43bc19e4275ee69348f78de195964f35",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
