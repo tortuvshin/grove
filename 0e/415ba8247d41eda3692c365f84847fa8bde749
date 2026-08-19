@@ -1,0 +1,139 @@
+apps/docs/src/content/docs/deployment/cloudflare.mdx
+  s_82d0e4d0ab8ba0::t_867f330406c775 47,52,92,98
+packages/starlight/styles/base.css
+  s_82d0e4d0ab8ba0::t_295ccc3c4868b5 337-354
+apps/docs/src/content/docs/reference/config.md
+  s_75aa02f6d0f279::t_d2ed82efe079c9 175,435
+  s_75aa02f6d0f279::t_0d4dc31a32e0a2 130-148
+  s_75aa02f6d0f279::t_878a88ef63e1be 246-272
+  s_75aa02f6d0f279::t_1f48a96a2ef0fd 191-199
+  s_75aa02f6d0f279::t_b4cb4b07b83759 172-174
+  s_75aa02f6d0f279::t_ecbaed841bb396 61-64
+  s_75aa02f6d0f279::t_c873bf7b366ee4 100-109
+  s_75aa02f6d0f279::t_fcc3827c717353 302-383
+  s_75aa02f6d0f279::t_9e10dc71eafc07 119
+apps/docs/src/home-landing.test.ts
+  s_82d0e4d0ab8ba0::t_92f434df572c53 497
+packages/starlight/components/overrides/Sidebar.astro
+  s_82d0e4d0ab8ba0::t_a5ac041649df4d 23-43,48-55
+  s_82d0e4d0ab8ba0::t_c0ad51e2d9dcbe 44-47
+apps/docs/src/styles/global.css
+  s_82d0e4d0ab8ba0::t_a961dd4b9da0e5 36,38-50
+apps/docs/src/docs-taxonomy-guard.test.ts
+  s_82d0e4d0ab8ba0::t_92f434df572c53 17
+apps/docs/src/docs-config.test.ts
+  s_75aa02f6d0f279::t_ea7b1bdc5461e4 23,32-35,37-38,46-60
+  s_75aa02f6d0f279::t_252845d979007a 61-63
+apps/docs/src/content/docs/automation/submissions.md
+  s_75aa02f6d0f279::t_623b4599cba30c 185
+apps/docs/src/content/docs/getting-started/configure.mdx
+  s_75aa02f6d0f279::t_052972ad81545f 184-185
+  s_75aa02f6d0f279::t_642ec4cd5ff590 56,59,62-67
+apps/docs/src/content/docs/getting-started/first-record.mdx
+  s_75aa02f6d0f279::t_c0c3b3f57837a0 86
+apps/docs/src/content/docs/getting-started/install-cli.mdx
+  s_82d0e4d0ab8ba0::t_867f330406c775 58,63,68,89,96,103,121,126,131,172,177,182
+  s_75aa02f6d0f279::t_561316d3f734c4 230
+apps/docs/src/content/docs/automation/check.md
+  s_75aa02f6d0f279::t_c2760a86059dc6 26
+apps/docs/src/content/docs/concepts/decisions.mdx
+  s_75aa02f6d0f279::t_623b4599cba30c 216,226-228,244-246
+apps/docs/src/content/docs/getting-started/scaffold.mdx
+  s_82d0e4d0ab8ba0::t_867f330406c775 26,31,36,50,56,62,77,82,87
+  s_75aa02f6d0f279::t_847e75087a4030 3
+apps/docs/src/content/docs/maintainers/ci-quality.md
+  s_75aa02f6d0f279::t_623b4599cba30c 87
+apps/docs/src/content/docs/reference/cli.md
+  s_75aa02f6d0f279::t_021d54a0b12a7f 497-578
+  s_75aa02f6d0f279::t_1a4402601aa42c 110-112
+apps/docs/src/content/docs/automation/sync-github.md
+  s_75aa02f6d0f279::t_d46b882fb7f86c 163-183,190-192
+  s_75aa02f6d0f279::t_fa7c73c12f8447 44-54
+  s_75aa02f6d0f279::t_b22f05be5a650f 146-151
+  s_75aa02f6d0f279::t_376dfc7a7fa82c 8-9
+  s_75aa02f6d0f279::t_b470f90fac6137 66,70
+  s_75aa02f6d0f279::t_b4ab1d43724cfe 71
+apps/docs/src/content/docs/automation/cleanup.md
+  s_75aa02f6d0f279::t_623b4599cba30c 83
+apps/docs/src/content/docs/project/faq.md
+  s_75aa02f6d0f279::t_d160e6064d5724 62
+  s_75aa02f6d0f279::t_dcdf253b5ec20b 32,34
+  s_75aa02f6d0f279::t_e1c375101fbc9d 24
+apps/docs/src/content/docs/concepts/collections.mdx
+  s_75aa02f6d0f279::t_623b4599cba30c 204,214-216
+apps/docs/src/content/docs/introduction.mdx
+  s_75aa02f6d0f279::t_8f4791fdfc2d6e 137-139
+  s_75aa02f6d0f279::t_5596d641213db7 147
+apps/docs/astro.config.mjs
+  s_75aa02f6d0f279::t_d820cd557b21d1 17-19,23-30
+  s_75aa02f6d0f279::t_35f9c8c611279f 155-158,166,170-171,174-235,237,245,257-260,270-281,290-294,297-299
+apps/docs/src/content/docs/content/author-a-record.mdx
+  s_75aa02f6d0f279::t_ada032d34d57cd 20,24,28,32
+  s_75aa02f6d0f279::t_2309d8ffd7ff3f 38-82
+  s_75aa02f6d0f279::t_d540879a621a47 255
+  s_75aa02f6d0f279::t_54dc857c38459c 219,221
+  s_75aa02f6d0f279::t_7d5b88fb541fe6 206
+  s_82d0e4d0ab8ba0::t_867f330406c775 109,114,119,131,136,141
+apps/docs/src/content/docs/discovery/promote.md
+  s_75aa02f6d0f279::t_623b4599cba30c 108
+apps/docs/src/content/docs/concepts/files-canonical.mdx
+  s_75aa02f6d0f279::t_2686427fde1a0a 58-59,63-73,75,77-88,90,92-101,105-114,159-160,162,169-171
+  s_75aa02f6d0f279::t_76fcd28d9fca6b 176
+apps/docs/src/content/docs/reference/record-schema.md
+  s_75aa02f6d0f279::t_705c8bb5d12c2c 235
+  s_75aa02f6d0f279::t_2181c3b68fb2c5 223,225-231
+  s_75aa02f6d0f279::t_c0a2ce40ff8dd6 7,9-12,16-17
+apps/docs/src/content/docs/project/roadmap.md
+  s_75aa02f6d0f279::t_104f4577142403 110-111
+  s_75aa02f6d0f279::t_66cde393520902 206,208-213
+  s_75aa02f6d0f279::t_17dd39eccd7f9c 61-68
+apps/docs/src/content/docs/start-here/quickstart.mdx
+  s_75aa02f6d0f279::t_1e3aef28577f8d 10,34,38,49,62-64,66,68,70,91,96
+  s_75aa02f6d0f279::t_2b82016def4ab8 16,23-26,30-32,53-56
+  s_75aa02f6d0f279::t_e6130541ce7a90 6
+  s_75aa02f6d0f279::t_deb156511d9223 33
+apps/docs/src/content/docs/start-here/why-grove.mdx
+  s_75aa02f6d0f279::t_8f4791fdfc2d6e 63
+apps/docs/src/content/docs/discovery/browse.md
+  s_75aa02f6d0f279::t_623b4599cba30c 89
+apps/docs/src/content/docs/concepts/content-pages.mdx
+  s_75aa02f6d0f279::t_479b664d521b89 145
+apps/docs/src/content/docs/concepts/static-deployment.mdx
+  s_75aa02f6d0f279::t_b23f2ccd36471d 133
+apps/docs/src/content/docs/content/health-classification.mdx
+  s_75aa02f6d0f279::t_4181a0e62c0bfb 222
+apps/docs/src/content/docs/content/taxonomy-files.mdx
+  s_75aa02f6d0f279::t_871508f884387b 165
+apps/docs/src/content/docs/deployment/self-hosted.mdx
+  s_75aa02f6d0f279::t_4ee4e8be103d57 192
+apps/docs/src/content/docs/guides/walkthrough-curate-collection.mdx
+  s_75aa02f6d0f279::t_128a9b75b7bf4e 143
+apps/docs/src/content/docs/outputs/overview.md
+  s_75aa02f6d0f279::t_78f9aa4f14cf9c 2
+apps/docs/src/content/docs/start-here/glossary.mdx
+  s_75aa02f6d0f279::t_cde18c719a7212 113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0e415ba8247d41eda3692c365f84847fa8bde749",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_82d0e4d0ab8ba0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b29421f-913b-4647-8afa-dbfe14fab10e",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
