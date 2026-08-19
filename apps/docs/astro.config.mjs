@@ -5,8 +5,10 @@ import grove from '@grove-dev/starlight';
 import tailwindcss from '@tailwindcss/vite';
 
 // Grove docs — the canonical Astro/Starlight site for the project.
-// This site is itself a Grove space: it uses the same record schema,
-// Astro template, and CLI workflow as any user-built space.
+// Note: this site is NOT a Grove space. It is a Starlight docs site that
+// uses the @grove-dev/starlight theme only; it has no data/records/, no
+// grove.config.ts, and does not run @grove-dev/astro. The reference Grove
+// space — the one `grove init` copies — is apps/example/.
 export default defineConfig({
     site: 'https://withgrove.dev',
     // Astro's built-in redirects (added in Astro 5). Starlight 0.41 does
