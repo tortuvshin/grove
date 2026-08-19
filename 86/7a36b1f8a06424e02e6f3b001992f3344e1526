@@ -1,0 +1,25 @@
+apps/docs/src/content/docs/start-here/why-grove.mdx
+  s_75aa02f6d0f279::t_e9b0d2d35e1b87 53-66
+apps/docs/astro.config.mjs
+  s_75aa02f6d0f279::t_e9b0d2d35e1b87 8-11
+apps/docs/src/content/docs/content/author-a-record.mdx
+  s_75aa02f6d0f279::t_5c8a81beec4b57 95,289
+apps/docs/src/content/docs/start-here/quickstart.mdx
+  s_75aa02f6d0f279::t_5c8a81beec4b57 79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "867a36b1f8a06424e02e6f3b001992f3344e1526",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
