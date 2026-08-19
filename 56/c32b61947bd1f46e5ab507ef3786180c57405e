@@ -1,0 +1,33 @@
+apps/docs/src/content/docs/reference/api-core.md
+  s_75aa02f6d0f279::t_89f4d48af74489 234-235,237
+  s_75aa02f6d0f279::t_b5d279f4985862 156,158-159,161-165,167-175,178
+  s_75aa02f6d0f279::t_43201503cea38d 355-356
+  s_75aa02f6d0f279::t_b7d5a46d43b88a 40,43,51,54,62,65,72-80,83
+  s_75aa02f6d0f279::t_b69a767f7fe5f8 307
+  s_75aa02f6d0f279::t_ba8a545b6ce5b4 104-107
+  s_75aa02f6d0f279::t_634aea6af3c0ae 269
+  s_75aa02f6d0f279::t_6ad44ae209cf6e 16
+  s_75aa02f6d0f279::t_edfbb2fcc25647 102
+  s_75aa02f6d0f279::t_a5c5ee657bb518 117-120,122
+  s_75aa02f6d0f279::t_fd347be84f7dd0 322,326,328-332,335
+  s_75aa02f6d0f279::t_625a18e8ef9989 342-344,348
+  s_75aa02f6d0f279::t_c141df6417f40f 110
+apps/docs/src/content/docs/start-here/glossary.mdx
+  s_75aa02f6d0f279::t_2809878948234c 42-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "56c32b61947bd1f46e5ab507ef3786180c57405e",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
