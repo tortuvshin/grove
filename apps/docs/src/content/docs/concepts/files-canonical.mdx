@@ -79,13 +79,16 @@ file is in tells you whether you may edit it.
     - HTML pages — `/`, `/projects/`, `/projects/<slug>/`, `/collections/<slug>/`, and the rest.
     - JSON datasets — `data/generated/records.full.json`, `records.index.json`,
       `records.json`, `site-config.json`.
-    - `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt`.
-    - `public/og/<page>.png` — satori-rendered social cards.
-    - The README block bounded by `<!-- grove-readme:start/end -->` — text outside
-      the sentinels survives untouched.
+    - `public/sitemap.xml`, `public/llms.txt`, `public/llms-full.txt`.
+    - `public/og/**` — satori-rendered social cards, namespaced by page type
+      (`og/home.png`, `og/records/<slug>.png`, `og/collections/<slug>.png`, and so on).
 
     Every derived artifact is a pure function of the source files plus `grove.config.ts`.
-    Never hand-edit them; `grove check` overwrites the diff.
+    Never hand-edit them; the next build overwrites the diff.
+
+    Two files are the exception. `public/robots.txt` and `public/og-image.svg` are
+    generated with an ownership marker: edit either one and Grove stops regenerating it,
+    leaving your version alone.
   </Card>
 
   <Card title="Refreshed facts" icon="rocket">
@@ -96,6 +99,8 @@ file is in tells you whether you may edit it.
       GitHub signals plus the freshness rules in `packages/core/src/health.ts`.
     - `data/generated/contributors.json` and `data/generated/repo-stats.json` —
       aggregated by `grove sync contributors`.
+    - The README block bounded by `<!-- grove-readme:start/end -->` — rewritten by
+      `grove readme generate`. Text outside the sentinels survives untouched.
 
     These blocks live inside author-owned files but are owned by Grove. The merge
     contract guarantees curator edits outside the sync surface survive a re-run.
@@ -153,7 +158,11 @@ Confirm your own setup in one command:
 pnpm exec grove check
 ```
 
-If validation passes, the derived tier (`data/generated/`, `public/og/`, etc.) is up-to-date with your sources.
+If validation passes, the build-time part of the derived tier is up to date with your
+sources: the records and site-config JSON, the sitemap, the `llms` files, and the OG
+cards. The three files written by other commands — `contributors.json`,
+`repo-stats.json`, and `cleanup-report.json` — also live under `data/generated/` but are
+not touched by `grove check`.
 
 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
   <LinkButton href="/content/author-a-record/" variant="primary" icon="open-book">

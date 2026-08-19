@@ -5,13 +5,13 @@ description: What problem Grove solves, who it's for, and what it deliberately i
 
 import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard } from '@astrojs/starlight/components';
 
-Grove exists for teams who want **the source of truth to be a human-readable file in their repo** and want a static, deploy-anywhere output for it.
+Structured knowledge tends to get entered more than once. The same project ends up
+described in a website, a README table, a spreadsheet, and a search-engine snippet —
+each drifting from the others at its own pace, each needing its own edit.
 
-If your content already lives in files that your contributors are comfortable editing (YAML, Markdown, taxonomy files, JSON), Grove turns that content into a website plus a set of derived surfaces — without changing the way you write.
-
-<Aside type="caution" title="When Grove isn't the right tool">
-If your content lives in a database, a CMS, or a vendor service today, Grove is probably not the right tool yet. A database-driven system will keep performing better for problems that are themselves database-shaped.
-</Aside>
+Grove's answer is to make the file the only place that description lives, and to derive
+every other surface from it. That trade is worth making for some projects and not for
+others. This page is about telling those apart.
 
 ## What Grove is — and what it isn't
 
@@ -25,7 +25,6 @@ If your content lives in a database, a CMS, or a vendor service today, Grove is 
   <Card title="What Grove isn't">
     - <Badge text="-" variant="danger" /> A **database**. There is no runtime; the build is fully static.
     - <Badge text="-" variant="danger" /> A **CMS**. Editors don't log in. Files are the editor.
-    - <Badge text="-" variant="danger" /> A **directory starter**. A directory is one use case — not the boundary.
     - <Badge text="-" variant="danger" /> A **community platform**. Grove gives no chat, no auth, no reactions. Use the file system.
     - <Badge text="-" variant="danger" /> A **content-first renderer** you can fork and theme forever. Grove's presentations are stable and known; if you want unbounded design freedom, an empty Astro starter is a better choice.
   </Card>
@@ -33,11 +32,17 @@ If your content lives in a database, a CMS, or a vendor service today, Grove is 
 
 ## When Grove is the right call
 
+Grove fits content that is **a set of comparable things** — each with the same handful
+of attributes, each worth a page of its own, collectively worth an index. Curated
+catalogues of open-source projects and tools. Research collections of papers, datasets,
+and working groups. Community knowledge bases. Industry ecosystems of companies and
+foundations. Editorial libraries of articles, podcasts, and courses.
+
 <Aside type="tip">
-Grove pays off when **the same knowledge needs to be authoritative everywhere at once**:
+It pays off when **the same knowledge needs to be authoritative everywhere at once**:
 
 - You maintain a directory of OSS tools, agents, or libraries that dozens of contributors read.
-- You publish a community resource hub that needs both a website and machine-readable feeds (RSS, JSON, `llms.txt`) for AI assistants.
+- You publish a community resource hub that needs both a website and machine-readable feeds (`llms.txt`, JSON datasets) for AI assistants.
 - You want curatorial judgment (visibility, sort priority, "why this is listed") expressed in files, not in a moderation backend.
 - You want a maintenance loop — refresh facts on a schedule, surface stale records, keep the dataset clean — without writing a cron job.
 </Aside>
