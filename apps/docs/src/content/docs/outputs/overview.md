@@ -35,6 +35,9 @@ The exact URL prefixes (`projects/`, `resources/`, `entities/`) are decided by `
 | `resource-hub` | `/resources/` |
 | `ecosystem-map` | `/entities/` |
 
+`project-directory` is the only blueprint Grove ships today; the other two rows
+record defaults the schema reserves for future blueprints.
+
 ## Machine-readable feeds
 
 | Output | URL / path | Consumer |

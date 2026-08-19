@@ -40,6 +40,12 @@ export default defineConfig({
         '/getting-started/deploy/':         '/deployment/overview/',
         '/automation/validation/':          '/automation/check/',
         '/automation/github-metadata/':     '/automation/sync-github/',
+        // Both pages were merged into their canonical counterparts: the
+        // add-a-record walkthrough only re-narrated scaffold + first-record,
+        // and the sync deep-dive shared a title and most of its content with
+        // the main sync page.
+        '/guides/walkthrough-add-record/':   '/getting-started/first-record/',
+        '/automation/sync-github-deep-dive/': '/automation/sync-github/',
         '/getting-started/create-a-space/': '/getting-started/scaffold/',
         '/getting-started/add-your-first-project/': '/getting-started/first-record/',
         '/roadmap/':                        '/project/roadmap/',
@@ -183,7 +189,6 @@ export default defineConfig({
                             label: 'Author',
                             items: [
                                 { label: 'Author your first record', slug: 'getting-started/first-record' },
-                                { label: 'Walkthrough: add a record', slug: 'guides/walkthrough-add-record' },
                                 { label: 'Add a record', slug: 'content/author-a-record' },
                                 { label: 'Organize with taxonomy', slug: 'content/taxonomy-files' },
                                 { label: 'Add content pages', slug: 'concepts/content-pages' },
@@ -219,7 +224,6 @@ export default defineConfig({
                     items: [
                         { label: 'grove check', slug: 'automation/check' },
                         { label: 'Sync GitHub metadata', slug: 'automation/sync-github' },
-                        { label: 'Sync GitHub deep-dive', slug: 'automation/sync-github-deep-dive' },
                         { label: 'Walkthrough: sync GitHub', slug: 'guides/walkthrough-sync-github' },
                         { label: 'Sync contributors', slug: 'automation/sync-contributors' },
                         { label: 'Scheduled workflows', slug: 'automation/scheduled' },

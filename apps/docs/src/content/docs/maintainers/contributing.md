@@ -125,7 +125,7 @@ A PR that fills these out takes the reviewer 30 seconds to process.
 - **The PR bundles multiple records.** One record per PR.
 - **The record edits an existing record's `health` block by hand.**
   Don't. The health block is auto-derived. See
-  [Sync GitHub metadata](/automation/sync-github-deep-dive/).
+  [Sync GitHub metadata](/automation/sync-github/).
 
 ## What happens after the PR lands
 

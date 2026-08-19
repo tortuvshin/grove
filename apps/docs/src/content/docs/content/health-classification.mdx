@@ -202,7 +202,7 @@ If you want a record to surface better in the index:
 - **Stars are above 500 but the record is `experimental`?** The sync step ran before the stars crossed the threshold. Run `grove sync github` again, or wait for the next scheduled run. The threshold is checked every time.
 - **The record is `hidden` but you want it back?** It got `hidden` because `status` is `archived` or `inactive`. Resolve the underlying status first (most often: the upstream repo came back to life). The next sync will reclassify it.
 
-See [Sync GitHub metadata](/automation/sync-github-deep-dive/) for the upstream data the signals are computed from.
+See [Sync GitHub metadata](/automation/sync-github/) for the upstream data the signals are computed from.
 
 ## How overrides work
 
@@ -216,7 +216,7 @@ See [Sync GitHub metadata](/automation/sync-github-deep-dive/) for the upstream 
 A curator who wants a record visible regardless of GitHub status sets `visibility: keep` on the record. A curator who wants a record hidden regardless of GitHub status sets `visibility: hide` or adds a `decisions.yml` entry.
 </Aside>
 
-<LinkButton href="/automation/sync-github-deep-dive/" variant="primary" icon="right-arrow">
+<LinkButton href="/automation/sync-github/" variant="primary" icon="right-arrow">
   Sync GitHub deep dive
 </LinkButton>
 <LinkButton href="https://github.com/tortuvshin/grove" variant="minimal" icon="external">
@@ -224,7 +224,7 @@ A curator who wants a record visible regardless of GitHub status sets `visibilit
 </LinkButton>
 
 <CardGrid>
-  <LinkCard title="Sync GitHub metadata" href="/automation/sync-github-deep-dive/" description="The upstream data the signals are computed from." />
+  <LinkCard title="Sync GitHub metadata" href="/automation/sync-github/" description="The upstream data the signals are computed from." />
   <LinkCard title="Manage decisions" href="/concepts/decisions/" description="Curator overrides for visibility, rename-slug, sort priority." />
   <LinkCard title="Author a record" href="/content/author-a-record/" description="The day-to-day authoring walkthrough." />
 </CardGrid>
