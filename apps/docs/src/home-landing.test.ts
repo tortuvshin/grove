@@ -469,7 +469,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		const robots = await readFile(resolve(docsRoot, "public/robots.txt"), "utf8");
 		expect(robots).toMatch(/^User-agent:\s*\*/m);
 		expect(robots).toMatch(/^Allow:\s*\//m);
-		expect(robots).toContain("https://withgrove.dev/sitemap-index.xml");
+		expect(robots).toContain("https://withgrove.dev/sitemap.xml");
 
 		const manifest = JSON.parse(
 			await readFile(resolve(docsRoot, "public/manifest.json"), "utf8"),

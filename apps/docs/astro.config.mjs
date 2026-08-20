@@ -1,5 +1,5 @@
 // @ts-check
-import { writeFile } from 'node:fs/promises';
+import { copyFile, writeFile } from 'node:fs/promises';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
@@ -50,13 +50,20 @@ export default defineConfig({
             },
         }),
         {
-            name: 'grove-docs-redirects-file',
+            name: 'grove-docs-postbuild',
             hooks: {
+                // Runs after @astrojs/sitemap's own build:done hook
+                // (integration order in this array is hook order).
                 'astro:build:done': async ({ dir }) => {
                     const lines = Object.entries(REDIRECTS).map(
                         ([from, to]) => `${from} ${to} 301`,
                     );
                     await writeFile(new URL('_redirects', dir), lines.join('\n') + '\n');
+                    // The site is small enough for a single sitemap, and
+                    // /sitemap.xml is the address everything advertises —
+                    // publish the real urlset there (the sitemap-index.xml
+                    // + sitemap-0.xml pair stays for old references).
+                    await copyFile(new URL('sitemap-0.xml', dir), new URL('sitemap.xml', dir));
                 },
             },
         },
@@ -122,7 +129,7 @@ export default defineConfig({
                 { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
                 { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.json' } },
                 { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' } },
-                { tag: 'link', attrs: { rel: 'sitemap', href: '/sitemap-index.xml' } },
+                { tag: 'link', attrs: { rel: 'sitemap', href: '/sitemap.xml' } },
                 // Machine-readable index of the docs for LLM agents; the
                 // endpoints live at src/pages/llms{,-full}.txt.ts.
                 { tag: 'link', attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'LLM-readable docs index' } },

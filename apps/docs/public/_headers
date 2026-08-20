@@ -49,6 +49,7 @@
     Cache-Control: public, max-age=86400, must-revalidate
 
 # ─── Sitemap: short cache so search engines pick up changes fast ─────────
+/sitemap.xml
 /sitemap-index.xml
 /sitemap-0.xml
     Cache-Control: public, max-age=3600, must-revalidate
