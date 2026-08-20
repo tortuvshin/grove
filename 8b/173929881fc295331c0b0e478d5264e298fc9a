@@ -1,0 +1,24 @@
+packages/core/src/audit.ts
+  s_75aa02f6d0f279::t_c9c4c1e5de5d42 73-76
+apps/docs/src/content/docs/automation/audit.md
+  s_75aa02f6d0f279::t_0c2ba14de32b48 74-80
+CHANGELOG.md
+  s_75aa02f6d0f279::t_f8fe2414899369 24-152
+  s_75aa02f6d0f279::t_f654749508bc1a 854-857
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "8b173929881fc295331c0b0e478d5264e298fc9a",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
