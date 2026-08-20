@@ -22,22 +22,22 @@ export const FAQ_ITEMS: ReadonlyArray<FaqItem> = [
   },
   {
     q: 'Does it work without Astro?',
-    a: 'V1 ships the Astro adapter only. The core engine is framework-agnostic (typed schema, GitHub sync, importers, sitemap, llms.txt), so a SvelteKit or Next.js adapter is possible. A SvelteKit adapter lands in V1.1 if a real community space asks for it; see the [SvelteKit adapter status](/adapters/svelte/) and the roadmap for current status.',
+    a: 'Astro is the only renderer that exists today. The core engine is framework-agnostic — typed schema, source sync, importers, sitemap, llms.txt — so a renderer for another framework is possible, but none is scaffolded: `@grove-dev/svelte` and `@grove-dev/nextjs` have never been published. The [roadmap](/roadmap/) tracks where that stands.',
   },
   {
-    q: 'How is this different from an awesome-list README?',
-    a: 'An awesome-list is a flat Markdown list with no schema, no review state, no live metadata, and no static discovery surface. Grove adds a typed record model, scheduled GitHub metadata sync, health classification, search and filters, llms.txt for AI ingestion, and a PR-based submission workflow — without giving up the portability of files.',
+    q: 'How is this different from a Markdown list in a README?',
+    a: 'A hand-kept list has no schema, no review state, no refreshed facts, and nothing a machine can read. Grove adds a typed record model, scheduled metadata sync, staleness classification, search and filters, llms.txt for AI ingestion, and a PR-based submission workflow — without giving up the portability of plain files.',
   },
   {
     q: 'Where do I host the site?',
     a: 'Anywhere that serves static HTML. GitHub Pages, Cloudflare Pages, Netlify, and Vercel all work out of the box. There is no server runtime, so there is no database to back up and no API keys to manage at request time.',
   },
   {
-    q: "What happens when a record's repo is archived?",
-    a: "grove sync github reads the archived flag and writes it into the record's github block. The Astro template renders an Archived badge in the activity pill and a status row in the sidebar. The record stays visible by default — removing or hiding it is a curator's call, recorded in decisions.yml.",
+    q: 'What happens when an entry goes stale?',
+    a: "grove sync github reads the upstream state — including whether a repository was archived — and writes it into the record. The Astro template renders the status in the activity pill and a row in the sidebar, and the entry stays visible by default. Removing or hiding it is a curator's call, recorded in decisions.yml.",
   },
   {
-    q: 'Can I import an existing awesome-list?',
+    q: 'Can I import a list I already maintain?',
     a: 'Yes. grove import <github-url> parses the README, infers a record per entry, and writes them under data/records/. Each imported record gets source: { type: "import" } so curators can filter and finish them later.',
   },
 ];

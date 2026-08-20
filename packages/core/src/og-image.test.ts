@@ -19,7 +19,7 @@ function configFor(): GroveConfig {
     site: {
       name: "Open Apps",
       tagline: "Open-source apps with real codebases.",
-      url: "https://open-apps.dev.mn",
+      url: "https://openappscout.com",
     },
     labels: { singular: "app", plural: "apps" },
     theme: { primaryColor: "#3b82f6" },
@@ -37,7 +37,7 @@ describe("renderOgPng", () => {
         descriptor: "Self-hosted photo and video backup",
         stars: 12345,
         category: "Photos",
-        host: "open-apps.dev.mn",
+        host: "openappscout.com",
         accent: "#3b82f6",
       }),
     );

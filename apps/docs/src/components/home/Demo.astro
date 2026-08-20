@@ -27,7 +27,7 @@ const steps = [
   {
     label: 'Publish',
     heading: 'A real website appears.',
-    copy: 'A fast, searchable directory with lenses, filters, and rich detail pages. The window here is live — try it.',
+    copy: 'A fast, searchable site with saved views, filters, and rich detail pages. The window here is live — try it.',
   },
   {
     label: 'Deploy',
@@ -36,8 +36,8 @@ const steps = [
   },
   {
     label: 'Automate',
-    heading: 'Fully automated. Never outdated.',
-    copy: 'Scheduled syncs refresh metadata and flag stale or archived records — 183 days without a release earns a review.',
+    heading: 'Maintenance on rails.',
+    copy: 'Scheduled syncs refresh the facts that come from elsewhere and flag entries that have gone quiet, so the site cannot drift out of date unnoticed.',
   },
 ];
 
@@ -110,11 +110,13 @@ const hosts = [
   },
 ];
 
-// Scene 5 health rows — statuses use the real 183-day staleness threshold.
+// Scene 5 health rows. The panel shows what a review queue looks like, so the
+// rows read in plain language — the exact staleness threshold is a per-space
+// setting and belongs in the docs, not on the landing page.
 const health = [
-  { name: 'immich', meta: 'Release 3 days ago', status: 'synced', pill: 'Synced' },
-  { name: 'old-dashboard', meta: 'No release in 183+ days', status: 'review', pill: 'Needs review' },
-  { name: 'legacy-tool', meta: 'Repository archived', status: 'archived', pill: 'Archived' },
+  { name: 'immich', meta: 'Updated 3 days ago', status: 'synced', pill: 'Synced' },
+  { name: 'old-dashboard', meta: 'Quiet for six months', status: 'review', pill: 'Needs review' },
+  { name: 'legacy-tool', meta: 'Upstream archived', status: 'archived', pill: 'Archived' },
 ];
 
 const pillClass = {
@@ -128,9 +130,9 @@ const pillClass = {
   <Statement
     eyebrow="How Grove works"
     titleId="demo-title"
-    lede="Start from a folder of YAML and Markdown, and Grove grows it into a searchable site with curated collections, machine-readable outputs, and maintenance built in. The directory window is live — search it, switch lenses."
+    lede="Start from a folder of YAML and Markdown, and Grove grows it into a searchable site with curated collections, machine-readable outputs, and maintenance built in. The window below is live — search it, switch views."
   >
-    From files to a <span class="text-gradient">living directory.</span>
+    From a folder of files to a <span class="text-gradient">living site.</span>
   </Statement>
 
   <div id="hgw" class="hgw">
@@ -384,7 +386,7 @@ const pillClass = {
                     ))}
                   </div>
                   <p class="mt-3 border-t border-border pt-2.5 font-mono text-[10px] leading-relaxed text-subtle">
-                    Records with no release in 183+ days earn a review.
+                    Entries that go quiet are queued for review, never dropped.
                   </p>
                 </div>
             </div>

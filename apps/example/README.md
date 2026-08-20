@@ -50,7 +50,7 @@ your directory.
 
 Hand-picked tools worth running, studying, and extending.
 
-Browse the catalog → https://open-apps.dev.mn
+Browse the catalog → https://example.com
 
 ## Why this list
 

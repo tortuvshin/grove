@@ -22,7 +22,7 @@ outputs. No database, no CMS, and no runtime server required.
 
 ## One source, every surface
 
-<a href="https://withgrove.dev/#pipeline">
+<a href="https://withgrove.dev/">
   <img
     src=".github/assets/grove-pipeline.gif"
     alt="Animation showing YAML records, Markdown, collections, and taxonomy flowing through Grove into website, SEO, AI-ready, and repository outputs"

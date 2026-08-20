@@ -7,7 +7,7 @@ const config = {
   site: {
     name: "Open Apps",
     tagline: "Open-source apps with real codebases.",
-    url: "https://open-apps.dev.mn",
+    url: "https://openappscout.com",
   },
   routes: { directory: "apps" },
   labels: { singular: "app", plural: "apps" },
@@ -30,16 +30,16 @@ describe("LLM outputs", () => {
   it("uses the configured directory route in the compact index", () => {
     const text = buildLlmsTxt(input, config);
 
-    expect(text).toContain("Directory: https://open-apps.dev.mn/apps");
+    expect(text).toContain("Directory: https://openappscout.com/apps");
     expect(text).not.toContain("/projects");
   });
 
   it("uses configured route and plural label in the full index", () => {
     const text = buildLlmsFullTxt(input, config);
 
-    expect(text).toContain("> Source: https://open-apps.dev.mn/apps");
+    expect(text).toContain("> Source: https://openappscout.com/apps");
     expect(text).toContain("## Apps");
-    expect(text).toContain("- url: https://open-apps.dev.mn/apps/immich");
+    expect(text).toContain("- url: https://openappscout.com/apps/immich");
     expect(text).not.toContain("/projects");
   });
 });

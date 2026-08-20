@@ -20,7 +20,7 @@ describe("buildSitemap", () => {
       site: {
         name: "Open Apps",
         tagline: "Open-source apps with real codebases.",
-        url: "https://open-apps.dev.mn",
+        url: "https://openappscout.com",
       },
       routes: { directory: "apps" },
       labels: { singular: "app", plural: "apps" },
@@ -39,8 +39,8 @@ describe("buildSitemap", () => {
 
     // Trailing slashes: locs must match the pages' own canonicals
     // (`build.format: 'directory'`).
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/apps/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/apps/immich/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/apps/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/apps/immich/</loc>");
     expect(xml).not.toContain("/projects");
   });
 
@@ -49,7 +49,7 @@ describe("buildSitemap", () => {
     roots.push(cwd);
     const config = {
       blueprint: "project-directory",
-      site: { name: "Open Apps", url: "https://open-apps.dev.mn" },
+      site: { name: "Open Apps", url: "https://openappscout.com" },
       routes: {},
       labels: { singular: "app", plural: "apps" },
       paths: { publicDir: "public" },
@@ -74,18 +74,18 @@ describe("buildSitemap", () => {
     );
     const xml = await readFile(result.path, "utf8");
 
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/collections/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/collections/top-photos/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/collections/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/collections/top-photos/</loc>");
     // `seo.index: false` collections must never be advertised.
     expect(xml).not.toContain("secret-drafts");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/categories/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/categories/photos/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/stacks/typescript/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/categories/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/categories/photos/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/stacks/typescript/</loc>");
     // Licenses have no index page — detail URL only.
-    expect(xml).not.toContain("<loc>https://open-apps.dev.mn/licenses/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/licenses/agpl-3.0/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/about/</loc>");
-    expect(xml).toContain("<loc>https://open-apps.dev.mn/contributors/</loc>");
+    expect(xml).not.toContain("<loc>https://openappscout.com/licenses/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/licenses/agpl-3.0/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/about/</loc>");
+    expect(xml).toContain("<loc>https://openappscout.com/contributors/</loc>");
     // lastReviewedAt drives the collection's lastmod.
     expect(xml).toMatch(/top-photos\/<\/loc>\s*<lastmod>2026-06-01<\/lastmod>/);
   });
@@ -95,7 +95,7 @@ describe("buildSitemap", () => {
     roots.push(cwd);
     const config = {
       blueprint: "project-directory",
-      site: { name: "Open Apps", url: "https://open-apps.dev.mn" },
+      site: { name: "Open Apps", url: "https://openappscout.com" },
       routes: {},
       labels: { singular: "app", plural: "apps" },
       paths: { publicDir: "public" },
