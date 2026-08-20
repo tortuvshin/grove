@@ -1,0 +1,86 @@
+apps/docs/src/data/redirects.mjs
+  s_a4b25a450510ae::t_fa110683b25e14 1-54
+apps/docs/src/components/home/Header.astro
+  s_a4b25a450510ae::t_8659c0c106632e 7,45,72
+apps/docs/src/home-landing.test.ts
+  s_a4b25a450510ae::t_820cd23af08020 184,191,437,481-488,491-496,542-543,545-548,562,564-566,569-572,582-583
+  s_83df15219dc8b0::t_ac521a739dfb5c 550
+  s_83df15219dc8b0::t_5def703b37c544 171-172,175-179,216-217,222,225-226,238-240,242-244,254
+  s_83df15219dc8b0::t_e0ac754f92d5b7 215
+  s_83df15219dc8b0::t_638381ccd484e4 241
+apps/docs/src/components/home/FinalCta.astro
+  s_83df15219dc8b0::t_7ffe464fdcf0d8 25
+  s_a4b25a450510ae::t_8659c0c106632e 28
+apps/docs/src/pages/llms-full.txt.ts
+  s_a4b25a450510ae::t_a78869a879ac3b 1-15
+apps/docs/src/components/home/Footer.astro
+  s_a4b25a450510ae::t_8659c0c106632e 7-8
+  s_83df15219dc8b0::t_ac521a739dfb5c 57
+apps/docs/public/_headers
+  s_a4b25a450510ae::t_813570bc9d49ce 41-44,55-58
+  s_a4b25a450510ae::t_75e4f949960446 59
+apps/docs/src/layouts/HomeLayout.astro
+  s_a4b25a450510ae::t_315e20bb4056ca 17-22,111,118,120-121,129
+  s_83df15219dc8b0::t_528b59e02d6563 11-12
+  s_83df15219dc8b0::t_3acdcef7d0ba40 58
+  s_83df15219dc8b0::t_a3a86a345e7a8e 61-64,132,138
+apps/docs/scripts/generate-social-assets.mjs
+  s_a4b25a450510ae::t_71999e85a69492 1-35,40-44,46-48,50-51,54,56-57
+  s_a4b25a450510ae::t_c4a7d3fb0e4dc6 36-39,45,49,52-53,55,58
+apps/docs/src/data/docs-sidebar.mjs
+  s_a4b25a450510ae::t_fa110683b25e14 1-148
+apps/docs/src/components/home/Hero.astro
+  s_a4b25a450510ae::t_8659c0c106632e 28,47
+  s_83df15219dc8b0::t_bd17f3c1aefefe 40,43
+  s_83df15219dc8b0::t_a3a86a345e7a8e 31
+apps/docs/src/lib/llms-site.ts
+  s_a4b25a450510ae::t_a78869a879ac3b 1-19
+apps/docs/src/docs-seo.test.ts
+  s_a4b25a450510ae::t_dd272c13b8d0e3 1-157
+apps/docs/package.json
+  s_a4b25a450510ae::t_441641bf5628ee 14
+apps/docs/src/lib/llms.ts
+  s_a4b25a450510ae::t_a78869a879ac3b 1-95
+apps/docs/src/lib/git-lastmod.mjs
+  s_a4b25a450510ae::t_cd7f8fe6f76839 3-5,11-13,22-25,27-33
+  s_a4b25a450510ae::t_32a44e01503ce8 1-2,6-10,14-21,26,34-39
+apps/docs/public/manifest.json
+  s_a4b25a450510ae::t_813570bc9d49ce 4,15-32
+apps/docs/src/components/StarlightHead.astro
+  s_a4b25a450510ae::t_ccea2e62e616b4 7,23-26,30-37
+  s_a4b25a450510ae::t_8b76a1f87afa2c 1-6,8-22,27-29,38-68
+apps/docs/public/og-image.svg
+  s_83df15219dc8b0::t_db5eb306410ed1 21-22
+  s_83df15219dc8b0::t_2e63a505b65d45 23-24,27
+apps/docs/astro.config.mjs
+  s_a4b25a450510ae::t_dc5d67daf34b8d 2,5,8-26,35-39,44-62,79-84,116-121,124-128,134-139,175
+  s_a4b25a450510ae::t_196a1fbb1a0b93 173-174
+apps/docs/src/pages/llms.txt.ts
+  s_a4b25a450510ae::t_a78869a879ac3b 1-17
+pnpm-lock.yaml
+  s_a4b25a450510ae::t_fd41bfcd6425ef 43-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "57894881cee5d412172aa769a1aaf2a19830f7ae",
+  "prompts": {},
+  "sessions": {
+    "s_83df15219dc8b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "026a19a0-7d5e-4e5b-a2c1-5864ff0857dd",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_a4b25a450510ae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a4083ce-3239-4b66-bff7-8d1a70cf6136",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
