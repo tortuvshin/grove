@@ -1,0 +1,19 @@
+apps/docs/public/_headers
+  s_a4b25a450510ae::t_fa2b03206ae943 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "956c9bd84e911e0d55b4e1b01f89364d35c4553b",
+  "prompts": {},
+  "sessions": {
+    "s_a4b25a450510ae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a4083ce-3239-4b66-bff7-8d1a70cf6136",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
