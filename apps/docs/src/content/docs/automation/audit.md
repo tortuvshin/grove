@@ -55,7 +55,7 @@ Each entry (`auditPageManifestEntrySchema`, `packages/core/src/schema.ts:596-601
 | `path` | yes | string | URL path relative to `baseUrl`. |
 | `type` | yes | enum | One of `home`, `directory`, `collection`, `record`, `content`, `empty`, `404`. |
 | `label` | yes | string | Human-readable label; carried through into JSON/JUnit output. |
-| `sample` | no | `Record<string, string>` | Declared in the schema and the `PageManifestEntry` type, but `parsePageEntry()` in `audit-cli.ts` (the TypeScript-AST reader for `grove.config.ts`) never reads a `sample` property off the config — setting it currently has no effect on the audit run. |
+| `sample` | no | `Record<string, string>` | **Deprecated, no-op.** Declared in the schema and the `PageManifestEntry` type, but nothing reads it — `parsePageEntry()` in `audit-cli.ts` (the TypeScript-AST reader for `grove.config.ts`) never looks for it. Kept so existing configs keep type-checking; it will be removed in the next major. Do not add it to new pages. |
 
 `type` only changes behavior in two places (see below): a `404` page skips the budget entirely, and an `empty` page skips only the SEO score check. It otherwise has no effect on which thresholds apply — every other page type is checked against the same `DEFAULT_BUDGET`.
 

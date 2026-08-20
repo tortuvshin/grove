@@ -5,6 +5,12 @@ export interface PageManifestEntry {
   path: string;
   type: PageType;
   label: string;
+  /**
+   * @deprecated No-op. Declared since the audit manifest was added but
+   * never read by `runAudit` or `parseAuditBlock`. Kept so removing it
+   * is not a breaking type change; drop it in the next major.
+   */
+  sample?: Record<string, string>;
 }
 
 export interface LighthouseScores {

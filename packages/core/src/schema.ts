@@ -597,6 +597,11 @@ const auditPageManifestEntrySchema = z.object({
   path: z.string().min(1),
   type: auditPageTypeSchema,
   label: z.string().min(1),
+  /**
+   * @deprecated No-op — nothing reads this. Retained so an existing
+   * grove.config.ts keeps type-checking; removed in the next major.
+   */
+  sample: z.record(z.string(), z.string()).optional(),
 });
 
 export const auditSchema = z.object({
