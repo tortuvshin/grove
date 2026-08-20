@@ -38,11 +38,14 @@ const groups = [
       One source, every surface
     </p>
 
-    <ul class="flex flex-wrap justify-center gap-2" aria-label="The files you write">
+    <!-- The four chips are sized to stay on one line down to the `lg`
+         breakpoint, where the column is at its narrowest. A wrapped row
+         orphans the last chip and leaves its connector crossing the others. -->
+    <ul class="flex flex-wrap justify-center gap-1.5" aria-label="The files you write">
       {
         inputs.map((label, i) => (
           <li
-            class="pipeline-node pipeline-in whitespace-nowrap rounded-full border border-border bg-card px-3.5 py-1.5 font-mono text-xs text-fg"
+            class="pipeline-node pipeline-in whitespace-nowrap rounded-full border border-border bg-card px-3 py-1.5 font-mono text-[11px] text-fg"
             style={`--d: ${i * 90}ms`}
           >
             {label}

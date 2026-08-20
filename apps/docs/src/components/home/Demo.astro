@@ -6,9 +6,12 @@ import Statement from './Statement.astro';
 // closes on the Grove mark, while a five-step nav tracks progress. Scenes
 // are strictly sequential: each one fully exits before the next enters,
 // with a short dead zone in between, so no two scenes are ever visible at
-// once. On mobile, without JS, or with reduced motion the section renders
-// statically: step cards followed by the live demo window and the deploy /
-// health panels, so no content ever depends on the animation.
+// once. The scrub runs at every viewport width — below `lg` the canvas and
+// the step rail stack instead of sitting side by side — and the rendered
+// progress eases toward the scroll position, so a fast flick still plays the
+// transitions instead of skipping them. Without JS or with reduced motion the
+// section renders statically: step cards followed by the live demo window and
+// the deploy / health panels, so no content ever depends on the animation.
 
 const steps = [
   {
@@ -533,7 +536,7 @@ const pillClass = {
     #hgw-extras { grid-template-columns: repeat(2, 1fr); align-items: start; }
   }
 
-  /* ---- Scrub mode: enabled by JS on desktop when motion is allowed. ---- */
+  /* ---- Scrub mode: enabled by JS at every width when motion is allowed. -- */
   #hgw.is-scrub { height: 440vh; }
 
   #hgw.is-scrub .hgw-sticky {
@@ -541,24 +544,39 @@ const pillClass = {
     top: 0;
     display: flex;
     height: 100vh;
+    /* `svh` keeps the pinned canvas inside the visible area on mobile, where
+       `vh` measures past the browser chrome and clips the step rail. */
+    height: 100svh;
     align-items: center;
   }
 
+  /* Narrow viewports stack: canvas on top, step rail underneath. The DOM
+     order is already canvas → rail (static mode pulls the rail up with
+     `order: -1`), so the single-column grid needs no reordering. */
   #hgw.is-scrub .hgw-wrap {
     display: grid;
-    grid-template-columns: 1.55fr 1fr;
-    gap: 3.5rem;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
     align-items: center;
     width: 100%;
     padding-bottom: 0;
   }
 
   #hgw.is-scrub #hgw-canvas {
-    height: 66vh;
+    height: 60svh;
     overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     background: rgb(17 29 37 / 0.62);
+  }
+
+  @media (min-width: 1024px) {
+    #hgw.is-scrub .hgw-wrap {
+      grid-template-columns: 1.55fr 1fr;
+      gap: 3.5rem;
+    }
+
+    #hgw.is-scrub #hgw-canvas { height: 66vh; }
   }
 
   #hgw.is-scrub .hgw-gridbg {
@@ -785,6 +803,22 @@ const pillClass = {
   #hgw.is-scrub .hgw-step.is-done { opacity: 0.55; }
   #hgw.is-scrub .hgw-step.is-active { opacity: 1; }
 
+  /* Below `lg` there is no room beneath the canvas for all five steps, and
+     the caption pill plus the progress bar already say where the story is,
+     so the rail collapses to the step currently on screen. */
+  @media (max-width: 1023px) {
+    #hgw.is-scrub .hgw-step { display: none; }
+    #hgw.is-scrub .hgw-step.is-active { display: block; }
+    #hgw.is-scrub .hgw-scene,
+    #hgw.is-scrub #hgw-site { padding: 0 1rem; }
+
+    /* The 40rem design box would be fitted to roughly half size on a phone,
+       which puts the demo window's already-small type below legibility. Let
+       it reflow to the canvas width instead, the way static mode does, so
+       fit() only has to scale for height. */
+    #hgw.is-scrub #hgw-composition { width: 100%; }
+  }
+
   /* Completed steps show a check mark; the active step hides it because
      its body is already expanded underneath. */
   #hgw.is-scrub .hgw-step.is-done .hgw-step-check { opacity: 0.7; }
@@ -891,6 +925,10 @@ const pillClass = {
     const lerp = (a, b, t) => a + (b - a) * t;
     const ramp = (p, s, e) => clamp((p - s) / (e - s));
     const smooth = (t) => t * t * (3 - 2 * t);
+    // A scene holds still far longer than it transitions, and `blur(0px)`
+    // still costs a filter pass every frame it is set. Collapsing it to
+    // `none` during the holds keeps the expensive work to the handoffs.
+    const blur = (px) => (px > 0.01 ? `blur(${px}px)` : 'none');
 
     const term = $('hgw-terminal');
     const typed = $('hgw-typed');
@@ -930,6 +968,10 @@ const pillClass = {
 
     let raf = 0;
     let enabled = false;
+    // The progress actually rendered, which chases the scroll position
+    // rather than tracking it exactly — see tick().
+    let progress = 0;
+    let lastTime = 0;
 
     // One uniform fit for the whole composition, computed only on enable
     // and resize. Scroll animates opacity and translation — never scale —
@@ -945,13 +987,15 @@ const pillClass = {
       }
     };
 
-    const render = () => {
-      raf = 0;
+    // Where the scroll position says the story should be, 0→1.
+    const readTarget = () => {
       const rect = track.getBoundingClientRect();
       const total = track.offsetHeight - window.innerHeight;
-      if (total <= 0) return;
-      const p = clamp(Math.min(Math.max(-rect.top, 0), total) / total);
+      if (total <= 0) return null;
+      return clamp(Math.min(Math.max(-rect.top, 0), total) / total);
+    };
 
+    const render = (p) => {
       // Continuous progress bar fills smoothly across all five steps so the
       // viewer gets a constant sense of where they are in the journey.
       if (progressFill) progressFill.style.width = `${(p * 100).toFixed(2)}%`;
@@ -967,7 +1011,7 @@ const pillClass = {
       term.style.opacity = termO;
       term.style.visibility = termO > 0.001 ? 'visible' : 'hidden';
       term.style.transform = `translate3d(${lerp(0, -42, exitTerm)}%, ${lerp(0, -6, exitTerm)}px, 0) scale(${lerp(1, 0.96, exitTerm)})`;
-      term.style.filter = `blur(${lerp(0, 0.8, exitTerm)}px)`;
+      term.style.filter = blur(lerp(0, 0.8, exitTerm));
       const chars = Math.round(ramp(p, 0.01, 0.07) * COMMAND.length);
       typed.textContent = COMMAND.slice(0, chars);
       cursor.style.opacity = chars < COMMAND.length || p < 0.15 ? '1' : '0';
@@ -982,7 +1026,7 @@ const pillClass = {
       files.style.opacity = filesO;
       files.style.visibility = filesO > 0.001 ? 'visible' : 'hidden';
       files.style.transform = `translate3d(${lerp(42, 0, filesIn) + lerp(0, -42, filesOut)}%, ${lerp(6, 0, filesIn) + lerp(0, -6, filesOut)}px, 0) scale(${lerp(0.96, 1, filesIn) * lerp(1, 0.96, filesOut)})`;
-      files.style.filter = `blur(${lerp(0.8, 0, filesIn) + lerp(0, 0.8, filesOut)}px)`;
+      files.style.filter = blur(lerp(0.8, 0, filesIn) + lerp(0, 0.8, filesOut));
       for (const node of treeNodes) {
         const at = Number(node.dataset.at);
         const r = ramp(p, at, at + 0.02);
@@ -999,7 +1043,7 @@ const pillClass = {
       site.style.visibility = siteO > 0.001 ? 'visible' : 'hidden';
       site.style.pointerEvents = p > 0.53 && p < 0.6 ? 'auto' : 'none';
       site.style.transform = `translate3d(${lerp(42, 0, appear) + lerp(0, -42, siteOut)}%, ${lerp(6, 0, appear) + lerp(0, -6, siteOut)}px, 0)`;
-      site.style.filter = `blur(${lerp(0.8, 0, appear) + lerp(0, 0.8, siteOut)}px)`;
+      site.style.filter = blur(lerp(0.8, 0, appear) + lerp(0, 0.8, siteOut));
       // Scale is the resize-computed fit — scroll never changes it.
       composition.style.transform = `scale(${fitScale})`;
       records.forEach((record, i) => {
@@ -1016,7 +1060,7 @@ const pillClass = {
       deploy.style.opacity = depO;
       deploy.style.visibility = depO > 0.001 ? 'visible' : 'hidden';
       deploy.style.transform = `translate(calc(-50% + ${lerp(60, 0, depIn) + lerp(0, -60, depOut)}px), -50%) scale(${lerp(0.96, 1, depIn) * lerp(1, 0.96, depOut)})`;
-      deploy.style.filter = `blur(${lerp(0.8, 0, depIn) + lerp(0, 0.8, depOut)}px)`;
+      deploy.style.filter = blur(lerp(0.8, 0, depIn) + lerp(0, 0.8, depOut));
       hostItems.forEach((item, i) => {
         const r = ramp(p, 0.705 + i * 0.012, 0.745 + i * 0.012);
         item.style.opacity = r;
@@ -1031,7 +1075,7 @@ const pillClass = {
       healthPanel.style.opacity = autoO;
       healthPanel.style.visibility = autoO > 0.001 ? 'visible' : 'hidden';
       healthPanel.style.transform = `translate(calc(-50% + ${lerp(60, 0, autoIn) + lerp(0, -60, autoOut)}px), -50%) scale(${lerp(0.96, 1, autoIn) * lerp(1, 0.96, autoOut)})`;
-      healthPanel.style.filter = `blur(${lerp(0.8, 0, autoIn) + lerp(0, 0.8, autoOut)}px)`;
+      healthPanel.style.filter = blur(lerp(0.8, 0, autoIn) + lerp(0, 0.8, autoOut));
       if (spin) spin.style.transform = `rotate(${ramp(p, 0.84, 0.95) * 360}deg)`;
       healthRows.forEach((row, i) => {
         const r = ramp(p, 0.865 + i * 0.015, 0.9 + i * 0.015);
@@ -1086,8 +1130,53 @@ const pillClass = {
       }
     };
 
+    // A flick can cross the whole 440vh track in a handful of frames, which
+    // would snap the scenes past faster than any of them could be read. The
+    // rendered progress therefore chases the scroll position instead of
+    // tracking it, under two limits:
+    //
+    //   TAU       — exponential time constant, which shapes the ease-out as
+    //               it arrives and keeps ordinary scrolling feeling direct.
+    //   MAX_RATE  — a ceiling on progress per second. This is what actually
+    //               fixes a fast flick: an exponential ease takes about the
+    //               same time whatever the distance, so on its own it still
+    //               crams all five scenes into a fraction of a second. At
+    //               0.5/s the full story cannot play in under ~2s, which is
+    //               roughly 0.4s a scene. Normal scrolling never reaches the
+    //               ceiling, so it is unaffected.
+    //
+    // Both steps are scaled by real elapsed time, so 60Hz and 120Hz displays
+    // ease at one speed, and the rAF loop keeps running until it caught up.
+    const TAU = 0.22;
+    const MAX_RATE = 0.5;
+    const EPSILON = 0.0002;
+
+    const tick = (now) => {
+      raf = 0;
+      const target = readTarget();
+      if (target === null) return;
+      // The first frame after an idle period has no measurable delta; it
+      // renders where it is and lets the next frame do the moving.
+      const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.1) : 0;
+      lastTime = now;
+      const diff = target - progress;
+      if (Math.abs(diff) < EPSILON) {
+        // Settled: render the exact target and let the loop stop until the
+        // next scroll event restarts it.
+        progress = target;
+        lastTime = 0;
+        render(progress);
+        return;
+      }
+      const eased = diff * (1 - Math.exp(-dt / TAU));
+      const cap = MAX_RATE * dt;
+      progress += Math.max(-cap, Math.min(cap, eased));
+      render(progress);
+      raf = requestAnimationFrame(tick);
+    };
+
     const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(render);
+      if (!raf) raf = requestAnimationFrame(tick);
     };
 
     const onResize = () => {
@@ -1103,12 +1192,18 @@ const pillClass = {
         window.addEventListener('scroll', onScroll, { passive: true });
         window.addEventListener('resize', onResize, { passive: true });
         fit();
-        render();
+        // Enabling mid-section must not ease in from zero — start where the
+        // scroll position already is.
+        progress = readTarget() ?? 0;
+        lastTime = 0;
+        render(progress);
       } else {
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('resize', onResize);
         if (raf) cancelAnimationFrame(raf);
         raf = 0;
+        progress = 0;
+        lastTime = 0;
         for (const el of styled) el.removeAttribute('style');
         for (const node of treeNodes) {
           node.style.opacity = '';
@@ -1119,10 +1214,11 @@ const pillClass = {
       }
     };
 
-    const wide = window.matchMedia('(min-width: 1024px)');
+    // Reduced motion is the only thing that turns the scrub off now: the
+    // story runs at every viewport width, with the canvas and the step rail
+    // stacking below `lg` instead of sitting side by side.
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const evaluate = () => setEnabled(wide.matches && !motion.matches);
-    wide.addEventListener('change', evaluate);
+    const evaluate = () => setEnabled(!motion.matches);
     motion.addEventListener('change', evaluate);
     evaluate();
   })();

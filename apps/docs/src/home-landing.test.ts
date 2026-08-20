@@ -280,15 +280,25 @@ describe("docs homepage (standalone Astro route)", () => {
 		}
 		expect(demo).toContain("classList.add('is-growing')");
 
-		// The scrub is a progressive enhancement only: it gates on viewport
-		// width and reduced motion, and tears down cleanly.
+		// The scrub is a progressive enhancement, but it now runs at every
+		// viewport width: reduced motion is the only thing that turns it off,
+		// and it tears down cleanly when that changes.
 		expect(demo).toContain('id="hgw"');
 		expect(demo).toContain("height: 440vh");
 		expect(demo).toContain("const stepStarts = [0, 0.21, 0.47, 0.675, 0.835]");
 		expect(demo).toContain("scroll-snap-type: inline mandatory");
 		expect(demo).toContain("Swipe to explore all five steps");
 		expect(demo).toContain("prefers-reduced-motion");
-		expect(demo).toContain("min-width: 1024px");
+		expect(demo).toContain("setEnabled(!motion.matches)");
+		expect(demo).not.toContain("min-width: 1024px)');");
+
+		// Fast flicks ease into place instead of snapping past every scene:
+		// an exponential ease shapes the arrival, and a rate ceiling is what
+		// stops all five scenes crossing in a fraction of a second.
+		expect(demo).toContain("const TAU = 0.22");
+		expect(demo).toContain("Math.exp(-dt / TAU)");
+		expect(demo).toContain("const MAX_RATE = 0.5");
+		expect(demo).toContain("const cap = MAX_RATE * dt");
 
 		// The window and side rail live in one composition that is fitted with
 		// a single resize-computed scale — scroll never changes its size.

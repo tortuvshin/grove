@@ -19,7 +19,9 @@ import Pipeline from './Pipeline.astro';
   <div class="hero-beams" aria-hidden="true"></div>
 
   <div class="relative mx-auto w-full max-w-6xl px-6 py-16">
-    <div class="grid items-center gap-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.9fr)] lg:gap-16">
+    <!-- Even columns: the diagram needs the width to keep its four input
+         chips on one line, and the pitch reads fine at half of max-w-6xl. -->
+    <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
       <div class="flex flex-col items-center text-center lg:items-start lg:text-left">
         <a
           href="/roadmap/"
