@@ -71,6 +71,13 @@ Each entry (`auditPageManifestEntrySchema`, `packages/core/src/schema.ts:596-601
 - CLS ≤ 0.25
 - TBT ≤ 200 ms
 
+:::note[The budget is not configurable]
+`auditSchema` accepts only `baseUrl` and `pages`, and the config reader
+(`parseAuditBlock`) looks for nothing else — there is no `audit.budget`
+key. A project that needs different thresholds has to read the `--json`
+report and apply its own.
+:::
+
 Two exceptions, both hard-coded in `evaluateBudget()`:
 
 - **`type: "404"`** pages skip the budget entirely — Lighthouse can't meaningfully score a 404 response (scores collapse to 0, metrics to `Infinity`), so the audit still runs the page but no violation is recorded for it.

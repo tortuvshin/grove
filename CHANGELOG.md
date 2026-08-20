@@ -21,8 +21,135 @@ For the developer workflow that produces these entries, see
 ## [Unreleased]
 
 > Working buffer for the next release. Targets are tracked in
-> [`apps/docs/src/content/docs/roadmap.md`](./apps/docs/src/content/docs/roadmap.md)
-> under "Next release" until they ship.
+> [`apps/docs/src/content/docs/project/roadmap.md`](./apps/docs/src/content/docs/project/roadmap.md)
+> until they ship.
+
+---
+
+## [0.7.0] — 2026-08-21
+
+Three data files that Grove validated, exported, or shipped a config flag
+for turned out to have no reader at all, so the features they describe did
+nothing at runtime. This release connects them. It also rebuilds the
+documentation site against the source code — most pages are rewritten,
+because a large amount of what was there did not match what the code does.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/cli`
+
+### Added
+
+- **`@grove-dev/cli`:** `grove sync github` derives a health entry per
+  record via `classifyHealth` and writes `data/health.yml` at the end of
+  the run, gated on `integrations.github.health`. That flag previously
+  resolved to a value with no call sites anywhere in the codebase.
+- **`@grove-dev/core`:** `data/overrides.yml` is applied by the build.
+  Each entry's `patch` supplies top-level fields merged over the parsed
+  record before validation, so a curator's correction survives every
+  `grove sync github` run. The schema, the default path, and the public
+  export have existed since the file was introduced; the reader had not.
+
+### Changed
+
+These change the output of an existing site. Read them before upgrading.
+
+- **`@grove-dev/core`:** the build reads `data/health.yml`. `grove check`
+  has always errored on a GitHub-linked record with no entry there, but
+  nothing ever read the file back, so the health signals it carries never
+  reached a rendered page. `generate()` now merges an entry onto any
+  project record that carries no inline `health` block — an inline block
+  still wins. **If your `health.yml` contains `visibility: hide` or
+  `remove` entries, those records will now disappear from the index,
+  the sitemap, and the llms outputs.**
+- **`@grove-dev/cli`:** `grove readme generate` resolves visibility the
+  way the build does — `data/decisions.yml`, then an inline `health`
+  block, then `data/health.yml`, then the record's own field. It
+  previously read only the record's top-level `visibility:`, which is not
+  the signal a project record uses, so a record hidden by a curator
+  decision still shipped in the generated README.
+- **`@grove-dev/core`:** `llms-full.txt` carries record bodies. The
+  `#### Detail` block that `buildDetailSection` has always supported was
+  unreachable because `toLlmsRecord` never populated `detail`; it now
+  reads the record's `content:` sidecar with frontmatter stripped. **This
+  file now grows with your prose rather than your record count** — on the
+  six-record reference space it goes from 9 KB to 53 KB.
+- **`@grove-dev/core`:** `llms.txt` and `llms-full.txt` agree on their
+  record count. `llms.txt`'s `Records indexed:` counted visible records
+  while `llms-full.txt`'s header counted every parsed one, so the two
+  disagreed on any space with a hidden record. Both use the visible count.
+- **`@grove-dev/cli`:** `grove audit --page <path>` exits `1` and lists
+  the declared paths when nothing matches. A path absent from
+  `audit.pages[]` used to leave the page list empty, skip every loop, and
+  still print a passing scorecard with exit `0` — **a typo in CI read as
+  a green audit.**
+
+### Fixed
+
+- **`@grove-dev/core`:** `fetchGithubMetadata` resolves its token from
+  `GH_TOKEN`, then `GITHUB_TOKEN`, matching `syncContributors`. It read
+  only `GITHUB_TOKEN`, while the scaffolded `sync-github.yml` passes
+  `GH_TOKEN` — so every scheduled sync ran unauthenticated against the
+  rate-limited API path.
+- **Scaffold:** `cleanup.yml`'s schedule is a plain monthly cron. The
+  previous `0 5 1-7 * 1` fired roughly ten times a month rather than on
+  the first Monday, because POSIX cron ORs day-of-month with day-of-week
+  when both fields are restricted.
+
+### Deprecated
+
+- **`@grove-dev/core`:** `audit.pages[].sample`, on the
+  `PageManifestEntry` type and in the config schema. Nothing has ever read
+  it — `parsePageEntry()` does not look for it. It is retained so existing
+  configs keep type-checking and will be removed in the next major.
+
+### Documentation
+
+- Every page of the documentation site was checked against `packages/`
+  and rewritten where it did not match. Among the corrections: about
+  fourteen function signatures on the programmatic API page that do not
+  exist, six components documented on the customization page that are not
+  in `packages/astro/src/components/`, an architecture page describing a
+  caching layer that was never built, and a security page listing three
+  supply-chain protections this repository does not have.
+- The sidebar is reorganised from seven catch-all sections into nine
+  grouped by reader intent. Starlight resolves sidebar items by slug, so
+  no redirects were needed for the regrouping; six redirects cover merged
+  and removed pages.
+- Content teaching `resource-hub` and `ecosystem-map` as usable features
+  was removed. Those schema shapes have no scaffold, no routes, and no
+  authoring path, and are now described as schema-only.
+
+---
+
+## [0.6.1] — 2026-08-16
+
+A patch release that stops the Lighthouse gate from flaking. The default
+budget demanded a perfect score on every category, which a single
+cold-cache run on a CI runner could not reliably hit even when nothing had
+regressed.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/cli`, `@grove-dev/astro`
+
+### Changed
+
+- **`@grove-dev/core`:** the default audit budget moves from perfect
+  scores plus `{ lcp: 1800, cls: 0.05, tbt: 100 }` to Google's "good"
+  thresholds — `{ performance, accessibility, bestPractices, seo } ≥ 0.9`,
+  `lcp ≤ 2500ms`, `tbt ≤ 200ms` — with CLS at the looser `0.25` bound.
+  Typical single-run variance on a CI runner is ±0.05 on the score
+  categories and ±50% on CLS; `--runs N` with a median is the variance
+  absorber, and this budget is the floor beneath it.
+- **`@grove-dev/cli`:** the audit command description and the passing
+  scorecard describe the actual budget instead of claiming "100×4", which
+  had stopped being true.
+
+### Fixed
+
+- **`@grove-dev/astro`:** the paginated browse description reads
+  `pageCount` rather than the undefined `pages`, so "Browse page 2 of N"
+  renders a real total.
+- **CI:** `pnpm audit` ignores a specific advisory that has no fix path in
+  the dependency tree, so the weekly job reports real findings instead of
+  failing on a known, accepted one.
 
 ---
 
@@ -724,7 +851,10 @@ range are intentionally not reconstructed; the git history of
 - The `Versions` table in `SECURITY.md` describes the support window
   per release line.
 
-[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/tortuvshin/grove/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/tortuvshin/grove/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/tortuvshin/grove/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/tortuvshin/grove/compare/v0.5.0...v0.6.0
 [0.4.0]: https://github.com/tortuvshin/grove/releases/tag/v0.4.0
 [0.3.4]: https://github.com/tortuvshin/grove/releases/tag/v0.3.4
 [0.3.2]: https://github.com/tortuvshin/grove/releases/tag/v0.3.2

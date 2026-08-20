@@ -70,8 +70,10 @@ export interface BudgetViolation {
 // is real but pre-existing — pinning the budget to the "good"
 // 0.1 threshold made every CI run red without surfacing anything new.
 //
-// Override per project by exporting `audit.budget` from grove.config.ts
-// (the audit CLI parses it the same way it parses `audit.pages`).
+// Not overridable per project: `auditSchema` accepts only `baseUrl` and
+// `pages`, and `parseAuditBlock` reads nothing else off the config. A
+// project that needs a different gate has to read the `--json` report
+// and apply its own thresholds.
 export const DEFAULT_BUDGET: BudgetConfig = {
   scores: { performance: 0.9, accessibility: 0.9, bestPractices: 0.9, seo: 0.9 },
   metrics: { lcp: 2500, cls: 0.25, tbt: 200 },
