@@ -1,0 +1,68 @@
+---
+// Starlight `Head` override: renders the default head, then adds the
+// per-page SEO pieces Starlight leaves out — an explicit robots policy
+// (noindex for the 404 page) and TechArticle + BreadcrumbList JSON-LD.
+// Registered via `components.Head` in astro.config.mjs.
+import Default from '@astrojs/starlight/components/Head.astro';
+import { getCollection } from 'astro:content';
+
+const { entry, id } = Astro.locals.starlightRoute;
+const siteUrl = Astro.site?.toString() ?? 'https://withgrove.dev';
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+
+const isNotFound = id === '404' || Astro.url.pathname.replace(/\/$/, '') === '/404';
+const robots = isNotFound ? 'noindex' : 'index,follow,max-image-preview:large';
+
+// Humanize a URL segment for breadcrumb labels ("getting-started" ->
+// "Getting started"). The final crumb uses the page's real title.
+const humanize = (segment: string) => {
+  const words = segment.replace(/-/g, ' ');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
+// Google requires every crumb except the last to carry a resolvable URL,
+// so intermediate path segments only become crumbs when a docs page
+// actually exists at that path (most section prefixes have no index page).
+const docSlugs = new Set((await getCollection('docs')).map((doc) => doc.id));
+const segments = Astro.url.pathname.split('/').filter(Boolean);
+const crumbs = [
+  { name: 'Home', item: siteUrl },
+  ...segments
+    .slice(0, -1)
+    .map((segment, index) => ({ segment, path: segments.slice(0, index + 1).join('/') }))
+    .filter(({ path }) => docSlugs.has(path))
+    .map(({ segment, path }) => ({
+      name: humanize(segment),
+      item: new URL(`/${path}/`, siteUrl).toString(),
+    })),
+  { name: entry.data.title, item: canonical },
+];
+
+const jsonLd = isNotFound
+  ? []
+  : [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: entry.data.title,
+        description: entry.data.description,
+        url: canonical,
+        inLanguage: 'en',
+        isPartOf: { '@type': 'WebSite', name: 'Grove', url: siteUrl },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: crumbs.map((crumb, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: crumb.name,
+          item: crumb.item,
+        })),
+      },
+    ];
+---
+
+<Default><slot /></Default>
+<meta name="robots" content={robots} />
+{jsonLd.map((node) => <script type="application/ld+json" set:html={JSON.stringify(node)} />)}

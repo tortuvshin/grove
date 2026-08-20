@@ -18,13 +18,13 @@
   </g>
   <g transform="translate(96, 240)" fill="#e3f3f5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
     <text x="0" y="0" font-size="84" font-weight="700" letter-spacing="-2">Grove</text>
-    <text x="0" y="74" font-size="84" font-weight="700" letter-spacing="-2">The framework for</text>
-    <text x="0" y="158" font-size="84" font-weight="700" letter-spacing="-2">community knowledge</text>
-    <text x="0" y="240" font-size="32" font-weight="500" fill="#89a8b3">Structured files into static, searchable,</text>
-    <text x="0" y="282" font-size="32" font-weight="500" fill="#89a8b3">contributor-friendly knowledge spaces.</text>
+    <text x="0" y="74" font-size="84" font-weight="700" letter-spacing="-2">Publish knowledge</text>
+    <text x="0" y="158" font-size="84" font-weight="700" letter-spacing="-2">that stays current.</text>
+    <text x="0" y="240" font-size="32" font-weight="500" fill="#89a8b3">Plain files in. A searchable site, its SEO and</text>
+    <text x="0" y="282" font-size="32" font-weight="500" fill="#89a8b3">AI outputs, and a README — all kept in sync.</text>
   </g>
   <g transform="translate(96, 558)" fill="#718b95" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="22">
-    <text x="0" y="0">npx @grove-dev/cli@latest new my-space</text>
+    <text x="0" y="0">npx @grove-dev/cli@latest init my-space</text>
     <text x="900" y="0">withgrove.dev</text>
   </g>
 </svg>

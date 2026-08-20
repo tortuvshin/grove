@@ -1,8 +1,29 @@
 // @ts-check
+import { writeFile } from 'node:fs/promises';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import sitemap from '@astrojs/sitemap';
 import grove from '@grove-dev/starlight';
 import tailwindcss from '@tailwindcss/vite';
+import { REDIRECTS } from './src/data/redirects.mjs';
+import { SIDEBAR } from './src/data/docs-sidebar.mjs';
+import { buildLastmodMap } from './src/lib/git-lastmod.mjs';
+
+// Per-file last-commit dates for sitemap <lastmod>. Empty map when git
+// history is unavailable (the sitemap then omits lastmod entirely).
+const lastmodMap = buildLastmodMap();
+
+/** Map a page URL to its content file's last-commit date, if known. */
+function lastmodFor(url) {
+    const path = new URL(url).pathname.replace(/^\/|\/$/g, '');
+    if (!path) return undefined;
+    return (
+        lastmodMap.get(`${path}.md`) ??
+        lastmodMap.get(`${path}.mdx`) ??
+        lastmodMap.get(`${path}/index.md`) ??
+        lastmodMap.get(`${path}/index.mdx`)
+    );
+}
 
 // Grove docs — the canonical Astro/Starlight site for the project.
 // Note: this site is NOT a Grove space. It is a Starlight docs site that
@@ -11,63 +32,34 @@ import tailwindcss from '@tailwindcss/vite';
 // space — the one `grove init` copies — is apps/example/.
 export default defineConfig({
     site: 'https://withgrove.dev',
-    // Astro's built-in redirects (added in Astro 5). Starlight 0.41 does
-    // not recognize a `redirects` key on its own config — these are emitted
-    // by Astro at build time and served as 301s by the static host.
-    redirects: {
-        '/concepts/philosophy/':            '/start-here/why-grove/',
-        // Mental model was folded into the files-are-canonical page, which
-        // now carries the full three-tier breakdown.
-        '/start-here/mental-model/':        '/concepts/files-canonical/',
-        '/concepts/records/':               '/content/author-a-record/',
-        '/concepts/taxonomy/':              '/content/taxonomy-files/',
-        '/concepts/health/':                '/content/health-classification/',
-        // The "three blueprints" page was retired: only `project-directory`
-        // is supported today, so the docs no longer teach the other two.
-        // These legacy URLs now land on the schema reference, which states
-        // the `kind` each blueprint accepts without promoting the feature.
-        '/blueprints/project-directory/':   '/reference/record-schema/',
-        '/blueprints/resource-hub/':        '/reference/record-schema/',
-        '/blueprints/ecosystem-map/':       '/reference/record-schema/',
-        '/concepts/blueprints/':            '/reference/record-schema/',
-        '/sources/records/':                '/content/author-a-record/',
-        '/sources/taxonomy-files/':         '/content/taxonomy-files/',
-        '/sources/collections/':            '/concepts/collections/',
-        '/sources/decisions/':              '/concepts/decisions/',
-        '/sources/content-pages/':          '/concepts/content-pages/',
-        '/sources/health-classification/':  '/content/health-classification/',
-        '/content/decisions/':              '/concepts/decisions/',
-        '/content/collections/':            '/concepts/collections/',
-        '/content/pages/':                  '/concepts/content-pages/',
-        '/getting-started/deploy/':         '/deployment/overview/',
-        '/automation/validation/':          '/automation/check/',
-        '/automation/github-metadata/':     '/automation/sync-github/',
-        // Both pages were merged into their canonical counterparts: the
-        // add-a-record walkthrough only re-narrated scaffold + first-record,
-        // and the sync deep-dive shared a title and most of its content with
-        // the main sync page.
-        '/guides/walkthrough-add-record/':   '/getting-started/first-record/',
-        '/automation/sync-github-deep-dive/': '/automation/sync-github/',
-        '/getting-started/create-a-space/': '/getting-started/scaffold/',
-        '/getting-started/add-your-first-project/': '/getting-started/first-record/',
-        '/roadmap/':                        '/project/roadmap/',
-        '/faq/':                            '/project/faq/',
-        '/architecture/incremental-build/': '/project/architecture/',
-        '/showcase/splash-pages/':          '/customize/template-customization/',
-        '/showcase/splash/banner/':         '/customize/template-customization/',
-        '/showcase/splash/centered/':       '/customize/template-customization/',
-        '/showcase/splash/centered-top/':   '/customize/template-customization/',
-        '/showcase/splash/split-left/':     '/customize/template-customization/',
-        '/showcase/splash/split-right/':    '/customize/template-customization/',
-        '/showcase/typography/':            '/customize/template-customization/',
-        '/showcase/starlight-components/':  '/reference/components/',
-        '/open-apps/':                      '/start-here/why-grove/',
-        '/reference/frameworks/':           '/project/architecture/',
-    },
+    // Astro's built-in redirects (added in Astro 5). The map lives in
+    // src/data/redirects.mjs so the same data drives both these build-time
+    // meta-refresh stubs (fallback for local preview / other hosts) and the
+    // dist/_redirects file below, which Cloudflare serves as real 301s.
+    redirects: REDIRECTS,
     vite: {
         plugins: [tailwindcss()],
     },
     integrations: [
+        // Declared explicitly (Starlight only auto-adds @astrojs/sitemap when
+        // absent) so entries can carry <lastmod> from git history.
+        sitemap({
+            serialize(item) {
+                const lastmod = lastmodFor(item.url);
+                return lastmod ? { ...item, lastmod } : item;
+            },
+        }),
+        {
+            name: 'grove-docs-redirects-file',
+            hooks: {
+                'astro:build:done': async ({ dir }) => {
+                    const lines = Object.entries(REDIRECTS).map(
+                        ([from, to]) => `${from} ${to} 301`,
+                    );
+                    await writeFile(new URL('_redirects', dir), lines.join('\n') + '\n');
+                },
+            },
+        },
         starlight({
             // The custom landing page at "/" is the standalone Astro build
             // (src/pages/index.astro). The Starlight docs own every other
@@ -84,6 +76,12 @@ export default defineConfig({
                 light: './src/assets/logo-light.svg',
             },
             customCss: ['./src/styles/global.css'],
+            components: {
+                // Adds per-page robots meta (noindex on 404) and
+                // TechArticle + BreadcrumbList JSON-LD on top of
+                // Starlight's default head.
+                Head: './src/components/StarlightHead.astro',
+            },
             // Starlight's default `editLink.baseUrl` would be inferred
             // from the GitHub repo metadata and produce a path under
             // `docs/src/content/docs/...` — but our content actually lives
@@ -115,18 +113,30 @@ export default defineConfig({
                 // public/og-image.svg. Lighthouse "best practices" expects
                 // these on every page so the home/launch icon, theme color,
                 // and PWA install hint are never missing.
-                { tag: 'meta', attrs: { name: 'theme-color', content: '#08090a' } },
+                // Docs surface background is --background: oklch(14.5% 0 0)
+                // (~#0a0a0a) in dark mode and white in light mode; scope the
+                // browser-chrome color to the active scheme. The home page
+                // sets its own (#091116) in HomeLayout.astro.
+                { tag: 'meta', attrs: { name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0a0a0a' } },
+                { tag: 'meta', attrs: { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#ffffff' } },
                 { tag: 'meta', attrs: { name: 'color-scheme', content: 'dark light' } },
                 { tag: 'link', attrs: { rel: 'manifest', href: '/manifest.json' } },
-                { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/og-image.svg' } },
+                { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' } },
+                { tag: 'link', attrs: { rel: 'sitemap', href: '/sitemap-index.xml' } },
+                // Machine-readable index of the docs for LLM agents; the
+                // endpoints live at src/pages/llms{,-full}.txt.ts.
+                { tag: 'link', attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'LLM-readable docs index' } },
                 // Open Graph image (default for every Starlight content
                 // page). Individual pages can override via frontmatter
                 // `socialImage: { src: '...' }`. Starlight emits
                 // og:title / og:type / og:url / og:description / twitter:card
                 // on its own — we only fill the dimensional + image pieces
-                // it leaves blank.
-                { tag: 'meta', attrs: { property: 'og:image', content: 'https://withgrove.dev/og-image.svg' } },
-                { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://withgrove.dev/og-image.svg' } },
+                // it leaves blank. Must be a raster image: social platforms
+                // do not render SVG cards (public/og-image.png is generated
+                // from og-image.svg by scripts/generate-social-assets.mjs).
+                { tag: 'meta', attrs: { property: 'og:image', content: 'https://withgrove.dev/og-image.png' } },
+                { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://withgrove.dev/og-image.png' } },
+                { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/png' } },
                 { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
                 { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
                 { tag: 'meta', attrs: { property: 'og:image:alt', content: 'Grove — The framework for community knowledge' } },
@@ -160,152 +170,9 @@ export default defineConfig({
                     }),
                 },
             ],
-            // Sections are ordered by reader intent: understand it, build
-            // with it, automate it, ship it, then look things up. Sidebar
-            // groups are decoupled from file paths (Starlight resolves items
-            // by `slug`), so regrouping here never changes a URL.
-            sidebar: [
-                {
-                    label: 'Start here',
-                    items: [
-                        { label: 'Introduction', slug: 'introduction' },
-                        { label: 'Quickstart', slug: 'start-here/quickstart' },
-                        { label: 'Why Grove', slug: 'start-here/why-grove' },
-                        { label: 'Files are canonical', slug: 'concepts/files-canonical' },
-                    ],
-                },
-                {
-                    // 16 how-to pages would be unreadable as a flat list, so
-                    // they are grouped by the job the reader is doing.
-                    label: 'Guides',
-                    items: [
-                        {
-                            label: 'Set up',
-                            items: [
-                                { label: 'Install the CLI', slug: 'getting-started/install-cli' },
-                                { label: 'Scaffold a space', slug: 'getting-started/scaffold' },
-                                { label: 'Configure your space', slug: 'getting-started/configure' },
-                            ],
-                        },
-                        {
-                            label: 'Author',
-                            items: [
-                                { label: 'Author your first record', slug: 'getting-started/first-record' },
-                                { label: 'Add a record', slug: 'content/author-a-record' },
-                                { label: 'Organize with taxonomy', slug: 'content/taxonomy-files' },
-                                { label: 'Add content pages', slug: 'concepts/content-pages' },
-                            ],
-                        },
-                        {
-                            label: 'Curate',
-                            items: [
-                                { label: 'Curate with decisions', slug: 'concepts/decisions' },
-                                { label: 'Build collections', slug: 'concepts/collections' },
-                                { label: 'Walkthrough: curate a collection', slug: 'guides/walkthrough-curate-collection' },
-                                { label: 'Triage health signals', slug: 'content/health-classification' },
-                                { label: 'Browse pages', slug: 'discovery/browse' },
-                                { label: 'Lens recipes', slug: 'discovery/lens-recipes' },
-                                { label: 'Promote a filter to a collection', slug: 'discovery/promote' },
-                            ],
-                        },
-                        {
-                            // These two read as framework-contributor docs
-                            // because of their `maintainers/` path, but both
-                            // are written for the person running a Grove-powered
-                            // directory — a reader, not a Grove contributor.
-                            label: 'Run your directory',
-                            items: [
-                                { label: 'Contributing', slug: 'maintainers/contributing' },
-                                { label: 'Governance', slug: 'maintainers/governance' },
-                            ],
-                        },
-                    ],
-                },
-                {
-                    label: 'Automation',
-                    items: [
-                        { label: 'grove check', slug: 'automation/check' },
-                        { label: 'Sync GitHub metadata', slug: 'automation/sync-github' },
-                        { label: 'Walkthrough: sync GitHub', slug: 'guides/walkthrough-sync-github' },
-                        { label: 'Sync contributors', slug: 'automation/sync-contributors' },
-                        { label: 'Scheduled workflows', slug: 'automation/scheduled' },
-                        { label: 'Cleanup report', slug: 'automation/cleanup' },
-                        { label: 'Audit', slug: 'automation/audit' },
-                        { label: 'Generate README', slug: 'automation/readme' },
-                        { label: 'Community submissions', slug: 'automation/submissions' },
-                        { label: 'GitHub workflows', slug: 'outputs/workflows' },
-                    ],
-                },
-                {
-                    label: 'Deploy',
-                    items: [
-                        { label: 'Deploy your site', slug: 'deployment/overview' },
-                        { label: 'Static deployment', slug: 'concepts/static-deployment' },
-                        { label: 'GitHub Pages', slug: 'deployment/github-pages' },
-                        { label: 'Cloudflare', slug: 'deployment/cloudflare' },
-                        { label: 'Netlify', slug: 'deployment/netlify' },
-                        { label: 'Self-hosted', slug: 'deployment/self-hosted' },
-                    ],
-                },
-                {
-                    label: 'Customization',
-                    items: [
-                        { label: 'Theme tokens', slug: 'customize/theme' },
-                        { label: 'Branding', slug: 'customize/branding' },
-                        { label: 'Components', slug: 'customize/components' },
-                        { label: 'Custom pages', slug: 'customize/pages' },
-                        { label: 'Template customization', slug: 'customize/template-customization' },
-                        { label: 'Assets', slug: 'customize/assets' },
-                        { label: 'Icons', slug: 'customize/icons' },
-                    ],
-                },
-                {
-                    // Grove's core promise is one source producing many
-                    // outputs, so these get their own section rather than
-                    // being buried at the bottom of Reference.
-                    label: 'Outputs',
-                    items: [
-                        { label: 'Files & outputs', slug: 'outputs/overview' },
-                        { label: 'LLM & AI surfaces', slug: 'outputs/llm' },
-                        { label: 'SEO & social', slug: 'outputs/seo' },
-                        { label: 'Site metadata', slug: 'outputs/site-meta' },
-                        { label: 'Generated data files', slug: 'outputs/generated-data' },
-                    ],
-                },
-                {
-                    label: 'Reference',
-                    items: [
-                        { label: 'grove.config.ts', slug: 'reference/config' },
-                        { label: 'Record schema', slug: 'reference/record-schema' },
-                        { label: 'CLI reference', slug: 'reference/cli' },
-                        { label: 'Astro components', slug: 'reference/components' },
-                        { label: 'Migration guide', slug: 'reference/migration' },
-                        { label: 'Glossary', slug: 'start-here/glossary' },
-                    ],
-                },
-                {
-                    label: 'Extend',
-                    collapsed: true,
-                    items: [
-                        { label: 'Programmatic API', slug: 'reference/api-core' },
-                        { label: 'Plugin API', slug: 'reference/plugin-api' },
-                        { label: 'Plugin author guide', slug: 'reference/plugin-author-guide' },
-                    ],
-                },
-                {
-                    // Grove's own engineering process — for people working on
-                    // the framework, not on a site built with it. Roadmap and
-                    // FAQ are reachable from the top nav instead.
-                    label: 'Project',
-                    collapsed: true,
-                    items: [
-                        { label: 'Architecture', slug: 'project/architecture' },
-                        { label: 'CI & quality', slug: 'maintainers/ci-quality' },
-                        { label: 'Release process', slug: 'maintainers/release-process' },
-                        { label: 'Security', slug: 'maintainers/security' },
-                    ],
-                },
-            ],
+            // Shared with the llms.txt endpoint — see src/data/docs-sidebar.mjs
+            // (which also documents the section ordering rationale).
+            sidebar: SIDEBAR,
         }),
     ],
 });

@@ -38,6 +38,10 @@
 /logos/*
     Cache-Control: public, max-age=86400, must-revalidate
 /og-image.svg
+/og-image.png
+/apple-touch-icon.png
+/logo.png
+/icons/*
     Cache-Control: public, max-age=86400, must-revalidate
 /manifest.json
     Cache-Control: public, max-age=3600, must-revalidate
@@ -47,4 +51,9 @@
 # ─── Sitemap: short cache so search engines pick up changes fast ─────────
 /sitemap-index.xml
 /sitemap-0.xml
+    Cache-Control: public, max-age=3600, must-revalidate
+
+# ─── LLM indexes: regenerated every build, short cache ───────────────────
+/llms.txt
+/llms-full.txt
     Cache-Control: public, max-age=3600, must-revalidate
