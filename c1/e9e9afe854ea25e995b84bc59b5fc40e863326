@@ -1,0 +1,33 @@
+apps/docs/src/home-landing.test.ts
+  s_83df15219dc8b0::t_4aefffd5dbe8dd 178-182,185,189-195
+apps/docs/src/components/home/Hero.astro
+  s_83df15219dc8b0::t_95583104c91984 2-7,16,21,43-55,60,78-85,93-94,96,98-103
+apps/docs/src/content/docs/deployment/overview.mdx
+  s_75aa02f6d0f279::t_af1ea89704f844 9,22,24-27,29,31-43,51-52,55-57,61-62,66,72,82,84-85,92,95-97,99,102,105,108,111,115,142,160
+apps/docs/src/content/docs/deployment/github-pages.mdx
+  s_75aa02f6d0f279::t_2754ae22f9cf9f 3,9,14,16,20,23-24,28-29,34,36,38-41,46-48,51-52,55-56,58,61,104-106,112,116,120-122,151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "c1e9e9afe854ea25e995b84bc59b5fc40e863326",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_83df15219dc8b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "026a19a0-7d5e-4e5b-a2c1-5864ff0857dd",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
