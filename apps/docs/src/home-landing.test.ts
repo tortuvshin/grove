@@ -183,8 +183,8 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toContain("Read the docs");
 		expect(hero).toContain('href="/introduction/"');
 		expect(hero).toContain("View on GitHub");
-		expect(hero).toContain('href="https://github.com/tortuvshin/grove"');
-		expect(hero).toContain('target="_blank"');
+		// target/rel come from <Button external>, not from hand-written attrs.
+		expect(hero).toContain('href="https://github.com/tortuvshin/grove" variant="secondary" external');
 		expect(hero).toContain('href="/roadmap/"');
 		expect(hero).not.toContain("npx @grove-dev/cli init");
 		expect(hero).not.toContain("navigator.clipboard");
@@ -374,13 +374,48 @@ describe("docs homepage (standalone Astro route)", () => {
 
 		expect(openApps).toContain("Grove grew out of maintaining Open Apps.");
 		expect(openApps).toContain('id="open-apps"');
-		expect(openApps).toContain("https://open-apps.dev.mn");
+
+		// The live space is openappscout.com, in both the links and the mock
+		// address bar. The old host does not resolve, so it must not come
+		// back as a destination (the frontmatter comment naming it is fine).
+		expect(openApps).toContain("https://openappscout.com");
+		expect(openApps).not.toContain("https://open-apps.dev.mn");
+		expect(openApps).not.toContain("open-apps.dev.mn/apps");
 
 		// A real screenshot (astro:assets) replaced the hand-built mock; the
 		// honesty caveat about the pending package migration stays.
 		expect(openApps).toContain("astro:assets");
 		expect(openApps).toContain("open-apps-home.png");
 		expect(openApps).toContain("published Grove packages");
+	});
+
+	it("renders every landing call to action through the shared Button", async () => {
+		const button = await readComponent("Button");
+
+		// One radius, one primary fill, one secondary treatment.
+		expect(button).toContain("rounded-lg");
+		expect(button).toContain("bg-brand text-bg hover:bg-brand-light");
+		expect(button).toContain("border border-border bg-card/70");
+		// External links carry target/rel from the component, not by hand.
+		expect(button).toContain('rel: \'noopener noreferrer\'');
+
+		// No section may hand-roll its own button any more — the rounded-full
+		// pill and the bg-fg fill were the two treatments that had drifted.
+		for (const name of ["Hero", "OpenApps", "FinalCta"]) {
+			const src = await readComponent(name);
+			expect(src, name).toContain("import Button from './Button.astro'");
+			expect(src, name).not.toContain("rounded-full bg-fg");
+			expect(src, name).not.toContain("rounded-full border border-border-strong");
+		}
+	});
+
+	it("seats the footer directly under the closing CTA", async () => {
+		const footer = await readComponent("Footer");
+
+		// A top margin here exposes a bare strip of page background between
+		// the CTA's gradient and the footer's top border.
+		expect(footer).toMatch(/<footer class="border-t/);
+		expect(footer).not.toContain('<footer class="mt-');
 	});
 
 	it("closes with a full-bleed gradient CTA band and a package-manager tabbed install command", async () => {

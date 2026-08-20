@@ -1,0 +1,32 @@
+---
+// The landing page's only button. Every call to action renders through this
+// so the primary/secondary pair cannot drift per section — before this the
+// hero, the Open Apps story, and the closing CTA each had their own radius,
+// fill, and hover treatment.
+interface Props {
+  href: string;
+  variant?: 'primary' | 'secondary';
+  /** Adds target/rel and is required for any off-site destination. */
+  external?: boolean;
+  class?: string;
+}
+
+const { href, variant = 'primary', external = false, class: extra } = Astro.props;
+
+const base =
+  'inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors';
+
+const variants = {
+  primary: 'bg-brand text-bg hover:bg-brand-light',
+  secondary:
+    'border border-border bg-card/70 text-fg backdrop-blur hover:border-border-strong hover:bg-card-hover',
+};
+---
+
+<a
+  href={href}
+  class:list={[base, variants[variant], extra]}
+  {...external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+>
+  <slot />
+</a>

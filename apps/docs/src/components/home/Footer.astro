@@ -31,7 +31,10 @@ const columns = [
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-12 border-t border-border/60">
+<!-- No top margin: the closing CTA already ends in its own gradient, and a
+     gap between the two left a bare strip of page background reading as an
+     extra, bordered section above the footer. -->
+<footer class="border-t border-border/60">
   <div class="mx-auto max-w-7xl px-6 py-12">
     <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
       <div>

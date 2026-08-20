@@ -1,9 +1,17 @@
 ---
 import { Image } from 'astro:assets';
+import Button from './Button.astro';
 import SectionHeader from './SectionHeader.astro';
-// Real product screenshot; replacing src/assets/open-apps-home.png swaps the
-// preview without touching this component.
+// Real product screenshot, kept in step with the one the README ships
+// (.github/assets/open-apps-home.png); replacing src/assets/open-apps-home.png
+// swaps the preview without touching this component.
 import openAppsShot from '../../assets/open-apps-home.png';
+
+// The live space. `open-apps.dev.mn` — which this section used to link — no
+// longer resolves at all; openappscout.com is the space the README documents
+// and the screenshot above was taken from.
+const LIVE_URL = 'https://openappscout.com';
+const REPO_URL = 'https://github.com/tortuvshin/open-apps';
 ---
 
 <section id="open-apps" class="mx-auto max-w-7xl px-6 py-24" aria-labelledby="open-apps-title">
@@ -20,8 +28,8 @@ import openAppsShot from '../../assets/open-apps-home.png';
         The live repository still carries local versions of this logic. Migration to the published Grove packages is the next reference-space milestone.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="https://open-apps.dev.mn" target="_blank" rel="noopener noreferrer" class="rounded-full bg-fg px-5 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90">Explore the live space</a>
-        <a href="https://github.com/tortuvshin/open-apps" target="_blank" rel="noopener noreferrer" class="rounded-full border border-border-strong bg-card px-5 py-2.5 text-sm font-semibold text-fg transition-colors hover:bg-card-hover">Inspect the source</a>
+        <Button href={LIVE_URL} external>Explore the live space</Button>
+        <Button href={REPO_URL} variant="secondary" external>Inspect the source</Button>
       </div>
     </div>
 
@@ -30,12 +38,12 @@ import openAppsShot from '../../assets/open-apps-home.png';
     <div class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(39_183_200_/_0.2)] backdrop-blur" aria-label="Open Apps product preview">
       <div class="flex items-center gap-2 border-b border-border px-4 py-3">
         <span class="size-3 rounded-full bg-[#ff5f57]"></span><span class="size-3 rounded-full bg-[#febc2e]"></span><span class="size-3 rounded-full bg-[#28c840]"></span>
-        <span class="mx-auto rounded-full border border-border bg-surface px-6 py-1 font-mono text-[11px] text-subtle">open-apps.dev.mn/apps</span>
+        <span class="mx-auto rounded-full border border-border bg-surface px-6 py-1 font-mono text-[11px] text-subtle">openappscout.com</span>
         <span class="size-3" aria-hidden="true"></span>
       </div>
       <Image
         src={openAppsShot}
-        alt="Open Apps directory home page — a searchable, filterable grid of curated open-source applications"
+        alt="The Open Apps home page: a search box over a curated directory, ecosystem counts for indexed apps, categories, stacks and owners, and a row of actively developed applications"
         widths={[640, 960, 1280]}
         sizes="(min-width: 1024px) 640px, 100vw"
         format="webp"

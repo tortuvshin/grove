@@ -1,4 +1,6 @@
 ---
+import Button from './Button.astro';
+
 // One command, four runners. The scaffold itself is pnpm-based, so pnpm is
 // the default tab; the other runners only change how the CLI is fetched.
 const pms = [
@@ -23,20 +25,17 @@ const defaultPm = 'pnpm';
       Turn structured files and Markdown into a curated, searchable site that stays useful — with the maintenance on rails. No CMS or runtime database required.
     </p>
     <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-      <a
-        href="/getting-started/create-a-space/"
-        class="inline-flex w-full items-center justify-center rounded-full bg-fg px-6 py-2.5 text-sm font-semibold text-bg transition-opacity hover:opacity-90 sm:w-auto"
-      >
+      <Button href="/getting-started/create-a-space/" class="w-full sm:w-auto">
         Read the quick start
-      </a>
-      <a
+      </Button>
+      <Button
         href="https://github.com/tortuvshin/grove"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex w-full items-center justify-center rounded-full border border-border-strong bg-bg/40 px-6 py-2.5 text-sm font-semibold text-fg backdrop-blur transition-colors hover:bg-bg/60 sm:w-auto"
+        variant="secondary"
+        external
+        class="w-full sm:w-auto"
       >
         View on GitHub
-      </a>
+      </Button>
     </div>
 
     <div id="install-tabs" class="mx-auto mt-10 max-w-md rounded-lg border border-border-strong bg-bg/70 text-left backdrop-blur">
