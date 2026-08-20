@@ -2,7 +2,11 @@ name: Cleanup report
 
 on:
   schedule:
-    - cron: "0 5 1-7 * 1"
+    # POSIX cron ORs day-of-month with day-of-week when both are
+    # restricted, so "0 5 1-7 * 1" fired on the 1st-7th *and* every
+    # Monday — about ten times a month. Plain day-of-month keeps it
+    # genuinely monthly.
+    - cron: "0 5 1 * *"
   workflow_dispatch:
 
 jobs:

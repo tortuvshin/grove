@@ -597,7 +597,6 @@ const auditPageManifestEntrySchema = z.object({
   path: z.string().min(1),
   type: auditPageTypeSchema,
   label: z.string().min(1),
-  sample: z.record(z.string(), z.string()).optional(),
 });
 
 export const auditSchema = z.object({

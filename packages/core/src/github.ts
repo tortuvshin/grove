@@ -49,7 +49,18 @@ function asNumber(value: unknown): number | undefined {
   return typeof value === "number" ? value : undefined;
 }
 
-export async function fetchGithubMetadata(ref: GithubRepoRef, token = process.env.GITHUB_TOKEN): Promise<GithubMetadata | undefined> {
+/**
+ * Resolve a GitHub token from the environment. `GH_TOKEN` is checked
+ * first because that is the name the GitHub CLI and the scaffolded
+ * workflows use; `GITHUB_TOKEN` is the Actions-provided name. Reading
+ * only one of the two meant `sync-github.yml` — which passes
+ * `GH_TOKEN` — silently ran unauthenticated.
+ */
+export function resolveGithubToken(): string | undefined {
+  return process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN ?? undefined;
+}
+
+export async function fetchGithubMetadata(ref: GithubRepoRef, token = resolveGithubToken()): Promise<GithubMetadata | undefined> {
   const repo = asRecord(await githubJson(`/repos/${ref.owner}/${ref.repo}`, token));
   if (Object.keys(repo).length === 0) return undefined;
 

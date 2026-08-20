@@ -5,7 +5,6 @@ export interface PageManifestEntry {
   path: string;
   type: PageType;
   label: string;
-  sample?: Record<string, string>;
 }
 
 export interface LighthouseScores {

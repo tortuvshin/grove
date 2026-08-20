@@ -35,6 +35,19 @@ export async function runAudit(opts: AuditCliOptions): Promise<number> {
   const pageFilter = opts.page.length > 0 ? new Set(opts.page) : null;
   const pages = manifest.pages.filter((p) => !pageFilter || pageFilter.has(p.path));
 
+  // A `--page` value that matches nothing used to leave `pages` empty,
+  // which skipped every loop below and still printed a passing
+  // scorecard with an exit code of 0 — a typo in CI read as a green
+  // audit. Fail loudly instead, and name the paths that do exist.
+  if (pages.length === 0) {
+    const known = manifest.pages.map((p) => p.path).join(", ");
+    console.error(
+      `[audit] no pages matched ${[...(pageFilter ?? [])].join(", ")}. ` +
+        `audit.pages[] declares: ${known}`,
+    );
+    return 1;
+  }
+
   const results: AuditResult[] = [];
   const chrome = await chromeLauncher.launch({
     chromeFlags: buildChromeFlags(process.platform, true),
