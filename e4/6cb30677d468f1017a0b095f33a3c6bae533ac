@@ -1,0 +1,19 @@
+README.md
+  s_0939826cd26e90::t_335fabb34503f9 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "e46cb30677d468f1017a0b095f33a3c6bae533ac",
+  "prompts": {},
+  "sessions": {
+    "s_0939826cd26e90": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "156b8f8c-7932-4dd0-be4b-d2005afcf291",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
