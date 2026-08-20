@@ -33,8 +33,9 @@ git push --follow-tags
 in order:
 
 1. **Bumps versions** in the four published package manifests. The
-   default is a patch bump (`0.4.0 → 0.4.1`); `--minor` and `--major`
-   set the kind, and `--bump=2.3.4` sets an explicit version.
+   default is a patch bump (e.g. `0.6.1 → 0.6.2`); `--minor` and
+   `--major` set the kind, and `--bump=2.3.4` sets an explicit
+   version.
 2. **Builds every package** with `pnpm -r build`. This surfaces any
    cross-package breakage before publish.
 3. **Publishes every package** in dependency order:
@@ -44,9 +45,12 @@ in order:
    `.release-in-progress` and the bumped files for explicit recovery
    instead of silently double-bumping on a retry.
 
-`--skip-build` and `--skip-bump` are available for advanced flows
-(mostly CI). `NPM_OTP` env or `--otp=<code>` forwards the one-time
-password to `pnpm publish`.
+`--skip-build` and `--skip-bump` are available for advanced flows —
+for example, re-running the publish step after a bump has already
+landed. `NPM_OTP` env or `--otp=<code>` forwards the one-time
+password to `pnpm publish`. No GitHub Actions workflow runs this
+script; every release today is a manual, local invocation by a
+maintainer with npm publish access.
 
 ## The version-bump model
 
@@ -61,10 +65,10 @@ release note that references one of them, it's stale — file a PR.
 For published changes:
 
 - **Bug fixes and package docs changes** ship as a patch bump
-  (`0.4.0 → 0.4.1`).
-- **Public API additions** ship as a minor bump (`0.4.0 → 0.5.0`).
-- **Breaking changes** ship as a major bump (`0.4.0 → 1.0.0`) with
-  migration notes.
+  (e.g. `0.6.1 → 0.6.2`).
+- **Public API additions** ship as a minor bump (e.g. `0.6.1 → 0.7.0`).
+- **Breaking changes** ship as a major bump (e.g. `0.6.1 → 1.0.0`)
+  with migration notes.
 
 ## The CHANGELOG
 
@@ -74,18 +78,22 @@ The structure:
 
 ```markdown
 ## [Unreleased]
-### Added
-### Changed
-### Fixed
 
-## [0.4.0] - 2026-07-30
+## [0.6.0] — 2026-08-16
 ### Added
-- `@grove-dev/cli`: new `grove collection promote` command that ...
+- `@grove-dev/core`: the JSON-LD registry — `siteSchema`,
+  `breadcrumbSchema`, `collectionSchema`, ...
 ### Changed
-- `@grove-dev/core`: `parseGithubRepoUrl` now returns `null` on ...
-### Fixed
-- `@grove-dev/astro`: project detail page no longer crashes when ...
+- `@grove-dev/astro`: every scaffold page consumes the new `seo`
+  blocks ...
 ```
+
+(the real structure, from `CHANGELOG.md` at the repo root — as of
+this writing `[Unreleased]` is the working buffer above the `0.6.0`
+entry; there is no `0.6.1` entry yet even though the package
+manifests are already bumped to `0.6.1`, which is expected — the
+CHANGELOG entry lands with the next real release, not with every
+patch to the manifests in between).
 
 The `[Unreleased]` section is the working buffer. PRs that change
 user-visible behaviour add a line to the appropriate `### Added` /
@@ -98,11 +106,6 @@ The maintainer cutting the release:
 3. Tags every line with the affected `@grove-dev/*` package(s).
 4. Commits the CHANGELOG as part of the release commit (or as a
    follow-up commit before the publish).
-
-> A drift-protection script (`scripts/check-versions.mjs`) fails CI
-> if the largest version in `packages/*/package.json` is not
-> represented by a `## [X.Y.Z]` heading in `CHANGELOG.md` dated within
-> the last 90 days.
 
 ## Breaking changes
 
@@ -130,12 +133,12 @@ the new versions to each `packages/*/package.json`; the maintainer
 commits them with a message like:
 
 ```
-chore(release): cut 0.5.0
+chore(release): cut X.Y.Z
 
-- @grove-dev/core 0.4.0 → 0.5.0
-- @grove-dev/astro 0.4.0 → 0.5.0
-- @grove-dev/cli 0.4.0 → 0.5.0
-- @grove-dev/starlight 0.4.0 → 0.5.0
+- @grove-dev/core PREV → X.Y.Z
+- @grove-dev/astro PREV → X.Y.Z
+- @grove-dev/cli PREV → X.Y.Z
+- @grove-dev/starlight PREV → X.Y.Z
 
 See CHANGELOG.md for the user-visible changes.
 ```
@@ -147,8 +150,10 @@ create Git tags.
 
 After the publish, the maintainer drafts a GitHub release:
 
-- **Tag:** `v0.5.0` (created by the push).
-- **Title:** `v0.5.0` (or `v0.5.0 — <one-line summary>`).
+- **Tag:** `vX.Y.Z` — the release script does not create Git tags
+  (see above), so the maintainer creates it locally (`git tag vX.Y.Z`)
+  before `git push --follow-tags`.
+- **Title:** `vX.Y.Z` (or `vX.Y.Z — <one-line summary>`).
 - **Body:** the corresponding section of `CHANGELOG.md`, with the
   `### Added` / `### Changed` / `### Fixed` sections preserved.
 
@@ -156,10 +161,8 @@ After the publish, the maintainer drafts a GitHub release:
 
 There is no fixed cadence. The historical pattern is roughly:
 
-- **Patch releases** ship as needed — usually within a day of a bug
-  report that has a fix.
-- **Minor releases** ship every 4-8 weeks, batching the unreleased
-  changes.
+- **Patch releases** ship as needed, when a fix is ready.
+- **Minor releases** batch the accumulated `[Unreleased]` changes.
 - **Major releases** ship when there is a *user-visible* breaking
   change worth the migration.
 
@@ -211,9 +214,9 @@ de-facto standard for JS package releases; we evaluated it.
   produces four diffs and four changelogs to reconcile, where
   `scripts/release.mjs` produces one.
 - **Author friction.** Changesets requires a `.changeset/*.md`
-  file in every PR that touches a public API. For a small
-  maintainer team, the extra PR step slowed reviews in pilot
-  testing.
+  file in every PR that touches a public API — an extra step that
+  doesn't pay for itself for a small maintainer team on a single
+  version line.
 - **Single CHANGELOG.md.** The repository publishes one
   CHANGELOG.md, not per-package. Changesets' per-package
   changelog files would have to be aggregated by the release

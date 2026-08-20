@@ -1,103 +1,52 @@
 ---
-title: Incremental build
-description: Architectural decision record — replacing the always-full `prepareDirectory` pipeline with per-entry caching.
+title: Architecture
+description: The Grove monorepo's package boundaries, and the single build pipeline that turns files in data/ into every generated output.
 ---
 
-> Status: **proposed**. This page documents the design for incremental build support. The current pipeline (full re-run on every call) is the largest latent performance cliff in Grove.
+## The packages
 
-## Problem
+Grove is a pnpm monorepo under `packages/` — `astro`, `cli`, `core`, `starlight` — publishing four packages to npm under the `@grove-dev/*` scope, currently all at the same version (`0.6.1`):
 
-`prepareDirectory` (`packages/core/src/prepare.ts:108`) chains `loadConfig` → `generate` → `buildSitemap` → `buildLlmsFiles` → `buildSiteArtifacts`. Every invocation re-parses every YAML file, regenerates every JSON, and re-emits every public artifact. For a directory with thousands of records, this is acceptable for production builds but unacceptable for `astro dev` cycles where content changes are frequent.
-
-## Goals
-
-1. **Per-file change detection** — editing one record triggers re-processing of that record plus downstream artifacts that depend on it (sitemap entry, llms section, related records).
-2. **No correctness regression** — the visible output must match a full re-run.
-3. **Backward-compatible CLI** — existing `grove check` behavior is unchanged; incremental is opt-in.
-4. **Watch-mode for dev** — `astro dev` should hot-reload content without restarting the server.
-
-## Design
-
-### Cache layer
-
-A `.grove/cache/manifest.json` records per-file hashes and pipeline-stage outputs:
-
-```json
-{
-  "version": 1,
-  "schemaVersion": "0.5.0-next.2",
-  "files": {
-    "data/records/ollama.yml": {
-      "hash": "sha256:...",
-      "mtime": 1723641600000,
-      "stages": {
-        "parse": { "ok": true, "output": "IndexRecord" },
-        "generate": { "ok": true, "output": "data/generated/records.json#ollama" },
-        "sitemap": { "ok": true, "output": "public/sitemap.xml#ollama" },
-        "llms": { "ok": true, "output": "public/llms-full.txt#ollama" }
-      }
-    }
-  }
-}
-```
-
-### Trigger integration
-
-The Astro integration hooks (`astro:config:setup`, `astro:server:setup`) call `prepareDirectory` only when the manifest is missing or invalid. Subsequent calls invoke `refreshContent({ loaders })` (Astro 5) on file-watcher events.
-
-### Vite plugin
-
-A dedicated Vite plugin (`grove-content-watcher`) is injected into the Astro config:
-
-```js
-{
-  name: "grove-content-watcher",
-  configureServer(server) {
-    server.watcher.add([
-      "data/**/*.yml",
-      "data/**/*.yaml",
-      "content/**/*.md",
-      "data/decisions.yml",
-      "data/overrides.yml",
-      "grove.config.ts"
-    ]);
-  },
-  async handleHotUpdate(ctx) {
-    if (matchesContent(ctx.file)) {
-      await rebuildIncrementally(ctx.file);
-      await ctx.server.reloadModule();
-    }
-  },
-  apply: "serve"
-}
-```
-
-The plugin is `apply: 'serve'` so it never runs in production builds.
-
-## Trade-offs
-
-| Pro | Con |
+| Package | What it owns |
 |---|---|
-| Sub-second dev cycles for large catalogs | Cache invalidation is hard to get right |
-| Watch mode without restarting dev server | First build is no faster |
-| Opt-in via flag | New config knob for users to learn |
+| `@grove-dev/core` | Headless engine: resource schema, config, importers, validators, taxonomy, sitemap, `llms.txt`, OG images, and the build pipeline. |
+| `@grove-dev/astro` | Astro integration + UI: components, layouts, server view-models, and framework-agnostic `lib/` helpers (search, lenses, scores, repo-URL parsing, formatting, taxonomy counts). |
+| `@grove-dev/cli` | The `grove` command — scaffolds a Grove-powered space and orchestrates `@grove-dev/core`. |
+| `@grove-dev/starlight` | Grove's theme for Starlight — the package this docs site itself runs on. |
 
-## Alternative considered
+`@grove-dev/astro` and `@grove-dev/cli` both depend on `@grove-dev/core` (`workspace:*`) — every generated artifact ultimately flows out of the core package. `@grove-dev/starlight` has no dependency on `@grove-dev/core`; it's a standalone Starlight theme and does not touch the pipeline below.
 
-**Vite HMR alone** — let `data/generated/records.json` be a JSON module that Astro watches. Re-runs of `prepareDirectory` are still needed for sitemap/llms, so this doesn't address the root issue.
+## The single build pipeline
 
-**Write-only outputs** — only regenerate the outputs that changed. Doesn't solve the per-record invalidation problem.
+Everything a Grove space generates — the JSON records, the sitemap, `llms.txt`, the site config, and the OG images — comes from one function: `prepareDirectory()` in `packages/core/src/prepare.ts`. Its own doc comment states the intent directly:
 
-## Roll-out
+> "This is the single application-facing pipeline used by the Astro integration and by CLI validation. A Grove-powered Astro project can therefore run `astro dev`, `astro check`, and `astro build` directly; it does not need consumer-owned prebuild scripts." — `packages/core/src/prepare.ts:106-112`
 
-1. Land cache manifest behind `--incremental` flag in core.
-2. Wire `refreshContent` in the Astro integration.
-3. Add the Vite plugin.
-4. Make `--incremental` the default in `astro dev`.
-5. Deprecate `--no-incremental`.
+One call to `prepareDirectory(cwd)` (`packages/core/src/prepare.ts:114-273`) runs, in order:
+
+1. **`loadConfig(root)`** — parses `grove.config.ts`, the single source of truth for blueprint, site metadata, paths, integrations, theme, and component overrides.
+2. **`generate(root, config)`** — reads every `.yml` file under the records directory, applies `data/decisions.yml` overrides, and writes `data/generated/records.full.json` and `data/generated/site-config.json`.
+3. Reads those two just-written files back into memory to feed the remaining stages.
+4. **`loadCollections(root)`** — loads every `Collection` from `data/collections/*.yml`.
+5. **`buildSitemap(...)`** — writes `public/sitemap.xml`, covering records, collections, and taxonomy pages.
+6. **`buildLlmsFiles(...)`** — writes `public/llms.txt` and `public/llms-full.txt`.
+7. **`buildSiteArtifacts(root, config, sitePayload.stats)`** — writes `robots.txt` and the fallback site-wide OG SVG.
+8. **`buildOgImages(...)`** — rasterizes a 1200×630 PNG per record, collection, and taxonomy page via satori + resvg, skipping unchanged pages against a content-hash manifest (`data/generated/og-manifest.json`). This stage is deliberately non-fatal: per the comment at `prepare.ts:181-184`, "a wrong count in a caption is acceptable, a failed build is not."
+
+The function returns `{ generated, sitemap, llms, siteArtifacts, ogImages }` — one result object each caller uses to report what it produced.
+
+## The two entry points
+
+`prepareDirectory()` has exactly two callers:
+
+- **`@grove-dev/astro`'s `astro:config:setup` hook** (`packages/astro/src/index.ts:70-71`) — runs it once, before the rest of the Astro build, whenever the consumer project has a `grove.config.ts` at its root. This is why a Grove-powered Astro project's own `build` script can be nothing more than `astro build` — see `apps/example/package.json:13` — with no separate prebuild step; the integration hook does the data preparation as a side effect of `astro:config:setup`.
+- **`grove check`** (`packages/cli/src/index.ts:63-85`) — first runs `validateProject()` (schema, link, and config validation) and, only if that passes, calls `prepareDirectory()` and then `astro check`. This is the only place `astro check` and Grove's own validation run together; it's a separate, explicit step from `astro build`, and only Grove's own CI (the `build` job in `ci.yml`) invokes it as part of a normal run.
+
+There is no third path. Other CLI commands either call `prepareDirectory()` themselves where they need generated data (`grove sync contributors`) or work directly against `data/records/*.yml` without it (`grove sync github`, `grove import`).
+
+`grove init` scaffolds a new space from `scaffoldSource()` (`packages/cli/src/init.ts:40-42`), which prefers the packaged `dist/site` copy and falls back to `apps/example` in this repo — both carry the same six GitHub Actions workflows a scaffolded space ships with.
 
 ## Related
 
-- [Astro integration hooks](https://docs.astro.build/en/reference/integrations-reference/)
-- [Vite plugin API](https://vite.dev/guide/api-plugin)
-- [Plugin author guide](/reference/plugin-author-guide/)
+- [Generated outputs](/outputs/generated-data/)
+- [Static deployment](/concepts/static-deployment/)

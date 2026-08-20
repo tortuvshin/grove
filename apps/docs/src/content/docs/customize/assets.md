@@ -11,9 +11,10 @@ Static assets go under `public/`. Anything in `public/` is served as-is from the
 public/
 ├── favicon.svg                 # referenced via site.favicon in grove.config.ts
 ├── logo.svg                    # referenced via site.logo in grove.config.ts
-├── og-image.svg                # generated brand card
-├── robots.txt                  # generated; do not edit
-├── llms.txt                    # generated; do not edit
+├── og-image.svg                # generated brand card — edit to take ownership
+├── robots.txt                  # generated — edit to take ownership
+├── llms.txt                    # generated; always regenerated, edit the config instead
+├── llms-full.txt               # generated; always regenerated, edit the config instead
 └── icons/
     ├── .grove-icons.json       # synced; do not edit
     ├── stacks/                 # language / framework marks
@@ -23,7 +24,10 @@ public/
     └── platforms/              # ios.svg, android.svg, web.svg, …
 ```
 
-`robots.txt`, `llms.txt`, `llms-full.txt`, `og-image.svg` are **generated** — `grove check` overwrites them. Override by editing the config inputs, not the files.
+All of these are written by `prepareDirectory`, which runs on every `astro dev`, `astro build`, and `grove check` (`packages/core/src/prepare.ts`) — not just `grove check`. What happens to your edits on the next build differs by file:
+
+- **`robots.txt` and `og-image.svg`** carry an ownership-marker comment (`# grove-generated: edit this file to take ownership` / `<!-- grove-generated: edit this file to take ownership -->`). Grove only (re)writes the file while that marker is still present. Edit the file yourself — the marker goes away with your edit — and Grove leaves it alone on every future build (`packages/core/src/site-artifacts.ts`).
+- **`llms.txt` and `llms-full.txt`** have no such marker — they're overwritten unconditionally on every build. Change the inputs (`site`, `readme`, your records) instead of the files.
 
 ## Stack and platform icons
 
@@ -76,7 +80,7 @@ grove icons sync --check   # exit 1 if the set has drifted (for CI)
 
 Ownership is tracked by sha256 in `public/icons/.grove-icons.json`. Edit an icon and Grove leaves it alone, reporting it during the build.
 
-The set is vendored from [Simple Icons](https://simpleicons.org/) and [SVG Logos](https://github.com/gilbarbara/logos), both CC0-1.0. Brand marks remain the property of their respective owners.
+The set is vendored via `@iconify-json/simple-icons` and `@iconify-json/logos` (both CC0-1.0), pinned per-icon in `scripts/icons.config.mjs`. Brand marks remain the property of their respective owners.
 
 ## Adding custom directories
 
@@ -110,7 +114,7 @@ Stack icons in particular have to stay in `public/`: they are referenced by a UR
 
 - Records — they're YAML under `data/records/`.
 - Markdown content — long-form prose goes under `content/pages/`.
-- Generated files — `llms.txt`, `robots.txt`, `og-image.svg` are overwritten by `grove check`.
+- Hand-authored `llms.txt`/`llms-full.txt` — always overwritten on the next build; there's no ownership marker to remove.
 - Synced files — `public/icons/.grove-icons.json` is written by the build; it records which icons Grove owns.
 
 ## Related

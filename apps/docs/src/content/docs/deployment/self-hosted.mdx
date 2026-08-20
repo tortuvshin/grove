@@ -1,12 +1,12 @@
 ---
 title: Self-hosted
-description: Run the static build output on any HTTP server — Nginx, Caddy, Apache, GitHub Pages, S3 + CloudFront.
+description: Run the static build output on any HTTP server — Nginx, Caddy, Apache, S3 + CloudFront.
 ---
 
 import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="One dist/, many hosts">
-  Grove emits a fully static `dist/` directory. Any HTTP server that can serve files can host a Grove space — S3 + CloudFront, nginx, Caddy, Apache, or your own CDN. Pick the host you already operate; the build output does not care.
+  Grove emits a fully static `dist/` directory — no adapter, no output-mode override in `astro.config.mjs`. Any HTTP server that can serve files can host a Grove space: S3 + CloudFront, nginx, Caddy, Apache, or your own CDN. Pick the host you already operate; the build output doesn't care.
 </Aside>
 
 This page covers the recommended setups for common servers.
@@ -15,30 +15,29 @@ This page covers the recommended setups for common servers.
 
 1. ## Build the site
 
+   Before deploying, make sure `site.url` in `grove.config.ts` is your real production domain, or export `SITE_URL` in the shell that runs the build — `astro.config.mjs` reads `process.env.SITE_URL || groveConfig.site.url`. If neither resolves to a URL, the build fails: the shared `Seo` layout throws when `Astro.site` is unset, rather than shipping pages with links to a domain you don't own.
+
    <Tabs syncKey="pkg">
      <TabItem label="pnpm" icon="seti:notebook">
        ```bash
-       pnpm exec grove check
-       pnpm build
+       SITE_URL=https://example.com pnpm build
        ```
      </TabItem>
      <TabItem label="npm" icon="seti:notebook">
        ```bash
-       npx grove check
-       npm run build
+       SITE_URL=https://example.com npm run build
        ```
      </TabItem>
      <TabItem label="bun" icon="seti:notebook">
        ```bash
-       bunx grove check
-       bun run build
+       SITE_URL=https://example.com bun run build
        ```
      </TabItem>
    </Tabs>
 
-   <Aside type="note" title="What you should see">
-     `pnpm build` writes a fully static site to `dist/`. Every record, collection, page, sitemap, `llms.txt`, and OG image is on disk — no server runtime needed.
-   </Aside>
+   `pnpm build` is `astro build`. The Grove Astro integration prepares `data/generated/*.json`, `sitemap.xml`, `llms.txt`/`llms-full.txt`, `robots.txt`, and the OG images as part of that one command — no separate step is required. If you want the stricter pre-flight gate CI uses (schema validation plus `astro check`), run `pnpm exec grove check` first; it's optional for a self-hosted deploy, not required for `dist/` to be complete.
+
+   The result is a fully static site in `dist/`: every record, collection, and page, plus the sitemap, `llms.txt`, and OG images — no server runtime needed to serve it.
 
 2. ## Nginx
 
@@ -49,12 +48,14 @@ This page covers the recommended setups for common servers.
        root /var/www/grove/dist;
        index index.html;
 
-       # Astro static output uses path-based routing
+       # build.format: 'directory' (astro.config.mjs) means every route
+       # is a folder with an index.html, e.g. /projects/<slug>/index.html —
+       # try_files needs the trailing-slash form to resolve directly.
        location / {
            try_files $uri $uri/ $uri.html /404.html;
        }
 
-       # Long cache for hashed assets
+       # Long cache for hashed assets (Astro's default assets directory)
        location /_astro/ {
            expires 1y;
            add_header Cache-Control "public, immutable";
@@ -66,9 +67,7 @@ This page covers the recommended setups for common servers.
    }
    ```
 
-   <Aside type="note" title="What you should see">
-     `try_files` falls back to `404.html` so deep links like `/projects/<slug>/` resolve without a server-side router. Hashed assets under `/_astro/` are cached for a year with `immutable`; everything else uses the default cache policy.
-   </Aside>
+   `try_files` falls back to `404.html` (the scaffold ships `src/pages/404.astro`, which Astro's file-based routing turns into `dist/404.html`) so deep links resolve without a server-side router. Hashed assets under `/_astro/` are cached for a year with `immutable`; everything else uses nginx's default (no explicit cache policy set above — add one to taste).
 
 3. ## Caddy
 
@@ -83,11 +82,7 @@ This page covers the recommended setups for common servers.
    }
    ```
 
-   Caddy's automatic HTTPS via Let's Encrypt makes this the lowest-friction option for self-hosters.
-
-   <Aside type="note" title="What you should see">
-     Caddy fetches and renews the Let's Encrypt certificate on first request. `try_files` mirrors the nginx pattern; `encode gzip zstd` covers both classic and modern browsers without extra config.
-   </Aside>
+   Caddy's automatic HTTPS via Let's Encrypt makes this the lowest-friction option for self-hosters — standard Caddy behavior, unrelated to Grove. `try_files` mirrors the nginx pattern above.
 
 4. ## Apache
 
@@ -117,8 +112,8 @@ This page covers the recommended setups for common servers.
 
    <Aside type="caution" title="Common pitfalls">
      - `mod_rewrite` must be enabled (`a2enmod rewrite`) and `AllowOverride All` must be set in the `<Directory>` block — without it, the `.htaccess` is silently ignored.
-     - `.htaccess` is shipped inside `dist/` if `public/.htaccess` exists in your space; make sure the build emits it.
-     - The `<IfModule mod_expires.c>` block is a no-op without `mod_expires` — enable it (`a2enmod expires`) for the asset cache headers.
+     - Grove doesn't generate `public/.htaccess` — if you want one shipped inside `dist/`, add it to `public/.htaccess` yourself; Astro copies everything under `public/` into `dist/` unchanged.
+     - The `<IfModule mod_expires.c>` block is a no-op without `mod_expires` enabled (`a2enmod expires`).
    </Aside>
 
 5. ## S3 + CloudFront
@@ -142,13 +137,9 @@ This page covers the recommended setups for common servers.
    Set bucket website hosting to redirect unknown paths to `/404.html`.
 
    <Aside type="caution" title="Common pitfalls">
-     - The CloudFront invalidation is required after every deploy — S3 has no native cache, but the edge does.
-     - The `--delete` flag on `aws s3 sync` removes stale files from the bucket; without it, removed records keep serving from edge caches until invalidation propagates.
+     - CloudFront invalidation is required after every deploy — S3 has no built-in cache-busting, but the edge does.
+     - The `--delete` flag on `aws s3 sync` removes stale files from the bucket; without it, removed records keep serving from the bucket (and edge cache) until you clean them up manually.
      - The S3 website endpoint only supports HTTP; serve TLS through CloudFront.
-   </Aside>
-
-   <Aside type="note" title="What you should see">
-     `dist/` is mirrored to `s3://example.com`, the distribution invalidates every path, and the next request resolves through CloudFront to your updated `dist/`.
    </Aside>
 
 6. ## Local preview
@@ -156,30 +147,25 @@ This page covers the recommended setups for common servers.
    <Tabs syncKey="pkg">
      <TabItem label="pnpm" icon="seti:notebook">
        ```bash
-       pnpm exec grove check
        pnpm build
-       pnpm exec serve dist
+       pnpm preview
        ```
      </TabItem>
      <TabItem label="npm" icon="seti:notebook">
        ```bash
-       npx grove check
        npm run build
-       npx serve dist
+       npm run preview
        ```
      </TabItem>
      <TabItem label="bun" icon="seti:notebook">
        ```bash
-       bunx grove check
        bun run build
-       bunx serve dist
+       bun run preview
        ```
      </TabItem>
    </Tabs>
 
-   <Aside type="note" title="What you should see">
-     `serve` (or any static-file server) listens on a local port and renders the production build exactly as your host will. Walk through every page before pushing.
-   </Aside>
+   `astro preview` (the scaffold's `preview` script) serves `dist/` on a local port and renders the production build exactly as your host will. Walk through every page before pushing.
 
 </Steps>
 
@@ -197,17 +183,17 @@ This page covers the recommended setups for common servers.
 <CardGrid>
   <LinkCard
     title="Cloudflare"
-    description="Pages or Workers-with-Assets — the maintainers use Workers-with-Assets on apps/docs/."
+    description="Pages or Workers-with-Assets — the Grove docs site itself uses Workers-with-Assets."
     href="/deployment/cloudflare/"
   />
   <LinkCard
     title="GitHub Pages"
-    description="Zero-config deploys with the bundled ci.yml and deploy.yml workflows."
+    description="Zero-config deploys — the workflow deploy.yml already ships."
     href="/deployment/github-pages/"
   />
   <LinkCard
     title="Netlify"
-    description="Zero-config deploys with PR previews and edge functions on demand."
+    description="Static hosting with PR previews and edge functions on demand."
     href="/deployment/netlify/"
   />
 </CardGrid>

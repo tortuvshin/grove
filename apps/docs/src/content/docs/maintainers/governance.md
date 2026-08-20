@@ -22,9 +22,9 @@ code — they're conventions.
 - **Maintainer** — has write access to the repo. Reviews and merges
   record PRs. Triages the cleanup report. Writes decisions. Tags
   releases of the directory's content.
-- **Curator** — has read access to all records, write access to
-  `data/decisions.yml` and `data/overrides.yml`. Doesn't merge
-  record PRs but can mark records as `keep` / `hide` / `historical`.
+- **Curator** — has read access to all records and write access to
+  `data/decisions.yml`. Doesn't merge record PRs but can mark records
+  as `keep` / `hide` / `historical`.
 - **Contributor** — anyone outside the maintainer team. Submits
   record PRs, opens issues, reviews PRs from other contributors.
 
@@ -38,13 +38,15 @@ There is no required cadence. The example directory runs:
 - **PR review** — within 7 days. A `good first issue` or
   `help wanted` label is the right signal that the maintainer team
   is asking for help.
-- **Cleanup triage** — monthly, automated by the `cleanup.yml`
-  workflow. The output lands as a workflow artifact; one maintainer
-  walks it in a single sitting.
-- **Sync review** — weekly, automated. The `sync-github.yml`
-  workflow opens a PR (or commits directly to `main`, depending on
-  your `integrations.github` setting). Maintainers review the diff
-  for unexpected archive events or transfers.
+- **Cleanup triage** — the `cleanup.yml` workflow pipes
+  `grove cleanup`'s output into the job's Step Summary, so the list
+  is readable in the Actions UI. It commits nothing. Note that its
+  shipped cron (`0 5 1-7 * 1`) fires far more often than monthly —
+  see [GitHub workflows](/outputs/workflows/) before you plan a
+  cadence around it.
+- **Sync review** — weekly. `sync-github.yml` always opens a pull
+  request; it never pushes to `main`. Maintainers review the diff for
+  unexpected archive events or repository transfers.
 - **Decision audit** — quarterly. One maintainer reads through
   `data/decisions.yml`, checks the dates, and confirms the older
   decisions still make sense.
@@ -65,7 +67,7 @@ reviewers.
 | Add a record | Maintainer review | PR review |
 | Remove a record | Maintainer review | PR review (with a `remove` decision in the same PR) |
 | Edit a record's content fields | Maintainer review | PR review |
-| Edit a record's `health` block | **Auto**, not human | Don't — the sync step overwrites |
+| Edit a record's health entry | Maintainer review | By hand in `data/health.yml` — no command writes it. See [Maintain health signals](/content/health-classification/) |
 | Mark a record as `highlight` / `keep` / `hide` | Curator or maintainer | PR to `data/decisions.yml` |
 | Add a new `category` | Maintainer review | The second record in a category is the PR that establishes it |
 | Edit `grove.config.ts` | Maintainer review | PR review (often needs a second pair of eyes for breaking changes) |
@@ -155,9 +157,11 @@ A few governance-adjacent features ship with the framework:
 - **The decisions file** (`data/decisions.yml`) is the audit log of
   editorial overrides. It is the natural artifact to share when a
   reader asks "why is this record hidden?".
-- **The `pr-` labels** on issues and PRs are the framework's
-  convention. The scaffolded `record_submission.md` issue template
-  includes the labels the maintainer team is expected to use.
+- **The submission issue template**
+  (`.github/ISSUE_TEMPLATE/record_submission.md`) ships with the
+  scaffold. It is a plain Markdown template that applies the
+  `submission` label, so incoming suggestions land in one filterable
+  bucket.
 
 That's it. The framework does not host discussion threads, send
 notifications, or do any community-management work.

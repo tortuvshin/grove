@@ -1,83 +1,64 @@
 ---
 title: CI & quality
-description: Continuous integration, observability, and quality gates for Grove contributors.
+description: What actually runs on every Grove pull request, what runs on a schedule, and what is configured but not yet enforced.
 ---
 
-This page covers the CI pipeline for Grove itself — what runs on every PR, what runs on schedule, and what the maintainers monitor.
+This page covers the CI pipeline for Grove itself — the `@grove-dev/*` packages, the CLI, and this docs site's contract with the implementation. It does not cover the gate a *record* PR runs (that's `grove check --strict`; see [Contributing](/maintainers/contributing/)), and it does not cover the six workflows a scaffolded space ships with (`apps/example`'s own CI, sync, and cleanup jobs) — see [Scheduled automation](/automation/scheduled/) for those.
 
 ## On every PR
 
-The `.github/workflows/ci.yml` workflow runs:
+`.github/workflows/ci.yml` runs four jobs on every push to `main` and every pull request against `main`:
 
-| Step | Tool | Status |
-|---|---|---|
-| Install | `pnpm install` | required |
-| Lint | `biome ci .` | planned (currently off in CI) |
-| Unit tests | `vitest run --coverage` | required (coverage not enforced) |
-| Scaffold test | `pnpm test:scaffold` | required |
-| Docs check | `pnpm docs:check` | required |
+| Job | What it runs |
+|---|---|
+| **Build & type-check** | `pnpm install --frozen-lockfile`, `pnpm -r build`, `pnpm -r check` |
+| **Scaffold smoke test** | rebuilds, then `pnpm test:scaffold` (needs Build) |
+| **Unit tests (vitest)** | rebuilds, then `pnpm test` — the Vitest 4 `projects` suite across `@grove-dev/{core,astro,cli,starlight}` (needs Build) |
+| **Repo hygiene** | four checks, listed below |
 
-Lighthouse audit (`.github/workflows/lighthouse-audit.yml`) runs separately when PRs touch `@grove-dev/core`, `@grove-dev/cli`, `@grove-dev/astro`, or `apps/example`.
+The "Repo hygiene" job (`lint` in the workflow file) runs:
 
-### Biome in CI
+1. Fails if any `.DS_Store` file is committed.
+2. Fails if `"workspace:*"` appears anywhere outside a `peerDependencies`/`peerDependenciesMeta` block in `packages/*/package.json` or the root `package.json`.
+3. `pnpm docs:check` — see below.
+4. `pnpm icons:check` — asserts the committed icon SVGs are byte-for-byte what `scripts/sync-icons.mjs` regenerates from `scripts/icons.config.mjs`.
 
-Grove ships `biome.json` at the repo root with formatter, linter, and `organizeImports` configured. The current CI does not run `biome ci .` — this is a known gap tracked under "configured but not enforced." The fix is to add `biomejs/setup-biome@v2` (pinned to match the locally installed Biome version) before the `pnpm install` step.
+`.github/workflows/lighthouse-audit.yml` runs separately from `ci.yml`, but also on every pull request and push to `main` when the change touches `packages/core/**`, `packages/cli/**`, `packages/astro/**`, `apps/example/**`, or the workflow file itself (plus a weekly cron). It builds `apps/example`, boots `astro preview`, and runs `node packages/cli/dist/index.js audit --runs 3 --json ... --junit ...`, which exits non-zero on any Lighthouse budget violation. The workflow's own comment notes that turning a regression into a hard merge block additionally requires this workflow to be added to the repository's branch-protection required-checks — that setting lives in GitHub's repo configuration, not in this codebase, so this page can't confirm whether it's on.
 
-### Vitest coverage
+### Biome — configured, not run in CI
 
-`vitest.config.ts` declares thresholds (`statements: 58`, `branches: 42`, `functions: 54`, `lines: 60`). The thresholds are calibrated just below the baseline so they don't fail; they are not currently enforced in CI. The fix is to upload `coverage/lcov.info` via `codecov/codecov-action@v5` with `codecov.yml` declaring `coverage.status.project.default: { target: auto, threshold: 1% }` and `coverage.status.patch.default: { target: 80% }`.
+`biome.json` at the repo root configures a formatter and a linter (`pnpm lint`, `pnpm lint:fix`, `pnpm format`, and `pnpm format:check` all exist as root scripts). No workflow invokes `biome` anywhere in this repository — it is not part of the "Repo hygiene" job or any other job. A contributor's local `pnpm lint` result has no effect on CI today.
 
-### Docs sidebar coverage
+### Vitest coverage — configured, not enforced in CI
 
-`scripts/check-starlight-sidebar.mjs` validates that every slug in the docs `astro.config.mjs` resolves to an existing file. The companion check (every file under `apps/docs/src/content/docs/` is in the sidebar or nav-links) is tracked as a follow-up.
+`vitest.config.ts` declares coverage thresholds (`statements: 58`, `branches: 42`, `functions: 54`, `lines: 60`), calibrated just under the measured baseline at the time. The "Unit tests" job runs plain `pnpm test` (`vitest run`, no `--coverage`), so those thresholds never evaluate in CI — the coverage report only appears when a contributor runs `pnpm test:coverage` locally.
 
-## Scheduled jobs
+### Docs contract checks
+
+`pnpm docs:check` runs three scripts in order:
+
+1. **`scripts/check-docs-contract.mjs`** — cross-references the documented surface against the implementation: every CLI command registered in `packages/cli/src/index.ts` / `*-cli.ts` must be mentioned somewhere under `apps/docs/src/content/docs/`; every named export from `packages/core/src/index.ts` and `packages/astro/src/index.ts` must appear in `reference/api-core.md`, `reference/components.mdx`, or another docs page; every top-level field of `groveConfigSchema` must appear in `reference/config.md` or elsewhere.
+2. **`scripts/check-starlight-sidebar.mjs --check-orphans`** — every slug referenced in `astro.config.mjs`'s sidebar must resolve to a real file, and every file under `apps/docs/src/content/docs/` must be reachable from the sidebar or `navLinks` (no orphan pages).
+3. **`scripts/check-starlight-internal-links.mjs`** — every `/path/` link found in the docs content resolves to a real `.md`/`.mdx` file.
+
+## Scheduled jobs (Grove's own)
 
 | Workflow | Schedule | What it does |
 |---|---|---|
-| `audit.yml` | weekly (Sunday 02:00 UTC) | `pnpm audit` against the lockfile |
-| `lighthouse-audit.yml` | weekly + on PR | Builds, runs CLI `audit --runs 1`, posts PR comment |
-| `cleanup.yml` (example app) | monthly | Identifies stale records |
-| `sync-contributors.yml` (example app) | weekly | Fetches contributor data |
-| `sync-github.yml` (example app) | weekly | Refreshes GitHub metadata |
-| `readme.yml` (example app) | weekly | Regenerates the README awesome block |
+| `audit.yml` | weekly, Monday 06:00 UTC — plus PRs/pushes touching `package.json`, `pnpm-lock.yaml`, or a package manifest | `pnpm audit --prod --audit-level=high --ignore GHSA-jmr9-qjv8-65gv`; a separate dev-deps audit step runs with `continue-on-error: true` and can't fail the job. |
+| `lighthouse-audit.yml` | weekly, Monday 06:37 UTC — plus the path-scoped PR/push trigger above | Builds `apps/example`, runs `grove audit --runs 3`, uploads the JSON/JUnit report as a workflow artifact, and posts (or updates) a scorecard comment on the triggering PR. |
 
 ## Dependency management
 
-Neither Dependabot nor Renovate is configured. Renovate is the recommended choice because of better pnpm monorepo support (`enabledManagers: ['pnpm']`, per-package grouping, weekly schedule with auto-merge for non-major updates). A conservative initial `renovate.json`:
-
-```json
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
-      "groupName": "dev-deps"
-    },
-    {
-      "matchUpdateTypes": ["major"],
-      "automerge": false,
-      "labels": ["major-update"]
-    }
-  ],
-  "lockFileMaintenance": { "enabled": true }
-}
-```
+`.github/dependabot.yml` is configured — weekly, Mondays, two ecosystems: `npm` at the repo root (grouping `@grove-dev/*` bumps under a `grove-internal` label, but explicitly `ignore`-ing them, since the release script owns `workspace:*` rewrites) and `github-actions`. Renovate is not configured.
 
 ## Supply-chain security
 
-- **`pnpm audit`** runs weekly and catches known CVEs.
-- **`dependency-review-action@v4`** (planned) gates PRs on new vulnerable deps from `pnpm-lock.yaml` diffs.
-- **`onlyBuiltDependencies`** in `pnpm-workspace.yaml` (planned) allowlists install scripts.
-- **Socket.dev GitHub App** (org-level, free for public repos) catches install-script and typosquat risks.
+The supply-chain automation that actually runs is **`pnpm audit`** in `audit.yml` (above) and Dependabot's weekly update PRs. There is no `dependency-review-action`, no `pnpm.onlyBuiltDependencies` allowlist, and no third-party dependency-scanning app configured in this repository.
 
 ## Release automation
 
-`scripts/release.mjs` is hand-rolled: builds each package, publishes in order (core → cli → astro → starlight), and writes version tags. The current script does not produce per-package changelogs or coordinate semver bumps across `workspace:*` deps.
-
-[Changesets](https://github.com/changesets/changesets) is the recommended replacement — `pnpm changeset` on every PR, `changesets/action@v1` opens a "Version Packages" PR, and `pnpm version` coordinates the release. The migration is tracked in [Release process](/maintainers/release-process/).
+`scripts/release.mjs` is a hand-rolled script, not a CI workflow — no GitHub Actions job publishes a release. It builds every package, bumps the four published package manifests together, and publishes them in dependency order: `core → astro → cli → starlight`. See [Release process](/maintainers/release-process/) for the full mechanics, and for why Grove hasn't (yet) adopted Changesets.
 
 ## Related
 

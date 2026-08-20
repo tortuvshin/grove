@@ -9,10 +9,10 @@ description: The packaged icon set and grove icons sync.
 
 On each build:
 
-1. The integration reads `packages/astro/.../icons/**` (the packaged set shipped with the package).
-2. For each icon in the source, it copies to `public/icons/` if the destination is missing or has not been edited.
-3. It writes `public/icons/.grove-icons.json` — a manifest of every icon and its hash.
-4. Icons the consumer has hand-edited are **preserved** (per-file ownership).
+1. The integration reads `packages/astro/assets/icons/` — the packaged set shipped inside `@grove-dev/astro` (`packages/astro/src/lib/packaged-icons.ts`).
+2. For each icon in the source, it copies to `public/icons/` if the destination is missing or its content still matches the last hash Grove wrote there.
+3. It writes `public/icons/.grove-icons.json` — a sha256 manifest of every icon Grove owns.
+4. Icons the consumer has hand-edited (content no longer matches the recorded hash) are **preserved** — Grove reports them as kept, not overwritten.
 
 ## When to use the CLI command
 
@@ -33,15 +33,15 @@ Drift can happen if you upgrade `@grove-dev/astro` to a version that ships new i
 
 | Path | Description |
 |---|---|
-| `public/icons/<name>.svg` | One SVG per icon. Editable per file. |
-| `public/icons/.grove-icons.json` | Manifest of the synced set. Don't edit. |
+| `public/icons/stacks/<id>.svg` | One SVG per stack (language/framework) taxonomy id. Editable per file. |
+| `public/icons/platforms/<id>.svg` | One SVG per platform taxonomy id. Editable per file. |
+| `public/icons/.grove-icons.json` | sha256 manifest of the synced set (`packages/core/src/sync-icons.ts`). Don't edit — this is what lets sync tell "unmodified" apart from "you edited this". |
 
-## Pinning icons to records
+## How records resolve to an icon
 
-Records reference icons through their taxonomy entries. The framework's components render the icon SVG by name; the manifest path is implicit. See [Icon kinds](https://github.com/tortuvshin/grove) for the registry.
+`<Icon name="..." category="stack" />` resolves `name` to `/icons/{stacks|platforms|brands}/{name}.svg` (lowercased, dash-cased), with a small built-in alias table for names that share artwork — `ios`/`macos`/`swiftui`/`objective-c` all render `stacks/apple.svg`, `kmp` renders `stacks/kotlin.svg` (`packages/astro/src/lib/icon-registry.ts`). A name the alias table and packaged set don't recognize still resolves to that path — it just 404s and falls back to an initials chip, which is how a consumer's own icon under the same folder works without touching the registry. See [Images and assets](/customize/assets/) for the full mono/color rendering model.
 
 ## See also
 
 - [Reference: programmatic API](/reference/api-core/) — `syncIconAssets` and `IconSyncOptions`.
-- [Customize: theme](/customize/theme/) — token-based customization of the icon-button family.
-- [Images and assets](/customize/assets/) — broader image asset guidance.
+- [Images and assets](/customize/assets/) — mono vs. color rendering, adding your own icon, the vendored source.

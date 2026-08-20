@@ -17,7 +17,7 @@ No — Astro is the rendering layer. If you want a non-Astro frontend, you'd nee
 
 ## Do I need a database?
 
-No. Grove is fully file-first. Records, taxonomy, collections, decisions — everything is YAML or Markdown. The generated JSON in `data/generated/` is the only runtime data, and it's regenerated on every build.
+No. Grove is fully file-first. Records, taxonomy, collections, decisions — everything is YAML or Markdown. `data/generated/` holds derived JSON, which the build rewrites from those files; it is never a source of truth and never hand-edited.
 
 ## How does Grove compare to Hugo / Jekyll / Eleventy?
 
@@ -27,31 +27,32 @@ No. Grove is fully file-first. Records, taxonomy, collections, decisions — eve
 
 ## How does Grove compare to a CMS?
 
-Grove is not a CMS. There's no admin UI, no live preview, no workflow engine. Curation happens in Git: PRs review changes, GitHub Actions sync metadata. This is a deliberate choice — see the [architecture guardrails](/concepts/philosophy/#what-grove-is-not).
-
-## What blueprint does Grove use?
-
-`project-directory` — a curated catalog of open-source projects, libraries, agents, or tools. It's the only supported blueprint today; `grove init` always scaffolds it, and every record is `kind: project`. The schema also defines `resource-hub` and `ecosystem-map` blueprints for non-project content, but neither has a supported scaffold yet — see the [roadmap](/roadmap/#later--directional).
+Grove is not a CMS. There's no admin UI, no live preview, no workflow engine. Curation happens in Git: PRs review changes, GitHub Actions sync metadata. This is a deliberate choice — see [Why Grove](/start-here/why-grove/).
 
 ## How do I deploy?
 
-Any static host. See [GitHub Pages](/deployment/github-pages/), [Cloudflare](/deployment/cloudflare/), [Netlify](/deployment/netlify/), or [self-hosted](/deployment/self-hosted/).
+Any static host — `pnpm build` writes a plain directory of files. `grove init` ships a working GitHub Pages workflow; for other hosts you write the config yourself. See [Deploy your site](/deployment/overview/), [GitHub Pages](/deployment/github-pages/), [Cloudflare](/deployment/cloudflare/), [Netlify](/deployment/netlify/), or [self-hosted](/deployment/self-hosted/).
 
 ## How do I extend Grove?
 
-Three extension points:
+Grove has no plugin system of its own. You extend it with the tools Astro already gives you:
 
-1. **Astro integration** — runs alongside `@grove-dev/astro`. See [Plugin author guide](/reference/plugin-author-guide/).
-2. **Vite plugin** — dev-only augmentations.
-3. **Starlight plugin** — extends the docs site.
+1. **Write an Astro integration** that runs alongside `@grove-dev/astro`.
+2. **Add a Vite plugin** through that integration's `updateConfig`.
+3. **Read `data/generated/*.json`** at build time and emit your own pages.
+4. **Ship a Starlight plugin** if you are extending a docs site.
+
+There is no Grove-exposed virtual module and no supported way to extend the config schema. See [Plugin author guide](/reference/plugin-author-guide/).
 
 ## Does Grove support i18n?
 
-Not yet. `i18n:setup` hooks are scaffolded in the Starlight plugin but commented out. Multi-locale sites need to fork the schema and customize per-locale.
+No. `site.locale` sets one language for the whole site — it drives `<html lang>`, `og:locale`, and JSON-LD `inLanguage`, and nothing more. No `hreflang` alternates are emitted and there is no per-locale routing. (The Starlight theme package has an `i18n:setup` hook stubbed out in `core/plugin.ts`, but that is the docs theme, not a Grove space.)
 
 ## How are stars and freshness computed?
 
-Stars come from the GitHub API (`fetchGithubMetadata`). Freshness uses `github.pushedAt`. Health classification (`active`/`stale`/`inactive`) is computed from these in `packages/core/src/health.ts`. See [Health classification](/content/health-classification/).
+`grove sync github` fetches stars, forks, language, topics, license, and `pushed_at` from the GitHub API and writes them under `github.*` on each record.
+
+Health (`active` / `stale` / `inactive` and the `tier` above it) is a *separate* derivation, implemented as `classifyHealth` in `packages/core/src/health.ts`. Note that no shipped command runs it — health entries in `data/health.yml` are authored by hand or by a script of your own. See [Maintain health signals](/content/health-classification/).
 
 ## What is `llms.txt`?
 
@@ -59,7 +60,7 @@ A site-level index file designed to be ingested by AI assistants. Spec: <https:/
 
 ## Can I use Grove for non-directory content?
 
-Only `project-directory` is a supported blueprint today, so `data/records/*.yml` is scoped to `kind: project`. For content that doesn't fit a project directory, author `content/pages/*.md` for free-form Markdown pages and build custom Astro components. The data layer (`@grove-dev/core`) is reusable beyond the directory use case.
+Records are scoped to `kind: project` today, so a record has to be something project-shaped. For anything else, author free-form Markdown under `content/pages/` and render it with your own Astro components — see [Content pages](/concepts/content-pages/). The data layer in `@grove-dev/core` is reusable well beyond a directory.
 
 ## What's the license?
 
@@ -72,5 +73,5 @@ Open an issue at <https://github.com/tortuvshin/grove/issues>.
 ## Related
 
 - [Introduction](/introduction/)
-- [Philosophy](/concepts/philosophy/)
-- [Roadmap](/roadmap/)
+- [Why Grove](/start-here/why-grove/)
+- [Roadmap](/project/roadmap/)

@@ -1,90 +1,91 @@
 ---
 title: Cloudflare
-description: Deploy a Grove space to Cloudflare Pages or Workers-with-Assets.
+description: Deploy a Grove space to Cloudflare Pages or Workers-with-Assets. Grove ships no wrangler.toml — you write one.
 ---
 
-import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="Cloudflare as a deploy target">
-  Cloudflare serves static assets at the edge with very low latency. Cloudflare Pages is the conventional static-site target; Workers-with-Assets is the pattern the canonical Grove docs site uses because it bypasses a `prismjs` resolution issue with `@astrojs/cloudflare`.
+  Cloudflare serves static assets at the edge with very low latency. Grove ships no adapter and no `wrangler.toml` for either pattern below — you write the config file yourself, once.
 </Aside>
 
-Two deployment targets on Cloudflare work with Grove:
+Two deployment targets on Cloudflare work with a Grove space's `dist/` output:
 
 1. **Cloudflare Pages** — the conventional static-site target.
-2. **Workers-with-Assets** — used by the canonical Grove docs site (`apps/docs/`) to bypass a `prismjs` resolution issue with `@astrojs/cloudflare`.
-
-This page covers both, with emphasis on the second since it's the path the maintainers use.
+2. **Workers-with-Assets** — the pattern this documentation site itself (`apps/docs/`, a separate Starlight project in the Grove monorepo, not a Grove space) uses, because Cloudflare's automatic Astro config injection pulls in `@astrojs/cloudflare`, whose Vite plugin has an unresolved `prismjs` dependency.
 
 <Aside type="note" title="Prerequisites">
   - A Cloudflare account (the free tier works).
   - A Grove space that builds to `dist/` via `pnpm build`.
-  - For Workers-with-Assets: a `[build]` block in `wrangler.toml` that runs `pnpm build` before upload.
-  - For Workers-with-Assets: bypass `@astrojs/cloudflare` in your build pipeline (this pattern doesn't use the adapter).
+  - Neither pattern needs the `@astrojs/cloudflare` adapter — Grove's build is fully static (`astro build` with no `output` or `adapter` configured, which defaults to static output).
 </Aside>
 
 ## Cloudflare Pages
 
-Standard `wrangler pages deploy dist` flow. `apps/docs` was originally configured this way; the configuration was migrated to Workers-with-Assets because the `@astrojs/cloudflare` adapter pulled in `prismjs` for SSR-only code paths even when the site is fully static, which caused build-time resolution failures on certain `pnpm` versions.
+Standard `wrangler pages deploy dist` flow.
 
 <Steps>
 
 1. Add a `wrangler.toml` at the project root:
 
    ```toml title="wrangler.toml"
-   name = "grove"
+   name = "your-site"
    pages_build_output_dir = "./dist"
    compatibility_date = "2024-09-01"
    ```
 
-   <Aside type="note" title="What you should see">
-     Wrangler reads `pages_build_output_dir` and uploads the contents of `dist/` to the Pages edge.
-   </Aside>
+   Wrangler reads `pages_build_output_dir` and uploads the contents of `dist/` to the Pages edge. Set the build command (`pnpm build`) and output directory (`dist`) in the Cloudflare Pages dashboard's project settings, not in `wrangler.toml` — the Pages build environment reads those from the dashboard.
 
 2. Deploy with the Pages CLI:
 
    <Tabs syncKey="pkg">
      <TabItem label="pnpm" icon="pnpm">
        ```bash
+       pnpm build
        pnpm dlx wrangler pages deploy dist
        ```
      </TabItem>
      <TabItem label="npm" icon="npm">
        ```bash
+       npm run build
        npx wrangler pages deploy dist
        ```
      </TabItem>
      <TabItem label="bun" icon="bun">
        ```bash
+       bun run build
        bunx wrangler pages deploy dist
        ```
      </TabItem>
    </Tabs>
 
-   <Aside type="note" title="What you should see">
-     A Pages project URL is printed by the CLI; the deploy becomes live at the edge in seconds.
-   </Aside>
+   A Pages project URL is printed by the CLI; the deploy becomes live at the edge shortly after.
+
+3. Set the site URL: add `SITE_URL` as an environment variable in the Pages project's dashboard settings (Settings → Environment variables), pointing at your Pages URL or custom domain. `astro.config.mjs` reads `process.env.SITE_URL || groveConfig.site.url` — without a matching value, the build either fails (if `site.url` in `grove.config.ts` is also unset — the shared `Seo` layout throws when `Astro.site` is undefined) or ships with the wrong canonical URLs baked into `sitemap.xml`, OG tags, and `llms.txt`.
 
 </Steps>
 
-## Workers-with-Assets (canonical pattern)
+## Workers-with-Assets
+
+This is the pattern the Grove documentation site (`apps/docs/`) actually uses in this monorepo, for the `prismjs` reason above. Its real `wrangler.toml`, unedited:
+
+```toml title="apps/docs/wrangler.toml (real file, for reference)"
+name = "grove"
+compatibility_date = "2026-06-11"
+
+[assets]
+directory = "./dist"
+```
+
+Notice what's **not** here: no `main` entry point and no `[build]` block. There is no custom Worker script — a plain `astro build` with no adapter never emits a `dist/_worker.js/`, only the static `dist/` tree, so `[assets]` with just a `directory` is the entire config. The build command and output directory (`pnpm build`, `dist`) are set in the Cloudflare dashboard's project settings, exactly as with Pages — not inside `wrangler.toml`.
+
+<Aside type="caution" title="Why this file exists at all">
+  Without an `[assets]`/`[build]`-free `wrangler.toml`, Cloudflare's `runAutoConfig` detects an Astro project, downloads `@astrojs/cloudflare`, and injects it into `astro.config.mjs`. That adapter's Vite plugin imports `prismjs`, which is a `devDependency` of `@astrojs/cloudflare` and isn't bundled with it — the build then fails with `Cannot find package 'prismjs'`. Shipping your own minimal `wrangler.toml` skips the auto-config step entirely.
+</Aside>
 
 <Steps>
 
-1. Add a `wrangler.toml` at the project root:
-
-   ```toml title="wrangler.toml"
-   name = "grove-docs"
-   compatibility_date = "2024-09-01"
-   main = "./dist/_worker.js/index.js"
-   assets = { directory = "./dist", binding = "ASSETS" }
-   [build]
-   command = "pnpm build"
-   ```
-
-   <Aside type="note" title="What you should see">
-     Wrangler recognises the `[build]` block and runs `pnpm build` before upload.
-   </Aside>
+1. Write `wrangler.toml` as shown above, adjusting `name` and `compatibility_date` (use today's date or a recent one — Cloudflare accepts any past date).
 
 2. Build and deploy:
 
@@ -109,31 +110,25 @@ Standard `wrangler pages deploy dist` flow. `apps/docs` was originally configure
      </TabItem>
    </Tabs>
 
-   <Aside type="note" title="What you should see">
-     `dist/_worker.js/` (the Workers entry) and `dist/` (the static asset directory) are both uploaded.
-   </Aside>
+   `wrangler deploy` (the Workers CLI, not `wrangler pages deploy`) uploads `dist/` as the Worker's static assets.
+
+3. In the Cloudflare dashboard, set the project's Root directory, Build command, and Build output to match your repo layout (for a monorepo, Root directory is the path to your Grove space, e.g. `apps/example`), and add `SITE_URL` under the project's environment variables.
 
 </Steps>
-
-Astro's `output: 'static'` build emits `dist/_worker.js/` (the Workers entry) and `dist/` (the static asset directory). Wrangler uploads both.
 
 ## Caveats
 
 <Aside type="caution" title="prismjs resolution">
-  When using `@astrojs/cloudflare`, even fully static builds resolve `prismjs`. The Workers-with-Assets pattern bypasses this because the build doesn't pull in `@astrojs/cloudflare` at all.
+  This only bites you if something in your build pipeline pulls in `@astrojs/cloudflare` — Grove itself never adds it. If you don't add the adapter yourself and you ship the minimal `wrangler.toml` above, you won't hit this.
 </Aside>
 
 <Aside type="caution" title="Custom domain">
-  Cloudflare Pages handles CNAME setup automatically; Workers-with-Assets require manual route configuration.
+  Cloudflare Pages projects get domain/CNAME setup through the dashboard's Custom domains tab; Workers need a Route or Custom Domain binding configured separately (dashboard → Worker → Settings → Domains & Routes).
 </Aside>
 
 <Aside type="caution" title="Headers">
-  Set custom headers (cache-control, security) in `public/_headers` for Cloudflare Pages or in the Worker fetch handler for Workers-with-Assets.
+  Set custom headers (cache-control, security) in `public/_headers` — Cloudflare Pages and Workers-with-Assets both honor this file if it's present in the uploaded directory. Grove doesn't generate one; add it to `public/` yourself if you need it.
 </Aside>
-
-## Why the docs site uses Workers-with-Assets
-
-`apps/docs/astro.config.mjs` was migrated to Workers-with-Assets after a series of intermittent `prismjs` resolution failures on `pnpm install`. The pattern is more verbose but eliminates the class of bug entirely. The trade-off is that it bypasses Astro's Cloudflare adapter, which means no SSR route helpers — acceptable because the docs site is fully static.
 
 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
   <LinkButton href="/deployment/self-hosted/" variant="secondary" icon="setting">
@@ -147,7 +142,7 @@ Astro's `output: 'static'` build emits `dist/_worker.js/` (the Workers entry) an
 ## Related
 
 <CardGrid>
-  <LinkCard title="GitHub Pages" href="/deployment/github-pages/" description="Easiest deploy — copy two bundled workflows into .github/workflows/." />
-  <LinkCard title="Netlify" href="/deployment/netlify/" description="Zero-config static hosting with PR previews and edge functions." />
+  <LinkCard title="GitHub Pages" href="/deployment/github-pages/" description="Zero-config deploys — the workflow deploy.yml already ships." />
+  <LinkCard title="Netlify" href="/deployment/netlify/" description="Static hosting with PR previews and edge functions." />
   <LinkCard title="Self-hosted" href="/deployment/self-hosted/" description="Run the dist/ output on Nginx, Caddy, Apache, or S3 + CloudFront." />
 </CardGrid>

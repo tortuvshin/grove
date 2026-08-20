@@ -115,9 +115,9 @@ export default defineConfig({
     // Either a boolean (enable/disable GitHub integration)
     // or a partial object (enable specific sub-features).
     github: {
-      metadata: true,    // fetch stars, forks, last commit, etc.
+      metadata: true,    // gates `grove sync github`
       contributors: false, // gates `grove sync contributors`
-      health: true,      // derive health.status from metadata
+      health: false,     // accepted by the schema, read by nothing
     },
   },
 
@@ -283,10 +283,16 @@ Enables the GitHub integration. Three modes:
 - `{ metadata, contributors, health }` — pick which sub-features
   to enable.
 
-All three sub-features are implemented in the current release. `metadata`
-powers `grove sync github`; `contributors` powers
-`grove sync contributors`; `health` derives `health.status` from
-the metadata on every render.
+`metadata` and `contributors` are real gates: with either set to `false`,
+the matching `grove sync` target prints `disabled by
+integrations.github.<flag> — skipping` and exits without making a request.
+
+:::caution[`health` is inert]
+`normalizeGithubIntegration` resolves the `health` flag, but nothing in the
+CLI or the build ever reads it — setting it to `true` enables nothing.
+Health entries are authored by hand in `data/health.yml`; see
+[Maintain health signals](/content/health-classification/).
+:::
 
 ### `theme`
 

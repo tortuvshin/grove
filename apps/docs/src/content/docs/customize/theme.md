@@ -16,7 +16,7 @@ theme: {
 },
 ```
 
-That's it. The default template reads these tokens everywhere; changes flow through.
+Restart `pnpm dev` after editing `theme` — `grove.config.ts` is read once at server boot, not hot-reloaded. `astro build` picks up the change on its next run.
 
 ## Primary color is optional
 

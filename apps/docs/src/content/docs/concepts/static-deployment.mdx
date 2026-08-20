@@ -3,49 +3,53 @@ title: Static deployment
 description: Grove output is fully static — no runtime, no database.
 ---
 
-import { Aside, Badge, Card, CardGrid, FileTree, Icon, LinkButton, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, Badge, Card, CardGrid, FileTree, Tabs, TabItem, LinkButton, LinkCard } from '@astrojs/starlight/components';
 
-Every output Grove produces is fully static. No runtime, no server, no database. Deployment is `pnpm build` + upload to a CDN.
+Every output Grove produces is fully static. No runtime, no server, no database. Deployment is `pnpm build` (`astro build`, no adapter, no output-mode override) plus uploading `dist/` to a static host.
 
 <Aside type="tip" title="Static-first philosophy">
-  Grove deliberately avoids runtime, databases, and servers. The build pipeline is the entire backend; everything else is static bytes served by a CDN.
+  Grove deliberately avoids runtime, databases, and servers. `astro build` is the entire backend; everything else is static bytes served by a CDN.
 </Aside>
 
 ## What gets deployed
 
 Everything under `dist/` after `pnpm build`:
 
-- **HTML pages** — every route's static output (`/`, `/projects/`, `/projects/<slug>/`, `/collections/<slug>/`, etc.).
-- **JSON datasets** — `records.json` and others under `data/generated/`, copied into the build.
-- **`sitemap.xml`**, **`robots.txt`**, **`llms.txt`**, **`llms-full.txt`** — emitted to `public/` then copied into the build.
-- **`public/og/**`** — satori-rendered OG cards, namespaced by page type (`home.png`, `default.png`, `records/<slug>.png`, `collections/<slug>.png`, `categories/<id>.png`, `stacks/<id>.png`, `licenses/<id>.png`).
-- **`public/icons/**`** — the packaged icon set, with per-file ownership preserved.
-- **`manifest.json`** — referenced by the Starlight docs site via `<link rel="manifest">`. Consumers provide their own; the default scaffold does not.
+- **HTML pages** — every route's static output (`/`, `/projects/`, `/projects/<slug>/`, `/collections/<slug>/`, etc.), plus `404.html` from the scaffold's `src/pages/404.astro`.
+- **Build-time JSON routes** — e.g. `/projects/page/records.json`, an Astro route (`src/pages/[slug]/page/records.json.ts`) rendered at build time from `data/generated/site-config.json`. It's what the browse page's client-side filtering fetches — not a raw copy of any `data/generated/*.json` file.
+- **`sitemap.xml`**, **`robots.txt`**, **`llms.txt`**, **`llms-full.txt`**, **`og-image.svg`** — written to `public/` by the Grove Astro integration during `astro:config:setup`, then copied into `dist/` like any other `public/` asset.
+- **`og/**`** — satori-rendered per-page OG cards, also written to `public/og/` and copied through: `home.png`, `default.png`, `records/<slug>.png`, `collections/<slug>.png`, `categories/<id>.png`, `stacks/<id>.png`, `licenses/<id>.png`.
+- **`icons/**`** — the packaged icon set, synced into `public/icons/` by the integration, with per-file ownership preserved (locally edited icons are kept, not overwritten).
+
+<Aside type="caution" title="What does NOT get deployed">
+  `data/generated/*.json` (`records.json`, `records.full.json`, `site-config.json`, `og-manifest.json`, and friends) lives outside `public/` and is never copied into `dist/`. Astro pages import it at build time through the `@grove/generated` Vite alias (e.g. `import siteConfig from "@grove/generated/site-config.json"`) and bake its content into rendered HTML or JSON routes like the one above — the raw files themselves aren't served.
+</Aside>
 
 A typical `dist/` after `pnpm build` looks like this (abridged):
 
 <FileTree>
 - dist/
   - index.html                  # homepage
+  - 404.html
   - projects/
-    - index.html                # project directory index
+    - index.html                # directory index
+    - page/
+      - records.json            # client-side filtering data, generated at build time
     - \<slug\>/
       - index.html              # one per record
   - collections/
     - index.html                # collections index
     - \<slug\>/index.html       # one per collection
-  - data/
-    - records.json              # full record list (searchable)
-    - records.full.json         # record + body content
-    - site-config.json          # identity, nav, facets
   - sitemap.xml
   - robots.txt
   - llms.txt
   - llms-full.txt
+  - og-image.svg
   - og/                         # satori-rendered OG cards
     - home.png
     - records/\<slug\>.png       # one per record
     - collections/\<slug\>.png   # one per collection
+  - icons/                      # packaged icon set
   - _astro/                     # hashed CSS / JS
 </FileTree>
 
@@ -53,25 +57,26 @@ The build is deterministic: the same source files plus the same `grove.config.ts
 
 ## Where the build runs
 
-The build pipeline runs on three events:
-
 <Tabs syncKey="trigger">
   <TabItem label="Local dev" icon="rocket">
-    `pnpm dev` (which runs `astro dev`). The Astro integration invokes `prepareDirectory()` from `@grove-dev/core` on every `astro:config:setup`, so a save in `data/records/*.yml` produces an updated dataset within a few hundred milliseconds.
+    `pnpm dev` (which runs `astro dev`). The Astro integration invokes `prepareDirectory()` from `@grove-dev/core` on every `astro:config:setup`, so a save in `data/records/*.yml` produces an updated dataset on the next reload.
   </TabItem>
-  <TabItem label="CI on push" icon="setting">
-    `.github/workflows/ci.yml` runs `grove check` and Astro build.
+  <TabItem label="CI validation" icon="setting">
+    `.github/workflows/ci.yml` runs on every push to `main` and every pull request: `pnpm exec grove check` (schema validation, then the same generation step, then `astro check`), then `pnpm build`. This is a pass/fail gate — it does not deploy anything.
+  </TabItem>
+  <TabItem label="Deploy" icon="rocket">
+    `.github/workflows/deploy.yml` runs on push to `main` (and manual dispatch): `pnpm build`, then `actions/upload-pages-artifact` and `actions/deploy-pages` publish `dist/` to GitHub Pages.
   </TabItem>
   <TabItem label="Scheduled maintenance" icon="info">
-    `sync-github.yml`, `sync-contributors.yml`, `cleanup.yml`, `readme.yml` re-run periodically and commit. The next push triggers another CI run that rebuilds.
+    `sync-github.yml`, `sync-contributors.yml`, `cleanup.yml`, `readme.yml` re-run on cron and commit changes to source files (`data/generated/*.json`, `README.md`) — some open a PR, some commit directly. A merge to `main` triggers `deploy.yml`, which rebuilds and republishes.
   </TabItem>
 </Tabs>
 
-There is no separate "refresh" step required. The framework regenerates everything from sources on every build.
+There is no separate "refresh" step required for the pages themselves. `astro build` regenerates everything from sources every time it runs.
 
 ## Static-host expectations
 
-A Grove site deploys to any static host. The scaffold has first-class workflows for Cloudflare and GitHub Pages, and recipe-style notes for Vercel, Netlify, and self-hosted setups — see [Deployment](/deployment/overview/).
+A Grove site deploys to any static host. The scaffold ships a working `deploy.yml` for GitHub Pages; Cloudflare, Netlify, and self-hosted are recipes you configure yourself — see [Deployment](/deployment/overview/).
 
 For any host:
 
@@ -80,29 +85,29 @@ For any host:
     Upload the contents of `dist/` to your static host's web root. Everything the site needs is in there.
   </Card>
   <Card title="404 handling" icon="warning">
-    404s use `404.html` (Astro emits this automatically).
+    404s use `404.html`, produced by the scaffold's `src/pages/404.astro` via Astro's file-based routing.
   </Card>
   <Card title="Trailing slash" icon="right-arrow">
-    `trailingSlash: 'ignore'` is the Astro default — both `/about/` and `/about` work.
+    `astro.config.mjs` sets `trailingSlash: 'ignore'` and `build.format: 'directory'` — pages render as `<route>/index.html`, and both `/about/` and `/about` resolve once your host serves directory indexes.
   </Card>
   <Card title="Cache headers" icon="setting">
-    Cache headers are the host's responsibility. Set `Cache-Control: public, max-age=300, s-maxage=600` for HTML and one year for assets the framework generates (sitemap, OG cards, JSON datasets).
+    Cache headers are the host's responsibility — Grove doesn't set any. A common pattern is a short `max-age` for HTML and a long, immutable one for hashed assets under `_astro/`.
   </Card>
 </CardGrid>
 
 ## What the host needs to know
 
 <Aside type="note" title="The site URL">
-  The site URL is configured in `site.url` in `grove.config.ts`. The framework writes it into:
+  The site URL comes from `site.url` in `grove.config.ts`, or from the `SITE_URL` environment variable, which `astro.config.mjs` prefers when set (`site: process.env.SITE_URL || groveConfig.site.url`). The framework writes it into:
 </Aside>
 
-- Every `<link rel="canonical">` and JSON-LD `url`.
+- Every `<link rel="canonical">` and JSON-LD `url` (via the shared `Seo` layout, which reads `Astro.site`).
 - Every `og:url` and Twitter `url` meta tag.
-- `og-image.svg` host references.
-- The OG card manifest (`og-manifest.json`).
-- The `Directory:` line in `llms.txt`.
+- `sitemap.xml`'s `<loc>` entries and `robots.txt`'s `Sitemap:` line.
+- `og-image.svg`'s and each per-page OG card's host text.
+- The `Site:` line in `llms.txt`.
 
-If you change `site.url`, rebuild — there's no other source of truth for the URL.
+If **neither** `SITE_URL` nor `site.url` resolves to a URL, the build fails outright — the `Seo` layout throws `Seo: \`site\` is not set on the Astro config` rather than shipping pages with links to a domain nobody owns. If one of them is set but wrong, the build succeeds and every one of the above silently points at the wrong domain. Either way: if you change `site.url`, rebuild — there's no other source of truth for the URL.
 
 ## Why static-first is durable
 
@@ -141,7 +146,7 @@ The tradeoff is the same as every static site: changes go through a build. Curat
 <CardGrid>
   <LinkCard
     title="Deployment overview"
-    description="Provider recipes for Cloudflare, GitHub Pages, Vercel, Netlify, and self-hosted setups."
+    description="Provider recipes for GitHub Pages, Cloudflare, Netlify, and self-hosted setups."
     href="/deployment/overview/"
   />
   <LinkCard
