@@ -164,7 +164,10 @@ export function buildLlmsFullTxt(
     return [
       `# ${config?.site.name ?? legacyInput.siteUrl ?? "Directory"} — full directory`,
       "",
-      `> Generated ${legacyInput.generatedAt} from ${legacyInput.records.length} records.`,
+      // Count the visible records, not every parsed one — llms.txt's
+      // "Records indexed" line already reports the filtered count, and
+      // the two disagreeing on the same build was confusing.
+      `> Generated ${legacyInput.generatedAt} from ${visible.length} records.`,
       `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`pnpm build\`.`,
       "",
       "Each section below mirrors one record detail page.",

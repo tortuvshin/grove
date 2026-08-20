@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 import { generate, type GenerateResult } from "./build-data.js";
+import { readContentFile } from "./content-body.js";
 import type { CollectionEntry } from "./collections.js";
 import { loadCollections } from "./collections-io.js";
 import { runCollection } from "./collector.js";
@@ -43,6 +44,8 @@ type GeneratedRecord = {
   homepageUrl?: string;
   addedAt?: string | null;
   lastCommitAt?: string | null;
+  /** Path to the record's Markdown sidecar, relative to the project root. */
+  content?: string;
   links?: { github?: string; website?: string };
   github?: {
     stars?: number;
@@ -71,7 +74,23 @@ function toSitemapItem(record: GeneratedRecord): SitemapInput["items"][number] {
   };
 }
 
-function toLlmsRecord(record: GeneratedRecord): LlmsRecordInput {
+/**
+ * Read a record's Markdown sidecar for the `#### Detail` block in
+ * llms-full.txt. `LlmsRecordInput.detail` has always been supported by
+ * `buildDetailSection`, but nothing populated it, so the block was
+ * unreachable in a real build and llms-full.txt carried metadata only.
+ */
+function readDetailBody(root: string, record: GeneratedRecord): string | undefined {
+  if (!record.content) return undefined;
+  const found = readContentFile(record.content, [
+    resolve(root, record.content),
+    join(root, record.content.replace(/^\.\//, "")),
+  ]);
+  const body = found?.body.trim();
+  return body ? body : undefined;
+}
+
+function toLlmsRecord(root: string, record: GeneratedRecord): LlmsRecordInput {
   const stars =
     record.github?.stars ?? record.github?.repository?.stargazers_count;
   const visibility = record.health?.visibility ?? record.visibility;
@@ -100,6 +119,10 @@ function toLlmsRecord(record: GeneratedRecord): LlmsRecordInput {
     ...(license !== undefined ? { license } : {}),
     ...(lastCommitAt !== undefined ? { lastCommitAt } : {}),
     ...(record.addedAt !== undefined ? { addedAt: record.addedAt } : {}),
+    ...((): { detail?: string } => {
+      const detail = readDetailBody(root, record);
+      return detail ? { detail } : {};
+    })(),
   };
 }
 
@@ -167,7 +190,7 @@ export async function prepareDirectory(
   const llms = await buildLlmsFiles(
     {
       generatedAt,
-      records: records.map(toLlmsRecord),
+      records: records.map((r) => toLlmsRecord(root, r)),
     },
     root,
     config,
