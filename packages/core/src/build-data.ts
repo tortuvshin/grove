@@ -7,7 +7,12 @@ import {
   toIndexRecord,
   unwrapDecisions,
   decisionsFileSchema,
+  unwrapHealth,
+  healthFileSchema,
+  unwrapOverrides,
+  overridesFileSchema,
   type GroveConfig,
+  type HealthEntry,
   type Resource,
 } from "./schema.js";
 import { classifyHealth } from "./health.js";
@@ -54,6 +59,50 @@ function applyDecision(
   // Resource-hub / ecosystem-map: no `health` block; the top-level
   // `visibility` field on the base schema is the source of truth.
   return { ...record, visibility: override as typeof record.visibility };
+}
+
+/**
+ * Load `data/health.yml` into a slug -> health-block map.
+ *
+ * `grove check` has always validated this file — a record with a
+ * GitHub link and no entry here is a `missing_health` error — but
+ * nothing ever read it back into the build, so the health signals it
+ * carries never reached a rendered page. This is that missing read.
+ * Missing or invalid file → empty map, same as decisions.
+ */
+async function loadHealthEntries(
+  healthPath: string,
+  cwd: string,
+): Promise<Map<string, HealthEntry["health"]>> {
+  try {
+    const raw = await readFile(resolve(cwd, healthPath), "utf8");
+    const parsed = healthFileSchema.parse(parseYaml(raw, { schema: "core" }) ?? {});
+    const out = new Map<string, HealthEntry["health"]>();
+    for (const entry of unwrapHealth(parsed)) out.set(entry.id, entry.health);
+    return out;
+  } catch {
+    return new Map();
+  }
+}
+
+/**
+ * Load `data/overrides.yml` into a slug -> patch map. Each patch is a
+ * shallow set of top-level fields applied over the parsed record, for
+ * correcting imported records without editing generated YAML by hand.
+ */
+async function loadOverridePatches(
+  overridesPath: string,
+  cwd: string,
+): Promise<Map<string, Record<string, unknown>>> {
+  try {
+    const raw = await readFile(resolve(cwd, overridesPath), "utf8");
+    const parsed = overridesFileSchema.parse(parseYaml(raw, { schema: "core" }) ?? {});
+    const out = new Map<string, Record<string, unknown>>();
+    for (const entry of unwrapOverrides(parsed)) out.set(entry.id, entry.patch);
+    return out;
+  } catch {
+    return new Map();
+  }
 }
 
 async function loadDecisionVisibility(
@@ -176,8 +225,13 @@ export async function generate(
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith(".yml")).sort();
 
-  // Load human curation decisions once; missing file → empty map.
+  // Load the three side files once; a missing file is an empty map.
+  // Precedence, lowest to highest: overrides patch the parsed record,
+  // health.yml supplies a health block the record does not carry, and
+  // decisions.yml has the final say on visibility.
   const visibilityById = await loadDecisionVisibility(cfg.paths.decisions, cwd);
+  const healthBySlug = await loadHealthEntries(cfg.paths.health, cwd);
+  const patchBySlug = await loadOverridePatches(cfg.paths.overrides, cwd);
 
   const out: Resource[] = [];
   const errors: string[] = [];
@@ -187,8 +241,15 @@ export async function generate(
       const text = await readFile(join(recordsDir, file), "utf8");
       const raw = (parseYaml(text, { schema: "core" }) ?? {}) as Record<string, unknown>;
       if (!raw.kind) raw.kind = expectedKind;
-      const normalized = recordsFileSchema.parse(raw);
+      const patch = patchBySlug.get(fileSlug);
+      const normalized = recordsFileSchema.parse(patch ? { ...raw, ...patch } : raw);
       normalized.slug = fileSlug;
+      // A health block written inline on the record wins; otherwise
+      // take the one keyed by this slug in health.yml, if there is one.
+      if (normalized.kind === "project" && !normalized.health) {
+        const health = healthBySlug.get(fileSlug);
+        if (health) normalized.health = health;
+      }
       // Apply decisions.yml visibility override on top of the record.
       // The index payload then derives visibility from record.health,
       // which is now the merged result.

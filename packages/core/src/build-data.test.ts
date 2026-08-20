@@ -107,6 +107,92 @@ describe("generate — filesystem round-trip", () => {
     await rm(cwd, { recursive: true, force: true });
   });
 
+  it("merges a data/health.yml entry onto a record that carries no inline health block", async () => {
+    // `grove check` has always validated health.yml, but the build
+    // never read it back, so the signals it carries never reached a
+    // rendered page. This pins the read.
+    await writeFile(
+      join(cwd, "data", "records", "demo.yml"),
+      "kind: project\nslug: demo\nname: Demo\ncategory: tools\n",
+    );
+    await writeFile(
+      join(cwd, "data", "health.yml"),
+      [
+        "health:",
+        "  - id: demo",
+        "    health:",
+        "      status: archived",
+        "      tier: hidden",
+        "      visibility: hide",
+        "      cleanupCandidate: true",
+      ].join("\n"),
+    );
+
+    await generate(cwd);
+    const full = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "records.full.json"), "utf8"),
+    ) as { records: Array<{ slug: string; health?: { status?: string; visibility?: string } }> };
+    const demo = full.records.find((r) => r.slug === "demo");
+    expect(demo?.health?.status).toBe("archived");
+    expect(demo?.health?.visibility).toBe("hide");
+
+    // visibility: hide keeps it out of the slim index entirely.
+    const index = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "records.index.json"), "utf8"),
+    ) as { records: Array<{ slug: string }> };
+    expect(index.records.find((r) => r.slug === "demo")).toBeUndefined();
+  });
+
+  it("lets an inline health block win over the data/health.yml entry for the same slug", async () => {
+    await writeFile(
+      join(cwd, "data", "records", "demo.yml"),
+      [
+        "kind: project",
+        "slug: demo",
+        "name: Demo",
+        "category: tools",
+        "health:",
+        "  status: active",
+        "  visibility: keep",
+      ].join("\n"),
+    );
+    await writeFile(
+      join(cwd, "data", "health.yml"),
+      "health:\n  - id: demo\n    health:\n      status: archived\n      visibility: hide\n",
+    );
+
+    await generate(cwd);
+    const full = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "records.full.json"), "utf8"),
+    ) as { records: Array<{ slug: string; health?: { status?: string } }> };
+    expect(full.records.find((r) => r.slug === "demo")?.health?.status).toBe("active");
+  });
+
+  it("applies a data/overrides.yml patch over the parsed record", async () => {
+    await writeFile(
+      join(cwd, "data", "records", "demo.yml"),
+      "kind: project\nslug: demo\nname: Demo\ncategory: tools\ndescription: from upstream\n",
+    );
+    await writeFile(
+      join(cwd, "data", "overrides.yml"),
+      [
+        "overrides:",
+        "  - id: demo",
+        "    patch:",
+        "      description: corrected by a curator",
+        "      category: developer-tools",
+      ].join("\n"),
+    );
+
+    await generate(cwd);
+    const full = JSON.parse(
+      await readFile(join(cwd, "data", "generated", "records.full.json"), "utf8"),
+    ) as { records: Array<{ slug: string; description?: string; category?: string }> };
+    const demo = full.records.find((r) => r.slug === "demo");
+    expect(demo?.description).toBe("corrected by a curator");
+    expect(demo?.category).toBe("developer-tools");
+  });
+
   it("generates records.full.json, records.index.json, and records.json (alias) from a real records dir", async () => {
     await writeFile(
       join(cwd, "data", "records", "demo.yml"),

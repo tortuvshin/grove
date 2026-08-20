@@ -4,10 +4,13 @@ import { join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import {
   buildAwesomeReadme,
+  decisionsFileSchema,
+  healthFileSchema,
   injectAwesomeReadmeBlock,
   loadConfig,
   type AwesomeReadmeCategory,
   type AwesomeReadmeRecord,
+  type GroveConfig,
 } from "@grove-dev/core";
 
 const DEFAULT_README_PATH = "README.md";
@@ -36,7 +39,7 @@ export function buildReadmeCommand(): Command {
       }) => {
         const cwd = process.cwd();
         const config = await loadConfig(cwd);
-        const records = await loadRecords(cwd, config.paths.recordsDir);
+        const records = await loadRecords(cwd, config);
         const categories = await loadCategories(
           cwd,
           config.paths.taxonomyDir,
@@ -98,11 +101,61 @@ async function safeRead(path: string): Promise<string> {
   }
 }
 
+/**
+ * Resolve effective visibility the same way the build does.
+ *
+ * This command used to read only the record's own top-level
+ * `visibility:` field. For project records that field is not the
+ * signal the site uses — `health.visibility` is, and a
+ * `data/decisions.yml` entry overrides both. The result was that a
+ * record hidden by a curator decision still shipped in the generated
+ * README. Precedence here matches `generate()` in
+ * `@grove-dev/core`: decision, then inline health, then health.yml,
+ * then the record's own field.
+ */
+async function loadVisibilityResolver(
+  cwd: string,
+  config: GroveConfig,
+): Promise<(slug: string, raw: Record<string, unknown>) => string | undefined> {
+  const decisions = new Map<string, string>();
+  try {
+    const parsed = decisionsFileSchema.parse(
+      parseYaml(await readFile(resolve(cwd, config.paths.decisions), "utf8")) ?? {},
+    );
+    const list = Array.isArray(parsed) ? parsed : parsed.decisions;
+    for (const d of list) decisions.set(d.id, d.decision.visibility);
+  } catch {
+    // missing or invalid decisions.yml → no overrides
+  }
+
+  const health = new Map<string, string>();
+  try {
+    const parsed = healthFileSchema.parse(
+      parseYaml(await readFile(resolve(cwd, config.paths.health), "utf8")) ?? {},
+    );
+    const list = Array.isArray(parsed) ? parsed : parsed.health;
+    for (const e of list) health.set(e.id, e.health.visibility);
+  } catch {
+    // missing or invalid health.yml → no entries
+  }
+
+  return (slug, raw) => {
+    const decided = decisions.get(slug);
+    if (decided) return decided;
+    const inline = (raw.health as { visibility?: string } | undefined)?.visibility;
+    if (inline) return inline;
+    const fromFile = health.get(slug);
+    if (fromFile) return fromFile;
+    return typeof raw.visibility === "string" ? (raw.visibility as string) : undefined;
+  };
+}
+
 async function loadRecords(
   cwd: string,
-  recordsDir: string,
+  config: GroveConfig,
 ): Promise<AwesomeReadmeRecord[]> {
-  const dir = resolve(cwd, recordsDir);
+  const dir = resolve(cwd, config.paths.recordsDir);
+  const resolveVisibility = await loadVisibilityResolver(cwd, config);
   const files = (await readdir(dir))
     .filter((file) => file.endsWith(".yml") || file.endsWith(".yaml"))
     .sort();
@@ -144,10 +197,10 @@ async function loadRecords(
         typeof raw.homepageUrl === "string"
           ? (raw.homepageUrl as string)
           : (links.website ?? undefined),
-      visibility:
-        typeof raw.visibility === "string"
-          ? (raw.visibility as string)
-          : undefined,
+      visibility: resolveVisibility(
+        typeof raw.slug === "string" ? (raw.slug as string) : file.replace(/\.ya?ml$/, ""),
+        raw,
+      ),
       ...(stars !== undefined ? { stars } : {}),
       ...(license !== undefined ? { license } : {}),
     });
