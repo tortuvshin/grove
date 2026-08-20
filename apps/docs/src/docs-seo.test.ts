@@ -139,7 +139,7 @@ describe("generated raster assets", () => {
 describe("per-page head coverage", () => {
 	it("registers the Head override with robots + article JSON-LD", async () => {
 		const head = await readFile(
-			resolve(docsRoot, "src/components/StarlightHead.astro"),
+			resolve(docsRoot, "src/starlight/Head.astro"),
 			"utf8",
 		);
 		expect(head).toContain("index,follow,max-image-preview:large");
@@ -148,7 +148,7 @@ describe("per-page head coverage", () => {
 		expect(head).toContain("BreadcrumbList");
 
 		const config = await readFile(resolve(docsRoot, "astro.config.mjs"), "utf8");
-		expect(config).toContain("Head: './src/components/StarlightHead.astro'");
+		expect(config).toContain("Head: './src/starlight/Head.astro'");
 		// The sitemap integration is declared explicitly so entries carry
 		// lastmod from git history (Starlight would otherwise add a bare one).
 		expect(config).toContain("sitemap(");

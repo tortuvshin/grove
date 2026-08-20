@@ -87,7 +87,7 @@ export default defineConfig({
                 // Adds per-page robots meta (noindex on 404) and
                 // TechArticle + BreadcrumbList JSON-LD on top of
                 // Starlight's default head.
-                Head: './src/components/StarlightHead.astro',
+                Head: './src/starlight/Head.astro',
             },
             // Starlight's default `editLink.baseUrl` would be inferred
             // from the GitHub repo metadata and produce a path under

@@ -4,6 +4,16 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = resolve(import.meta.dirname, "../../..");
 
+// The sidebar was extracted to src/data/docs-sidebar.mjs (shared with the
+// llms.txt endpoint); sidebar assertions read it together with the config,
+// which still owns navLinks and everything else.
+const readConfigWithSidebar = async () =>
+  (await readFile(resolve(repoRoot, "apps/docs/astro.config.mjs"), "utf8")) +
+  (await readFile(
+    resolve(repoRoot, "apps/docs/src/data/docs-sidebar.mjs"),
+    "utf8",
+  ));
+
 describe("docs Astro config", () => {
   it("uses the local Starlight plugin and existing stylesheet", async () => {
     const config = await readFile(
@@ -21,10 +31,7 @@ describe("docs Astro config", () => {
   });
 
   it("declares 9 sidebar sections matching the IA redesign", async () => {
-    const config = await readFile(
-      resolve(repoRoot, "apps/docs/astro.config.mjs"),
-      "utf8",
-    );
+    const config = await readConfigWithSidebar();
 
     const sectionLabels = [
       "Start here",
@@ -50,10 +57,7 @@ describe("docs Astro config", () => {
    * duplicates. Comparable docs sites name sections by subject instead.
    */
   it("no longer declares the retired catch-all sections", async () => {
-    const config = await readFile(
-      resolve(repoRoot, "apps/docs/astro.config.mjs"),
-      "utf8",
-    );
+    const config = await readConfigWithSidebar();
 
     for (const label of ["Walkthroughs", "Advanced", "Resources", "Customize"]) {
       expect(config, `retired section "${label}" still present`).not.toContain(
@@ -77,10 +81,7 @@ describe("docs sidebar coverage", () => {
 
   it("every content file under apps/docs/src/content/docs is referenced from sidebar or navLinks", async () => {
     const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
-    const config = await readFile(
-      resolve(repoRoot, "apps/docs/astro.config.mjs"),
-      "utf8",
-    );
+    const config = await readConfigWithSidebar();
 
     const slugRe = /\bslug:\s*['"]([^'"]+)['"]/g;
     const slugs = [...config.matchAll(slugRe)].map((m) => m[1]);
@@ -108,10 +109,7 @@ describe("docs sidebar coverage", () => {
 
   it("every sidebar slug resolves to an existing file", async () => {
     const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
-    const config = await readFile(
-      resolve(repoRoot, "apps/docs/astro.config.mjs"),
-      "utf8",
-    );
+    const config = await readConfigWithSidebar();
     const slugRe = /\bslug:\s*['"]([^'"]+)['"]/g;
     const slugs = [...config.matchAll(slugRe)].map((m) => m[1]);
 
