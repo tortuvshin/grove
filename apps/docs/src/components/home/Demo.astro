@@ -387,17 +387,22 @@ const pillClass = {
             </div>
           </div>
 
-          <!-- Finale (scrub only): the story closes on the Grove mark. -->
+          <!-- Finale (scrub only): the story closes on the Grove mark, which
+               grows itself as the scene rises — a seed falls, the stem draws
+               upward, the leaves unfurl, side shoots take hold — and then
+               keeps swaying gently, like wind. Pure CSS, started by the
+               .is-growing class the scrub loop adds once. -->
           <div id="hgw-finale" class="hgw-scene" aria-hidden="true">
             <div class="flex flex-col items-center gap-3">
-              <div class="relative">
+              <div class="hgw-mark relative">
                 <div class="hgw-finale-glow absolute left-1/2 top-1/2 size-44 -translate-x-1/2 -translate-y-1/2" aria-hidden="true"></div>
-                <svg class="relative size-20 text-fg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <path d="M16 28V13" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                  <path d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor"></path>
-                  <path d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7"></path>
-                  <path d="M16 18C16 18 16.2 21 19.5 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-                  <path d="M16 21C16 21 15.8 24 12.5 25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                <svg class="hgw-mark-svg relative size-20 text-fg" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <circle class="hgw-seed" cx="16" cy="27" r="1.6" fill="currentColor"></circle>
+                  <path class="hgw-stem" d="M16 28C15.6 24.5 15.8 18.5 16 13" pathLength="1" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                  <path class="hgw-leaf hgw-leaf-r" d="M16 13C16 13 16.5 6 24 5C24 5 24 12 16 13Z" fill="currentColor"></path>
+                  <path class="hgw-leaf hgw-leaf-l" d="M16 13C16 13 15.5 6 8 5C8 5 8 12 16 13Z" fill="currentColor" fill-opacity="0.7"></path>
+                  <path class="hgw-shoot hgw-shoot-1" d="M16 18C16 18 16.2 21 19.5 22" pathLength="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                  <path class="hgw-shoot hgw-shoot-2" d="M16 21C16 21 15.8 24 12.5 25" pathLength="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
                 </svg>
               </div>
               <span class="text-3xl font-semibold tracking-tight text-fg">Grove</span>
@@ -626,6 +631,118 @@ const pillClass = {
     background: radial-gradient(circle, rgb(39 183 200 / 0.32), transparent 68%);
     filter: blur(2px);
   }
+
+  /* Growth timeline, measured from the moment .is-growing lands: seed falls
+     (0–0.6s) → stem draws up (0.6–1.3s) → leaves unfurl (1.15–2s) → side
+     shoots (1.8–2.4s) — then the sway and float take over. Every part starts
+     invisible and every animation uses `both`, so the mark cannot flash
+     fully-grown before the scene reaches it. The scene only exists in scrub
+     mode, which is already gated on reduced motion, so there is no static
+     fallback to keep in step. */
+  .hgw-seed,
+  .hgw-stem,
+  .hgw-leaf,
+  .hgw-shoot {
+    opacity: 0;
+  }
+
+  #hgw-finale.is-growing .hgw-mark {
+    animation: hgw-mark-float 6s ease-in-out 2.5s infinite alternate;
+  }
+
+  @keyframes hgw-mark-float {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+  }
+
+  /* After growing, the sprout sways like wind is moving through it: the whole
+     plant rocks around its base while each leaf flexes on its own slightly
+     offset rhythm, so the loop never reads as mechanical. */
+  #hgw-finale.is-growing .hgw-mark-svg {
+    transform-origin: 50% 96%;
+    animation: hgw-sway 7s ease-in-out 2.9s infinite;
+  }
+
+  @keyframes hgw-sway {
+    0%, 100% { transform: rotate(0deg); }
+    30% { transform: rotate(1.7deg); }
+    65% { transform: rotate(-1.3deg); }
+  }
+
+  #hgw-finale.is-growing .hgw-seed {
+    animation:
+      hgw-seed-fall 0.6s cubic-bezier(0.3, 1.3, 0.5, 1) both,
+      hgw-seed-vanish 0.35s ease-out 0.65s forwards;
+  }
+
+  @keyframes hgw-seed-fall {
+    from { opacity: 0; transform: translateY(-24px); }
+    30% { opacity: 1; }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes hgw-seed-vanish {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(0.5px) scale(0.4); }
+  }
+
+  #hgw-finale.is-growing .hgw-stem {
+    stroke-dasharray: 1;
+    animation: hgw-stem-grow 0.7s cubic-bezier(0.2, 0.6, 0.2, 1) 0.6s both;
+  }
+
+  /* The 0%→1% opacity step hides the round-linecap dot that an undrawn dashed
+     path would otherwise leave at its start point. */
+  @keyframes hgw-stem-grow {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    1% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+  }
+
+  .hgw-leaf {
+    transform-box: view-box;
+    transform-origin: 16px 13px;
+  }
+
+  #hgw-finale.is-growing .hgw-leaf-r {
+    animation:
+      hgw-leaf-unfurl-r 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) 1.15s both,
+      hgw-leaf-sway-r 5.2s ease-in-out 3.1s infinite alternate;
+  }
+
+  #hgw-finale.is-growing .hgw-leaf-l {
+    animation:
+      hgw-leaf-unfurl-l 0.65s cubic-bezier(0.2, 1.35, 0.35, 1) 1.35s both,
+      hgw-leaf-sway-l 6.4s ease-in-out 3.5s infinite alternate;
+  }
+
+  @keyframes hgw-leaf-unfurl-r {
+    from { opacity: 0; transform: scale(0) rotate(-14deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes hgw-leaf-unfurl-l {
+    from { opacity: 0; transform: scale(0) rotate(14deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes hgw-leaf-sway-r {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(2.2deg); }
+  }
+
+  @keyframes hgw-leaf-sway-l {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-1.8deg); }
+  }
+
+  #hgw-finale.is-growing .hgw-shoot {
+    stroke-dasharray: 1;
+    animation: hgw-stem-grow 0.45s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
+
+  #hgw-finale.is-growing .hgw-shoot-1 { animation-delay: 1.8s; }
+  #hgw-finale.is-growing .hgw-shoot-2 { animation-delay: 1.95s; }
 
   /* Scrub-mode caption: identifies the active step above the canvas. Hidden
      in static layout (where the step cards above already carry the labels). */
@@ -927,6 +1044,10 @@ const pillClass = {
       finale.style.opacity = fin;
       finale.style.visibility = fin > 0.001 ? 'visible' : 'hidden';
       finale.style.transform = `scale(${lerp(0.92, 1, fin)})`;
+      // The mark grows itself once, the first time the scene starts to show.
+      // The class is never removed, so scrubbing back and forth cannot restart
+      // the growth halfway through.
+      if (fin > 0.02) finale.classList.add('is-growing');
 
       // Step rail follows the scene-specific holds instead of dividing scroll
       // into equal slices. Copy now changes only when its visual has arrived.

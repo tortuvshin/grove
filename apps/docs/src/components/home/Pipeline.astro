@@ -1,20 +1,21 @@
 ---
-import Statement from './Statement.astro';
-
-// "One source, every surface" — the transformation diagram: the plain files
-// you write flow through Grove and come out as a complete website plus every
-// artifact around it (SEO files, AI indexes, README, JSON data).
+// "One source, every surface" — the transformation diagram that now lives in
+// the hero's right column: the plain files you write flow down through Grove
+// and come out as a complete website plus every artifact around it (SEO files,
+// AI indexes, README, JSON data).
 //
-// Without JS (or with reduced motion) everything renders visible and static;
-// JS only adds the connector paths, the staged reveal, and the traveling
-// pulses. The connectors are drawn from measured DOM positions, so the
-// columns are plain flex/grid layout and nothing can overlap or distort.
+// The flow reads top to bottom at every width, so unlike the old standalone
+// section there is no separate mobile layout to fall back to. Without JS (or
+// with reduced motion) everything renders visible and static; JS only adds the
+// connector paths, the staged reveal, and the traveling pulses. The connectors
+// are drawn from measured DOM positions, so the rows are plain flex/grid
+// layout and nothing can overlap or distort.
 
 const inputs = ['YAML records', 'Markdown', 'Collections', 'Taxonomy'];
 
-// Every output is real: the site capabilities ship with @grove-dev/astro,
-// the public files come from GENERATED_PUBLIC_NAMES in packages/cli, the
-// README from `grove readme generate`, the JSON from data/generated/.
+// Every output is real: the site capabilities ship with @grove-dev/astro, the
+// public files come from GENERATED_PUBLIC_NAMES in packages/cli, the README
+// from `grove readme generate`, the JSON from data/generated/.
 const groups = [
   { title: 'Website', items: ['Search', 'Filters', 'Lenses', 'Collections', 'Detail pages'] },
   { title: 'SEO', items: ['sitemap.xml', 'robots.txt', 'og-image.svg'] },
@@ -23,82 +24,69 @@ const groups = [
 ];
 ---
 
-<section id="pipeline" aria-labelledby="pipeline-title">
-  <Statement
-    eyebrow="One source, every surface"
-    titleId="pipeline-title"
-    lede="The YAML and Markdown you already write become a full website — search, filters, lenses, collections, detail pages — plus the SEO files, AI indexes, and README a healthy directory needs. One build, every surface in sync."
-  >
-    Plain files in. A <span class="text-gradient">complete site</span> out.
-  </Statement>
+<div
+  id="pipeline-stage"
+  class="relative w-full overflow-hidden rounded-lg border border-border bg-surface/60 px-5 py-7 sm:px-7 sm:py-9"
+>
+  <div class="pipeline-gridbg absolute inset-0" aria-hidden="true"></div>
+  <svg id="pipeline-paths" class="absolute inset-0 h-full w-full" fill="none" aria-hidden="true"></svg>
 
-  <div class="mx-auto max-w-6xl px-6 pb-24">
-    <div
-      id="pipeline-stage"
-      class="relative overflow-hidden rounded-lg border border-border bg-surface/60 px-6 py-10 sm:px-10 sm:py-14"
-    >
-      <div class="pipeline-gridbg absolute inset-0" aria-hidden="true"></div>
-      <svg id="pipeline-paths" class="absolute inset-0 h-full w-full" fill="none" aria-hidden="true"
-      ></svg>
+  <div class="relative flex flex-col items-center gap-8">
+    <!-- The section's phrase stays with the diagram, but as a label rather
+         than a heading: the hero owns the page's only <h1>. -->
+    <p class="font-mono text-[10px] uppercase tracking-widest text-subtle">
+      One source, every surface
+    </p>
 
-      <div class="relative grid items-center gap-10 md:grid-cols-[1fr_auto_1.2fr] md:gap-4">
-        <ul
-          class="flex flex-wrap justify-center gap-2.5 md:flex-col md:items-end md:gap-7"
-          aria-label="The files you write"
-        >
-          {
-            inputs.map((label, i) => (
-              <li
-                class="pipeline-node pipeline-in whitespace-nowrap rounded-full border border-border bg-card px-4 py-1.5 font-mono text-xs text-fg"
-                style={`--d: ${i * 90}ms`}
-              >
-                {label}
-              </li>
-            ))
-          }
-        </ul>
-
-        <div
-          class="pipeline-node pipeline-core mx-auto flex flex-col items-center gap-1 rounded-xl border border-brand/40 bg-brand/10 px-9 py-6 shadow-[0_0_48px_-8px_rgb(39_183_200/0.65)] backdrop-blur-sm md:mx-10"
-          style="--d: 380ms"
-        >
-          <span class="text-2xl font-semibold tracking-tight text-brand-light">Grove</span>
-          <span class="font-mono text-[10px] uppercase tracking-widest text-subtle"
-            >one command build</span
+    <ul class="flex flex-wrap justify-center gap-2" aria-label="The files you write">
+      {
+        inputs.map((label, i) => (
+          <li
+            class="pipeline-node pipeline-in whitespace-nowrap rounded-full border border-border bg-card px-3.5 py-1.5 font-mono text-xs text-fg"
+            style={`--d: ${i * 90}ms`}
           >
-        </div>
+            {label}
+          </li>
+        ))
+      }
+    </ul>
 
-        <ul
-          class="grid gap-3 sm:grid-cols-2 md:grid-cols-1 md:max-w-sm md:justify-self-end"
-          aria-label="Everything Grove generates"
-        >
-          {
-            groups.map((group, i) => (
-              <li
-                class="pipeline-node pipeline-out rounded-lg border border-border bg-card/90 p-3.5"
-                style={`--d: ${520 + i * 130}ms`}
-              >
-                <h3 class="font-mono text-[10px] uppercase tracking-widest text-brand-light">
-                  {group.title}
-                </h3>
-                <ul class="mt-2 flex flex-wrap gap-1.5">
-                  {group.items.map((item) => (
-                    <li class="rounded-full border border-border/80 bg-surface px-2.5 py-0.5 font-mono text-[10px] text-muted">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
+    <div
+      class="pipeline-node pipeline-core flex flex-col items-center gap-1 rounded-xl border border-brand/40 bg-brand/10 px-7 py-4 shadow-[0_0_48px_-8px_rgb(39_183_200/0.65)] backdrop-blur-sm"
+      style="--d: 380ms"
+    >
+      <span class="text-xl font-semibold tracking-tight text-brand-light">Grove</span>
+      <span class="font-mono text-[10px] uppercase tracking-widest text-subtle"
+        >one command build</span
+      >
     </div>
+
+    <ul class="grid w-full grid-cols-2 gap-2.5" aria-label="Everything Grove generates">
+      {
+        groups.map((group, i) => (
+          <li
+            class="pipeline-node pipeline-out rounded-lg border border-border bg-card/90 p-3"
+            style={`--d: ${520 + i * 130}ms`}
+          >
+            <h3 class="font-mono text-[10px] uppercase tracking-widest text-brand-light">
+              {group.title}
+            </h3>
+            <ul class="mt-2 flex flex-wrap gap-1.5">
+              {group.items.map((item) => (
+                <li class="rounded-full border border-border/80 bg-surface px-2 py-0.5 font-mono text-[10px] text-muted">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))
+      }
+    </ul>
   </div>
-</section>
+</div>
 
 <style is:global>
-  #pipeline .pipeline-gridbg {
+  #pipeline-stage .pipeline-gridbg {
     opacity: 0.5;
     background-image:
       linear-gradient(to right, rgb(54 86 102 / 0.3) 1px, transparent 1px),
@@ -186,8 +174,10 @@ const groups = [
 
 <script is:inline>
   (() => {
-    // Connector paths + staged reveal. Enhancement only: without JS the
-    // columns already read left → Grove → right, just without the lines.
+    // Connector paths + staged reveal. Enhancement only: without JS the rows
+    // already read files → Grove → outputs top to bottom, just without the
+    // lines. The geometry is vertical at every width, so unlike the old
+    // three-column layout there is nothing to gate on viewport size.
     const stage = document.getElementById('pipeline-stage');
     const svg = document.getElementById('pipeline-paths');
     if (!stage || !svg) return;
@@ -197,24 +187,21 @@ const groups = [
     if (!core || !ins.length || !outs.length) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const wide = window.matchMedia('(min-width: 768px)');
     const NS = 'http://www.w3.org/2000/svg';
 
     const draw = () => {
       svg.replaceChildren();
-      // The stacked mobile layout has no meaningful left→right geometry.
-      if (!wide.matches) return;
       const sr = stage.getBoundingClientRect();
       if (sr.width === 0) return;
       svg.setAttribute('viewBox', `0 0 ${sr.width} ${sr.height}`);
       svg.setAttribute('preserveAspectRatio', 'none');
       const cr = core.getBoundingClientRect();
-      const coreL = { x: cr.left - sr.left, y: cr.top - sr.top + cr.height / 2 };
-      const coreR = { x: cr.right - sr.left, y: coreL.y };
+      const coreT = { x: cr.left - sr.left + cr.width / 2, y: cr.top - sr.top };
+      const coreB = { x: coreT.x, y: cr.bottom - sr.top };
 
       const connect = (from, to, cls, delay) => {
-        const midX = (from.x + to.x) / 2;
-        const d = `M ${from.x} ${from.y} C ${midX} ${from.y}, ${midX} ${to.y}, ${to.x} ${to.y}`;
+        const midY = (from.y + to.y) / 2;
+        const d = `M ${from.x} ${from.y} C ${from.x} ${midY}, ${to.x} ${midY}, ${to.x} ${to.y}`;
         for (const [extra, pulseDelay] of [
           ['pipeline-path ' + cls, delay],
           ['pipeline-pulse', delay + 900],
@@ -232,8 +219,8 @@ const groups = [
       ins.forEach((el, i) => {
         const r = el.getBoundingClientRect();
         connect(
-          { x: r.right - sr.left + 6, y: r.top - sr.top + r.height / 2 },
-          { x: coreL.x - 6, y: coreL.y },
+          { x: r.left - sr.left + r.width / 2, y: r.bottom - sr.top + 4 },
+          { x: coreT.x, y: coreT.y - 4 },
           'pipeline-path-in',
           250 + i * 70,
         );
@@ -241,8 +228,8 @@ const groups = [
       outs.forEach((el, i) => {
         const r = el.getBoundingClientRect();
         connect(
-          { x: coreR.x + 6, y: coreR.y },
-          { x: r.left - sr.left - 6, y: r.top - sr.top + r.height / 2 },
+          { x: coreB.x, y: coreB.y + 4 },
+          { x: r.left - sr.left + r.width / 2, y: r.top - sr.top - 4 },
           'pipeline-path-out',
           600 + i * 110,
         );

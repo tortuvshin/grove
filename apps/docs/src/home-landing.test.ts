@@ -22,7 +22,6 @@ describe("docs homepage (standalone Astro route)", () => {
 			"Hero",
 			"Features",
 			"Demo",
-			"Pipeline",
 			"OpenApps",
 			"Faq",
 			"FinalCta",
@@ -33,11 +32,11 @@ describe("docs homepage (standalone Astro route)", () => {
 			);
 		}
 
-		// Renders every section in the vite.dev-style order: hero → feature
-		// grid → live demo → transformation diagram → production story → FAQ →
-		// gradient CTA band.
+		// Renders every section in the vite.dev-style order: hero (which now
+		// carries the transformation diagram in its right column) → feature
+		// grid → live demo → production story → FAQ → gradient CTA band.
 		expect(indexAstro).toMatch(
-			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<Pipeline\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
+			/<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
 		);
 
 		// Superseded sections from earlier iterations must stay deleted.
@@ -157,8 +156,14 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(homeLayout).not.toContain("https://grove.dev'");
 	});
 
-	it("renders the hero as the story's first frame: mark, headline, and the CLI as primary CTA", async () => {
+	it("renders the hero as the story's first frame: pitch left, transformation diagram right", async () => {
 		const hero = await readComponent("Hero");
+
+		// Two columns: the pitch is left-aligned from `lg` up, and the
+		// diagram that used to sit halfway down the page rides alongside it.
+		expect(hero).toContain("import Pipeline from './Pipeline.astro'");
+		expect(hero).toContain("<Pipeline />");
+		expect(hero).toContain("lg:text-left");
 
 		// Micro badge + positioning line, closing phrase in the animated
 		// signature gradient.
@@ -187,11 +192,12 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toContain('target="_blank"');
 		expect(hero).toContain('href="/roadmap/"');
 
-		// Growing, swaying mark + aurora field degrade gracefully.
+		// Aurora field degrades gracefully. The growing mark has moved to the
+		// How Grove works finale and must not linger here.
 		expect(hero).toContain("hero-beams");
-		expect(hero).toContain("hero-mark-glow");
-		expect(hero).toContain("hero-sway");
 		expect(hero).toContain("prefers-reduced-motion");
+		expect(hero).not.toContain("hero-mark");
+		expect(hero).not.toContain("hero-sway");
 
 		// Honesty strip.
 		expect(hero).toContain("No database · No CMS · MIT licensed");
@@ -235,7 +241,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(demo).toContain("living directory.");
 
 		// Five-step narrative: strictly sequential scenes, no cross-fades.
-		// (The transformation diagram lives in its own Pipeline section now.)
+		// (The transformation diagram lives in the hero now.)
 		for (const label of [
 			"Initialize",
 			"Add content",
@@ -264,6 +270,13 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(demo).toContain("Collection health");
 		expect(demo).toContain("183");
 		expect(demo).toContain('id="hgw-finale"');
+
+		// The finale closes on the growing Grove mark, which the hero used to
+		// own: seed, stem, leaves, and shoots, started once by the scrub loop.
+		for (const cls of ["hgw-seed", "hgw-stem", "hgw-leaf", "hgw-shoot", "hgw-sway"]) {
+			expect(demo, cls).toContain(cls);
+		}
+		expect(demo).toContain("classList.add('is-growing')");
 
 		// The scrub is a progressive enhancement only: it gates on viewport
 		// width and reduced motion, and tears down cleanly.
@@ -304,11 +317,16 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(demo).toContain('aria-live="polite"');
 	});
 
-	it("presents the transformation diagram in the standalone Pipeline section", async () => {
+	it("presents the transformation diagram as the hero's right column", async () => {
 		const pipeline = await readComponent("Pipeline");
 
-		expect(pipeline).toContain('id="pipeline"');
-		expect(pipeline).toMatch(/<section[^>]+aria-labelledby=/);
+		// A visual inside the hero, not a page section: no <section>, no
+		// heading of its own, and the phrase it used to head survives as a
+		// label so the hero still says what Grove produces.
+		expect(pipeline).toContain('id="pipeline-stage"');
+		expect(pipeline).toContain("One source, every surface");
+		expect(pipeline).not.toContain("<section");
+		expect(pipeline).not.toContain("Statement.astro");
 
 		// Inputs are the files users actually write.
 		for (const input of ["YAML records", "Markdown", "Collections", "Taxonomy"]) {
@@ -331,11 +349,12 @@ describe("docs homepage (standalone Astro route)", () => {
 			expect(pipeline, output).toContain(output);
 		}
 
-		// Enhancement only: reveal/paths gate on reduced motion and the
-		// stacked mobile layout draws no connectors.
+		// Enhancement only: reveal and connector paths gate on reduced motion.
+		// The flow is vertical at every width, so unlike the old three-column
+		// section there is no viewport gate on drawing the connectors.
 		expect(pipeline).toContain("prefers-reduced-motion");
 		expect(pipeline).toContain("IntersectionObserver");
-		expect(pipeline).toContain("min-width: 768px");
+		expect(pipeline).not.toContain("min-width: 768px");
 	});
 
 	it("keeps the Open Apps production story with a real product screenshot", async () => {
@@ -382,7 +401,7 @@ describe("docs homepage (standalone Astro route)", () => {
 		expect(hero).toMatch(/<section[^>]+aria-labelledby=/);
 		expect(hero).toMatch(/<h1[^>]+id=/);
 
-		for (const name of ["Features", "Demo", "Pipeline", "OpenApps", "Faq", "FinalCta"]) {
+		for (const name of ["Features", "Demo", "OpenApps", "Faq", "FinalCta"]) {
 			const src = await readComponent(name);
 			expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
 		}
