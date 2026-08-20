@@ -1,0 +1,80 @@
+apps/docs/src/content/docs/automation/audit.md
+  s_75aa02f6d0f279::t_05cee0f362e1b1 3,6-8,12-14,19,30,49,51-53,57-58,60,64,74-81,89,97,99,101,103-105,107,109,111-115,117-119,123,125-126
+apps/docs/src/content/docs/automation/check.md
+  s_75aa02f6d0f279::t_caa7de21b5ab17 34
+  s_75aa02f6d0f279::t_608523602b2f37 3,6,8-14,16-18,21-22,25,27,29-33,35-41,43,45,47,49,51-52,54,56,58,60-63,65,67,75-83,85,92,94,96-100,102,104,106-108,112,115-116,120-121,123,125,131,134,138,143-144
+apps/docs/src/content/docs/concepts/decisions.mdx
+  s_75aa02f6d0f279::t_ee35b321477c33 67,165
+apps/docs/src/content/docs/content/health-classification.mdx
+  s_75aa02f6d0f279::t_f1dca1ee4707a2 16,18-26,200,203
+apps/docs/src/content/docs/automation/sync-contributors.md
+  s_75aa02f6d0f279::t_73a1c3eb0e9509 3,6,8-10,12,14-16,20-24,26,30,32,36,38-62,64,66,68-70,74,79,83,87-91,95-97
+  s_75aa02f6d0f279::t_d4e046f1ae6152 28,31,34
+apps/docs/src/content/docs/outputs/seo.md
+  s_75aa02f6d0f279::t_4b5a5d349ee071 3,6-7,9-15,17-52,54-61,63-70,74-76,78-81,83-86,90,93,96-97,101-104,106-107,109,111-113,115-119,121-123,125-127,129,131-134,136,138-141
+apps/docs/src/content/docs/automation/scheduled.md
+  s_75aa02f6d0f279::t_e6872a4957dcf7 19,22-25
+  s_75aa02f6d0f279::t_644bb99a45db89 6-10,12,14,16-18,20-21,27,29,31-60,62,66,68,76-77
+apps/docs/src/content/docs/outputs/site-meta.md
+  s_75aa02f6d0f279::t_7368c14eace8e5 3,6-57,59,61-63,65-73,75,77-78,80,82,85-87,89-91,93,95-98
+apps/docs/src/content/docs/introduction.mdx
+  s_75aa02f6d0f279::t_ee35b321477c33 69
+apps/docs/src/content/docs/outputs/overview.md
+  s_75aa02f6d0f279::t_a65fb596e96437 3,6-9,11-12,14-19,22-28,30,32-34,36-37,39-42,44-49,51,53,55,58-59,61-64,67-79,81-85,87,89-90,92-99,101,103,105-111,117-148
+apps/docs/src/content/docs/automation/readme.md
+  s_75aa02f6d0f279::t_6ecd860e2cc29f 41,44
+  s_75aa02f6d0f279::t_cf8b3f6e8437f6 6,10-12,15-16,18,20-36,39,46,57,59-61,63,65-68,70,72,74,76-78,80-82,84,86,88-90,92,94,96-97,101,109,113,117,119-124,128,130,134,138-142,147,151-153,157,160
+  s_75aa02f6d0f279::t_8836c385a10829 40
+apps/docs/src/content/docs/reference/record-schema.md
+  s_75aa02f6d0f279::t_1061ad02aab871 17-21
+  s_75aa02f6d0f279::t_2190924a23b42c 3,6-8,10-15,23,25,29-35,37-41,47-65,69,71-73,79-80,84,86-88,92,94-96,100,102,104,106-113,117,119,121-128,130-131,133,135,137-139,143-144,146-148,150,166-169,178-180,183-230,232-304
+apps/docs/src/content/docs/automation/submissions.md
+  s_75aa02f6d0f279::t_7d799dc7862e99 99
+  s_75aa02f6d0f279::t_7b90d4f7f8bf5a 3,6,8,10,12,14,18-22,24,26,28-56,58,60,62,66-69,71-73,76-78,83,85,87,89,91,93,95-97,101,103-106,108,110-113,117-120
+  s_75aa02f6d0f279::t_c0aeac04557296 16
+apps/docs/src/content/docs/outputs/generated-data.md
+  s_75aa02f6d0f279::t_558903e68cbdf3 3,6-8,10-11,13,15-40,44-49,53-70,72-75,80-99,103-106,108,110-138,140-142,144,146-153,155,158
+apps/docs/src/content/docs/automation/cleanup.md
+  s_75aa02f6d0f279::t_c4e430e51d6923 3,6,8,10-14,23-25,27-28,33,37-48,50,52,59-60,64-65,67-70,76,78,80-83,85,89-91
+apps/docs/src/content/docs/automation/sync-github.md
+  s_75aa02f6d0f279::t_7d799dc7862e99 202-203
+  s_75aa02f6d0f279::t_d210d17d11d998 3,6,8,17-19,24,26-43,45-47,50-52,55,57,61,63,65,69,71,73-76,78-80,82,86,95,98-100,103,105-106,112-118,126,134,136,138,142,144-145,147,149,151,153,155,157,159-161,163,167-172,184-194,201,204-206
+apps/docs/src/content/docs/outputs/workflows.md
+  s_75aa02f6d0f279::t_4f093c9dd7e1ef 3,6-9,13-19,22-24,35-73,76-77,80-81,83,85-87,89-94,96,98-109,111,113-116
+  s_75aa02f6d0f279::t_4aa998332f3f30 20,26-33
+packages/starlight/styles/base.css
+  s_a81f057502dfc0::t_d8665892c5653b 762-764
+  s_a81f057502dfc0::t_b60f4c0709f7b4 753-757,770-772
+  s_a81f057502dfc0::t_ea60ddb4558022 777-781
+apps/docs/src/content/docs/guides/walkthrough-sync-github.mdx
+  s_75aa02f6d0f279::t_c3bd13adaf2305 159,165,169-179
+  s_75aa02f6d0f279::t_f154353924c618 3,8-11,42,45-46,48-49,90,92,95,98
+  s_75aa02f6d0f279::t_8006b856d18760 88-89,112-116,118-125,128,131-133,138,153
+  s_75aa02f6d0f279::t_f86fd4d0bce214 99
+apps/docs/src/content/docs/concepts/files-canonical.mdx
+  s_75aa02f6d0f279::t_ee35b321477c33 113-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "dce487f55f9c0bef3d44ad637f133f70b6cdaff9",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_a81f057502dfc0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6770f900-360b-4ebc-a4ec-7ce8faa53480",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
