@@ -11,6 +11,7 @@ outputs. No database, no CMS, and no runtime server required.
 [![npm](https://img.shields.io/npm/v/@grove-dev/cli?label=%40grove-dev%2Fcli&color=0f766e&style=flat-square)](https://www.npmjs.com/package/@grove-dev/cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/tortuvshin/grove/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/tortuvshin/grove/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0f766e.svg?style=flat-square)](LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/tortuvshin/grove)
 
 [Website](https://withgrove.dev/) ·
 [Documentation](https://withgrove.dev/introduction/) ·
