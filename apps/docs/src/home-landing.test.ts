@@ -175,22 +175,24 @@ describe("docs homepage (standalone Astro route)", () => {
 		// One-sentence philosophy in user terms.
 		expect(hero).toContain("searchable, SEO-ready directory");
 
-		// The CLI is the primary call to action: it types on load, prints
-		// the first scaffold lines, and the copy button hands it over.
-		expect(hero).toContain("npx @grove-dev/cli init");
-		expect(hero).toContain("Ready to grow.");
-		expect(hero).toContain("Copied");
-		expect(hero).toContain("navigator.clipboard");
-		expect(hero).not.toContain("pnpm dlx");
-		expect(hero).not.toContain("<pre");
-
-		// Secondary links point at real destinations; no triple-button row.
-		expect(hero).toContain("View on GitHub");
+		// Three calls to action pointing at real destinations. The install
+		// command is deliberately not one of them — it belongs in the docs,
+		// not in the first frame.
+		expect(hero).toContain('href="/getting-started/create-a-space/"');
+		expect(hero).toContain("Get started");
 		expect(hero).toContain("Read the docs");
 		expect(hero).toContain('href="/introduction/"');
+		expect(hero).toContain("View on GitHub");
 		expect(hero).toContain('href="https://github.com/tortuvshin/grove"');
 		expect(hero).toContain('target="_blank"');
 		expect(hero).toContain('href="/roadmap/"');
+		expect(hero).not.toContain("npx @grove-dev/cli init");
+		expect(hero).not.toContain("navigator.clipboard");
+		expect(hero).not.toContain("<pre");
+
+		// Fills the first screen under the sticky h-16 header, with an `svh`
+		// unit so mobile browser chrome cannot leak the next section in.
+		expect(hero).toContain("calc(100svh - 4rem)");
 
 		// Aurora field degrades gracefully. The growing mark has moved to the
 		// How Grove works finale and must not linger here.

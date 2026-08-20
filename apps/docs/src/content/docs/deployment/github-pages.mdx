@@ -1,56 +1,64 @@
 ---
 title: GitHub Pages
-description: Deploy a Grove space to GitHub Pages with the bundled ci.yml and deploy.yml workflows.
+description: Deploy a Grove space to GitHub Pages with the bundled deploy.yml workflow.
 ---
 
 import { Aside, CardGrid, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="Recommended">
-  Grove spaces deploy to GitHub Pages with zero configuration beyond copying the two bundled workflows into `.github/workflows/`. It is the default deploy target because every Grove repo already lives on GitHub.
+  GitHub Pages is the default deploy target: `grove init` already writes `.github/workflows/deploy.yml` into your repo, so there is nothing extra to copy in. You only need to enable Pages and point the workflow at your domain.
 </Aside>
 
 ## Prerequisites
 
-- A GitHub repository containing your Grove space.
-- `astro build` produces a static `dist/` directory (default Astro behavior).
+- A GitHub repository containing your Grove space (created by `grove init`, which includes `.github/workflows/deploy.yml`).
 - GitHub Pages enabled in repository settings, source = "GitHub Actions".
+- A `SITE_URL` repository variable set to your production domain (below).
 
 ## Workflow
 
-The template ships `.github/workflows/deploy.yml`:
+`deploy.yml` ships as-is — this is the real file, unedited:
 
 ```yaml title=".github/workflows/deploy.yml"
-name: Deploy to GitHub Pages
+name: Deploy
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 jobs:
-  build:
+  pages:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 24 }
+        with:
+          node-version: "24"
+          cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec grove check
       - run: pnpm build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
-        with: { path: ./dist }
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }
-    steps:
+        with:
+          path: dist
       - uses: actions/deploy-pages@v4
+        id: deployment
 ```
 
-The `build` job runs `grove check` first (validates and generates `data/generated/*.json`, sitemap, llms files, robots, og-image), then `pnpm build` to produce the Astro static output.
+The single `pages` job checks out the repo, installs with pnpm, runs `pnpm build` (which is `astro build` — the Grove Astro integration generates `data/generated/*.json`, the sitemap, `llms.txt`/`llms-full.txt`, `robots.txt`, and the OG images as part of that one command), then hands `dist/` to the official Pages actions. There is no separate `grove check` step here — that only runs in `ci.yml`, on pushes and pull requests, as a pre-flight gate that does not deploy anything.
 
 ## Deploy procedure
 
@@ -91,29 +99,27 @@ The `build` job runs `grove check` first (validates and generates `data/generate
       </TabItem>
     </Tabs>
 
-    <Aside type="note" title="What you should see">
-      The Actions tab shows a new `Deploy to GitHub Pages` workflow run within seconds of the push. The run starts in queued/running state and reports a green checkmark once the deploy job completes.
-    </Aside>
-
 2. Enable GitHub Pages in repository settings (Settings → Pages) with source = "GitHub Actions".
 
-3. Wait for the workflow to complete. The first deploy typically takes 1–2 minutes; subsequent pushes reuse cached dependencies and finish faster.
+3. Set the `SITE_URL` repository variable: Settings → Secrets and variables → Actions → **Variables** tab → New repository variable → name `SITE_URL`, value `https://your-username.github.io/your-repo` (or your custom domain). The workflow passes this into the build as `env: SITE_URL: ${{ vars.SITE_URL }}` — without it, the build falls back to `site.url` in `grove.config.ts`, and if that's still the scaffold's `https://example.com` placeholder, every canonical link, sitemap entry, and OG image will point at the wrong domain.
+
+4. Push again, or re-run the workflow from the Actions tab (`workflow_dispatch` is enabled). The workflow runs on every push to `main`.
 
 </Steps>
 
 ## Custom domain
 
-Add a `CNAME` file at `public/CNAME` containing your domain. Grove's `site.url` in `grove.config.ts` must match.
+Add a `CNAME` file at `public/CNAME` containing your domain (a plain-text file with one line — GitHub Pages reads it directly; this is generic GitHub Pages behavior, not something Grove generates). Keep the `SITE_URL` variable (or `site.url` in `grove.config.ts`) in sync with it, or your sitemap and canonical tags will point at the wrong host even though the page serves correctly.
 
 ## Path-based deployment
 
-To deploy under a subpath (e.g., `https://username.github.io/repo-name/`), set `base: '/repo-name'` in `astro.config.mjs` and `site.url` in `grove.config.ts` accordingly.
+To deploy under a subpath (e.g., `https://username.github.io/repo-name/`), set `base: '/repo-name'` in `astro.config.mjs` (a standard Astro config option — Grove's `astro.config.mjs` doesn't set `base` by default) and update `SITE_URL`/`site.url` to include the same path.
 
 ## Troubleshooting
 
-- **404 on routes other than `/`** — set `trailingSlash: 'always'` in Astro config.
-- **Old content after deploy** — verify the workflow ran `grove check` (it regenerates `data/generated/`).
-- **Sitemap resolves to localhost** — verify `site.url` in `grove.config.ts`.
+- **Build fails with `Seo: \`site\` is not set on the Astro config`** — neither the `SITE_URL` repository variable nor `site.url` in `grove.config.ts` is set. Set one of them; the build will not silently substitute a placeholder here.
+- **Sitemap or OG images resolve to the wrong domain** — the build succeeded but `SITE_URL`/`site.url` is stale (often still the scaffold's `https://example.com`). Update it and rebuild; there's no other source of truth for the URL.
+- **404 on the Pages URL right after the first deploy** — GitHub Pages can take a minute to attach the domain after the first successful `deploy-pages` run; check the run's `page_url` output in the Actions log.
 
 ## Related
 

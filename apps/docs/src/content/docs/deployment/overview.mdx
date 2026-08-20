@@ -6,7 +6,7 @@ description: How to ship the static site produced by `astro build` to any static
 import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astrojs/starlight/components';
 
 <Aside type="tip">
-  The Astro build produces a fully static site. The build output is in `dist/` after `pnpm build`. There is no server runtime — every host that serves static files works.
+  The Astro build produces a fully static site. The build output is in `dist/` after `pnpm build`. There is no server runtime, no adapter, and no database — every host that serves static files works.
 </Aside>
 
 ## Build command
@@ -19,14 +19,28 @@ import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astr
     pnpm build
     ```
 
-    Runs `pnpm exec grove check` (validate, generate, sitemap, llms, robots, og-image, astro check), then `astro build`. The site is now a folder of HTML, CSS, JS, and JSON.
+    This runs `astro build` — that's the entire `build` script in `package.json`. The Grove Astro integration (`@grove-dev/astro`) hooks into Astro's `astro:config:setup` and calls `prepareDirectory()` automatically before any page renders, so a plain `pnpm build` already:
 
-2. Set the environment variables for the production host:
+    - regenerates `data/generated/*.json` from your records, taxonomy, and overrides,
+    - writes `public/sitemap.xml`, `public/llms.txt`, `public/llms-full.txt`,
+    - writes `public/robots.txt` and `public/og-image.svg`,
+    - renders the per-page OG cards under `public/og/**`.
 
-    - **`SITE_URL`** — canonical URL the build uses for absolute links in `sitemap.xml`, OG tags, and JSON-LD. Defaults to `https://example.com`. Set this to your production URL in the host's build environment.
-    - **`GITHUB_TOKEN`** — only needed if `grove sync github` runs as part of the build. Most sites keep sync as a separate scheduled workflow.
+    No consumer-owned prebuild script is required — Astro's own build then turns all of this plus your pages into `dist/`.
 
-    The build is fully static; no runtime secrets required.
+    `grove check` (schema/data validation, then the same generation step, then `astro check`) is a stricter pre-flight gate used in `.github/workflows/ci.yml` on every push and pull request. It is **not** part of `pnpm build` and it is **not** run by the deploy workflow below — deploy only runs `pnpm build`.
+
+2. Set the site URL for the production host:
+
+    The canonical URL used for `sitemap.xml`, canonical/OG/Twitter tags, JSON-LD, and `llms.txt` comes from `site.url` in `grove.config.ts`, or from the `SITE_URL` environment variable, which `astro.config.mjs` prefers when it's set:
+
+    ```js
+    site: process.env.SITE_URL || groveConfig.site.url,
+    ```
+
+    If **neither** is set, `Astro.site` is `undefined` and the build fails outright — the shared `Seo` layout throws `Seo: \`site\` is not set on the Astro config` rather than silently emitting URLs on a domain you don't own. If `site.url` is set but wrong (still the scaffold's placeholder, or a typo), the build succeeds but every canonical link, sitemap entry, OG image, and the `llms.txt` `Site:` line silently point at the wrong domain.
+
+    Set `SITE_URL` in the host's build environment (see each provider page for exactly where) so the same repo can build a preview under one domain and production under another without editing `grove.config.ts`.
 
 </Steps>
 
@@ -34,33 +48,28 @@ import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astr
 
 <CardGrid>
   <Card title="GitHub Pages" icon="external">
-    <Badge text="Easiest" variant="success" size="small" />
-    No adapter. Best for open-source repos and project pages.
+    <Badge text="Ships out of the box" variant="success" size="small" />
+    No adapter. `grove init` already scaffolds `deploy.yml`.
     [Deploy to GitHub Pages →](/deployment/github-pages/)
   </Card>
-  <Card title="Cloudflare Pages" icon="cloud">
-    <Badge text="Easy" variant="tip" size="small" />
-    No adapter. Fast edge cache, custom domains.
+  <Card title="Cloudflare" icon="cloud">
+    <Badge text="Recipe" variant="tip" size="small" />
+    No adapter. Pages or Workers-with-Assets; you write the config.
     [Deploy to Cloudflare →](/deployment/cloudflare/)
   </Card>
-  <Card title="Cloudflare Workers-with-Assets" icon="cloud">
-    <Badge text="Medium" variant="note" size="small" />
-    No adapter. Bypasses `@astrojs/cloudflare` `prismjs` issue.
-    [Workers-with-Assets pattern →](/deployment/cloudflare/#workers-with-assets-canonical-pattern)
-  </Card>
   <Card title="Netlify" icon="external">
-    <Badge text="Easy" variant="tip" size="small" />
-    No adapter. PR previews, edge functions.
+    <Badge text="Recipe" variant="tip" size="small" />
+    No adapter. You write `netlify.toml`.
     [Deploy to Netlify →](/deployment/netlify/)
   </Card>
   <Card title="Self-hosted" icon="setting">
-    <Badge text="Medium" variant="note" size="small" />
+    <Badge text="Recipe" variant="note" size="small" />
     No adapter. Own infrastructure (nginx, Caddy, S3).
     [Self-hosted guide →](/deployment/self-hosted/)
   </Card>
 </CardGrid>
 
-All providers run `pnpm build` and serve `dist/`. Differences are in CI setup, headers, and edge features.
+Grove's own scaffold (what `grove init` writes, and what `apps/example/` in the repo mirrors) ships only one deploy workflow: `.github/workflows/deploy.yml`, targeting GitHub Pages. Cloudflare, Netlify, and self-hosted are all "bring your own host config" — Grove ships no `wrangler.toml`, `netlify.toml`, or `Dockerfile`. Every host, including GitHub Pages, is just serving the same `dist/` folder — the differences are in CI setup, headers, and edge features, not in what Astro produces.
 
 ## Pre-deploy checklist
 
@@ -70,37 +79,40 @@ Before you point your domain at a new deploy:
 
 1. `pnpm build` succeeds locally.
 2. `dist/index.html` exists and contains your site name.
-3. `dist/sitemap.xml` is present and lists the right URLs.
+3. `dist/sitemap.xml` is present and lists your production domain, not `example.com`.
 4. `dist/llms.txt` and `dist/llms-full.txt` are present.
-5. `dist/projects/<some-slug>/index.html` exists for at least one record.
-6. `SITE_URL` is set in the host's environment, not hardcoded.
+5. A record's detail page exists on disk, e.g. `dist/<your-directory-route>/<some-slug>/index.html`.
+6. `SITE_URL` (or `site.url` in `grove.config.ts`) is your real production domain, not the scaffold placeholder.
 7. `pnpm preview` shows the site the way you expect.
 
 </Steps>
 
 ## Continuous deployment
 
-The scaffold ships a `deploy.yml` GitHub Actions workflow that builds and deploys on every push to `main`. The other workflows:
+The scaffold ships six GitHub Actions workflows (`grove init` writes all of them into `.github/workflows/`); only `deploy.yml` deploys:
 
 <CardGrid>
+  <Card title="deploy.yml" icon="rocket">
+    Push to `main` or manual dispatch. Builds with `pnpm build` and publishes `dist/` to GitHub Pages.
+  </Card>
   <Card title="ci.yml" icon="document">
-    Runs `grove check` + `astro build` on every PR.
+    Push to `main` and every pull request. Runs `pnpm exec grove check`, then `pnpm build` — no deploy step.
   </Card>
   <Card title="sync-github.yml" icon="document">
-    Weekly cron, refreshes stars/languages/last-pushed.
+    Weekly cron. Refreshes stars/language/last-pushed from GitHub and opens a PR.
   </Card>
   <Card title="sync-contributors.yml" icon="document">
-    Weekly cron, aggregates contributor data.
+    Weekly cron. Aggregates contributor data and commits it directly.
   </Card>
   <Card title="cleanup.yml" icon="document">
-    Monthly cron, produces the triage report.
+    First Monday of the month. Posts a triage report to the job summary.
   </Card>
   <Card title="readme.yml" icon="document">
-    Weekly cron, regenerates the README block.
+    Weekly cron. Regenerates the README's awesome-list block and opens a PR if it changed.
   </Card>
 </CardGrid>
 
-See [Scheduled maintenance](/automation/scheduled/) for cadence and triggers.
+None of the scheduled workflows touch `dist/` or deploy anything — they update source files (`data/generated/*.json`, `README.md`) and either commit directly or open a PR. A merge to `main` is what triggers `deploy.yml`. See [Scheduled maintenance](/automation/scheduled/) for cadence and triggers.
 
 ## Local preview
 
@@ -127,7 +139,7 @@ The `preview` script serves `dist/` on a local port. Walk through every page, ch
 <CardGrid>
   <LinkCard
     title="GitHub Pages"
-    description="Zero-config deploys for open-source repos. Ships with deploy.yml."
+    description="Zero-config deploys — the workflow deploy.yml already ships."
     href="/deployment/github-pages/"
   />
   <LinkCard
