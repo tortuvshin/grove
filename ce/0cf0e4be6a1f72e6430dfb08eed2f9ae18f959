@@ -1,0 +1,42 @@
+README.md
+  s_83df15219dc8b0::t_ebee265886ad14 25
+packages/core/src/awesome-readme.test.ts
+  s_83df15219dc8b0::t_2d8a1dfad24726 13
+apps/docs/src/components/home/Demo.astro
+  s_83df15219dc8b0::t_b3761b8c7b8258 113-115,117-119
+  s_83df15219dc8b0::t_50fce6db61de03 389
+  s_83df15219dc8b0::t_015ea3a2268d5e 133,135
+  s_83df15219dc8b0::t_02d8342badb6aa 30,39-40
+packages/core/src/og-image.test.ts
+  s_83df15219dc8b0::t_2d8a1dfad24726 22,40
+packages/core/src/llms.test.ts
+  s_83df15219dc8b0::t_2d8a1dfad24726 10,33,40,42
+apps/example/README.md
+  s_83df15219dc8b0::t_c702847a8d5fd2 53
+apps/example/grove.config.ts
+  s_83df15219dc8b0::t_c702847a8d5fd2 100
+apps/docs/src/components/home/Features.astro
+  s_83df15219dc8b0::t_612567749a4d5f 7-12,17,21-22,27,32,36-37,41-42,47
+  s_83df15219dc8b0::t_f66ebbcdb10f39 79,82
+packages/core/src/sitemap.test.ts
+  s_83df15219dc8b0::t_2d8a1dfad24726 23,42-43,52,77-78,81-83,85-88,98
+apps/docs/src/data/faq.ts
+  s_83df15219dc8b0::t_d21824262ce137 36-37,40
+  s_83df15219dc8b0::t_453d3f68ba478d 25,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "ce0cf0e4be6a1f72e6430dfb08eed2f9ae18f959",
+  "prompts": {},
+  "sessions": {
+    "s_83df15219dc8b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "026a19a0-7d5e-4e5b-a2c1-5864ff0857dd",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
