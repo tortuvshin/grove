@@ -1,68 +1,70 @@
 ---
 title: grove check
-description: Validate records, regenerate artifacts, and run astro check — the single CI gate for every change.
+description: Validate records, regenerate every derived artifact, and run astro check — the single CI gate for every change.
 ---
 
-`grove check` is the single-command entry point for validation. It runs in CI on every pull request and catches schema errors, cross-reference errors, and broken taxonomy values before they merge.
+`grove check` is the single-command entry point for validation. It runs in CI on every pull request and catches schema errors, cross-reference errors, and unknown taxonomy values before they merge.
+
+## What it does, in order
+
+1. Loads `grove.config.ts` (`loadConfig()`). If the config file itself fails to parse against the Zod schema, the command exits before any records are read.
+2. Runs `validateProject()` (`packages/core/src/validate.ts`) against every file in `paths.recordsDir` (default `data/records`) and prints one line per issue.
+3. If validation failed — or `--strict` was passed and any warnings were reported — the command stops here with exit code `1`. Nothing is regenerated.
+4. Otherwise it calls `prepareDirectory()` (`packages/core/src/prepare.ts`), which regenerates every derived artifact, and prints a one-line summary.
+5. Finally it runs `pnpm exec astro check` as a child process.
+
+Source: `packages/cli/src/index.ts:64-85`.
 
 ## Run it
 
-Locally:
-
 ```bash
-grove check            # validate + generate + sitemap + llms + robots + astro check
-grove check --strict   # also fail on warnings (recommended for CI)
+grove check            # validate, regenerate artifacts, run astro check
+grove check --strict   # also fail when there are warnings
 ```
 
-In CI, the scaffold writes `.github/workflows/ci.yml`, which runs `grove check --strict` on every PR. Failed validation blocks merge.
+## What gets validated
 
-## What it checks
+`validateProject()` reads every `*.yml` file in `paths.recordsDir`, parses it, and accumulates issues across **all** files before returning — it does not stop at the first failure. Each issue carries a `code` and a `severity` of `error` or `warning`:
 
-The validator runs in this order; the first failure stops the run:
-
-1. **Config load** — `grove.config.ts` parses and validates against the Zod schema. A misspelled field or wrong type fails here.
-2. **YAML parse** — every `data/records/*.yml` is parseable YAML.
-3. **Schema validation** — each record matches its blueprint's Zod schema (see [Record schema](/reference/record-schema/)):
-   - `kind` matches the space's `blueprint`. `project-directory` is the only supported blueprint today, so `kind` must be `project`.
-   - Required fields are present (`slug`, `kind`, `name`, `description`, `category`).
-   - Enum values are valid (`projectType`, `category`, `tags`, etc.).
-   - URL fields are well-formed (`repoUrl`, `homepageUrl`, `logoUrl`, `links.*`).
-4. **Slug uniqueness** — every record has a unique `slug`. Two records cannot share a slug.
-5. **Filename match** — the record's `slug` matches its filename (`data/records/<slug>.yml`).
-6. **Cross-record references** — `related[]`, `parent`, and other slug references resolve to existing records.
-7. **Taxonomy values** — every record's `category`, `stack`, `platform`, and `license` values are present in `data/taxonomy/*.yml`.
-8. **Decisions** — every entry in `data/decisions.yml` references an existing slug. Every `pin`/`renameSlug`/`sortPriority` field is well-formed.
-9. **Overrides** — every entry in `data/overrides.yml` applies cleanly to the matching record (no type mismatches).
-10. **Collections** — every `data/collections/*.yml` has a valid `query` predicate that matches at least one record (warnings if empty).
-11. **Body paths** — every `content:` path resolves to an existing Markdown file.
-
-`validateProject` (`packages/core/src/validate.ts`) does not check `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, or `og-image.svg` — those files aren't validated at all; `grove check` just regenerates them unconditionally via `prepareDirectory()` after the checks above pass, then runs `astro check`.
-
-If `astro check` passes, the build is good to go.
-
-## Severity levels
-
-Two exit codes:
-
-- **Exit 0** — validation passed.
-- **Exit 1** — validation failed; the PR is blocked.
-
-By default, **warnings** are reported to stdout but do not affect exit code. `--strict` promotes warnings to errors:
-
-| Issue | Default | `--strict` |
+| Code | Severity | What it means |
 |---|---|---|
-| Missing `bestFor` on a curated record | warning | error |
-| Slug doesn't match filename | error | error |
-| Unparseable YAML | error | error |
-| Empty collection (no records match) | warning | error |
-| `links.github` differs from `repoUrl` | warning | error |
-| Description > 200 characters | warning | warning |
+| `missing_records_dir` | error | `paths.recordsDir` doesn't exist. |
+| `schema_error` | error | The record's YAML parsed to something that isn't a mapping (empty file, a list, etc.), or a non-Zod exception was thrown while parsing it. |
+| `duplicate_slug` | error | Two record files resolve to the same slug. |
+| `zod_error` | error | One line per failed Zod check against `recordsFileSchema` — missing required field, wrong type, invalid enum value, and so on. If a record has no `kind`, it's defaulted to `project` before the Zod parse runs. |
+| `slug_mismatch` | warning | The record's own `slug` field doesn't match its filename. |
+| `unknown_taxonomy_value` | warning | The record's `category`, `stack`, or (for `platforms[]`) a `platform` value isn't defined in `data/taxonomy/{categories,stacks,platforms}.yml`. Only checked when the matching taxonomy file has entries. |
+| `missing_health` | error | The record has a `repoUrl` or `links.github` but `data/health.yml` has no entry for its slug. |
+| `missing_health_file` | warning | `data/health.yml` doesn't exist, but at least one record links to GitHub and would need an entry. |
+| `health_file_invalid` | error | `data/health.yml` exists but fails to parse against its schema. |
+| `decisions_file_invalid` | error | `data/decisions.yml` exists but fails to parse against its schema. |
+| `unknown_decision_record` | error | An entry in `data/decisions.yml` references a slug that has no matching record. |
 
-For CI on a mature directory, use `--strict` to keep drift out.
+Source: `packages/core/src/validate.ts:70-284`.
+
+A **YAML syntax error** (bad indentation, an unterminated string, and so on) is not one of these codes — `validateProject` calls the YAML parser without a `try`/`catch` around it, so a syntax error throws straight out of the function. It crashes the `check` command with the raw parser error message instead of a structured `[error] ...` line, and still exits `1`.
+
+Two checks that a previous draft of this page claimed do not exist in the source: there is no check that `related[]` or `parent` slug references resolve to real records, no validation of `data/overrides.yml`, no check that `data/collections/*.yml` queries match records, no check of `content:` body paths, and no taxonomy check for `license`. None of those fields or files are touched anywhere in `validate.ts`.
+
+## Severity and exit codes
+
+- **Exit 0** — no errors (and, with `--strict`, no warnings either).
+- **Exit 1** — at least one error, or (`--strict`) at least one warning.
+
+By default only `errors.length === 0` decides the outcome; warnings are printed but don't fail the run. `--strict` changes the pass condition to `errors.length === 0 && warnings.length === 0` (`packages/core/src/validate.ts:286-299`).
 
 ## Reading the output
 
-Each issue is printed as `[severity] code: message`, one line per issue (`packages/cli/src/index.ts:72-74`). A clean run with a couple of warnings looks like this:
+Each issue prints as `[severity] code: message`, one line per issue, via:
+
+```ts
+const output = issue.severity === "error" ? console.error : console.warn;
+output(`[${issue.severity}] ${issue.code}: ${issue.message}`);
+```
+
+Both `console.error` and `console.warn` write to **stderr** in Node — so every `[error]`/`[warning]` line goes to stderr, not stdout. Errors print before warnings, regardless of file order, because `issues` is `[...errors, ...warnings]`.
+
+A run with warnings but no errors looks like this (the message text comes straight from `validate.ts`'s templates):
 
 ```
 [warning] unknown_taxonomy_value: coolify: category "devtools" is not defined in data/taxonomy/categories.yml
@@ -70,78 +72,73 @@ Each issue is printed as `[severity] code: message`, one line per issue (`packag
 [grove] 247 records prepared; sitemap and llms files updated.
 ```
 
-The final `[grove] ...` line only prints once validation passes without a blocking failure — it comes from `prepareDirectory()` regenerating every artifact (`packages/cli/src/index.ts:80-83`), not from a per-file "updated" log. There is no separate line for `sitemap.xml`, `llms.txt`, `llms-full.txt`, `robots.txt`, or `og-image.svg` individually.
+The `[grove] ...` line is the only line printed via `console.log` (stdout), and only prints once validation passes without a blocking failure:
 
-Failures look like:
+```ts
+console.log(
+  `[grove] ${prepared.generated.totalRecords} records prepared; sitemap and llms files updated.`,
+);
+```
+
+Source: `packages/cli/src/index.ts:72-83`.
+
+A blocked run looks like this, and stops — nothing after it runs, and there is no summary line:
 
 ```
 [error] duplicate_slug: Duplicate record slug: old
 [error] zod_error: cool-tool: projectType Invalid enum value
 ```
 
-The command then exits with code 1 and does not print a summary line. Each error points at the file and the field. Fix and re-run.
+## What `prepareDirectory()` reads and writes
+
+Once validation passes, step 4 above regenerates every derived artifact by calling the functions in `packages/core/src/prepare.ts`:
+
+- **`generate()`** (`packages/core/src/build-data.ts`) reads every `data/records/*.yml` and `data/decisions.yml`, and writes `data/generated/records.full.json`, `data/generated/records.index.json`, `data/generated/records.json` (an alias of the full file), and `data/generated/site-config.json`.
+- **`buildSitemap()`** writes `public/sitemap.xml` from the generated records and `data/collections/*.yml`.
+- **`buildLlmsFiles()`** writes `public/llms.txt` and `public/llms-full.txt`.
+- **`buildSiteArtifacts()`** writes `public/robots.txt` and a default `public/og-image.svg` — but only while those files still contain a `grove-generated` marker comment. Editing either file by hand removes the marker, and `check` stops touching it.
+- **`buildOgImages()`** writes a per-record/per-collection/per-taxonomy OG image under `public/`.
+
+None of this is checked by `validateProject()` — `check` regenerates all of it unconditionally after validation passes, then runs `astro check`.
 
 ## What it does NOT check
 
-- **Record accuracy.** A description saying "the world's best project" passes validation; reviewer judgement is required.
-- **URL reachability.** A 404 on `repoUrl` passes validation. Run `grove audit` or a manual check for that.
-- **Cross-record semantics.** "Coolify is a Heroku alternative" passes validation; reviewer judgement for accuracy.
+- **Record accuracy.** A description that overstates a project passes validation; that's reviewer judgement.
+- **Cross-record semantics.** Whether a `related[]` reference or a written claim about another project is actually true — not checked (and, as noted above, `related[]`/`parent` slugs aren't even checked for *existing*).
 - **Editorial consistency.** Slug style, tag vocabulary, category assignment — humans enforce these.
-
-Validation catches structural problems. Curation is a human job.
-
-## Linting and formatting
-
-The scaffold ships a Biome config for TypeScript and JSON files. To run it:
-
-```bash
-pnpm lint           # biome check
-pnpm lint --fix     # biome check --write
-```
-
-`grove check` does not run Biome — the two are independent. CI runs both: `biome check` first, `grove check` second.
-
-## Schema migrations
-
-When the record schema changes between versions, `grove check --strict` flags old-style fields:
-
-```
-[check] 1 warning:
-  - data/records/legacy.yml: "sortPriority" replaced deprecated "pin"; consider updating
-```
-
-There is no automatic `grove migrate` command. Deprecated fields are mapped for one release with a warning (e.g., `pin` → `sortPriority`); curators apply the rename in their next PR. See the [Migration guide](/reference/migration/) for the current state of deprecated fields.
 
 ## Continuous integration
 
-The scaffold's `ci.yml` workflow:
+`grove init` scaffolds `.github/workflows/ci.yml`. As shipped in `apps/example/.github/workflows/ci.yml`, the job runs `grove check` **without** `--strict`:
 
 ```yaml
-name: ci
+name: CI
+
 on:
-  pull_request:
   push:
     branches: [main]
+  pull_request:
+
 jobs:
-  validate:
+  check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.12
+          node-version: "24"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec biome check
-      - run: pnpm exec grove check --strict
+      - run: pnpm exec grove check
       - run: pnpm build
 ```
 
-A green CI means the PR is safe to merge from a structural standpoint. The reviewer decides editorial fitness.
+If you want CI to fail on warnings too, change that step to `pnpm exec grove check --strict`.
 
 ## Related
 
 - [CLI reference — `grove check`](/reference/cli/#grove-check) — full flag reference
-- [Record schema](/reference/record-schema/) — the schema validation enforces
+- [Record schema](/reference/record-schema/) — the schema `zod_error` issues are checked against
 - [Author a record](/content/author-a-record/) — how to write a record that passes

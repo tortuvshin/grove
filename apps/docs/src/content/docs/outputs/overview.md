@@ -1,111 +1,148 @@
 ---
 title: Outputs overview
-description: Every artifact Grove generates from your source files — human-facing pages, machine-readable feeds, SEO assets, and LLM-oriented outputs.
+description: Every artifact Grove writes — the pages the scaffold routes, the files it publishes to public/, the JSON it keeps in data/generated/, and what it deliberately does not emit.
 ---
 
-Grove turns your source files (YAML records, taxonomy, decisions, Markdown bodies) into a coordinated set of outputs. Each output exists for a specific consumer: humans browsing the site, search engines indexing it, AI assistants reading it, social platforms previewing it.
+Grove turns your source files — YAML records, taxonomy, decisions, Markdown
+bodies, `grove.config.ts` — into a coordinated set of outputs. Each one exists
+for a specific consumer: people browsing, search engines indexing, AI
+assistants reading, social platforms previewing.
 
-## Human-facing pages
+They fall into three groups, and the difference between the second and third
+is the one people get wrong.
 
-| Page | URL pattern | Source |
+## Pages the scaffold routes
+
+These are Astro pages in your own `src/pages/`. `grove init` gives you a
+working set; they are yours to change or delete.
+
+| Page | Route | Source |
 |---|---|---|
 | Home | `/` | record set + `grove.config.ts` |
-| Directory index | `/projects/` | records filtered by blueprint `kind` |
-| Record detail | `/projects/<recordSlug>/` | record YAML + `content/records/<slug>.md` |
-| Curated collection | `/collections/<slug>/` | `data/collections/<slug>.yml` |
-| Collections index | `/collections/` | same |
-| Browse filters | `/browse?...` | record set + `browse.facets` |
+| Directory index | `/<prefix>/` | the visible record set |
+| Paginated index | `/<prefix>/page/<n>/` | same, paginated |
+| Card view | `/<prefix>/page/cards/` | same |
+| Client index endpoint | `/<prefix>/page/records.json` | the visible record set, as JSON |
+| Record detail | `/<prefix>/<recordSlug>/` | record YAML + `content/records/<slug>.md` |
+| Collections index | `/collections/` | `data/collections/*.yml` |
+| Collection | `/collections/<slug>/` | `data/collections/<slug>.yml` |
 | Categories index | `/categories/` | `data/taxonomy/categories.yml` |
-| Category landing | `/categories/<id>/` | records filtered by category |
+| Category | `/categories/<name>/` | records in that category |
 | Stacks index | `/stacks/` | `data/taxonomy/stacks.yml` |
-| Stack landing | `/stacks/<id>/` | records filtered by stack |
-| Platforms index | `/platforms/` | `data/taxonomy/platforms.yml` |
-| Licenses index | `/licenses/` | `data/taxonomy/licenses.yml` |
-| License landing | `/licenses/<id>/` | records filtered by license |
-| About | `/about/` | consumer-authored Astro page |
+| Stack | `/stacks/<name>/` | records with that stack |
+| License | `/licenses/<name>/` | records with that license |
+| About | `/about/` | your Astro page, reading a content page |
 | Contributors | `/contributors/` | `data/generated/contributors.json` |
-| Submit | `/submit/` | consumer-authored Astro page (if `submission` is configured) |
-| 404 | `/404/` | consumer-authored Astro page |
+| Submit | `/submit/` | your Astro page |
+| 404 | `/404/` | your Astro page |
 
-The exact URL prefixes (`projects/`, `resources/`, `entities/`) are decided by `routes.directory` in `grove.config.ts`. Default per blueprint:
+`<prefix>` defaults to `projects`. Override it with `routes.directory` in
+`grove.config.ts`; the resolved value surfaces as
+`blueprintConfig.routeSlug` in `site-config.json`, which is what the
+scaffolded routes read.
 
-| Blueprint | Route prefix |
-|---|---|
-| `project-directory` | `/projects/` |
-| `resource-hub` | `/resources/` |
-| `ecosystem-map` | `/entities/` |
+:::note[There is no platforms landing page]
+`data/taxonomy/platforms.yml` feeds browse facets and record pages, but the
+scaffold ships no `/platforms/` route. Nor is there a standalone `/browse`
+page — filtering happens on the directory index itself, driven by
+`browse.facets`.
+:::
 
-`project-directory` is the only blueprint Grove ships today; the other two rows
-record defaults the schema reserves for future blueprints.
+## Files published to `public/`
 
-## Machine-readable feeds
+These are written by the build and served at the URL that matches their path.
 
-| Output | URL / path | Consumer |
+| File | URL | Consumer |
 |---|---|---|
 | `sitemap.xml` | `/sitemap.xml` | Search engines |
-| `llms.txt` | `/llms.txt` | AI assistants (constant-size site header + counts, no per-record content) |
-| `llms-full.txt` | `/llms-full.txt` | AI assistants (verbose) |
-| `records.full.json` | `/data/generated/records.full.json` | Any tooling — full record set |
-| `records.index.json` | `/data/generated/records.index.json` | Slim visible-only index |
-| `records.json` | `/data/generated/records.json` | Alias of `records.full.json` |
-| `site-config.json` | `/data/generated/site-config.json` | Resolved configuration + taxonomy |
-| `cleanup-report.json` | `/data/generated/cleanup-report.json` | Triage list of records that need human review |
-| `contributors.json` | `/data/generated/contributors.json` | Aggregated contributor counts |
-| `repo-stats.json` | `/data/generated/repo-stats.json` | Per-repo activity totals |
-| `og-manifest.json` | `/data/generated/og-manifest.json` | Map of every OG card written |
+| `llms.txt` | `/llms.txt` | AI assistants — site header and counts only |
+| `llms-full.txt` | `/llms-full.txt` | AI assistants — per-record detail |
 | `robots.txt` | `/robots.txt` | Crawlers |
-| `og-image.svg` | `/og-image.svg` | Sentinel-owned fallback OG image |
-| `og/home.png`, `og/default.png`, `og/records/<slug>.png`, `og/collections/<slug>.png`, `og/categories/<id>.png`, `og/stacks/<id>.png`, `og/licenses/<id>.png` | `/og/...` (namespaced by page type) | Satori-rendered social cards |
+| `og-image.svg` | `/og-image.svg` | Fallback social image |
+| `og/home.png`, `og/default.png` | `/og/…` | Satori-rendered social cards |
+| `og/records/<slug>.png` | `/og/records/…` | Per-record cards |
+| `og/collections/<slug>.png`, `og/categories/<id>.png`, `og/stacks/<id>.png`, `og/licenses/<id>.png` | `/og/…` | Per-page cards |
 | `icons/**` | `/icons/**` | The packaged icon set |
-| `README.md` sentinel block | `<!-- grove-readme:start/end -->` | Replaces the bounded block in your README.md |
 
-## Per-page JSON-LD, OG, and Twitter
+`README.md`'s sentinel block is the one output that lands outside `public/`
+— `grove readme generate` rewrites the region between
+`<!-- grove-readme:start -->` and `<!-- grove-readme:end -->`.
 
-Every page emits a `PageDocument`:
+## JSON kept in `data/generated/`
 
-- **JSON-LD** — `WebSite` on the homepage; `CollectionPage` on collection pages; `SoftwareSourceCode` (or matching type per blueprint) on record pages.
-- **Open Graph** — `og:title`, `og:url`, `og:description`, `og:image`, `og:image:width`, `og:image:height`, `og:image:alt`.
-- **Twitter card** — `twitter:card` (set to `summary_large_image` when an OG card is present), `twitter:title`, `twitter:description`, `twitter:image`.
+:::caution[These are not published URLs]
+Nothing copies `data/generated/` into `public/`, so there is no
+`/data/generated/records.json` on your deployed site. These files are build
+inputs and tooling inputs — read them from disk, or through the
+`@grove/generated` Vite alias. The one record payload your site *does* serve
+is the `/<prefix>/page/records.json` endpoint above.
+:::
 
-`definePageDocument` from `@grove-dev/core` is the source. See [Reference: programmatic API](/reference/api-core/) for the type signature.
+`records.full.json`, `records.index.json`, `records.json`,
+`site-config.json`, and `og-manifest.json` are rewritten on every build.
+`cleanup-report.json`, `contributors.json`, and `repo-stats.json` are written
+only by their own commands. [Generated data files](/outputs/generated-data/)
+has the exact shape of each.
 
-## What's not generated
+## Per-page JSON-LD, OG, and Twitter tags
 
-Grove does NOT emit any of these:
+Every page is described by a `PageDocument`, built with `definePageDocument`
+from `@grove-dev/core`:
 
-- **`feed.xml` / RSS** — not generated. Use a third-party feed generator over `llms.txt` or `records.json`.
-- **`feed.json` / JSON Feed** — not generated.
-- **`security.txt`** — not generated. Consumers add their own if needed.
-- **`humans.txt`** — not generated. Consumers add their own if needed.
-- **A `webmanifest`** with full PWA metadata — not generated. The Starlight docs site ships `<link rel="manifest" href="/manifest.json">` but the manifest itself is consumer-provided.
-- **A JSON catalog of all known Grove records** — only `records.full.json` exists. There is no separate "catalog" shape.
-- **A separate `sitemap-index.xml`** — only the single `sitemap.xml` is emitted.
-- **An `ai.txt` separate from `llms.txt`** — only `llms.txt` and `llms-full.txt` are produced.
+- **JSON-LD** — `buildJsonLd` is overloaded by input shape and emits
+  `WebSite` for the site, `CollectionPage` for collections,
+  `SoftwareSourceCode` for project records, and an article-style node for
+  content pages. `validateJsonLd` reports structural issues.
+- **Open Graph** — `og:title`, `og:url`, `og:description`, `og:image`, and
+  the image's `width` / `height` / `alt`.
+- **Twitter** — `twitter:card` (`summary_large_image` when a card exists),
+  `twitter:title`, `twitter:description`, `twitter:image`.
 
-If a feature you need isn't on this list, look at the [Roadmap](/project/roadmap/) — there's a chance it's planned but not yet shipped.
+See [Programmatic API](/reference/api-core/) for the signatures.
+
+## What Grove does not emit
+
+- **RSS or JSON Feed** — neither `feed.xml` nor `feed.json` is generated.
+- **`security.txt`, `humans.txt`, `manifest.json`** — add your own to
+  `public/` if you want them.
+- **`sitemap-index.xml`** — one `sitemap.xml`, no index.
+- **`ai.txt`** — only `llms.txt` and `llms-full.txt`.
+- **A health block on your records** — `classifyHealth` exists, but no
+  command applies it. See [Maintain health signals](/content/health-classification/).
 
 ## When each output is regenerated
 
 | Output | When |
 |---|---|
-| `data/generated/*` | Every `grove check` and every Astro build (the Astro integration runs `prepareDirectory()` on every `astro:config:setup`). |
-| `public/{sitemap,llms*,robots,og-image}.*` | Same — every build. |
-| `public/og/**` (namespaced: `home.png`, `default.png`, `records/<slug>.png`, `collections/<slug>.png`, `categories/<id>.png`, `stacks/<id>.png`, `licenses/<id>.png`) | Every build. Satori-rendered, non-fatal on render error. |
-| `public/icons/**` | Every Astro build (run by the integration) — or explicitly via `grove icons sync`. |
-| `data/generated/contributors.json` | Explicit `grove sync contributors` run. |
-| `data/generated/cleanup-report.json` | Explicit `grove cleanup` run. |
-| `README.md` sentinel block | Explicit `grove readme generate` run. |
+| `data/generated/records*.json`, `site-config.json`, `og-manifest.json` | Every `grove check` and every Astro build — the integration runs `prepareDirectory()` on `astro:config:setup` |
+| `public/sitemap.xml`, `public/llms.txt`, `public/llms-full.txt` | Same |
+| `public/og/**` | Same. Satori-rendered; a render failure logs and falls back to `/og-image.svg` rather than failing the build |
+| `public/robots.txt`, `public/og-image.svg` | Same, but only while Grove still owns them — see below |
+| `public/icons/**` | Every Astro build, or explicitly with `grove icons sync` (`--check` reports drift, `--force` overwrites local edits) |
+| `data/generated/contributors.json`, `repo-stats.json` | `grove sync contributors` |
+| `data/generated/cleanup-report.json` | `grove cleanup` |
+| `README.md` sentinel block | `grove readme generate` |
 
-## What this means for editing
+## Ownership: how `robots.txt` and `og-image.svg` stop regenerating
 
-- **Always-regenerated** files (most outputs): edit the source YAML/Markdown/`grove.config.ts` and rebuild. Don't edit the output file directly.
-- **Sentinel-owned** files (`robots.txt`, `og-image.svg`): the first time Grove writes one, it includes a sentinel marker (`<!-- grove-generated: edit this file to take ownership -->`). Editing the file after that point keeps your version; Grove regenerates only when the sentinel has not been taken. After you edit, the file is yours.
-- **Per-file ownership**: `public/icons/**` lets you edit any single icon and have it preserved across builds.
+Both files are written with a marker on the first line:
 
-## See also
+- `robots.txt` — `# grove-generated: edit this file to take ownership`
+- `og-image.svg` — `<!-- grove-generated: edit this file to take ownership -->`
 
-- [Generated data files](/outputs/generated-data/) — exact shape of each JSON dataset.
-- [LLM-oriented outputs](/outputs/llm/) — the `llms.txt` family.
-- [SEO & social](/outputs/seo/) — sitemap, OG, JSON-LD details.
-- [Site metadata](/outputs/site-meta/) — what's actually emitted vs consumer-provided.
-- [GitHub workflows](/outputs/workflows/) — the scheduled maintenance surface.
+Before each rewrite, Grove reads the existing file and checks for its marker.
+If the marker is gone, it leaves the file alone permanently. Deleting the
+marker line is how you take ownership; deleting the whole file makes Grove
+write a fresh one.
+
+Everything else regenerates unconditionally — edit the source, not the
+output. `public/icons/**` is per-file: `grove icons sync` preserves an icon
+you modified unless you pass `--force`.
+
+## Related
+
+- [Generated data files](/outputs/generated-data/) — the JSON shapes.
+- [LLM-oriented outputs](/outputs/llm/) — `llms.txt` and `llms-full.txt`.
+- [SEO & social](/outputs/seo/) — sitemap, OG, JSON-LD.
+- [Site metadata](/outputs/site-meta/) — emitted vs consumer-provided.
+- [GitHub workflows](/outputs/workflows/) — the scheduled surface.

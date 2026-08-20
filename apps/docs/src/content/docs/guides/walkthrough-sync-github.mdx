@@ -1,12 +1,14 @@
 ---
 title: "Walkthrough: sync GitHub metadata"
-description: Enrich every record with live stars, forks, language, topics, and the auto-derived health block, end-to-end.
+description: Refresh every record's github.* block with live stars, forks, language, topics, and license, end-to-end.
 ---
 
 import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Requires a GITHUB_TOKEN">
-  By the end of this walkthrough every record that has a `repoUrl` will have a populated `github.*` block and a derived `health.*` block. The walkthrough assumes you have at least one record with `repoUrl` set. If not, complete [Walkthrough: add your first record](/getting-started/first-record/) first. Without a GitHub personal access token (PAT), the sync command fails with a clear auth error. You can complete the rest of the walkthrough up to step 3 with no token; step 4 onwards requires one.
+<Aside type="note" title="Before you start">
+  By the end of this walkthrough every record that has a `repoUrl` will have a populated `github.*` block. The walkthrough assumes you have at least one record with `repoUrl` set — if not, complete [Walkthrough: add your first record](/getting-started/first-record/) first.
+
+  A token is not strictly required. Without one the sync calls the GitHub API unauthenticated, which is heavily rate-limited, and falls back to scraping the repo page when the API call fails. With more than a handful of records you want a token.
 </Aside>
 
 <Steps>
@@ -37,16 +39,14 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
 2. ## Add the token to `.env`
 
    ```bash
-   echo 'GITHUB_TOKEN=ghp_…' >> .env
+   export GITHUB_TOKEN=ghp_…
    ```
 
-   <Aside type="caution" title="Never commit this">
-     Grove reads `.env` automatically via the Astro integration. **Do not commit it.** Add `.env` to your `.gitignore` if it isn't there.
+   <Aside type="caution" title="The variable name matters">
+     `grove sync github` reads `process.env.GITHUB_TOKEN` and nothing else — `GH_TOKEN` is **not** read by this command (`packages/core/src/github.ts`). `grove sync contributors` is the one that accepts either name.
+
+     Grove's CLI does not load `.env` files. Export the variable in your shell, or use a runner that injects it, before calling the command. If you do keep it in a file, make sure that file is gitignored.
    </Aside>
-
-   ```bash
-   git status .env   # confirm it's ignored
-   ```
 
 3. ## Enable the GitHub integration
 
@@ -85,15 +85,17 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
 
    The command walks every record, calls the GitHub REST API for the repo at `repoUrl`, and writes back into the record YAML:
 
-   - `github.repository` — the raw REST shape (id, full_name, default_branch, html_url, ...).
-   - `github.languages` — language breakdown with byte counts.
-   - `github.sync` — `{ syncedAt, source }` provenance.
+   - `github.repository` — `full_name`, `stargazers_count`, `forks_count`, `open_issues_count`, `language`, `pushed_at`, `updated_at`, `archived`, `disabled`, `default_branch`, `license`, and `topics`. Merged over whatever was already there, so extra keys you added survive.
+   - `github.latestReleaseAt` and `github.homepage` — written only when GitHub returned them.
+   - `github.sync` — `{ syncedAt, source }` provenance, where `source` is `api` or `html`.
 
-   It also computes `health.*` from the GitHub signals (last-pushed date, archive flag, stars, etc.).
+   Everything it writes lands under `github.`. It does not touch `health`, `curation`, or any prose you wrote — the patch is merged into the existing `github` block, so fields outside the sync surface survive a re-run.
 
    <Aside type="note" title="What you should see">
-     the command prints the records it processed and the new sync timestamp. If a record has a missing `repoUrl`, it's skipped with a clear warning.
+     One line per record: `[sync github] <file>: api`, or `html` when the fallback handled it, or `no repository, skipped` / `invalid GitHub URL, skipped` / `unavailable`. The run ends with a count of updated, HTML-fallback, and failed records.
    </Aside>
+
+   Two flags are worth knowing: `--limit <count>` processes only the first N record files (useful for a dry run), and `--strict` sets a non-zero exit code when any record failed.
 
 5. ## Inspect the new fields
 
@@ -105,34 +107,35 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
    repoUrl: https://github.com/withastro/astro
    github:
      repository:
-       id: 79145104
        full_name: withastro/astro
-       html_url: https://github.com/withastro/astro
        stargazers_count: 51234
+       forks_count: 2678
+       open_issues_count: 143
+       language: TypeScript
+       pushed_at: "2026-03-28T09:11:52Z"
+       updated_at: "2026-03-28T09:11:52Z"
        archived: false
-     languages:
-       TypeScript: 87123123
+       disabled: false
+       default_branch: main
+       license:
+         spdx_id: MIT
+         name: MIT
+       topics: [astro, static-site-generator, ssg]
+     latestReleaseAt: "2026-03-20T16:04:00Z"
+     homepage: https://astro.build
      sync:
        syncedAt: "2026-04-01T10:23:00Z"
-       source: api.github.com
-   health:
-     status: active
-     maturity: useful
-     tier: curated
-     visibility: keep
-     cleanupCandidate: false
-     confidence: high
-     reasons:
-       - 51234-stars
-       - last-commit-2026-03
+       source: api
    ```
 
-   If `stargazers_count >= 500`, the record is automatically promoted to `tier: curated`. The threshold is checked every sync — there's no editor override.
+   <Aside type="caution" title="The sync does not derive a health block">
+     Star counts do not promote a record's `tier`, and nothing here writes `health.*`. Health entries live in `data/health.yml` and are authored separately — see [Maintain health signals](/content/health-classification/).
+   </Aside>
 
    <FileTree>
    - data
      - records
-       - **astro.yml** _(gained `github.*` and `health.*` blocks after sync)_
+       - **astro.yml** _(gained a `github.*` block after sync)_
        - other-record.yml
    - grove.config.ts
    - package.json
@@ -147,23 +150,33 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
    ```
 
    <Aside type="note" title="What you should see">
-     the diff is contained to `github.*` and `health.*` blocks. Review the diff to make sure no curator content was overwritten — the merge contract guarantees that curator additions outside the sync surface survive a re-run, but a quick review confirms it.
+     the diff is contained to `github.*` blocks. Review it to confirm no curator content was overwritten — the merge keeps additions outside the sync surface, but a quick look costs nothing.
    </Aside>
 
 </Steps>
 
 <Aside type="tip" title="Schedule the sync">
-  Don't run `grove sync github` by hand every week. The scaffold ships a `.github/workflows/sync-github.yml` that runs weekly and commits any changes back to the repository:
+  Don't run `grove sync github` by hand every week. `grove init` ships a `.github/workflows/sync-github.yml` that runs on a schedule and opens a pull request with the result rather than pushing to `main`:
 
   ```yaml
   # .github/workflows/sync-github.yml (already in the scaffold)
   on:
     schedule:
-      - cron: "0 6 * * 1"   # every Monday at 06:00 UTC
+      - cron: "0 3 * * 0"   # every Sunday at 03:00 UTC
     workflow_dispatch:
   ```
 
-  Add a `GITHUB_TOKEN` repository secret in **Settings → Secrets → Actions** for the workflow to use. The default token has read access; for higher rate limits, create a dedicated PAT and add it as `GROVE_GITHUB_TOKEN`.
+  `secrets.GITHUB_TOKEN` is provided by Actions automatically — there is no secret to create.
+</Aside>
+
+<Aside type="caution" title="Check the env var name in the scaffolded workflow">
+  The shipped workflow passes the token as `GH_TOKEN`. `grove sync github` reads `GITHUB_TOKEN`, so as written the step runs unauthenticated and leans on the rate-limited path. Until that is fixed upstream, change the step to:
+
+  ```yaml
+  - run: pnpm exec grove sync github
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ```
 </Aside>
 
 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">

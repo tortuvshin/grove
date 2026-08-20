@@ -13,10 +13,17 @@ This guide is for site maintainers triaging the periodic cleanup report. If you'
 
 ## Where the health data comes from
 
-The `health` block on a record — `status`, `maturity`, `tier`, `visibility`, `cleanupCandidate`, `staleReason`, `confidence`, and `reasons` — is computed by `classifyHealth` (`packages/core/src/health.ts`), Grove's single source of truth for deriving these fields from a record's GitHub metadata (`github.*`).
+A health block — `status`, `maturity`, `tier`, `visibility`, `cleanupCandidate`, `staleReason`, `confidence`, and `reasons` — is derived from a record's GitHub metadata by `classifyHealth` (`packages/core/src/health.ts`). That function is the single source of truth for the rules, and the rest of this page documents exactly what it does.
 
-Treat `health.*` as computed, not hand-authored: don't edit `status`, `maturity`, `tier`, `visibility`, `cleanupCandidate`, or `confidence` directly. To change a record's effective visibility, write a [decision](/concepts/decisions/) in `data/decisions.yml` instead — it overrides `health.visibility` without touching the rest of the block.
-(`data/health.yml` is a legacy format the validator no longer parses.)
+Health entries live in `data/health.yml`, keyed by record slug — that is the file `grove check` validates, and the file the reference space in `apps/example/` ships. A record may also carry an inline `health:` block in its own YAML; the build reads `record.health.visibility` from there.
+
+<Aside type="caution" title="Nothing writes health for you yet">
+`classifyHealth` is exported from `@grove-dev/core`, but no shipped command applies it. `grove sync github` writes only under `github.*` — it does not touch `health`, and it does not create or update `data/health.yml`.
+
+So today health entries are hand-authored, or produced by a script of your own that imports `classifyHealth`. `grove check` enforces the consequence: if any record links to a GitHub repo and `data/health.yml` is missing, you get a `missing_health_file` warning; if the file exists but a GitHub-linked record has no entry in it, that is a `missing_health` error.
+</Aside>
+
+To change a record's effective visibility, write a [decision](/concepts/decisions/) in `data/decisions.yml` rather than editing `health.visibility` by hand — the decision is folded in at build time and leaves the rest of the block alone.
 
 `reasons` is a plain-language array explaining the classification — e.g. `"Recent repository activity"`, `"No recent commits in the last 6 months"`, `"Strong adoption with maintenance signals"`, `"Clear license found"`, `"License is missing or unclear"`. It's for humans reading the raw record, not rendered to visitors.
 
@@ -190,10 +197,10 @@ Low confidence doesn't mean the record is bad — it means "we're guessing, not 
 If you want a record to surface better in the index:
 
 - **Stars are below 50, but you think it deserves `listed`?** You can't promote by hand — `tier` is a function of star count and `status`. The only legitimate override is a decision setting `visibility: highlight` so the record is editorially featured regardless of tier; `tier` itself stays `experimental`, since visibility and tier are separate axes.
-- **Stars are above 500 but the record is still `experimental`?** The record's `health` block hasn't been recomputed against the current star count yet.
+- **Stars are above 500 but the record is still `experimental`?** The health entry is stale relative to the current star count. Nothing recomputes it on a schedule — rerun your classifier script, or update `data/health.yml` by hand.
 - **The record is `hidden` but you want it back?** It's `hidden` because `status` is `archived` or `inactive`. Resolve the underlying status first (most often: the upstream repo came back to life), or add a decision to override `visibility` directly.
 
-See [Sync GitHub metadata](/automation/sync-github/) for how `github.*` — the metadata `classifyHealth` reads — gets onto a record.
+See [Sync GitHub metadata](/automation/sync-github/) for how `github.*` — the metadata `classifyHealth` reads — gets onto a record. Refreshing that metadata is automated; turning it into a health entry is not.
 
 ## How overrides work
 

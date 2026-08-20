@@ -64,7 +64,7 @@ The record-level fields are usually enough. `data/decisions.yml` is for the case
 
 `curation.labels`, `curation.lenses`, and `curation.notes` are editorial judgement that belongs on the record itself — edit `data/records/<slug>.yml` directly for these.
 
-Visibility is different for project records (the only blueprint Grove ships today). The index reads a project's effective visibility from `health.visibility`, not from a top-level `visibility:` key on the record — so adding `visibility: highlight` to the top of a project record's YAML has no effect on what's listed. Don't hand-edit `health.*` either — see [Health classification](/content/health-classification/). Use `data/decisions.yml` instead: a decision's `visibility` is folded into the record's effective `health.visibility` when the site is built.
+Visibility is different for project records (the only blueprint Grove ships today). The index reads a project's effective visibility from `health.visibility`, not from a top-level `visibility:` key on the record — so adding `visibility: highlight` to the top of a project record's YAML has no effect on what's listed. `health.*` is not refreshed by any command — see [Health classification](/content/health-classification/). Use `data/decisions.yml` instead: a decision's `visibility` is folded into the record's effective `health.visibility` when the site is built.
 
 Use `data/decisions.yml` when:
 
@@ -162,7 +162,7 @@ A record can carry several labels. None of the four labels are computed automati
 </Aside>
 
 <Aside type="danger" title="Never manually set health fields">
-  Don't manually set `health.*`. To change a record's effective visibility, write a `data/decisions.yml` entry instead — it overrides `health.visibility` without touching the rest of the health block.
+  To change a record's effective visibility, write a `data/decisions.yml` entry rather than editing `health.visibility` by hand — the decision is folded in at build time and leaves the rest of the health block alone.
 </Aside>
 
 <Aside type="danger" title="Never delete a record to remove it">

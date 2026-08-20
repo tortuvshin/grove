@@ -750,21 +750,35 @@
         display: none;
     }
 
+    /* A step's heading sits on the same line as its number bullet. The wrapper
+     * only sets a *minimum* height: a fixed `height` clips any heading that is
+     * taller than the bullet (an `h2` step title) or wraps to a second line on
+     * narrow viewports, and the following block — usually a code frame — then
+     * paints over the overflowing text. */
     .sl-markdown-content .sl-steps > li > .sl-heading-wrapper {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        height: var(--bullet-size);
+        /* Matches the h3/h4 anchor icon: the level-h2 default (1.25rem) is
+         * sized for a full-size heading, not a step title. */
+        --sl-anchor-icon-size: 0.875rem;
         min-height: var(--bullet-size);
         transform: none;
         margin-bottom: 0;
     }
 
-    .sl-markdown-content .sl-steps > li > .sl-heading-wrapper :is(h3, h4) {
+    /* Step titles render at one size whatever heading level the page picked,
+     * so `## Step` and `### Step` look the same inside <Steps>. */
+    .sl-markdown-content .sl-steps > li > .sl-heading-wrapper :is(h1, h2, h3, h4, h5, h6) {
         font-size: 1rem;
         line-height: 1.75rem;
         font-weight: 500;
         margin: 0;
+        /* `h2` carries a `padding-top` for section spacing further up this file;
+         * inside a step it would push the title off the number bullet's line.
+         * Only the block padding is reset — the inline padding is the room
+         * Starlight reserves for the anchor-link icon. */
+        padding-block: 0;
     }
 
     .sl-markdown-content .sl-steps > li > .sl-heading-wrapper .sl-anchor-link {

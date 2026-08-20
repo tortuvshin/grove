@@ -1,11 +1,11 @@
 ---
 title: Sync GitHub metadata
-description: Keep stars, forks, last-pushed dates, license, and language fresh automatically through scheduled GitHub Actions.
+description: Keep stars, forks, license, language, and topics fresh by refreshing each record's github block from the GitHub API.
 ---
 
-The GitHub metadata sync enriches each record's `github.repository` block with live data from the GitHub API: stars, forks, watchers, the last-pushed date, license, primary language, topics, and homepage. The sync runs against the canonical `repoUrl` and writes back into the record YAML — reviewable in a pull request.
+`grove sync github` refreshes the `github` block on every `data/records/*.yml` file with live data from the GitHub REST API, writing the result back to the same YAML files so the diff is reviewable in a pull request.
 
-This guide is for site maintainers who run (or schedule) the sync. If you're a contributor adding a single record, you don't need to read this — the sync step runs in CI on your PR.
+This guide is for site maintainers who run (or schedule) the sync. If you're a contributor adding a single record, you don't need to read this — the scaffolded workflow runs it on a schedule, not on your PR.
 
 ## Enable
 
@@ -14,89 +14,108 @@ In `grove.config.ts`:
 ```ts
 integrations: {
   github: {
-    metadata: true,        // fetch stars, forks, last commit, etc.
-    health: true,          // derive health.status from metadata
+    metadata: true,       // gates `grove sync github`
+    contributors: true,   // gates `grove sync contributors`
+    health: true,          // accepted by the schema; see note below
   },
 },
 ```
 
-The `metadata` flag controls `grove sync github`. The `health` flag derives `health.status`, `health.tier`, and `health.cleanupCandidate` from the metadata on every render.
+`integrations.github` can also be a single boolean (`github: true`), which expands to all three sub-flags via `normalizeGithubIntegration`.
+
+:::caution[The `health` flag currently does nothing]
+`normalizeGithubIntegration` (`packages/core/src/schema.ts`) resolves `metadata`, `contributors`, and `health` into three booleans, but the `sync` command in `packages/cli/src/index.ts` only reads `githubFlags.metadata` and `githubFlags.contributors`. Nothing in the CLI branches on `githubFlags.health`. Setting `health: false` does not turn off anything today — health classification (`classifyHealth` in `packages/core/src/health.ts`) is a separate function that `grove sync github` never calls.
+:::
+
+If `integrations.github.metadata` is `false`, running `grove sync github` prints `[sync github] disabled by integrations.github.metadata — skipping` and exits without reading any files.
+
+## What it does, in order
+
+For each `.yml` file in `config.paths.recordsDir` (default `data/records`, sorted alphabetically, optionally truncated by `--limit`):
+
+1. Parses the file and reads `repoUrl`, falling back to `links.github` if `repoUrl` is unset.
+2. If neither is set, logs `[sync github] <file>: no repository, skipped` and moves on.
+3. Parses the URL with `parseGithubRepoUrl`. If it doesn't match `https?://github.com/<owner>/<repo>`, logs `[sync github] <file>: invalid GitHub URL, skipped`.
+4. Tries `fetchGithubMetadata(ref)` — a `GET /repos/<owner>/<repo>` call, followed by `GET /repos/<owner>/<repo>/releases/latest` for the latest release date. Any thrown error (rate limit, network failure, non-2xx status) is caught silently and falls through to step 5.
+5. If the API call didn't produce metadata, tries `enrichFromGithubHtml(repoUrl)` — an unauthenticated fetch of the public `https://github.com/<owner>/<repo>` HTML page.
+6. If both sources failed, logs `[sync github] <file>: unavailable` and counts it as failed.
+7. On success from either source, merges the result into the record's `github` block and rewrites the file with `stringifyRecordYaml`, logging `[sync github] <file>: api` or `[sync github] <file>: html`.
+8. After all files, prints one summary line: `[sync github] <updated> updated (<htmlOnly> HTML fallback), <failed> failed`.
+
+There is no separate command for "which records were skipped" beyond what's printed to stdout during the run — nothing is written to disk for skips.
 
 ## Run it
 
-Locally:
-
 ```bash
-grove sync github                # enrich every record with live metadata
-grove sync github --limit 10     # only the first 10 records (rate-limit guard)
-grove sync github --strict       # fail if any record could not be synced
+grove sync github                # sync every record in data/records/
+grove sync github --limit 10     # only the first 10 records, sorted by filename
+grove sync github --strict       # process.exitCode = 1 if any record ended up "unavailable"
 ```
 
-In CI, the scaffold writes `.github/workflows/sync-github.yml`, a weekly cron plus `workflow_dispatch` for manual runs. The workflow:
+`--limit` always takes the **first N files alphabetically** (`files.slice(0, options.limit)`). There is no `--offset` flag and no stored progress between runs — running `--limit 10` twice in a row syncs the same 10 files both times. If you need to bound API usage per run on a large directory, `--limit` caps the ceiling; it does not let you page through the rest of the records on a later run.
 
-1. Reads every `data/records/*.yml`.
-2. For each, fetches `https://api.github.com/repos/<owner>/<repo>`.
-3. Writes back a `github.repository` block + `github.sync.{syncedAt, source}`.
-4. Opens a PR with the diff if anything changed.
-
-No token is required for public repositories (60 requests/hour/IP). Set `GITHUB_TOKEN` (or `GH_TOKEN`) to raise the limit to 5,000 requests/hour/user.
+`--strict` doesn't stop the loop early — every selected file is still processed. It only flips the process exit code to `1` at the end if `failed > 0`, which is what makes it useful as a CI gate.
 
 ## Authentication
 
-`grove sync github` looks for a GitHub token in this order:
+`fetchGithubMetadata` reads exactly one source for a token: the `GITHUB_TOKEN` environment variable (`packages/core/src/github.ts`, `token = process.env.GITHUB_TOKEN`). There is no fallback to `gh auth token` or any other CLI — the code never shells out to `gh`.
 
-1. `GITHUB_TOKEN` (or `GH_TOKEN`) environment variable.
-2. The token resolved by `gh auth token`, if the `gh` CLI is installed and authenticated.
+If `GITHUB_TOKEN` is unset, requests go out unauthenticated with only `Accept`, `X-GitHub-Api-Version`, and `User-Agent: grove` headers. Unauthenticated requests are subject to GitHub's per-IP rate limit, which is tighter than the authenticated one — set `GITHUB_TOKEN` in CI (as the scaffolded workflow already does) to avoid hitting it on directories with more than a handful of records.
 
-If neither is set, the sync runs unauthenticated — fine for small directories, but it rate-limits quickly on anything over 50 records.
-
-For local dev, the simplest setup is to install and authenticate the `gh` CLI; `grove sync github` picks up the token automatically. For CI, set `GITHUB_TOKEN` as a workflow secret — the `sync-github.yml` workflow the scaffold generates already does this.
+`enrichFromGithubHtml` (the HTML fallback) never sends a token — it's a plain unauthenticated `fetch` of the public repo page and, for license only, `img.shields.io`.
 
 ## API → HTML fallback
 
-When the GitHub API rate-limits the sync (5,000/hour is generous but not infinite for large directories), or when the repository is private / behind a firewall, the sync falls back to scraping the public repo page HTML.
+The HTML fallback exists so a scheduled sync stays useful even when the API is rate-limited or a request otherwise fails. It does **not** recover everything the API sync would.
 
-```
-[sync github] owner/repo ... updated             # API success
-[sync github] owner/repo ... html-fallback        # HTML scraping (partial fields)
-[sync github] owner/repo ... skipped (no repoUrl) # record has no repoUrl
-[sync github] owner/repo ... skipped (api+html error) # both methods failed
-```
+`enrichFromGithubHtml` (`packages/core/src/enrich.ts`) scrapes exactly four fields from the repo's public HTML page:
 
-The HTML fallback is best-effort — it cannot recover `stargazers_count` exactly (it reads the page-visible "12.3k" string), and it does not recover `forks_count` or `pushed_at` at all. It does pick up license, language, topics, and homepage.
+- `license` — parsed from the "X license" link text, or `img.shields.io/github/license/<owner>/<repo>` if the page doesn't render that text.
+- `language` — the primary-language label span.
+- `topics` — the topic tag links.
+- `homepage` — the "Homepage" link in the sidebar, if present.
 
-When the fallback fires, `github.sync.source` is `"html"`. The renderer treats `"api"` and `"html"` sources identically for display; only `grove check --strict` differentiates (and only when the field set differs from the canonical API shape).
+:::caution[It does not recover stars, forks, or the last-pushed date]
+The HTML path never touches `stargazers_count`, `forks_count`, `open_issues_count`, `pushed_at`, `updated_at`, `archived`, or `default_branch`. Those fields simply aren't scraped — `extractLicense`, `extractLanguage`, `extractTopics`, and `extractHomepage` are the only extractors in `enrich.ts`. A record that fell back to HTML keeps whatever `github.repository` values it already had from a previous API sync (or has none at all if it's never synced successfully via the API).
+:::
 
-`api → html` fallback is normal on shared CI runners: GitHub's REST API allows 60 unauthenticated requests per hour per IP, and a 200-record directory can exhaust that in one run. The HTML fallback has no rate limit. A record with `github.html` only (no `github.repository`) won't have `stargazers_count`, `forks_count`, or `pushed_at` in its data, so `health.status` shows `unknown` for those fields until a later run succeeds via the API — for example, once a `GITHUB_TOKEN` is set.
+When the HTML fallback succeeds, the CLI writes the four scraped fields into a **separate** `github.html` block (not into `github.repository`) plus `github.homepage` at the top level if a homepage was found. It does not touch `github.repository` at all on an HTML-fallback run.
 
 ## What gets written back
 
-For a successful API sync:
+For a successful API sync, `buildGithubSyncPatch` (`packages/core/src/github.ts`) writes these fields into `github.repository`, spread on top of whatever was already there so unrelated custom keys survive:
 
 ```yaml
 github:
   repository:
     full_name: ollama/ollama
-    description: Get up and running with large language models.
     stargazers_count: 92000
     forks_count: 6300
     open_issues_count: 412
+    language: Go
     pushed_at: "2026-08-10T18:21:33Z"
     updated_at: "2026-08-12T09:14:01Z"
-    license:
-      spdx_id: MIT
-      name: MIT License
-    language: Go
-    topics: [llm, ollama, ai, local-llm]
-    homepage: https://ollama.com
     archived: false
     disabled: false
+    default_branch: main
+    license:
+      spdx_id: MIT
+      name: MIT
+    topics: [llm, ollama, ai, local-llm]
+  latestReleaseAt: "2026-07-30T00:00:00Z"   # top-level, only when a release exists
+  homepage: https://ollama.com               # top-level, only when set upstream
   sync:
     syncedAt: "2026-08-14T03:11:42.000Z"
     source: api
 ```
 
-For an HTML fallback, only the visible fields are populated:
+Notes on this shape:
+
+- `license.spdx_id` and `license.name` are both set to the **same** string (whichever GitHub returned — SPDX id preferred, falling back to the license's display name). The API's own `license.name` (which can differ from the SPDX id) is not fetched into a separate field.
+- `latestReleaseAt` and `homepage` live at the top level of `github`, not nested inside `repository` — that's deliberate (see the comment on `buildGithubSyncPatch`).
+- Fields `fetchGithubMetadata` fetches from the API but that `buildGithubSyncPatch` never writes back: `watchers_count`, `created_at`, `description`, `html_url`, `size`, `visibility`, `fork`, `private`. If you need one of those, it isn't part of the sync's write surface today.
+
+For an HTML-fallback sync:
 
 ```yaml
 github:
@@ -104,8 +123,7 @@ github:
     license: MIT
     language: Go
     topics: [llm, ai]
-    homepage: https://ollama.com
-    starsLabel: "92k"     # page-visible count (imprecise)
+  homepage: https://ollama.com   # only if the fallback found one
   sync:
     syncedAt: "2026-08-14T03:11:42.000Z"
     source: html
@@ -113,83 +131,45 @@ github:
 
 ## Field precedence
 
-When a record already has a `github.repository` block from a previous sync, the sync overwrites it. To preserve a hand-edited field, add it to `data/overrides.yml` instead — overrides win over the sync write.
+Within `github.repository`, sync always overwrites the specific fields listed above on every successful API run — there is no per-field opt-out. Anything else already present on the record (other keys under `github`, or the record's other top-level fields) is left untouched by the merge.
 
-For `repoUrl`:
+`data/overrides.yml` (`overridesFileSchema` in `packages/core/src/schema.ts`) exists as a schema and is re-exported from `@grove-dev/core`, but no code in this repo reads or applies it — `grove sync github` never checks it, and neither does the build pipeline (`packages/core/src/build-data.ts`). Don't rely on it to protect a field from being overwritten; there is currently no mechanism that does that.
 
-- `record.repoUrl` is canonical.
-- `record.links.github` is a fallback (used by import).
-- If both are set and disagree, `repoUrl` wins and a warning is logged.
-
-## Rate-limit strategies
-
-The default `--limit` is unbounded (every record is synced). For large directories, plan ahead:
-
-| Records | Recommended schedule | Token needed? |
-|---|---|---|
-| < 100 | Weekly cron | No |
-| 100 - 1,000 | Weekly cron | Recommended (`GITHUB_TOKEN` for 5,000/hr) |
-| 1,000 - 5,000 | Weekly cron + `--limit 1000` per run, multiple days | Required |
-| > 5,000 | Daily cron, `--limit 500` per run, monthly full pass | Required |
-
-For very large directories, run the sync in batches:
-
-```bash
-grove sync github --limit 500   # sync the first 500 records
-git diff data/records/           # review the changes
-git add data/records/ && git commit -m "sync github metadata (batch 1)"
-grove sync github --limit 1000 --offset 500
-```
-
-The CLI does not currently expose `--offset`; this is a hand-rolled pattern until V1.1 ships pagination.
-
-## Sync strategy: scheduled vs. per-PR
-
-The default — and the right setup for most community-maintained directories — is the scaffolded `sync-github.yml` schedule: it runs weekly, catches new stars, archive events, and transfers automatically, and keeps the commit history reviewable at one PR-sized diff per week. Watch the Actions tab; a "Sync GitHub metadata" run that fails three weeks in a row usually means a token expired or a config change broke something.
-
-For a stricter setup, run `grove sync github --strict` as a required check on PRs instead, so every PR touching `data/records/` also updates the GitHub-derived fields. The trade-off: PRs get slower, and a transient API failure blocks otherwise-good changes. Most sites do the opposite — schedule sync weekly and accept the lag, so record-content PRs go through normal review without sync in the loop.
+For `repoUrl` resolution: `record.repoUrl` is read first, falling back to `record.links.github` if unset. The sync command does not compare the two or warn when they disagree — it just uses whichever one resolves.
 
 ## Skipped records
 
-Records are skipped (not failed) when:
+A file is skipped (not counted as failed) when:
 
-- `repoUrl` is missing.
-- `repoUrl` does not parse as a GitHub URL (`parseGithubRepoUrl` returns `null`).
-- The owner or repo name contains invalid characters.
-- The record is `visibility: remove` or `visibility: hide`.
+- It has neither `repoUrl` nor `links.github` set.
+- The value present doesn't match `parseGithubRepoUrl`'s pattern (`https?://github.com/<owner>/<repo>`) — this covers non-GitHub hosts like GitLab or Codeberg, and malformed URLs.
 
-Skipped records are printed to stdout; the command exit code is `0` unless `--strict` is set and any record failed.
-
-## What "drift" looks like
-
-A record has drifted when its `github.repository.pushed_at` is older than the record's `health.reasons` suggests it should be. Most often, this means:
-
-- The repo was archived upstream and you didn't notice.
-- The repo was transferred to a new owner.
-- The repo was deleted and the URL now 404s.
-
-The cleanup step (`grove cleanup`, see [Health classification](/content/health-classification/)) flags all of these. If the report has a sudden spike in `archived` or `unavailable` candidates, check the upstream before writing decisions — sometimes it's a transfer, and the new owner is actively maintaining the project.
+The sync command does not look at `visibility`, `health.visibility`, or any curation field before deciding whether to process a record — every `.yml` file in the records directory is read regardless of its visibility.
 
 ## Handling a failed run
 
-When `grove sync github` fails outright (exit non-zero), the cause is almost always one of:
+`grove sync github` doesn't throw or stop early on a per-record failure — both the API call and the HTML fallback are wrapped in their own `try/catch`, so a bad record just falls through to "unavailable" and the loop continues to the next file. The whole command only exits non-zero if `--strict` is set and at least one record ended up unavailable; records that did sync successfully are written regardless.
 
-- **`GITHUB_TOKEN` not set in CI** — the workflow log shows 401s. Add the secret.
-- **Network partition in CI** — the log shows `ECONNRESET`. Re-run.
-- **A record's `repoUrl` points at a 404** — the log shows `skipped (api+html error)` for that slug. Either fix the URL or remove the record.
-- **A record's `repoUrl` is unparseable** — the log shows `unparseable repoUrl, skipping`. The URL isn't a github.com URL; fix it or set `links.github` instead.
+If the API returns `403` with an `x-ratelimit-remaining: 0` header, `github.ts` throws `GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze.` — that error is caught by the CLI and treated the same as any other API failure (falls through to the HTML fallback).
 
-In all cases, the records that *did* sync are still written — the CLI doesn't roll back partial state.
+## CI schedule
+
+The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on a weekly cron (`0 3 * * 0`, Sunday 03:00 UTC) plus `workflow_dispatch` for manual runs:
+
+1. `pnpm install --frozen-lockfile`
+2. `pnpm exec grove sync github`, with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in the environment
+3. `peter-evans/create-pull-request@v6` opens a PR (branch `chore/sync-github`) if the run changed any files
+
+Note the workflow sets `GH_TOKEN`, while `fetchGithubMetadata` reads `GITHUB_TOKEN` — in GitHub Actions the automatic `secrets.GITHUB_TOKEN` covers both names for many tools, but if you're setting a personal access token for higher rate limits, confirm the env var name matches what `github.ts` actually reads (`GITHUB_TOKEN`).
 
 ## What is NOT synced
 
-- **Releases** — `github.repository` does not include releases. To track release dates, use `decisions.yml` to add a curator note.
-- **Issues / PRs** — the public API exposes counts; Grove does not sync these (they're not in `IndexRecord`).
-- **Private repositories** — the HTML fallback won't work on private repos. The API requires a token with `repo` scope.
-- **Non-GitHub hosts** — `gitlab.com`, `codeberg.org`, `bitbucket.org` are unparseable and skipped. Use the record's `links.homepage` and `links.source` for non-GitHub projects.
-- **Contributors** — `grove sync github` only touches `github.repository`, `github.html`, and `github.sync`. Contributor refresh is a separate command, `grove sync contributors` (see [CLI reference](/reference/cli/#grove-sync-contributors)).
-- **The `health` block directly** — it's computed at render time from `github.repository.pushed_at`, `archived`, and stars. Updating the `github` block changes what the next render computes, but the sync step doesn't touch `health` on the record YAML itself.
-- **`data/health.yml`** — that file is a legacy format the validator no longer parses. `github.repository` on each record is the source of truth for the rendered health block.
+- **Releases** — only `latestReleaseAt` (the single latest release's `published_at`) is written; no release list or notes.
+- **Issues / PRs** — `open_issues_count` is written, but no per-issue or per-PR data.
+- **Private repositories** — the HTML fallback scrapes a public page, so it won't work on a private repo; the API path needs a token with access.
+- **Non-GitHub hosts** — GitLab, Codeberg, Bitbucket, etc. don't match `parseGithubRepoUrl` and are skipped.
+- **`health`** — `grove sync github` never calls `classifyHealth` and never writes a record's `health` block. Whatever `health` a record carries has to come from somewhere else.
+- **Contributors** — a separate command, [`grove sync contributors`](/automation/sync-contributors/), handles that.
 
 ## Programmatic API
 
@@ -199,38 +179,28 @@ import {
   fetchGithubMetadata,
   enrichFromGithubHtml,
   buildGithubSyncPatch,
-  syncContributors,
 } from "@grove-dev/core";
 
-const { owner, repo } = parseGithubRepoUrl("https://github.com/ollama/ollama");
-const metadata = await fetchGithubMetadata(owner, repo, {
-  auth: process.env.GITHUB_TOKEN,
-});
-const html = await fetch(`https://github.com/${owner}/${repo}`).then(r => r.text());
-const enriched = enrichFromGithubHtml(html);
-const patch = buildGithubSyncPatch(metadata, enriched);
-await syncContributors(records, { auth: process.env.GITHUB_TOKEN });
+const ref = parseGithubRepoUrl("https://github.com/ollama/ollama");
+if (ref) {
+  const metadata = await fetchGithubMetadata(ref); // reads process.env.GITHUB_TOKEN by default
+  if (metadata) {
+    const patch = buildGithubSyncPatch(metadata, existingRecord.github);
+    // ...merge `patch` into the record and write it back yourself
+  } else {
+    const enriched = await enrichFromGithubHtml("https://github.com/ollama/ollama");
+    // enriched.fields.{license, language, topics, homepage}
+  }
+}
 ```
 
 The full programmatic surface is in [Programmatic API](/reference/api-core/).
 
-## Verifying the sync
-
-After a sync, check:
-
-1. **`github.sync.syncedAt`** is recent.
-2. **`github.sync.source`** is `"api"` (good) or `"html"` (acceptable for failed API).
-3. **`health.status`** is `active` for records with recent commits, `stale` for old ones.
-4. **`health.tier`** matches expectations — `curated` for ≥500★, `listed` for ≥50★, `experimental` otherwise.
-
-```bash
-grove check --strict    # verify the syncs wrote valid YAML
-pnpm dev                # inspect the record detail pages
-```
-
 ## Related
 
-- [Health classification](/content/health-classification/) — what `health.status` means and how it's derived
-- [Decisions](/concepts/decisions/) — overriding auto-derived health signals
-- [Scheduled maintenance](/automation/scheduled/) — the workflow that runs this on a cron
-- [CLI reference — `grove sync github`](/reference/cli/#grove-sync-github) — full flag reference
+- [Record schema](/reference/record-schema/) — every field a record file may carry, including `github.*`
+- [Maintain health signals](/content/health-classification/) — why `health.*` is not part of this sync
+- [Decisions](/concepts/decisions/) — the curator layer that overrides visibility
+- [Cleanup report](/automation/cleanup/) — the command that flags stale/archived records for review
+- [Scheduled maintenance](/automation/scheduled/) — the workflow cadence this runs on
+- [CLI reference — `grove sync github`](/reference/cli/#grove-sync-github) — flag reference

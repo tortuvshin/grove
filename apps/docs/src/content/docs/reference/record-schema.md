@@ -1,135 +1,153 @@
 ---
 title: Record schema
-description: The discriminated Resource union — every kind, every field, every default. The schema `grove check` validates and generates against.
+description: Every field a record file may carry, its type, its default, and which ones a human writes versus which ones a command fills in.
 ---
 
-Grove is built around a discriminated `Resource` union with three concrete
-shapes:
+A record is one YAML file under `data/records/`. `grove check` parses it with
+the Zod schema in `packages/core/src/schema.ts` and rejects the build if it
+does not validate.
 
-- `kind: 'project'` — the `project-directory` blueprint. **The only
-  blueprint supported today** — `grove init` always scaffolds it.
-- `kind: 'resource'` — reserved for a future `resource-hub` blueprint.
-- `kind: 'entity'` — reserved for a future `ecosystem-map` blueprint.
+The schema is a discriminated union on `kind` with three members —
+`project`, `resource`, and `entity`. **Only `kind: project` is usable
+today.** `grove init` scaffolds a space whose `blueprint` is
+`project-directory`, and `validate.ts` rejects any record whose `kind` does
+not match that blueprint, so `resource` and `entity` records cannot be
+authored in a real space. Everything below documents `kind: project`.
 
-Every record inherits a **shared base** and adds a kind-specific
-extension. The CLI rejects records whose `kind` does not match the
-space's `blueprint` in `grove.config.ts`. In practice that means
-`kind: project` for every record in a Grove space today.
+**One file per record.** The filename without its extension is the slug. If a
+record's `slug:` field disagrees with its filename, `grove check` reports
+`record slug "…" does not match filename` as a **warning** — the build
+continues and the filename wins, because the loader overwrites `slug` with the
+filename. Run `grove check --strict` if you want that to fail.
 
-**Convention:** one file per record, named `<slug>.yml`. The file
-name is the canonical slug. The build pipeline enforces
-`slug === filename-without-extension`.
+## Shared base fields
 
-## The shared base
-
-Every record, regardless of `kind`, carries these fields:
+These fields come from `resourceBaseSchema` and apply to every record.
 
 ### `slug`
 
-**Type:** `string` (required, min 1)
-**Convention:** kebab-case, matching the filename
+**Type:** `string`, min length 1 · **Required**
 
-The unique identifier. Used as the URL, the cross-reference key
-(`related[]`, `parent`), and the in-page anchor.
+The unique identifier. It is the URL segment for the detail page, the key
+used by `data/decisions.yml` and `data/overrides.yml`, and the id carried
+into every generated output. Must equal the filename.
+
+### `name`
+
+**Type:** `string`, min length 1 · **Required**
+
+The human-readable name shown in cards, headings, and the browse index.
+(Defined on `projectRecordSchema`, not the base — but every project record
+needs one.)
 
 ### `description`
 
 **Type:** `string` · **Default:** `""`
 
-A short, single-sentence summary. Shown in list cards, search
-snippets, and `llms.txt`. Aim for under 200 characters; the
-renderer truncates with an ellipsis after that.
+A short summary. This is the field `grove sync github` treats as
+GitHub-sourced prose; see `summary` below for the curator-written
+alternative.
+
+### `summary`
+
+**Type:** `string` · **Optional**
+
+A curator-written lead paragraph. When present, the detail page renders
+`summary` first and `description` below it as the secondary "from the
+project's README" block. Write here when you want your own words without
+overwriting what GitHub says the project is.
+
+### `sourceDescription`
+
+**Type:** `string` · **Optional**
+
+The original GitHub-sourced description, preserved separately so a curated
+`summary` does not destroy it.
 
 ### `category`
 
-**Type:** `string` (required, min 1) · **Default:** `"uncategorized"`
+**Type:** `string`, min length 1 · **Default:** `"uncategorized"`
 
-A single category. Configure the allowed set in
-`data/taxonomy/categories.yml` (or by convention in your space).
+A single category string. It is not validated against a fixed list — the
+schema only requires a non-empty string. Keep the set consistent by
+convention, and mirror it in `data/taxonomy/` if you want category pages.
 
 ### `tags`
 
 **Type:** `string[]` · **Default:** `[]`
 
-Free-form labels. Normalize by convention (lowercase, kebab-case)
-so cross-record searches work.
+Free-form labels. Also unvalidated against a list; normalize casing and
+hyphenation yourself so filtering behaves.
 
 ### `links`
 
-**Type:** `Record<string, string>` (URL values) · **Default:** `{}`
+**Type:** object of URL strings · **Default:** `{}`
 
-A map of named links. Recognized keys: `github`, `website`, `docs`,
-`source`. Additional keys are allowed (catchall) for project-specific
-links.
+`github`, `website`, `docs`, and `source` are named keys. Any other key is
+allowed through the catchall — but **every value must parse as a URL**,
+including the extra ones. A non-URL value fails validation.
 
 ### `content`
 
-**Type:** `string` (path) · **Default:** `undefined`
+**Type:** `string` · **Optional**
 
-Optional path to a Markdown body for the record, relative to
-`paths.bodiesDir` (default `content/records/`). The renderer
-embeds the body on the detail page.
+Path to a Markdown body for this record, relative to `paths.bodiesDir`
+(default `content/records`). The detail page renders the body beneath the
+record header.
 
 ### `source`
 
-**Type:** `object` · **Default:** `{ type: "manual" }`
+**Type:** object · **Default:** `{ type: "manual" }`
 
-Provenance. Useful for distinguishing hand-authored records from
-imported ones.
+Provenance, mostly written by `grove import`.
 
-| Field | Type | Description |
+| Field | Type | Default |
 |---|---|---|
-| `type` | `"manual" \| "github-topic" \| "awesome-list" \| "submit" \| "import"` | How the record was created |
-| `file` | `string` | Original file path (for imports) |
-| `url` | `string` | Original source URL |
-| `provider` | `string` | Provider name (e.g. `github`) |
-| `owner` | `string` | GitHub owner (if applicable) |
-| `repo` | `string` | GitHub repo name (if applicable) |
+| `type` | `"manual"` \| `"github-topic"` \| `"awesome-list"` \| `"submit"` \| `"import"` | `"manual"` |
+| `file` | `string` | — |
+| `url` | `string` | — |
+| `provider` | `string` | — |
+| `owner` | `string` | — |
+| `repo` | `string` | — |
+
+Note that `source.url` here is a plain string, not a validated URL.
 
 ### `curation`
 
-**Type:** `object` · **Default:** `{ reviewed: false, labels: [], lenses: [] }`
+**Type:** object · **Default:** `{ reviewed: false, labels: [], lenses: [] }`
 
-Curator metadata on the record itself.
+Curator metadata, written by hand.
 
-| Field | Type | Default | Description |
-|---|---|---|---|
-| `reviewed` | `boolean` | `false` | Has a human reviewed this record? |
-| `reviewedBy` | `string` | — | Curator handle |
-| `reviewedAt` | `string` | — | ISO timestamp |
-| `notes` | `string` | — | Free-form curator notes |
-| `labels` | `Array<"new" \| "hot" \| "mature" \| "featured">` | `[]` | Curator-applied labels (separate from auto-derived `health.tier`) |
-| `lenses` | `string[]` | `[]` | Lens names this record should appear in (e.g. `hot`, `new`, `mature`) |
+| Field | Type | Default |
+|---|---|---|
+| `reviewed` | `boolean` | `false` |
+| `reviewedBy` | `string` | — |
+| `reviewedAt` | `string` | — |
+| `notes` | `string` | — |
+| `labels` | array of `"new"` \| `"hot"` \| `"mature"` \| `"featured"` | `[]` |
+| `lenses` | `string[]` | `[]` |
+
+`labels` is a closed enum — exactly those four values. `lenses` is an open
+string array.
 
 ### `scores`
 
-**Type:** `object` · **Default:** `{}`
+**Type:** object · **Default:** `{}`
 
-Optional 0-100 scores for the record across multiple dimensions.
-Adapters and the home page can use these to rank and filter.
-
-| Field | Type | Range | Description |
-|---|---|---|---|
-| `activity` | `number` | 0-100 | Recency and frequency of commits |
-| `maturity` | `number` | 0-100 | Stability and production-readiness |
-| `learning` | `number` | 0-100 | Quality of docs, examples, and onboarding |
-| `contribution` | `number` | 0-100 | Openness to outside contributions |
-| `docs` | `number` | 0-100 | Quality of documentation |
-| `overall` | `number` | 0-100 | Composite score |
+Every key is optional and constrained to `0`–`100`: `activity`, `maturity`,
+`learning`, `contribution`, `docs`, `overall`. Nothing in the build computes
+these; they are yours to fill in and yours to use.
 
 ### `visibility`
 
-**Type:** `"highlight" \| "keep" \| "needs_review" \| "hide" \| "remove" \| "historical"` · **Default:** `"keep"`
+**Type:** `"highlight"` \| `"keep"` \| `"needs_review"` \| `"hide"` \|
+`"remove"` \| `"historical"` · **Default:** `"keep"`
 
-Effective visibility after any `decisions.yml` override. For
-`project` records, the canonical signal lives in
-`health.visibility`; for `resource` and `entity` records, this
-top-level `visibility` is the source of truth.
+For project records the signal that actually drives the index is
+`health.visibility`, not this field. This top-level `visibility` exists on
+the base schema for the kinds that have no `health` block.
 
-## `ProjectRecord` (`kind: project`)
-
-For the `project-directory` blueprint. The full record with
-project-specific fields:
+## Project fields
 
 ```yaml
 kind: project
@@ -142,98 +160,145 @@ links:
   github: https://github.com/calcom/cal.com
   website: https://cal.com
 repoUrl: https://github.com/calcom/cal.com
-logoUrl: https://example.com/calcom-logo.png
 stack: Next.js
 stacks: [Next.js, TypeScript, Prisma, tRPC]
 platforms: [Web, Self-hosted]
-projectType: production           # real-app | production | reference | library | tool | demo | template | historical
-difficulty: intermediate          # beginner | intermediate | advanced
-codebaseSize: large               # small | medium | large | huge
+licenses: [mit]
+projectType: production
+difficulty: intermediate
+codebaseSize: large
 bestFor:
   - Adding scheduling to SaaS products
-  - Replacing Calendly with a self-hostable alternative
 whyListed:
   - Active, well-maintained open-source project
 caveats:
   - Requires Postgres for self-hosted setups
 distribution:
   channels:
-    - { type: docker, platform: linux, label: "Docker image" }
-    - { type: website, url: https://cal.com, verified: true }
-github:
-  repository:
-    full_name: calcom/cal.com
-    stargazers_count: 32000
-    pushed_at: "2024-09-14T..."
-  sync:
-    syncedAt: "2024-09-14T..."
-    source: api
-health:
-  status: active                 # active | mature | stale | inactive | archived | unknown | historical | needs_review | quiet | unavailable
-  maturity: mature               # experimental | useful | mature | unknown
-  tier: curated                  # curated | listed | experimental | hidden
-  visibility: keep               # (see Visibility enum above)
-  cleanupCandidate: false
-  confidence: high               # low | medium | high
-  reasons: []
+    - type: docker
+      label: Docker image
+      url: https://hub.docker.com/r/calcom/cal.com
 ```
 
-### Project-specific fields
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `kind` | literal `"project"` | — | Required discriminator |
+| `name` | `string` min 1 | — | Required |
+| `projectType` | `real-app` \| `production` \| `reference` \| `library` \| `tool` \| `demo` \| `template` \| `historical` | — | Optional |
+| `stack` | `string` | — | The single primary technology |
+| `stacks` | `string[]` | `[]` | Full stack list |
+| `platforms` | `string[]` | `[]` | Free-form |
+| `licenses` | `string[]` | `[]` | SPDX identifiers, e.g. `[mit]`, `[apache-2.0]` |
+| `difficulty` | `beginner` \| `intermediate` \| `advanced` | — | Optional |
+| `codebaseSize` | `small` \| `medium` \| `large` \| `huge` | — | Optional |
+| `repoUrl` | URL | — | Canonical repo. `grove sync github` reads `repoUrl` first and falls back to `links.github` |
+| `logoUrl` | URL | — | Falls back to the GitHub owner avatar, then to initials |
+| `screenshots` | array | `[]` | Each entry needs `src` (URL) and `alt` (min 1); `source`, `width`, `height` optional |
+| `bestFor` | `string[]` | `[]` | Curator bullets |
+| `whyListed` | `string[]` | `[]` | Curator bullets |
+| `caveats` | `string[]` | `[]` | Curator bullets |
+| `distribution.channels` | array | `[]` | Each channel **requires** `type` and a valid `url`; `platform`, `label`, `verified`, `notes` optional |
+| `github` | object | — | Written by `grove sync github` — do not hand-edit |
+| `health` | object | — | See below |
 
-| Field | Type | Description |
+:::caution[`distribution.channels[].url` is required]
+A channel entry without a valid `url` fails validation. `{ type: docker,
+platform: linux }` alone will not parse.
+:::
+
+## The `github` block
+
+`grove sync github` owns this block and rewrites it in place. It merges
+rather than replaces, so anything you add outside the fields sync writes
+survives a re-run.
+
+- `github.repository` — the raw GitHub REST repository object
+  (`full_name`, `stargazers_count`, `pushed_at`, `license`, `topics`, and
+  the rest). Passthrough, so unknown keys are kept.
+- `github.languages`, `github.latestRelease`, `github.activity`,
+  `github.files`, `github.labels` — optional records written by sync.
+- `github.sync` — `{ syncedAt, source }`, where `source` is `"api"` or
+  `"html"`.
+- `github.html` and `github.homepage` — written only when the API path
+  failed and the token-free HTML fallback succeeded.
+
+## The `health` block
+
+`health` describes how fresh and relevant a record is. It is optional, and
+its shape is:
+
+| Field | Type | Default |
 |---|---|---|
-| `name` | `string` (required) | Human-readable name. Shown in cards and headings. |
-| `projectType` | enum | One of `real-app`, `production`, `reference`, `library`, `tool`, `demo`, `template`, `historical` |
-| `stack` | `string` | The single primary stack piece (e.g. `Next.js`) |
-| `stacks` | `string[]` | Full stack list |
-| `platforms` | `string[]` | `Web`, `Self-hosted`, `CLI`, `iOS`, `Android`, etc. |
-| `difficulty` | enum | `beginner` \| `intermediate` \| `advanced` |
-| `codebaseSize` | enum | `small` \| `medium` \| `large` \| `huge` |
-| `repoUrl` | `string` (URL) | Canonical repo URL. **Preferred** by `grove sync github` over `links.github`. |
-| `logoUrl` | `string` (URL) | Optional logo/avatar. Falls back to the GitHub owner avatar (for `github.com` `repoUrl`) or initials. |
-| `bestFor` | `string[]` | Short bullets on what the project is good for |
-| `whyListed` | `string[]` | Curator note: why this record is included |
-| `caveats` | `string[]` | Curator note: things to be aware of |
-| `distribution.channels` | array | Where the project ships: `docker`, `npm`, `pypi`, `website`, etc. |
-| `github.repository` | object | Live metadata from `grove sync github` (do not edit by hand) |
-| `health` | object | Auto-derived + curator-overridden health block |
+| `status` | `active` \| `mature` \| `stale` \| `inactive` \| `archived` \| `unknown` \| `historical` \| `needs_review` \| `quiet` \| `unavailable` | `"unknown"` |
+| `maturity` | `experimental` \| `useful` \| `mature` \| `unknown` | `"unknown"` |
+| `tier` | `curated` \| `listed` \| `experimental` \| `hidden` | `"experimental"` |
+| `visibility` | same enum as top-level `visibility` | `"keep"` |
+| `cleanupCandidate` | `boolean` | `false` |
+| `staleReason` | `string \| null` | — |
+| `confidence` | `low` \| `medium` \| `high` | `"medium"` |
+| `reasons` | `string[]` | `[]` |
 
-### The `health` block
+:::caution[No command writes `health` into your record files]
+`grove sync github` writes only under `github.*`. The classifier that
+derives a health block, `classifyHealth` in
+`packages/core/src/health.ts`, is exported from `@grove-dev/core` for your
+own scripts, and the build calls it in exactly one narrow case: when a
+record has a `data/decisions.yml` override but no `health` block at all, so
+the override has somewhere to land (`packages/core/src/build-data.ts`).
+Otherwise `health` is whatever is in your YAML.
+:::
 
-The `health` block is the **auto-derived** signal of how fresh and
-relevant the record is. It is populated by `grove sync github` and
-can be overridden by curator decisions in `data/decisions.yml`.
+### How `classifyHealth` derives each field
 
-| Field | Type | Description |
-|---|---|---|
-| `status` | enum | `active` (commit ≤ 183d), `stale` (184–548d), `inactive` (> 730d), `archived`, `unknown` — plus editor-only `mature` / `quiet` / `historical` / `needs_review` / `unavailable` set via `decisions.yml`. Implementation in `packages/core/src/health.ts: classifyHealth`. |
-| `maturity` | enum | `experimental`, `useful`, `mature`, `unknown` — `mature` is auto-set when `active` + ≥ 500★ + maintained signals (recent release or clear license). |
-| `tier` | enum | `curated` (≥ 500★), `listed` (≥ 50★), `experimental` (else), `hidden` (status is `archived` or `inactive`). The record is still in the data; `hidden` only excludes it from the index. |
-| `visibility` | enum | `keep` (tier=curated/listed/experimental), `hide` (tier=hidden) — overridden by `decisions.yml`. |
-| `cleanupCandidate` | `boolean` | `true` when `status` is `stale`, `archived`, or `inactive`. Drives `grove cleanup`. |
-| `staleReason` | `string \| null` | Machine-readable reason: `no_commits_365_days` (stale), `no_commits_24_months` (inactive), `github_archived`. |
-| `confidence` | enum | `low`, `medium`, `high` — `high` when GitHub metadata is complete; `low` when no GitHub data exists at all. |
-| `reasons` | `string[]` | Human-readable reasons explaining the current state (e.g. "Recent repository activity", "Repository is archived on GitHub"). |
+If you do run the classifier yourself, these are its actual rules. With no
+GitHub metadata at all it returns `status: unknown`, `tier: experimental`,
+`confidence: low`. Otherwise, from `pushedAt`:
 
-**Health is a review signal, not a final ranking.** The
-`cleanup.yml` workflow surfaces records with
-`cleanupCandidate: true` for human review; the curator decides
-whether to keep, hide, mark historical, or remove.
+| Days since last push | `status` |
+|---|---|
+| repo is archived on GitHub | `archived` |
+| ≤ 183 | `active` |
+| 184 – 548 | `stale` |
+| 549 – 730 | `needs_review` |
+| > 730 | `inactive` |
 
-## `ResourceRecord` and `EntityRecord` (`kind: resource`, `kind: entity`)
+Then, with `popular` meaning ≥ 500 stars and `maintainedSignals` meaning
+pushed within 183 days **and** (a release within 365 days **or** a license
+that is not `NOASSERTION`):
 
-The Zod schema also defines `resourceRecordSchema` (`kind: resource`)
-and `entityRecordSchema` (`kind: entity`), for the `resource-hub` and
-`ecosystem-map` blueprints respectively. **Neither blueprint is
-supported yet** — `grove init` cannot scaffold them, and there is no
-documented authoring path for these kinds. Only `kind: project`
-(the `project-directory` blueprint) is supported today; see
-[`ProjectRecord`](#projectrecord-kind-project) above.
+- `maturity` is `unknown` when archived or inactive; `mature` when
+  `popular && maintainedSignals`; `useful` at ≥ 50 stars or with
+  maintained signals; `experimental` otherwise.
+- An `active` record that reaches `mature` maturity has its `status`
+  promoted to `mature` as well.
+- `tier` is `hidden` when archived or inactive, else `curated` at ≥ 500
+  stars, `listed` at ≥ 50, `experimental` below that.
+- `visibility` is `hide` when `tier` is `hidden`, otherwise `keep`.
+- `cleanupCandidate` is `true` for `stale`, `archived`, and `inactive`.
+- `staleReason` is `no_commits_365_days` (stale), `no_commits_24_months`
+  (inactive), `github_archived` (archived), or `null`.
+- `confidence` is `high` when `github.fullName` is present, `medium` when
+  it is not, and `low` only in the no-metadata case above.
 
-## Related docs
+`quiet`, `unavailable`, and `historical` are valid `status` values in the
+schema but the classifier never produces them — set them by hand.
 
-- **[Author a record](/content/author-a-record/)** — the editorial workflow that produces a record.
-- **[grove.config.ts](/reference/config/)** — site config.
-- **[CLI](/reference/cli/)** — `grove check` validates and
-  generates against this schema.
-- **Source: [`packages/core/src/schema.ts`](https://github.com/tortuvshin/grove)** — the canonical schema.
+Health is a review signal, not a ranking. `grove cleanup` reads
+`health.cleanupCandidate` to surface records for a human to look at; the
+curator decides what happens next in `data/decisions.yml`.
+
+## `kind: resource` and `kind: entity`
+
+`resourceRecordSchema` and `entityRecordSchema` exist in the schema file and
+add their own fields (`title`/`type`/`topic`/`related` and
+`name`/`type`/`founded`/`parent` respectively). Neither is reachable:
+`grove init` does not scaffold a space that accepts them, and validation
+rejects records whose `kind` does not match the space's blueprint. Treat
+them as schema-only.
+
+## Related
+
+- [Author a record](/content/author-a-record/) — the editorial workflow.
+- [grove.config.ts](/reference/config/) — `paths.recordsDir`,
+  `paths.bodiesDir`, and the rest of the site config.
+- [CLI](/reference/cli/) — `grove check` validates against this schema.

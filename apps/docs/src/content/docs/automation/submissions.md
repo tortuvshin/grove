@@ -1,187 +1,120 @@
 ---
 title: Community submissions
-description: Accept new entries through GitHub issues and review them as pull requests before publishing.
+description: The on-site /submit/ page generates a record draft and a pre-filled GitHub PR link; a human always reviews and merges.
 ---
 
-Submissions follow a simple principle: **every change is a file, every file is reviewable.** The bot never edits records directly; a human reviewer always merges. This pattern scales better than bot-driven PRs and gives the community a clear point of contact.
+Grove's submission surface is the scaffolded `/submit/` page. There is no submission bot and no automated issue-to-PR pipeline in this repository — the page is a client-side draft generator that hands the contributor a pre-filled GitHub link, and every record still lands as a pull request a maintainer reviews.
 
-## The submission flow
+## How the submit page works
 
-```
-Submitter                Issue template          Maintainer              Bot
-─────────                ──────────────          ──────────              ────
-   │                          │                     │                    │
-   │  fills form              │                     │                    │
-   ├─────────────────────────►│                     │                    │
-   │                          │                     │                    │
-   │                          │  renders YAML draft │                    │
-   │                          │  + bot response      │                    │
-   │                          ├────────────────────►│                    │
-   │                          │                     │                    │
-   │  copies YAML             │                     │                    │
-   │  into a PR               │                     │                    │
-   ├──────────────────────────┴────────────────────►│                    │
-   │                          │                     │                    │
-   │                          │                     │  ci.yml: grove check + astro build
-   │                          │                     │◄───────────────────┤
-   │                          │                     │                    │
-   │                          │                     │  merge + close issue
-   │                          │                     │                    │
-   │                          │                     │  sync-github.yml: enrich record
-   │                          │                     │◄───────────────────┤
-   │                          │                     │                    │
-   │                          │                     │  deploy.yml: rebuild + redeploy
-   │                          │                     │◄───────────────────┤
-```
+The page (`apps/example/src/pages/submit.astro`, rendered by `SubmissionClient.astro`) walks a contributor through three steps:
 
-## The scaffolder writes four pieces
+1. **Paste a GitHub URL.** Clicking "Generate draft" parses the URL and fetches repo metadata. By default (the static-build path the scaffold ships) this is a **direct browser call** to `https://api.github.com/repos/<owner>/<repo>` — no server, no token. If the response is `404`, the form shows "Repository not found or not public." If it's `403` or `429`, it shows: "GitHub rate limit reached (60 requests/hour per visitor). Try again later or fill the fields manually." Private repos are rejected client-side after the fetch succeeds ("Private repositories cannot be submitted.").
 
-After `grove init`, four files wire this up:
+   `SubmissionClient` also accepts an optional `githubProxyPath` prop so an SSR-adapter consumer can route this call through a server endpoint that reads a server-only `GITHUB_TOKEN` (see `packages/astro/src/server/github-repo.ts`) instead of hitting the API from the visitor's browser. The scaffolded `submit.astro` does not pass this prop, so the shipped example always uses the direct, unauthenticated browser call.
 
-### `.github/ISSUE_TEMPLATE/record_submission.md`
+2. **Review the auto-filled form.** A successful fetch fills in name, slug, description, primary stack (guessed from language/topics — Flutter/Dart, React Native, Swift/Objective-C → iOS, Kotlin/Java → Android), tags (up to 8, from GitHub topics), and website (from the repo's homepage). The contributor can edit any field; category, platforms, tags, and license inputs only appear if the site's `browse.facets` configuration enables them.
+
+3. **Get the draft.** As the form changes, the client regenerates a `kind: project` YAML draft in the page and validates it:
+   - the slug must not already exist among `existingSlugs`,
+   - the description must be at least 40 characters,
+   - category and stack (if enabled) must be chosen from the site's taxonomy,
+   - at least one platform must be checked (if platforms are enabled).
+
+   Any validation failure disables both action buttons and shows the first issue as status text. Once valid, "Copy YAML" copies the draft to the clipboard, and "Open PR draft" opens `<repoUrl>/new/main?filename=data/records/<slug>.yml&value=<yaml>` in a new tab — GitHub's own "create new file" editor, pre-filled with the path and content, which is where GitHub itself takes over the fork/commit/PR flow for a contributor who doesn't have push access.
+
+The generated draft always looks like this shape (fields present depend on which `fields.*` are enabled in `getSubmissionPageModel`):
 
 ```yaml
-name: Submit a record
-description: Suggest a project, resource, or entity for the directory.
-labels: ["submission"]
-body:
-  - type: input
-    id: url
-    attributes:
-      label: URL
-      description: Link to the project (repo, website, or article)
-    validations:
-      required: true
-  - type: input
-    id: category
-    attributes:
-      label: Category
-      description: Existing category slug (e.g. ai, web, cli)
-    validations:
-      required: true
-  - type: textarea
-    id: description
-    attributes:
-      label: One-line description
-      description: Factual, third-person, under 200 characters.
-    validations:
-      required: true
-  - type: textarea
-    id: notes
-    attributes:
-      label: Notes for the reviewer
-      description: Anything that helps the reviewer (links, context).
-    validations:
-      required: false
+kind: project
+slug: ollama
+name: "Ollama"
+description: "Get up and running with large language models locally."
+category: ai
+projectType: real-app
+stack: "go"
+platforms:
+  - macos
+  - linux
+tags:
+  - llm
+  - local-llm
+repoUrl: https://github.com/ollama/ollama
+links:
+  github: https://github.com/ollama/ollama
+  website: https://ollama.com
+bestFor:
+  []
+source:
+  type: manual
+  owner: ollama
+  repo: ollama
+curation:
+  reviewed: false
+  labels: []
+  lenses: []
 ```
 
-When a contributor opens an issue with this template, GitHub renders the form. The fields mirror the record schema; the bot reads the form body and renders a YAML draft in a comment.
+`projectType: real-app` is always hardcoded by the generator — the form doesn't expose a way to pick a different project type.
 
-### `.github/ISSUE_TEMPLATE/bug_report.md` and `feature_request.md`
+## The submission copy
 
-Generic feedback templates. They don't render a YAML draft; the maintainer triages manually.
-
-### `src/pages/submit.astro`
-
-The on-site submission page. Contributors who don't want to touch GitHub can fill the form on the site; the page generates a pre-filled GitHub issue link (via `?template=record_submission.md&...` query params) and a YAML draft they can copy into a PR.
-
-The on-site form is optional; the issue template alone is enough for the flow.
-
-### `.github/workflows/ci.yml`
-
-Runs on every PR:
-
-1. `pnpm install`
-2. `grove check` — schema validation + sitemap + llms generation
-3. `pnpm build` — Astro build
-
-If any step fails, the PR can't merge. The maintainer reviews the diff and merges when green.
-
-## Bot behaviour
-
-The scaffold can include `.github/workflows/submission-bot.yml` (optional — opt in by adding it from the template gallery). When enabled, the bot:
-
-1. Watches for new issues with the `submission` label.
-2. Reads the form body.
-3. Posts a YAML draft as a comment, with a "Create PR" link that pre-fills the record file.
-4. Closes the issue when a PR referencing it is merged.
-
-Without the bot, the maintainer writes the YAML by hand. For a directory with < 5 submissions/week, hand-writing is faster than configuring the bot.
-
-## The submission page
-
-The on-site submission page is at `/submit/`. It explains:
-
-- What belongs in the directory (the inclusion criteria).
-- What doesn't belong (the exclusion criteria).
-- How to open a PR (the contributor path).
-- How the review process works.
-
-The page is generated from `grove.config.ts`'s `submission` block:
+`grove.config.ts`'s `submission` block drives the page's headline, description, and the "good submissions" / "please avoid" lists (`copy.good` / `copy.avoid`), consumed via `getSubmissionPageModel` in `packages/astro/src/server/models.ts`:
 
 ```ts
 submission: {
-  eyebrow: "Project submission",
-  title: "Suggest an open-source project",
-  description: "Generate a record, review it, and open a pull request.",
+  eyebrow: "AI project submission",
+  title: "Add an open-source AI project",
+  description:
+    "Generate a Grove record from a public GitHub repository, review the AI taxonomy, then open a pull request.",
   good: [
-    "Public source and a clear license",
-    "Active maintenance (commit within the last 12 months)",
-    "Functional software, not vaporware",
+    "A usable open-source AI tool, agent framework, interface, or infrastructure project",
+    "A public repository with a clear license and enough documentation to evaluate",
+    "A category, stack, and tags chosen from this directory's taxonomy",
   ],
   avoid: [
-    "Duplicates of existing records",
-    "Marketing-only pages with no working software",
-    "Vendor-sponsored forks without an active community",
+    "Closed-source AI products or marketing-only landing pages",
+    "Prompt collections, tutorials, snippets, or duplicate entries",
+    "Abandoned experiments without documentation or a verifiable license",
   ],
 },
 ```
 
-The form on the submission page is a generator, not a submitter — it produces a GitHub issue link the contributor opens in their browser. This is deliberate: it avoids the bot needing write access to your repo, and it works for contributors who don't yet have a fork.
+If any field is omitted, `submit.astro` falls back to generic copy hardcoded in the page itself, not to anything from `@grove-dev/core`.
 
-## Anti-patterns to avoid
+## The freeform issue template
 
-- **Bot writes the record directly.** Loses human review, breaks the audit trail.
-- **Form submits via a third-party service (Formspree, Netlify Forms).** Bypasses the issue tracker; submissions live outside GitHub.
-- **A Slack/Discord channel for submissions.** Hard to track, easy to lose.
-- **Email submissions.** Same — opaque, easy to lose.
+`.github/ISSUE_TEMPLATE/record_submission.md` is a plain Markdown issue template (not a GitHub Issue Forms schema) for contributors who'd rather describe a suggestion than fill out the on-site form. It asks for the same broad shape of information — name, description, category, stack, platforms, project type, links, and a rationale — as free-text fields under Markdown headings, plus a small checklist (public repo, OSI license, maintained in the last 12 months, author-disclosure).
 
-The pattern above keeps every submission in GitHub, where it can be triaged, discussed, and traced back to the contributor.
+Nothing automated reads this template. Opening an issue with it does not generate a YAML draft, does not comment back, and does not open a PR — a maintainer reads the issue and, if it's in scope, either writes the record by hand or asks the submitter to use `/submit/` instead. `.github/ISSUE_TEMPLATE/bug_report.md` and `feature_request.md` are separate, unrelated templates for site bugs and feature requests.
 
-## Spam protection
+## Review flow
 
-GitHub issues are not a high-volume spam target, but a few measures help:
+Once a PR exists — whether opened through the `/submit/` "Open PR draft" link, hand-written from a copied YAML draft, or opened directly — `apps/example/.github/workflows/ci.yml` runs on every PR and push to `main`:
 
-- Require the `submission` label.
-- Set a CODEOWNERS entry for `data/records/` — only maintainers can merge.
-- The CI gate (`grove check` rejects malformed YAML) is itself a spam filter.
-- For high-spam directories, enable [GitHub's required workflows](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-required-status-checks) to require the CI check.
+1. `pnpm install --frozen-lockfile`
+2. `pnpm exec grove check` — schema validation against every record (including the new one), regenerating artifacts, and (internally) running `astro check`
+3. `pnpm build` — the full Astro build
 
-For a directory that needs stricter moderation, add a `.github/ISSUE_TEMPLATE/config.yml` that limits who can open issues:
+A red CI run blocks merge in the usual GitHub sense (branch protection has to be configured for that; the workflow itself just reports status). Once merged, the new record has no `github.*` block yet — that is filled in by the next scheduled run of [`grove sync github`](/automation/sync-github/), which runs weekly by default. A `health` entry is *not* filled in by anything; see [Maintain health signals](/content/health-classification/).
 
-```yaml
-contact_links:
-  - name: Maintainer team
-    url: https://example.com/contact
-    about: For non-submission questions.
-```
+## What's not automated
 
-## What the maintainer does
+- No bot writes, comments on, or closes issues.
+- No bot merges PRs. A human always reviews and merges.
+- No auto-labeling beyond the static `labels: ["submission"]` on the issue template's own frontmatter.
+- `CODEOWNERS` is not part of the scaffolded `apps/example/` site — this repository's own `.github/CODEOWNERS` covers the Grove monorepo itself, not a site built with Grove. If you want required review on `data/records/`, add a `CODEOWNERS` entry yourself.
 
-A typical submission takes 5-10 minutes of maintainer time:
+## Spam and quality gates
 
-1. Triage the issue — is the project in scope? Has it been submitted before?
-2. If yes, write the YAML record (the bot may have written a draft; revise it).
-3. Open a PR with the new record file.
-4. The CI runs `grove check` + `pnpm build`. If green, merge.
-5. The next `sync-github.yml` run enriches the record with stars, license, language.
-6. The site rebuilds and the record appears on the index, on category pages, and in `sitemap.xml`.
-
-The whole round-trip from issue-opened to record-live is usually under a week; for an active directory, often under 24 hours.
+- The issue template's `labels: ["submission"]` frontmatter tags every issue opened from it, which you can use to filter or triage.
+- `grove check` in CI rejects a PR whose record YAML doesn't match the schema — malformed submissions fail the build rather than merging silently.
+- Branch protection requiring the CI check to pass (a GitHub repo setting, not something Grove configures) is the mechanism that actually blocks a bad PR from merging.
+- A `CODEOWNERS` entry for `data/records/` (a plain GitHub feature) restricts who can approve changes there — add it if you want it; it isn't shipped by default.
 
 ## Related
 
-- [Author a record](/content/author-a-record/) — the YAML schema a contributor needs
-- [Validation](/automation/check/) — what `grove check` enforces
-- [Health classification](/content/health-classification/) — the post-merge enrichment that follows
-- [Contributor path](/maintainers/contributing/) — what a contributor sees
+- [Record schema](/reference/record-schema/) — every field a contributor's YAML draft needs to satisfy
+- [`grove check`](/automation/check/) — what the CI gate validates
+- [Sync GitHub metadata](/automation/sync-github/) — the enrichment that runs after a record merges
+- [Contributing](/maintainers/contributing/) — the contributor-facing walkthrough of this same flow

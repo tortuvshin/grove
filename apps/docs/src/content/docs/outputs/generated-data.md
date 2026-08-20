@@ -1,90 +1,158 @@
 ---
 title: Generated data files
-description: JSON datasets and review artifacts written under data/generated/.
+description: The JSON files under data/generated/ — who writes each one, what shape it has, and which ones a build regenerates.
 ---
 
-`data/generated/` is rewritten on every `grove check` (or every Astro build). The contents are reproducible from the source files plus `grove.config.ts`. Don't edit by hand; **do** consume them.
+`data/generated/` holds derived JSON. Nothing in it is a source of truth, and
+nothing in it should be hand-edited — but it is meant to be read, both by
+Grove's own Astro adapters and by whatever you want to build on top.
 
-## Files
+Not everything here is rewritten on every build. That distinction matters
+when you are debugging why a file looks stale.
 
-| File | Contents | Producer |
-|---|---|---|
-| `records.full.json` | Every record with every field resolved. | `generate()` (in `packages/core/src/build-data.ts`) |
-| `records.index.json` | Trimmed index — id, slug, name/title, category, tags, visibility. | same |
-| `records.json` | Alias of `records.full.json`. | same |
-| `site-config.json` | Resolved `grove.config.ts` plus audit metadata. | same |
-| `cleanup-report.json` | Output of `grove cleanup` — records flagged for human review. | `cleanupStale()` in `packages/core/src/decisions.ts` |
-| `contributors.json` | Output of `grove sync contributors`. | `syncContributors()` in `packages/core/src/contributors.ts` |
-| `repo-stats.json` | Per-repository activity totals, written alongside `contributors.json`. | same |
-| `og-manifest.json` | Map of generated OG cards — page → file path. | `buildOgImages()` in `packages/core/src/og-image.ts` |
+## Written on every `grove check` and every Astro build
 
-## `records.json` shape
+| File | Contents |
+|---|---|
+| `records.full.json` | Every record, normalized, regardless of visibility |
+| `records.index.json` | Slim payload, **visible records only** |
+| `records.json` | Byte-for-byte alias of `records.full.json` |
+| `site-config.json` | Resolved `grove.config.ts` plus taxonomy and counts |
+| `og-manifest.json` | OG card path → content hash, so unchanged cards are not re-rendered |
 
-```jsonc
-{
-  "records": [
-    {
-      "id": "ollama",
-      "slug": "ollama",
-      "kind": "project",
-      "name": "Ollama",
-      "description": "Get up and running with large language models locally.",
-      "category": "ai-tools",
-      "tags": ["llm", "local"],
-      "visibility": "keep",
-      "github": { "stars": 0, "forks": 0, /* ... */ }
-      // ...every field of the record's schema, including health, scores, etc.
-    }
-  ],
-  "taxonomy": {
-    "categories": [/* id, name, description */],
-    "stacks": [/* ... */],
-    "platforms": [/* ... */],
-    "licenses": [/* id, name, spdx_id, url */]
-  },
-  "site": {
-    "name": "My Space",
-    "url": "https://example.com"
-  }
-}
-```
+All five come out of `generate()` in `packages/core/src/build-data.ts`, which
+`prepareDirectory()` runs as the first step of the build pipeline.
 
-The Astro integration and any custom consumer code consumes `records.json` through Vite aliases (`@grove/generated`) so the import path is stable across site structures.
+## Written only by their own command
 
-## `site-config.json` shape
+| File | Command |
+|---|---|
+| `cleanup-report.json` | `grove cleanup` |
+| `contributors.json` | `grove sync contributors` |
+| `repo-stats.json` | `grove sync contributors` |
+
+:::caution[A build will not refresh these]
+`grove check` does not regenerate `cleanup-report.json`, `contributors.json`,
+or `repo-stats.json`. If they look out of date, it is because nobody ran the
+command — locally or in the scheduled workflow.
+:::
+
+## `records.full.json` and `records.json`
 
 ```jsonc
 {
-  "site": { "name": "My Space", "url": "https://example.com" /* ... */ },
+  "schemaVersion": 1,
   "blueprint": "project-directory",
-  "nav": [/* ... */],
-  "footer": { /* ... */ },
-  "audit": { "pages": [/* ... */ ] }
-  // ...every field of grove.config.ts, resolved and ready to read
+  "generatedAt": "2026-08-20T16:40:34.448Z",
+  "totalRecords": 6,
+  "visibleRecords": 6,
+  "records": [ /* … */ ]
 }
 ```
 
-## Consumers of `data/generated/`
+Each entry carries the record's fields as the schema resolved them — defaults
+filled in, slug normalized to the filename. For a project record that is
+`slug`, `kind`, `name`, `description`, `category`, `tags`, `links`,
+`content`, `curation`, `scores`, `source`, `visibility`, plus the project
+fields: `projectType`, `stack`, `stacks`, `platforms`, `licenses`,
+`difficulty`, `codebaseSize`, `repoUrl`, `screenshots`, `bestFor`,
+`whyListed`, `caveats`, `distribution`, and `github` / `health` when the
+record has them.
 
-- `@grove-dev/astro`'s server adapters (`/server`) read the JSON to build record index, taxonomy tables, and collection pages.
-- Consumer pages in `src/pages/**/records.json.ts` (or built-in `DirectoryIndexClient`) consume the same files.
-- CI workflows read `cleanup-report.json` to surface review candidates.
-- External scripts and tooling can read `records.json` to build custom surfaces (notebooks, dashboards).
+There is no `taxonomy` key and no `site` key in this file — those live in
+`site-config.json`.
 
-## What you'll do with this directory day-to-day
+## `records.index.json`
 
-- **Debug a record?** Check `records.json` after `pnpm exec grove check` to see what the framework thinks the record is.
-- **Confirm a sync?** Compare `github.sync.syncedAt` in `records.json` against your most recent `grove sync github` run.
-- **Audit a curation?** `cleanup-report.json` is the canonical triage list. `git diff data/generated/cleanup-report.json` shows what sync changed.
-- **Need a custom report?** Write a small script that reads `records.json`. The format is documented; it's safe to depend on.
+Same envelope minus `visibleRecords`, and a smaller record shape: `scores`,
+`source`, and `distribution` are dropped. More importantly, records whose
+effective visibility excludes them are **not in this file at all**, which is
+why `totalRecords` here can be lower than in `records.full.json`.
 
-## What you should NOT do
+This is the file `grove sync contributors` reads to discover which
+repositories to aggregate.
 
-- Don't edit any file under `data/generated/`. They're disposable.
-- Don't commit a fix to a record by editing `records.json`. Edit the source YAML in `data/records/<slug>.yml` and re-run `grove check`.
-- Don't `git checkout data/generated/` after a bot PR — it usually reverts work that the bot needs you to review.
+## `site-config.json`
 
-## See also
+```jsonc
+{
+  "blueprint": "project-directory",
+  "blueprintConfig": { /* … */ },
+  "name": "My Space",
+  "tagline": "…",
+  "description": "…",
+  "siteUrl": "https://example.com",
+  "repoUrl": "https://github.com/you/your-space",
+  "locale": "en",
+  "nav": [ /* … */ ],
+  "footer": { /* … */ },
+  "submission": { /* … */ },
+  "analytics": { /* … */ },
+  "browse": { /* … */ },
+  "theme": { /* … */ },
+  "integrations": { /* … */ },
+  "contributors": { /* … */ },
+  "taxonomy": {
+    "categories": [], "stacks": [], "platforms": [],
+    "topics": [], "distributionChannels": [], "licenses": []
+  },
+  "stats": { "totalRecords": 6, "totalCategories": 5, /* … */ }
+}
+```
+
+`taxonomy` is the resolved contents of `data/taxonomy/`, and `stats` is a flat
+block of counts (`totalRecords`, `totalApps`, `totalCategories`,
+`totalStacks`, `totalPlatforms`, `totalStars`, and the repository totals).
+There is no `audit` key here.
+
+## `og-manifest.json`
+
+A flat map from OG image path to content hash:
+
+```json
+{
+  "home.png": "95744d04325474eb3225c5a0d2bfb5df0a526be8",
+  "records/crewai.png": "a099cc5fed9107ca547eb5db9a8cced450c59ab5"
+}
+```
+
+The paths are relative to `public/og/`. The hashes let the build skip
+re-rendering a card whose inputs did not change — the manifest is not a
+lookup table for finding an image, since the path is derivable from the slug.
+
+## `repo-stats.json`
+
+A single flat object about your own repository, not the records:
+
+```json
+{ "repoUrl": "https://github.com/you/your-space", "stars": 0, "forks": 0, "contributors": 0 }
+```
+
+## Reading these files
+
+Inside a Grove Astro project, `@grove-dev/astro` registers a Vite alias so the
+path is stable regardless of where your page lives:
+
+```ts
+import records from "@grove/generated/records.json";
+```
+
+The alias resolves to `data/generated/` in your project root
+(`packages/astro/src/index.ts`). Outside Astro — a script, a notebook, another
+tool — just read the file.
+
+## Day-to-day
+
+- **Debugging a record?** Run `grove check` and look at `records.json`. That
+  is what Grove thinks the record is after defaults and normalization.
+- **Confirming a sync?** `github.sync.syncedAt` inside the record entry.
+- **Wondering why a record vanished from the site?** Check whether it is in
+  `records.index.json`. If it is in `records.full.json` but not the index, its
+  visibility excluded it.
+- **Do not** fix a record by editing the JSON. Edit
+  `data/records/<slug>.yml` and rebuild.
+
+## Related
 
 - [Outputs overview](/outputs/overview/) — every artifact Grove produces.
-- [Cleanup report](/automation/cleanup/) — how the cleanup report is produced and consumed.
+- [Cleanup report](/automation/cleanup/) — what `cleanup-report.json` contains.

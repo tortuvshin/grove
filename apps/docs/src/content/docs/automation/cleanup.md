@@ -1,13 +1,17 @@
 ---
 title: Cleanup report
-description: Surface records that need human review without deleting them.
+description: Surface records whose embedded health signals need human review, without deleting anything.
 ---
 
-`grove cleanup` reads the current record set, classifies candidates, and writes `data/generated/cleanup-report.json`. **The command never deletes records.** It surfaces a triage list; curators act via the record YAML or `data/decisions.yml`.
+`grove cleanup` reads every record's own `health:` block, filters for the ones that need a human look, and writes `data/generated/cleanup-report.json`. **The command never deletes or edits a record.** It surfaces a triage list; a curator acts on it via the record's YAML or `data/decisions.yml`.
 
-## Prerequisites
+Source: `pickCleanupCandidates()` and `cleanupStale()` in `packages/core/src/decisions.ts`.
 
-None. Runs unconditionally.
+## Where the health data comes from — and where it doesn't
+
+`cleanupStale()` reads each record file directly (`recordsFileSchema.parse(...)` per `data/records/*.yml`) and looks at the `health:` field embedded on that record. It does **not** read `data/health.yml`, and it does **not** apply `data/decisions.yml` overrides — that merge only happens in the separate `generate()` build step (`packages/core/src/build-data.ts`), which the cleanup report doesn't go through. So a record with a `keep` decision in `data/decisions.yml` can still show up in the cleanup report if its own `health.cleanupCandidate` is `true`.
+
+Grove itself does not compute or write that `health:` block for you. `classifyHealth()` (`packages/core/src/health.ts`) is the function that derives it from GitHub metadata, but no shipped command calls it and writes the result back into a record. In practice the block is hand-authored, or produced by a script of your own that imports `classifyHealth`. See [Maintain health signals](/content/health-classification/) for the full picture, including why `data/health.yml` (the file `grove check` cross-references) and a record's inline `health:` block (the file `grove cleanup` reads) are two different things.
 
 ## Usage
 
@@ -16,69 +20,72 @@ pnpm exec grove cleanup           # writes the report
 pnpm exec grove cleanup --strict  # exits 1 when there are candidates (CI gate)
 ```
 
-The command prints to stdout:
+There's no other flag — no `--delete`, no threshold override on the command line.
 
-```text
-[cleanup] 4 candidate(s) → data/generated/cleanup-report.json
+The command prints to stdout (`packages/cli/src/index.ts:207-213`):
+
+```
+[cleanup] 4 candidate(s) → /absolute/path/to/data/generated/cleanup-report.json
   - some-slug (archived, 23★)
   - another-slug (stale, 1024★)
-  - ...
 ```
 
-Up to 10 candidates are shown inline. The full set lives in the JSON report.
+The path in that first line is whatever `join(resolve(cwd, config.paths.generatedDir), "cleanup-report.json")` resolves to — an absolute filesystem path, not the relative `data/generated/...` form. Up to 10 candidates are listed inline (`report.candidates.slice(0, 10)`); the full set is in the JSON file.
 
 ## What makes a record a candidate
 
-`cleanupStale()` from `packages/core/src/decisions.ts` runs `pickCleanupCandidates()` over the record set. A record is flagged when, in broad terms:
+`pickCleanupCandidates()` is exactly two conditions, checked per record:
 
-- The repository is **archived** (`github.archived: true`).
-- The repository has **no commits in 365 days** and stars under a low threshold.
-- The record has been at **experimental tier for 12+ months** without promotion.
-- The record's `visibility` is `remove` or `historical` AND there are no other records pointing to it.
+```ts
+export function pickCleanupCandidates(records: Resource[]): Resource[] {
+  return records.filter((r) => {
+    const health = (r as { health?: { cleanupCandidate?: boolean; status?: string } }).health;
+    if (health?.cleanupCandidate) return true;
+    if (health?.status === "unknown" || health?.status === "needs_review") return true;
+    return false;
+  });
+}
+```
 
-The exact thresholds live in `packages/core/src/decisions.ts:pickCleanupCandidates`. They're conservative by default — curators expand the threshold when they want broader sweeps.
+A record with no `health:` block at all is not a candidate — `health?.cleanupCandidate` and `health?.status` are both `undefined`, and neither condition matches.
+
+When the block *was* produced by `classifyHealth()`, `cleanupCandidate` is `true` for `status: stale`, `status: archived`, or `status: inactive` (`packages/core/src/health.ts:88`); `unknown` and `needs_review` are caught by the second condition directly. The exact GitHub-activity thresholds behind those statuses are documented on [Maintain health signals](/content/health-classification/) — this page only documents what `grove cleanup` itself does with the block once it exists.
 
 ## The cleanup-report.json shape
 
 ```jsonc
 {
   "generatedAt": "2026-04-01T03:00:00.000Z",
-  "totalCandidates": 4,
+  "blueprint": "project-directory",
+  "totalCandidates": 1,
   "candidates": [
     {
       "slug": "some-slug",
+      "name": "Some Project",
+      "url": "https://github.com/example/some-project",
       "status": "archived",
-      "stars": 23,
-      "cleanupCandidate": true,
-      "reasons": ["GitHub repo is archived"],
-      "lastCommitAt": "2024-01-15T00:00:00.000Z"
+      "tier": "hidden",
+      "staleReason": "github_archived",
+      "lastCommitAt": "2024-01-15T00:00:00.000Z",
+      "stars": 23
     }
   ]
 }
 ```
 
-The full shape is the `CleanupReport` type (`packages/core/src/decisions.ts:CleanupReport`).
+Every `candidates[]` entry has exactly these eight fields (`CleanupCandidate` in `packages/core/src/decisions.ts:12-21`): `slug`, `name`, `url`, `status`, `tier`, `staleReason`, `lastCommitAt`, `stars`. `name` comes from `record.name`; `url` falls back through `links.github` → `links.website` → `links.source` → `""`; `stars` and `lastCommitAt` come from `record.github.repository.stargazers_count` / `.pushed_at` (`0` / `null` when absent). There's no `reasons` or `cleanupCandidate` field on the report entries — those live only on the source `health:` block, not the report.
 
-## How to act on the report
+## How to act on a candidate
 
-For each candidate, choose one:
+- **Keep as-is.** The report is informational; do nothing.
+- **Write a decision.** Add an entry to `data/decisions.yml` with `id`, and `decision: { visibility, reason, reviewedBy?, reviewedAt? }`. `visibility` is one of `highlight`, `keep`, `needs_review`, `hide`, `remove`, `historical` (`decisionVisibilitySchema`, `packages/core/src/schema.ts:55-63`). This is applied at build time via `generate()` — it changes what renders, not what `grove cleanup` reports next run.
+- **`hide` or `remove`.** Both are excluded from `data/generated/records.index.json` (the listing payload) and from `public/sitemap.xml` (`packages/core/src/build-data.ts:211-212`, `packages/core/src/sitemap.ts:120`). Both are still present in `data/generated/records.full.json`, which keeps every record "regardless of visibility" (`packages/core/src/build-data.ts:78`).
+- **Delete it for good.** There's no archive-directory convention in the framework — `generate()` and `cleanupStale()` only read whatever `.yml` files are inside `paths.recordsDir`. To drop a record entirely, delete or move its YAML file out of that directory.
 
-- **Keep as-is.** The report is informational. Do nothing.
-- **Edit the record.** Change `visibility: hide` if you want to remove the record from listings but keep the detail page addressable.
-- **Override via `data/decisions.yml`.** Add a `decision` entry with a `reason` and (optionally) `reviewedBy` / `reviewedAt`. This is the audit-friendly path.
-- **Set `visibility: historical`.** The lens for "historical" surfaces these in a dedicated section; the rest of the site de-emphasizes them.
-- **True archival?** Move the record YAML to `data/archive/` (consumer convention) so it's no longer picked up by `generate()`. The framework will not delete the YAML for you.
-
-The cleanup-report is a **read-only** signal. Re-running `grove cleanup` produces the same JSON.
-
-## What this page deliberately doesn't claim
-
-- "Cleanup archives records for you." It does not. There is no `--delete` flag.
-- "Cleanup sends PRs." It does not. PRs come from humans or from `grove readme generate`.
-- "Cleanup respects decisions.yml." The classification reads `health.*` from the latest sync; a curator-set `visibility: keep` on the record itself is honored when generating the listing view, but the cleanup report still flags the underlying signals.
+Re-running `grove cleanup` with no source changes produces the same JSON — it's a read-only report over whatever `health:` data is currently on disk.
 
 ## See also
 
-- [Health classification](/content/health-classification/) — the `health` block schema.
-- [Decisions file](/concepts/decisions/) — the curator override surface.
-- [GitHub workflows](/outputs/workflows/) — the monthly `cleanup.yml` schedule.
+- [Maintain health signals](/content/health-classification/) — how `health:` gets its values, and the `data/health.yml` vs. inline `health:` distinction
+- [Decisions file](/concepts/decisions/) — the curator override surface
+- [GitHub workflows](/outputs/workflows/) — the scheduled `cleanup.yml` workflow that runs `grove cleanup` and posts the output to a job summary

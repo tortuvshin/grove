@@ -1,64 +1,116 @@
 ---
 title: GitHub workflows
-description: Scheduled sync, audit, cleanup, and readme jobs.
+description: The six workflows grove init scaffolds, what each one actually runs, and how each commits its result back.
 ---
 
-The default scaffold ships six workflows under `.github/workflows/`. They keep `health.*`, `cleanup-report.json`, contributor data, and `README.md` fresh without human intervention. Every workflow is `workflow_dispatch`-able for on-demand runs.
+`grove init` copies six workflows into your space's `.github/workflows/`. Two
+are CI and deploy; four are the maintenance cadence that keeps generated data
+and the README from drifting. Every scheduled one is also
+`workflow_dispatch`-able.
 
 ## The shipped workflows
 
-| Workflow | Trigger | Schedule | What it does |
-|---|---|---|---|
-| `ci.yml` | push to main, PR | — | `grove check`, Astro build |
-| `deploy.yml` | push to main, dispatch | — | build + Pages deploy |
-| `sync-github.yml` | dispatch | weekly, Sunday 03:00 UTC | `grove sync github`; auto-commits `github.sync.syncedAt` changes |
-| `sync-contributors.yml` | dispatch | weekly, Sunday 04:00 UTC | `grove sync contributors`; auto-commits `data/generated/contributors.json` |
-| `cleanup.yml` | dispatch | monthly, first Monday 05:00 UTC | `grove cleanup --strict`; surfaces `cleanup-report.json` in the Step Summary |
-| `readme.yml` | dispatch | weekly, Sunday 04:00 UTC | `grove readme generate`; opens a PR with the regenerated README block |
+| File | Trigger | What it runs |
+|---|---|---|
+| `ci.yml` | push to `main`, pull request | `grove check`, then `pnpm build` |
+| `deploy.yml` | push to `main`, dispatch | `pnpm build` with `SITE_URL`, then GitHub Pages deploy |
+| `sync-github.yml` | `0 3 * * 0` — Sunday 03:00 UTC | `grove sync github` |
+| `sync-contributors.yml` | `0 4 * * 0` — Sunday 04:00 UTC | `grove sync contributors` |
+| `readme.yml` | `0 4 * * 0` — Sunday 04:00 UTC | `grove readme generate` |
+| `cleanup.yml` | `0 5 1-7 * 1` — see the caution below | `grove cleanup` |
 
-`grove audit` is part of `ci.yml`'s Lighthouse step (`audit.pages[]` from `grove.config.ts`); there is no separate `audit.yml` workflow file.
+All six pin `actions/checkout@v4`, `pnpm/action-setup@v4`, and
+`actions/setup-node@v4` on Node 24 with pnpm caching, and install with
+`pnpm install --frozen-lockfile`.
 
-## How sync workflows commit
+:::caution[`cleanup.yml`'s cron does not mean "first Monday"]
+When a cron expression restricts **both** day-of-month and day-of-week, POSIX
+cron runs the job when **either** matches, not both. `0 5 1-7 * 1` therefore
+fires on the 1st through the 7th *and* on every Monday — roughly ten times a
+month, not once. If you want it monthly, use `0 5 1 * *` and accept an
+arbitrary weekday, or keep `0 5 1-7 * *` with a guard step that exits unless
+`date +%u` is `1`.
+:::
 
-`sync-github.yml` and `sync-contributors.yml` use `GITHUB_TOKEN` (provided automatically by `actions/checkout` + a configured `permissions: contents: write`) to commit back to the same branch. The pattern:
+:::note[There is no audit workflow in the scaffold]
+`grove audit` is not wired into any scaffolded workflow. Run it locally, or
+add a step yourself — see [Audit](/automation/audit/).
+:::
+
+## How each one commits back
+
+They do not all use the same mechanism, and the difference matters.
+
+**Pull request** — `sync-github.yml` and `readme.yml` both open a PR with
+`peter-evans/create-pull-request@v6` rather than pushing to `main`. Record
+YAML and `README.md` are files a human should look at before they land.
+`readme.yml` checks `git diff --quiet README.md` first and skips the PR step
+entirely when nothing changed.
 
 ```yaml
-- uses: actions/checkout@v4
-- run: pnpm install --frozen-lockfile
-- run: pnpm exec grove sync github
-- run: |
-    if [[ -n "$(git status --porcelain)" ]]; then
-      git config user.name "grove-bot"
-      git config user.email "grove-bot@users.noreply.github.com"
-      git commit -am "chore: refresh GitHub metadata"
-      git push
-    fi
+- uses: peter-evans/create-pull-request@v6
+  with:
+    commit-message: "chore(data): sync GitHub metadata"
+    title: "Sync GitHub metadata"
+    branch: chore/sync-github
+    delete-branch: true
 ```
 
-## Why this shape
+**Direct commit** — `sync-contributors.yml` pushes straight to the branch
+with `stefanzweifel/git-auto-commit-action@v6`, scoped to exactly two paths:
 
-- **Weekly cadence** keeps GitHub API usage low even for sites with thousands of records.
-- **Sunday 03:00 UTC** is after the GitHub week but before most maintainers' Mondays.
-- **`workflow_dispatch`** lets a curator re-run any of these on demand without waiting for the cron.
-- **Strict mode** in `cleanup.yml` makes the workflow fail when there are candidates, so triage cadence is enforced by CI.
-- **`--check`** is the inverse — fail when content drifts. `readme.yml` could be wired to use `--check` to enforce that PR authors don't leave the README behind.
+```yaml
+- uses: stefanzweifel/git-auto-commit-action@v6
+  with:
+    commit_message: "chore(data): sync contributors"
+    file_pattern: data/generated/contributors.json data/generated/repo-stats.json
+```
 
-## What you'll customize
+Contributor data is purely derived, so a review step would only add noise.
 
-- **Schedule** — the cron expressions in `sync-github.yml`, `sync-contributors.yml`, `cleanup.yml`, `readme.yml` are the only customization most sites need.
-- **Token permissions** — Sites that don't want bots committing back can drop the `contents: write` permission and accept stale `github.*` blocks until a human re-runs the sync.
-- **Re-run policy** — Add `if: github.event_name == 'schedule'` to the dispatch run, or vice versa, depending on whether dispatch should bypass a maintainer check.
+**No commit at all** — `cleanup.yml` runs with `permissions: contents: read`.
+It pipes the command's console output to a file and appends it to the job
+summary, so the report shows up in the Actions UI and nowhere else:
 
-## What this page deliberately does NOT promise
+```yaml
+- run: pnpm exec grove cleanup | tee cleanup-report.md
+- run: cat cleanup-report.md >> "$GITHUB_STEP_SUMMARY"
+```
 
-- Real-time sync on every push (the schedule is weekly).
-- Per-record sync triggers based on upstream events (the sync reads every record each run).
-- Centralized maintenance of multiple Groves from one workflow (each site has its own `apps/example`).
-- Larger surfaces (RSS, JSON Feed) — see the roadmap at [Project > Roadmap](/project/roadmap/).
+Note that this captures `grove cleanup`'s printed summary, not the
+`data/generated/cleanup-report.json` file the command writes.
 
-## See also
+## Permissions and tokens
 
-- [Sync GitHub metadata](/automation/sync-github/) — the `grove sync github` pipeline.
-- [Sync contributors](/automation/sync-contributors/) — the contributors aggregator.
-- [Cleanup report](/automation/cleanup/) — what the cleanup workflow writes.
-- [Scheduled maintenance](/automation/scheduled/) — the broader maintenance cadence.
+`sync-github.yml` and `sync-contributors.yml` pass the built-in
+`secrets.GITHUB_TOKEN` as `GH_TOKEN`. That is enough for the GitHub API
+calls the sync makes against public repositories.
+
+- `sync-github.yml` and `readme.yml` need `contents: write` and
+  `pull-requests: write` to open their PRs.
+- `sync-contributors.yml` needs `contents: write` to push.
+- `cleanup.yml` needs only `contents: read`.
+- `deploy.yml` declares `pages: write` and `id-token: write` at the workflow
+  level for the Pages deployment.
+
+## What you will change
+
+- **Cadence.** The cron expressions are the only edit most sites need. Weekly
+  keeps API usage low even with thousands of records.
+- **`--strict`.** Both `grove sync github` and `grove cleanup` accept
+  `--strict`, which sets a non-zero exit code — on failed records and on
+  outstanding review candidates respectively. Neither scaffolded workflow
+  passes it. Add it when you want the schedule to fail loudly.
+- **`grove readme generate --check`.** Exits 1 when the rendered block differs
+  from what is committed. Add it as a `ci.yml` step to stop PRs that leave the
+  README behind, instead of waiting for the weekly PR.
+- **`SITE_URL`.** `deploy.yml` reads it from repository variables
+  (`vars.SITE_URL`). Set it, or canonical URLs and OG image paths point at the
+  wrong origin.
+
+## Related
+
+- [Scheduled maintenance](/automation/scheduled/) — the cadence in context.
+- [Sync GitHub metadata](/automation/sync-github/) — what the sync writes.
+- [Sync contributors](/automation/sync-contributors/) — the aggregator.
+- [Cleanup report](/automation/cleanup/) — what the report contains.

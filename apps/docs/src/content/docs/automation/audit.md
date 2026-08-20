@@ -1,20 +1,22 @@
 ---
 title: Audit
-description: Lighthouse scoring against audit.pages[] with the default quality budget.
+description: Lighthouse scoring against grove.config.ts audit.pages[], checked against a default quality budget.
 ---
 
-`grove audit` runs Lighthouse against every page listed in `grove.config.ts` → `audit.pages[]` and asserts each score against the framework's default quality budget. Pages can opt into or out of profiles via flags; output can be JSON or JUnit for CI integration.
+`grove audit` runs Lighthouse against every page listed in `grove.config.ts` → `audit.pages[]` and checks each result against a default quality budget. Output can be written as JSON or JUnit XML for CI.
+
+Source: `packages/cli/src/audit-cli.ts`, `packages/cli/src/audit.ts`, `packages/core/src/audit.ts`.
 
 ## Prerequisites
 
-- A running dev or preview server. The default `baseUrl` is `http://127.0.0.1:4321`; override with `--base-url` or `audit.baseUrl`.
-- An `audit.pages[]` entry in `grove.config.ts` (at least one page).
-- Chrome/Chromium available in the environment.
+- A running dev or preview server. The default `baseUrl` is `http://127.0.0.1:4321`; override with `--base-url` or `audit.baseUrl` in `grove.config.ts`.
+- An `audit.pages[]` array in `grove.config.ts` with at least one entry — `loadManifest()` throws `grove.config.ts must declare audit.pages[]` otherwise.
+- Chrome or Chromium available (`chrome-launcher` looks it up; set `CHROME_PATH` to point at a specific binary).
 
 ## Usage
 
 ```bash
-pnpm exec grove audit                              # default run against all audit.pages
+pnpm exec grove audit                              # both profiles, all audit.pages, 3 runs each
 pnpm exec grove audit --page /                     # audit only the home page
 pnpm exec grove audit --page /projects/ --page /   # audit two pages (repeatable)
 pnpm exec grove audit --mobile                     # mobile profile only
@@ -25,11 +27,9 @@ pnpm exec grove audit --junit reports/lighthouse.xml
 pnpm exec grove audit --base-url https://staging.example.com
 ```
 
-By default, the command runs the **mobile** profile **3 times** per page. Run count is configurable up to 5.
+By default — with neither `--mobile` nor `--desktop` — the command runs **both** profiles, **3** runs per page each (`profilesFromOptions()`, `packages/cli/src/audit-cli.ts:182-186`; the `--runs` default is `3`, clamped to the 1–5 range). Passing `--page` with a path that isn't in `audit.pages[]` silently filters the run down to zero pages and still exits `0` — there's no "unknown page" error.
 
 ## `audit.pages[]`
-
-The audit manifest is configured in `grove.config.ts`:
 
 ```ts
 audit: {
@@ -46,20 +46,22 @@ audit: {
 }
 ```
 
-Each entry has:
+(`apps/example/grove.config.ts`, the CLI's own manifest under test.)
 
-| Field | Required | Type | Description |
+Each entry (`auditPageManifestEntrySchema`, `packages/core/src/schema.ts:596-601`):
+
+| Field | Required | Type | Notes |
 |---|---|---|---|
 | `path` | yes | string | URL path relative to `baseUrl`. |
 | `type` | yes | enum | One of `home`, `directory`, `collection`, `record`, `content`, `empty`, `404`. |
-| `label` | yes | string | Human-readable label, used in `--json` / `--junit` reports. |
-| `sample` | no | `Record<string, string>` | Optional sample data used for parametrized paths. |
+| `label` | yes | string | Human-readable label; carried through into JSON/JUnit output. |
+| `sample` | no | `Record<string, string>` | Declared in the schema and the `PageManifestEntry` type, but `parsePageEntry()` in `audit-cli.ts` (the TypeScript-AST reader for `grove.config.ts`) never reads a `sample` property off the config — setting it currently has no effect on the audit run. |
 
-The `type` enum is what the audit pipeline keys off — it lets the budget account for page-kind-specific behavior (e.g., the homepage can have different LCP targets than a record detail page).
+`type` only changes behavior in two places (see below): a `404` page skips the budget entirely, and an `empty` page skips only the SEO score check. It otherwise has no effect on which thresholds apply — every other page type is checked against the same `DEFAULT_BUDGET`.
 
 ## The default budget
 
-`evaluateBudget()` from `packages/core/src/audit.ts` enforces a baseline. The threshold values come from the Lighthouse "good" ranges:
+`evaluateBudget()` (`packages/core/src/audit.ts:78-105`) checks each result against `DEFAULT_BUDGET`:
 
 - Performance score ≥ 0.9
 - Accessibility score ≥ 0.9
@@ -69,7 +71,14 @@ The `type` enum is what the audit pipeline keys off — it lets the budget accou
 - CLS ≤ 0.25
 - TBT ≤ 200 ms
 
-A page that drops below the threshold on any score or metric fails the audit. `process.exitCode = 1` unless every page passes.
+Two exceptions, both hard-coded in `evaluateBudget()`:
+
+- **`type: "404"`** pages skip the budget entirely — Lighthouse can't meaningfully score a 404 response (scores collapse to 0, metrics to `Infinity`), so the audit still runs the page but no violation is recorded for it.
+- **`type: "empty"`** pages skip only the SEO score — empty-state fixtures intentionally ship `noindex`, which fails Lighthouse's SEO "is-crawlable" audit regardless of anything else on the page.
+
+A page/profile combination that drops below the threshold on any remaining score or metric produces a `BudgetViolation`. `runAudit()` returns `1` if there is at least one violation, `0` otherwise, and `audit-cli.ts` assigns that to `process.exitCode`.
+
+Each result is the **median across the `--runs` samples** for that page/profile, not one entry per individual run (`aggregateRuns()`, `packages/cli/src/audit.ts:222-251`).
 
 ## JSON output
 
@@ -77,7 +86,7 @@ A page that drops below the threshold on any score or metric fails the audit. `p
 pnpm exec grove audit --json reports/audit.json
 ```
 
-The JSON is the Lighthouse JSON shape — one entry per page per profile per run. The CLI walks the array after the runs finish and prints the pass/fail summary.
+This is not raw Lighthouse JSON — it's `{ "results": AuditResult[], "violations": BudgetViolation[] }`, Grove's own shape. `results` has one entry per page/profile combination (medianed across runs), each with `url`, `type`, `profile`, `scores`, `metrics`, `runs` (the sample count), and `durationMs`. `violations` lists every `BudgetViolation`: `page`, `profile`, `category` (`"score"` or `"metric"`), `name`, `expected`, `actual`.
 
 ## JUnit output
 
@@ -85,28 +94,33 @@ The JSON is the Lighthouse JSON shape — one entry per page per profile per run
 pnpm exec grove audit --junit reports/audit.xml
 ```
 
-JUnit XML is the format CI platforms use to render test results inside PRs. Each page maps to a `<testcase>`; failures become `<failure>` elements with the violation messages.
+One `<testcase classname="grove.audit" name="{profile} {pathname}">` per page/profile combination; a combination with at least one violation embeds a `<failure>` listing them (`writeJunitReport()`, `packages/cli/src/audit.ts:257-278`).
+
+## Passing output
+
+When every combination clears the budget, the command prints (`packages/cli/src/audit.ts:102-105`):
+
+```
+✓ N page/profile combinations passed the budget (scores ≥ 0.9, lcp ≤ 2500ms, cls ≤ 0.25, tbt ≤ 200ms)
+```
+
+and each page prints a `✓ {profile} {path}` line as it finishes (`packages/cli/src/audit.ts:73`). On failure, it prints `✗ N budget violation(s)` to stderr followed by one `[profile] path category.name: expected X, got Y` line per violation (`packages/cli/src/audit.ts:90-93`).
 
 ## How it runs in CI
 
-Two patterns:
+The `grove init` scaffold does **not** wire `grove audit` into any GitHub Actions workflow by default — `apps/example/.github/workflows/ci.yml` only runs `grove check` and `pnpm build`. What the scaffold does ship is a package script, `"audit": "grove audit --runs 1"` (`apps/example/package.json`), for a fast local/manual run against a server you already have up.
 
-1. **`ci.yml`** runs `grove audit` as part of `pnpm check`. Pages are scored on every PR; failures block merging.
-2. **`lighthouse-audit.yml`** runs the same audit weekly against a preview deploy. The weekly job is informational — it posts a scorecard to the PR or a Slack channel.
-
-Both jobs require a running server. `ci.yml` typically uses `pnpm build && pnpm preview` first.
+For a working CI example, this repository's own `.github/workflows/lighthouse-audit.yml` (part of Grove's own development CI, not something `grove init` copies into a new project) builds `apps/example`, boots `astro preview` on `127.0.0.1:4321`, runs `grove audit --runs 3 --json lighthouse-report.json --junit lighthouse-junit.xml`, uploads both reports as artifacts, and — on pull requests — posts a scorecard comment summarizing `results.length` and `violations.length`. Use it as a template if you want the same thing in your own project's CI.
 
 ## When to extend the audit
 
-- **Adding a new page kind** — extend `auditPageTypeSchema` in `packages/core/src/schema.ts:586` (currently `home | directory | collection | record | content | empty | 404`).
-- **Per-page custom thresholds** — fork `DEFAULT_BUDGET` in `packages/core/src/audit.ts` and pass it through `evaluateBudget`.
-- **New metrics** — add to `LighthouseMetrics` and update `evaluateBudget` to read them.
-
-These are framework-level changes and ship as named PRs against `@grove-dev/core`.
+- **Adding a new page kind** — extend `auditPageTypeSchema` in `packages/core/src/schema.ts:586` (currently `home | directory | collection | record | content | empty | 404`), and the matching `ALLOWED_TYPES` set in `packages/cli/src/audit.ts:18`.
+- **Per-page custom thresholds** — build your own `BudgetConfig` and pass it as the third argument to `evaluateBudget()`; there's no `grove.config.ts` field wired up for this yet.
+- **New metrics** — add to `LighthouseMetrics` and extend `evaluateBudget()` to read them.
 
 ## See also
 
-- [Reference: programmatic API](/reference/api-core/) — `evaluateBudget`, `DEFAULT_BUDGET`, the `PageType` and `LighthouseScores` types.
+- [Reference: programmatic API](/reference/api-core/) — `evaluateBudget`, `DEFAULT_BUDGET`, and the `PageType`, `Profile`, `PageManifestEntry`, `LighthouseScores`, `LighthouseMetrics`, `AuditResult`, `BudgetConfig`, `BudgetViolation` types, all exported from `@grove-dev/core`.
 - [Reference: `grove.config.ts`](/reference/config/) — `audit.pages[]` field reference.
-- [`packages/core/src/audit.ts`](https://github.com/tortuvshin/grove) — the budget implementation.
-- [`packages/cli/src/audit.ts`](https://github.com/tortuvshin/grove) — the CLI command implementation.
+- [`packages/core/src/audit.ts`](https://github.com/tortuvshin/grove/blob/main/packages/core/src/audit.ts) — the budget implementation.
+- [`packages/cli/src/audit.ts`](https://github.com/tortuvshin/grove/blob/main/packages/cli/src/audit.ts) — the CLI command implementation.
