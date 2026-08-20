@@ -18,7 +18,7 @@
     # CSP that excludes `unsafe-inline` works once those hashes are
     # captured at build time. For now allow `unsafe-inline` for the
     # inline JSON-LD and theme bootstrap script.
-    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://withgrove.dev; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
+    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://withgrove.dev https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
 
 # ─── HTML: never cache (so deploys ship immediately) ─────────────────────
 /

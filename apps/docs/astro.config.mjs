@@ -7,6 +7,7 @@ import grove from '@grove-dev/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { REDIRECTS } from './src/data/redirects.mjs';
 import { SIDEBAR } from './src/data/docs-sidebar.mjs';
+import { GA_INLINE, GA_SRC } from './src/data/analytics.mjs';
 import { buildLastmodMap } from './src/lib/git-lastmod.mjs';
 
 // Per-file last-commit dates for sitemap <lastmod>. Empty map when git
@@ -116,6 +117,11 @@ export default defineConfig({
                 { icon: 'github', label: 'GitHub', href: 'https://github.com/tortuvshin/grove' },
             ],
             head: [
+                // Google Analytics (the inline bootstrap no-ops on
+                // localhost). The home page adds the same pair in
+                // HomeLayout.astro.
+                { tag: 'script', attrs: { src: GA_SRC, async: true } },
+                { tag: 'script', content: GA_INLINE },
                 // Mobile / PWA defaults — paired with public/manifest.json and
                 // public/og-image.svg. Lighthouse "best practices" expects
                 // these on every page so the home/launch icon, theme color,

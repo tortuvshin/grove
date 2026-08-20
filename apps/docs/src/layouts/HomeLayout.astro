@@ -1,6 +1,7 @@
 ---
 import '../styles/home.css';
 import { FAQ_ITEMS } from '../data/faq.ts';
+import { GA_INLINE, GA_SRC } from '../data/analytics.mjs';
 
 interface Props {
   title?: string;
@@ -112,6 +113,9 @@ const faqJsonLd = {
     <meta name="theme-color" content="#091116" />
     <meta name="color-scheme" content="dark light" />
     <meta name="generator" content={Astro.generator} />
+
+    <script is:inline async src={GA_SRC}></script>
+    <script is:inline set:html={GA_INLINE} />
 
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
