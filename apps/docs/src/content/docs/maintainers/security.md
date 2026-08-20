@@ -22,10 +22,9 @@ window:
 | Previous minor   | Critical fixes only, for 30 days after a new minor |
 | Older            | No fixes — please upgrade                          |
 
-In practice this means: if you're on `0.5.0-next.2` and a new stable
-release ships, you have 30 days of critical-only support on
-`0.5.0-next.2` before you should upgrade. After 30 days, you're on
-your own.
+In practice this means: once a new minor release ships, the minor
+you were previously on gets 30 days of critical-only support before
+you should upgrade. After 30 days, you're on your own.
 
 To check which version your space is on:
 
@@ -65,7 +64,7 @@ Report privately by email to:
 
 Include, where possible:
 
-1. The affected package and version (e.g., `@grove-dev/cli@0.5.0-next.2`).
+1. The affected package and version (e.g., `@grove-dev/cli@0.6.1`).
 2. A minimal reproduction — the smallest `grove.config.ts` + data +
    command that triggers the issue. A failing test case is even
    better.
@@ -108,72 +107,26 @@ hours.
 
 ## Supply-chain hardening
 
-The framework is small but it does pull in dependencies. Three
-measures harden the supply chain without slowing development:
+What actually runs today, in this repository:
 
-### `pnpm` `onlyBuiltDependencies` allowlist
+- **`.github/workflows/audit.yml`** runs `pnpm audit --prod --audit-level=high`
+  on a weekly cron and on any PR or push that touches `package.json`,
+  `pnpm-lock.yaml`, or a package manifest. It fails the job on a
+  high/critical advisory in a production dependency (one known
+  advisory, `GHSA-jmr9-qjv8-65gv`, is explicitly ignored — see the
+  workflow's own comment for why it doesn't apply here). A second,
+  dev-dependency audit step runs with `continue-on-error: true` and
+  cannot fail the job.
+- **`.github/dependabot.yml`** opens weekly update PRs (Mondays) for
+  the root `npm` ecosystem and for `github-actions`. `@grove-dev/*`
+  bumps are explicitly excluded — the release script owns
+  `workspace:*` version rewrites, so Dependabot is told not to touch
+  them.
 
-By default, pnpm 9+ does not run install scripts for dependencies
-unless they appear in `pnpm.onlyBuiltDependencies` in
-`package.json`. The repository's `package.json` includes an
-explicit allowlist:
-
-```json
-{
-  "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "playwright", "@parcel/watcher"]
-  }
-}
-```
-
-Adding a new entry requires a PR review — that's the gate. If a
-transitive dependency tries to run an install script, pnpm will
-refuse unless the package is on the list. This is the
-**defence-in-depth** against a malicious post-install script
-(typosquat, namespace takeover, supply-chain compromise).
-
-### `dependency-review-action` on PRs
-
-`.github/workflows/dependency-review.yml` runs GitHub's
-[`dependency-review-action`](https://github.com/actions/dependency-review-action)
-on every pull request. It fails the PR if any new dependency
-introduces:
-
-- A vulnerability in the GitHub Advisory Database.
-- A license that's not in the project's allowlist.
-- A package that was published less than 7 days ago (a
-  typosquat-protection heuristic).
-
-Configuration:
-
-```yaml
-- uses: actions/dependency-review-action@v4
-  with:
-    fail-on-severity: high
-    license-check: true
-    deny-licenses: AGPL-3.0, AGPL-3.0-or-later, SSPL-1.0
-    comment-summary-on-pr: always
-```
-
-The `deny-licenses` list is intentionally conservative. If your
-project accepts AGPL, remove it from the list.
-
-### Socket.dev GitHub App (optional)
-
-For repositories that want stronger supply-chain signals,
-[Socket.dev](https://socket.dev/) is a GitHub App that scans every
-PR for:
-
-- Typosquats and namespace takeovers.
-- Install scripts that exfiltrate env vars.
-- Behavioural changes (a maintainer pushes a new version with
-  suspicious network calls).
-- Known-malicious maintainer accounts.
-
-Socket is opt-in — install the GitHub App at the org level and it
-applies to every repository automatically. It is not a substitute
-for `dependency-review-action`; the two are complementary
-(static-vulnerability + behavioural-analysis).
+There is no `dependency-review-action`, no `pnpm.onlyBuiltDependencies`
+allowlist, and no third-party supply-chain scanning app (e.g.
+Socket.dev) configured in this repository. [CI & quality](/maintainers/ci-quality/)
+has the full breakdown of what runs on a PR and what doesn't.
 
 ## `security.txt` (RFC 9116)
 
@@ -239,16 +192,18 @@ Grove is a build-time tool. It does not phone home, log analytics, or
 collect telemetry. The only network calls the CLI makes are:
 
 1. **To the GitHub API** (`api.github.com`) — during
-   `grove sync github`. The call uses the token resolved from
-   `GITHUB_TOKEN` or `gh auth token`.
+   `grove sync github`. The call uses the token from the
+   `GITHUB_TOKEN` environment variable, when set.
 2. **To `registry.npmjs.org`** — when you run `pnpm publish` (via
    the release script). The framework itself does not initiate this.
 3. **To the host of any URL in a record's `links`** — when the
    rendered page is loaded in a browser.
 
 A built site has no JavaScript that phones home unless the user adds
-it. The Astro template's `BaseLayout.astro` ships with no third-party
-scripts by default; any analytics integration is the user's choice.
+it. `@grove-dev/astro`'s `BaseLayout.astro` has one built-in
+third-party script — Google Analytics — and it only renders when
+`site.analytics.googleAnalyticsId` is set in `grove.config.ts`; with
+no ID configured, no analytics script ships.
 
 ## Safe-harbour
 
@@ -261,9 +216,8 @@ confirm a vulnerability.
 ## Past advisories
 
 Public security advisories are listed at
-[GitHub Security Advisories for this repo](https://github.com/tortuvshin/grove/security/advisories).
-The list is empty in `0.5.0-next.2`; it is the right place to look if you
-want to confirm a CVE.
+[GitHub Security Advisories for this repo](https://github.com/tortuvshin/grove/security/advisories) —
+the right place to look if you want to confirm a CVE.
 
 ## For directory maintainers
 
