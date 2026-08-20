@@ -5,7 +5,7 @@ description: llms.txt and llms-full.txt — the formats AI assistants expect.
 
 Grove emits two files for AI assistants: `llms.txt` (concise) and `llms-full.txt` (verbose). Both are Markdown, in the spirit of the `llms.txt` proposal, though neither follows it byte-for-byte — see the exact formats below.
 
-The "LLM-ready" framing in earlier Grove docs is replaced with the more precise framing here: Grove emits these two formats and no others. There is no separate `ai.txt`, no JSON Feed variant, no MCP manifest, no structured catalog. Those are different surfaces — use them when they make sense, but don't expect them as part of the framework.
+Grove emits these two and no others. There is no `ai.txt`, no JSON Feed variant, no MCP manifest, no structured catalog.
 
 ## `llms.txt` (concise)
 
@@ -86,6 +86,8 @@ Both `buildLlmsTxt` and `buildLlmsFullTxt` filter out any record whose `visibili
 
 There is no maximum size limit enforced anywhere in the pipeline.
 
+One inconsistency to be aware of: `llms.txt`'s `Records indexed:` count is the **visible** record count, while `llms-full.txt`'s `> Generated … from N records` line uses the **total** count before the visibility filter. On a space with hidden records the two numbers disagree, by design of the code rather than by intent.
+
 ## How consumers read these files
 
 LLM assistants and crawlers fetch `llms.txt` to get the site's index, then fetch individual pages or `llms-full.txt` for detail. The format is intentionally minimal so any tool can parse it without a Grove-specific library.
@@ -94,9 +96,9 @@ If you build tools that consume this format, the proposal at <https://llmstxt.or
 
 ## Customization
 
-The `llms.txt` header (the `H1` and blockquote) is built from `site.name` and `site.description`. There's no separate config block.
+There is no config block for either file. `llms.txt`'s heading and lead line come from `site.name` and `site.description` (falling back to `site.tagline`); the `Directory:` line comes from `site.url` plus the resolved directory route slug.
 
-If you want to add custom sections to `llms.txt` (a "Long-form articles" section or "Recent updates"), edit the consumer's `src/pages/llms.txt.ts` (consumer-owned) and emit your own file at build time. The Astro integration does not own this route.
+Both files are written to `public/`, not served from an Astro route — so you cannot override them with a `src/pages/llms.txt.ts`, and adding one would collide with the generated file. If you need a different cut of the data, write it to a differently-named path from your own page or script, reading `data/generated/records.json`.
 
 ## What's deliberately not in scope
 
