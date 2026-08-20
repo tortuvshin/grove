@@ -1,0 +1,23 @@
+packages/core/src/github.ts
+  s_75aa02f6d0f279::t_744008157e4b30 52-63
+packages/cli/src/audit.ts
+  s_75aa02f6d0f279::t_744008157e4b30 38-50
+apps/example/.github/workflows/cleanup.yml
+  s_75aa02f6d0f279::t_744008157e4b30 5-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "6c5ec38259307a2b731be1b8a2676025c07288aa",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
