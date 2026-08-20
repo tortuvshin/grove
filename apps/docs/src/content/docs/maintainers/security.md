@@ -119,9 +119,9 @@ What actually runs today, in this repository:
   cannot fail the job.
 - **`.github/dependabot.yml`** opens weekly update PRs (Mondays) for
   the root `npm` ecosystem and for `github-actions`. `@grove-dev/*`
-  bumps are explicitly excluded — the release script owns
-  `workspace:*` version rewrites, so Dependabot is told not to touch
-  them.
+  packages are grouped but then explicitly `ignore`-d — the release
+  script owns `workspace:*` version rewrites, so Dependabot is told
+  not to touch them.
 
 There is no `dependency-review-action`, no `pnpm.onlyBuiltDependencies`
 allowlist, and no third-party supply-chain scanning app (e.g.

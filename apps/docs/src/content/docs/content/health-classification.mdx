@@ -17,10 +17,10 @@ A health block — `status`, `maturity`, `tier`, `visibility`, `cleanupCandidate
 
 Health entries live in `data/health.yml`, keyed by record slug — that is the file `grove check` validates, and the file the reference space in `apps/example/` ships. A record may also carry an inline `health:` block in its own YAML; the build reads `record.health.visibility` from there.
 
-<Aside type="caution" title="Nothing writes health for you yet">
-`classifyHealth` is exported from `@grove-dev/core`, but no shipped command applies it. `grove sync github` writes only under `github.*` — it does not touch `health`, and it does not create or update `data/health.yml`.
+<Aside type="tip" title="Who writes the file">
+`grove sync github` writes `data/health.yml` for you — but only when `integrations.github.health` is `true` in `grove.config.ts`. With the flag on, each record whose metadata the sync fetched gets a fresh entry derived by `classifyHealth`. With it off, the file is yours to author by hand, or to generate with a script that imports `classifyHealth` from `@grove-dev/core`.
 
-So today health entries are hand-authored, or produced by a script of your own that imports `classifyHealth`. `grove check` enforces the consequence: if any record links to a GitHub repo and `data/health.yml` is missing, you get a `missing_health_file` warning; if the file exists but a GitHub-linked record has no entry in it, that is a `missing_health` error.
+Either way `grove check` holds you to it: if any record links to a GitHub repo and `data/health.yml` is missing, you get a `missing_health_file` warning; if the file exists but a GitHub-linked record has no entry, that is a `missing_health` error.
 </Aside>
 
 To change a record's effective visibility, write a [decision](/concepts/decisions/) in `data/decisions.yml` rather than editing `health.visibility` by hand — the decision is folded in at build time and leaves the rest of the block alone.
@@ -197,10 +197,10 @@ Low confidence doesn't mean the record is bad — it means "we're guessing, not 
 If you want a record to surface better in the index:
 
 - **Stars are below 50, but you think it deserves `listed`?** You can't promote by hand — `tier` is a function of star count and `status`. The only legitimate override is a decision setting `visibility: highlight` so the record is editorially featured regardless of tier; `tier` itself stays `experimental`, since visibility and tier are separate axes.
-- **Stars are above 500 but the record is still `experimental`?** The health entry is stale relative to the current star count. Nothing recomputes it on a schedule — rerun your classifier script, or update `data/health.yml` by hand.
+- **Stars are above 500 but the record is still `experimental`?** The health entry is stale relative to the current star count. Re-run `grove sync github` with `integrations.github.health` on, or update `data/health.yml` by hand.
 - **The record is `hidden` but you want it back?** It's `hidden` because `status` is `archived` or `inactive`. Resolve the underlying status first (most often: the upstream repo came back to life), or add a decision to override `visibility` directly.
 
-See [Sync GitHub metadata](/automation/sync-github/) for how `github.*` — the metadata `classifyHealth` reads — gets onto a record. Refreshing that metadata is automated; turning it into a health entry is not.
+See [Sync GitHub metadata](/automation/sync-github/) for how `github.*` — the metadata `classifyHealth` reads — gets onto a record, and for the flag that turns it into a health entry in the same run.
 
 ## How overrides work
 

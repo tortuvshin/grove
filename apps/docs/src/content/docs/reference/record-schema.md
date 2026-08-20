@@ -238,21 +238,21 @@ its shape is:
 | `confidence` | `low` \| `medium` \| `high` | `"medium"` |
 | `reasons` | `string[]` | `[]` |
 
-:::caution[No command writes `health` into your record files]
-`grove sync github` writes only under `github.*`. The classifier that
-derives a health block, `classifyHealth` in
-`packages/core/src/health.ts`, is exported from `@grove-dev/core` for your
-own scripts, and the build calls it in exactly one narrow case: when a
-record has a `data/decisions.yml` override but no `health` block at all, so
-the override has somewhere to land (`packages/core/src/build-data.ts`).
-Otherwise `health` is whatever is in your YAML.
+:::note[Health usually lives in `data/health.yml`, not on the record]
+An inline `health:` block on the record always wins. When a record has
+none, the build looks up its slug in `data/health.yml` and merges that
+entry in. That file is written by `grove sync github` when
+`integrations.github.health` is enabled, and hand-authored otherwise.
+
+`classifyHealth` in `packages/core/src/health.ts` is the derivation, and
+it is exported from `@grove-dev/core` if you would rather drive it from
+your own script.
 :::
 
 ### How `classifyHealth` derives each field
 
-If you do run the classifier yourself, these are its actual rules. With no
-GitHub metadata at all it returns `status: unknown`, `tier: experimental`,
-`confidence: low`. Otherwise, from `pushedAt`:
+With no GitHub metadata at all it returns `status: unknown`,
+`tier: experimental`, `confidence: low`. Otherwise, from `pushedAt`:
 
 | Days since last push | `status` |
 |---|---|

@@ -117,7 +117,7 @@ export default defineConfig({
     github: {
       metadata: true,    // gates `grove sync github`
       contributors: false, // gates `grove sync contributors`
-      health: false,     // accepted by the schema, read by nothing
+      health: true,      // derive data/health.yml during `sync github`
     },
   },
 
@@ -287,12 +287,10 @@ Enables the GitHub integration. Three modes:
 the matching `grove sync` target prints `disabled by
 integrations.github.<flag> — skipping` and exits without making a request.
 
-:::caution[`health` is inert]
-`normalizeGithubIntegration` resolves the `health` flag, but nothing in the
-CLI or the build ever reads it — setting it to `true` enables nothing.
-Health entries are authored by hand in `data/health.yml`; see
+`health` gates whether `grove sync github` also derives a health entry per
+record — via `classifyHealth` — and writes them all to `data/health.yml` at
+the end of the run. Leave it off and that file stays yours to author. See
 [Maintain health signals](/content/health-classification/).
-:::
 
 ### `theme`
 

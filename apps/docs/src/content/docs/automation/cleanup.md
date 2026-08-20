@@ -11,7 +11,7 @@ Source: `pickCleanupCandidates()` and `cleanupStale()` in `packages/core/src/dec
 
 `cleanupStale()` reads each record file directly (`recordsFileSchema.parse(...)` per `data/records/*.yml`) and looks at the `health:` field embedded on that record. It does **not** read `data/health.yml`, and it does **not** apply `data/decisions.yml` overrides — that merge only happens in the separate `generate()` build step (`packages/core/src/build-data.ts`), which the cleanup report doesn't go through. So a record with a `keep` decision in `data/decisions.yml` can still show up in the cleanup report if its own `health.cleanupCandidate` is `true`.
 
-Grove itself does not compute or write that `health:` block for you. `classifyHealth()` (`packages/core/src/health.ts`) is the function that derives it from GitHub metadata, but no shipped command calls it and writes the result back into a record. In practice the block is hand-authored, or produced by a script of your own that imports `classifyHealth`. See [Maintain health signals](/content/health-classification/) for the full picture, including why `data/health.yml` (the file `grove check` cross-references) and a record's inline `health:` block (the file `grove cleanup` reads) are two different things.
+`classifyHealth()` (`packages/core/src/health.ts`) is what derives that block from GitHub metadata. `grove sync github` runs it and writes `data/health.yml` when `integrations.github.health` is enabled; otherwise the file is hand-authored. The build merges those entries onto records that carry no inline `health:` block of their own, so both routes end up in the same place. See [Maintain health signals](/content/health-classification/).
 
 ## Usage
 

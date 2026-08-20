@@ -17,19 +17,18 @@ and the README from drifting. Every scheduled one is also
 | `sync-github.yml` | `0 3 * * 0` — Sunday 03:00 UTC | `grove sync github` |
 | `sync-contributors.yml` | `0 4 * * 0` — Sunday 04:00 UTC | `grove sync contributors` |
 | `readme.yml` | `0 4 * * 0` — Sunday 04:00 UTC | `grove readme generate` |
-| `cleanup.yml` | `0 5 1-7 * 1` — see the caution below | `grove cleanup` |
+| `cleanup.yml` | `0 5 1 * *` — the 1st of each month, 05:00 UTC | `grove cleanup` |
 
 All six pin `actions/checkout@v4`, `pnpm/action-setup@v4`, and
 `actions/setup-node@v4` on Node 24 with pnpm caching, and install with
 `pnpm install --frozen-lockfile`.
 
-:::caution[`cleanup.yml`'s cron does not mean "first Monday"]
+:::note[Why `cleanup.yml` is not on a "first Monday" cron]
 When a cron expression restricts **both** day-of-month and day-of-week, POSIX
-cron runs the job when **either** matches, not both. `0 5 1-7 * 1` therefore
-fires on the 1st through the 7th *and* on every Monday — roughly ten times a
-month, not once. If you want it monthly, use `0 5 1 * *` and accept an
-arbitrary weekday, or keep `0 5 1-7 * *` with a guard step that exits unless
-`date +%u` is `1`.
+cron runs the job when **either** matches, not both — so the obvious-looking
+`0 5 1-7 * 1` fires about ten times a month rather than once. If you want a
+specific weekday, keep a plain day-of-month cron and add a guard step that
+exits unless `date +%u` matches.
 :::
 
 :::note[There is no audit workflow in the scaffold]

@@ -38,12 +38,10 @@ There is no required cadence. The example directory runs:
 - **PR review** — within 7 days. A `good first issue` or
   `help wanted` label is the right signal that the maintainer team
   is asking for help.
-- **Cleanup triage** — the `cleanup.yml` workflow pipes
-  `grove cleanup`'s output into the job's Step Summary, so the list
-  is readable in the Actions UI. It commits nothing. Note that its
-  shipped cron (`0 5 1-7 * 1`) fires far more often than monthly —
-  see [GitHub workflows](/outputs/workflows/) before you plan a
-  cadence around it.
+- **Cleanup triage** — monthly. The `cleanup.yml` workflow runs on
+  the 1st at 05:00 UTC and pipes `grove cleanup`'s output into the
+  job's Step Summary, so the list is readable in the Actions UI. It
+  commits nothing.
 - **Sync review** — weekly. `sync-github.yml` always opens a pull
   request; it never pushes to `main`. Maintainers review the diff for
   unexpected archive events or repository transfers.
@@ -67,7 +65,7 @@ reviewers.
 | Add a record | Maintainer review | PR review |
 | Remove a record | Maintainer review | PR review (with a `remove` decision in the same PR) |
 | Edit a record's content fields | Maintainer review | PR review |
-| Edit a record's health entry | Maintainer review | By hand in `data/health.yml` — no command writes it. See [Maintain health signals](/content/health-classification/) |
+| Edit a record's health entry | Derived, then reviewed | `grove sync github` rewrites `data/health.yml` when `integrations.github.health` is on. Review the diff rather than editing entries by hand. See [Maintain health signals](/content/health-classification/) |
 | Mark a record as `highlight` / `keep` / `hide` | Curator or maintainer | PR to `data/decisions.yml` |
 | Add a new `category` | Maintainer review | The second record in a category is the PR that establishes it |
 | Edit `grove.config.ts` | Maintainer review | PR review (often needs a second pair of eyes for breaking changes) |

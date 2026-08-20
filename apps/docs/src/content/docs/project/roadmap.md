@@ -83,15 +83,6 @@ the `README.md` sentinel block (`grove readme generate`).
 
 ## In flight
 
-### Health derivation is not wired up
-
-`classifyHealth` in `packages/core/src/health.ts` derives a record's
-status, maturity, tier, visibility, and cleanup flag from its GitHub
-metadata — but no shipped command runs it. `grove sync github` writes only
-under `github.*`, and `data/health.yml` is validated by `grove check`
-without ever being read by the build. Health entries are hand-authored
-today. Closing this gap is the largest outstanding item.
-
 ### Audit findings from the post-launch review
 
 The internal audit catalogue still lists verified items the shipped surface

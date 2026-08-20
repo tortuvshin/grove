@@ -133,7 +133,17 @@ github:
 
 Within `github.repository`, sync always overwrites the specific fields listed above on every successful API run — there is no per-field opt-out. Anything else already present on the record (other keys under `github`, or the record's other top-level fields) is left untouched by the merge.
 
-`data/overrides.yml` (`overridesFileSchema` in `packages/core/src/schema.ts`) exists as a schema and is re-exported from `@grove-dev/core`, but no code in this repo reads or applies it — `grove sync github` never checks it, and neither does the build pipeline (`packages/core/src/build-data.ts`). Don't rely on it to protect a field from being overwritten; there is currently no mechanism that does that.
+`data/overrides.yml` is applied by the **build**, not by the sync. Each entry is `{ id, patch }`, and the patch's top-level keys are merged over the parsed record before validation:
+
+```yaml
+overrides:
+  - id: some-project
+    patch:
+      description: A description the upstream README got wrong.
+      category: developer-tools
+```
+
+Because it runs at build time, an override survives every `grove sync github` run — the sync rewrites `data/records/<slug>.yml`, the override re-applies on top. That makes it the right place to correct an imported record you do not want to hand-edit. It does **not** stop the sync from rewriting the underlying YAML.
 
 For `repoUrl` resolution: `record.repoUrl` is read first, falling back to `record.links.github` if unset. The sync command does not compare the two or warn when they disagree — it just uses whichever one resolves.
 
@@ -160,7 +170,7 @@ The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on 
 2. `pnpm exec grove sync github`, with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in the environment
 3. `peter-evans/create-pull-request@v6` opens a PR (branch `chore/sync-github`) if the run changed any files
 
-Note the workflow sets `GH_TOKEN`, while `fetchGithubMetadata` reads `GITHUB_TOKEN` — in GitHub Actions the automatic `secrets.GITHUB_TOKEN` covers both names for many tools, but if you're setting a personal access token for higher rate limits, confirm the env var name matches what `github.ts` actually reads (`GITHUB_TOKEN`).
+`fetchGithubMetadata` resolves its token from `GH_TOKEN` first and `GITHUB_TOKEN` second, so either name works — including a personal access token you set yourself for higher rate limits.
 
 ## What is NOT synced
 

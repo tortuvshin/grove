@@ -107,8 +107,6 @@ See [Programmatic API](/reference/api-core/) for the signatures.
   `public/` if you want them.
 - **`sitemap-index.xml`** — one `sitemap.xml`, no index.
 - **`ai.txt`** — only `llms.txt` and `llms-full.txt`.
-- **A health block on your records** — `classifyHealth` exists, but no
-  command applies it. See [Maintain health signals](/content/health-classification/).
 
 ## When each output is regenerated
 

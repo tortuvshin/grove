@@ -52,7 +52,7 @@ No. `site.locale` sets one language for the whole site — it drives `<html lang
 
 `grove sync github` fetches stars, forks, language, topics, license, and `pushed_at` from the GitHub API and writes them under `github.*` on each record.
 
-Health (`active` / `stale` / `inactive` and the `tier` above it) is a *separate* derivation, implemented as `classifyHealth` in `packages/core/src/health.ts`. Note that no shipped command runs it — health entries in `data/health.yml` are authored by hand or by a script of your own. See [Maintain health signals](/content/health-classification/).
+Health (`active` / `stale` / `inactive` and the `tier` above it) is a *separate* derivation, implemented as `classifyHealth` in `packages/core/src/health.ts`. Set `integrations.github.health: true` and `grove sync github` writes the derived entries to `data/health.yml` in the same run; leave it off and the file is yours to author. See [Maintain health signals](/content/health-classification/).
 
 ## What is `llms.txt`?
 

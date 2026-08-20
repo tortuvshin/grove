@@ -66,7 +66,9 @@ Record A's description.
 ...
 ```
 
-Each detail section (`buildDetailSection`, `packages/core/src/llms.ts:75-100`) lists description, slug, category, stack, stars, and — only when present on the record — license, repo, homepage, url, lastCommit, and added. There is no separate "Full content" block sourced from `content:` Markdown bodies in the build pipeline: `prepareDirectory` never populates the optional `detail` field the function supports (`packages/core/src/prepare.ts:74-104`), so that block never appears in a real build's output.
+Each detail section (`buildDetailSection`, `packages/core/src/llms.ts`) lists description, slug, category, stack, stars, and — only when present on the record — license, repo, homepage, url, lastCommit, and added.
+
+When a record has a `content:` sidecar, the build appends a `#### Detail` block carrying that Markdown body with its frontmatter stripped. This is the one part of the file that grows with your prose rather than your record count, so a directory with long bodies produces a substantially larger `llms-full.txt`.
 
 ## Generation
 

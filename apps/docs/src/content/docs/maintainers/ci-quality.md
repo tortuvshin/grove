@@ -50,7 +50,7 @@ The "Repo hygiene" job (`lint` in the workflow file) runs:
 
 ## Dependency management
 
-`.github/dependabot.yml` is configured — weekly, Mondays, two ecosystems: `npm` at the repo root (grouping `@grove-dev/*` bumps under a `grove-internal` label, but explicitly `ignore`-ing them, since the release script owns `workspace:*` rewrites) and `github-actions`. Renovate is not configured.
+`.github/dependabot.yml` is configured — weekly, Mondays, two ecosystems: `npm` at the repo root (with a `grove-internal` dependency group for `@grove-dev/*`, which is then explicitly `ignore`-d, since the release script owns `workspace:*` rewrites) and `github-actions`. Renovate is not configured.
 
 ## Supply-chain security
 

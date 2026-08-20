@@ -43,7 +43,7 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
    ```
 
    <Aside type="caution" title="The variable name matters">
-     `grove sync github` reads `process.env.GITHUB_TOKEN` and nothing else — `GH_TOKEN` is **not** read by this command (`packages/core/src/github.ts`). `grove sync contributors` is the one that accepts either name.
+     `grove sync github` checks `GH_TOKEN` first, then `GITHUB_TOKEN` — the same order `grove sync contributors` uses. Either name works.
 
      Grove's CLI does not load `.env` files. Export the variable in your shell, or use a runner that injects it, before calling the command. If you do keep it in a file, make sure that file is gitignored.
    </Aside>
@@ -169,14 +169,8 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
   `secrets.GITHUB_TOKEN` is provided by Actions automatically — there is no secret to create.
 </Aside>
 
-<Aside type="caution" title="Check the env var name in the scaffolded workflow">
-  The shipped workflow passes the token as `GH_TOKEN`. `grove sync github` reads `GITHUB_TOKEN`, so as written the step runs unauthenticated and leans on the rate-limited path. Until that is fixed upstream, change the step to:
-
-  ```yaml
-  - run: pnpm exec grove sync github
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  ```
+<Aside type="note" title="The scaffolded workflow already passes a token">
+  It sets `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}`, which is one of the two names the sync reads. Nothing to change.
 </Aside>
 
 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
