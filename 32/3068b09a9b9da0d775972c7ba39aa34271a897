@@ -1,0 +1,24 @@
+apps/docs/src/content/docs/maintainers/security.md
+  s_75aa02f6d0f279::t_dbb3253813ca3e 203-206
+  s_75aa02f6d0f279::t_b571a8ee6ce2d8 195-196
+  s_75aa02f6d0f279::t_649414436a8a0f 25-27
+  s_75aa02f6d0f279::t_fbd8674f538fea 219-220
+  s_75aa02f6d0f279::t_df34ca891c5622 67
+  s_75aa02f6d0f279::t_e035c948192f2a 110-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "323068b09a9b9da0d775972c7ba39aa34271a897",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
