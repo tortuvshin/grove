@@ -1,0 +1,39 @@
+apps/docs/src/components/home/Demo.astro
+  s_83df15219dc8b0::t_12a82ec96391e8 635-746
+  s_83df15219dc8b0::t_a4e1bf1c3205c4 390-394,397,399-405
+  s_83df15219dc8b0::t_9bb3698c4209fc 1047-1050
+apps/docs/src/components/home/Hero.astro
+  s_83df15219dc8b0::t_f0802a332fe65a 30-32,34-80,82-102
+  s_83df15219dc8b0::t_b2a5cefa1abdd6 2-11
+  s_83df15219dc8b0::t_a94195b9beafb3 27-29
+  s_83df15219dc8b0::t_c58a57ba81a65c 156-157
+  s_83df15219dc8b0::t_0dc1bfdf5fb19d 105
+apps/docs/src/home-landing.test.ts
+  s_83df15219dc8b0::t_38bda6e4fe93dc 39,404
+  s_83df15219dc8b0::t_8c15825bd87df7 35-37
+  s_83df15219dc8b0::t_c2ccf368c19407 159,162-166
+  s_83df15219dc8b0::t_51b7d5948ee930 352-354,357
+  s_83df15219dc8b0::t_9b55e92f18c19f 244
+  s_83df15219dc8b0::t_7cdcef42afaaef 195-196,199-200
+  s_83df15219dc8b0::t_7305d6e881f611 320,323-329
+  s_83df15219dc8b0::t_0c005b43872f66 274-280
+  s_83df15219dc8b0::t_394f7f9fbc3371 167
+apps/docs/src/components/home/Pipeline.astro
+  s_83df15219dc8b0::t_1ba9a2f97228d8 2-5,7-12,16-18,27-32,34-39,41-46,48-52,54-61,63-84,86,89,177-180,199-200,203-204,222-223,231-232
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "c22d71b6ca943cab3631b6030bb7719fcd0534af",
+  "prompts": {},
+  "sessions": {
+    "s_83df15219dc8b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "026a19a0-7d5e-4e5b-a2c1-5864ff0857dd",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
