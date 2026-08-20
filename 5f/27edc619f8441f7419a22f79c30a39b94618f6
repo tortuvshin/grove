@@ -1,0 +1,27 @@
+packages/core/src/build-data.ts
+  s_75aa02f6d0f279::t_744008157e4b30 10-13,15,64-107,228-231,233-234,244-245,247-252
+packages/cli/src/index.ts
+  s_75aa02f6d0f279::t_744008157e4b30 9,18,132-136,159-161,209-216
+  s_75aa02f6d0f279::t_f2f8a0bc48818a 217
+packages/cli/src/readme-cli.ts
+  s_75aa02f6d0f279::t_24f5824f71c6a5 7-8,13,42,104-124,127-135,138-152,155,157-158,200-203
+  s_75aa02f6d0f279::t_25d08697810443 125-126,136-137
+packages/core/src/build-data.test.ts
+  s_75aa02f6d0f279::t_7788670eb7fcc5 110-195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "5f27edc619f8441f7419a22f79c30a39b94618f6",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
