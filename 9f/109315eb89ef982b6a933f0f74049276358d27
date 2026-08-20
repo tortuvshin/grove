@@ -1,0 +1,81 @@
+apps/docs/src/content/docs/project/faq.md
+  s_75aa02f6d0f279::t_bd227aa1d74625 38,40-45
+  s_75aa02f6d0f279::t_5ad2381d271dba 20,30,34,49,53-55,63,76-77
+apps/docs/src/content/docs/concepts/static-deployment.mdx
+  s_75aa02f6d0f279::t_0b374a3ad9fa45 6,8,11,18-26,33,35-37,47,52,62,64-68,71,75,79,88,91,94,101,104,106-108,110,149,162
+apps/docs/src/content/docs/deployment/netlify.mdx
+  s_75aa02f6d0f279::t_3b2ee565dfc85b 3,6,9,12,17,23,27,30-32,40,46,48-49,57-58,62,66,80
+apps/docs/src/content/docs/customize/icons.md
+  s_75aa02f6d0f279::t_989d84517fe420 12-15
+  s_75aa02f6d0f279::t_88ccb01509eeab 36-38,40,42
+  s_75aa02f6d0f279::t_4c6f1cbae0bec4 47
+apps/docs/src/content/docs/customize/components.md
+  s_75aa02f6d0f279::t_522d85467bae9b 6,10,12-21,25-54,58,62,65-72,74-78,81,84,88,91,94-95,97,101,108-109
+apps/docs/src/content/docs/customize/template-customization.md
+  s_75aa02f6d0f279::t_b2a30ffaf91e83 58-59,61,67
+  s_75aa02f6d0f279::t_7cc10003810d51 77,80
+  s_75aa02f6d0f279::t_05256553396176 84
+  s_75aa02f6d0f279::t_c9808214b11db0 88
+  s_75aa02f6d0f279::t_0c2dc26d0f7491 103-105
+  s_75aa02f6d0f279::t_086edfe35fd60d 109-110
+  s_75aa02f6d0f279::t_144a33061886a5 68
+apps/docs/src/content/docs/project/roadmap.md
+  s_75aa02f6d0f279::t_347c31e04f389a 3,6-8,10,14,16,18-23,25-26,28,30-33,35,37,43,47,49,53-54,56,58,60-65,67-69,71,73,75-82,84,86,88-93,95,97-100,104-129,132,134-136,138,140-143
+apps/docs/src/content/docs/customize/theme.md
+  s_75aa02f6d0f279::t_34036980431afd 19
+apps/docs/src/content/docs/maintainers/governance.md
+  s_75aa02f6d0f279::t_f1dc9a635f0fd8 25-27,41-49,70,160-164
+apps/docs/src/content/docs/deployment/self-hosted.mdx
+  s_75aa02f6d0f279::t_6d339f248c959e 3,9,18-19,23,28,33,38-40,51-53,58,70,85,115-116,140-141,151,157,163,168,186,191,196
+apps/docs/src/content/docs/customize/branding.md
+  s_75aa02f6d0f279::t_5e2b2544f5050d 34-35,38-40,46,48
+apps/docs/src/content/docs/project/architecture.md
+  s_75aa02f6d0f279::t_397a7bdcc3c16f 2-3,6-10,12-36,38,40,42-43,45,47,51-52
+apps/docs/src/content/docs/deployment/cloudflare.mdx
+  s_75aa02f6d0f279::t_6e46e0b847af2d 3,6,9,12,15,20,25,32,37,44,50,56,62-64,68,70,72-74,76-78,80-88,113,115,117,122,126,130,145-146
+apps/docs/src/content/docs/reference/config.md
+  s_75aa02f6d0f279::t_b8bdcb938a5f57 118,120,286-295
+apps/docs/src/content/docs/customize/assets.md
+  s_75aa02f6d0f279::t_330dafa2c3811a 14-17,27-30
+  s_75aa02f6d0f279::t_a42f2d24c42e80 83
+  s_75aa02f6d0f279::t_57669d6c685532 117
+apps/docs/src/content/docs/maintainers/ci-quality.md
+  s_75aa02f6d0f279::t_dd3ff68dcaca91 3,6,10,12-24,26,28,30,32,34,36,38,40-44,48-49,53,57,61,68
+apps/docs/src/content/docs/maintainers/release-process.md
+  s_75aa02f6d0f279::t_7656d37b8dbd38 68-71
+  s_75aa02f6d0f279::t_28bd3030c207f2 136,138-141
+  s_75aa02f6d0f279::t_5246b00ec7dcc9 164-165
+  s_75aa02f6d0f279::t_d87550f7efc18f 153-156
+  s_75aa02f6d0f279::t_afcbbcfc2bb4a4 217-219
+  s_75aa02f6d0f279::t_e52edfbe3c2458 82,84-85,87-88,91-96
+  s_75aa02f6d0f279::t_2991e44dda645c 36-38,48-53
+  s_83df15219dc8b0::t_49da009d06acba 97
+apps/docs/src/content/docs/reference/migration.md
+  s_75aa02f6d0f279::t_cc841a66fe4572 10-34,38-40,44-47
+apps/docs/src/content/docs/getting-started/scaffold.mdx
+  s_75aa02f6d0f279::t_5a60bc0df869b1 171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "9f109315eb89ef982b6a933f0f74049276358d27",
+  "prompts": {},
+  "sessions": {
+    "s_75aa02f6d0f279": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2f889b-f70d-4307-95cc-2a1e46f479a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    },
+    "s_83df15219dc8b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "026a19a0-7d5e-4e5b-a2c1-5864ff0857dd",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
