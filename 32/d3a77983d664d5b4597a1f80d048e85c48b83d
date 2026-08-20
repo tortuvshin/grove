@@ -1,0 +1,29 @@
+apps/docs/astro.config.mjs
+  s_a4b25a450510ae::t_25245ee8b79cde 2,53,55-56,62-66,132
+apps/docs/public/_headers
+  s_a4b25a450510ae::t_25245ee8b79cde 52
+apps/docs/public/robots.txt
+  s_a4b25a450510ae::t_25245ee8b79cde 4
+apps/docs/src/home-landing.test.ts
+  s_a4b25a450510ae::t_25245ee8b79cde 472
+apps/docs/src/layouts/HomeLayout.astro
+  s_a4b25a450510ae::t_25245ee8b79cde 120
+apps/docs/src/lib/git-lastmod.mjs
+  s_a4b25a450510ae::t_25245ee8b79cde 16-23,45,47-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "32d3a77983d664d5b4597a1f80d048e85c48b83d",
+  "prompts": {},
+  "sessions": {
+    "s_a4b25a450510ae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a4083ce-3239-4b66-bff7-8d1a70cf6136",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
