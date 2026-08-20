@@ -1,0 +1,23 @@
+apps/docs/src/docs-config.test.ts
+  s_a4b25a450510ae::t_d1626bdc6098c9 7-16,34,60,84,112
+apps/docs/astro.config.mjs
+  s_a4b25a450510ae::t_d1626bdc6098c9 90
+apps/docs/src/docs-seo.test.ts
+  s_a4b25a450510ae::t_d1626bdc6098c9 142,151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "03bba3c8d7ec1ce52c7fdb2d616406e08a6479b0",
+  "prompts": {},
+  "sessions": {
+    "s_a4b25a450510ae": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3a4083ce-3239-4b66-bff7-8d1a70cf6136",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
