@@ -1,0 +1,13 @@
+{
+  "scaffold": "@grove/default",
+  "scaffoldVersion": "0.1.0",
+  "builtAt": "2026-08-28",
+  "fileCount": 1,
+  "files": [
+    {
+      "path": "README.md",
+      "hash": "sha256-30393d9fcf3449f0d03463f8bfea1cc81d82ebfc14b6117bea60e625bb5c63e6",
+      "bytes": 2030
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "@grove-dev/registry",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "description": "Canonical UI source for Grove — registry scaffolds (currently @grove/default) installed into the consumer's src/ at grove init time.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "default"
+  ],
+  "exports": {
+    ".": "./default/registry.json",
+    "./default": "./default/registry.json",
+    "./default/*": "./default/*"
+  },
+  "keywords": [
+    "grove",
+    "registry",
+    "ui",
+    "scaffold"
+  ],
+  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
+    "directory": "packages/registry"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-registry.mjs",
+    "check": "node ../../scripts/check-registry-invariants.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2"
+  }
+}
