@@ -17,7 +17,7 @@ import BaseLayout from "../layouts/base-layout.astro";
 import Container from "../layouts/container.astro";
 import siteConfig from "@grove/generated/site-config.json";
 import { getAboutPageSeo, getPageContentHtml, indexSlug, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
-import { buttonClass } from "@grove-dev/astro/ui/button";
+import { buttonClass } from "../lib/classnames.ts";
 
 const githubUrl = siteConfig.repoUrl;
 const seo = getAboutPageSeo(siteConfig);
