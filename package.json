@@ -19,6 +19,8 @@
     "inventory:check": "node scripts/build-inventory.mjs --check",
     "registry:build": "node scripts/build-registry.mjs",
     "registry:check": "node scripts/check-registry-invariants.mjs",
+    "example:check": "node scripts/check-example-mirrors-registry.mjs",
+    "example:sync": "node scripts/check-example-mirrors-registry.mjs --write",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
