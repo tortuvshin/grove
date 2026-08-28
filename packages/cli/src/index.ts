@@ -26,6 +26,7 @@ import { buildIconsCommand } from "./icons-cli.js";
 import { buildImportCommand } from "./import-cli.js";
 import { initDirectory, readCliVersion } from "./init.js";
 import { buildReadmeCommand } from "./readme-cli.js";
+import { formatPlan, runUpdate } from "./update.js";
 
 const program = new Command();
 
@@ -231,6 +232,52 @@ program
     }
     if (options.strict && report.totalCandidates > 0) process.exitCode = 1;
   });
+
+program
+  .command("update")
+  .description(
+    "Reconcile the consumer's installed scaffold against the registry upstream. " +
+      "Never overwrites locally modified files.",
+  )
+  .option("--check", "print the plan only; exit non-zero if anything needs applying")
+  .option("--diff", "include a unified diff for every upstream_changed row")
+  .option("--force", "apply changes even when conflicts exist (locally-modified is still preserved)")
+  .option("--json", "emit a machine-readable JSON summary")
+  .action(
+    async (options: {
+      check?: boolean;
+      diff?: boolean;
+      force?: boolean;
+      json?: boolean;
+    }) => {
+      const summary = await runUpdate({
+        cwd: process.cwd(),
+        check: options.check === true,
+        diff: options.diff === true,
+        force: options.force === true,
+        json: options.json === true,
+      });
+      if (summary.exitCode === 1) {
+        console.error(
+          "No .grove/registry.lock.json found. Run `grove init` first.",
+        );
+        process.exitCode = 1;
+        return;
+      }
+      if (options.json) {
+        console.log(
+          JSON.stringify(
+            { plan: summary.plan, applied: summary.applied, preserved: summary.preserved },
+            null,
+            2,
+          ),
+        );
+      } else {
+        console.log(formatPlan(summary.plan, summary.applied));
+      }
+      if (summary.exitCode !== 0) process.exitCode = summary.exitCode;
+    },
+  );
 
 program.addCommand(buildAuditCommand());
 program.addCommand(buildCollectionCommand());
