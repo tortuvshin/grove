@@ -27,6 +27,20 @@ describe("grove init (registry bootstrapper)", () => {
       'name: "AI Stack"',
     );
 
+    // astro.config.mjs registers the Tailwind v4 Vite plugin the
+    // scaffold's styles need, plus the Grove integration.
+    const astroConfig = await readFile(join(target, "astro.config.mjs"), "utf8");
+    expect(astroConfig).toContain("@tailwindcss/vite");
+    expect(astroConfig).toContain("@grove-dev/astro");
+
+    // The scaffold's own npm deps and scripts land in package.json —
+    // registry.json declares them, grove init installs them.
+    expect(pkg.dependencies.astro).toBe("latest");
+    expect(pkg.dependencies.tailwindcss).toBe("latest");
+    expect(pkg.dependencies["@tailwindcss/vite"]).toBe("latest");
+    expect(pkg.scripts.dev).toBe("astro dev");
+    expect(pkg.scripts.build).toBe("astro build");
+
     // The scaffold landed in src/.
     expect(existsSync(join(target, "src/components/grove/project-card.astro"))).toBe(true);
     expect(existsSync(join(target, "src/layouts/base-layout.astro"))).toBe(true);

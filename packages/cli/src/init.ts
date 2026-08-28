@@ -2,21 +2,29 @@
 /**
  * `grove init` — registry bootstrapper.
  *
- * Per §19 of `apps/docs/v1-architecture.md`, `grove init` does five
- * things and nothing else:
+ * `grove init` does, and only does:
  *
- *   1. Detect Astro (implicit — the scaffold ships Astro pages).
- *   2. Install Grove packages (@grove-dev/{core,astro,cli,registry}).
- *   3. Create grove.config.ts.
- *   4. Initialize content/data (records/, collections/, taxonomy/).
- *   5. Install the @grove/default scaffold into src/.
- *   6. Create Grove registry state (.grove/registry.lock.json).
- *   7. Validate (no separate step — scaffold is correct on install).
+ *   1. Install the @grove/default scaffold into src/ (also writes
+ *      `.grove/registry.lock.json` recording install-time hashes,
+ *      consumed later by `grove update`).
+ *   2. Write package.json — Grove packages pinned to the CLI version,
+ *      plus the scaffold's own npm dependencies/devDependencies/
+ *      scripts, straight from the registry manifest.
+ *   3. Write grove.config.ts (project-specific, so the scaffold
+ *      doesn't ship one — this generates a fresh template).
+ *   4. Write astro.config.mjs (registers the Grove integration and
+ *      the Tailwind v4 Vite plugin the scaffold's styles need).
  *
  * The scaffold is shipped from `@grove-dev/registry` and materialized
  * by `materializeRegistry()`. There is no second template to maintain
  * in this repo and no fallback path — if the registry snapshot is
  * missing, init fails fast with a clear message.
+ *
+ * `grove init` does NOT scaffold `data/`, `content/`, `public/`, or
+ * `.github/` — those are content/workflow concerns, not UI-registry
+ * concerns, and are out of scope here. (The CLI wrapper in index.ts
+ * runs `pnpm install` and `git init` after this returns, per its own
+ * `--no-install`/`--no-git` flags.)
  */
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -106,20 +114,36 @@ export async function initDirectory(
   const rawName = options.projectName ?? fallbackName;
   const projectName = packageName(rawName);
 
-  // 1. Write package.json with engine + registry pinned to the CLI version.
+  // 1. Materialize the @grove/default scaffold into src/. This also
+  //    writes `.grove/registry.lock.json` recording the install-time
+  //    hashes (consumed by `grove update`), and gives us the scaffold
+  //    manifest so step 2 can install what it actually declares.
+  const installed = await materializeRegistry(target);
+
+  // 2. Write package.json — Grove packages pinned to the CLI version,
+  //    plus the scaffold's own npm dependencies straight from its
+  //    manifest (registry.json declares package names, not version
+  //    ranges, so those resolve against "latest" at install time).
   const packagePath = resolve(target, "package.json");
-  const pkg: { name: string; type?: string; dependencies: Record<string, string> } = {
+  const pkg: {
+    name: string;
+    type?: string;
+    scripts?: Record<string, string>;
+    dependencies: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  } = {
     name: projectName,
     type: "module",
     dependencies: {},
   };
   for (const dep of GROVE_PACKAGES) pkg.dependencies[dep] = `^${version}`;
+  for (const dep of installed.manifest.dependencies) pkg.dependencies[dep] = "latest";
+  if (installed.manifest.devDependencies?.length) {
+    pkg.devDependencies = {};
+    for (const dep of installed.manifest.devDependencies) pkg.devDependencies[dep] = "latest";
+  }
+  if (installed.manifest.scripts) pkg.scripts = installed.manifest.scripts;
   await writeFile(packagePath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
-
-  // 2. Materialize the @grove/default scaffold into src/. This also
-  //    writes `.grove/registry.lock.json` recording the install-time
-  //    hashes (consumed by `grove update`).
-  const installed = await materializeRegistry(target);
 
   // 3. Write grove.config.ts. The scaffold doesn't ship one (it's
   //    project-specific), so we generate a fresh template and
@@ -151,6 +175,36 @@ export default defineConfig({
 });
 `;
   await writeFile(configPath, configTemplate, "utf8");
+
+  // 4. Write astro.config.mjs. Without this the scaffold's Tailwind
+  //    v4 styles (`@import "tailwindcss"` in styles/system.css) never
+  //    get processed — the Vite plugin has to be registered somewhere,
+  //    and there's no second template shipping one.
+  const astroConfigPath = resolve(target, "astro.config.mjs");
+  const astroConfigTemplate = `// @ts-check
+import { defineConfig } from "astro/config";
+import tailwindcss from "@tailwindcss/vite";
+import groveAstro from "@grove-dev/astro";
+import { loadConfig } from "@grove-dev/core";
+
+// \`site\` is the canonical URL the build uses for absolute links
+// (sitemap, OpenGraph, canonical tags, JSON-LD). Read from
+// grove.config.ts and overridable per build via SITE_URL.
+const groveConfig = await loadConfig();
+
+export default defineConfig({
+  site: process.env.SITE_URL || groveConfig.site.url,
+  trailingSlash: "ignore",
+  integrations: [groveAstro()],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+  build: {
+    format: "directory",
+  },
+});
+`;
+  await writeFile(astroConfigPath, astroConfigTemplate, "utf8");
 
   return { targetDir: target, projectName, installedScaffold: installed };
 }

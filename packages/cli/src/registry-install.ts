@@ -49,7 +49,6 @@ export interface RegistryManifest {
   type: string;
   dependencies: string[];
   devDependencies?: string[];
-  files: { path: string; target: string; hash: string; bytes?: number }[];
   scripts?: Record<string, string>;
   meta?: Record<string, unknown>;
 }
