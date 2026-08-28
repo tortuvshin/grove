@@ -298,3 +298,37 @@ export { findRelated } from "./related.js";
 
 // ── Collection IO (YAML loading from data/collections) ───────────────
 export { loadCollections } from "./collections-io.js";
+
+// ── Directory filter keys (single source of truth, see §22) ──────────
+// One canonical mapping between facet group keys, URL param keys,
+// taxonomy kinds, and display labels. Replaces three duplicated
+// inline copies that pre-v1 lived in DirectoryIndexClient,
+// RefinePanel, and server/directory.
+export {
+  DIRECTORY_FILTER_KEYS,
+  DIRECTORY_TAXONOMY_KINDS,
+  DIRECTORY_FILTER_LABELS,
+  FACET_DIMENSION_FOR_KEY,
+  isDirectoryFilterGroupKey,
+} from "./directory-filter-keys.js";
+export type {
+  DirectoryFilterGroupKey,
+  DirectoryFilterParamKey,
+  DirectoryTaxonomyKind,
+  DirectoryFilterLabel,
+} from "./directory-filter-keys.js";
+
+// ── YAML string helpers (submit form, future CLI emit) ───────────────
+// Pure, dependency-free. Safe to use in browser (live preview) and
+// in Node (server-side YAML generation).
+export {
+  parseGithubRepo,
+  recordSlugify,
+  yamlLines,
+  yamlQuote,
+} from "./yaml.js";
+export type { ParsedRepo } from "./yaml.js";
+
+// ── Taxonomy inference (stack suggestion from GitHub metadata) ───────
+export { inferStackFromTopics } from "./taxonomy-inference.js";
+export type { InferStackInput } from "./taxonomy-inference.js";

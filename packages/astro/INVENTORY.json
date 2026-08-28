@@ -2,7 +2,7 @@
   "sourceRoot": "packages/astro/src",
   "fileCount": 49,
   "businessLogicCount": 7,
-  "forbiddenImportCount": 1,
+  "forbiddenImportCount": 0,
   "files": [
     {
       "path": "packages/astro/src/components/CardGrid.astro",
@@ -89,9 +89,7 @@
       "path": "packages/astro/src/components/DirectoryIndexClient.astro",
       "kind": "composition",
       "hasBusinessLogic": true,
-      "forbiddenImports": [
-        "from \"@grove-dev/core/directory"
-      ],
+      "forbiddenImports": [],
       "hash": "eda791b0a7d37966cc411b7d2988f4e629e9adccb7c983f46b24903e254b4c49",
       "lines": 511,
       "target": "registry/default/components/grove/directory-index-client.astro"

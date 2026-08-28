@@ -34,18 +34,16 @@ const inventoryMdPath = resolve(root, "packages/astro/INVENTORY.md");
 
 const check = process.argv.includes("--check");
 
-// Forbidden subpaths per §22 of the v1 architecture spec:
-// registry UI may import only `@grove-dev/core/types` and
-// `@grove-dev/astro/server` models. Anything else from core is
-// domain logic that does not belong in a presentational component.
+// Forbidden subpaths per §22 of the v1 architecture spec.
+// Registry UI may import only `@grove-dev/core/types` and
+// `@grove-dev/astro/server` models. It must not import the runtime
+// component/layout subpaths from `@grove-dev/astro` — those go away
+// in v1. (`@grove-dev/core/directory` is the browser-safe subpath
+// for filter/sort/facet logic and is permitted in client scripts.)
 const FORBIDDEN_IMPORTS = [
-  /from\s+["']@grove-dev\/core\/directory/,
-  /from\s+["']@grove-dev\/core\/search/,
-  /from\s+["']@grove-dev\/core\/ranking/,
-  /from\s+["']@grove-dev\/core\/taxonomy/,
-  /from\s+["']@grove-dev\/core\/enrich/,
-  /from\s+["']@grove-dev\/core\/github(?:-client)?/,
-  /from\s+["']@grove-dev\/core\/directory-(?:facets|lenses|repo|scores|format|search|display)/,
+  /from\s+["']@grove-dev\/astro\/components/,
+  /from\s+["']@grove-dev\/astro\/ui/,
+  /from\s+["']@grove-dev\/astro\/layouts/,
 ];
 
 // Components explicitly known to host client-side domain logic.

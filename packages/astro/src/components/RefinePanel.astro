@@ -12,6 +12,7 @@
  * The form is a GET to the list page base, with each facet as a
  * repeated key. Empty values are dropped, so the URL stays clean.
  */
+import { DIRECTORY_FILTER_KEYS } from "@grove-dev/core";
 
 import type { IndexFilters } from "../lib/search";
 import { SORT_OPTIONS } from "../lib/search";
@@ -94,10 +95,10 @@ const groups = groupModels.map((group) => ({
     )}
 </div>
 
-<script is:inline define:vars={{ pathPrefix }}>
+<script is:inline define:vars={{ pathPrefix, filterKeys: DIRECTORY_FILTER_KEYS }}>
   (() => {
     const groups = document.querySelectorAll(".grove-filter");
-    const keys = { stacks: "stack", platforms: "platform", categories: "category", tags: "tag", licenses: "license" };
+    const keys = filterKeys;
     function closeAll(except) {
       groups.forEach((group) => {
         if (group === except) return;

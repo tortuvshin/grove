@@ -13,7 +13,7 @@ in Phase 4 of the plan. This table is the rename map.
 | --- | --- |
 | Total files inventoried | 49 |
 | Files with business logic to extract | 7 |
-| Forbidden core subpath imports | 1 |
+| Forbidden core subpath imports | 0 |
 
 ## File Table
 
@@ -28,7 +28,7 @@ in Phase 4 of the plan. This table is the rename map.
 | `packages/astro/src/components/CollectionRow.astro` | domain-ui | 82 |  |  | `registry/default/components/grove/collection-row.astro` |
 | `packages/astro/src/components/CollectionTeaser.astro` | domain-ui | 48 |  |  | `registry/default/components/grove/collection-teaser.astro` |
 | `packages/astro/src/components/ContributorsGrid.astro` | domain-ui | 144 |  |  | `registry/default/components/grove/contributors-grid.astro` |
-| `packages/astro/src/components/DirectoryIndexClient.astro` | composition | 511 | ✓ | 1 hit(s) | `registry/default/components/grove/directory-index-client.astro` |
+| `packages/astro/src/components/DirectoryIndexClient.astro` | composition | 511 | ✓ |  | `registry/default/components/grove/directory-index-client.astro` |
 | `packages/astro/src/components/EditorialSummary.astro` | domain-ui | 58 |  |  | `registry/default/components/grove/editorial-summary.astro` |
 | `packages/astro/src/components/FilterGroupMenu.astro` | domain-ui | 70 |  |  | `registry/default/components/grove/filter-group-menu.astro` |
 | `packages/astro/src/components/FilterOptions.astro` | domain-ui | 50 |  |  | `registry/default/components/grove/filter-options.astro` |

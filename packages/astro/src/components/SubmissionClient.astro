@@ -1,4 +1,12 @@
 ---
+import {
+  inferStackFromTopics,
+  parseGithubRepo,
+  recordSlugify,
+  yamlLines,
+  yamlQuote,
+} from "@grove-dev/core";
+
 interface Props {
   existingSlugs: string[];
   existingFullNames: string[];
@@ -31,7 +39,7 @@ const {
 } = Astro.props;
 ---
 
-<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields, taxonomy, githubProxyPath }}>
+<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields, taxonomy, githubProxyPath, recordSlugify, parseGithubRepo, yamlQuote, yamlLines, inferStackFromTopics }}>
     /** @typedef {{ name: string; description: string | null; html_url: string; homepage: string | null; language: string | null; private: boolean; topics: string[] }} GitHubRepo */
     /** @type {GitHubRepo | null} */
     let repository = null;
@@ -61,16 +69,12 @@ const {
     const stackIds = new Set(taxonomy?.stackIds ?? []);
     const platformIds = new Set(taxonomy?.platformIds ?? []);
 
-    const slugify = /** @param {unknown} value */ (value) =>
-      String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    const parseRepo = /** @param {unknown} value */ (value) => {
-      const match = String(value ?? "").match(/github\.com\/([^/]+)\/([^/?#]+)/);
-      return match ? { owner: match[1], repo: match[2].replace(/\.git$/, "") } : null;
-    };
-    const quote = /** @param {unknown} value */ (value) =>
-      `"${String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-    const lines = /** @param {string[]} values */ (values, indent = 2) =>
-      values.map((value) => `${" ".repeat(indent)}- ${value}`).join("\n");
+    const slugify = recordSlugify;
+    const parseRepo = parseGithubRepo;
+    const quote = yamlQuote;
+    const lines = yamlLines;
+    const inferStack = /** @param {GitHubRepo} repo */ (repo) =>
+      inferStackFromTopics({ language: repo.language, topics: repo.topics });
     const selectedPlatforms = () =>
       /** @type {string[]} */ ([...document.querySelectorAll("input[name=platform]:checked")].map((input) => /** @type {HTMLInputElement} */ (input).value));
     const setStatus = (text, tone = "muted") => {
@@ -79,15 +83,6 @@ const {
       // Status tokens (danger/warning/success) so the submit states use
       // the same semantic roles as the rest of the system.
       status.className = `mt-3 min-h-5 text-2xs ${tone === "error" ? "text-danger" : tone === "warn" ? "text-warning" : tone === "success" ? "text-success" : "text-muted-foreground"}`;
-    };
-    const inferStack = /** @param {GitHubRepo} repo */ (repo) => {
-      const language = String(repo.language || "").toLowerCase();
-      const topics = (repo.topics || []).map((topic) => String(topic).toLowerCase());
-      if (topics.includes("flutter") || language === "dart") return "flutter";
-      if (topics.includes("react-native")) return "react-native";
-      if (language === "swift" || language === "objective-c") return "ios";
-      if (language === "kotlin" || language === "java") return "android";
-      return language;
     };
     const generateYaml = () => {
       if (!repository) return "";

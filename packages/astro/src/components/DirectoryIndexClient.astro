@@ -38,6 +38,9 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
     activeFilterChips,
     applySort,
     buildFacets,
+    DIRECTORY_FILTER_KEYS,
+    DIRECTORY_FILTER_LABELS,
+    DIRECTORY_TAXONOMY_KINDS,
     effectivePage,
     effectiveSort,
     filterRecords,
@@ -254,27 +257,9 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
         if (select instanceof HTMLSelectElement) select.value = sort;
       });
 
-      const filterKeys = {
-        stacks: "stack",
-        platforms: "platform",
-        categories: "category",
-        tags: "tag",
-        licenses: "license",
-      };
-      const filterLabels = {
-        stacks: "Stack",
-        platforms: "Platform",
-        categories: "Category",
-        tags: "Tag",
-        licenses: "License",
-      };
-      const taxonomyKinds = {
-        stacks: "stacks",
-        platforms: "platforms",
-        categories: "categories",
-        tags: "topics",
-        licenses: "licenses",
-      };
+      const filterKeys = DIRECTORY_FILTER_KEYS;
+      const filterLabels = DIRECTORY_FILTER_LABELS;
+      const taxonomyKinds = DIRECTORY_TAXONOMY_KINDS;
       const taxonomyName = (groupKey, value) =>
         (taxonomy[taxonomyKinds[groupKey]] || []).find((entry) => entry.id === value)?.name ??
         value;
