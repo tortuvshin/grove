@@ -38,3 +38,8 @@ examples/*/
 
 # Biome linter/formatter cache
 .cache/
+
+# Build-time copy of packages/registry/default/, materialized by
+# scripts/build-cli.mjs so `tsc` and the published tarball can pick
+# it up. Regenerated on every CLI build — never hand-edit or commit.
+packages/cli/src/registry-snapshot/
