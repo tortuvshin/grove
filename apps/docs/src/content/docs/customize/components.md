@@ -1,109 +1,135 @@
 ---
 title: Components
-description: Replace any default Astro component by importing your own .astro file in your pages. The data engine stays untouched.
+description: Grove's UI ships from a registry scaffold installed into your src/. You own the files. grove update reconciles upstream changes without overwriting local edits.
 ---
 
-Grove pages are plain Astro pages in your project. The data engine (`prepareDirectory`, generated JSON, Zod schemas) is owned by `@grove-dev/core`. The UI is a set of `.astro` components shipped **inside** `@grove-dev/astro` — a scaffolded space doesn't copy them into `src/components/`; pages import them straight from the package, and you override one by swapping that import for a local file.
+Grove pages are plain Astro pages in your project. The data engine (`prepareDirectory`, generated JSON, Zod schemas) is owned by `@grove-dev/core`. The UI ships from a **registry scaffold** that `grove init` installed into your `src/`. There is no `@grove-dev/astro/components/X.astro` import path in v1 — every component lives in your repo, and `grove update` keeps it in sync with upstream changes without overwriting what you edited.
 
-This split is deliberate: data and presentation evolve at different speeds.
+This split is deliberate: data and presentation evolve at different speeds, and consumers should be able to fork the UI freely without touching engine packages.
 
 ## Where the components live
 
-`@grove-dev/astro`'s `package.json` exports two subpaths that resolve straight to the shipped `.astro` source (not a compiled bundle):
+After `grove init`, your `src/` has the same structure the registry ships:
 
 ```
-"./components/*.astro": "./src/components/*.astro"
-"./layouts/*.astro":    "./src/layouts/*.astro"
+src/
+├── components/
+│   ├── ui/         # primitives — Button, Badge, Input, Sheet, ThemeToggle
+│   ├── grove/      # domain UI — ProjectCard, FilterBar, DirectoryIndexClient, …
+│   └── site/       # site chrome — ThemeToggle
+├── layouts/        # BaseLayout, Header, Footer, Container, Seo, SectionHeader
+├── pages/          # Home, Browse, Record detail, Collections, About, Submit, 404
+├── lib/            # UI-local helpers (classnames, icon-kinds, icon-registry)
+└── styles/         # system.css + global.css
 ```
 
-So `import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";` resolves to the real source file, browsable after install at `node_modules/@grove-dev/astro/src/components/ProjectCard.astro`. The reference space (`apps/example/`) imports every page-level component this way — its own `src/components/` only holds page bodies it composes *from* those (`DirectoryBrowse.astro`, `TaxonomyList.astro`), not overrides of the package's defaults.
+Pages import from local paths:
 
-## Components (`packages/astro/src/components/`, 33 files)
+```astro
+---
+import ProjectCard from "../components/grove/project-card.astro";
+import BaseLayout from "../layouts/base-layout.astro";
+import { Button } from "../components/ui/button.astro";
+---
+```
+
+If you change a file in `src/`, Grove does not touch it. The next `grove update` will tell you a new version is available but will not overwrite yours — see [grove update](/reference/cli/#grove-update).
+
+## Components (`packages/registry/default/components/grove/`)
+
+Domain UI components rendered by Grove's pages. Each accepts a view-model-shaped prop and renders pure presentation — no taxonomy, ranking, or normalization logic lives in the component.
 
 | Component | Purpose |
 |---|---|
-| `ProjectCard` | The canonical record card — logo, name, owner/repo, description, stack/star/updated footer. Every listing surface renders through it. |
-| `CardGrid` | The responsive three-column grid host for card children. |
-| `IndexRow` / `CollectionRow` | Thin `ProjectCard` adapters for the browse page and collection pages respectively. |
-| `CardIcon` | Small metadata glyphs (star, clock, curated check, arrow) shared by card components. |
-| `RecordHeader` | Identity header at the top of a record detail page (avatar, pills, name, description, CTAs). |
-| `RecordSidebar` | Sticky right-hand column on the record detail page. |
-| `RecordSection` | Generic lens-style section wrapper used on the home page. |
-| `EditorialSummary` | Card surfacing the curated summary at the top of a record body. |
-| `MarkdownBody` | Renders a record's pre-sanitized Markdown body (`getContentHtml`). |
-| `TableOfContents` | Collapsible on-page nav for a record's Markdown body. |
-| `LanguageBreakdown` | GitHub-Linguist-style language composition bar + legend. |
-| `StackPlatformChips` | Labelled Stack + Platform chip rows on the record page. |
-| `Icon` | Brand/stack/platform icon registry — see [Icons](/customize/icons/). |
-| `Hero` | The home page banner. |
-| `WhyThisExists` | The 3-point "what is this site for?" section on the home page. |
-| `StackGrid` / `CategoryGrid` | Browse-by-stack / browse-by-category grids on the home page. |
-| `ContributorsGrid` | Avatar grid of GitHub contributors on the home page. |
-| `OriginalCollection` | Legacy-lineage card linking to a project's origin/upstream. |
-| `FinalCta` | Closing call-to-action section. |
-| `CollectionIndex` / `CollectionTeaser` | Grid of every curated collection / a homepage-sized subset (`limit` defaults to 3). |
-| `CollectionCard` | Card for one collection (kind, title, description, entry count). |
-| `CollectionPage` | Renders a single collection from a `CollectionPageModel`. |
-| `DirectoryIndexClient` | Client controller for the prerendered browse routes — re-derives filters, chips, and pagination from `location.search`. |
-| `RefinePanel` / `FilterGroupMenu` / `FilterOptions` | The multi-select facet filter UI. |
-| `Pagination` | Page nav for index pages. |
-| `SmartLensTabs` | Curated single-select lens tabs (sort/curation presets). |
-| `SubmissionClient` | The client-side submission form controller. |
-| `PoweredBy` | The inlined "Powered by Grove" footer mark. |
+| `project-card.astro` | The canonical record card — logo, name, owner/repo, description, stack/star/updated footer. Every listing surface renders through it. |
+| `card-grid.astro` | The responsive three-column grid host for card children. |
+| `index-row.astro` / `collection-row.astro` | Thin `project-card` adapters for the browse page and collection pages respectively. |
+| `card-icon.astro` | Small metadata glyphs (star, clock, curated check, arrow) shared by card components. |
+| `record-header.astro` | Identity header at the top of a record detail page (avatar, pills, name, description, CTAs). |
+| `record-sidebar.astro` | Sticky right-hand column on the record detail page. |
+| `record-section.astro` | Generic lens-style section wrapper used on the home page. |
+| `hero.astro` | Home banner with stats, search, quick filters, and CTAs. |
+| `stack-grid.astro` | Browse-by-stack grid for the home page and `/stacks/`. |
+| `category-grid.astro` | Browse-by-category grid for the home page and `/categories/`. |
+| `contributors-grid.astro` | Avatar grid with optional contribution counts. |
+| `original-collection.astro` | Legacy lineage card with stars/forks/contributors. |
+| `collection-card.astro` / `collection-index.astro` / `collection-page.astro` / `collection-teaser.astro` | Collection surfaces. |
+| `final-cta.astro` | End-of-page "Know an X that belongs here?" CTA. |
+| `markdown-body.astro` | Renders pre-sanitized record body HTML. |
+| `language-breakdown.astro` | Code-composition bar + legend for the record detail sidebar. |
+| `editorial-summary.astro` | "Best for" + "Consider before using" cards on the record detail page. |
+| `table-of-contents.astro` | Collapsible TOC with scroll-spy and smooth scroll. |
+| `directory-index-client.astro` | Client controller for the browse page (filter, sort, paginate, chips). |
+| `submission-client.astro` | Submit-form client (GitHub fetch + YAML preview). |
+| `refine-panel.astro` | Multi-select facet dropdowns used by the browse page. |
+| `filter-group-menu.astro` / `filter-options.astro` | Single facet dropdown + checkbox list. |
+| `pagination.astro` | Previous/Next + windowed page list. |
+| `powered-by.astro` | "Powered by Grove" inline SVG attribution. |
+| `smart-lens-tabs.astro` | Horizontal curated lens tabs (server-rendered). |
+| `stack-platform-chips.astro` | Labelled Stack + Platform pill rows. |
+| `why-this-exists.astro` | Three-point "why" section with icons. |
 
-`Header.astro`, `Footer.astro`, `BaseLayout.astro`, `Container.astro`, `Seo.astro`, and `ThemeToggle.astro` ship from `@grove-dev/astro/layouts/*.astro` (same override mechanism, different subpath) rather than `components/`.
+## Primitives (`packages/registry/default/components/ui/`)
 
-## Override by replacement
+Stateless, presentation-only primitives. Use them in any consumer page or in your own components.
 
-In any page that imports a default component, swap the import for your own file:
+| Component | Purpose |
+|---|---|
+| `badge.astro` | Span-based status pill with six semantic variants. |
+| `button.astro` | `<a>` or `<button>` with class via `buttonClass()`. |
+| `empty-state.astro` | "Nothing here" block with optional recovery link. |
+| `filter-drawer.astro` | Mobile filter surface built on `<dialog>`. |
+| `page-header.astro` | Eyebrow + h1/h2 + description block. |
+| `search-field.astro` | Search input with magnifier icon, clear button, `/` shortcut. |
 
-```astro
----
-// apps/example/src/pages/[slug]/[recordSlug].astro (example)
+## Site chrome (`packages/registry/default/components/site/`)
 
-// Default:
-// import RecordHeader from "@grove-dev/astro/components/RecordHeader.astro";
+| Component | Purpose |
+|---|---|
+| `theme-toggle.astro` | Three-mode (light/dark/system) switcher button. |
 
-// Your override — same props, your markup:
-import RecordHeader from "../../../components/RecordHeader.astro";
----
+## Layouts (`packages/registry/default/layouts/`)
 
-<RecordHeader detail={detail} />
+| Layout | Purpose |
+|---|---|
+| `base-layout.astro` | Document shell — `<head>`, theme-init, Header/Footer, GA4. |
+| `container.astro` | Width-constrained wrapper using `--grove-container`. |
+| `header.astro` | Sticky brand + nav + submit + repo button + theme toggle. |
+| `footer.astro` | Four-column grid + copyright bar. |
+| `section-header.astro` | Eyebrow + heading + description block. |
+| `seo.astro` | `<title>`, OG, Twitter, JSON-LD emission. |
+
+## Overriding a component
+
+Three patterns, in increasing order of how much you take on:
+
+### 1. Edit the file directly (most common)
+
+Open `src/components/grove/project-card.astro`, change whatever you want, save. The next `grove update` will report `! locally modified — preserved` and never overwrite.
+
+### 2. Subclass it (preserve the upstream version)
+
+If you want both your version and the upstream version side-by-side, copy the file to a new path (e.g. `src/components/grove/my-card.astro`), edit it, and update the page import.
+
+### 3. Add a new component without touching the registry
+
+Drop a new `.astro` file under `src/components/grove/` (or any other directory), then `import` it from a page. The registry has no opinion about what you add; `grove update` only reconciles the files it shipped.
+
+## What if I want to go back to the upstream version?
+
+```bash
+grove update --diff   # see what changed
+grove update          # apply upstream, but only to files you haven't edited
 ```
 
-`RecordHeader` takes a single `detail: RecordDetailModel` prop (produced by `getRecordDetailModel()`), not a raw record — check the component you're overriding for its actual prop shape before copying an example. `ProjectCard`, for instance, takes `record` (optional — adapters can pass explicit props instead) plus a required `href`:
+Files you have edited are flagged `locally modified` and never overwritten. To force them back to upstream, delete the local file and run `grove update` again — the registry will reinstall it.
 
-```astro
----
-import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
----
+## What if I add a component the registry doesn't ship?
 
-<ProjectCard record={r} href={`/${slug}/${r.slug}/`} />
-```
+Nothing. The registry tracks only what it ships. New files under `src/` are yours and stay yours forever.
 
-The override component receives the same props; your version renders anything, and the page that imports it doesn't know or care that it's not the default.
+## See also
 
-## The data contract
-
-Record and index types come from `@grove-dev/core`, not from a component-specific type:
-
-```ts
-import type { Resource, IndexRecord, ProjectRecord } from "@grove-dev/core";
-```
-
-- `Resource` — the full discriminated union (`project` | `resource` | `entity`) parsed from a record YAML file. `ProjectRecord` narrows it to `kind: "project"` — the only kind usable in V1. See the [record schema](/reference/record-schema/) for every field.
-- `IndexRecord` — the slim projection served to list pages from `data/generated/records.index.json` (`packages/core/src/schema.ts`, `toIndexRecord`).
-
-Page-model types (the shapes `RecordHeader`, `CollectionPage`, and friends actually consume) come from `@grove-dev/astro/server` instead — `RecordDetailModel`, `DirectoryIndexModel`, `CollectionPageModel`, `DirectorySiteConfig`, and so on, all produced by the matching `get*Model()` function in `packages/astro/src/server/models.ts` / `collections.ts`.
-
-## What NOT to do
-
-- Don't edit files inside `node_modules/@grove-dev/astro/`  — wiped on `pnpm install`. Copy the file into your own project first.
-- Don't fork the data layer — add fields to the record schema, not a component.
-- Don't replicate the whole template — start with the default, override only what you need.
-
-## Related
-
-- [Custom pages](/customize/pages/) — adding new pages
-- [Record schema](/reference/record-schema/) — every field a record carries
-- [Branding](/customize/branding/) — site identity without component edits
+- [Registry and consumer-owned source](/concepts/registry/) — mental model and `grove update` algorithm.
+- [Theme](/customize/theme/) — overriding design tokens and the dark variant.
+- [Pages](/customize/pages/) — how pages compose components and consume server view-models.

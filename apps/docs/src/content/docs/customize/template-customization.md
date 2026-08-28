@@ -64,7 +64,7 @@ import siteConfig from "@grove/generated/site-config.json";
 </BaseLayout>
 ```
 
-`BaseLayout` ships from the package, not from a local `src/layouts/`; a fresh space has no `src/layouts/` directory at all. `title`, `description`, and `site` are all required props — `site` is `data/generated/site-config.json`, which the `@grove/generated` alias resolves for you.
+`BaseLayout` lives at `src/layouts/base-layout.astro` in your repo. `grove init` installed it there from the `@grove/default` registry scaffold. `title`, `description`, and `site` are all required props — `site` is `data/generated/site-config.json`, which the `@grove/generated` alias resolves for you.
 
 Add a nav link in `grove.config.ts`. See [Custom pages](/customize/pages/) for Markdown-page patterns and structured data.
 
@@ -81,20 +81,22 @@ content: ./content/records/astro.md
 
 ### Editing copy
 
-Page-specific copy (the home page's section headings, the about page, the submission form) lives in `src/pages/` and your own `src/components/` — edit them directly, they're your files, not generated. There's no local `src/layouts/`: shared chrome (`Header`, `Footer`, `BaseLayout`) ships from `@grove-dev/astro/layouts/`, and `site.name`/`site.tagline` flow into it automatically from `grove.config.ts`.
+Page-specific copy (the home page's section headings, the about page, the submission form) lives in `src/pages/` and your own `src/components/` — edit them directly, they're your files, not generated. Shared chrome (`Header`, `Footer`, `BaseLayout`) lives at `src/layouts/`, installed by `grove init` from the `@grove/default` registry scaffold, and `site.name`/`site.tagline` flow into it automatically from `grove.config.ts`.
 
 ## 3. Components
 
-`@grove-dev/astro` ships 33 components (`packages/astro/src/components/`) plus the shared layouts (`Header`, `Footer`, `BaseLayout`, and friends, under `layouts/`). See [Components](/customize/components/) for the list and the data contract. Override by replacing the import in your page:
+Components live in your `src/components/{ui,grove,site}/` directory — installed by `grove init` from the `@grove/default` registry. The registry ships 33 domain components (`grove/`), 6 primitives (`ui/`), and 1 site chrome (`site/`). See [Components](/customize/components/) for the list and the data contract. Override by editing the file directly:
 
 ```astro
 ---
-// import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro";
-import ProjectCard from "../components/MyProjectCard.astro";
+// src/pages/index.astro — uses the registry-installed ProjectCard
+import ProjectCard from "../components/grove/project-card.astro";
 ---
 ```
 
-The override component must accept the same props as the original. See [Components](/customize/components/) for the data contract.
+Edit `src/components/grove/project-card.astro` to override. `grove update` will see your edit and never overwrite it.
+
+The override is a direct edit — open the file in `src/components/grove/`, change what you want, save. The next `grove update` will see your edit and never overwrite it. See [Components](/customize/components/) for the data contract.
 
 ## 4. Styling
 

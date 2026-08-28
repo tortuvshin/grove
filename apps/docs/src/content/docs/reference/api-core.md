@@ -377,6 +377,29 @@ const result = await syncIconAssets(sourceDir, targetDir, {
 
 All exports are listed in [`apps/docs/docs-audit/package-api-inventory.md`](https://github.com/tortuvshin/grove/blob/main/apps/docs/docs-audit/package-api-inventory.md). New exports can land in a minor version; existing ones are stable.
 
+## Directory filter keys (single source of truth)
+
+A small set of pure-data constants that the browse-page controller, refine panel, and server view-models all share, so chip labels and URL params never drift apart. See the [Registry and consumer-owned source](/concepts/registry/) concept doc for how this fits the v1 architecture.
+
+- `DIRECTORY_FILTER_KEYS` — facet group key → URL param key (`stacks → stack`, `platforms → platform`, …).
+- `DIRECTORY_TAXONOMY_KINDS` — facet group key → taxonomy kind (`stacks → stacks`, `tags → topics`, …).
+- `DIRECTORY_FILTER_LABELS` — facet group key → singular display label (`Stack`, `Platform`, …).
+- `FACET_DIMENSION_FOR_KEY` — reverse map (URL param key → facet group key).
+- `isDirectoryFilterGroupKey(value)` — type guard.
+
+## YAML string helpers (submit form, future CLI emit)
+
+Pure, dependency-free helpers for the submit form's YAML preview. Used by `SubmissionClient.astro` (now in the registry scaffold at `components/grove/submission-client.astro`).
+
+- `recordSlugify(value)` — coerce any input to a URL-safe hyphen slug.
+- `parseGithubRepo(value)` — parse a GitHub URL into `{ owner, repo }` or return null.
+- `yamlQuote(value)` — quote a scalar for safe inclusion in a YAML double-quoted string.
+- `yamlLines(values, indent?)` — render a YAML block sequence with a given indent.
+
+## Taxonomy inference
+
+- `inferStackFromTopics({ language, topics })` — suggest a stack id (e.g. `flutter`, `ios`, `android`) from a repository's GitHub metadata. Used by the submit form to pre-fill the primary-stack field.
+
 ## See also
 
 - [Configuration reference](/reference/config/) — every `grove.config.ts` field.
