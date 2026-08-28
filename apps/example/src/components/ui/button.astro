@@ -8,7 +8,7 @@
  * definition. Pass layout-only extras (widths, one-off spacing)
  * through `class`.
  */
-import { buttonClass, type ButtonSize, type ButtonVariant } from "../../lib/classnames.ts";
+import { buttonClass, PAGINATION_DISABLED, type ButtonSize, type ButtonVariant } from "../../lib/classnames.ts";
 
 interface Props {
   variant?: ButtonVariant;
@@ -28,6 +28,7 @@ const {
   size = "sm",
   href,
   type = "button",
+  disabled,
   class: className = "",
   ...rest
 } = Astro.props;
@@ -36,7 +37,13 @@ const classes = buttonClass(variant, size, className);
 ---
 
 {href ? (
-  <a href={href} class={classes} {...rest}><slot /></a>
+  <a
+    href={href}
+    class:list={[classes, disabled && PAGINATION_DISABLED]}
+    aria-disabled={disabled ? "true" : undefined}
+    tabindex={disabled ? -1 : undefined}
+    {...rest}
+  ><slot /></a>
 ) : (
-  <button type={type} class={classes} {...rest}><slot /></button>
+  <button type={type} class={classes} disabled={disabled} {...rest}><slot /></button>
 )}

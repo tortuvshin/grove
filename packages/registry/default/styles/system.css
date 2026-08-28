@@ -212,6 +212,22 @@
   }
 }
 
+/* Respect the OS-level "reduce motion" setting. Neutralizes every
+ * animation/transition (the `--animate-*` custom properties above,
+ * plus one-off `animate-pulse` / `animate-ping` utility classes used
+ * directly in components) rather than trying to freeze each keyframe
+ * mid-motion, which isn't meaningful for e.g. `background-position`. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ──────────────────────────────────────────────────────────────────
  * Base
  * ────────────────────────────────────────────────────────────────── */
