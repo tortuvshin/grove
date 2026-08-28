@@ -1,0 +1,68 @@
+packages/registry/default/components/grove/index-row.astro
+  s_134e5b252de84f::t_87ffc411dfbd03 12-15,18,35,39
+packages/astro/src/server/record-detail-model.test.ts
+  s_134e5b252de84f::t_074df79184c363 1-97
+apps/example/src/components/grove/project-card.astro
+  s_134e5b252de84f::t_2e614717cbed95 26-28,30-35,41,46-47,59,67-86,194
+packages/registry/default/components/grove/collection-row.astro
+  s_134e5b252de84f::t_db47a7e3ba0cda 26-32,38-41,43-45
+  s_134e5b252de84f::t_1d3463bc01dfc8 94
+  s_134e5b252de84f::t_2ef99e32bd67ec 81-93,95-109,114
+  s_134e5b252de84f::t_f879fe0abfd138 42
+apps/example/src/components/grove/index-row.astro
+  s_134e5b252de84f::t_2e614717cbed95 12-15,18,35,39
+packages/registry/default/components/grove/record-sidebar.astro
+  s_134e5b252de84f::t_53208e97ddee09 237
+  s_134e5b252de84f::t_b199e09b436f5d 210,214
+  s_134e5b252de84f::t_b8e4cd784ade46 370
+  s_134e5b252de84f::t_d0af4b03274096 66-68
+  s_134e5b252de84f::t_12053af752ef38 162,166
+packages/registry/default/components/grove/record-section.astro
+  s_134e5b252de84f::t_bb284eeeb18fc5 27
+  s_134e5b252de84f::t_c28a5a257fec01 30
+  s_134e5b252de84f::t_e7ba8b65c16f36 97
+  s_134e5b252de84f::t_12c04d9271fac3 32
+  s_134e5b252de84f::t_8a3adfc117b57e 110,113
+packages/astro/src/server/models.ts
+  s_134e5b252de84f::t_c0b2fb62e8e255 786-788
+  s_134e5b252de84f::t_7abf13c80257fd 622-634
+  s_134e5b252de84f::t_0632e24828f0c0 1182-1334,1336
+  s_134e5b252de84f::t_30f395b293e866 11,15,36,44
+  s_134e5b252de84f::t_3c48e715228482 1335
+  s_134e5b252de84f::t_f9ccf060a63cee 1337
+packages/registry/default/components/grove/project-card.astro
+  s_134e5b252de84f::t_ae43d3a19246f2 26-28,30-35,41,46-47,59,67-86,194
+apps/example/src/components/grove/collection-row.astro
+  s_134e5b252de84f::t_2e614717cbed95 26-32,38-45,81-109,114
+apps/example/src/components/TaxonomyList.astro
+  s_134e5b252de84f::t_4f1c7630d5a77c 85
+  s_134e5b252de84f::t_915e58257437e7 22,24,26
+apps/example/src/components/grove/record-section.astro
+  s_134e5b252de84f::t_2e614717cbed95 27,110,113
+  s_134e5b252de84f::t_c28a5a257fec01 30
+  s_134e5b252de84f::t_c17937b8d03931 32,97
+packages/astro/src/server/project-card.test.ts
+  s_134e5b252de84f::t_b777ddd157d855 1-124
+apps/example/src/components/grove/record-sidebar.astro
+  s_134e5b252de84f::t_11e85ab1158379 66-68,162,166,210,214,237,370
+packages/registry/default/components/grove/submission-client.astro
+  s_134e5b252de84f::t_c144fa23878d1a 121-135
+apps/example/src/components/grove/submission-client.astro
+  s_134e5b252de84f::t_11e85ab1158379 121-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "56b19c40c1c848405f4355274c85e83ce1e4cf40",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
