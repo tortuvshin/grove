@@ -2,36 +2,36 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const astroTheme = readFileSync(resolve(import.meta.dirname, "styles.css"), "utf8");
+const astroTheme = readFileSync(resolve(import.meta.dirname, "../../registry/default/styles/system.css"), "utf8");
 const scaffoldTheme = readFileSync(
   resolve(import.meta.dirname, "../../../apps/example/src/styles/global.css"),
   "utf8",
 );
 const tailwindMarkup = [
-  "components/FilterGroupMenu.astro",
-  "layouts/Header.astro",
+  "../../registry/default/components/grove/filter-group-menu.astro",
+  "../../registry/default/layouts/header.astro",
 ].map((file) => readFileSync(resolve(import.meta.dirname, file), "utf8")).join("\n") +
   readFileSync(resolve(import.meta.dirname, "../../../apps/example/src/pages/submit.astro"), "utf8");
 const iconMarkup = readFileSync(
-  resolve(import.meta.dirname, "components/Icon.astro"),
+  resolve(import.meta.dirname, "../../registry/default/components/grove/icon.astro"),
   "utf8",
 );
 // Name resolution lives in lib/ so the icon tests can assert on the
 // exact aliases the component applies instead of reimplementing them.
 const iconRegistry = readFileSync(
-  resolve(import.meta.dirname, "lib/icon-registry.ts"),
+  resolve(import.meta.dirname, "../../registry/default/lib/icon-registry.ts"),
   "utf8",
 );
 const themeToggleMarkup = readFileSync(
-  resolve(import.meta.dirname, "layouts/ThemeToggle.astro"),
+  resolve(import.meta.dirname, "../../registry/default/components/site/theme-toggle.astro"),
   "utf8",
 );
 const baseLayoutMarkup = readFileSync(
-  resolve(import.meta.dirname, "layouts/BaseLayout.astro"),
+  resolve(import.meta.dirname, "../../registry/default/layouts/base-layout.astro"),
   "utf8",
 );
 const smartLensMarkup = readFileSync(
-  resolve(import.meta.dirname, "components/SmartLensTabs.astro"),
+  resolve(import.meta.dirname, "../../registry/default/components/grove/smart-lens-tabs.astro"),
   "utf8",
 );
 

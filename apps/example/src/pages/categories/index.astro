@@ -5,8 +5,8 @@
  * the category (detail pages live at `/categories/<id>/`).
  */
 import siteConfig from "@grove/generated/site-config.json";
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import CategoryGrid from "@grove-dev/astro/components/CategoryGrid.astro";
+import BaseLayout from "../../layouts/base-layout.astro";
+import CategoryGrid from "../../components/grove/category-grid.astro";
 import { getTaxonomyIndexModel, getTaxonomyIndexSeo, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";

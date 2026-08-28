@@ -19,11 +19,11 @@ const root = resolve(import.meta.dirname, "../../..");
 const dist = resolve(root, "apps/example/dist");
 
 const poweredBySource = readFileSync(
-  resolve(import.meta.dirname, "components/PoweredBy.astro"),
+  resolve(import.meta.dirname, "../../registry/default/components/grove/powered-by.astro"),
   "utf8",
 );
 const footerSource = readFileSync(
-  resolve(import.meta.dirname, "layouts/Footer.astro"),
+  resolve(import.meta.dirname, "../../registry/default/layouts/footer.astro"),
   "utf8",
 );
 /** Markup only — the frontmatter's prose mentions `<img src>` on purpose. */

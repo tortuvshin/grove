@@ -18,7 +18,7 @@
  */
 import siteConfig from "@grove/generated/site-config.json";
 import { getDirectoryIndexModel } from "@grove-dev/astro/server";
-import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
+import IndexRow from "../../../components/grove/index-row.astro";
 
 export function getStaticPaths() {
   const routeSlug = siteConfig.blueprintConfig?.routeSlug ?? "projects";

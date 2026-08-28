@@ -5,8 +5,8 @@
  * the stack (detail pages live at `/stacks/<id>/`).
  */
 import siteConfig from "@grove/generated/site-config.json";
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import StackGrid from "@grove-dev/astro/components/StackGrid.astro";
+import BaseLayout from "../../layouts/base-layout.astro";
+import StackGrid from "../../components/grove/stack-grid.astro";
 import { getTaxonomyIndexModel, getTaxonomyIndexSeo, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";

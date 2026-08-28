@@ -74,7 +74,7 @@ describe("token values in styles.css match the pairs tested here", () => {
   it("pins the status hexes so the test can't silently drift", async () => {
     const { readFileSync } = await import("node:fs");
     const { resolve } = await import("node:path");
-    const css = readFileSync(resolve(import.meta.dirname, "styles.css"), "utf8");
+    const css = readFileSync(resolve(import.meta.dirname, "../../registry/default/styles/system.css"), "utf8");
     for (const hex of ["#15803d", "#92400e", "#b91c1c", "#1d4ed8", "#4ade80", "#fbbf24", "#f87171", "#60a5fa", "#141516"]) {
       expect(css, hex).toContain(hex);
     }

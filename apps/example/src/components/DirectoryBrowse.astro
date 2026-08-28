@@ -25,18 +25,18 @@
  */
 import siteConfig from "@grove/generated/site-config.json";
 import { getDirectoryIndexModel, itemLabel, itemLabelPlural, seoTitle, taxonomy, titleCaseFirst } from "@grove-dev/astro/server";
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import CardGrid from "@grove-dev/astro/components/CardGrid.astro";
-import RefinePanel from "@grove-dev/astro/components/RefinePanel.astro";
-import IndexRow from "@grove-dev/astro/components/IndexRow.astro";
-import Pagination from "@grove-dev/astro/components/Pagination.astro";
-import DirectoryIndexClient from "@grove-dev/astro/components/DirectoryIndexClient.astro";
+import BaseLayout from "../layouts/base-layout.astro";
+import CardGrid from "../components/grove/card-grid.astro";
+import RefinePanel from "../components/grove/refine-panel.astro";
+import IndexRow from "../components/grove/index-row.astro";
+import Pagination from "../components/grove/pagination.astro";
+import DirectoryIndexClient from "../components/grove/directory-index-client.astro";
 import { SORT_OPTIONS, sortDisplay } from "@grove-dev/astro";
 import { formatCount } from "@grove-dev/core";
-import { buttonClass, chipClass } from "@grove-dev/astro/ui/button";
-import PageHeader from "@grove-dev/astro/ui/PageHeader.astro";
-import SearchField from "@grove-dev/astro/ui/SearchField.astro";
-import FilterDrawer from "@grove-dev/astro/ui/FilterDrawer.astro";
+import { buttonClass, chipClass } from "../lib/classnames.ts";
+import PageHeader from "../components/ui/page-header.astro";
+import SearchField from "../components/ui/search-field.astro";
+import FilterDrawer from "../components/ui/filter-drawer.astro";
 
 interface Props {
   /** 1-based page this route renders. */

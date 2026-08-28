@@ -4,8 +4,8 @@
  * shared `EmptyState` primitive so the audit sample represents what
  * visitors actually see when a directory has nothing to show.
  */
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import EmptyState from "@grove-dev/astro/ui/EmptyState.astro";
+import BaseLayout from "../layouts/base-layout.astro";
+import EmptyState from "../components/ui/empty-state.astro";
 import siteConfig from "@grove/generated/site-config.json";
 
 const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";

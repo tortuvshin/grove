@@ -59,7 +59,7 @@ describe("default Astro route configuration", () => {
 
   it("generates submission drafts accepted by the Grove record schema", async () => {
     const submitClient = await readFile(
-      resolve(import.meta.dirname, "components/SubmissionClient.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/submission-client.astro"),
       "utf8",
     );
 
@@ -86,7 +86,7 @@ describe("default Astro route configuration", () => {
 
   it("hydrates static list pages with URL-driven search and pagination", async () => {
     const listClient = await readFile(
-      resolve(import.meta.dirname, "components/DirectoryIndexClient.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/directory-index-client.astro"),
       "utf8",
     );
 
@@ -108,7 +108,7 @@ describe("default Astro route configuration", () => {
     // left page 2's records rendered under the page-1 URL. Only a URL
     // that carries a query — which no prerendered page has — is ours.
     const listClient = await readFile(
-      resolve(import.meta.dirname, "components/DirectoryIndexClient.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/directory-index-client.astro"),
       "utf8",
     );
 
@@ -128,11 +128,11 @@ describe("default Astro route configuration", () => {
     // the count spans in place (audit P0: counts stayed global under
     // an active filter).
     const listClient = await readFile(
-      resolve(import.meta.dirname, "components/DirectoryIndexClient.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/directory-index-client.astro"),
       "utf8",
     );
     const filterOptions = await readFile(
-      resolve(import.meta.dirname, "components/FilterOptions.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/filter-options.astro"),
       "utf8",
     );
 
@@ -148,7 +148,7 @@ describe("default Astro route configuration", () => {
     // role="listbox" over label/input children has no valid a11y
     // tree; the popover is a group of native checkboxes/radios.
     const menu = await readFile(
-      resolve(import.meta.dirname, "components/FilterGroupMenu.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/filter-group-menu.astro"),
       "utf8",
     );
     expect(menu).not.toContain('role="listbox"');
@@ -159,7 +159,7 @@ describe("default Astro route configuration", () => {
 
   it("announces theme changes with a stateful label and live region", async () => {
     const toggle = await readFile(
-      resolve(import.meta.dirname, "layouts/ThemeToggle.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/site/theme-toggle.astro"),
       "utf8",
     );
     expect(toggle).toContain('role="status"');
@@ -170,7 +170,7 @@ describe("default Astro route configuration", () => {
 
   it("builds the mobile filter drawer on a native dialog", async () => {
     const drawer = await readFile(
-      resolve(import.meta.dirname, "ui/FilterDrawer.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/ui/filter-drawer.astro"),
       "utf8",
     );
     expect(drawer).toContain("<dialog");
@@ -180,7 +180,7 @@ describe("default Astro route configuration", () => {
 
   it("restores focus to the trigger when Escape closes a filter popover", async () => {
     const panel = await readFile(
-      resolve(import.meta.dirname, "components/RefinePanel.astro"),
+      resolve(import.meta.dirname, "../../registry/default/components/grove/refine-panel.astro"),
       "utf8",
     );
     expect(panel).toContain('aria-expanded="true"');

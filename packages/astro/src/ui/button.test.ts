@@ -37,7 +37,7 @@ describe("button class builders", () => {
     // must render byte-identical chips. Both now import chipClass —
     // assert neither has regressed to an inline copy of the string.
     const clientSource = readFileSync(
-      resolve(import.meta.dirname, "../components/DirectoryIndexClient.astro"),
+      resolve(import.meta.dirname, "../../../registry/default/components/grove/directory-index-client.astro"),
       "utf8",
     );
     const serverPage = readFileSync(
