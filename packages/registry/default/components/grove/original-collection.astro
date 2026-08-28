@@ -11,6 +11,7 @@
  * site-specific copy.
  */
 import { buttonClass } from "../../lib/classnames.ts";
+import { compact } from "@grove-dev/core";
 
 interface OriginStats {
   stars?: number;
@@ -36,15 +37,6 @@ const {
   description = "This directory descends from an earlier curated collection. The original still lives on — same shape, same spirit, fresh data.",
   class: className = "",
 } = Astro.props;
-
-function fmt(n: number | undefined): string | null {
-  if (typeof n !== "number" || !Number.isFinite(n)) return null;
-  if (n >= 1000) {
-    const k = n / 1000;
-    return (k >= 10 ? Math.round(k).toString() : k.toFixed(1)) + "k";
-  }
-  return n.toString();
-}
 
 const hasStats =
   stats.stars !== undefined ||
@@ -79,20 +71,20 @@ const hasStats =
           >
             {stats.stars !== undefined && (
               <div class="flex items-center gap-1">
-                <dd class="m-0 font-mono">{fmt(stats.stars) ?? stats.stars}</dd>
+                <dd class="m-0 font-mono">{compact(stats.stars)}</dd>
                 <dt>stars</dt>
               </div>
             )}
             {stats.forks !== undefined && (
               <div class="flex items-center gap-1">
-                <dd class="m-0 font-mono">{fmt(stats.forks) ?? stats.forks}</dd>
+                <dd class="m-0 font-mono">{compact(stats.forks)}</dd>
                 <dt>forks</dt>
               </div>
             )}
             {stats.contributors !== undefined && (
               <div class="flex items-center gap-1">
                 <dd class="m-0 font-mono">
-                  {fmt(stats.contributors) ?? stats.contributors}
+                  {compact(stats.contributors)}
                 </dd>
                 <dt>contributors</dt>
               </div>

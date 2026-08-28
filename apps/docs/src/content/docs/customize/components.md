@@ -9,7 +9,7 @@ This split is deliberate: data and presentation evolve at different speeds, and 
 
 ## Where the components live
 
-After `grove init`, your `src/` has the same structure the registry ships:
+After `grove init`, your `src/` has the same `components/`, `layouts/`, `lib/`, and `styles/` structure the registry ships — plus a `pages/` directory that's entirely yours to add:
 
 ```
 src/
@@ -18,7 +18,7 @@ src/
 │   ├── grove/      # domain UI — ProjectCard, FilterBar, DirectoryIndexClient, …
 │   └── site/       # site chrome — ThemeToggle
 ├── layouts/        # BaseLayout, Header, Footer, Container, Seo, SectionHeader
-├── pages/          # Home, Browse, Record detail, Collections, About, Submit, 404
+├── pages/          # consumer-owned, not registry-shipped — Home, Browse, Record detail, Collections, About, Submit, 404
 ├── lib/            # UI-local helpers (classnames, icon-kinds, icon-registry)
 └── styles/         # system.css + global.css
 ```

@@ -16,7 +16,7 @@
 import { formatCount } from "@grove-dev/core";
 import CardGrid from "./card-grid.astro";
 import CollectionRow from "./collection-row.astro";
-import Container from "../../layouts/Container.astro";
+import Container from "../../layouts/container.astro";
 import SectionHeader from "../../layouts/section-header.astro";
 import EmptyState from "../ui/empty-state.astro";
 import type { CollectionPageModel } from "@grove-dev/astro/server";
@@ -37,7 +37,7 @@ interface Props {
    * Heading level for the collection title. This component IS the
    * page on collection detail routes, so it defaults to 1.
    */
-  headingLevel?: 1 | 2;
+  level?: 1 | 2;
   /** Noun pair for the entry count (blueprint labels). */
   countNoun?: { singular: string; plural: string };
   class?: string;
@@ -50,7 +50,7 @@ const {
   description,
   emptyLabel = "This collection is currently empty.",
   id,
-  headingLevel = 1,
+  level = 1,
   countNoun = { singular: "item", plural: "items" },
   class: className = "",
 } = Astro.props;
@@ -62,7 +62,7 @@ const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated 
 
 <section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
-    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} level={headingLevel} />
+    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} level={level} />
 
     {/* Editorial context reads as a quiet callout, not metadata
         shouting in uppercase. */}

@@ -18,7 +18,7 @@
  */
 import CardGrid from "./card-grid.astro";
 import CollectionCard from "./collection-card.astro";
-import Container from "../../layouts/Container.astro";
+import Container from "../../layouts/container.astro";
 import SectionHeader from "../../layouts/section-header.astro";
 import EmptyState from "../ui/empty-state.astro";
 import type { CollectionIndexModel } from "@grove-dev/astro/server";
@@ -40,7 +40,7 @@ interface Props {
    * renders the page's title (the `/collections` index); the default
    * 2 fits embedded use (homepage teaser).
    */
-  headingLevel?: 1 | 2;
+  level?: 1 | 2;
   /** Noun pair for the per-card entry counts (blueprint labels). */
   countNoun?: { singular: string; plural: string };
   class?: string;
@@ -56,7 +56,7 @@ const {
   viewAllLabel = "View all",
   emptyLabel = "No collections yet.",
   limit,
-  headingLevel = 2,
+  level = 2,
   countNoun,
   class: className = "",
 } = Astro.props;
@@ -68,7 +68,7 @@ const headerActions = Astro.slots.has("header-actions");
 <section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <SectionHeader eyebrow={eyebrow} title={title} description={description} level={headingLevel} />
+      <SectionHeader eyebrow={eyebrow} title={title} description={description} level={level} />
       {(viewAllHref || headerActions) && (
         <div class="flex shrink-0 items-center gap-2 pb-2">
           {viewAllHref && (

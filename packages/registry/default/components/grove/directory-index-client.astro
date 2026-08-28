@@ -33,6 +33,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
 
 <script is:inline id="grove-index-config" type="application/json" set:html={clientConfigJson}></script>
 <script>
+  import type { IndexRecord } from "@grove-dev/core";
   import {
     PAGE_SIZE,
     activeFilterChips,
@@ -72,7 +73,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
       );
       // Filled by `loadRecords()`. Until then the page shows what the
       // server rendered, which for an unfiltered view is already right.
-      let items: any[] = [];
+      let items: IndexRecord[] = [];
       const pathPrefix = `/${slug}`;
 
       // Cards for this page came with the document. A filtered view can

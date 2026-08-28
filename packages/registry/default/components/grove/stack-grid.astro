@@ -36,7 +36,7 @@ interface Props {
   /** Noun pair for count chips — singular fixes "1 projects". */
   itemNoun?: { singular: string; plural: string };
   /** Pass 1 when this grid IS the page (`/stacks` index). */
-  headingLevel?: 1 | 2;
+  level?: 1 | 2;
   /**
    * Card link builder. Defaults to the browse page filtered by stack
    * (`{pathPrefix}?stack=…`); pass e.g. `(slug) => \`/stacks/${slug}\``
@@ -53,11 +53,11 @@ const {
   bare = false,
   itemLabelPlural = "items",
   itemNoun = { singular: "item", plural: "items" },
-  headingLevel = 2,
+  level = 2,
   hrefFor,
 } = Astro.props;
 
-const Heading = `h${headingLevel}` as "h1" | "h2";
+const Heading = `h${level}` as "h1" | "h2";
 
 function buildHref(slug: string): string {
   if (hrefFor) return hrefFor(slug);
@@ -135,10 +135,10 @@ function statusLabel(s: StackEntry["status"]): string | null {
               class:list={[
                 "shrink-0 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider",
                 s.status === "live"
-                  ? "!bg-emerald-50 !text-emerald-700 dark:!bg-emerald-950/80 dark:!text-emerald-300"
+                  ? "!bg-success/10 !text-success"
                   : s.status === "expanding"
-                    ? "!bg-blue-50 !text-blue-700 dark:!bg-blue-950/80 dark:!text-blue-300"
-                    : "!bg-amber-50 !text-amber-800 dark:!bg-amber-950/80 dark:!text-amber-300",
+                    ? "!bg-info/10 !text-info"
+                    : "!bg-warning/10 !text-warning",
               ]}
             >
               {statusLabel(s.status)}

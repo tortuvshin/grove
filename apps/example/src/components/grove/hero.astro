@@ -13,7 +13,7 @@
  * "apps indexed", a resource-hub renders "resources indexed",
  * an ecosystem-map renders "entities indexed".
  */
-import Container from "../../layouts/Container.astro";
+import Container from "../../layouts/container.astro";
 import { compact } from "@grove-dev/core";
 
 interface CTA {
@@ -30,15 +30,13 @@ interface Props {
   tagline: string;
   /** Longer descriptive paragraph. */
   description?: string;
-  /** Trust stats: items count, categories, stacks, contributors, stars. */
+  /** Trust stats: items count, categories, stacks, owners, stars. */
   stats?: {
     totalApps?: number;
     totalCategories?: number;
     totalStacks?: number;
     totalOwners?: number;
     totalStars?: number;
-    repositoryContributors?: number;
-    originalRepo?: string;
   };
   /** Search form target — the list page. */
   searchHref?: string;
@@ -49,8 +47,6 @@ interface Props {
    * "entities"). Used in the trust-stats label and CTA copy.
    */
   itemsLabel?: string;
-  /** Singular noun for the Submit / Browse copy. */
-  itemLabel?: string;
   /** Quick filter chips under the search bar. */
   quickFilters?: Array<{ label: string; href: string }>;
   /** CTAs rendered below the form. */
@@ -71,17 +67,12 @@ const {
   searchHref = "/",
   searchPlaceholder = "Search the directory...",
   itemsLabel = "items",
-  itemLabel,
   quickFilters = [],
   ctas = [],
   class: className = "",
   eyebrow = "A directory of curated knowledge",
   eyebrowBadge,
 } = Astro.props;
-
-// Singular for the Submit-style CTA copy. Defaults to the lowercased
-// items label so "apps" → "app" without an extra prop.
-const singular = (itemLabel ?? itemsLabel.replace(/s$/, "")).toLowerCase();
 
 // One compact stats line: "6 projects indexed · 5 categories · 3 stacks".
 // Every entry is guarded so a fresh directory never renders a zero-value.
@@ -131,11 +122,11 @@ const primaryCta: CTA | undefined =
           `PoweredBy` link, a release badge) without forking the Hero. */}
       <span class="inline-flex animate-fade-in items-center gap-2 text-[13px] font-medium text-ink-500 dark:text-ink-400">
         <slot name="eyebrow">
-          <span aria-hidden="true" class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"></span>
+          <span aria-hidden="true" class="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-success"></span>
           {eyebrow}
           {eyebrowBadge && (
             <span
-              class="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300"
+              class="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-warning"
               aria-label={eyebrowBadge}
             >
               {eyebrowBadge}
@@ -237,7 +228,6 @@ const primaryCta: CTA | undefined =
           </a>
         </div>
       )}
-      {singular /* suppress unused warning on the singular variable */ ? null : null}
     </div>
   </Container>
 </section>

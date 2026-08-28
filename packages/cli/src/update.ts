@@ -78,15 +78,21 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
   }
   const installed = await loadManifest();
   const lockMap = mapByTarget(lock.files);
-  const installedMap = mapByTarget(installed.files);
-  const registryMap = mapByTarget(installed.files);
+  // `installed` here is the bundled REGISTRY snapshot (loadManifest()
+  // reads the package's own registry files), not the consumer's disk
+  // state — despite the name `loadManifest` returning something that
+  // looks "installed". `registrySnapshotMap` is that snapshot's
+  // target→hash map, used both to know which targets to hash on disk
+  // (below) and as the upstream side of the three-way diff. The real
+  // on-disk "installed" hashes are `installedHashes`, computed next.
+  const registrySnapshotMap = mapByTarget(installed.files);
 
   const installedHashes = await hashAllInstalled(
     options.cwd,
-    installedMap,
+    registrySnapshotMap,
   );
 
-  const plan = planUpdate(installedHashes, lockMap, registryMap);
+  const plan = planUpdate(installedHashes, lockMap, registrySnapshotMap);
 
   const applied: string[] = [];
   const preserved: string[] = [];

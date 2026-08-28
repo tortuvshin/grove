@@ -27,7 +27,7 @@ interface Props {
   /** Noun pair for count chips — singular fixes "1 projects". */
   itemNoun?: { singular: string; plural: string };
   /** Pass 1 when this grid IS the page (`/categories` index). */
-  headingLevel?: 1 | 2;
+  level?: 1 | 2;
   /** Card link builder (defaults to browse filtered by category). */
   hrefFor?: (slug: string) => string;
 }
@@ -39,11 +39,11 @@ const {
   bare = false,
   itemLabelPlural = "items",
   itemNoun = { singular: "item", plural: "items" },
-  headingLevel = 2,
+  level = 2,
   hrefFor,
 } = Astro.props;
 
-const Heading = `h${headingLevel}` as "h1" | "h2";
+const Heading = `h${level}` as "h1" | "h2";
 
 function buildHref(slug: string): string {
   if (hrefFor) return hrefFor(slug);

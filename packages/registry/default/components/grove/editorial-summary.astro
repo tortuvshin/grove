@@ -25,7 +25,7 @@ const hasAny = bestFor.length > 0 || caveats.length > 0;
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
       {bestFor.length > 0 && (
         <div>
-          <h3 class="m-0 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+          <h3 class="m-0 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-success">
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor">
               <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
             </svg>
@@ -40,7 +40,7 @@ const hasAny = bestFor.length > 0 || caveats.length > 0;
       )}
       {caveats.length > 0 && (
         <div>
-          <h3 class="m-0 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+          <h3 class="m-0 flex items-center gap-1.5 text-2xs font-semibold uppercase tracking-wider text-warning">
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor">
               <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm9 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-.25-6.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 .4 1.04l1.6.8a.75.75 0 1 0 .67-1.34l-1.17-.59V4.75z" />
             </svg>
