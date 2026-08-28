@@ -9,8 +9,13 @@
  * you found it on the home page or in the browse list. The repository
  * is reached through the card's `owner/repo` line, so this adapter
  * adds nothing to the card at all.
+ *
+ * Builds the `ProjectCardModel` from `record` internally — `record`
+ * stays this adapter's public contract (unaffected by `ProjectCard`'s
+ * presentation-only rewrite).
  */
 import type { IndexRecord } from "@grove-dev/core";
+import { buildProjectCardModel } from "@grove-dev/astro/server";
 import ProjectCard from "./project-card.astro";
 
 interface Props {
@@ -27,10 +32,11 @@ interface Props {
 
 const { record, detailHref, eager = false, class: className = "" } = Astro.props;
 
+const model = buildProjectCardModel(record);
 ---
 
 <ProjectCard
-  record={record}
+  model={model}
   href={detailHref}
   eager={eager}
   class={className}

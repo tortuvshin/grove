@@ -118,6 +118,21 @@ const {
         "",
       ].join("\n");
     };
+    // NOTE: this taxonomy/slug membership logic duplicates a concern
+    // that belongs in `@grove-dev/core` (domain/taxonomy rules, not
+    // UI), but it can't be moved into an import here. This `<script>`
+    // uses `define:vars` (see the tag above), which Astro's compiler
+    // implicitly treats as `is:inline` — the script is emitted
+    // verbatim into the page and is NOT run through Vite's bundler,
+    // so a bare-specifier `import ... from "@grove-dev/core"` would
+    // not resolve in the browser (no bundler rewrite, no import map).
+    // `define:vars` itself only hands the script JSON-serializable
+    // data (see `taxonomy`, `existingSlugs`, etc. above) — a function
+    // reference can't cross that boundary either. Moving this out
+    // would require converting the script off `is:inline`/`define:vars`
+    // to a regular bundled `<script>` that reads its props from
+    // `data-*` attributes or a JSON island, which is a larger
+    // structural change than this fix warrants.
     const validationIssues = () => {
       const issues = [];
       if (inputs.slug && slugSet.has(slugify(inputs.slug.value))) {

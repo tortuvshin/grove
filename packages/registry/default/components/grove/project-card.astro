@@ -23,91 +23,30 @@
  * **The layout is fixed.** Earlier versions let list pages opt into a
  * curated badge, a license tag, a `category · status` line and
  * labelled chip rows, so the same record rendered differently
- * depending on where a visitor found it. Those flags are now
- * deprecated no-ops, as is `secondaryLinks` — the repository is
- * reached through the `owner/repo` line rather than a separate footer
- * button. Platform support is likewise off the card: it is reference
- * detail and belongs on the record page (`RecordSidebar`).
+ * depending on where a visitor found it. Platform support is
+ * likewise off the card: it is reference detail and belongs on the
+ * record page (`RecordSidebar`).
  *
- * Data can come from a full `record` or from explicit props (adapters
- * for shapes like `CollectionEntry` pass fields directly); explicit
- * props win over record-derived values.
+ * Presentation only: this component takes a pre-built
+ * `ProjectCardModel` (see `@grove-dev/astro/server`'s
+ * `buildProjectCardModel`) and renders it — no record shapes, casts,
+ * or formatting live here. Callers that render a raw record (or a
+ * lightweight adapter shape like `CollectionEntry`) build the model
+ * themselves before reaching this component.
  *
  * Uses the package's design-system tokens plus the standard `dark:`
  * variant. Equal-height cards in the row are achieved at the grid
  * level (`CardGrid`: `grid` + `items-stretch`).
  */
-import type { IndexRecord, Resource, ProjectRecord, IndexProjectRecord } from "@grove-dev/core";
-import {
-  getOwnerAndRepoFromRepoUrl,
-  getOwnerAvatarUrl,
-  formatRelative,
-  formatStars,
-  nameInitials,
-  projectStackIds,
-  truncateWords,
-} from "@grove-dev/astro";
+import type { ProjectCardModel } from "@grove-dev/astro/server";
 import CardIcon from "./card-icon.astro";
 import Icon from "./icon.astro";
 
-type CardRecord = IndexRecord | Resource | ProjectRecord | IndexProjectRecord;
-
-interface SecondaryLink {
-  label: string;
-  href: string;
-  /** Adds target="_blank" + rel and the external-link glyph. */
-  external?: boolean;
-  /** Analytics hooks forwarded as data-event attributes. */
-  event?: string;
-  eventSource?: string;
-}
-
 interface Props {
-  /** Record to render. Optional when explicit props are passed. */
-  record?: CardRecord;
+  /** Pre-built view-model — see `buildProjectCardModel`. */
+  model: ProjectCardModel;
   /** Full detail-page URL. */
   href: string;
-  /** Optional pre-resolved logo URL. Wins over the GitHub avatar. */
-  logoUrl?: string;
-  /** Override the description (defaults to `record.description`). */
-  description?: string;
-  /** Explicit overrides for record-derived values (adapter use). */
-  name?: string;
-  slug?: string;
-  repoUrl?: string;
-  stars?: number;
-  pushedAt?: string | null;
-  license?: string | null;
-  category?: string;
-  status?: string;
-  curated?: boolean;
-  stack?: string;
-  /**
-   * @deprecated Cards render the stack, not platform support — that
-   * belongs on the record page. Accepted and ignored.
-   */
-  platforms?: string[];
-  /**
-   * @deprecated The card renders one fixed metadata set on every
-   * surface. These flags used to add a curated badge, a license tag,
-   * a `category · status` line, and labelled chip rows on list pages
-   * only, which made the same record look like a different record
-   * depending on where you found it. Accepted and ignored.
-   */
-  showCurated?: boolean;
-  /** @deprecated Ignored — see `showCurated`. */
-  showLicense?: boolean;
-  /** @deprecated Ignored — see `showCurated`. */
-  showCategoryStatus?: boolean;
-  /** @deprecated Ignored — see `showCurated`. */
-  labelledChips?: boolean;
-  /** Footer links; presence switches the root to `<article>` mode. */
-  /**
-   * @deprecated Ignored. The repository is reached by clicking the
-   * `owner/repo` line under the title, so cards no longer carry a
-   * separate footer link button.
-   */
-  secondaryLinks?: SecondaryLink[];
   /** Eager-load the avatar (above-the-fold rows). */
   eager?: boolean;
   /** Analytics data-event attributes on the card root. */
@@ -117,88 +56,37 @@ interface Props {
 }
 
 const {
-  record,
+  model,
   href,
-  logoUrl: logoUrlProp,
-  description: descriptionProp,
-  name: nameProp,
-  slug: slugProp,
-  repoUrl: repoUrlProp,
-  stars: starsProp,
-  pushedAt: pushedAtProp,
-  stack: stackProp,
   eager = false,
   event,
   eventSource,
   class: className = "",
 } = Astro.props;
 
-const isProject = record?.kind === "project";
-const name =
-  nameProp ??
-  (record
-    ? record.kind === "resource"
-      ? (record as { title: string }).title
-      : (record as { name: string }).name
-    : "");
-const slug = slugProp ?? (record as { slug?: string } | undefined)?.slug;
-const repoHref =
-  repoUrlProp ??
-  (isProject
-    ? (record as { repoUrl?: string }).repoUrl
-    : (record as { links?: { github?: string } } | undefined)?.links?.github);
+const {
+  name,
+  slug,
+  description,
+  initials,
+  avatarUrl,
+  repoHref,
+  owner,
+  repo,
+  isArticle,
+  stars,
+  starsLabel,
+  hasStars,
+  pushedAt,
+  updatedLabel,
+  hasUpdated,
+  visibleStacks,
+  stackOverflow,
+  hasStacks,
+} = model;
 
-const { owner, repo } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
-const avatarUrl =
-  logoUrlProp ??
-  (isProject ? (record as { logoUrl?: string }).logoUrl : undefined) ??
-  getOwnerAvatarUrl(owner, 80);
-
-const initials = nameInitials(name);
-
-// Trimmed on a word boundary before the two-line clamp gets to it: a
-// CSS clamp cuts at whatever character the box runs out of room on,
-// which is what produced "…and multi-", "…and retrieval", "…an" across
-// a grid.
-const description = truncateWords(
-  descriptionProp ?? (record as { description?: string } | undefined)?.description ?? "",
-);
-
-const stars =
-  starsProp ?? (isProject ? (record as { github?: { stars?: number } }).github?.stars : undefined);
-const pushedAt =
-  pushedAtProp ??
-  (isProject
-    ? (record as { github?: { pushedAt?: string | null } }).github?.pushedAt
-    : (record as { publishedAt?: string | null } | undefined)?.publishedAt);
-const stackIds = stackProp
-  ? [stackProp]
-  : isProject
-    ? projectStackIds(record as { stack?: string; stacks?: string[] })
-    : [];
-
-const starsLabel = formatStars(stars);
-const updatedLabel = formatRelative(pushedAt);
-
-const hasStars = starsLabel !== null && typeof stars === "number" && stars > 0;
-const hasUpdated = Boolean(pushedAt);
-
-// `<a>`-in-`<a>` is invalid HTML, and the `owner/repo` line is its own
-// link to the repository — so any card that shows one renders as an
-// `<article>` whose title link is stretched over the whole card.
-const isArticle = Boolean(repoHref && owner && repo);
 const Root = isArticle ? "article" : "a";
 const rootAttrs = isArticle ? {} : { href, "aria-label": `Open ${name}` };
-
-// The card's brand strip shows the record's STACK, not its platforms.
-// Stack is what distinguishes one card from its neighbours in a list;
-// platform support is reference detail, and it belongs on the record
-// page (`RecordSidebar`) where there is room to label it. Marks come
-// from the shared `Icon` component, which falls back to initials when
-// an asset is missing.
-const visibleStacks = stackIds.slice(0, 4);
-const stackOverflow = stackIds.length - visibleStacks.length;
-const hasStacks = visibleStacks.length > 0;
 ---
 
 <Root
@@ -303,7 +191,7 @@ const hasStacks = visibleStacks.length > 0;
     <div class="flex min-w-0 shrink-0 items-center gap-3 text-ink-500 dark:text-ink-400">
       {hasStars && (
         <span class="inline-flex items-center gap-1" title={`${stars ?? 0} stars on GitHub`}>
-          <span class="inline-flex text-amber-500"><CardIcon name="star" /></span>
+          <span class="inline-flex text-warning"><CardIcon name="star" /></span>
           <span class="font-mono">{starsLabel}</span>
         </span>
       )}

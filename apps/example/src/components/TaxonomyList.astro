@@ -19,16 +19,11 @@
  */
 import CardGrid from "../components/grove/card-grid.astro";
 import ProjectCard from "../components/grove/project-card.astro";
-import { itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { buildProjectCardModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 import { formatCount } from "@grove-dev/core";
+import type { IndexRecord } from "@grove-dev/core";
 
-interface TaxonomyRecord {
-  slug: string;
-  name?: string;
-  title?: string;
-  description?: string;
-  repoUrl?: string;
-}
+type TaxonomyRecord = IndexRecord;
 
 interface Props {
   /** URL slug from `Astro.params`. Echoed in the back link. */
@@ -66,7 +61,6 @@ const {
 
 const count = records.length;
 const hrefPrefix = backHref.replace(/\/$/, "");
-type CardRecord = Parameters<typeof ProjectCard>[0]["record"];
 ---
 
 <section class="mx-auto w-full max-w-container px-5 py-12 sm:px-7 sm:py-16">
@@ -88,10 +82,8 @@ type CardRecord = Parameters<typeof ProjectCard>[0]["record"];
         {records.map((record, i) => (
           <li class="m-0 p-0">
             <ProjectCard
-              record={record as CardRecord}
+              model={buildProjectCardModel(record)}
               href={`${hrefPrefix}/${record.slug}`}
-              showCurated
-              showLicense
               eager={i < 3}
             />
           </li>

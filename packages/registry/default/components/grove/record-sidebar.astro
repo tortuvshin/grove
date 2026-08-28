@@ -63,6 +63,9 @@ const {
   totalLanguageBytes,
   readingMetrics,
   record,
+  firstCommitYear,
+  lastFetchedLabel,
+  reviewedAtLabel,
 } = detail;
 
 // Visibility helpers for individual rows inside the Activity card.
@@ -156,11 +159,11 @@ function row(label: string, value: unknown) {
             <dd class="font-mono text-ink-900 dark:text-ink-100">{repo!.default_branch}</dd>
           </div>
         )}
-        {row("First commit", repo?.created_at ? new Date(String(repo!.created_at)).getUTCFullYear() : null) && (
+        {row("First commit", firstCommitYear) && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">First commit</dt>
             <dd class="text-ink-900 dark:text-ink-100">
-              <time datetime={String(repo!.created_at)}>{new Date(String(repo!.created_at)).getUTCFullYear()}</time>
+              <time datetime={String(repo!.created_at)}>{firstCommitYear}</time>
             </dd>
           </div>
         )}
@@ -204,11 +207,11 @@ function row(label: string, value: unknown) {
             <dd class="text-ink-900 dark:text-ink-100">{pushedLabel}</dd>
           </div>
         )}
-        {repo?.updated_at && (
+        {repo?.updated_at && lastFetchedLabel && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">Last fetched</dt>
             <dd class="text-ink-900 dark:text-ink-100">
-              <time datetime={String(repo.updated_at)}>{new Date(String(repo.updated_at)).toLocaleDateString()}</time>
+              <time datetime={String(repo.updated_at)}>{lastFetchedLabel}</time>
             </dd>
           </div>
         )}
@@ -231,7 +234,7 @@ function row(label: string, value: unknown) {
         {isArchived && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">Status</dt>
-            <dd class="text-amber-700 dark:text-amber-400">Archived</dd>
+            <dd class="text-warning">Archived</dd>
           </div>
         )}
         {repo?.homepage && (
@@ -364,7 +367,7 @@ function row(label: string, value: unknown) {
       <p class="m-0 leading-relaxed">
         Reviewed by {record.curation?.reviewedBy ?? "grove"}
         on <time datetime={String(record.curation?.reviewedAt)}>
-          {record.curation?.reviewedAt ? new Date(String(record.curation.reviewedAt)).toLocaleDateString() : "—"}
+          {reviewedAtLabel ?? "—"}
         </time>.
       </p>
       {detail.collectionMembership && detail.collectionMembership.length > 0 && (

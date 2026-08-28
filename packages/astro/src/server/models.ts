@@ -8,9 +8,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type {
   IndexFilters,
+  IndexProjectRecord,
   IndexRecord,
   ProjectRecord,
   ReadingMetrics,
+  Resource,
   TocEntry,
 } from "@grove-dev/core";
 import {
@@ -31,6 +33,7 @@ import {
   hasAnyFilter,
   hrefForClearedFilters,
   hrefForFilters,
+  nameInitials,
   pagePathHref,
   paginate,
   projectStackIds,
@@ -38,6 +41,7 @@ import {
   readContentFile,
   statusDisplay,
   totalPages,
+  truncateWords,
 } from "@grove-dev/core";
 import {
   entityBySlug,
@@ -615,6 +619,19 @@ export function getRecordDetailModel(
   const language = github?.language ?? null;
   const licenseSpdx = github?.license?.spdx_id ?? null;
   const pushedAt = github?.pushed_at ?? null;
+  // Pre-formatted date fields for the record sidebar — computed once
+  // here so the template never does its own `new Date(...)` business
+  // logic (only the raw ISO string for a `<time datetime>` attribute
+  // is still read directly off the record in the template).
+  const firstCommitYear = github?.created_at
+    ? new Date(String(github.created_at)).getUTCFullYear()
+    : null;
+  const lastFetchedLabel = github?.updated_at
+    ? new Date(String(github.updated_at)).toLocaleDateString()
+    : null;
+  const reviewedAtLabel = record.curation?.reviewedAt
+    ? new Date(String(record.curation.reviewedAt)).toLocaleDateString()
+    : null;
   const isArchived = !!github?.archived;
   const isDisabled = !!github?.disabled;
   const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
@@ -766,6 +783,9 @@ export function getRecordDetailModel(
     pushedAt,
     starsLabel: formatStars(stars),
     pushedLabel: formatRelative(pushedAt),
+    firstCommitYear,
+    lastFetchedLabel,
+    reviewedAtLabel,
     ownerRepo,
     avatarSrc,
     initials: name.replace(/[^a-z0-9]/gi, "").slice(0, 2).toUpperCase(),
@@ -1156,6 +1176,162 @@ export function getAboutPageSeo(site: DirectorySiteConfig): PageSeo {
         { path: "about/", name: "About" },
       ]),
     ],
+  };
+}
+
+// ── ProjectCard view-model ──────────────────────────────────────────
+
+/**
+ * The raw shapes `ProjectCard` has historically been asked to render:
+ * a slim index record (browse/home lists), a full `Resource` (a
+ * project or resource sidecar), a full `ProjectRecord`, or the
+ * index-projected `IndexProjectRecord`. `buildProjectCardModel`
+ * absorbs all four so the component itself never branches on `kind`.
+ */
+export type CardRecord = IndexRecord | Resource | ProjectRecord | IndexProjectRecord;
+
+export interface ProjectCardModel {
+  name: string;
+  slug?: string;
+  description: string;
+  initials: string;
+  avatarUrl?: string;
+  repoHref?: string;
+  owner?: string;
+  repo?: string;
+  /** True when repoHref+owner+repo all resolved — the card renders
+   *  as an `<article>` with a stretched title link. */
+  isArticle: boolean;
+  stars?: number;
+  starsLabel: string | null;
+  hasStars: boolean;
+  pushedAt?: string | null;
+  updatedLabel: string | null;
+  hasUpdated: boolean;
+  stackIds: string[];
+  /** First 4 stack ids — what the card footer actually renders. */
+  visibleStacks: string[];
+  /** `stackIds.length - visibleStacks.length`. */
+  stackOverflow: number;
+  hasStacks: boolean;
+}
+
+/** Explicit overrides for record-derived `ProjectCardModel` fields.
+ *  Adapters that only have a lightweight shape (e.g. `CollectionEntry`)
+ *  pass these instead of a `record`; explicit values always win over
+ *  whatever the record would have derived. */
+export interface ProjectCardModelOverrides {
+  logoUrl?: string;
+  description?: string;
+  name?: string;
+  slug?: string;
+  repoUrl?: string;
+  stars?: number;
+  pushedAt?: string | null;
+  stack?: string;
+}
+
+/**
+ * Build the presentation-ready model for `ProjectCard` — every
+ * branch/cast/format call that used to live in the component's
+ * frontmatter, extracted verbatim. Registry UI reads `model.*` and
+ * does no derivation of its own (see `v1-architecture.md` §7-14).
+ */
+export function buildProjectCardModel(
+  record?: CardRecord,
+  overrides: ProjectCardModelOverrides = {},
+): ProjectCardModel {
+  const {
+    logoUrl: logoUrlProp,
+    description: descriptionProp,
+    name: nameProp,
+    slug: slugProp,
+    repoUrl: repoUrlProp,
+    stars: starsProp,
+    pushedAt: pushedAtProp,
+    stack: stackProp,
+  } = overrides;
+
+  const isProject = record?.kind === "project";
+  const name =
+    nameProp ??
+    (record
+      ? record.kind === "resource"
+        ? (record as { title: string }).title
+        : (record as { name: string }).name
+      : "");
+  const slug = slugProp ?? (record as { slug?: string } | undefined)?.slug;
+  const repoHref =
+    repoUrlProp ??
+    (isProject
+      ? (record as { repoUrl?: string }).repoUrl
+      : (record as { links?: { github?: string } } | undefined)?.links?.github);
+
+  const { owner, repo } = getOwnerAndRepoFromRepoUrl(repoHref ?? "");
+  const avatarUrl =
+    logoUrlProp ??
+    (isProject ? (record as { logoUrl?: string }).logoUrl : undefined) ??
+    getOwnerAvatarUrl(owner, 80) ??
+    undefined;
+
+  const initials = nameInitials(name);
+
+  // Trimmed on a word boundary before the two-line clamp gets to it: a
+  // CSS clamp cuts at whatever character the box runs out of room on,
+  // which is what produced "…and multi-", "…and retrieval", "…an" across
+  // a grid.
+  const description = truncateWords(
+    descriptionProp ?? (record as { description?: string } | undefined)?.description ?? "",
+  );
+
+  const stars =
+    starsProp ?? (isProject ? (record as { github?: { stars?: number } }).github?.stars : undefined);
+  const pushedAt =
+    pushedAtProp ??
+    (isProject
+      ? (record as { github?: { pushedAt?: string | null } }).github?.pushedAt
+      : (record as { publishedAt?: string | null } | undefined)?.publishedAt);
+  const stackIds = stackProp
+    ? [stackProp]
+    : isProject
+      ? projectStackIds(record as { stack?: string; stacks?: string[] })
+      : [];
+
+  const starsLabel = formatStars(stars);
+  const updatedLabel = formatRelative(pushedAt);
+
+  const hasStars = starsLabel !== null && typeof stars === "number" && stars > 0;
+  const hasUpdated = Boolean(pushedAt);
+
+  // `<a>`-in-`<a>` is invalid HTML, and the `owner/repo` line is its own
+  // link to the repository — so any card that shows one renders as an
+  // `<article>` whose title link is stretched over the whole card.
+  const isArticle = Boolean(repoHref && owner && repo);
+
+  const visibleStacks = stackIds.slice(0, 4);
+  const stackOverflow = stackIds.length - visibleStacks.length;
+  const hasStacks = visibleStacks.length > 0;
+
+  return {
+    name,
+    slug,
+    description,
+    initials,
+    avatarUrl,
+    repoHref,
+    owner: owner ?? undefined,
+    repo: repo ?? undefined,
+    isArticle,
+    stars,
+    starsLabel,
+    hasStars,
+    pushedAt,
+    updatedLabel,
+    hasUpdated,
+    stackIds,
+    visibleStacks,
+    stackOverflow,
+    hasStacks,
   };
 }
 

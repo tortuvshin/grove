@@ -24,10 +24,12 @@
  * homepage never collapses to a blank section.
  */
 import type { IndexRecord } from "@grove-dev/core";
+import { buildProjectCardModel } from "@grove-dev/astro/server";
 import CardGrid from "./card-grid.astro";
 import ProjectCard from "./project-card.astro";
-import Container from "../../layouts/Container.astro";
+import Container from "../../layouts/container.astro";
 import SectionHeader from "../../layouts/section-header.astro";
+import EmptyState from "../ui/empty-state.astro";
 
 interface Props {
   /** Used as the section id (so deep links work) and a stable key. */
@@ -92,9 +94,7 @@ const visible = items.slice(0, limit);
     </div>
 
     {visible.length === 0 ? (
-      <p class="m-0 text-sm text-ink-500 dark:text-ink-400">
-        {emptyLabel}
-      </p>
+      <EmptyState title={emptyLabel} />
     ) : (
       <CardGrid>
         {visible.map((item) => {
@@ -107,9 +107,10 @@ const visible = items.slice(0, limit);
           const fallbackHref = `${base}/${item.slug}`;
           const finalHref =
             typeof hrefFor === "function" ? hrefFor(item) : fallbackHref;
+          const model = buildProjectCardModel(item);
           return (
             <li class="m-0 p-0">
-              <ProjectCard record={item} href={finalHref} />
+              <ProjectCard model={model} href={finalHref} />
             </li>
           );
         })}
