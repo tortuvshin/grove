@@ -31,12 +31,14 @@ import RefinePanel from "../components/grove/refine-panel.astro";
 import IndexRow from "../components/grove/index-row.astro";
 import Pagination from "../components/grove/pagination.astro";
 import DirectoryIndexClient from "../components/grove/directory-index-client.astro";
+import SmartLensTabs from "../components/grove/smart-lens-tabs.astro";
 import { SORT_OPTIONS, sortDisplay } from "@grove-dev/astro";
 import { formatCount } from "@grove-dev/core";
-import { buttonClass, chipClass } from "../lib/classnames.ts";
+import { chipClass } from "../lib/classnames.ts";
 import PageHeader from "../components/ui/page-header.astro";
 import SearchField from "../components/ui/search-field.astro";
 import FilterDrawer from "../components/ui/filter-drawer.astro";
+import Button from "../components/ui/button.astro";
 
 interface Props {
   /** 1-based page this route renders. */
@@ -87,6 +89,17 @@ const description = seo.description;
         eyebrow={slug}
         title={`Browse ${slug}`}
         description={`Search, filter, and explore ${formatCount(total, { singular: itemLabel(), plural: itemLabelPlural() })} in this directory.`}
+      />
+
+      {/* Curated views. Real links (not a JS-driven control) — the
+          same server-and-client filter pipeline (@grove-dev/core's
+          filtersFromSearchParams/filterRecords) already understands
+          `?lens=`, so this works with JS disabled too. */}
+      <SmartLensTabs
+        currentParams={Astro.url.searchParams}
+        pathPrefix={`/${slug}`}
+        lensIds={["all", "hot", "new", "mature"]}
+        class="mt-6"
       />
 
       {/* Row 1 — search and sort. Search filters as you type (see
@@ -205,7 +218,7 @@ const description = seo.description;
         <p class="m-0 text-sm font-medium text-ink-700 dark:text-ink-200">
           {`No ${itemLabelPlural()} match these filters.`}
         </p>
-        <a href={clearFiltersHref} class={buttonClass("secondary", "sm", "mt-4")}>Clear filters</a>
+        <Button href={clearFiltersHref} variant="secondary" size="sm" class="mt-4">Clear filters</Button>
       </div>
       {/* Plain div wrapper — Pagination renders its own
           <nav aria-label="Pagination">, so a nav here would nest two
@@ -225,12 +238,9 @@ const description = seo.description;
         <p class="m-0 max-w-2xl text-sm text-ink-500 dark:text-ink-400">
           {`Open a pull request with a YAML file. We review every submission against the bar — no marketing, no tutorials.`}
         </p>
-        <a
-          href="/submit"
-          class={buttonClass("primary", "sm", "mt-2")}
-        >
+        <Button href="/submit" variant="primary" size="sm" class="mt-2">
           {`Submit ${itemLabel()}`}
-        </a>
+        </Button>
 
       </div>
     </div>

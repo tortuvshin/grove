@@ -22,6 +22,7 @@
 import { licenseDisplay } from "@grove-dev/core";
 import type { RecordDetailModel } from "@grove-dev/astro/server";
 import { taxonomyLabel } from "@grove-dev/astro/server";
+import Badge from "../ui/badge.astro";
 import Icon from "./icon.astro";
 import LanguageBreakdown from "./language-breakdown.astro";
 
@@ -234,7 +235,7 @@ function row(label: string, value: unknown) {
         {isArchived && (
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">Status</dt>
-            <dd class="text-warning">Archived</dd>
+            <dd><Badge variant="warning">Archived</Badge></dd>
           </div>
         )}
         {repo?.homepage && (

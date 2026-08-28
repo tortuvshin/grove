@@ -131,8 +131,8 @@
     },
     {
       "path": "components/grove/record-sidebar.astro",
-      "hash": "sha256-26667f8d0a7e1b2c952133d6b1229e34c26b8f1e373748c0754d8f81fcbd042b",
-      "bytes": 16585
+      "hash": "sha256-cd35f7b84c3f0e52929ee0e323387cfa557e19fa564df3e809940e69268accbc",
+      "bytes": 16636
     },
     {
       "path": "components/grove/refine-panel.astro",
