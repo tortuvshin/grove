@@ -12,6 +12,7 @@ export const SIDEBAR = [
             { label: 'Quickstart', slug: 'start-here/quickstart' },
             { label: 'Why Grove', slug: 'start-here/why-grove' },
             { label: 'Files are canonical', slug: 'concepts/files-canonical' },
+            { label: 'UI registry and consumer-owned source', slug: 'concepts/registry' },
         ],
     },
     {

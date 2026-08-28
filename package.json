@@ -15,6 +15,8 @@
     "docs:check": "node scripts/check-docs-contract.mjs && node scripts/check-starlight-sidebar.mjs --check-orphans && node scripts/check-starlight-internal-links.mjs",
     "icons:sync": "node scripts/sync-icons.mjs",
     "icons:check": "node scripts/sync-icons.mjs --check",
+    "inventory": "node scripts/build-inventory.mjs",
+    "inventory:check": "node scripts/build-inventory.mjs --check",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
