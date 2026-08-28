@@ -1,0 +1,25 @@
+packages/registry/default/lib/classnames.test.ts
+  s_134e5b252de84f::t_596f9fd030a4cb 4
+  s_134e5b252de84f::t_c2a1e203b3858d 35-43
+  s_134e5b252de84f::t_a36a7b58548f79 45
+apps/example/src/lib/classnames.test.ts
+  s_134e5b252de84f::t_e8bbb75ee44bfc 4,35-43,45
+vitest.config.ts
+  s_134e5b252de84f::t_7c6ed845f1f18c 54-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "5fafcee0d2a479027381aec9fd811337dcd84349",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
