@@ -28,7 +28,7 @@ in Phase 4 of the plan. This table is the rename map.
 | `packages/astro/src/components/CollectionRow.astro` | domain-ui | 82 |  |  | `registry/default/components/grove/collection-row.astro` |
 | `packages/astro/src/components/CollectionTeaser.astro` | domain-ui | 48 |  |  | `registry/default/components/grove/collection-teaser.astro` |
 | `packages/astro/src/components/ContributorsGrid.astro` | domain-ui | 144 |  |  | `registry/default/components/grove/contributors-grid.astro` |
-| `packages/astro/src/components/DirectoryIndexClient.astro` | composition | 511 | ✓ |  | `registry/default/components/grove/directory-index-client.astro` |
+| `packages/astro/src/components/DirectoryIndexClient.astro` | composition | 496 | ✓ |  | `registry/default/components/grove/directory-index-client.astro` |
 | `packages/astro/src/components/EditorialSummary.astro` | domain-ui | 58 |  |  | `registry/default/components/grove/editorial-summary.astro` |
 | `packages/astro/src/components/FilterGroupMenu.astro` | domain-ui | 70 |  |  | `registry/default/components/grove/filter-group-menu.astro` |
 | `packages/astro/src/components/FilterOptions.astro` | domain-ui | 50 |  |  | `registry/default/components/grove/filter-options.astro` |
@@ -45,11 +45,11 @@ in Phase 4 of the plan. This table is the rename map.
 | `packages/astro/src/components/RecordHeader.astro` | domain-ui | 221 |  |  | `registry/default/components/grove/record-header.astro` |
 | `packages/astro/src/components/RecordSection.astro` | composition | 129 | ✓ |  | `registry/default/components/grove/record-section.astro` |
 | `packages/astro/src/components/RecordSidebar.astro` | domain-ui | 387 |  |  | `registry/default/components/grove/record-sidebar.astro` |
-| `packages/astro/src/components/RefinePanel.astro` | composition | 169 | ✓ |  | `registry/default/components/grove/refine-panel.astro` |
+| `packages/astro/src/components/RefinePanel.astro` | composition | 170 | ✓ |  | `registry/default/components/grove/refine-panel.astro` |
 | `packages/astro/src/components/SmartLensTabs.astro` | domain-ui | 82 |  |  | `registry/default/components/grove/smart-lens-tabs.astro` |
 | `packages/astro/src/components/StackGrid.astro` | composition | 152 | ✓ |  | `registry/default/components/grove/stack-grid.astro` |
 | `packages/astro/src/components/StackPlatformChips.astro` | domain-ui | 74 |  |  | `registry/default/components/grove/stack-platform-chips.astro` |
-| `packages/astro/src/components/SubmissionClient.astro` | composition | 255 | ✓ |  | `registry/default/components/grove/submission-client.astro` |
+| `packages/astro/src/components/SubmissionClient.astro` | composition | 250 | ✓ |  | `registry/default/components/grove/submission-client.astro` |
 | `packages/astro/src/components/TableOfContents.astro` | domain-ui | 140 |  |  | `registry/default/components/grove/table-of-contents.astro` |
 | `packages/astro/src/components/WhyThisExists.astro` | domain-ui | 117 |  |  | `registry/default/components/grove/why-this-exists.astro` |
 | `packages/astro/src/layouts/BaseLayout.astro` | layout | 416 |  |  | `registry/default/layouts/base-layout.astro` |

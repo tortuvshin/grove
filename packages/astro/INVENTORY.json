@@ -90,8 +90,8 @@
       "kind": "composition",
       "hasBusinessLogic": true,
       "forbiddenImports": [],
-      "hash": "eda791b0a7d37966cc411b7d2988f4e629e9adccb7c983f46b24903e254b4c49",
-      "lines": 511,
+      "hash": "2d9a16ca64462b5bc463c38834dc6c79bb79ead21d4e7073641fdb8e69a3df10",
+      "lines": 496,
       "target": "registry/default/components/grove/directory-index-client.astro"
     },
     {
@@ -243,8 +243,8 @@
       "kind": "composition",
       "hasBusinessLogic": true,
       "forbiddenImports": [],
-      "hash": "42b327dc579fae54b0ee29527fdeb831146a1a5c43208e5d1299d1e200da238d",
-      "lines": 169,
+      "hash": "7575980efd4cac89cf66e592a6fb7d544ef129e74ae94c836b836fb2edaf2f71",
+      "lines": 170,
       "target": "registry/default/components/grove/refine-panel.astro"
     },
     {
@@ -279,8 +279,8 @@
       "kind": "composition",
       "hasBusinessLogic": true,
       "forbiddenImports": [],
-      "hash": "d91394acebc5cbb43979c6be6468c03e63d66245d427e543c754e57a8000630c",
-      "lines": 255,
+      "hash": "782e6d94227b84d4000a5c8288220e3300b7a17c62b3c025344600e6dce7517d",
+      "lines": 250,
       "target": "registry/default/components/grove/submission-client.astro"
     },
     {
