@@ -1,0 +1,96 @@
+apps/example/src/components/grove/original-collection.astro
+  s_134e5b252de84f::t_11e85ab1158379 14,74,80,87
+packages/cli/src/update.ts
+  s_134e5b252de84f::t_dbf18f7eeeb7e1 81-88,92,95
+apps/example/src/components/grove/card-icon.astro
+  s_134e5b252de84f::t_c17937b8d03931 9
+apps/example/src/components/grove/hero.astro
+  s_134e5b252de84f::t_c28a5a257fec01 16
+  s_134e5b252de84f::t_ed63b525f2e23e 33,125,129
+packages/registry/default/components/grove/editorial-summary.astro
+  s_134e5b252de84f::t_a27a61bdaa583e 43
+  s_134e5b252de84f::t_1b77a7692da100 28
+packages/registry/default/components/grove/stack-grid.astro
+  s_134e5b252de84f::t_7d566fd7639fad 138,140-141
+  s_134e5b252de84f::t_590adbcaf51870 56,60
+  s_134e5b252de84f::t_3596df9f3b3bf6 39
+apps/example/src/components/grove/editorial-summary.astro
+  s_134e5b252de84f::t_c17937b8d03931 28,43
+packages/registry/default/components/grove/card-icon.astro
+  s_134e5b252de84f::t_8342ac195af8c2 9
+packages/registry/default/components/grove/collection-index.astro
+  s_134e5b252de84f::t_c28a5a257fec01 21
+  s_134e5b252de84f::t_0af853c766c5d4 43
+  s_134e5b252de84f::t_b2f4f2df031c4a 59
+  s_134e5b252de84f::t_a5006137d80cc9 71
+apps/example/src/components/grove/category-grid.astro
+  s_134e5b252de84f::t_c17937b8d03931 30,42,46
+packages/registry/default/components/grove/category-grid.astro
+  s_134e5b252de84f::t_1526887805549c 42,46
+  s_134e5b252de84f::t_6ff8e106c19747 30
+apps/example/src/components/grove/directory-index-client.astro
+  s_134e5b252de84f::t_c17937b8d03931 36,76
+apps/example/src/components/grove/contributors-grid.astro
+  s_134e5b252de84f::t_c17937b8d03931 15,90
+  s_134e5b252de84f::t_11e85ab1158379 14,16,69,125
+apps/docs/src/content/docs/customize/components.md
+  s_134e5b252de84f::t_c5f89862536f4f 12,21
+packages/registry/default/components/grove/hero.astro
+  s_134e5b252de84f::t_c28a5a257fec01 16
+  s_134e5b252de84f::t_f2d5057f9e325c 33
+  s_134e5b252de84f::t_0f143736ad21e8 125,129
+apps/example/src/pages/collections/index.astro
+  s_134e5b252de84f::t_eda4fc17f3fe07 31
+apps/example/src/pages/stacks/index.astro
+  s_134e5b252de84f::t_141e944d47c7ac 32
+apps/example/src/pages/categories/index.astro
+  s_134e5b252de84f::t_ce84f2920cf320 31
+apps/example/src/components/grove/collection-index.astro
+  s_134e5b252de84f::t_c28a5a257fec01 21
+  s_134e5b252de84f::t_c17937b8d03931 43,59,71
+apps/example/src/components/grove/collection-page.astro
+  s_134e5b252de84f::t_c17937b8d03931 40,53,65
+  s_134e5b252de84f::t_c28a5a257fec01 19
+packages/registry/default/registry.lock.json
+  s_134e5b252de84f::t_916721c5fd5ae1 104-105,134-135,154-155,179-180,259-260
+  s_134e5b252de84f::t_5ab756c7636b60 14-15,19-20,29-30,34-35,49-50,54-55,59-60,129-130,149-150,219-220
+  s_134e5b252de84f::t_2b44fd3bb2fea7 5,79-80,234-235
+  s_134e5b252de84f::t_2fda14589356d3 39-40,89-90,119-120
+packages/registry/default/components/grove/directory-index-client.astro
+  s_134e5b252de84f::t_a40d07db3966c2 36
+  s_134e5b252de84f::t_7cc9b174f52124 76
+apps/example/src/components/grove/stack-grid.astro
+  s_134e5b252de84f::t_c17937b8d03931 39,56,60,138,140-141
+packages/registry/default/components/grove/contributors-grid.astro
+  s_134e5b252de84f::t_c9f3da79f38aa4 125
+  s_134e5b252de84f::t_799099f360c389 15
+  s_134e5b252de84f::t_81bd356d76c203 69
+  s_134e5b252de84f::t_f4c06cc817c25a 90
+  s_134e5b252de84f::t_bb508360a40b8d 14,16
+packages/registry/default/components/grove/collection-page.astro
+  s_134e5b252de84f::t_aad0c1a28110e0 65
+  s_134e5b252de84f::t_0ea262ea27a0e5 53
+  s_134e5b252de84f::t_c28a5a257fec01 19
+  s_134e5b252de84f::t_3ebea143e5e5ac 40
+packages/registry/default/components/grove/original-collection.astro
+  s_134e5b252de84f::t_c1a283daf7bea3 14
+  s_134e5b252de84f::t_cebd6929b3e108 87
+  s_134e5b252de84f::t_6c6ccf861da4f5 80
+  s_134e5b252de84f::t_05e2470e61f57d 74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "732e3c670c0d231e724101ba14d6ac02342b0e1c",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
