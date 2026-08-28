@@ -1,0 +1,29 @@
+apps/docs/src/content/docs/getting-started/scaffold.mdx
+  s_134e5b252de84f::t_ea9337cccb5c00 95,98
+  s_134e5b252de84f::t_1f39d30e759d72 108-117,119,122-124,127-128,133-134,136-137,142-143,145-146
+  s_134e5b252de84f::t_2c77dbd9588b25 11
+  s_134e5b252de84f::t_fd264490394224 43
+packages/cli/src/init.ts
+  s_134e5b252de84f::t_3de26d21a99278 179-207
+  s_134e5b252de84f::t_9b9ddd54ac9db6 117-126,128-134,140-145
+  s_134e5b252de84f::t_66e64ea4c7c1ef 5,7-16,22-27
+  s_134e5b252de84f::t_7a4af94e025c43 208
+packages/cli/src/init.test.ts
+  s_134e5b252de84f::t_19d771bf36f38a 30-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "44ff7168f03d45972bde8191a9598bf06aaf9e0c",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
