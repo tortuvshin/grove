@@ -1,7 +1,7 @@
 {
   "$schema": "https://grove.dev/schemas/registry.json",
   "name": "@grove/default",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Grove's default scaffold — a complete directory site with home, browse, record detail, taxonomy, collections, submit, and about pages. Installed by `grove init` and updated by `grove update`.",
   "type": "registry:scaffold",
   "dependencies": [

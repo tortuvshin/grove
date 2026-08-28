@@ -1,8 +1,8 @@
 {
   "scaffold": "@grove/default",
-  "scaffoldVersion": "0.1.0",
+  "scaffoldVersion": "1.0.0",
   "builtAt": "2026-08-28",
-  "fileCount": 47,
+  "fileCount": 53,
   "files": [
     {
       "path": "components/grove/card-grid.astro",
@@ -26,13 +26,13 @@
     },
     {
       "path": "components/grove/collection-index.astro",
-      "hash": "sha256-f1eae3e23b7acd35dfc43f88cfd9a97b2eae2f32d26f34757574f6aa58c58e68",
-      "bytes": 3394
+      "hash": "sha256-f2e79f6f7fecb508c716fd1223a34327b12e5f6f0b44b3d88d62dc29e3d142f9",
+      "bytes": 3401
     },
     {
       "path": "components/grove/collection-page.astro",
-      "hash": "sha256-d5f515f465288d19bb47f828458489a31d1d66616786288580d0635e4c18976e",
-      "bytes": 4765
+      "hash": "sha256-b7b1c8305a217525cd4eb3fc0694b50b0d0e6ebfdb8636a78f2d82c2ea009429",
+      "bytes": 4772
     },
     {
       "path": "components/grove/collection-row.astro",
@@ -41,8 +41,8 @@
     },
     {
       "path": "components/grove/collection-teaser.astro",
-      "hash": "sha256-59cf534cfd299850fe4c5b5fb2502d0facd923c4c052da32d6ab2c0029b0e73d",
-      "bytes": 1272
+      "hash": "sha256-a084f8d375d2d9cbaf4668e0790fe8a447db3e34e04dd171d584fc39f44a72f3",
+      "bytes": 1271
     },
     {
       "path": "components/grove/contributors-grid.astro",
@@ -51,8 +51,8 @@
     },
     {
       "path": "components/grove/directory-index-client.astro",
-      "hash": "sha256-2d9a16ca64462b5bc463c38834dc6c79bb79ead21d4e7073641fdb8e69a3df10",
-      "bytes": 22192
+      "hash": "sha256-bfffea9b5b22a618dfbb9bbf2e9a0b4a0c6e1b619352e04384fc0fd9b8ef54e4",
+      "bytes": 22200
     },
     {
       "path": "components/grove/editorial-summary.astro",
@@ -61,8 +61,8 @@
     },
     {
       "path": "components/grove/filter-group-menu.astro",
-      "hash": "sha256-7fed6b74aa7dcbef4489a156668dd030ed2f6cf7b68b9a26551b9410e3b36cca",
-      "bytes": 2543
+      "hash": "sha256-51290f5eee6779ea5cd121a709d74526794493f085ac57cd02f008ee765a7ad2",
+      "bytes": 2551
     },
     {
       "path": "components/grove/filter-options.astro",
@@ -71,18 +71,18 @@
     },
     {
       "path": "components/grove/final-cta.astro",
-      "hash": "sha256-cb46bb0af121b690107c5b9eaee8fa227501a33ffdd4ba24f234011f3896fb06",
-      "bytes": 1711
+      "hash": "sha256-21e08e1c691c9ef2babcc51dcafb78989b67643f5755eeafc113ac374f24feb1",
+      "bytes": 1719
     },
     {
       "path": "components/grove/hero.astro",
-      "hash": "sha256-4909c1aa8e475e4b23b9c88535d437d8d70030d8c2457ac594b6158bc5489be3",
-      "bytes": 9915
+      "hash": "sha256-7698935449c0598b3c522f2cd2663cc1d534eae02f4ee833266ee08b2271bdcf",
+      "bytes": 9920
     },
     {
       "path": "components/grove/icon.astro",
-      "hash": "sha256-ca268af010f794d0a31e7f3ac1e217f4c30fa50899493ede0f71587ae86cca52",
-      "bytes": 6746
+      "hash": "sha256-17977f35f64c85c16488599f551a3f1c4e268687838bda049d6e5658e0fd6e82",
+      "bytes": 6758
     },
     {
       "path": "components/grove/index-row.astro",
@@ -96,18 +96,18 @@
     },
     {
       "path": "components/grove/markdown-body.astro",
-      "hash": "sha256-fc48c0840608042ddd2a3def2514a6d354d942c83dbd406000a8c8a1021968f8",
-      "bytes": 1233
+      "hash": "sha256-48035c684fc2068e43d7a11b05c8915d62b2c596cb3218703a1fce56571af052",
+      "bytes": 1234
     },
     {
       "path": "components/grove/original-collection.astro",
-      "hash": "sha256-0862454c8019a080448882b9e67665cfcf7151ff5a79200956c678e01e6a4797",
-      "bytes": 3747
+      "hash": "sha256-b16b58f4c0443cd3147e9de50b1d452ef50e9efd55b77239b724d22ee180270b",
+      "bytes": 3755
     },
     {
       "path": "components/grove/pagination.astro",
-      "hash": "sha256-96a46478c07eca2e9b72ec9bd5ddf39e0854d46a2441c8f625623d3cec60ec82",
-      "bytes": 1423
+      "hash": "sha256-51242a19b90141e2c89666d9e3f365b256aeb437c49696312f8276de7c4d8619",
+      "bytes": 1431
     },
     {
       "path": "components/grove/powered-by.astro",
@@ -121,28 +121,28 @@
     },
     {
       "path": "components/grove/record-header.astro",
-      "hash": "sha256-1357a80a4f40e1d0f9de5290bb484c5d8b1bea25da538c264413ba0f88c1273c",
-      "bytes": 8121
+      "hash": "sha256-efb8f1cf51244a90aebf797ac69746b5423cf54c34720d921c28decd2749cbef",
+      "bytes": 8133
     },
     {
       "path": "components/grove/record-section.astro",
-      "hash": "sha256-bf847380d26257c8d23ccbd482ce6f3609c34ce7c0cf29bfa266dcf9458de3e5",
-      "bytes": 3975
+      "hash": "sha256-02fb0da61a96ac05f9cf94fe1706341a5d0b522a1ec070ff3de02f0152023305",
+      "bytes": 3982
     },
     {
       "path": "components/grove/record-sidebar.astro",
-      "hash": "sha256-1fa9e87744f2b9002dd1f0d08f54daf59eeaa0b878f74f2afe1f6a5f274eb8b5",
-      "bytes": 16739
+      "hash": "sha256-e65df2f5d69235edcf31c3f38109ed90e1212661565fd363959133430aa124f4",
+      "bytes": 16744
     },
     {
       "path": "components/grove/refine-panel.astro",
-      "hash": "sha256-b30564535b1c73129e0955ab2fd3a936122eaa1106e66bbff3ce569037abf850",
-      "bytes": 6945
+      "hash": "sha256-7ce3a99f7d7fa980f9341c2bbc3be000231acf4853bd870835b4a54edf286b65",
+      "bytes": 6949
     },
     {
       "path": "components/grove/smart-lens-tabs.astro",
-      "hash": "sha256-5aa7cab62b8822e1326c09e150e696329ea6b7de79987a6aab64bc56450e9a1c",
-      "bytes": 2449
+      "hash": "sha256-1ff33fe1f676c588d8da607efaaa272ddb0803addc294a89d41a4f0f613734be",
+      "bytes": 2460
     },
     {
       "path": "components/grove/stack-grid.astro",
@@ -181,18 +181,18 @@
     },
     {
       "path": "components/ui/button.astro",
-      "hash": "sha256-27d8df9ae4aae7c481b0c0699c6fa6033e0eb554e3a02d28613117f8d12b0e2d",
-      "bytes": 1002
+      "hash": "sha256-a21c945a21d2898e29b62ab283e62eecb531196506ee0c0995b489a6de147d4e",
+      "bytes": 1014
     },
     {
       "path": "components/ui/empty-state.astro",
-      "hash": "sha256-eed8667de3a9b52fc454c2905c7a6f05e7d6524dcae61605446b4f978882a98b",
-      "bytes": 1268
+      "hash": "sha256-957abf5b933fdba287341358097d47bf083ebd0e826c484df6922aaff74f3115",
+      "bytes": 1280
     },
     {
       "path": "components/ui/filter-drawer.astro",
-      "hash": "sha256-b66b4cd13af1de46893de735ab1903737c368083bcabb639b2fcaaaf4ee850fb",
-      "bytes": 4437
+      "hash": "sha256-d26a367194cd7aa6e24890584547949ba3bea0d786bd4518e9ab736177e52b58",
+      "bytes": 4449
     },
     {
       "path": "components/ui/page-header.astro",
@@ -206,8 +206,8 @@
     },
     {
       "path": "layouts/base-layout.astro",
-      "hash": "sha256-6c3c1827c3874695e0f965e5c9ed0ac930cfcf0b4c9c1514e70b22bb9f7e61f3",
-      "bytes": 13880
+      "hash": "sha256-b7baeb895a53037fdd7d0015f14763d62ad9ea54d5c1bbeb8be4e655a5f0d8e5",
+      "bytes": 13892
     },
     {
       "path": "layouts/container.astro",
@@ -216,13 +216,13 @@
     },
     {
       "path": "layouts/footer.astro",
-      "hash": "sha256-956a0bba6c339081c2cc5019244c131160e520d59f02950d8197fea7d0c87568",
-      "bytes": 7431
+      "hash": "sha256-afece15f417ba13fddf43734efa8d5694dd0a35ef8904d621c1bf2af47062063",
+      "bytes": 7438
     },
     {
       "path": "layouts/header.astro",
-      "hash": "sha256-1cc610f14fa76ec12876aaf142720143268d66e322f76208aa95ec111c440a2c",
-      "bytes": 8294
+      "hash": "sha256-4d423bd690ae6626329b7daccaa07c7bf395d877acd7a85e7d6e60b0f55483e9",
+      "bytes": 8316
     },
     {
       "path": "layouts/section-header.astro",
@@ -235,9 +235,39 @@
       "bytes": 6804
     },
     {
+      "path": "lib/classnames.test.ts",
+      "hash": "sha256-43c14cb44ad2cd161accc1b4d685bc5b7f586598ffcd3614c2413eca07059bb9",
+      "bytes": 2271
+    },
+    {
+      "path": "lib/classnames.ts",
+      "hash": "sha256-8623a9f48f6d719f4c0a864297c9acf6f1b89847a32b01693d3ca3afbd6c7d84",
+      "bytes": 4119
+    },
+    {
+      "path": "lib/classnames.ts.new",
+      "hash": "sha256-8623a9f48f6d719f4c0a864297c9acf6f1b89847a32b01693d3ca3afbd6c7d84",
+      "bytes": 4119
+    },
+    {
+      "path": "lib/icon-kinds.ts",
+      "hash": "sha256-2b73f02adaf3c4404476309e7d68fe622d1959352b0edb15ad1e55aa062cb53e",
+      "bytes": 1818
+    },
+    {
+      "path": "lib/icon-registry.ts",
+      "hash": "sha256-e4eb2b36a2073c910fc61d5fac7f8d453340ac7e4ea1f2d11cc8ed268db7bd0f",
+      "bytes": 3495
+    },
+    {
       "path": "README.md",
       "hash": "sha256-30393d9fcf3449f0d03463f8bfea1cc81d82ebfc14b6117bea60e625bb5c63e6",
       "bytes": 2030
+    },
+    {
+      "path": "styles/system.css",
+      "hash": "sha256-d5b6051850d627267e4980adfe2725e7ee9c73b3f83c1bfc9538a537824dbc03",
+      "bytes": 39223
     }
   ]
 }

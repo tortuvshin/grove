@@ -40,13 +40,6 @@ export * from "@grove-dev/core";
 export * from "./lib/index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
-// `here` is the compiled `dist/` directory. The components and
-// layouts live in the source tree (the `dist/` is for the
-// integration helper only). Walk up one level to reach `src/`
-// before resolving the subpath roots.
-const srcRoot = resolve(here, "..", "src");
-const componentsDir = resolve(srcRoot, "components");
-const layoutsDir = resolve(srcRoot, "layouts");
 
 // Virtual module id used to inject the consumer's `src/styles/global.css`.
 // Resolved by the inline Vite plugin below to the absolute file path
@@ -104,8 +97,6 @@ export default function groveAstro(): AstroIntegration {
           vite: {
             resolve: {
               alias: {
-                "@grove-dev/astro/components": componentsDir,
-                "@grove-dev/astro/layouts": layoutsDir,
                 "@grove/generated": resolve(consumerRoot, "data/generated"),
               },
             },

@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/registry",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "private": false,
   "description": "Canonical UI source for Grove — registry scaffolds (currently @grove/default) installed into the consumer's src/ at grove init time.",
