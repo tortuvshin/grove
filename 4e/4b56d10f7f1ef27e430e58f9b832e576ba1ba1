@@ -1,0 +1,34 @@
+packages/registry/default/layouts/header.astro
+  s_134e5b252de84f::t_94608b74ddc8bd 176
+  s_134e5b252de84f::t_72a3dba5b3edaa 74
+  s_134e5b252de84f::t_3f481911c25ced 165
+  s_134e5b252de84f::t_4aac2e3ac8d533 18
+apps/example/src/styles/system.css
+  s_134e5b252de84f::t_11e85ab1158379 215-230
+apps/example/src/components/ui/button.astro
+  s_134e5b252de84f::t_11e85ab1158379 11,31,40-46,48
+packages/registry/default/styles/system.css
+  s_134e5b252de84f::t_bb0e43fd3b0725 215-230
+packages/registry/default/components/ui/button.astro
+  s_134e5b252de84f::t_fb590b7be3efad 31,40-46,48
+  s_134e5b252de84f::t_ad325fae332cc4 11
+apps/example/src/layouts/header.astro
+  s_134e5b252de84f::t_11e85ab1158379 18,74,165
+  s_134e5b252de84f::t_c17937b8d03931 176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "4e4b56d10f7f1ef27e430e58f9b832e576ba1ba1",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
