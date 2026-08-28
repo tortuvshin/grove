@@ -1,22 +1,49 @@
-import { cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+// SPDX-License-Identifier: MIT
+/**
+ * `grove init` — registry bootstrapper.
+ *
+ * Per §19 of `apps/docs/v1-architecture.md`, `grove init` does five
+ * things and nothing else:
+ *
+ *   1. Detect Astro (implicit — the scaffold ships Astro pages).
+ *   2. Install Grove packages (@grove-dev/{core,astro,cli,registry}).
+ *   3. Create grove.config.ts.
+ *   4. Initialize content/data (records/, collections/, taxonomy/).
+ *   5. Install the @grove/default scaffold into src/.
+ *   6. Create Grove registry state (.grove/registry.lock.json).
+ *   7. Validate (no separate step — scaffold is correct on install).
+ *
+ * The scaffold is shipped from `@grove-dev/registry` and materialized
+ * by `materializeRegistry()`. There is no second template to maintain
+ * in this repo and no fallback path — if the registry snapshot is
+ * missing, init fails fast with a clear message.
+ */
 import { existsSync } from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  materializeRegistry,
+  type InstalledScaffold,
+} from "./registry-install.js";
 
-const SKIP_NAMES = new Set(["node_modules", "dist", ".astro", ".DS_Store"]);
-const GENERATED_PUBLIC_NAMES = new Set([
-  "llms.txt",
-  "llms-full.txt",
-  "sitemap.xml",
-  "robots.txt",
-  "og-image.svg",
-  "og",
-]);
-const GROVE_PACKAGES = ["@grove-dev/astro", "@grove-dev/cli", "@grove-dev/core"] as const;
+const SKIP_NAMES = new Set(["node_modules", "dist", ".astro", ".DS_Store", ".grove"]);
+const GROVE_PACKAGES = [
+  "@grove-dev/core",
+  "@grove-dev/astro",
+  "@grove-dev/cli",
+  "@grove-dev/registry",
+] as const;
 
 export interface InitOptions {
   projectName?: string;
   version?: string;
+}
+
+export interface InitResult {
+  targetDir: string;
+  projectName: string;
+  installedScaffold: InstalledScaffold;
 }
 
 export function readCliVersion(): string {
@@ -37,14 +64,6 @@ function requireText(path: string): string {
   return globalThis.process.getBuiltinModule("node:fs").readFileSync(path, "utf8");
 }
 
-export function scaffoldSource(): string {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const candidates = [resolve(here, "site"), resolve(here, "../../../apps/example")];
-  const found = candidates.find((candidate) => existsSync(resolve(candidate, "package.json")));
-  if (!found) throw new Error("Grove site scaffold is missing. Reinstall @grove-dev/cli.");
-  return found;
-}
-
 function titleCase(value: string): string {
   return value
     .replace(/[-_]+/g, " ")
@@ -53,61 +72,85 @@ function titleCase(value: string): string {
 }
 
 function packageName(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "grove-directory";
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "grove-directory"
+  );
 }
 
 async function ensureEmpty(targetDir: string): Promise<void> {
   await mkdir(targetDir, { recursive: true });
+  const { readdir } = await import("node:fs/promises");
   const entries = (await readdir(targetDir)).filter((entry) => !SKIP_NAMES.has(entry));
   if (entries.length > 0) {
     throw new Error(`${targetDir} is not empty. Choose a new directory.`);
   }
 }
 
+/**
+ * Bootstrap a Grove directory by installing the @grove/default
+ * registry scaffold. Returns the manifest of what was installed
+ * so callers can report it to the user.
+ */
 export async function initDirectory(
   targetDir: string,
   options: InitOptions = {},
-): Promise<{ targetDir: string; projectName: string }> {
-  const source = scaffoldSource();
+): Promise<InitResult> {
   const target = resolve(targetDir);
   await ensureEmpty(target);
-  await cp(source, target, {
-    recursive: true,
-    filter: (sourcePath) => {
-      const pathFromRoot = relative(source, sourcePath);
-      const parts = pathFromRoot.split(/[\\/]/);
-      if (parts.some((part) => SKIP_NAMES.has(part))) return false;
-      if (parts[0] === "data" && parts[1] === "generated") return false;
-      if (parts[0] === "public" && GENERATED_PUBLIC_NAMES.has(parts[1] ?? "")) {
-        return false;
-      }
-      return true;
-    },
-  });
 
   const version = options.version ?? readCliVersion();
   const fallbackName = target.split(/[\\/]/).at(-1) ?? "grove-directory";
   const rawName = options.projectName ?? fallbackName;
   const projectName = packageName(rawName);
+
+  // 1. Write package.json with engine + registry pinned to the CLI version.
   const packagePath = resolve(target, "package.json");
-  const pkg = JSON.parse(await readFile(packagePath, "utf8")) as {
-    name?: string;
-    dependencies?: Record<string, string>;
+  const pkg: { name: string; type?: string; dependencies: Record<string, string> } = {
+    name: projectName,
+    type: "module",
+    dependencies: {},
   };
-  pkg.name = projectName;
-  pkg.dependencies ??= {};
-  for (const dependency of GROVE_PACKAGES) pkg.dependencies[dependency] = `^${version}`;
+  for (const dep of GROVE_PACKAGES) pkg.dependencies[dep] = `^${version}`;
   await writeFile(packagePath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
 
+  // 2. Materialize the @grove/default scaffold into src/. This also
+  //    writes `.grove/registry.lock.json` recording the install-time
+  //    hashes (consumed by `grove update`).
+  const installed = await materializeRegistry(target);
+
+  // 3. Write grove.config.ts. The scaffold doesn't ship one (it's
+  //    project-specific), so we generate a fresh template and
+  //    substitute the project name.
   const configPath = resolve(target, "grove.config.ts");
-  const config = await readFile(configPath, "utf8");
-  await writeFile(
-    configPath,
-    config.replace(/name:\s*"[^"]+"/, `name: ${JSON.stringify(titleCase(rawName))}`),
-    "utf8",
-  );
-  return { targetDir: target, projectName };
+  const configTemplate = `import { defineConfig } from "@grove-dev/core";
+
+export default defineConfig({
+  blueprint: "project-directory",
+
+  site: {
+    name: ${JSON.stringify(titleCase(rawName))},
+    tagline: "A Grove-powered directory.",
+    description: "",
+    url: "https://example.com",
+  },
+
+  nav: [
+    { label: "Home", href: "/" },
+    { label: "Browse", href: "/projects" },
+    { label: "About", href: "/about" },
+  ],
+
+  browse: {
+    facets: ["category", "stack", "platform", "license"],
+  },
+
+  theme: { radius: "soft", density: "comfortable", containerWidth: "72rem" },
+});
+`;
+  await writeFile(configPath, configTemplate, "utf8");
+
+  return { targetDir: target, projectName, installedScaffold: installed };
 }

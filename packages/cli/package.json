@@ -42,7 +42,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\" && node ../../scripts/package-site.mjs",
+    "build": "node ../../scripts/build-cli.mjs && node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && cp -r src/registry-snapshot dist/registry && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\" && node ../../scripts/package-site.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/cli",
     "dev": "tsx src/index.ts --help"

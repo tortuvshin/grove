@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 import { syncIconAssets } from "@grove-dev/core";
 import { Command } from "commander";
-import { scaffoldSource } from "./init.js";
+import { resolveRegistrySnapshotDir } from "./registry-install.js";
 
 /**
  * `grove icons sync` — the explicit escape hatch for the icon set.
@@ -22,7 +22,7 @@ export function buildIconsCommand(): Command {
     .option("--check", "report drift without writing; exit 1 if anything is stale")
     .action(async (options: { force?: boolean; check?: boolean }) => {
       const publicDir = resolve(process.cwd(), "public");
-      const source = resolve(scaffoldSource(), "public/icons");
+      const source = resolve(resolveRegistrySnapshotDir(), "public/icons");
       const result = await syncIconAssets(source, publicDir, {
         force: options.force === true,
         // `--force` means "make it match the packaged set exactly",

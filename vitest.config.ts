@@ -52,6 +52,11 @@ export default defineConfig({
           // the `{test,spec}.ts` suffix keeps `.d.ts` and the
           // test files co-located in the same directory.
           include: ['packages/*/src/**/*.{test,spec}.ts', 'apps/docs/src/**/*.{test,spec}.ts'],
+          // The CLI's registry-snapshot/ subdirectory holds the
+          // scaffolded source for `grove init`. The scaffold carries
+          // its own tests (classnames.test.ts etc.) that we do NOT
+          // want to double-run; they're not our suite's contract.
+          exclude: ['**/registry-snapshot/**'],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its
