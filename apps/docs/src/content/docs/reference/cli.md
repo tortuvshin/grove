@@ -17,7 +17,8 @@ up a space, work with records, ship the site.
 
 ## `grove init`
 
-Scaffold a new Grove space from the Astro template.
+Scaffold a new Grove space by installing the `@grove/default` item
+from Grove's [shadcn registry](/concepts/registry/).
 
 **Syntax:** `grove init [<directory>] [options]`
 
@@ -31,27 +32,45 @@ Scaffold a new Grove space from the Astro template.
 
 | Option | Description | Default |
 |---|---|---|
-| `--no-install` | Skip `pnpm install` after scaffolding | install runs |
+| `--no-install` | Skip Grove's own `pnpm install` after scaffolding. The shadcn step still installs the scaffold's dependencies. | install runs |
 | `--no-git` | Skip `git init` after scaffolding | git init runs |
 
-**Reads:** nothing (creates a new directory).
+**Reads:** the copy of `@grove/default` bundled with the CLI (via
+its `@grove-dev/registry` dependency) — no registry request, so
+`init` works offline.
 
 **Writes:**
 
+- `<directory>/package.json` (scripts `dev`, `build`, `check`;
+  `@grove-dev/{core,astro,cli,registry}` pinned to the CLI version)
+- `<directory>/tsconfig.json` (Astro base config with the `@/*` path alias)
+- `<directory>/components.json`
+  (`"registries": { "@grove": "https://withgrove.dev/r/{name}.json" }`)
 - `<directory>/grove.config.ts`
 - `<directory>/astro.config.mjs`
-- `<directory>/package.json`
-- `<directory>/tsconfig.json`
-- `<directory>/data/records/` (example YAML records)
-- `<directory>/data/taxonomy/` (categories, stacks, platforms)
-- `<directory>/data/collections/` (example curated collections)
-- `<directory>/data/decisions.yml` (empty `decisions: []`)
-- `<directory>/public/` (robots.txt, og-image.svg)
-- `<directory>/src/pages/` (home, browse, [slug], about, submit, 404)
-- `<directory>/src/styles/global.css`
-- `<directory>/.github/workflows/{ci,cleanup,deploy,readme,sync-contributors,sync-github}.yml`
-- `<directory>/.github/ISSUE_TEMPLATE/`
+- `<directory>/data/records/` (empty)
+- `<directory>/src/**` — every file of `@grove/default`: components,
+  layouts, `lib/`, `styles/system.css`, and all page routes (home,
+  browse, record detail, taxonomy, collections, submit, about,
+  contributors, 404)
+- `<directory>/.grove/registry.lock.json` (scaffold `@grove/default`,
+  version, and a sha256 per installed file — what `grove update`
+  diffs against)
 
+**Behavior:**
+
+1. Writes the config files above.
+2. Runs `pnpm dlx shadcn@4.19.0 add <bundled default.json> --yes`,
+   which lands the scaffold in `src/` and installs its npm
+   dependencies (astro, tailwindcss, `@tailwindcss/vite`,
+   `@astrojs/check`).
+3. Adds the `@grove-dev/*` packages and writes the lock.
+4. Runs `pnpm install` and `git init` unless disabled.
+
+It does **not** scaffold `content/`, `public/`, `data/taxonomy/`,
+`data/collections/`, or `.github/` — see the
+[deployment](/deployment/overview/) and
+[automation](/automation/scheduled/) guides for what to add by hand.
 The scaffolder does not prompt at runtime — the blueprint and
 integrations are chosen by editing `grove.config.ts` after scaffold.
 
@@ -60,7 +79,6 @@ integrations are chosen by editing `grove.config.ts` after scaffold.
 ```bash
 pnpm dlx @grove-dev/cli@latest init my-space
 cd my-space
-pnpm install
 pnpm dev
 ```
 
@@ -70,6 +88,55 @@ pnpm dev
   inside `<directory>/` to retry.
 - `Directory not empty` — when omitting `<directory>`, the current
   directory must be empty.
+
+## `grove update`
+
+Reconcile the installed scaffold against the registry upstream
+without overwriting files you have edited. Implementation in
+`packages/cli/src/update.ts`.
+
+**Syntax:** `grove update [options]`
+
+**Options:**
+
+| Option | Description | Default |
+|---|---|---|
+| `--check` | Print the plan only; exit non-zero if anything needs applying | off |
+| `--diff` | Include a unified diff for every `upstream_changed` file | off |
+| `--force` | Apply changes even when conflicts exist (locally modified files are still preserved) | off |
+| `--json` | Emit a machine-readable JSON summary | off |
+| `--from <path-or-url>` | Read `@grove/default` from a local file or URL instead of the registry in `components.json` | registry URL |
+
+**Reads:**
+
+- `.grove/registry.lock.json` — required; written by `grove init`.
+- `components.json` — the `@grove` registry URL.
+- `@grove/default` from that URL (or `--from`); falls back to the
+  copy bundled with the CLI.
+- Every file the lock lists, under `src/`.
+
+**Writes:** the files classified `new` or `upstream_changed`, and a
+refreshed `.grove/registry.lock.json`. Nothing is written with
+`--check`.
+
+**Behavior:** each file is compared across three states — installed,
+lock, registry — and classified as `unchanged`, `upstream_changed`,
+`new`, `locally_modified`, `conflict`, or `removed`. `new` and
+`upstream_changed` files are applied; `locally_modified` files are
+never overwritten; `conflict` files are preserved and reported (or
+applied with `--force`); `removed` files are reported, never deleted.
+See [the registry model](/concepts/registry/) for the full table.
+
+To reset one item to upstream regardless of local edits, use the
+shadcn CLI instead: `npx shadcn@latest add @grove/<item> --overwrite`.
+
+**Example:**
+
+```bash
+grove update --check     # CI gate: is the scaffold current?
+grove update --diff      # review every upstream change
+grove update             # apply safe changes, keep local edits
+```
 
 ## `grove import`
 
@@ -164,8 +231,9 @@ grove check
 grove check --strict
 ```
 
-**Use this in CI.** The `ci.yml` workflow the scaffolder generates
-runs `grove check` on every PR.
+**Use this in CI.** `grove init` doesn't generate workflows, but the
+reference app's `.github/workflows/ci.yml` (in the Grove repository's
+`apps/example/`) shows the pattern: run `grove check` on every PR.
 
 ## `grove sync github`
 
@@ -237,10 +305,12 @@ Refresh the local contributors aggregation from GitHub.
 
 **Behavior:**
 
-- The scaffolder writes `.github/workflows/sync-contributors.yml`,
-  which runs this on a weekly cron (Sun 04:00 UTC) and on manual
-  `workflow_dispatch`. The workflow auto-commits the generated
-  files back to the repo.
+- Typically run from a scheduled workflow. `grove init` doesn't write
+  one; the reference app's `.github/workflows/sync-contributors.yml`
+  (in the Grove repository's `apps/example/`) runs this on a weekly
+  cron (Sun 04:00 UTC) and on manual `workflow_dispatch`, and
+  auto-commits the generated files back to the repo — copy it as a
+  starting point.
 
 ## `grove cleanup`
 
@@ -585,4 +655,4 @@ grove icons sync --check     # CI gate: exit 1 when drift is detected
 - **[Record schema](/reference/record-schema/)** — the schema
   `grove check` validates against.
 - **[Scheduled sync](/automation/scheduled/)** — the GitHub Actions
-  workflows generated by `grove init`.
+  workflows that run the sync commands on a schedule.

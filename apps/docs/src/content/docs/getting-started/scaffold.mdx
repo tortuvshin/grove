@@ -8,7 +8,7 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, Tabs, Tab
 This is the long-form version of the [quickstart](/start-here/quickstart/)'s scaffold-and-first-run steps — what `grove init` actually does, what lands on disk, and why. If you already know the CLI and just want the commands, use the quickstart instead.
 
 <Aside type="tip" title="What `grove init` produces">
-  A working Astro project: the `@grove/default` UI scaffold installed into `src/` from Grove's [component registry](/concepts/registry/), plus `package.json`, `grove.config.ts`, and `astro.config.mjs` generated for your directory. The CLI is a thin bootstrapper — it materializes the registry scaffold (no second template lives in the CLI itself), writes those three config files, then runs `pnpm install` and `git init` — unless you pass `--no-install` or `--no-git`.
+  A working Astro project: the `@grove/default` item installed into `src/` from Grove's [shadcn registry](/concepts/registry/), plus `package.json`, `tsconfig.json`, `components.json`, `grove.config.ts`, `astro.config.mjs`, and an empty `data/records/` generated for your directory. The CLI is a thin bootstrapper — it writes those files, runs the shadcn CLI against the copy of `@grove/default` bundled with the CLI (no registry request, so it works offline), adds the `@grove-dev/*` packages, then runs `pnpm install` and `git init` — unless you pass `--no-install` or `--no-git`.
 </Aside>
 
 ## Requirements
@@ -40,12 +40,12 @@ See [Install the CLI](/getting-started/install-cli/) for the Node and pnpm versi
    </Tabs>
 
    <Aside type="note" title="What you should see">
-     A new `my-directory/` folder on disk: `src/` (the installed registry scaffold), `package.json`, `grove.config.ts`, `astro.config.mjs`, and `.grove/registry.lock.json` (the install-time record `grove update` diffs against later). The CLI prints what it created.
+     A new `my-directory/` folder on disk: `src/` (the installed registry scaffold), `package.json`, `tsconfig.json`, `components.json`, `grove.config.ts`, `astro.config.mjs`, an empty `data/records/`, and `.grove/registry.lock.json` (the install-time record `grove update` diffs against later). The CLI prints what it created.
    </Aside>
 
 2. ## Confirm dependencies are installed
 
-   `grove init` already ran `pnpm install` for you as its last step — you don't need to run it again unless you passed `--no-install`. `cd` in and check:
+   `grove init` already ran `pnpm install` for you as its last step — you don't need to run it again unless you passed `--no-install`. (Even with `--no-install`, the shadcn step installs the scaffold's own dependencies — astro, tailwindcss, and friends; what's skipped is the install of the `@grove-dev/*` packages.) `cd` in and check:
 
    <Tabs syncKey="pkg">
      <TabItem label="pnpm" icon="pnpm">
@@ -69,7 +69,7 @@ See [Install the CLI](/getting-started/install-cli/) for the Node and pnpm versi
    </Tabs>
 
    <Aside type="note" title="What you should see">
-     `node_modules/` already populated from the `init` run. Re-running install is safe — it's a no-op if nothing changed, and it's what pulls everything in if you used `--no-install`.
+     `node_modules/` already populated from the `init` run. Re-running install is safe — it's a no-op if nothing changed, and it's what pulls in the `@grove-dev/*` packages if you used `--no-install`.
    </Aside>
 
 3. ## Start the dev server
@@ -110,29 +110,36 @@ See [Install the CLI](/getting-started/install-cli/) for the Node and pnpm versi
       - grove/ domain UI — project-card, collection-index, hero, …
       - site/ site chrome — theme-toggle
     - layouts/ base-layout, header, footer, container, seo
-    - pages/ home, browse, record detail, taxonomy, collections, submit, about, 404
+    - pages/ home, browse, record detail, taxonomy, collections, submit, about, contributors, 404
     - lib/ classnames, icon registry — UI-local helpers
     - styles/system.css design tokens, light/dark theme, Tailwind theme
+  - data/
+    - records/ empty — your YAML records go here
   - .grove/
     - registry.lock.json install-time file hashes — what `grove update` diffs against
-  - package.json Grove packages + the scaffold's own deps (astro, tailwindcss, …), pinned/latest
+  - package.json Grove packages pinned to the CLI version + the scaffold's own deps (astro, tailwindcss, …)
+  - tsconfig.json Astro base config with the `@/*` path alias the shadcn CLI expects
+  - components.json maps the `@grove` namespace to the hosted registry
   - grove.config.ts site config (blueprint, site, theme, integrations)
   - astro.config.mjs registers the Grove integration and the Tailwind Vite plugin
 </FileTree>
 
-Everything under `src/` is copied from Grove's [component registry](/concepts/registry/) — it's yours to edit freely. `grove update` will offer upstream improvements later without overwriting anything you've changed; see [Update a scaffold](/concepts/registry/) for how that works.
+Everything under `src/` is installed from Grove's [shadcn registry](/concepts/registry/) — it's yours to edit freely. `grove update` will offer upstream improvements later without overwriting anything you've changed, and `npx shadcn@latest add @grove/<item>` restores or adds any single item; see [Update a scaffold](/concepts/registry/) for how that works.
 
 Three files matter most going forward:
 
 - **`grove.config.ts`** — site config. Name, blueprint, theme tokens, GitHub integration toggle, audit manifest.
 - **`src/components/`** — your UI. Edit anything here directly; there's no build step between the file and the rendered page.
-- **`data/records/`** — your directory entries, one YAML file per record. You create this directory yourself — see [Add your first record](/getting-started/first-record/), next.
+- **`data/records/`** — your directory entries, one YAML file per record. `grove init` creates it empty — see [Add your first record](/getting-started/first-record/), next.
 
 ## What just happened
 
 <CardGrid>
   <Card title="src/components/" icon="open-book">
     The full `@grove/default` UI, installed from the registry. Edit any component directly — Button, ProjectCard, Hero, and the rest.
+  </Card>
+  <Card title="components.json" icon="puzzle">
+    Points the `@grove` namespace at `https://withgrove.dev/r/{name}.json`, so `npx shadcn@latest add @grove/<item>` and `grove update` know where upstream lives.
   </Card>
   <Card title="src/styles/system.css" icon="seti:notebook">
     Design tokens: colors, radius, container widths, light/dark theme. Change these to re-theme the whole site from one file.
@@ -158,7 +165,7 @@ pnpm dlx @grove-dev/cli@latest init [directory] [--no-install] [--no-git]
 
 | Flag | Effect |
 | --- | --- |
-| `--no-install` | Skip `pnpm install` after scaffolding. |
+| `--no-install` | Skip Grove's own `pnpm install` after scaffolding. The shadcn step still installs the scaffold's dependencies. |
 | `--no-git` | Skip `git init` after scaffolding. |
 
 Omit `[directory]` to scaffold into the current directory (which must be empty). The scaffolder asks no prompts — site name, theme, and integrations are all chosen afterwards by editing `grove.config.ts`.

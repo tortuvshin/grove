@@ -1,15 +1,17 @@
 ---
 title: Components
-description: Grove's UI ships from a registry scaffold installed into your src/. You own the files. grove update reconciles upstream changes without overwriting local edits.
+description: Grove's UI ships as a shadcn registry installed into your src/. You own the files. grove update reconciles upstream changes without overwriting local edits.
 ---
 
-Grove pages are plain Astro pages in your project. The data engine (`prepareDirectory`, generated JSON, Zod schemas) is owned by `@grove-dev/core`. The UI ships from a **registry scaffold** that `grove init` installed into your `src/`. There is no `@grove-dev/astro/components/X.astro` import path in v1 — every component lives in your repo, and `grove update` keeps it in sync with upstream changes without overwriting what you edited.
+Grove pages are plain Astro pages in your project. The data engine (`prepareDirectory`, generated JSON, Zod schemas) is owned by `@grove-dev/core`. The UI ships from the **`@grove` registry** — a [shadcn registry](https://ui.shadcn.com/docs/registry) of feature-level items — that `grove init` installed into your `src/`. There is no `@grove-dev/astro/components/X.astro` import path in v1 — every component lives in your repo, and `grove update` keeps it in sync with upstream changes without overwriting what you edited.
 
 This split is deliberate: data and presentation evolve at different speeds, and consumers should be able to fork the UI freely without touching engine packages.
 
 ## Where the components live
 
-After `grove init`, your `src/` has the full structure the registry ships — `components/`, `layouts/`, `lib/`, `styles/`, **and** `pages/`. Pages are registry-shipped like everything else: `grove init` gives you a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) with zero records in it, not just a component library you have to build pages around yourself.
+After `grove init`, your `src/` has the full structure the registry ships — `components/`, `layouts/`, `lib/`, `styles/`, **and** `pages/`. Pages are registry-shipped like everything else: `grove init` gives you a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, contributors, 404) with zero records in it, not just a component library you have to build pages around yourself.
+
+`grove init` also writes a `components.json` at the project root that maps the `@grove` namespace to the hosted registry (`https://withgrove.dev/r/{name}.json`). That file is what lets the standard shadcn CLI add or restore individual items later; the files themselves are grouped into registry blocks, one per feature — see [Registry items](#registry-items) below.
 
 ```
 src/
@@ -18,7 +20,7 @@ src/
 │   ├── grove/      # domain UI + page-level compositions — project-card, hero, directory-browse, taxonomy-list, …
 │   └── site/       # site chrome — theme-toggle
 ├── layouts/        # base-layout, header, footer, container, seo, section-header
-├── pages/          # home, browse, record detail, taxonomy, collections, submit, about, 404 — same update rules as everything else here
+├── pages/          # home, browse, record detail, taxonomy, collections, submit, about, contributors, 404 — same update rules as everything else here
 ├── lib/            # UI-local helpers (classnames, icon-kinds, icon-registry)
 └── styles/         # system.css
 ```
@@ -34,6 +36,28 @@ import Button from "../components/ui/button.astro";
 ```
 
 If you change a file in `src/`, Grove does not touch it. The next `grove update` will tell you a new version is available but will not overwrite yours — see [grove update](/reference/cli/#grove-update).
+
+## Registry items
+
+The registry groups its files into 12 feature-level items plus `default`, which inlines all of them. Each item declares its files' targets under `src/` and depends on the other `@grove/*` items it imports from, so `npx shadcn@latest add @grove/<item>` pulls in everything the item needs.
+
+| Item | What it ships |
+|---|---|
+| `@grove/ui` | UI primitives — `button`, `badge`, `empty-state`, `filter-drawer`, `page-header`, `search-field` — plus `lib/classnames.ts`, the class builders that keep server-rendered and client-rebuilt controls byte-identical. |
+| `@grove/shell` | The document shell every page renders inside: `base-layout`, `header`, `footer`, `container`, `section-header`, `seo`, `theme-toggle`, `powered-by`, and `styles/system.css` (design tokens, light/dark theme, Tailwind theme). |
+| `@grove/project-card` | The canonical record card every listing surface renders through — `project-card`, `card-grid`, `card-icon`, the brand-mark `icon` component, and `lib/icon-kinds.ts` + `lib/icon-registry.ts`. |
+| `@grove/taxonomy` | Browse-by-category, -stack, and -license: `categories/`, `stacks/`, and `licenses/[name]` routes, the shared `taxonomy-list` body, and the `stack-grid` / `category-grid` the home page also renders. |
+| `@grove/collections` | Curated and generated collections: `collections/` index and detail routes, `collection-index`, `collection-page`, `collection-card`, `collection-row`, and `collection-teaser`. |
+| `@grove/home` | The landing route (`pages/index.astro`) with `hero`, `why-this-exists`, `pipeline-strip`, `record-section` (trending / new / established), `contributors-grid`, `original-collection`, and `final-cta`. |
+| `@grove/browse` | The list/discovery page and its paginated routes (`[slug]/index`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json.ts`) with `directory-browse`, `directory-index-client`, `refine-panel`, `filter-group-menu`, `filter-options`, `smart-lens-tabs`, `index-row`, and `pagination`. |
+| `@grove/record` | The per-record route (`[slug]/[recordSlug]`) with `record-header`, `record-sidebar`, `editorial-summary`, `table-of-contents`, `markdown-body`, and `language-breakdown`. |
+| `@grove/submit` | `pages/submit.astro` and `submission-client` — fetch a repository, validate against the taxonomy, draft a record YAML for a pull request. |
+| `@grove/about` | `pages/about.astro` — the narrative about route, overridable from `content/pages/about.md`. |
+| `@grove/contributors` | `pages/contributors.astro` — the full contributors route with per-user contribution counts. |
+| `@grove/not-found` | `pages/404.astro` — the on-brand fallback with a search form pointing at the browse page. |
+| `@grove/default` | Every file above, inlined, so the whole site installs in one step. This is what `grove init` installs and what `grove update` diffs against. |
+
+The per-component tables below describe the same files, grouped by directory.
 
 ## Components (`packages/registry/default/components/grove/`)
 
@@ -119,16 +143,30 @@ Drop a new `.astro` file under `src/components/grove/` (or any other directory),
 
 ## What if I want to go back to the upstream version?
 
+Two tools, for two different jobs.
+
+To reset one item to upstream — say, throw away your card edits — use the shadcn CLI with `--overwrite`. It rewrites every file that item ships (and its `@grove/*` dependencies), no questions asked:
+
 ```bash
-grove update --diff   # see what changed
+npx shadcn@latest add @grove/project-card --overwrite
+```
+
+To bring the whole site up to date while keeping your edits, use `grove update`:
+
+```bash
+grove update --diff   # see what changed upstream
 grove update          # apply upstream, but only to files you haven't edited
 ```
 
-Files you have edited are flagged `locally modified` and never overwritten. To force them back to upstream, delete the local file and run `grove update` again — the registry will reinstall it.
+Files you have edited are flagged `locally modified` and never overwritten. Either way, run `grove update` afterwards so the lockfile reflects what's on disk.
 
 ## What if I add a component the registry doesn't ship?
 
 Nothing. The registry tracks only what it ships. New files under `src/` are yours and stay yours forever.
+
+## What if I only want part of the registry?
+
+Every item is installable on its own. In a bare Astro project with a `components.json` like the one `grove init` writes and a tsconfig `@/*` path alias, `npx shadcn@latest add @grove/browse` installs the browse page and the `shell`, `project-card`, and `ui` items it depends on — no React, no `shadcn init`. `npx shadcn@latest view @grove/home` previews an item's files before installing.
 
 ## See also
 

@@ -1,6 +1,6 @@
 ---
 title: Template customization
-description: How to change look, structure, or data layout without forking the template.
+description: How to change look, structure, or data layout of the installed scaffold.
 ---
 
 Most customizations fall into three buckets, in increasing order of effort:
@@ -55,7 +55,7 @@ Create `src/pages/<page>.astro`. Astro file-based routing applies:
 ```astro
 ---
 // src/pages/changelog.astro
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
+import BaseLayout from "../layouts/base-layout.astro";
 import siteConfig from "@grove/generated/site-config.json";
 ---
 <BaseLayout title="Changelog" description="Recent updates" site={siteConfig}>
@@ -64,7 +64,7 @@ import siteConfig from "@grove/generated/site-config.json";
 </BaseLayout>
 ```
 
-`BaseLayout` lives at `src/layouts/base-layout.astro` in your repo. `grove init` installed it there from the `@grove/default` registry scaffold. `title`, `description`, and `site` are all required props — `site` is `data/generated/site-config.json`, which the `@grove/generated` alias resolves for you.
+`BaseLayout` lives at `src/layouts/base-layout.astro` in your repo — `grove init` installed it there from the `@grove/shell` registry item — so import it by relative path, not from a package. `title`, `description`, and `site` are all required props — `site` is `data/generated/site-config.json`, which the `@grove/generated` alias resolves for you.
 
 Add a nav link in `grove.config.ts`. See [Custom pages](/customize/pages/) for Markdown-page patterns and structured data.
 
@@ -85,7 +85,7 @@ Page-specific copy (the home page's section headings, the about page, the submis
 
 ## 3. Components
 
-Components live in your `src/components/{ui,grove,site}/` directory — installed by `grove init` from the `@grove/default` registry. The registry ships 33 domain components (`grove/`), 6 primitives (`ui/`), and 1 site chrome (`site/`). See [Components](/customize/components/) for the list and the data contract. Override by editing the file directly:
+Components live in your `src/components/{ui,grove,site}/` directory — installed by `grove init` from the `@grove` registry. The registry ships 35 domain components (`grove/`), 6 primitives (`ui/`), and 1 site chrome (`site/`), grouped into feature items (`shell`, `project-card`, `browse`, `record`, …). See [Components](/customize/components/) for the item list and the data contract. Override by editing the file directly:
 
 ```astro
 ---
@@ -96,7 +96,7 @@ import ProjectCard from "../components/grove/project-card.astro";
 
 Edit `src/components/grove/project-card.astro` to override. `grove update` will see your edit and never overwrite it.
 
-The override is a direct edit — open the file in `src/components/grove/`, change what you want, save. The next `grove update` will see your edit and never overwrite it. See [Components](/customize/components/) for the data contract.
+The override is a direct edit — open the file in `src/components/grove/`, change what you want, save. The next `grove update` will see your edit and never overwrite it. To throw the edit away and go back to upstream, `npx shadcn@latest add @grove/project-card --overwrite` reinstalls that item's files. See [Components](/customize/components/) for the data contract.
 
 ## 4. Styling
 

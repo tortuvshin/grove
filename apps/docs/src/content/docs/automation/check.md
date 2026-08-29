@@ -109,7 +109,7 @@ None of this is checked by `validateProject()` — `check` regenerates all of it
 
 ## Continuous integration
 
-`grove init` scaffolds `.github/workflows/ci.yml`. As shipped in `apps/example/.github/workflows/ci.yml`, the job runs `grove check` **without** `--strict`:
+`grove init` writes no workflows; the reference app's `apps/example/.github/workflows/ci.yml` is the one to copy. As shipped there, the job runs `grove check` **without** `--strict`:
 
 ```yaml
 name: CI

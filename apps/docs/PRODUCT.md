@@ -6,7 +6,7 @@ This document is the source of truth for what Grove actually is, what it ships t
 
 ## 1. What Grove is, in one paragraph
 
-Grove is a **framework for building community knowledge directories** powered by structured files. `grove init` installs Grove's component registry — including its page routes — into a fresh Astro project (`src/components`, `src/layouts`, `src/lib`, `src/styles`, `src/pages`) and generates `grove.config.ts`, `astro.config.mjs`, and `package.json`. The result is a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) with zero records in it. You then create your own `data/records/*.yml` files, write your own GitHub Actions (the example app's `.github/` is a working reference, not something the CLI generates for you), and run `grove check` / `astro build`. Every record is a file. Every change is reviewable. The site is static. There is no database, no CMS, no admin dashboard.
+Grove is a **framework for building community knowledge directories** powered by structured files. `grove init` installs Grove's component registry — including its page routes — into a fresh Astro project (`src/components`, `src/layouts`, `src/lib`, `src/styles`, `src/pages`) via the official shadcn CLI, and generates `package.json`, `tsconfig.json`, `components.json` (registering the `@grove` registry), `grove.config.ts`, `astro.config.mjs`, and an empty `data/records/`. The result is a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) with zero records in it. You then create your own `data/records/*.yml` files, write your own GitHub Actions (the example app's `.github/` is a working reference, not something the CLI generates for you), and run `grove check` / `astro build`. Every record is a file. Every change is reviewable. The site is static. There is no database, no CMS, no admin dashboard.
 
 The framework supports **one blueprint end-to-end today** — `project-directory`, rendered by the registry's default scaffold. Two other blueprints (`resource-hub`, `ecosystem-map`) exist as Zod schemas only — no scaffold, no routes, no authoring path. Selecting a blueprint is a config edit (`blueprint: "project-directory"` in `grove.config.ts`), not a CLI flag — `grove init` no longer prompts or accepts blueprint/framework/deploy options.
 
@@ -21,7 +21,7 @@ Grove is a pnpm monorepo. `packages/` contains exactly five packages — confirm
 | `@grove-dev/core` | `1.0.0` | Headless engine: Zod schemas, config loader (`defineConfig`/`loadConfig`), importers, validators, taxonomy/facet logic, GitHub sync + health classification, contributor aggregation, sitemap, `llms.txt`, awesome-list README generator, OG image pipeline, audit budget, and `prepareDirectory()` — the single build pipeline both the CLI and the Astro integration call. Zero framework dependencies. |
 | `@grove-dev/cli` | `1.0.0` | The `grove` command. Bootstraps a project from the registry, validates/generates/checks, syncs GitHub metadata and contributors, reports cleanup candidates, promotes filter URLs to curated collections, syncs the packaged icon set, imports awesome lists, generates an awesome-list README, and reconciles an installed scaffold against registry upstream (`grove update`). |
 | `@grove-dev/astro` | `1.0.0` | Astro integration + server-side view-models. Ships **zero visual components** — it wires `astro:config:setup` to run `prepareDirectory()` before every dev/build/check, syncs the packaged icon set into `public/icons/`, and re-exports `@grove-dev/core` plus framework-agnostic `lib/` helpers (search, lenses, scores, repo parsing, formatting, taxonomy counts). |
-| `@grove-dev/registry` | `1.0.0` | Canonical UI source. Ships one scaffold today, `@grove/default` (`packages/registry/default/`) — components, layouts, `lib/`, and `styles/system.css`. Installed into a consumer's `src/` by `grove init` via `materializeRegistry()`; there is no `@grove-dev/ui` package and no separate template-copy step in the CLI. |
+| `@grove-dev/registry` | `1.0.0` | Canonical UI source, as a shadcn registry (namespace `@grove`). `packages/registry/registry.json` declares 12 feature items (`ui`, `shell`, `project-card`, `taxonomy`, `collections`, `home`, `browse`, `record`, `submit`, `about`, `contributors`, `not-found`); the build generates `default` (all 70 files inlined) and runs the official `shadcn build` into `dist/r/<item>.json`, which the package ships (`./r/*`) and the docs site serves at `https://withgrove.dev/r/<item>.json`. `grove init` installs `default` via `shadcn add`; consumers add or restore single items with `npx shadcn@latest add @grove/<item>`. There is no `@grove-dev/ui` package and no template-copy step in the CLI. |
 | `@grove-dev/starlight` | `0.7.0` | Grove's Starlight theme — what `apps/docs` (this documentation site) runs on. Unrelated to the directory-building product surface described in this document. |
 
 `@grove-dev/ui`, `@grove-dev/nextjs`, and `@grove-dev/svelte` **do not exist** in this workspace — no directory under `packages/` for any of them, and no reference to them in any `pnpm-workspace.yaml` or build script. Any prior claim that they exist as skeleton packages is false as of this verification.
@@ -75,7 +75,7 @@ The full command surface, read directly from `packages/cli/src/index.ts` and its
 
 | Command | What it does |
 | --- | --- |
-| `grove init [directory]` | Install the `@grove/default` registry scaffold into `<directory>/src/`, write `package.json`, `grove.config.ts`, and `astro.config.mjs`, then run `pnpm install` and `git init`. **Does not** scaffold `data/`, `content/`, `public/`, or `.github/` — those are left entirely to you. Options: `--no-install`, `--no-git`. No blueprint/framework/GitHub/deploy flags exist. |
+| `grove init [directory]` | Write `package.json` (scripts `dev`/`build`/`check`), `tsconfig.json`, `components.json` (`"registries": { "@grove": "https://withgrove.dev/r/{name}.json" }`), `grove.config.ts`, `astro.config.mjs`, and an empty `data/records/`; run `pnpm dlx shadcn@4.19.0 add <bundled default.json> --yes` to install the `@grove/default` item into `src/` (the CLI depends on `@grove-dev/registry`, so this needs no registry request; shadcn installs the scaffold's npm deps — astro, tailwindcss, `@tailwindcss/vite`, `@astrojs/check`); add `@grove-dev/{core,astro,cli,registry}` pinned to the CLI version; write `.grove/registry.lock.json`; then `pnpm install` and `git init`. **Does not** scaffold `content/`, `public/`, or `.github/` — those are left entirely to you. Options: `--no-install` (skips Grove's own `pnpm install`; shadcn still installs the scaffold's deps), `--no-git`. No blueprint/framework/GitHub/deploy flags exist. |
 | `grove check` | Validate project data (`validateProject`), run the full generation pipeline (`prepareDirectory`), then run `pnpm exec astro check`. Option: `--strict` (treat warnings as errors). This is the single V1 entry point for validation + generation. |
 | `grove sync github` | Enrich each record with live GitHub metadata (stars, forks, pushed date, license, language, topics), with a token-free HTML fallback when the API path fails. Options: `--limit <n>`, `--strict`. |
 | `grove sync contributors` | Aggregate contributors across the configured repositories into `data/generated/contributors.json`. |
@@ -85,7 +85,7 @@ The full command surface, read directly from `packages/cli/src/index.ts` and its
 | `grove collection promote` | Promote a filter URL (e.g. `/browse?stack=flutter&category=finance`) into a curated `data/collections/<slug>.yml` file. Options: `--from` and `--slug` (required), `--title`, `--description`. |
 | `grove icons sync` | Copy the packaged icon set into `public/icons/`. Mostly redundant — `@grove-dev/astro` already syncs icons on every build — but useful for `--force` (restore hand-edited icons) and `--check` (CI drift gate). |
 | `grove readme generate` | Render an awesome-list-formatted README between `<!-- grove-readme:start -->`/`<!-- grove-readme:end -->` sentinels from `data/records/*.yml`. Options: `--stdout`, `--path <path>`, `--check`. |
-| `grove update` | Reconcile an installed scaffold against the registry upstream — never overwrites locally-modified files. Options: `--check`, `--diff`, `--force`, `--json`. Requires `.grove/registry.lock.json` (written by `grove init`). |
+| `grove update` | Fetch `@grove/default` from the registry URL in `components.json` (or `--from <path-or-url>`; falls back to the copy bundled with the CLI) and reconcile the installed `src/` against it with a three-way diff (installed / lock / registry), classifying each file as unchanged, upstream_changed, new, locally_modified, conflict, or removed. Applies the safe changes, never overwrites locally-modified files, refreshes the lock. Options: `--check`, `--diff`, `--force`, `--json`, `--from`. Requires `.grove/registry.lock.json` (written by `grove init`). |
 
 None of these commands existed in earlier documentation of this page under the names `grove validate`, `grove generate`, `grove sitemap`, `grove llms`, `grove build`, `grove dev`, or `grove workflows sync` — those command names **do not exist** in the current CLI. There is also no `grove run` command. Validation, generation, sitemap, and `llms.txt` are folded into `grove check` (and into the Astro integration's automatic pipeline — see §8); `build`/`dev` are plain `astro build`/`astro dev`, invoked as `pnpm build`/`pnpm dev` via the scripts the registry's `registry.json` manifest declares (`dev`: `astro dev`, `build`: `astro build`, `check`: `astro check`).
 
@@ -106,7 +106,7 @@ That is the entire flag surface. Omit `[directory]` to scaffold into the current
 
 There is no code anywhere in `packages/cli/`, `packages/core/`, or `scripts/` that writes GitHub Actions workflow files, issue templates, or provider-specific deploy config (`vercel.json`, `netlify.toml`, `wrangler.jsonc`). A repo-wide grep for `vercel`, `netlify`, `cloudflare`, `github-pages`, and `deploy-*.yml` turns up nothing in the CLI or scripts — only in `apps/docs/src/content/docs/deployment/*.mdx` (hand-written deployment *guides*, not generator code) and in `apps/example/.github/` itself, which is a **hand-maintained reference implementation**, not output the CLI produced. `apps/example/.github/` currently contains `workflows/{ci,cleanup,deploy,readme,sync-contributors,sync-github}.yml`, `ISSUE_TEMPLATE/{bug_report,feature_request,record_submission}.md`, and `pull_request_template.md` — useful as a starting point to copy by hand, not something `grove init` generates for you.
 
-(Note: `apps/docs/src/content/docs/reference/cli.md` — a docs page, not this file — still claims `grove init` writes `.github/workflows/*`, `data/records/`, `data/taxonomy/`, `data/collections/`, `src/pages/`, and `tsconfig.json`. That page is itself stale relative to `packages/cli/src/init.ts` and should be corrected separately; it is not treated as a source of truth here.)
+(Note: `apps/docs/src/content/docs/reference/cli.md`'s `grove init` and `grove update` entries were rewritten against this model on 2026-08-29. Its `grove check` and `grove sync contributors` entries still refer to workflows "the scaffolder generates" and remain stale.)
 
 ---
 
@@ -220,47 +220,69 @@ There is **no `components` field** in the config schema. Component customization
 
 ## 7. The registry model
 
-There is no "Astro adapter's default template" shipped from inside `@grove-dev/astro` anymore — `@grove-dev/astro` ships **zero visual components**. The canonical UI source is `packages/registry/default/` (published as `@grove-dev/registry`), and `grove init` installs it into a consumer's `src/` via `materializeRegistry()`. `apps/example/` is the reference implementation — its `src/components/{ui,grove,site}/`, `src/layouts/`, `src/lib/`, `src/styles/system.css`, and `src/pages/` are a byte-identical mirror of the registry, enforced by `scripts/check-example-mirrors-registry.mjs`.
+There is no "Astro adapter's default template" shipped from inside `@grove-dev/astro` anymore — `@grove-dev/astro` ships **zero visual components**. The canonical UI source is `packages/registry/` (published as `@grove-dev/registry`), a real shadcn registry under the `@grove` namespace, and `grove init` installs it into a consumer's `src/` through the standard shadcn CLI. `apps/example/` is the reference consumer — `scripts/check-example-mirrors-registry.mjs` verifies every file of the `default` item exists at its target under `apps/example` with identical bytes.
+
+**The manifest.** `packages/registry/registry.json` is hand-authored in the official shadcn schema (`https://ui.shadcn.com/schema/registry.json`). It declares 12 feature-level items, each with a title, description, its files (explicit `type` and `target`, always `~/src/<path>`), and `registryDependencies` on the other `@grove/*` items it imports from.
+
+**The source layout.** Item sources live under `packages/registry/default/`, laid out exactly like a consumer's `src/` (`components/{ui,grove,site}`, `layouts`, `lib`, `pages`, `styles`). This is a deliberate departure from a typical shadcn registry, which groups source per item and imports through `@/` aliases: Grove's `.astro` files use relative imports, so the layout *is* the import contract and every file type-checks in place. `.astro` files are never transformed by the shadcn CLI, so they use semantic types (`registry:page`, `registry:component`, `registry:ui`); `.ts` and `.css` files must be `registry:file`, because the CLI runs other types through ts-morph transformers that strip comments and reformat, and `grove update` hashes installed files, so they must land byte-identical.
+
+**The build.** `pnpm registry:build` (`scripts/build-registry.mjs`) first validates `registry.json` against the source tree — every file under `default/` belongs to exactly one item (or is listed as default-only; currently just `pages/empty.astro`, the audit empty-state fixture); each item's `registryDependencies` exactly equals what its files' relative imports imply; file types and targets follow the rules above; nothing imports the removed `@grove-dev/astro/{components,ui,layouts}` subpaths. It then generates the `default` item (all 70 files inlined, so a scaffold installs in one step with no registry lookups), stamps every item with `meta.version` from the package version, and runs the official `shadcn build` (shadcn 4.19.0, a devDependency) to produce `packages/registry/dist/r/<item>.json` plus a `registry.json` index. `pnpm registry:check` runs the validation alone.
+
+**Hosting.** `@grove-dev/registry` on npm ships `dist/r/` (exports `./r/*`). The docs site copies `dist/r` into `apps/docs/public/r/` before each build (`scripts/sync-registry-public.mjs`), so items are served at `https://withgrove.dev/r/<item>.json`. A consumer's `components.json` contains `"registries": { "@grove": "https://withgrove.dev/r/{name}.json" }`, so `npx shadcn@latest add @grove/browse` installs the browse item and its `@grove/*` dependencies, `npx shadcn@latest add @grove/project-card --overwrite` restores one item's files to upstream, and `npx shadcn@latest view @grove/home` previews. No React and no `shadcn init` are needed — a bare Astro project with `components.json` and a tsconfig `@/*` path alias is enough.
 
 ### What `grove init` actually produces
-
-Confirmed against `packages/cli/src/init.ts` and cross-checked against `apps/docs/src/content/docs/getting-started/scaffold.mdx` (accurate, written from the same source):
 
 ```
 my-space/
 ├── astro.config.mjs         # registers @grove-dev/astro + the Tailwind v4 Vite plugin
 ├── grove.config.ts          # generated fresh — the registry ships no config of its own
-├── package.json             # @grove-dev/{core,astro,cli,registry} pinned to the CLI version,
-│                             # plus the scaffold's own npm deps/scripts from registry.json
+├── components.json          # "registries": { "@grove": "https://withgrove.dev/r/{name}.json" }
+├── tsconfig.json            # Astro base config + the @/* path alias the shadcn CLI expects
+├── package.json             # scripts dev/build/check; @grove-dev/{core,astro,cli,registry} pinned to
+│                             # the CLI version, plus the scaffold's own deps installed by shadcn
+├── data/
+│   └── records/             # empty — your YAML records go here
 ├── .grove/
-│   └── registry.lock.json   # install-time per-file hashes — what `grove update` diffs against
+│   └── registry.lock.json   # scaffold @grove/default, version, per-file sha256 — what `grove update` diffs against
 └── src/
     ├── components/
     │   ├── ui/               # button, badge, empty-state, filter-drawer, page-header, search-field
     │   ├── grove/             # domain UI + page-level compositions — project-card, hero, directory-browse, taxonomy-list, etc.
     │   └── site/              # site chrome — theme-toggle
     ├── layouts/               # base-layout, container, footer, header, section-header, seo
-    ├── pages/                 # home, browse, record detail, taxonomy, collections, submit, about, 404
+    ├── pages/                 # home, browse, record detail, taxonomy, collections, submit, about, contributors, 404
     ├── lib/                   # classnames, icon-kinds, icon-registry — UI-local helpers
     └── styles/
         └── system.css         # design tokens, light/dark theme, Tailwind theme
 ```
 
-`pages/` is registry-shipped like everything else here — `grove init` produces a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) from a single install step, not a component library with no routes. Two of the 32 `grove/` files are page-level composition components, not reusable UI: `directory-browse.astro` (browse-page body, shared by the paginated and unfiltered routes) and `taxonomy-list.astro` (shared body for the three taxonomy pages) exist only to be imported by `pages/`, not by other components.
+`grove init` runs `pnpm dlx shadcn@4.19.0 add <bundled default.json> --yes` — the CLI depends on `@grove-dev/registry`, so the built `default` item ships with it and a fresh scaffold needs no registry request. shadcn itself installs the scaffold's npm deps (astro, tailwindcss, `@tailwindcss/vite`, `@astrojs/check`) with real version ranges. The lock records targets project-relative (`src/components/ui/button.astro`).
 
-`grove init` explicitly does **not** scaffold `data/`, `content/`, `public/`, or `.github/` — that's stated directly in `init.ts`'s own header comment. You create `data/records/*.yml` yourself (see the getting-started docs), and any GitHub Actions or issue templates are yours to write, optionally starting from `apps/example/.github/` as a reference.
+`pages/` is registry-shipped like everything else here — `grove init` produces a fully routable site from a single install step, not a component library with no routes. Two of the `grove/` files are page-level composition components, not reusable UI: `directory-browse.astro` (browse-page body, shared by the paginated and unfiltered routes) and `taxonomy-list.astro` (shared body for the three taxonomy pages) exist only to be imported by `pages/`, not by other components.
 
-### Components shipped
+`grove init` does **not** scaffold `content/`, `public/`, or `.github/`. `data/records/` is created empty; any GitHub Actions or issue templates are yours to write, optionally starting from `apps/example/.github/` as a reference.
 
-Counted directly from `packages/registry/default/components/` and `packages/registry/default/pages/`:
+### Items shipped
 
-- `components/ui/` — 6 files: `badge`, `button`, `empty-state`, `filter-drawer`, `page-header`, `search-field`.
-- `components/grove/` — 32 files, including `hero`, `project-card`, `record-header`, `record-section`, `record-sidebar`, `index-row`, `pagination`, `refine-panel`, `smart-lens-tabs`, `stack-grid`, `category-grid`, `contributors-grid`, `collection-index`/`collection-page`/`collection-card`/`collection-row`/`collection-teaser`, `submission-client`, `filter-group-menu`, `filter-options`, `table-of-contents`, `language-breakdown`, `markdown-body`, `editorial-summary`, `original-collection`, `why-this-exists`, `final-cta`, `powered-by`, `card-grid`, `card-icon`, `icon`, `directory-index-client`, `directory-browse`, `taxonomy-list`, `pipeline-strip`.
-- `components/site/` — 1 file: `theme-toggle`.
-- `layouts/` — 6 files: `base-layout`, `container`, `footer`, `header`, `section-header`, `seo`.
-- `pages/` — 18 route files: `index`, `about`, `submit`, `contributors`, `404`, `empty` (an `EmptyState` fixture), `[slug]/index`, `[slug]/[recordSlug]`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json`, `categories/index`, `categories/[name]`, `stacks/index`, `stacks/[name]`, `licenses/[name]`, `collections/index`, `collections/[slug]`.
+From `packages/registry/registry.json`:
 
-39 components across `ui`/`grove`/`site`, plus 6 layout files and 18 page routes — not "22 components + 1 layout under `packages/astro/src/components/`" as earlier documented; that path does not exist. Filenames are kebab-case (`project-card.astro`), not PascalCase.
+| Item | Type | Depends on | Ships |
+| --- | --- | --- | --- |
+| `ui` | `registry:ui` | — | 6 primitives (`badge`, `button`, `empty-state`, `filter-drawer`, `page-header`, `search-field`) + `lib/classnames.ts` |
+| `shell` | `registry:block` | `ui` | 6 layouts (`base-layout`, `container`, `footer`, `header`, `section-header`, `seo`), `theme-toggle`, `powered-by`, `styles/system.css`; declares the npm deps `astro`, `@astrojs/check`, `tailwindcss`, `@tailwindcss/vite` |
+| `project-card` | `registry:block` | — | `project-card`, `card-grid`, `card-icon`, `icon`, `lib/icon-kinds.ts`, `lib/icon-registry.ts` |
+| `taxonomy` | `registry:block` | `shell`, `project-card`, `ui` | `categories/{index,[name]}`, `stacks/{index,[name]}`, `licenses/[name]`, `taxonomy-list`, `stack-grid`, `category-grid` |
+| `collections` | `registry:block` | `shell`, `project-card`, `ui` | `collections/{index,[slug]}`, `collection-index`, `collection-page`, `collection-card`, `collection-row`, `collection-teaser` |
+| `home` | `registry:block` | `shell`, `project-card`, `ui`, `taxonomy`, `collections` | `index`, `hero`, `why-this-exists`, `pipeline-strip`, `record-section`, `contributors-grid`, `original-collection`, `final-cta` |
+| `browse` | `registry:block` | `shell`, `project-card`, `ui` | `[slug]/index`, `[slug]/page/{[page],cards,records.json.ts}`, `directory-browse`, `directory-index-client`, `refine-panel`, `filter-group-menu`, `filter-options`, `pagination`, `smart-lens-tabs`, `index-row` |
+| `record` | `registry:block` | `shell`, `project-card`, `ui` | `[slug]/[recordSlug]`, `record-header`, `record-sidebar`, `editorial-summary`, `table-of-contents`, `markdown-body`, `language-breakdown` |
+| `submit` | `registry:block` | `shell`, `ui` | `submit`, `submission-client` |
+| `about` | `registry:block` | `shell`, `ui` | `about` |
+| `contributors` | `registry:block` | `shell`, `ui` | `contributors` |
+| `not-found` | `registry:block` | `shell`, `ui` | `404` |
+| `default` | `registry:block` (generated) | — | every file of every item above plus `pages/empty.astro`, 70 files inlined |
+
+Filenames are kebab-case (`project-card.astro`), not PascalCase.
 
 ### Naming
 
@@ -268,7 +290,10 @@ Current naming is `ProjectCard` / `project-card.astro` (kebab-case files). There
 
 ### Updating a scaffold
 
-`grove update` reconciles an installed `src/` against the registry's current upstream version, classifying each file as unchanged / locally-modified / upstream-changed / conflicted, and never overwrites a file you've edited. This has no analogue in the earlier template-copy model.
+Two paths, for two jobs:
+
+- **Reset or add a single item** with the standard shadcn CLI: `npx shadcn@latest add @grove/<item>` installs an item and its `@grove/*` dependencies; `--overwrite` puts one item's files back to upstream. shadcn's only answer to an existing, differing file is a yes/no overwrite prompt.
+- **Keep the whole site current** with `grove update`. It fetches `@grove/default` from the registry URL in `components.json` (or `--from <path-or-url>`; falls back to the bundled copy) and runs a three-way classification per file — installed / lock / registry — into unchanged, upstream_changed, new, locally_modified, conflict, or removed. Safe changes are applied, locally modified files are never overwritten, and the lock is refreshed. This is Grove's value-add over plain `shadcn add`.
 
 ---
 

@@ -22,11 +22,15 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const configPath = resolve(repoRoot, "apps/docs/astro.config.mjs");
+// The sidebar itself lives in its own module (shared with the llms.txt
+// endpoint); astro.config.mjs only imports it. Scan both, so the slug
+// check sees the sidebar and the orphan check still sees navLinks.
+const sidebarPath = resolve(repoRoot, "apps/docs/src/data/docs-sidebar.mjs");
 const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
 
 const checkOrphans = process.argv.includes("--check-orphans");
 
-const src = readFileSync(configPath, "utf8");
+const src = `${readFileSync(configPath, "utf8")}\n${readFileSync(sidebarPath, "utf8")}`;
 
 // Match `slug: 'foo/bar'` and `slug: "foo/bar"` anywhere in the
 // config. The Starlight sidebar config typically writes slugs
