@@ -60,11 +60,6 @@ export default defineConfig({
             // (classnames.test.ts etc.) need an explicit include.
             'packages/registry/default/**/*.{test,spec}.ts',
           ],
-          // The CLI's registry-snapshot/ subdirectory is a build-time
-          // copy of packages/registry/default/ (see build-cli.mjs) —
-          // same test files, already covered by the include above.
-          // Without this exclude they'd double-run.
-          exclude: ['**/registry-snapshot/**'],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its

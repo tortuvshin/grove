@@ -6,17 +6,5 @@
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "src/**/*.test.ts",
-    // registry-snapshot/ is a build-time copy of packages/registry/default/
-    // (see scripts/build-cli.mjs) — bundled scaffold content, not CLI
-    // implementation. Its .ts files (records.json.ts, classnames.ts, …)
-    // aren't meant to be checked against the CLI's own strictness here;
-    // @grove-dev/astro's "./server" export resolves to source (not dist)
-    // for local-dev type inference, so anything under registry-snapshot/
-    // that imports it would otherwise pull @grove-dev/astro/src/server/**
-    // into this build's exactOptionalPropertyTypes check — a tree that
-    // package's own tsconfig deliberately excludes from itself too.
-    "src/registry-snapshot/**"
-  ]
+  "exclude": ["src/**/*.test.ts"]
 }

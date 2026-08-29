@@ -6,15 +6,17 @@
  *
  *   1. The on-disk file (what the consumer has today).
  *   2. `.grove/registry.lock.json` (what we last installed).
- *   3. The registry snapshot bundled with the CLI (what's upstream).
+ *   3. The upstream registry item JSON — `default.json` as built by
+ *      `shadcn build`, with every file's content inlined (what's
+ *      upstream).
  *
- * Each is sha256-hashed into a 64-char hex digest. Lockfiles are
- * `registry.lock.json` shapes that mirror `registry.json` with an
- * extra `installedAt` field; this module keeps the I/O minimal so
- * `grove update` can run quickly even on large scaffolds.
+ * Each is sha256-hashed into a `sha256-<64 hex>` digest. Lockfile
+ * entries carry project-relative targets (`src/...`) so the three
+ * sides can be joined on one key; this module keeps the I/O minimal
+ * so `grove update` can run quickly even on large scaffolds.
  */
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export type Sha256Hash = `sha256-${string}`;
@@ -24,9 +26,9 @@ export function sha256(value: string): Sha256Hash {
 }
 
 export interface LockfileFile {
-  /** Path inside the consumer's project (`src/components/grove/...`). */
+  /** Project-relative path (`src/components/grove/...`) — the item's `target` with `~/` stripped. */
   target: string;
-  /** Path inside the registry snapshot (relative to snapshot root). */
+  /** Path inside the registry source tree (`default/components/grove/...`) — the item's `path`. */
   source: string;
   /** Hash at install time. */
   hash: Sha256Hash;
@@ -68,14 +70,14 @@ export async function readLockfile(consumerRoot: string): Promise<RegistryLockfi
 }
 
 /**
- * Hash a file at `consumerRoot/src/<target>` and return the digest.
- * Returns null if the file is missing.
+ * Hash the file at `consumerRoot/<target>` (a project-relative lock
+ * target such as `src/pages/index.astro`). Returns null if missing.
  */
 export async function hashInstalledFile(
   consumerRoot: string,
   target: string,
 ): Promise<Sha256Hash | null> {
-  const filePath = join(consumerRoot, "src", target);
+  const filePath = join(consumerRoot, target);
   try {
     const source = await readFile(filePath, "utf8");
     return sha256(source);
@@ -86,13 +88,15 @@ export async function hashInstalledFile(
 }
 
 /**
- * Write a fresh lockfile. Called by `grove init` (via the registry
- * installer) and by `grove update` after applying changes.
+ * Write a fresh lockfile. Called by `grove init` after the scaffold is
+ * installed and by `grove update` after applying changes. Creates
+ * `.grove/` if needed.
  */
 export async function writeLockfile(
   consumerRoot: string,
   lockfile: RegistryLockfile,
 ): Promise<void> {
-  const path = join(consumerRoot, ".grove", "registry.lock.json");
-  await writeFile(path, `${JSON.stringify(lockfile, null, 2)}\n`, "utf8");
+  const dir = join(consumerRoot, ".grove");
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, "registry.lock.json"), `${JSON.stringify(lockfile, null, 2)}\n`, "utf8");
 }

@@ -1,24 +1,23 @@
 #!/usr/bin/env node
 
-import { spawn } from "node:child_process";
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { Command } from "commander";
 import {
   buildGithubSyncPatch,
   classifyHealth,
   cleanupStale,
   enrichFromGithubHtml,
   fetchGithubMetadata,
+  type HealthEntry,
   loadConfig,
   normalizeGithubIntegration,
   parseGithubRepoUrl,
   prepareDirectory,
   stringifyRecordYaml,
-  type HealthEntry,
   syncContributors,
   validateProject,
 } from "@grove-dev/core";
+import { Command } from "commander";
 import { parse as parseYaml } from "yaml";
 import { buildAuditCommand } from "./audit-cli.js";
 import { buildCollectionCommand } from "./collection-cli.js";
@@ -26,20 +25,10 @@ import { buildIconsCommand } from "./icons-cli.js";
 import { buildImportCommand } from "./import-cli.js";
 import { initDirectory, readCliVersion } from "./init.js";
 import { buildReadmeCommand } from "./readme-cli.js";
+import { run } from "./run.js";
 import { formatPlan, runUpdate } from "./update.js";
 
 const program = new Command();
-
-function run(command: string, args: string[], cwd = process.cwd()): Promise<void> {
-  return new Promise((resolvePromise, reject) => {
-    const child = spawn(command, args, { cwd, stdio: "inherit", shell: false });
-    child.once("error", reject);
-    child.once("exit", (code, signal) => {
-      if (code === 0) resolvePromise();
-      else reject(new Error(`${command} exited with ${signal ?? code ?? "unknown status"}`));
-    });
-  });
-}
 
 program
   .name("grove")
@@ -49,8 +38,11 @@ program
 program
   .command("init")
   .argument("[directory]", "directory to create", ".")
-  .description("Create a complete Grove directory from the official site.")
-  .option("--no-install", "skip pnpm install")
+  .description("Create a Grove project by installing the @grove/default registry scaffold.")
+  .option(
+    "--no-install",
+    "skip the final pnpm install (shadcn still installs the scaffold's own npm dependencies)",
+  )
   .option("--no-git", "skip git init")
   .action(async (directory: string, options: { install: boolean; git: boolean }) => {
     const target = resolve(process.cwd(), directory);
@@ -243,12 +235,17 @@ program
   .option("--diff", "include a unified diff for every upstream_changed row")
   .option("--force", "apply changes even when conflicts exist (locally-modified is still preserved)")
   .option("--json", "emit a machine-readable JSON summary")
+  .option(
+    "--from <path-or-url>",
+    "upstream default.json to compare against (defaults to the @grove registry in components.json)",
+  )
   .action(
     async (options: {
       check?: boolean;
       diff?: boolean;
       force?: boolean;
       json?: boolean;
+      from?: string;
     }) => {
       const summary = await runUpdate({
         cwd: process.cwd(),
@@ -256,6 +253,7 @@ program
         diff: options.diff === true,
         force: options.force === true,
         json: options.json === true,
+        ...(options.from === undefined ? {} : { from: options.from }),
       });
       if (summary.exitCode === 1) {
         console.error(

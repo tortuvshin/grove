@@ -5,10 +5,11 @@
  *
  * Algorithm:
  *   1. Read `.grove/registry.lock.json` (the install-time snapshot).
- *   2. Hash every file under `src/` that the lockfile claims came
- *      from the registry.
- *   3. Hash every file in the bundled registry snapshot.
- *   4. Diff installed vs lock vs registry per file → classification.
+ *   2. Load the upstream `default` item — `--from <path-or-url>`,
+ *      else the `@grove` registry URL in components.json, else the
+ *      copy bundled with `@grove-dev/registry`.
+ *   3. Hash every file on disk the lockfile or the item names.
+ *   4. Diff installed vs lock vs upstream per file → classification.
  *   5. Apply rules per the table in apps/docs/concepts/registry.md:
  *
  *        unchanged          → skip
@@ -25,19 +26,22 @@
  *   1  no lockfile (consumer was never initialized)
  *   2  conflicts present (caller decides whether to --force)
  */
-import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
 import { planUpdate, type UpdatePlan } from "./diff.js";
 import {
   hashInstalledFile,
   readLockfile,
-  sha256,
-  writeLockfile,
-  type RegistryLockfile,
   type Sha256Hash,
+  writeLockfile,
 } from "./hash.js";
-import { loadManifest } from "./registry-install.js";
+import {
+  buildLockfile,
+  itemLockEntries,
+  loadItem,
+  resolveBundledItemPath,
+  resolveRegistryTemplate,
+  SCAFFOLD_ITEM,
+  writeItemFiles,
+} from "./registry.js";
 
 export interface UpdateOptions {
   cwd: string;
@@ -49,6 +53,8 @@ export interface UpdateOptions {
   force?: boolean;
   /** Emit JSON instead of the human-readable table. */
   json?: boolean;
+  /** Upstream item to diff against: a local path or an http(s) URL to a built `default.json`. */
+  from?: string;
 }
 
 export interface UpdateSummary {
@@ -57,14 +63,32 @@ export interface UpdateSummary {
   applied: string[];
   /** Files we preserved despite upstream changes. */
   preserved: string[];
+  /** Where the upstream item came from (path or URL). */
+  source: string;
   exitCode: 0 | 1 | 2;
 }
 
 /**
- * Plan and optionally apply a registry update. Pure-function
- * surface: takes the consumer root and option flags, returns a
- * structured summary. CLI side effects (printing, exit codes) live
- * in `grove update`'s subcommand handler.
+ * Pick the upstream item. Explicit `--from` wins; then the registry
+ * the project configured in components.json; then the item bundled
+ * with the installed `@grove-dev/registry` (which tracks the CLI's
+ * version, not the latest release — hence the note).
+ */
+async function resolveUpstreamSource(cwd: string, from?: string): Promise<string> {
+  if (from) return from;
+  const template = await resolveRegistryTemplate(cwd);
+  if (template) return template.replace("{name}", SCAFFOLD_ITEM);
+  const bundled = resolveBundledItemPath();
+  console.error(
+    `[update] no @grove registry in components.json — comparing against the bundled ${bundled}`,
+  );
+  return bundled;
+}
+
+/**
+ * Plan and optionally apply a registry update. Takes the consumer
+ * root and option flags, returns a structured summary. Printing and
+ * exit codes live in `grove update`'s subcommand handler.
  */
 export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> {
   const lock = await readLockfile(options.cwd);
@@ -73,54 +97,35 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
       plan: emptyPlan(),
       applied: [],
       preserved: [],
+      source: options.from ?? "",
       exitCode: 1,
     };
   }
-  const installed = await loadManifest();
-  const lockMap = mapByTarget(lock.files);
-  // `installed` here is the bundled REGISTRY snapshot (loadManifest()
-  // reads the package's own registry files), not the consumer's disk
-  // state — despite the name `loadManifest` returning something that
-  // looks "installed". `registrySnapshotMap` is that snapshot's
-  // target→hash map, used both to know which targets to hash on disk
-  // (below) and as the upstream side of the three-way diff. The real
-  // on-disk "installed" hashes are `installedHashes`, computed next.
-  const registrySnapshotMap = mapByTarget(installed.files);
+  const source = await resolveUpstreamSource(options.cwd, options.from);
+  const item = await loadItem(source);
 
+  const lockMap = mapByTarget(lock.files);
+  const upstreamMap = mapByTarget(itemLockEntries(item));
+  // Disk state for every target either side knows about — the lock's
+  // targets so files upstream dropped classify as `removed`, the
+  // item's so brand-new files classify as `new`.
   const installedHashes = await hashAllInstalled(
     options.cwd,
-    registrySnapshotMap,
+    new Set([...lockMap.keys(), ...upstreamMap.keys()]),
   );
 
-  const plan = planUpdate(installedHashes, lockMap, registrySnapshotMap);
+  const plan = planUpdate(installedHashes, lockMap, upstreamMap);
 
-  const applied: string[] = [];
+  let applied: string[] = [];
   const preserved: string[] = [];
 
   if (!options.check) {
     // Apply upstream_changed and new — never locally_modified or conflict.
-    for (const target of [...plan.upstream_changed, ...plan.new]) {
-      const upstream = installed.files.find((f) => f.target === target);
-      if (!upstream) continue;
-      const dest = join(options.cwd, "src", target);
-      await mkdir(dirname(dest), { recursive: true });
-      await writeFile(dest, await readFile(join(installedSnapshotDir(), upstream.source), "utf8"));
-      applied.push(target);
-    }
+    applied = await writeItemFiles(item, options.cwd, {
+      only: new Set([...plan.upstream_changed, ...plan.new]),
+    });
     // Refresh the lockfile so the next update sees the new hashes.
-    const nextLock: RegistryLockfile = {
-      scaffold: installed.manifest.name,
-      scaffoldVersion: installed.manifest.version,
-      installedAt: new Date().toISOString().slice(0, 10),
-      fileCount: installed.files.length,
-      files: installed.files.map((f) => ({
-        target: f.target,
-        source: f.source,
-        hash: f.hash as Sha256Hash,
-        bytes: f.bytes,
-      })),
-    };
-    await writeLockfile(options.cwd, nextLock);
+    await writeLockfile(options.cwd, buildLockfile(item));
   }
 
   for (const target of plan.locally_modified) preserved.push(target);
@@ -129,7 +134,7 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
   const exitCode: 0 | 1 | 2 =
     plan.conflict.length > 0 && !options.force ? 2 : 0;
 
-  return { plan, applied, preserved, exitCode };
+  return { plan, applied, preserved, source, exitCode };
 }
 
 function emptyPlan(): UpdatePlan {
@@ -151,22 +156,13 @@ function mapByTarget<T extends { target: string; hash: string }>(files: T[]): Ma
 
 async function hashAllInstalled(
   cwd: string,
-  installed: Map<string, Sha256Hash>,
+  targets: Iterable<string>,
 ): Promise<Map<string, Sha256Hash | null>> {
   const out = new Map<string, Sha256Hash | null>();
-  for (const target of installed.keys()) {
+  for (const target of targets) {
     out.set(target, await hashInstalledFile(cwd, target));
   }
   return out;
-}
-
-function installedSnapshotDir(): string {
-  // Lazy import to avoid a circular module reference.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { resolveRegistrySnapshotDir } = require("./registry-install.js") as {
-    resolveRegistrySnapshotDir: () => string;
-  };
-  return resolveRegistrySnapshotDir();
 }
 
 /**
@@ -191,5 +187,5 @@ export function formatPlan(plan: UpdatePlan, applied: string[]): string {
   return lines.join("\n");
 }
 
-export { planUpdate };
 export { classify } from "./diff.js";
+export { planUpdate };
