@@ -1,0 +1,29 @@
+apps/docs/src/content/docs/customize/components.md
+  s_134e5b252de84f::t_d4eb5abff6b8dd 12,17-21,23,32
+  s_134e5b252de84f::t_f3186eadaf3646 70-72
+apps/docs/src/content/docs/getting-started/scaffold.mdx
+  s_134e5b252de84f::t_a4b483a67523fa 113
+apps/docs/src/content/docs/customize/pages.md
+  s_134e5b252de84f::t_e723866164243f 22
+  s_134e5b252de84f::t_67647b3c2435b3 77-78
+apps/docs/PRODUCT.md
+  s_134e5b252de84f::t_aebdc017e22acf 223
+  s_134e5b252de84f::t_6398819600382d 240,243,249-250,255,258,261,263
+  s_134e5b252de84f::t_811f31f06ee5b3 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "39c379ac67e20c007696f85016927edad64c9be1",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
