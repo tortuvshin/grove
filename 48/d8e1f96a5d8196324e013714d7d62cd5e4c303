@@ -1,0 +1,57 @@
+packages/cli/tsconfig.json
+  s_134e5b252de84f::t_011a6cacf34adf 9
+packages/astro/package.json
+  s_134e5b252de84f::t_cd8fd4919b4a9d 45-46
+packages/cli/src/registry.test.ts
+  s_134e5b252de84f::t_01538629ad3510 1-42,45,48-64,67-69
+  s_134e5b252de84f::t_87baa202b48b25 43-44,46-47
+  s_134e5b252de84f::t_720c5372f6a4b6 65-66
+packages/cli/src/run.ts
+  s_134e5b252de84f::t_939796f0ebd373 1-18
+packages/cli/src/init.ts
+  s_134e5b252de84f::t_f0dbd55d324d31 136-143,149-153
+  s_134e5b252de84f::t_98e5b9f176b344 3,5-8,10-30,32-36,38-39,41,43-51,60-71,76-80,86,132-135,144-148,154-168,175,182,184-186,188,191,193,195-203,210-214,216-260,284-286,288-293,315-317,319-322,331-349
+  s_134e5b252de84f::t_73f4b8739c8524 204-209,215
+packages/cli/src/icons-cli.ts
+  s_134e5b252de84f::t_3977938a9751ac 1-2,25,61-79
+  s_134e5b252de84f::t_1e95a56f9d678e 80
+packages/cli/src/hash.ts
+  s_134e5b252de84f::t_07dbb6fc7fccf2 9-11,13-16,29,31,73-74,80,91-93,99,101
+  s_134e5b252de84f::t_7e33392119e02b 100
+  s_134e5b252de84f::t_9219071c10553a 19
+packages/cli/src/update.test.ts
+  s_134e5b252de84f::t_6b8f024f8ce6a6 1-105
+packages/cli/src/init.test.ts
+  s_134e5b252de84f::t_d749a072e6f071 2,7,9-19,25,28,31-46,49,51,57-65,67-68,70-75,77-79,86-90
+packages/cli/package.json
+  s_134e5b252de84f::t_d4399841b18383 52
+  s_134e5b252de84f::t_88396e52c890df 45
+tests/integration/grove-init.test.ts
+  s_134e5b252de84f::t_d83030ffa48ef9 2-3,14-17,32,34-36,40,43-52,56-62
+packages/cli/README.md
+  s_134e5b252de84f::t_7514ee83773169 10-13
+packages/cli/src/index.ts
+  s_134e5b252de84f::t_b7c6eaef4bf1df 238-241,248,256
+  s_134e5b252de84f::t_f606adfc8c6412 3,11,20,28,41-45
+packages/cli/src/registry.ts
+  s_134e5b252de84f::t_bf4981c74f04e3 1-207
+packages/cli/src/update.ts
+  s_134e5b252de84f::t_f527ccac6132da 191
+  s_134e5b252de84f::t_1391a3f659e217 8-12,34,36-44,56-57,66-67,72-91,100,104-105,107-111,114,117,119,124-126,128,137,159,162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "48d8e1f96a5d8196324e013714d7d62cd5e4c303",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
