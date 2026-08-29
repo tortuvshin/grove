@@ -1,0 +1,86 @@
+apps/example/src/components/grove/taxonomy-list.astro
+  s_134e5b252de84f::t_b341b8cd93dd0b 1-96
+packages/registry/default/pages/[slug]/page/records.json.ts
+  s_134e5b252de84f::t_5c2f6007831c26 1-24
+packages/registry/default/pages/[slug]/[recordSlug].astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-71
+packages/registry/default/pages/categories/[name].astro
+  s_134e5b252de84f::t_7efe03198f325d 1-35
+packages/registry/default/pages/collections/[slug].astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-45
+packages/registry/default/pages/index.astro
+  s_134e5b252de84f::t_7efe03198f325d 1-162
+packages/registry/default/pages/collections/index.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-32
+packages/registry/default/pages/contributors.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-115
+packages/registry/default/pages/stacks/[name].astro
+  s_134e5b252de84f::t_7efe03198f325d 1-35
+apps/example/src/pages/licenses/[name].astro
+  s_134e5b252de84f::t_5c2f6007831c26 5
+apps/example/src/pages/stacks/[name].astro
+  s_134e5b252de84f::t_5c2f6007831c26 5
+packages/registry/default/components/grove/directory-browse.astro
+  s_134e5b252de84f::t_d49200fe71812a 1-27,35-36,42-256
+  s_134e5b252de84f::t_610a84e569c58a 28-34,37-41
+packages/registry/default/pages/[slug]/page/[page].astro
+  s_134e5b252de84f::t_7efe03198f325d 1-32
+packages/registry/default/pages/stacks/index.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-35
+apps/example/src/components/grove/directory-browse.astro
+  s_134e5b252de84f::t_b341b8cd93dd0b 1-256
+apps/example/src/pages/categories/[name].astro
+  s_134e5b252de84f::t_5c2f6007831c26 5
+packages/registry/default/pages/about.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-130
+packages/registry/default/pages/empty.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-24
+packages/registry/default/pages/404.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-63
+apps/example/src/components/grove/pipeline-strip.astro
+  s_134e5b252de84f::t_b341b8cd93dd0b 1-124
+apps/example/src/pages/[slug]/index.astro
+  s_134e5b252de84f::t_5c2f6007831c26 11
+packages/registry/default/pages/[slug]/index.astro
+  s_134e5b252de84f::t_7efe03198f325d 1-19
+packages/registry/default/pages/licenses/[name].astro
+  s_134e5b252de84f::t_7efe03198f325d 1-35
+apps/example/src/pages/[slug]/page/[page].astro
+  s_134e5b252de84f::t_5c2f6007831c26 16
+packages/registry/default/pages/submit.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-183
+scripts/check-example-mirrors-registry.mjs
+  s_134e5b252de84f::t_4013f79ef2626f 43
+apps/example/src/pages/index.astro
+  s_134e5b252de84f::t_5c2f6007831c26 17
+packages/registry/default/components/grove/taxonomy-list.astro
+  s_134e5b252de84f::t_111422cc42d2af 15-17
+  s_134e5b252de84f::t_d49200fe71812a 1-14,18-74,76-96
+  s_134e5b252de84f::t_9d445f12ce7609 75
+packages/registry/default/README.md
+  s_134e5b252de84f::t_596b2a0d09902e 11-19,22-24
+  s_134e5b252de84f::t_147636532be8b6 25
+packages/registry/default/components/grove/pipeline-strip.astro
+  s_134e5b252de84f::t_d49200fe71812a 1-2,4,12-16,20-25,27-124
+  s_134e5b252de84f::t_46082b3f7b7a59 3,5-11,17-19,26
+packages/registry/default/pages/[slug]/page/cards.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-50
+packages/registry/default/pages/categories/index.astro
+  s_134e5b252de84f::t_5c2f6007831c26 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "ee419f626ff6148a1fc7257033a6717f9df60428",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
