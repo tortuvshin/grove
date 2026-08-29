@@ -1,0 +1,19 @@
+scripts/sync-registry-public.mjs
+  s_65aee42924a4c3::t_37c13236cd7dd7 11,18,20-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "c95efe2e57bbd95bbe2bb65d49ba7dda7d7ff05c",
+  "prompts": {},
+  "sessions": {
+    "s_65aee42924a4c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea57d175-e1d6-4c7e-92ec-757a51c99821",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
