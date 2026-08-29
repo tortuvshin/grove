@@ -1,0 +1,19 @@
+scripts/test-scaffold.mjs
+  s_65aee42924a4c3::t_bfdcfe53fe25d3 59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "50249067c22b4831c43308fde34e2abc9aba4c83",
+  "prompts": {},
+  "sessions": {
+    "s_65aee42924a4c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea57d175-e1d6-4c7e-92ec-757a51c99821",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
