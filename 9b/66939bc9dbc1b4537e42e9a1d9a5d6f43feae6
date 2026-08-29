@@ -1,0 +1,33 @@
+scripts/test-scaffold.mjs
+  s_134e5b252de84f::t_e46c9878397c83 23,31
+packages/cli/src/registry-install.ts
+  s_134e5b252de84f::t_de2a018122d46e 116-123
+packages/cli/tsconfig.json
+  s_134e5b252de84f::t_a3d036d282c75d 9-21
+packages/cli/src/init.test.ts
+  s_134e5b252de84f::t_a4edae754b5cc8 56-60
+  s_134e5b252de84f::t_37b70f2ca2ace9 44,49-54
+  s_134e5b252de84f::t_07b5f9bda7045d 55
+packages/cli/src/init.ts
+  s_134e5b252de84f::t_424c27f30d5029 218-246
+  s_134e5b252de84f::t_23c26abb3d471e 17-19
+  s_134e5b252de84f::t_80d86360c720f0 247-261
+  s_134e5b252de84f::t_c3ad211f3fa048 20-22,24-28,30-36
+  s_134e5b252de84f::t_b5169f5d45736a 262
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "9b66939bc9dbc1b4537e42e9a1d9a5d6f43feae6",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
