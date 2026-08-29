@@ -58,3 +58,11 @@
 /llms.txt
 /llms-full.txt
     Cache-Control: public, max-age=3600, must-revalidate
+
+# ─── shadcn registry: the `@grove` items consumers install with
+#     `npx shadcn add @grove/<item>` and `grove update` (synced from
+#     packages/registry/dist/r on every build). Short cache, so a
+#     release is what an install fetches, not last week's scaffold.
+/r/*
+    Cache-Control: public, max-age=300, must-revalidate
+    Content-Type: application/json; charset=utf-8

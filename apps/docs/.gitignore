@@ -21,3 +21,6 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# Copy of packages/registry/dist/r, synced before each build (scripts/sync-registry-public.mjs)
+public/r/

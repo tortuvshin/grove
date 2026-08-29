@@ -53,7 +53,16 @@ jobs:
         run: pnpm -r build
 
       - name: Type-check
+        # Also runs `@grove-dev/registry`'s check: registry.json must be
+        # consistent with packages/registry/default/ (coverage, derived
+        # registryDependencies, file types, targets, forbidden imports).
         run: pnpm -r check
+
+      - name: apps/example mirrors the registry
+        # apps/example is the reference consumer — every file of the
+        # generated `default` scaffold must exist at its target there,
+        # byte-identical. Catches an edit made on one side only.
+        run: pnpm example:check
 
   test:
     name: Scaffold smoke test
