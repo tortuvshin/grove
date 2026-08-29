@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": false,
-  "description": "Canonical UI source for Grove — registry scaffolds (currently @grove/default) installed into the consumer's src/ at grove init time.",
+  "description": "Grove's UI as a shadcn registry — feature blocks (home, browse, record, …) plus the full `default` scaffold, installable with `npx shadcn add @grove/<item>` or by `grove init`.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -13,20 +13,25 @@
     "registry": "https://registry.npmjs.org/"
   },
   "files": [
-    "default"
+    "dist",
+    "default",
+    "registry.json",
+    "README.md"
   ],
   "exports": {
-    ".": "./default/registry.json",
-    "./default": "./default/registry.json",
-    "./default/*": "./default/*"
+    ".": "./dist/r/registry.json",
+    "./r/*": "./dist/r/*",
+    "./package.json": "./package.json"
   },
   "keywords": [
     "grove",
     "registry",
+    "shadcn",
+    "astro",
     "ui",
     "scaffold"
   ],
-  "homepage": "https://github.com/tortuvshin/grove#readme",
+  "homepage": "https://withgrove.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tortuvshin/grove.git",
@@ -34,9 +39,10 @@
   },
   "scripts": {
     "build": "node ../../scripts/build-registry.mjs",
-    "check": "node ../../scripts/check-registry-invariants.mjs"
+    "check": "node ../../scripts/check-registry.mjs"
   },
   "devDependencies": {
-    "@types/node": "^25.9.2"
+    "@types/node": "^25.9.2",
+    "shadcn": "4.19.0"
   }
 }

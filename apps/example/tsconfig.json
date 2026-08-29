@@ -5,6 +5,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@grove/generated/*": ["data/generated/*"]
     }
   },

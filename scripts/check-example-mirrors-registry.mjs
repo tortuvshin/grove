@@ -1,130 +1,69 @@
 // SPDX-License-Identifier: MIT
 /**
- * Verify that apps/example is structurally equivalent to a fresh
- * `grove init` output. The example is the canary for the registry
- * model — if the registry changes (Phase 4's move, Phase 6's init
- * rewrite, Phase 7's update mechanism) and apps/example drifts, the
- * difference will show here as a gate failure.
+ * Verify that apps/example is exactly what `grove init` would install:
+ * every file the registry's full scaffold ships exists at its target
+ * under apps/example/ with identical bytes. The example is the canary
+ * for the registry — a component edited in one place but not the
+ * other shows up here as a gate failure.
  *
  *   node scripts/check-example-mirrors-registry.mjs          verify
- *   node scripts/check-example-mirrors-registry.mjs --write  install
- *
- * `--write` materializes a registry lockfile snapshot at
- * apps/example/.grove/registry.lock.json so `grove update` has
- * something to compare against on the next run.
+ *   node scripts/check-example-mirrors-registry.mjs --write  refresh
+ *       apps/example/.grove/registry.lock.json (what `grove update`
+ *       compares against; .grove/ is gitignored, so this is local)
  */
-import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { relative, resolve } from "node:path";
+import {
+  ROOT,
+  SCAFFOLD_ID,
+  SCAFFOLD_ITEM,
+  buildFullRegistry,
+  lockEntriesFor,
+  readRegistryVersion,
+  readSource,
+  targetToProjectPath,
+} from "./lib/registry.mjs";
 
-const root = resolve(import.meta.dirname, "..");
-const registryDefault = resolve(root, "packages/registry/default");
-const exampleSrc = resolve(root, "apps/example/src");
-const exampleLockfile = resolve(root, "apps/example/.grove/registry.lock.json");
-const exampleGroveDir = resolve(root, "apps/example/.grove");
-
+const exampleRoot = resolve(ROOT, "apps/example");
+const lockfilePath = resolve(exampleRoot, ".grove/registry.lock.json");
 const writeMode = process.argv.includes("--write");
 
-function sha256(value) {
-  return createHash("sha256").update(value).digest("hex");
-}
+const scaffold = buildFullRegistry().items.find((item) => item.name === SCAFFOLD_ITEM);
 
-// Mirror the registry's directory layout onto apps/example/src. The
-// mapping is the same as Phase 4: registry/default/components/grove/
-// becomes example/src/components/grove/, etc.
-const REGISTRY_TO_EXAMPLE = {
-  "components/ui/": "components/ui/",
-  "components/grove/": "components/grove/",
-  "components/site/": "components/site/",
-  "layouts/": "layouts/",
-  "lib/": "lib/",
-  "styles/system.css": "styles/system.css",
-  "pages/": "pages/",
-};
-
-function registryToExamplePath(rel) {
-  for (const [from, to] of Object.entries(REGISTRY_TO_EXAMPLE)) {
-    if (rel.startsWith(from)) {
-      return to + rel.slice(from.length);
-    }
-  }
-  return null;
-}
-
-async function* walk(dir) {
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    if (entry.name === ".grove") continue;
-    const full = resolve(dir, entry.name);
-    if (entry.isDirectory()) yield* walk(full);
-    else if (entry.isFile()) yield full;
-  }
-}
-
-async function buildLockfile() {
-  const manifest = JSON.parse(
-    await readFile(resolve(registryDefault, "registry.json"), "utf8"),
-  );
-  const files = [];
-  for await (const full of walk(registryDefault)) {
-    if (full.endsWith("registry.json") || full.endsWith("registry.lock.json")) continue;
-    const rel = relative(registryDefault, full).split("\\").join("/");
-    if (rel === "README.md") continue;
-    const exampleRel = registryToExamplePath(rel);
-    if (!exampleRel) continue;
-    const source = await readFile(full, "utf8");
-    files.push({
-      path: exampleRel,
-      source: rel,
-      hash: `sha256-${sha256(source)}`,
-      bytes: Buffer.byteLength(source, "utf8"),
-    });
-  }
-  files.sort((a, b) => a.path.localeCompare(b.path));
-  return {
-    scaffold: manifest.name,
-    scaffoldVersion: manifest.version,
-    builtAt: new Date().toISOString().slice(0, 10),
+if (writeMode) {
+  const files = lockEntriesFor(scaffold);
+  const lock = {
+    scaffold: SCAFFOLD_ID,
+    scaffoldVersion: readRegistryVersion(),
+    installedAt: new Date().toISOString().slice(0, 10),
     fileCount: files.length,
     files,
   };
+  await mkdir(resolve(exampleRoot, ".grove"), { recursive: true });
+  await writeFile(lockfilePath, `${JSON.stringify(lock, null, 2)}\n`);
+  console.log(`Wrote ${relative(ROOT, lockfilePath)} (${files.length} files)`);
+  process.exit(0);
 }
 
-async function main() {
-  if (writeMode) {
-    const lock = await buildLockfile();
-    await mkdir(exampleGroveDir, { recursive: true });
-    await writeFile(exampleLockfile, JSON.stringify(lock, null, 2) + "\n");
-    console.log(`Wrote ${exampleLockfile.replace(root + "/", "")}`);
-    console.log(`  ${lock.fileCount} files`);
-    return;
+let missing = 0;
+let drifted = 0;
+for (const file of scaffold.files) {
+  const projectPath = targetToProjectPath(file.target);
+  const examplePath = resolve(exampleRoot, projectPath);
+  if (!existsSync(examplePath)) {
+    console.error(`missing: ${projectPath}`);
+    missing++;
+    continue;
   }
-
-  const lock = await buildLockfile();
-  let drifted = 0;
-  let missing = 0;
-  for (const file of lock.files) {
-    const examplePath = resolve(exampleSrc, file.path);
-    if (!existsSync(examplePath)) {
-      console.error(`missing: ${file.path}`);
-      missing++;
-      continue;
-    }
-    const source = await readFile(examplePath, "utf8");
-    if (`sha256-${sha256(source)}` !== file.hash) {
-      console.error(`drifted: ${file.path}`);
-      drifted++;
-    }
+  if ((await readFile(examplePath, "utf8")) !== readSource(file.path)) {
+    console.error(`drifted: ${projectPath}  (registry: ${file.path})`);
+    drifted++;
   }
-  if (missing + drifted > 0) {
-    console.error(`\n${missing + drifted} files differ from registry (${missing} missing, ${drifted} drifted).`);
-    console.error("Run `pnpm example:sync` to refresh apps/example from the registry.");
-    process.exit(1);
-  }
-  console.log(`apps/example mirrors @grove/default (${lock.fileCount} files in lockstep).`);
 }
-
-main().catch((err) => {
-  console.error(err);
+if (missing + drifted > 0) {
+  console.error(`\n${missing + drifted} file(s) differ from the registry (${missing} missing, ${drifted} drifted).`);
+  console.error("Copy the registry version over apps/example (or the other way round), then re-run.");
   process.exit(1);
-});
+}
+console.log(`apps/example mirrors ${SCAFFOLD_ID} (${scaffold.files.length} files in lockstep).`);
