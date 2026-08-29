@@ -6,7 +6,7 @@ This document is the source of truth for what Grove actually is, what it ships t
 
 ## 1. What Grove is, in one paragraph
 
-Grove is a **framework for building community knowledge directories** powered by structured files. `grove init` installs Grove's component registry into a fresh Astro project (`src/components`, `src/layouts`, `src/lib`, `src/styles`) and generates `grove.config.ts`, `astro.config.mjs`, and `package.json`. You then create your own `data/records/*.yml` files, write your own GitHub Actions (the example app's `.github/` is a working reference, not something the CLI generates for you), and run `grove check` / `astro build`. Every record is a file. Every change is reviewable. The site is static. There is no database, no CMS, no admin dashboard.
+Grove is a **framework for building community knowledge directories** powered by structured files. `grove init` installs Grove's component registry — including its page routes — into a fresh Astro project (`src/components`, `src/layouts`, `src/lib`, `src/styles`, `src/pages`) and generates `grove.config.ts`, `astro.config.mjs`, and `package.json`. The result is a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) with zero records in it. You then create your own `data/records/*.yml` files, write your own GitHub Actions (the example app's `.github/` is a working reference, not something the CLI generates for you), and run `grove check` / `astro build`. Every record is a file. Every change is reviewable. The site is static. There is no database, no CMS, no admin dashboard.
 
 The framework supports **one blueprint end-to-end today** — `project-directory`, rendered by the registry's default scaffold. Two other blueprints (`resource-hub`, `ecosystem-map`) exist as Zod schemas only — no scaffold, no routes, no authoring path. Selecting a blueprint is a config edit (`blueprint: "project-directory"` in `grove.config.ts`), not a CLI flag — `grove init` no longer prompts or accepts blueprint/framework/deploy options.
 
@@ -220,7 +220,7 @@ There is **no `components` field** in the config schema. Component customization
 
 ## 7. The registry model
 
-There is no "Astro adapter's default template" shipped from inside `@grove-dev/astro` anymore — `@grove-dev/astro` ships **zero visual components**. The canonical UI source is `packages/registry/default/` (published as `@grove-dev/registry`), and `grove init` installs it into a consumer's `src/` via `materializeRegistry()`. `apps/example/` is the reference implementation — its `src/components/{ui,grove,site}/`, `src/layouts/`, `src/lib/`, and `src/styles/system.css` are a byte-identical mirror of the registry, enforced by `scripts/check-example-mirrors-registry.mjs`.
+There is no "Astro adapter's default template" shipped from inside `@grove-dev/astro` anymore — `@grove-dev/astro` ships **zero visual components**. The canonical UI source is `packages/registry/default/` (published as `@grove-dev/registry`), and `grove init` installs it into a consumer's `src/` via `materializeRegistry()`. `apps/example/` is the reference implementation — its `src/components/{ui,grove,site}/`, `src/layouts/`, `src/lib/`, `src/styles/system.css`, and `src/pages/` are a byte-identical mirror of the registry, enforced by `scripts/check-example-mirrors-registry.mjs`.
 
 ### What `grove init` actually produces
 
@@ -237,26 +237,30 @@ my-space/
 └── src/
     ├── components/
     │   ├── ui/               # button, badge, empty-state, filter-drawer, page-header, search-field
-    │   ├── grove/             # domain UI — project-card, hero, collection-*, refine-panel, etc.
+    │   ├── grove/             # domain UI + page-level compositions — project-card, hero, directory-browse, taxonomy-list, etc.
     │   └── site/              # site chrome — theme-toggle
     ├── layouts/               # base-layout, container, footer, header, section-header, seo
+    ├── pages/                 # home, browse, record detail, taxonomy, collections, submit, about, 404
     ├── lib/                   # classnames, icon-kinds, icon-registry — UI-local helpers
     └── styles/
         └── system.css         # design tokens, light/dark theme, Tailwind theme
 ```
 
+`pages/` is registry-shipped like everything else here — `grove init` produces a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) from a single install step, not a component library with no routes. Two of the 32 `grove/` files are page-level composition components, not reusable UI: `directory-browse.astro` (browse-page body, shared by the paginated and unfiltered routes) and `taxonomy-list.astro` (shared body for the three taxonomy pages) exist only to be imported by `pages/`, not by other components.
+
 `grove init` explicitly does **not** scaffold `data/`, `content/`, `public/`, or `.github/` — that's stated directly in `init.ts`'s own header comment. You create `data/records/*.yml` yourself (see the getting-started docs), and any GitHub Actions or issue templates are yours to write, optionally starting from `apps/example/.github/` as a reference.
 
 ### Components shipped
 
-Counted directly from `packages/registry/default/components/`:
+Counted directly from `packages/registry/default/components/` and `packages/registry/default/pages/`:
 
 - `components/ui/` — 6 files: `badge`, `button`, `empty-state`, `filter-drawer`, `page-header`, `search-field`.
-- `components/grove/` — 32 files, including `hero`, `project-card`, `record-header`, `record-section`, `record-sidebar`, `index-row`, `pagination`, `refine-panel`, `smart-lens-tabs`, `stack-grid`, `category-grid`, `contributors-grid`, `collection-index`/`collection-page`/`collection-card`/`collection-row`/`collection-teaser`, `submission-client`, `filter-group-menu`, `filter-options`, `table-of-contents`, `language-breakdown`, `markdown-body`, `editorial-summary`, `original-collection`, `why-this-exists`, `final-cta`, `powered-by`, `card-grid`, `card-icon`, `icon`, `directory-index-client`.
+- `components/grove/` — 32 files, including `hero`, `project-card`, `record-header`, `record-section`, `record-sidebar`, `index-row`, `pagination`, `refine-panel`, `smart-lens-tabs`, `stack-grid`, `category-grid`, `contributors-grid`, `collection-index`/`collection-page`/`collection-card`/`collection-row`/`collection-teaser`, `submission-client`, `filter-group-menu`, `filter-options`, `table-of-contents`, `language-breakdown`, `markdown-body`, `editorial-summary`, `original-collection`, `why-this-exists`, `final-cta`, `powered-by`, `card-grid`, `card-icon`, `icon`, `directory-index-client`, `directory-browse`, `taxonomy-list`, `pipeline-strip`.
 - `components/site/` — 1 file: `theme-toggle`.
 - `layouts/` — 6 files: `base-layout`, `container`, `footer`, `header`, `section-header`, `seo`.
+- `pages/` — 18 route files: `index`, `about`, `submit`, `contributors`, `404`, `empty` (an `EmptyState` fixture), `[slug]/index`, `[slug]/[recordSlug]`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json`, `categories/index`, `categories/[name]`, `stacks/index`, `stacks/[name]`, `licenses/[name]`, `collections/index`, `collections/[slug]`.
 
-39 components across `ui`/`grove`/`site`, plus 6 layout files — not "22 components + 1 layout under `packages/astro/src/components/`" as earlier documented; that path does not exist. Filenames are kebab-case (`project-card.astro`), not PascalCase.
+39 components across `ui`/`grove`/`site`, plus 6 layout files and 18 page routes — not "22 components + 1 layout under `packages/astro/src/components/`" as earlier documented; that path does not exist. Filenames are kebab-case (`project-card.astro`), not PascalCase.
 
 ### Naming
 

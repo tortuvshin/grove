@@ -9,18 +9,18 @@ This split is deliberate: data and presentation evolve at different speeds, and 
 
 ## Where the components live
 
-After `grove init`, your `src/` has the same `components/`, `layouts/`, `lib/`, and `styles/` structure the registry ships — plus a `pages/` directory that's entirely yours to add:
+After `grove init`, your `src/` has the full structure the registry ships — `components/`, `layouts/`, `lib/`, `styles/`, **and** `pages/`. Pages are registry-shipped like everything else: `grove init` gives you a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, 404) with zero records in it, not just a component library you have to build pages around yourself.
 
 ```
 src/
 ├── components/
-│   ├── ui/         # primitives — Button, Badge, Input, Sheet, ThemeToggle
-│   ├── grove/      # domain UI — ProjectCard, FilterBar, DirectoryIndexClient, …
-│   └── site/       # site chrome — ThemeToggle
-├── layouts/        # BaseLayout, Header, Footer, Container, Seo, SectionHeader
-├── pages/          # consumer-owned, not registry-shipped — Home, Browse, Record detail, Collections, About, Submit, 404
+│   ├── ui/         # primitives — button, badge, empty-state, filter-drawer, page-header, search-field
+│   ├── grove/      # domain UI + page-level compositions — project-card, hero, directory-browse, taxonomy-list, …
+│   └── site/       # site chrome — theme-toggle
+├── layouts/        # base-layout, header, footer, container, seo, section-header
+├── pages/          # home, browse, record detail, taxonomy, collections, submit, about, 404 — same update rules as everything else here
 ├── lib/            # UI-local helpers (classnames, icon-kinds, icon-registry)
-└── styles/         # system.css + global.css
+└── styles/         # system.css
 ```
 
 Pages import from local paths:
@@ -29,7 +29,7 @@ Pages import from local paths:
 ---
 import ProjectCard from "../components/grove/project-card.astro";
 import BaseLayout from "../layouts/base-layout.astro";
-import { Button } from "../components/ui/button.astro";
+import Button from "../components/ui/button.astro";
 ---
 ```
 
@@ -66,8 +66,10 @@ Domain UI components rendered by Grove's pages. Each accepts a view-model-shaped
 | `pagination.astro` | Previous/Next + windowed page list. |
 | `powered-by.astro` | "Powered by Grove" inline SVG attribution. |
 | `smart-lens-tabs.astro` | Horizontal curated lens tabs (server-rendered). |
-| `stack-platform-chips.astro` | Labelled Stack + Platform pill rows. |
 | `why-this-exists.astro` | Three-point "why" section with icons. |
+| `directory-browse.astro` | Browse-page body shared by the unfiltered and paginated routes — search/sort, facets, active-filter chips, results grid, pagination. |
+| `taxonomy-list.astro` | Shared body for the three taxonomy pages (`stacks/[name]`, `categories/[name]`, `licenses/[name]`) — heading, count, card grid, empty state. |
+| `pipeline-strip.astro` | Optional "how this site works" home-page section — source file → build → published outputs. Sample record is illustrative, not live data. |
 
 ## Primitives (`packages/registry/default/components/ui/`)
 
