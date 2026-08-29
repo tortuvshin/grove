@@ -1,0 +1,35 @@
+---
+/**
+ * Stacks index — every stack with live counts. Linked from the
+ * default header nav; each tile opens the browse page pre-filtered to
+ * the stack (detail pages live at `/stacks/<id>/`).
+ */
+import siteConfig from "@grove/generated/site-config.json";
+import BaseLayout from "../../layouts/base-layout.astro";
+import StackGrid from "../../components/grove/stack-grid.astro";
+import { getTaxonomyIndexModel, getTaxonomyIndexSeo, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+
+const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+// Uncapped: the index page lists EVERY stack (the homepage grid's
+// 12-item cap is a homepage layout choice, not a data truth).
+const { stacks } = getTaxonomyIndexModel();
+const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
+const seo = getTaxonomyIndexSeo("stacks", siteConfig);
+---
+
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  image={seo.image}
+  jsonLd={seo.jsonLd}
+  site={siteConfig}
+>
+  <StackGrid
+    stacks={stacks}
+    pathPrefix={`/${slug}`}
+    itemLabelPlural={itemLabelPlural()}
+    itemNoun={itemNoun}
+    level={1}
+    hrefFor={(stackSlug: string) => `/stacks/${stackSlug}`}
+  />
+</BaseLayout>

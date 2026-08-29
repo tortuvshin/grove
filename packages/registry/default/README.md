@@ -4,22 +4,24 @@ The default registry scaffold shipped with `@grove-dev/registry`. `grove init` i
 
 ## What gets installed
 
-In v1, the scaffold's `files[]` manifest is empty (no `.astro` content has migrated yet). The structural directories are scaffolded so Phase 4 of the v1 migration plan can populate them:
-
 ```
 default/
 ├── registry.json          # this scaffold's manifest
 ├── README.md
-└── (in Phase 4)
-    ├── components/
-    │   ├── ui/            # primitives (button, badge, input, sheet, …)
-    │   ├── grove/         # domain UI (project-card, filter-bar, …)
-    │   └── site/          # site chrome (theme-toggle, …)
-    ├── layouts/           # base-layout, footer, header, seo
-    ├── pages/             # home, browse, record detail, taxonomy, …
-    ├── styles/            # system.css (design tokens), global.css
-    └── lib/               # UI-local helpers
+├── components/
+│   ├── ui/                # primitives (button, badge, empty-state, filter-drawer, page-header, search-field)
+│   ├── grove/              # domain UI + page-level compositions (project-card, hero, directory-browse, taxonomy-list, …)
+│   └── site/               # site chrome (theme-toggle)
+├── layouts/                # base-layout, container, footer, header, section-header, seo
+├── pages/                  # home, browse, record detail, taxonomy, collections, submit, about, 404
+├── lib/                    # classnames, icon-kinds, icon-registry — UI-local helpers
+└── styles/
+    └── system.css          # design tokens (--grove-*), light/dark theme, Tailwind theme
 ```
+
+`pages/` installs into the consumer's `src/pages/` exactly like every other directory here — there is no separate template-copy step. A fresh `grove init` produces a fully routable site (home, browse, taxonomy, collections, record detail, submit, about, 404) with zero records in it; add `data/records/*.yml` to populate it.
+
+Two composition components — `components/grove/directory-browse.astro` and `components/grove/taxonomy-list.astro` — hold markup shared by more than one page (the browse page and its pagination route; the three taxonomy list pages) and aren't meant to be imported anywhere else. `components/grove/pipeline-strip.astro` is optional editorial content for the home page; its sample record is illustrative markup, not live data (pass `samplePath` once you have a real record to link to).
 
 ## Versioning
 

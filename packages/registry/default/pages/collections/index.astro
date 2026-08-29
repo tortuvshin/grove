@@ -1,0 +1,32 @@
+---
+import CollectionIndex from "../../components/grove/collection-index.astro";
+import BaseLayout from "../../layouts/base-layout.astro";
+import {
+  getCollectionIndexModel,
+  recordsToCollectionEntries,
+  loadCollections,
+} from "@grove-dev/astro/server";
+import records from "@grove/generated/records.json";
+import siteConfig from "@grove/generated/site-config.json";
+
+const collections = await loadCollections(process.cwd());
+const entries = recordsToCollectionEntries(
+  (records as { records: unknown[] }).records as never,
+  siteConfig,
+);
+const model = getCollectionIndexModel(collections, entries, siteConfig);
+const countNoun = {
+  singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
+  plural: siteConfig.blueprintConfig?.labelPlural ?? "items",
+};
+const seo = model.seo;
+---
+<BaseLayout
+  title={seo?.title ?? "Collections"}
+  description={seo?.description ?? "Curated and generated directories of related items."}
+  image={seo?.image}
+  jsonLd={seo?.jsonLd}
+  site={siteConfig}
+>
+  <CollectionIndex model={model} level={1} countNoun={countNoun} />
+</BaseLayout>

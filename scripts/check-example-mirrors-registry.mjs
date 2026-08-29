@@ -40,6 +40,7 @@ const REGISTRY_TO_EXAMPLE = {
   "layouts/": "layouts/",
   "lib/": "lib/",
   "styles/system.css": "styles/system.css",
+  "pages/": "pages/",
 };
 
 function registryToExamplePath(rel) {

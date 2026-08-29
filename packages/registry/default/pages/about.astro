@@ -1,0 +1,130 @@
+---
+/**
+ * About page — generic.
+ *
+ * A continuous narrative in three movements: what this site is →
+ * how it's built (the file-first pipeline: source files → Grove →
+ * multiple outputs → ongoing sync) → how to contribute. Prose
+ * sections, not a stack of cards — the reading experience is the
+ * point here.
+ *
+ * The copy is generic — references "directory", "record",
+ * "repository" — so it works for any blueprint, and every dynamic
+ * value (`siteConfig.tagline`, `siteConfig.repoUrl`, item labels)
+ * flows from the site config.
+ */
+import BaseLayout from "../layouts/base-layout.astro";
+import Container from "../layouts/container.astro";
+import siteConfig from "@grove/generated/site-config.json";
+import { getAboutPageSeo, getPageContentHtml, indexSlug, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import { buttonClass } from "../lib/classnames.ts";
+
+const githubUrl = siteConfig.repoUrl;
+const seo = getAboutPageSeo(siteConfig);
+const slug = indexSlug();
+const item = itemLabel();
+const items = itemLabelPlural();
+const pageContentHtml = getPageContentHtml("about");
+---
+
+<BaseLayout title={seo.title} description={seo.description} image={seo.image} jsonLd={seo.jsonLd} site={siteConfig}>
+  <Container size="narrow">
+    <article class="py-12 sm:py-16">
+      <nav class="text-2xs text-muted-foreground" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-foreground">Home</a>
+        <span class="mx-1.5 text-ink-300 dark:text-ink-700">/</span>
+        <span class="text-foreground">About</span>
+      </nav>
+
+      {pageContentHtml ? (
+        <section class="grove-prose mt-8" set:html={pageContentHtml} />
+      ) : (
+      <>
+      <header class="mt-5">
+        <span class="text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+          About
+        </span>
+        <h1 class="mt-1 m-0 text-[1.75rem] sm:text-[2.25rem] font-semibold tracking-[-0.02em] leading-[1.1] text-foreground">
+          A directory that lives in files.
+        </h1>
+        <p class="mt-4 m-0 text-[1rem] sm:text-[1.0625rem] leading-relaxed text-foreground max-w-[62ch]">
+          {siteConfig.name} is a curated, health-aware directory of open-source
+          {items} — and every listing you see here is a plain YAML file in a
+          public repository. This website is one of the outputs generated from
+          those files.
+        </p>
+      </header>
+
+      <section class="mt-10">
+        <h2 class="m-0 text-[1.25rem] sm:text-[1.375rem] font-semibold tracking-tight text-foreground">
+          Why it exists
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-foreground">
+          GitHub search and README lists optimize for the repository name and
+          description. They rarely tell you whether a project is a real {item}
+          or a demo, which stack it uses beyond the headline, how active it
+          really is, or whether it has a clear license.
+        </p>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-foreground">
+          Each entry here carries the metadata a developer actually needs
+          before opening the repo: stack, platforms, license, activity and
+          health signals, plus curated notes — best for, why listed, caveats.
+          Everything links back to real, runnable source. No SEO spam, no
+          affiliate farms, no broken links.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="m-0 text-[1.25rem] sm:text-[1.375rem] font-semibold tracking-tight text-foreground">
+          How it's built
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-foreground">
+          The source of truth is a folder of files: one YAML record per
+          {item}, taxonomy files for categories, stacks, platforms, and
+          licenses, and Markdown for long-form notes. <a href="https://github.com/tortuvshin/grove" class="font-medium underline decoration-border underline-offset-2 hover:decoration-ring">Grove</a> validates
+          those files, joins in synced GitHub metadata, and publishes them as
+          multiple outputs — this website with its search and filters, a
+          generated README, an <code class="font-mono text-[0.875em]">llms.txt</code> index
+          for machines, and sitemap/SEO data.
+        </p>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-foreground">
+          Automation keeps the outputs current: weekly syncs refresh stars,
+          activity, and contributor data, and every change to a source file
+          rebuilds everything derived from it. There is no database and no
+          server — the output is static HTML, and the content stays portable
+          in files you can fork.
+        </p>
+      </section>
+
+      <section class="mt-10">
+        <h2 class="m-0 text-[1.25rem] sm:text-[1.375rem] font-semibold tracking-tight text-foreground">
+          How to contribute
+        </h2>
+        <p class="mt-3 m-0 text-[0.9375rem] leading-relaxed text-foreground">
+          Because the content is files, contributing is a pull request: add a
+          YAML record for a new {item}, fix a typo, or improve the metadata
+          behind an existing listing. The <a href="/submit" class="font-medium underline decoration-border underline-offset-2 hover:decoration-ring">submit page</a> drafts
+          the YAML for you from a repository URL, and every submission is
+          reviewed against the curation bar before it lands.
+        </p>
+      </section>
+
+      <section class="mt-10 flex flex-wrap items-center gap-3">
+        <a href={`/${slug}`} class={buttonClass("primary", "sm")}>Browse the directory</a>
+        {githubUrl && (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class={buttonClass("secondary", "sm")}
+          >
+            View on GitHub
+          </a>
+        )}
+        <a href="/submit" class={buttonClass("ghost", "sm")}>Submit a {item} →</a>
+      </section>
+      </>
+      )}
+    </article>
+  </Container>
+</BaseLayout>

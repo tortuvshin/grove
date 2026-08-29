@@ -11,14 +11,10 @@
  * Records render through the package's canonical `ProjectCard` inside
  * `CardGrid`, so taxonomy pages read as the same site as the browse
  * and collection pages.
- *
- * Lives under `apps/example/src/components/` because the page
- * shell (BaseLayout) and the SEO entry point (Seo) already ship
- * from `@grove-dev/astro`; a consumer-side body template is the
- * natural place for it.
  */
-import CardGrid from "../components/grove/card-grid.astro";
-import ProjectCard from "../components/grove/project-card.astro";
+import CardGrid from "./card-grid.astro";
+import ProjectCard from "./project-card.astro";
+import EmptyState from "../ui/empty-state.astro";
 import { buildProjectCardModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
 import { formatCount } from "@grove-dev/core";
 import type { IndexRecord } from "@grove-dev/core";
@@ -76,7 +72,7 @@ const hrefPrefix = backHref.replace(/\/$/, "");
     </p>
 
     {count === 0 ? (
-      <p class="mt-4 text-sm text-ink-500 dark:text-ink-400">No {itemNoun.plural} yet in {displayName}.</p>
+      <EmptyState class="mt-4" title={`No ${itemNoun.plural} yet in ${displayName}.`} />
     ) : (
       <CardGrid class="mt-6">
         {records.map((record, i) => (

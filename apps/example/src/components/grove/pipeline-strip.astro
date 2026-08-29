@@ -1,26 +1,29 @@
 ---
 /**
- * PipelineStrip — the file-first publishing story, told with this
- * site's own data.
+ * PipelineStrip — the file-first publishing story.
  *
- * Three beats: a real record YAML (source of truth) → the Grove build
- * → the published outputs (this site, README, llms.txt, sitemap),
- * plus the sync loop (edits arrive as pull requests, automation keeps
- * every output current). Consumer-owned: the copy and the sample
- * record are this directory's, not the framework's.
+ * Three beats: a record YAML (source of truth) → the Grove build →
+ * the published outputs (this site, README, llms.txt, sitemap),
+ * plus the sync loop (edits arrive as pull requests, automation
+ * keeps every output current). The sample record shown is
+ * illustrative markup, not live data — pass `samplePath` (a real
+ * repo-relative path to one of your own records) to turn the "Read
+ * this file on GitHub" link on; without it, the link is omitted.
  */
 
 interface Props {
   /** Repository URL for the "read the source" link. */
   repoUrl?: string;
-  /** Repo-relative path to the sample record. */
+  /** Repo-relative path to a real sample record. No default — a
+   * fresh scaffold has no records yet, so the link is omitted
+   * unless you supply one. */
   samplePath?: string;
   class?: string;
 }
 
 const {
   repoUrl,
-  samplePath = "apps/example/data/records/open-webui.yml",
+  samplePath,
   class: className = "",
 } = Astro.props;
 

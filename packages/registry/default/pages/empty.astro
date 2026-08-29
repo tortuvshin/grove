@@ -1,0 +1,24 @@
+---
+/**
+ * Empty-state fixture (`audit.pages` type "empty") — renders the
+ * shared `EmptyState` primitive so the audit sample represents what
+ * visitors actually see when a directory has nothing to show.
+ */
+import BaseLayout from "../layouts/base-layout.astro";
+import EmptyState from "../components/ui/empty-state.astro";
+import siteConfig from "@grove/generated/site-config.json";
+
+const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+---
+<BaseLayout title={`No results | ${siteConfig.name}`} description="Empty state fixture." site={siteConfig} noindex>
+  <section class="py-16 sm:py-24">
+    <div class="mx-auto w-full max-w-narrow px-5 sm:px-7">
+      <h1 class="sr-only">No results</h1>
+      <EmptyState
+        title="Nothing to show right now"
+        description="This view has no records yet — new entries land here as soon as their source files are added to the repository."
+        action={{ label: `Browse ${slug}`, href: `/${slug}`, variant: "primary" }}
+      />
+    </div>
+  </section>
+</BaseLayout>

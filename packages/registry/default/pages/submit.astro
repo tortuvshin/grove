@@ -1,0 +1,183 @@
+---
+import siteConfig from "@grove/generated/site-config.json";
+import { getSubmissionPageModel } from "@grove-dev/astro/server";
+import BaseLayout from "../layouts/base-layout.astro";
+import Container from "../layouts/container.astro";
+import SubmissionClient from "../components/grove/submission-client.astro";
+import { buttonClass } from "../lib/classnames.ts";
+
+const {
+  singular,
+  title,
+  description,
+  repoUrl,
+  copy,
+  fields,
+  categories,
+  stacks,
+  existingSlugs,
+  existingFullNames,
+  platformOptions,
+  licenseOptions,
+  taxonomy,
+} = getSubmissionPageModel(siteConfig);
+const goodSubmissions = [
+  ...(copy.good?.length ? copy.good : [
+    `A real, usable ${singular}, not a tutorial or one-screen demo`,
+    "A public repository with a clear open-source license",
+    "Enough documentation to understand, run, or contribute",
+    "Recent maintenance, releases, or meaningful project history",
+  ]),
+];
+const pleaseAvoid = [
+  ...(copy.avoid?.length ? copy.avoid : [
+    "Snippets, exercises, abandoned experiments, or duplicate entries",
+    "Private repositories or projects without source",
+    "Marketing pages with no usable project behind them",
+    "Records with no license or verifiable repository",
+  ]),
+];
+---
+
+<BaseLayout title={title} description={description} site={siteConfig} noindex>
+  <Container>
+    <section class="py-10 sm:py-14">
+      <div class="max-w-3xl">
+        <p class="m-0 text-2xs font-semibold uppercase tracking-wider text-ink-500 dark:text-ink-400">
+          {copy.eyebrow ?? `${singular} submission`}
+        </p>
+        <h1 class="mt-2 text-[2rem] font-semibold tracking-tight text-ink-900 dark:text-ink-100">
+          {copy.title ?? `Add ${singular === "app" ? "an" : "a"} ${singular} to the directory`}
+        </h1>
+        <p class="m-0 mt-3 max-w-[60ch] text-[0.9375rem] leading-relaxed text-ink-500 dark:text-ink-400">
+          {copy.description ?? `Paste a GitHub URL to pull in the basics, edit the generated draft, then open a pull request. The data stays in this repository.`}
+        </p>
+      </div>
+
+      {/* One compact line, not three cards — on mobile the form
+          starts within the first viewport. */}
+      <ol class="mt-4 flex flex-wrap gap-x-6 gap-y-1.5 text-2xs text-muted-foreground" aria-label="Submission steps">
+        {[
+          ["1", "Paste a GitHub URL"],
+          ["2", "Review the draft"],
+          ["3", "Open a pull request"],
+        ].map(([number, heading]) => (
+          <li class="flex items-center gap-1.5">
+            <span class="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border border-border font-mono text-[10px] font-semibold text-foreground">{number}</span>
+            <span class="font-medium text-foreground">{heading}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div class="mt-8 grid grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(300px,0.72fr)]">
+        <form id="submit-form" class="rounded-[calc(var(--radius)+0.25rem)] border border-ink-200 bg-background p-5 shadow-sm dark:border-ink-800">
+          <div class="grid gap-5">
+            <label class="grid gap-1.5">
+              <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">GitHub URL</span>
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <input id="repo-url" type="url" required placeholder="https://github.com/owner/repo" class="min-h-10 flex-1 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" />
+                <button id="fetch-repo" type="button" class={buttonClass("primary", "bare", "min-h-10 whitespace-nowrap px-3 text-sm")}>Generate draft</button>
+              </div>
+              <span class="text-2xs text-muted-foreground">The repository must be public. We never write to it.</span>
+            </label>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Name</span><input id="item-name" type="text" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
+              <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Slug</span><input id="item-slug" type="text" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 font-mono text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /><span class="text-2xs text-muted-foreground">URL fragment, auto-filled from the repository name.</span></label>
+            </div>
+
+            <label class="grid gap-1.5">
+              <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Description</span>
+              <textarea id="item-description" rows="3" class="min-h-10 resize-y rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35"></textarea>
+              <span class="text-2xs text-muted-foreground">One or two sentences in plain language.</span>
+            </label>
+
+            {(fields.category || fields.stack) && <div class:list={["grid grid-cols-1 gap-4", fields.category && fields.stack && "sm:grid-cols-2"]}>
+              {fields.category && (
+              <label class="grid gap-1.5">
+                <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Category</span>
+                <select id="item-category" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35">
+                  <option value="">Choose a category</option>
+                  {categories.map((option) => <option value={option.id}>{option.label}</option>)}
+                </select>
+              </label>
+              )}
+              {fields.stack && (
+              <label class="grid gap-1.5">
+                <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Primary stack</span>
+                <select id="primary-stack" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35">
+                  <option value="">Choose a stack</option>
+                  {stacks.map((option) => <option value={option.id}>{option.label}</option>)}
+                </select>
+              </label>
+              )}
+            </div>}
+
+            {fields.platforms && <fieldset class="grid gap-2">
+              <legend class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Platforms</legend>
+              <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {platformOptions.map((platform) => (
+                  <label class="flex min-h-9 items-center gap-2 rounded-md border border-ink-200 px-2 text-sm dark:border-ink-800">
+                    <input type="checkbox" name="platform" value={platform.id} class="h-4 w-4" />
+                    <span>{platform.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>}
+
+            {fields.tags && <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Tags</span><input id="item-tags" type="text" placeholder="self-hosted, developer-tools, offline-first" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>}
+
+            {fields.license && licenseOptions.length > 0 && (
+              <label class="grid gap-1.5">
+                <span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">License</span>
+                <select id="item-license" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35">
+                  <option value="">Detected from the repository if left empty</option>
+                  {licenseOptions.map((option) => <option value={option.id}>{option.label}</option>)}
+                </select>
+              </label>
+            )}
+            <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Website</span><input id="item-website" type="url" placeholder="https://example.com" class="min-h-10 rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" /></label>
+            <label class="grid gap-1.5"><span class="text-2xs font-medium uppercase tracking-[.05em] text-muted-foreground">Best for</span><textarea id="best-for" rows="3" class="min-h-10 resize-y rounded-[var(--radius)] border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/35" placeholder="One use case per line"></textarea></label>
+          </div>
+        </form>
+
+        <aside class="flex flex-col gap-4 md:sticky md:top-24">
+          <div class="rounded-[calc(var(--radius)+0.25rem)] border border-border bg-card p-5">
+            <h2 class="m-0 text-[0.9375rem] font-semibold text-ink-900 dark:text-ink-100">Submission criteria</h2>
+            <p class="m-0 mt-1 text-2xs text-ink-500 dark:text-ink-400">Use this checklist before opening the draft.</p>
+            <div class="mt-4 grid grid-cols-1 gap-4 text-2xs sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div>
+                <div class="font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Good submissions</div>
+                <ul class="m-0 mt-2 list-none space-y-1 p-0 text-ink-700 dark:text-ink-200">{goodSubmissions.map((item) => <li class="flex gap-2"><span class="text-emerald-600">✓</span><span>{item}</span></li>)}</ul>
+              </div>
+              <div>
+                <div class="font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">Please avoid</div>
+                <ul class="m-0 mt-2 list-none space-y-1 p-0 text-ink-700 dark:text-ink-200">{pleaseAvoid.map((item) => <li class="flex gap-2"><span class="text-amber-600">·</span><span>{item}</span></li>)}</ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex min-h-[360px] flex-col rounded-[calc(var(--radius)+0.25rem)] border border-border bg-card p-5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h2 class="m-0 text-base font-semibold text-ink-900 dark:text-ink-100">YAML draft</h2>
+              <div class="flex items-center gap-2">
+                <button id="copy-yaml" type="button" class={buttonClass("secondary", "sm", "whitespace-nowrap pointer-events-none opacity-50")} disabled>Copy YAML</button>
+                <a id="open-pr-link" href="#" target="_blank" rel="noopener noreferrer" class={buttonClass("secondary", "sm", "whitespace-nowrap pointer-events-none opacity-50")}>Open PR draft</a>
+              </div>
+            </div>
+            <pre class="mt-4 min-h-0 flex-1 overflow-auto rounded-md border border-ink-200 bg-ink-50 p-3 text-xs leading-relaxed text-ink-800 dark:border-ink-800 dark:bg-ink-900/60 dark:text-ink-200"><code id="yaml-preview">Paste a GitHub URL to generate a draft.</code></pre>
+            <p id="submit-status" class="mt-3 min-h-5 text-2xs text-ink-500 dark:text-ink-400" aria-live="polite"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </Container>
+
+  <SubmissionClient
+    existingSlugs={existingSlugs}
+    existingFullNames={existingFullNames}
+    repoUrl={repoUrl}
+    fields={fields}
+    taxonomy={taxonomy}
+  />
+</BaseLayout>
