@@ -56,7 +56,7 @@ await writeFile(
   ].join('\n'),
 );
 
-await run('pnpm', ['install'], target);
+await run('pnpm', ['install', '--no-frozen-lockfile'], target);
 await run('pnpm', ['exec', 'grove', 'check'], target);
 await run('pnpm', ['build'], target);
 console.log(`\nScaffold smoke passed: ${target}`);
