@@ -1,0 +1,28 @@
+apps/docs/package.json
+  s_134e5b252de84f::t_b43135971b91af 9
+.github/workflows/ci.yml
+  s_134e5b252de84f::t_deb40d1f956467 56-58,61-65
+  s_134e5b252de84f::t_d28035acc53b90 66
+scripts/sync-registry-public.mjs
+  s_134e5b252de84f::t_20a2c8dafe6a63 1-24
+apps/docs/public/_headers
+  s_134e5b252de84f::t_f54c56da256958 61-68
+apps/docs/.gitignore
+  s_134e5b252de84f::t_b43135971b91af 24-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "63f36c8591530f519abab0474140b555693ab7dc",
+  "prompts": {},
+  "sessions": {
+    "s_134e5b252de84f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44c0e848-f1ac-46dd-8faf-ac3d27e0939a",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
