@@ -77,7 +77,13 @@ const repo = github;
 const hasRepo = !!repo;
 const starsNumber = typeof stars === "number" && stars > 0 ? stars : null;
 const forksNumber = typeof forks === "number" && forks > 0 ? forks : null;
-const recentReleases = (repo?.releases ?? []).slice(0, 1);
+// `repo` is a loosely-typed passthrough of the raw GitHub API response
+// (see `@grove-dev/astro/server`'s `getRecordDetailModel`) — `releases`
+// isn't in the normalized `githubMetadataSchema`, so it arrives as
+// `unknown` and needs a local shape for the three fields read below.
+const recentReleases = (
+  (repo?.releases as Array<{ html_url?: string; tag_name?: string; name?: string }> | undefined) ?? []
+).slice(0, 1);
 const isArchived = !!repo?.archived;
 
 // Render a kv row only when both the label and value have content.
