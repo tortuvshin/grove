@@ -1,0 +1,878 @@
+apps/docs/src/lib/git-lastmod.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-28
+packages/registry/default/components/grove/table-of-contents.astro
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 8
+  s_65aee42924a4c3::t_455ca5f8e85a19 21,30
+apps/example/src/components/ui/search-field.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 29-31,34
+scripts/migrate-ui-phase4.mjs
+  s_65aee42924a4c3::t_a2c8b8a6e1d997 168-169
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-25,28-29,31-34,39,41-42,48-51,54-55,58-59,66,86,94,96,103-106,121,124-125,136,148,155,182,189,194,197,206,214-217
+  s_65aee42924a4c3::t_710ac9cfa74cc2 26
+packages/registry/default/lib/classnames.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 20,22,25,32-35,39-43,47-49,51,58,67,77,79,81,91,93,100,102,106
+apps/example/grove.config.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,5,8-9,11-13,17-20,26,28-29,33,35-40,44,46-51,55,59-60,62,64-65,69-71,79,87-89,93,95-105,110-113,115-120
+packages/registry/default/pages/categories/[name].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,4,17
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,5
+packages/starlight/components/overrides/Footer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 8-10
+apps/example/src/components/grove/language-breakdown.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 12
+apps/docs/src/layouts/HomeLayout.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4
+packages/core/src/config.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,4-5,7-8,11,14,17-18,24-26,30,32,39-40,42-43,45,48-50,53,56,58,63,66,68,73,76-77,82,85,87,93-94,98,102,104-105,107,110,113-114
+apps/docs/src/pages/index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4,7-10
+packages/astro/src/page-parity.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 23-24,27-29,37-38,50,55,57,60,72-73,84-85,93-94,111-112,123-124,133-134,142-143,161,173,177,179,184,189,199-225,228,232-233,235,248-251,256
+  s_65aee42924a4c3::t_710ac9cfa74cc2 25
+  s_65aee42924a4c3::t_4f20244131abb5 26
+apps/docs/src/components/home/SectionHeader.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 11
+apps/docs/src/data/redirects.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 6-53
+packages/astro/src/template-routes.test.ts
+  s_65aee42924a4c3::t_3e9e34f407e1dc 53,210,226,228
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,4-10,17-19,21-24,27,29-30,33,36-37,39,42-43,50-51,56,58-62,69-73,78-80,82,86,88-92,97,100,102-103,106,113-117,120,122,126,130,136-140,143-144,147-148,150-152,155,159-163,171,173-174,177,182,184-185,187-188,192,194-195,198,201,203-204,206,208-209,211,214-215,217-218,222-224,227,229-230,233-236,238-240
+packages/core/src/directory-search.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,13,30,34,39,45,52,57-59,62-74,77-81,84,86-91,94-95,97-98,100-104,107,109-111,113-117,120,124-136,139,143-145,147-149,152-153,156,175,177-179,182,185,188-192,196-202,205-209,214,219-223,227-228,233-236,240-244,254,256-258,261,263,265,268,270,273,276,278,300-301,303-315,319-320,322-323,326-329,332-333,335-338,341,343-344,347-350,353-354,356-360,363-364,366,370-371,373,377,379-381,385-386,390-391,394-397,400,403,405-408,413,415-416,419,422-423,426-428,431,433-434,436-439,442-447
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3,14
+packages/registry/default/components/grove/powered-by.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 26
+apps/docs/src/components/home/Demo.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 87-134
+packages/starlight/core/config/expresive-code.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 5-11,13-15,17,21,23-24,26-60
+packages/starlight/components/custom/dropdown/DropdownLabel.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 5-8
+apps/docs/src/pages/llms.txt.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+packages/core/src/markdown.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 6
+apps/example/src/components/grove/collection-card.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 11,31-33
+packages/registry/default/layouts/base-layout.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 19,21,144-146,149-151,160-161,168-169,176,188,194
+  s_65aee42924a4c3::t_710ac9cfa74cc2 18,20
+packages/starlight/core/config/override.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-24,28-31,33-36,38-46,48-49,51
+packages/core/src/collections.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,6-44,47-49,51-52,54-58,60-67,69-71,73,75-79,82,84,89-91,93-94,96-97,99-100
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/core/src/collector.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,6-28,31-41,43,46-55,59-68
+packages/core/src/importer.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 14-15,18,22
+  s_65aee42924a4c3::t_455ca5f8e85a19 16-17,24,26-28,31-33,37-39,42-43,46,50-51,55-57,63,65-75,78,80-81,84,92-96,99,102,104-109,112,116,120,127,131-135,138-142,145-152,154,156,158-161,164,167-174,176,181,185,192,194-201,207-208
+packages/astro/src/styles.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 131-136,503-511,527-529,531-533,536-538,542-544,546-548,551-553,556-558,564-566,571-576,579-581,586-595,597-598,602-604,611-612,615-620,623-633,647-652,691-703,785-793,805-813,830-832,843-845,848-854,861-863,874-876,911-935,941-942,948-949,961-964,969-971,986-987,991-992,1003-1008,1013-1015,1023-1025,1028-1030,1033-1034,1041-1061,1069-1071,1073-1075,1147,1152,1157,1162,1172-1180
+packages/starlight/components/overrides/parts/SidebarSublist.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 8-9
+apps/example/src/components/grove/record-sidebar.astro
+  s_65aee42924a4c3::t_aae8cb6860aeef 382,385,387
+  s_65aee42924a4c3::t_7930a57fdd93dc 71
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-27,42,45,79-80,86-87,93
+packages/astro/src/server/record-detail-model.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10,14-18,20-23,29-30,33,36-38,46,55-56,63-65,67,70,72-77,81-83,85-87,90-94
+packages/core/src/related.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+packages/core/src/host.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 6,10
+packages/registry/default/components/ui/filter-drawer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,27
+packages/core/src/health.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-21,25,37,42-43,47,49,51-54,57-58,63,69-70,74,78-80,83,90-91,94,101-102,105-107,110-112,115-117,121,123-125,127,135-144,150-159,163-171,175-184,188,191-194,197-202,205-207,210-212,215-217
+  s_65aee42924a4c3::t_710ac9cfa74cc2 19
+packages/cli/src/diff.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 9
+  s_65aee42924a4c3::t_455ca5f8e85a19 10,12,14-16,19-22,25-28,31-32,35-36,39-40,44-45,48-49,52-53,56-58,61-63,66,68-70,72-74
+apps/example/src/layouts/footer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,58-63,84-86,88,92,104-105,110-112,117-118
+packages/core/src/llms.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,6,8-10,12-13,17,20-24,29-30,33-34,37,40-43,47-48,51-53,57-61,66-68,71,74-77
+packages/registry/default/components/grove/pagination.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-10,12,15-16
+apps/docs/src/data/docs-sidebar.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 8-24,26-28,30-32,34-37,39-41,43-52,54-60,62-63,65-151
+scripts/check-starlight-internal-links.mjs
+  s_65aee42924a4c3::t_710ac9cfa74cc2 24-25
+  s_65aee42924a4c3::t_455ca5f8e85a19 26,28-29,35,45-46,57,59,98,101,106,110-111,127,147
+packages/core/src/decisions.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 11-12,15-17
+  s_65aee42924a4c3::t_455ca5f8e85a19 13-14,21-25,27,30,35-36,39-42,44-45,53-91,93,96-121,125,131,135-137,141,143,147-151,159,166,168-172,174-185,188,190-194,196-207,212-214,217-220,222,225,238,240,244,246-263,269,272,282-289,298
+apps/example/src/components/grove/why-this-exists.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,30-33,38-40,43-45,48-50
+packages/registry/default/lib/icon-registry.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10-11,24,34-42,44-47,52,55,83-87,93,102
+packages/starlight/schema.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-13,18-21,23-24,27-54
+packages/astro/src/index.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 27-28,30,32,34,40,47-48,52,54,61,82,87-88,92,99,108,112,115,121,134
+  s_65aee42924a4c3::t_710ac9cfa74cc2 29,31
+apps/example/src/layouts/section-header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 6,11-12
+packages/registry/default/components/grove/record-sidebar.astro
+  s_65aee42924a4c3::t_7930a57fdd93dc 71
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-27,42,45,79-80,86-87,93
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 382,385,387
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3
+packages/core/src/sitemap.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,9,52-56,63,66,70,79-81,85,102,109,115,120,131,141,153,161,171,177,184,193,199,201,203,211-212,224,226-229,234-238
+packages/core/src/yaml.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10,12-15,18-22,25-27,30-31,35-39,43-46,50-53,57-59,64-66,69-70,73,77,83-85,88-89,92-93
+  s_65aee42924a4c3::t_710ac9cfa74cc2 9
+packages/core/src/contributors.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,6,8,12-13,15-16,24,27-38,40-56,59-64,68,71,74-76,80-82,89,95-96,100,109-110,112,115-117,123-125
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1,4
+packages/cli/src/registry.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 25-29,32,34,36,38,73,76,79,83,108,117,121,123,126-127,135,148,157,181,195,197,204-205
+apps/example/src/styles/system.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 131-136,519-527,543-545,547-549,552-554,558-560,562-564,567-569,572-574,580-582,587-592,595-597,602-611,613-614,618-620,627-628,631-636,639-649,663-668,707-719,801-809,821-829,846-848,859-861,864-870,877-879,890-892,927-951,957-958,964-965,977-980,985-987,1002-1003,1007-1008,1019-1024,1029-1031,1039-1041,1044-1046,1049-1050,1057-1077,1085-1087,1089-1091,1163,1168,1173,1178,1188-1196
+packages/registry/default/components/grove/collection-index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-5
+  s_65aee42924a4c3::t_455ca5f8e85a19 23-24,52-54,56-57,61,64-65
+packages/registry/default/components/grove/taxonomy-list.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-5
+  s_65aee42924a4c3::t_455ca5f8e85a19 19-20,54,59
+packages/core/src/slug.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10,12-16,19,29-30,33,41-42,45-47,50,56-58,61-62,66-69,73-74,76-77,80,82-84,88,91,98-101,107,109
+  s_65aee42924a4c3::t_710ac9cfa74cc2 9
+packages/starlight/components/custom/dropdown/DropdownItem.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 5-12
+packages/starlight/core/config/docs-schema.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,19,30-31,33,35-37,42,47-57
+packages/starlight/components/custom/dropdown/DropdownTrigger.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 6-9,11-12,16-20,26
+packages/registry/default/components/grove/filter-options.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-21
+packages/core/src/io.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,12,15,24,26,31
+packages/registry/default/components/grove/why-this-exists.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,30-33,38-40,43-45,48-50
+packages/registry/default/components/grove/smart-lens-tabs.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 19,41-42
+  s_65aee42924a4c3::t_710ac9cfa74cc2 18
+apps/example/src/components/grove/filter-group-menu.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/registry/default/pages/submit.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,5-7,25-32,35-42
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4
+packages/astro/src/server/index.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3,5
+packages/registry/default/layouts/seo.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 24
+packages/astro/src/theme.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,5-8,10-11,13-23,25-26,31-32,35-36,39-40,43-44,47,49-54,57,59-67,78-81,84,86-98,102,107,112-114,116,120,127,130,141,144-149,158,161-165,170,177,180,183,193,195,198-199,202-206,209-210,215,218-219,221,224,227-229,233-235,238-239
+  s_65aee42924a4c3::t_3e9e34f407e1dc 121-122,124-125,166-167,178-179
+apps/example/src/pages/collections/index.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,19-20
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3,7,9-10
+packages/astro/src/lib/lenses.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+packages/registry/default/pages/stacks/[name].astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,5
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,4,17
+packages/registry/default/pages/collections/[slug].astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3,7,9-10
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,20
+packages/registry/default/pages/about.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-9
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-26,33
+packages/registry/default/pages/contributors.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-15,19-25
+  s_65aee42924a4c3::t_710ac9cfa74cc2 16-17
+apps/example/src/components/grove/icon.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,48
+  s_65aee42924a4c3::t_455ca5f8e85a19 46-47,57,107,113,120-121,124-125,132,142-143,146
+apps/example/src/lib/classnames.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 20,22,25,32-35,39-43,47-49,51,58,67,77,79,81,91,93,100,102,106
+packages/registry/default/components/grove/collection-card.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 11,31-33
+apps/example/src/layouts/header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 17-18,55-56,59-63,68
+  s_65aee42924a4c3::t_710ac9cfa74cc2 16
+packages/registry/default/pages/[slug]/[recordSlug].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-12,14
+  s_65aee42924a4c3::t_710ac9cfa74cc2 13,15-16
+packages/starlight/components/overrides/parts/toc/starlight-toc.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 8-10,12-17,19-20,22-25,27-29,31-44,46-63,65-77,79-82,84-88,90-102,104-114
+apps/example/src/pages/[slug]/page/cards.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 19-21,24,28
+packages/core/src/collector.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,12-15,19
+apps/docs/src/components/home/Faq.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+apps/example/src/components/grove/pagination.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-10,12,15-16
+packages/core/src/markdown.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4
+apps/example/src/styles/global.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 21
+packages/registry/default/components/grove/directory-browse.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 27,36,38-42,44,47
+  s_65aee42924a4c3::t_455ca5f8e85a19 26,28-35,37,43,45-46,48,56
+packages/registry/default/components/grove/contributors-grid.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-15,43-45,47,50
+packages/astro/INVENTORY.md
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 14
+  s_65aee42924a4c3::t_1fc26b1b76e5b9 22
+apps/docs/src/styles/home.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 14,16-18,23-29,112,116-120,129-141,147,160-167,171-178,200-205,225-230
+packages/core/src/contributors.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,32-33,37,41,48-53,56,64,66-68,74-77,90-93,103,122,129,133,146,164
+scripts/release.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 18-22,26-28,35,37-39,42-45,50,53-55,59,66-74,111-113,129,132,138,140,143,145,151,190-191,195-196,200,206-207,210,220-223,227,253,274,285-286
+packages/registry/default/components/grove/hero.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,22,67-69,72-73,99-100
+apps/example/src/layouts/seo.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 24
+packages/registry/default/styles/system.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 131-136,519-527,543-545,547-549,552-554,558-560,562-564,567-569,572-574,580-582,587-592,595-597,602-611,613-614,618-620,627-628,631-636,639-649,663-668,707-719,801-809,821-829,846-848,859-861,864-870,877-879,890-892,927-951,957-958,964-965,977-980,985-987,1002-1003,1007-1008,1019-1024,1029-1031,1039-1041,1044-1046,1049-1050,1057-1077,1085-1087,1089-1091,1163,1168,1173,1178,1188-1196
+packages/registry/default/components/ui/button.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-13,16,22,32-33,35,37
+  s_65aee42924a4c3::t_710ac9cfa74cc2 14-15
+packages/registry/default/components/grove/final-cta.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,13-17
+packages/astro/src/lib/icon-kinds.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,16-58
+packages/cli/src/run.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,11-13,15
+packages/registry/default/components/grove/pipeline-strip.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 24,26,29-32
+packages/registry/default/pages/stacks/index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 14-15
+  s_65aee42924a4c3::t_455ca5f8e85a19 7-13,17,22
+apps/example/src/components/ui/filter-drawer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,27
+apps/example/src/components/grove/directory-browse.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 26,28-35,37,43,45-46,48,56
+  s_65aee42924a4c3::t_710ac9cfa74cc2 27,36,38-42,44,47
+packages/core/src/directory-filter-keys.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 22,28,34,37,46-50,59-63,70-74,86-90
+apps/example/src/components/grove/record-section.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 27-30,63,65,67-68
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,31-32
+packages/astro/src/powered-by.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-16,18-19,22-23,26-27,30,38,40-41,48-50,53,56,60,63,68-70,74-75,77-79
+  s_65aee42924a4c3::t_3e9e34f407e1dc 64
+packages/core/src/decisions.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,26-33,38-39,51,74,78-80,98-99
+  s_65aee42924a4c3::t_710ac9cfa74cc2 5
+packages/starlight/components/custom/dropdown/DropdownContent.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 5-24,28-33
+packages/registry/default/components/ui/page-header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-21
+packages/astro/src/server/project-card.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 11,13-15,17,21-25,27-29,31,35,39,46-50,52-53,55,58,63-64,66-71,74,76,78,81,83-85,93,95,97,99,102-103,110,113-114,117-118
+packages/core/src/config.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,16
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/starlight/components/custom/dropdown/index.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-18,22-28
+scripts/check-registry.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,16
+packages/registry/default/components/grove/collection-page.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,21-22
+  s_65aee42924a4c3::t_455ca5f8e85a19 17-20,51,54-55,60-61
+scripts/build-registry.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 21-24,32,34,38-40,45-47,55-64,67,78-79
+  s_65aee42924a4c3::t_710ac9cfa74cc2 27
+packages/starlight/components/overrides/Header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 13
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3-5,7
+packages/astro/src/server/contrast.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-8,10-16,19,24-26,29-30,36-37,40,43-44,48,51,54-55,59-62,65-68,71-72,81-82,85-86
+packages/core/src/robots.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,4-6,10-11,16-20,22-25,27-29
+packages/core/src/sitemap.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4,6
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,5,14-16,19,21-23,25-27,32-33,38,42-44,47-48,51-52,54-55,60-61,63-64,67-69,75,77-78,80-83,85-88,93-94,97-98,100-101,106-107,112-115,119-121,123-124
+packages/registry/default/components/grove/card-icon.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 12,18,20
+packages/registry/default/components/grove/project-card.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 41-43,58,81-82
+packages/core/src/directory-format.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,25,35,37,39-40,43,46,63,67,85,95,98-101
+packages/astro/src/server/models.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 7-8,17,45,57,67,142,146,149,171-173,179,184-185,198,201,214-217,224,234,241-242,257,259,263,280,301-305,341-345,361,366,368,370,387-388,390,395,398,435,446-449,451,453,463,466-469,474-475,478,481,489-490,511-529,542,545-548,551,557-562,587,595,597,599,619-620,647-650,654-657,660-664,671-673,677,687-689,699-700,703-717,720,722-726,729-731,737,739,744-746,754,770,778,811-814,831-832,844-847,893,902-904,906,908-910,912,940,942,947-949,951-955,987,989-990,1006,1014,1017-1019,1041,1043,1049,1058,1060,1062,1067,1069,1075,1078,1094,1125,1130-1134,1136,1139-1141,1146,1157,1170,1173,1178,1181-1184,1189-1190,1269,1273,1276,1284,1298,1302-1303,1318
+  s_65aee42924a4c3::t_710ac9cfa74cc2 41
+packages/core/src/contributors-flag.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,12-14,16,24-25,27,37-39,52-53
+packages/registry/tsconfig.json
+  s_65aee42924a4c3::t_455ca5f8e85a19 6-7
+scripts/fix-example-component-imports.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 23-30
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1
+packages/cli/src/audit.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1,4-10,12
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,11,21,26-32,39,46-54,58-60,63-64,67-68,71-72,76-77,79,83-86,88,91-98,102-107,110-112,116-117,122,135,141,148-149,152-154,161,167,174,176-178,184-185,190,197-198,204,211-212,215,222-223,226-227,232,237,239,241,248,253-254,259,264-265,270-271,276
+packages/astro/src/server/contrast.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-13,20-27,35,113,118-119
+packages/starlight/virtual.d.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,7-8,12-16,20-22,26-31,33-35,39-40,44-45,49-50
+apps/docs/src/components/home/Footer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 16-20,22-26,34-43
+packages/core/src/taxonomy-inference.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 30-35
+packages/core/src/directory-repo.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,21
+packages/registry/default/components/grove/category-grid.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,38-39,41-42,47,51
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/core/src/taxonomy-inference.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 11
+  s_65aee42924a4c3::t_455ca5f8e85a19 12,14-18,21-22,25-27,30-32,35-37,40
+apps/example/src/components/grove/powered-by.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 26
+packages/registry/default/components/grove/filter-group-menu.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_455ca5f8e85a19 2
+apps/example/src/components/grove/filter-options.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-21
+apps/example/src/components/grove/collection-page.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,21-22
+  s_65aee42924a4c3::t_455ca5f8e85a19 17-20,51,54-55,60-61
+packages/registry/default/components/ui/empty-state.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 10
+  s_65aee42924a4c3::t_455ca5f8e85a19 21
+packages/registry/default/pages/categories/index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 15-16
+  s_65aee42924a4c3::t_455ca5f8e85a19 7-13,18,21
+apps/example/src/components/grove/card-grid.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 28
+packages/core/src/collections-io.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 6
+  s_65aee42924a4c3::t_455ca5f8e85a19 7-9,21,26,30-32
+packages/registry/default/components/grove/record-header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 23-24
+packages/registry/default/pages/collections/index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3,7,9-10
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,19-20
+apps/docs/src/docs-seo.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,6,8,10,13-15,20-84,87-99,102-127,130-144
+  s_65aee42924a4c3::t_710ac9cfa74cc2 5,7
+apps/example/src/components/ui/empty-state.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 10
+  s_65aee42924a4c3::t_455ca5f8e85a19 21
+packages/core/src/awesome-readme.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,6,9,11-13,16-18,22-27,29,32-36,38,41-47,52-53,55-56,59,61-63,69,71-74,77,80,83,87,89-90,93,95,98,103-107,110-114,117-121,125-127,133,139-144,147-152,156-157,160,162-163,166,168,171,177-181,185-186,189,195-199,203,206,211-214,218-219,223-224,227,229,232,235,237-238,241,244-245,247-248,251,254,256,259,262-263,265-266,269,272-273,275,278,283,286,291-292,295,298,301,304,307,309-311,314,317,322-324,328-329,340-342,345,349-350,354-355,362-367,370,372-376,378
+packages/core/src/directory-format.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,4-7,10-13,16-18,22,24,26-27,30,34,37,39,43-44,47-48
+packages/starlight/components/overrides/PageTitle.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-10
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+packages/starlight/styles/base.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-94,96-97,99,101-107,109,111-337,345-717,722-726,728-732,734,736-741,745-889
+apps/example/src/pages/collections/[slug].astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3,7,9-10
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,20
+packages/core/src/og-image.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 27
+  s_65aee42924a4c3::t_455ca5f8e85a19 22-26,30-67,78-80,99,101-109,114-120,124-128,131,133,135,140,142,149,151,154,162,164-167,170-171,183,185-186,192,195,197-198,209,217,219,231-233,242-253,266-267,270-276,289,294-300,302-307,320-323,340-342,345,350,354-355,358-359,364,368,377,389,403,420,435
+packages/core/src/directory-display.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+apps/docs/src/home-landing.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,6,9-95,98-635
+  s_65aee42924a4c3::t_3e9e34f407e1dc 96-97
+apps/example/src/pages/[slug]/page/records.json.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-12,15,22
+apps/example/src/components/grove/pipeline-strip.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 24,26,29-32
+packages/cli/src/update.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-8,14-15,18-20,30-31,44,46,54,57,59,65-66,69-70,83-84,87-88,90-95,104-105
+packages/core/src/index.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 12-21,23-25,27-32,45-47,49-58,60-68,70-75,88,94-98,105-115,117-122,129-150,152-179,187,190-192,195-199,202,204-209,212,216-233,236,238-265,268,270-296
+  s_65aee42924a4c3::t_455ca5f8e85a19 44,93,103-104,123-128,194,201,305
+  s_65aee42924a4c3::t_a546feccf881fb 210-211,213-215,234-235,266-267
+  s_65aee42924a4c3::t_fc13f6db79bb76 90-92,99-102
+packages/registry/default/pages/empty.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3
+  s_65aee42924a4c3::t_455ca5f8e85a19 9,11
+apps/example/src/components/site/theme-toggle.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 18
+packages/core/src/github.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,17,23-25,31-32,41-43,47,51,65-68,72-74,93-95,121-122,136
+apps/example/src/components/grove/collection-teaser.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 11,28-31
+packages/starlight/components/custom/dropdown/Dropdown.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 5-9
+packages/starlight/components/overrides/parts/NavBar.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-15
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+apps/example/src/components/grove/taxonomy-list.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 19-20,54,59
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-5
+scripts/lib/registry.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 37-39,41-44,46-47,49-50,60,64-70,73-79,92,96,104,118,123,128,133,137,144-147,181,184,186,193,212,216-218,224-227,229,232-236,246-248,261-264,273-276,289-290,293-294,303-306,319-322,338,345-346,348,369
+packages/registry/default/layouts/header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 17-18,55-56,59-63,68
+  s_65aee42924a4c3::t_710ac9cfa74cc2 16
+scripts/check-docs-contract.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 22-23,25-30,32,40,46,72,74,81,85,93-94,106-107,123,134,137-138,153,160,166-168,171-172,177,179,191
+  s_65aee42924a4c3::t_710ac9cfa74cc2 21
+packages/starlight/components/overrides/Hero.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-18,26-28,36-43
+apps/example/src/components/grove/collection-row.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 38,45-46,70,74,76,84,92,101
+packages/core/src/page-document.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 26-32,39,44,64-66,92,95,98,101,127-129,135-136,153-154,156,174,177-179,185-186,189,203,210,212-214,236-238,242,253-260,264,269,275,277-278,281-282,284-285,287-288,291,294-295,297,302,304
+apps/example/src/pages/licenses/[name].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,4,17
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,5
+packages/astro/src/lib/format.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+packages/core/src/prepare.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4,9,13
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,5-8,10-12,52,55,74,81,86,88,92,117,122,128,148,168,176,196,201,213,219,225,239
+packages/starlight/components/overrides/parts/Drawer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-15
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+apps/example/src/components/grove/category-grid.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,38-39,41-42,51
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_aae8cb6860aeef 47
+apps/example/src/components/grove/index-row.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 18-19,33
+packages/registry/default/components/grove/index-row.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 18-19,33
+packages/registry/default/components/grove/submission-client.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,14-20
+scripts/check-starlight-sidebar.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 21,23-24,28-29,31,33,49,54-60,64-67,74-84,86-100,102,104-108,110,112-117,120,122-123
+  s_65aee42924a4c3::t_710ac9cfa74cc2 19-20
+apps/example/src/components/grove/card-icon.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 12,18,20
+packages/starlight/components/custom/ContainerSection.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 3
+packages/cli/src/collection-cli.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/registry/default/layouts/container.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 3,7,9-13
+scripts/build-inventory.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 25-26,28,30-33,35,53-54,61-65,69-76,78,87-92,97-102,105-107,110-111,118,125,143,152,156,158-161,166-167,169,180,183,193-203,209-213,216-217,220,234,240
+  s_65aee42924a4c3::t_710ac9cfa74cc2 27
+packages/astro/src/icons.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-17,19-22,29,35,37-38,44,48,52,58,63,73,77,82,91,105,109-113,126-127
+apps/docs/src/components/home/OpenApps.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 7-8
+apps/example/src/pages/stacks/index.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 7-13,17,22
+  s_65aee42924a4c3::t_710ac9cfa74cc2 14-15
+packages/core/src/directory-client.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 8-9,26
+  s_65aee42924a4c3::t_710ac9cfa74cc2 10-15,23,27-28
+packages/registry/default/pages/404.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-10,12-13
+  s_65aee42924a4c3::t_710ac9cfa74cc2 11
+apps/example/src/components/grove/record-header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 23-24
+packages/registry/default/components/grove/stack-grid.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,22,51,53,55-56,61,65,69,71-76
+packages/core/src/llms.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,35-37,41-43,47,51,64,68-70,75,78-80,82-83,85-87,89-90,93,95,99,101,146,148-149,151,153-154,157,159-160,166-170,172-174,176-177,183,186,188-189,192,195,197,200,205,207,218-221,225-226
+apps/example/src/pages/index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-19
+  s_65aee42924a4c3::t_455ca5f8e85a19 32
+apps/docs/scripts/generate-social-assets.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-22,31-33,52-57,60-71,73-78,81-86
+packages/registry/default/pages/[slug]/page/cards.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 19-21,24,28
+biome.json
+  s_65aee42924a4c3::t_a546feccf881fb 55
+  s_65aee42924a4c3::t_710ac9cfa74cc2 52-54,56-64
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 6-9,11-14
+packages/core/src/sync-icons.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-23,25,61,67,98,128,144,157,168,172,191-192
+packages/astro/src/server/directory.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 33-36,42,44,46-48,50-54
+  s_65aee42924a4c3::t_a2c8b8a6e1d997 680-687
+packages/astro/src/lib/taxonomy-counts.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+apps/example/src/components/grove/project-card.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 41-43,58,81-82
+packages/starlight/components/overrides/PageFrame.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4-5
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-15,21,23-26
+apps/docs/astro.config.mjs
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4,7,9-10
+  s_65aee42924a4c3::t_455ca5f8e85a19 19-26,35-67,69-112,114,116-131,133-142,144-205,207-212,214-228
+packages/astro/src/quality-gates.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 18-20,24-26,41,43-44,53-56,60,63,70-71,73-74,78,83,94-95,100-101,111,121,125,136-138,145,147,149-150,152,157-159,162,169,182,190,193-195,197,203,208,211,222,226-229,236,238-240
+  s_65aee42924a4c3::t_710ac9cfa74cc2 21-22
+packages/cli/src/registry.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-6,15,17-18,20,22,27,30-31,35,45,47,56,58-59,62-67
+apps/docs/src/pages/llms-full.txt.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+apps/example/src/pages/[slug]/page/[page].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-16,19
+packages/registry/default/components/grove/collection-teaser.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 11,28-31
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+packages/core/src/directory-filter-keys.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 18,20-21,23-27,32-34,37-41,45-51,55-56,63-66,69-72
+  s_65aee42924a4c3::t_710ac9cfa74cc2 11
+packages/cli/src/icons-cli.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,16,19-22,24,37,43,55,70,73,79
+tests/integration/grove-init.test.ts
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 38-41
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-6,8-9,13-21,25,28,30,32,36-37,42,46-47,49-56,63-64,66-67,70-71,74-75
+scripts/sync-icons.mjs
+  s_65aee42924a4c3::t_a546feccf881fb 162,167
+  s_65aee42924a4c3::t_455ca5f8e85a19 33-34,36,38,40-45,47,53,59,76,84,87,100,108,116,120,126,136,146,168,181,194,200,209-210,213,223-224,231,235
+  s_65aee42924a4c3::t_710ac9cfa74cc2 35
+packages/cli/src/index.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 3-4,19-29,34-35,39-41,43,46,50,53-54,59-61,68,79,83-87,91,93,107,111,116,129,144,149,157,177,193,203,212-214,225,228,230-231,233-239,258
+apps/example/astro.config.mjs
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,6-7
+packages/registry/default/components/grove/record-section.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 27-30,63,65,67-68
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,31-32
+packages/astro/src/lib/packaged-icons.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-12,20-23
+packages/registry/default/components/grove/markdown-body.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 20
+packages/registry/default/components/grove/refine-panel.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,16
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,27,50,56-57
+packages/astro/src/server/collections.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,7,68,71,73-75,79,91,116,138,149,156-161,169-171,181,186-187,198-199,225-230,245-248,251,256,258,267-268,305-314
+apps/example/src/pages/[slug]/[recordSlug].astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 13,15-16
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-12,14
+packages/starlight/components/custom/LinkButton.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 13-14,18-21,28
+packages/core/src/github.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 12-13
+  s_65aee42924a4c3::t_455ca5f8e85a19 14,16-18,22-25,29-32,36,40-42,46,49-51,53-55,59-61,64,66,68,70,73,76-78,83,85,94-103,105,109,112,116-118,121-123,127,129-130,135,140-141,144,151-152,154,157,160,165-166,169-170
+packages/core/src/directory-taxonomy.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,3,5-6,9-10,12,15-16,19,22-24
+apps/example/src/pages/stacks/[name].astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,5
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,4,17
+apps/example/src/components/grove/table-of-contents.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 21,30
+  s_65aee42924a4c3::t_aae8cb6860aeef 8
+packages/core/src/enrich.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 14,24-25,28-31,61-64,67-70,116,120,126,132
+apps/docs/src/styles/global.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-27,30-33
+apps/example/src/pages/submit.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,5-7,25-32,35-42
+packages/astro/src/lib/repo.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+packages/core/src/related.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,6-41,44-45,47-49,51,56
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/core/src/yaml.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 25,27-28,43,45-46,57-58,68
+apps/docs/src/docs-taxonomy-guard.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,5,14,17,19,21-22,29-30,32-37,41-42,45-48,51-53,57-58,63
+apps/example/src/pages/404.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-10,12-13
+  s_65aee42924a4c3::t_710ac9cfa74cc2 11
+packages/core/src/health.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,15-18,21-22,31,33-34,36-37,39-40,42-43,45-46,50,54-56,58-60,62,64,67-69,72-73,75,77-78,87-88,90-95,97
+apps/example/src/components/grove/submission-client.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 8,14-20
+packages/starlight/components/overrides/parts/toc/TableOfContentsList.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 5,9-11
+packages/registry/default/pages/[slug]/page/records.json.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-12,15,22
+packages/astro/src/server/models.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,27,31,33-36,42-43,48-49,51,66,68-69,74,78,81,90-91,93-95,99,102-103,106,108-111,124,126-127,131-132
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+packages/astro/src/server/seo.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,10,12-14,17-19,23-25,28-29,32-33,37-39,42-44,47-49,51,56,60-61,63,66,69-71,73,76-80,84-87,91-92,94-95,99-102,106-111,113,116-118,120
+packages/core/src/github-client.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 13-14
+  s_65aee42924a4c3::t_455ca5f8e85a19 16-18,22-26,30,32-35,41,43-46,53-54,61,70-71,79,87,94-95,100,111,123,127,130,135,139-140,143,148,159,162,169,172,175,178,182,185,190,196,198-201,204,207
+apps/example/src/lib/classnames.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,6-10,14-16,19-23,26-28,31,41-42,44-45
+packages/registry/default/components/grove/icon.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 46-47,57,107,113,120-121,124-125,132,142-143,146
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,48
+packages/starlight/core/config/vite.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 5-7,9-17
+packages/registry/default/components/ui/search-field.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 29-31,34
+apps/example/src/components/grove/original-collection.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 14,34,36-38,42
+packages/astro/INVENTORY.json
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 3
+  s_65aee42924a4c3::t_1fc26b1b76e5b9 12-13
+apps/example/src/components/grove/hero.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,22,67-69,72-73,99-100
+packages/core/src/audit.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,47,82-88,98,106,108-115,120-127
+packages/astro/src/server/seo.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-13,51,54-55,74,76,80,86-92,95-101,112,116-117,119-120,122,127,139-142
+packages/core/src/directory-taxonomy.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,20,29,40
+apps/docs/src/docs-version-prose.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,20-21,24-31,34,40,51-52,57-58,88-90
+packages/starlight/core/sidebar.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 9-11,21
+packages/registry/default/components/grove/language-breakdown.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 12
+apps/docs/src/docs-config.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,5,11-16,20-24,27,31-39,42,51,54,62,68,74-75,98,102-103,110,124,126
+apps/example/src/components/grove/final-cta.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,13-17
+packages/registry/default/components/grove/card-grid.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 28
+apps/example/src/pages/categories/index.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 7-13,18,21
+  s_65aee42924a4c3::t_710ac9cfa74cc2 15-16
+packages/starlight/styles/theme.css
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-12,14-30,32-42,44-59,61-66
+apps/example/src/pages/about.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 24-26,33
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-9
+scripts/test-scaffold.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 3-6,8-11,15-19,23,25-26,28-34,36-37,39,41,49,51-53,55-56,59-61
+packages/cli/src/audit.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 6-7,14-16
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,13,18-26,51,53,68,73-75,77-110,115-117,143-145,162-176,178,204,206-207,209,212-215,220-222,232,236-240,253-255,264-265,270,278,286-288,296,298,306-308,325-330,333-337,345-355,360,364-367
+apps/example/src/components/ui/page-header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-21
+apps/example/src/components/ui/badge.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,22-27,30
+packages/core/src/schema.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,3,15,24,29-31,39-48,52-57,62,69-76,80-90,94-104,107,209,214-217,220,289,305,311-313,320,331,339,349-350,420,436,451,544,562,564-566,574-580,621,625,645,657,709,727-728,773-783,786-796,845,850-851,861,874,905,922,924,928-933,937,944,946,949-950,956,958-962,967,970,973,976,1001,1006,1010,1031,1048,1052,1071
+packages/core/src/parseReadme.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 35,46-47,55-56,68,71,83
+  s_65aee42924a4c3::t_a2c8b8a6e1d997 21
+packages/registry/default/lib/classnames.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,6-10,14-16,19-23,26-28,31,41-42,44-45
+packages/registry/registry.json
+  s_65aee42924a4c3::t_455ca5f8e85a19 12-46,57-101,110-139,149-188,198-232,240-246,248-287,297-356,366-400,410-419,429-433,443-447,457-461
+packages/cli/src/readme-cli.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,12,16,19-20,23-32,34-46,48-51,53-55,57-62,65-67,69-73,80,82,106,117,132,136,140,144-147,149,152,154,157,159-162,164,166,170,180-182,185-186,189
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1,4-5,8,13-14
+apps/example/src/pages/[slug]/index.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 10-11,14
+apps/docs/src/starlight/Head.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+packages/astro/src/lib/search.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+packages/core/src/awesome-readme.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 58-59,64-66,71,80,84,88-90,96,98,110,141,148,150,154,156-157,161,165,169,171,175-176,181,189,191,194,206,220,225,227
+packages/core/src/directory-facets.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,17,32-54,58,61-70
+packages/registry/default/layouts/footer.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,58-63,84-86,88,92,104-105,110-112,117-118
+packages/starlight/user-components.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+packages/astro/src/theme-contrast.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10-11,36-38,41-49,54,56,59-68,73,75-91
+apps/example/src/pages/categories/[name].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,4,17
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,5
+scripts/check-example-mirrors-registry.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-16,26,28-30,43,59,65-70
+  s_65aee42924a4c3::t_710ac9cfa74cc2 20,23-24
+packages/registry/default/components/grove/directory-index-client.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 338
+  s_65aee42924a4c3::t_9a665b5e19c2b8 37,51,70-73,268-271,323-325,333
+apps/example/src/components/ui/button.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 14-15
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-13,16,22,32-33,35,37
+packages/registry/default/pages/index.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-19
+  s_65aee42924a4c3::t_455ca5f8e85a19 32
+packages/registry/default/layouts/section-header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 6,11-12
+packages/astro/src/server/collections.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1,5,7
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,8,10-11,14-21,23-26,30,33-40,42,45,49,51-52,54-55,58-61,64-67,70-73,77,79,82,85-88,92-93,96-97,99,104-109,111,115-120,125-127,129-130,136-140,145-149,154-158,164-165,169,172,174,177,180,183,189-190,194,196,200-201
+apps/example/src/components/grove/contributors-grid.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-15,43-45,47,50
+packages/registry/default/components/grove/original-collection.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+  s_65aee42924a4c3::t_455ca5f8e85a19 14,34,36-38,42
+apps/example/src/components/grove/markdown-body.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 20
+packages/core/src/validate.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,15,17,44,49,51,78,80,87,91,93-95,107,109,114-115,120-121,123,125,136,138,155,157,159,164,166,176,178,183,186,188,192,195,211,214,216,223,225,233,235,247,249,255,257,297,299,303,307-308,311-313,324,341
+  s_65aee42924a4c3::t_710ac9cfa74cc2 5,9,11
+packages/astro/src/server/models-home.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 15,22,26,30-31,37,39,47-49,52,54,56,59-60,62,65,67-72,76-77,80-82,85,87,92-93
+packages/core/src/build-data.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4-5,8-13
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,19,43,46,53-56,76,78-80,98-99,113-114,162-163,169-171,187-188,215,223,236,238-239,246,270,277-279,296-297,300,306,316,344-349,352-357,361-366,369-374,377-379,384,388,390,399-400,428-431,435,437,457-462,475
+packages/core/src/content-body.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 17-18,26,29,33,44-46,49-51,56-61,63,66-69,76-79,82-84,87,89-90,93,96,99-101,107-109,112-114,116-117,121-123,125-126,132-134,137-138,141,143-148,150-152,156-157,159,164-165,169-170,172-174,180-181,184-186,189-191,195-197,201,205-213,215-216,220-222,228-231,234-235,239,241,245-246,254-255,257
+  s_65aee42924a4c3::t_710ac9cfa74cc2 15-16,19,23
+packages/core/src/content-body.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 44-46,68,77,99-100,102,128,133,135-136,138-139,170-174,199,208,212,226,228,254,261
+apps/example/src/layouts/base-layout.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 18,20
+  s_65aee42924a4c3::t_455ca5f8e85a19 19,21,144-146,149-151,160-161,168-169,176,188,194
+packages/cli/src/init.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 38-41,50-51,53,55-58,61-63,91,99,104,109,118-119,149,151,155-156,162,179,187,190,211,229,235-237,241-243,247-251,259,285,292,316,323,326-328,337
+packages/core/src/validate.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 21-22,24,29,31-34,36,55,66-69,77-80,82-83,86,88-96,101,104,109-112,114-115,118,120-129,137-139,141,143-151,161-163,168,170-178,183,188-190,199-202,207,212-215,221,223-230,238,240,244-246,251,255,257,261-263,269,271-279,291-294,296,298-306,310,312-317,321,323,327-329,331,333-337,339-341,345
+  s_65aee42924a4c3::t_710ac9cfa74cc2 19-20,23,25
+packages/core/src/directory-lenses.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-22,24-25,27-28,30-32,34-35,48-51,54-57,60-63,66-69,72-75,78-87,91-94,97-100,103-106,109-112,115-118,137,151,157-158,188,190,207,227,230-235,249
+packages/core/src/og-image.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-6,18,20-22,24-26,30-31,34-37,39-41,51-55,58-60,69-73,75,79,90,95-98,102
+packages/astro/src/lib/display.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1
+packages/registry/default/pages/[slug]/index.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 10-11,14
+packages/starlight/core/config/schemas.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 6-7,13-44,50-74
+packages/core/src/public-api.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,5-6,10-12,17-20
+apps/example/src/components/grove/refine-panel.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,27,50,56-57
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2,16
+packages/registry/default/components/grove/collection-row.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 38,45-46,70,74,76,84,92,101
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+apps/example/src/pages/empty.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-3
+  s_65aee42924a4c3::t_455ca5f8e85a19 9,11
+packages/starlight/components/overrides/Search.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 6-11
+packages/cli/src/diff.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 23,26-31,41-52,54-61,63-70,72-79,84,105
+packages/starlight/core/plugin.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,6,9
+  s_65aee42924a4c3::t_455ca5f8e85a19 5,7,12,14-18,20,24-28,30-39,41-47,49-56
+packages/registry/default/pages/licenses/[name].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 2,4,17
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,5
+apps/example/src/lib/icon-kinds.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,16-58
+packages/cli/src/import-cli.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,7,36-38
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3,8
+packages/core/src/importer.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1,4
+apps/example/src/components/grove/stack-grid.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-3,22,51,53,55-56,61,65,69,71-76
+packages/registry/default/components/ui/badge.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,22-27,30
+packages/core/src/enrich.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,33-34,38,41,46,58-62,67-71,76-80,83,85,87-88,92,104,110,114,117,119-122
+  s_65aee42924a4c3::t_710ac9cfa74cc2 12
+packages/registry/default/components/site/theme-toggle.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 18
+apps/example/src/layouts/container.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 3,7,9-13
+scripts/sync-registry-public.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 11-14,16,18
+packages/core/src/build-data.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 18-19,22,25
+  s_65aee42924a4c3::t_455ca5f8e85a19 20-21,23-24,29-33,38,43,62-65,68-69,76,80,84-86,89,91,95,100-103,111,116-117,120,122-129,134,136-138,142,144,147,149,151-158,161-162,167,169,172,174-175,178,180-185,190,192-194,197,199,201-209,216-218,231,233-241,244,246-251,258,261,266,269,271,273-282,285-286,298-300,302-304,306,312,314,316,325,333,336-337,339-342,345,347-355,360,366-367,371-372,374,376-386,389,391-399,404,412-415,419,421,423-431,434,436,438
+packages/core/src/directory-search.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,29-33,36,38,43-53,63,65-66,81-84,105,136,140,144-145,157,160,163,166,168,178,203,207,210,243,251-252,254,260-261,264-265,268-269,280,286-287,292,307,322,334,348,350,358,363,397-401,405-409,424-425,429,434,437,440,443,446,449,452,455,459-461,464,489,499,537,550,553-557,560,573-577,580,588,601,606-607,625
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2
+packages/cli/src/hash.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 18-20,25,46-52,60,62,73,88,91,105,107-111
+packages/core/src/page-document.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 4,7-9
+  s_65aee42924a4c3::t_455ca5f8e85a19 1,11,13-14,18-20,23-25,27-31,33,45,49-51,54-56,58-62,64,77-78,80-83,85,88,91-93,95,100,102-104,106-107,110-111,118,120-122,124-125,128-129,133-134,137,139-144,146,148,152,154-155,157,160,163,165-169,171-172,175,178-181,183-184,187,190,192-195,197-198,201,205-206,208-211,213-214,217,221-224,226,229-231,234,236,238-240,243-245,247
+  s_65aee42924a4c3::t_d14a9ccaaeb91c 147
+packages/astro/src/lib/icon-registry.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10-11,24,34-42,44-47,52,55,83-87,93,102
+scripts/fix-relative-imports.mjs
+  s_65aee42924a4c3::t_710ac9cfa74cc2 18-19
+  s_65aee42924a4c3::t_455ca5f8e85a19 17,21,23,29,34,41,50,57-62,73,84,86-100
+packages/astro/src/lib/index.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 20,22-23,25-26
+  s_65aee42924a4c3::t_455ca5f8e85a19 21,24,27-28
+apps/example/src/components/grove/smart-lens-tabs.astro
+  s_65aee42924a4c3::t_710ac9cfa74cc2 18
+  s_65aee42924a4c3::t_455ca5f8e85a19 19,41-42
+packages/cli/src/init.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-7,18-21,23-24,29-33,35,38-40,43-46,49,52-54,58-62,68-69,73-74,78,82-84,87-90
+apps/docs/src/components/home/Header.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 8
+packages/core/src/audit.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 3
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,7-9,18,20,23-26,29,36-37,40,42-44,47,54-60,62-67,69,71,73-80
+packages/core/src/slug.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-16,21
+packages/core/src/directory-scores.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 34,36,38,40,42,48,54-59,64-69,78-80,82-84
+packages/core/src/github-client.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 15-17,28,45,62
+packages/starlight/core/i18n.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-9,21-23,25-37,39-61,66-67,69,73,77,88-90,92-93,95-97,99-102,104-106,114-116,118-120,122,130-132,134-150,155-158,160-174
+apps/example/src/components/grove/directory-index-client.astro
+  s_65aee42924a4c3::t_aae8cb6860aeef 37,51,70-73,268-271,323-325,333,338
+vitest.config.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 31,34
+tests/integration/grove-audit.test.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-3,5-7,23,31,33-34,36,40,43,52,54,56-61
+apps/example/src/lib/icon-registry.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 10-11,24,34-42,44-47,52,55,83-87,93,102
+packages/core/src/collections.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 21,23,100,122,125,148,150,152,154,156
+apps/example/src/components/grove/collection-index.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 23-24,52-54,56-57,61,64-65
+  s_65aee42924a4c3::t_710ac9cfa74cc2 2-5
+packages/core/src/site-artifacts.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 51
+packages/registry/default/pages/[slug]/page/[page].astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-16,19
+packages/starlight/global.d.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-4
+packages/registry/default/lib/icon-kinds.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 13,16-58
+scripts/icons.config.mjs
+  s_65aee42924a4c3::t_455ca5f8e85a19 50-55,61-65,68-79,81-83,86-91,95-99,104-109
+packages/core/src/site-artifacts.test.ts
+  s_65aee42924a4c3::t_710ac9cfa74cc2 1
+  s_65aee42924a4c3::t_455ca5f8e85a19 2-8,12-14,16-17,20,28-30,36-38,41-44,49,53
+apps/example/src/pages/contributors.astro
+  s_65aee42924a4c3::t_455ca5f8e85a19 14-15,19-25
+  s_65aee42924a4c3::t_710ac9cfa74cc2 16-17
+packages/cli/src/audit-cli.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-2,5-15
+apps/docs/src/docs-style-boundary.test.ts
+  s_65aee42924a4c3::t_3e9e34f407e1dc 97-99
+  s_65aee42924a4c3::t_455ca5f8e85a19 1-4,21-22,29,35-41,44-57,59-62,64-70,72-73,75-79,81-84,86-89,91-96,100-102,104-107,109-112
+packages/cli/src/update.ts
+  s_65aee42924a4c3::t_455ca5f8e85a19 29-30,39,75,95,129,145-147,175,183,186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6919b14e73e5a29eeb2f55e29a2df0c81459328e",
+  "prompts": {},
+  "sessions": {
+    "s_65aee42924a4c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea57d175-e1d6-4c7e-92ec-757a51c99821",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
