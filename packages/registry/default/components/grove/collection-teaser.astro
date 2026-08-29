@@ -1,4 +1,5 @@
 ---
+import type { CollectionIndexModel } from '@grove-dev/astro/server';
 /**
  * CollectionTeaser — homepage-friendly subset of `CollectionIndex`.
  *
@@ -7,8 +8,7 @@
  * different copy, use `CollectionIndex` directly with explicit
  * `limit` and `viewAllHref` props.
  */
-import CollectionIndex from "./collection-index.astro";
-import type { CollectionIndexModel } from "@grove-dev/astro/server";
+import CollectionIndex from './collection-index.astro';
 
 interface Props {
   model: CollectionIndexModel;
@@ -25,10 +25,10 @@ interface Props {
 
 const {
   model,
-  title = "Featured collections",
-  description = "Hand-picked and auto-generated groupings of related items.",
-  viewAllHref = "/collections/",
-  viewAllLabel = "View all collections",
+  title = 'Featured collections',
+  description = 'Hand-picked and auto-generated groupings of related items.',
+  viewAllHref = '/collections/',
+  viewAllLabel = 'View all collections',
   limit = 3,
   countNoun,
   class: className,

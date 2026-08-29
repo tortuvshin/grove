@@ -17,12 +17,12 @@
  * marker comment. A marker inside an SVG would corrupt the
  * byte-for-byte drift check against the vendored upstream artwork.
  */
-import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 
-const MANIFEST_NAME = ".grove-icons.json";
+const MANIFEST_NAME = '.grove-icons.json';
 
 interface IconManifest {
   /** Relative path (`stacks/apple.svg`) → sha256 of the bytes Grove wrote. */
@@ -58,13 +58,13 @@ export interface IconSyncOptions {
 }
 
 function sha256(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
+  return createHash('sha256').update(value).digest('hex');
 }
 
 async function readManifest(path: string): Promise<IconManifest> {
   if (!existsSync(path)) return { files: {} };
   try {
-    const parsed = JSON.parse(await readFile(path, "utf8")) as IconManifest;
+    const parsed = JSON.parse(await readFile(path, 'utf8')) as IconManifest;
     return { files: parsed.files ?? {} };
   } catch {
     // A corrupt sidecar means "we no longer know what we own" — treat
@@ -95,7 +95,7 @@ export async function syncIconAssets(
   if (!existsSync(sourceManifestPath)) return result;
 
   const packaged = await readManifest(sourceManifestPath);
-  const targetRoot = resolve(publicDir, "icons");
+  const targetRoot = resolve(publicDir, 'icons');
   const targetManifestPath = resolve(targetRoot, MANIFEST_NAME);
   const previous = await readManifest(targetManifestPath);
   const { dryRun = false } = options;
@@ -125,7 +125,7 @@ export async function syncIconAssets(
     const target = resolve(targetRoot, relativePath);
 
     if (existsSync(target)) {
-      const current = sha256(await readFile(target, "utf8"));
+      const current = sha256(await readFile(target, 'utf8'));
       if (current === packagedHash) {
         // Already the packaged version — nothing to do, still ours.
         owned[relativePath] = packagedHash;
@@ -141,7 +141,7 @@ export async function syncIconAssets(
 
     if (!dryRun) {
       await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, await readFile(source, "utf8"));
+      await writeFile(target, await readFile(source, 'utf8'));
     }
     owned[relativePath] = packagedHash;
     result.written.push(relativePath);
@@ -154,7 +154,7 @@ export async function syncIconAssets(
     if (relativePath in packaged.files) continue;
     const target = resolve(targetRoot, relativePath);
     if (!existsSync(target)) continue;
-    if (sha256(await readFile(target, "utf8")) !== recorded) continue;
+    if (sha256(await readFile(target, 'utf8')) !== recorded) continue;
     if (!dryRun) await rm(target, { force: true });
     result.pruned.push(relativePath);
   }
@@ -165,11 +165,11 @@ export async function syncIconAssets(
     // requests those file names any more, so they are dead weight
     // rather than a consumer's working icon.
     const retiredPair = /-(light|dark)\.svg$/;
-    for (const folder of ["stacks", "platforms"]) {
+    for (const folder of ['stacks', 'platforms']) {
       const dir = resolve(targetRoot, folder);
       if (!existsSync(dir)) continue;
       for (const entry of await readdir(dir)) {
-        if (!entry.endsWith(".svg")) continue;
+        if (!entry.endsWith('.svg')) continue;
         const relativePath = `${folder}/${entry}`;
         if (relativePath in packaged.files) continue;
         if (result.pruned.includes(relativePath)) continue;
@@ -188,8 +188,8 @@ export async function syncIconAssets(
 
   const next = `${JSON.stringify({ files: owned }, null, 2)}\n`;
   const currentSidecar = existsSync(targetManifestPath)
-    ? await readFile(targetManifestPath, "utf8")
-    : "";
+    ? await readFile(targetManifestPath, 'utf8')
+    : '';
   if (next !== currentSidecar) {
     await mkdir(targetRoot, { recursive: true });
     await writeFile(targetManifestPath, next);

@@ -1,8 +1,8 @@
 ---
-import BaseLayout from "../../layouts/base-layout.astro";
-import { getTaxonomyPageModel, itemLabelPlural } from "@grove-dev/astro/server";
-import siteConfig from "@grove/generated/site-config.json";
-import TaxonomyList from "../../components/grove/taxonomy-list.astro";
+import siteConfig from '@grove/generated/site-config.json';
+import { getTaxonomyPageModel, itemLabelPlural } from '@grove-dev/astro/server';
+import TaxonomyList from '../../components/grove/taxonomy-list.astro';
+import BaseLayout from '../../layouts/base-layout.astro';
 
 export function getStaticPaths() {
   const categories = siteConfig.taxonomy?.categories ?? [];
@@ -14,7 +14,7 @@ export function getStaticPaths() {
 
 const { displayName } = Astro.props;
 const name = Astro.params.name;
-const model = getTaxonomyPageModel("categories", name, displayName, siteConfig);
+const model = getTaxonomyPageModel('categories', name, displayName, siteConfig);
 ---
 
 <BaseLayout

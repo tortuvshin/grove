@@ -15,9 +15,8 @@
  * takes the list-page base via `pathPrefix`.
  */
 
-import { LENSES, hrefForLens, isLensActive } from "@grove-dev/core";
-import { lensDisplay } from "@grove-dev/core";
-import { lensTabClass } from "../../lib/classnames.ts";
+import { hrefForLens, isLensActive, LENSES, lensDisplay } from '@grove-dev/core';
+import { lensTabClass } from '../../lib/classnames.ts';
 
 interface Props {
   currentParams: URLSearchParams;
@@ -39,8 +38,8 @@ interface Props {
 
 const {
   currentParams,
-  pathPrefix = "/",
-  class: className = "",
+  pathPrefix = '/',
+  class: className = '',
   layout = true,
   lensIds,
   allLabel,

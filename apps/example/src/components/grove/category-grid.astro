@@ -1,5 +1,6 @@
 ---
-import { formatCount } from "@grove-dev/core";
+import { formatCount } from '@grove-dev/core';
+
 /**
  * CategoryGrid — browse-by-category grid for the home page.
  *
@@ -34,20 +35,20 @@ interface Props {
 
 const {
   categories,
-  pathPrefix = "/",
-  class: className = "",
+  pathPrefix = '/',
+  class: className = '',
   bare = false,
-  itemLabelPlural = "items",
-  itemNoun = { singular: "item", plural: "items" },
+  itemLabelPlural = 'items',
+  itemNoun = { singular: 'item', plural: 'items' },
   level = 2,
   hrefFor,
 } = Astro.props;
 
-const Heading = `h${level}` as "h1" | "h2";
+const Heading: 'h1' | 'h2' = level === 1 ? 'h1' : 'h2';
 
 function buildHref(slug: string): string {
   if (hrefFor) return hrefFor(slug);
-  const base = pathPrefix.replace(/\/$/, "");
+  const base = pathPrefix.replace(/\/$/, '');
   return `${base}?category=${encodeURIComponent(slug)}`;
 }
 ---

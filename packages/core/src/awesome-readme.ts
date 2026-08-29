@@ -55,20 +55,20 @@ export interface AwesomeReadmeInput {
   readme?: AwesomeReadmeOptions | undefined;
 }
 
-export const AWESOME_README_START = "<!-- grove-readme:start -->";
-export const AWESOME_README_END = "<!-- grove-readme:end -->";
+export const AWESOME_README_START = '<!-- grove-readme:start -->';
+export const AWESOME_README_END = '<!-- grove-readme:end -->';
 
 const SENTINEL_PATTERN = /<!--\s*grove-readme:start\s*-->[\s\S]*?<!--\s*grove-readme:end\s*-->/;
 
 function normalizeDescription(value: string | undefined): string {
-  if (!value) return "";
-  const collapsed = value.replace(/\s+/g, " ").trim();
-  const stripped = collapsed.replace(/[.!?…]+\s*$/u, "");
+  if (!value) return '';
+  const collapsed = value.replace(/\s+/g, ' ').trim();
+  const stripped = collapsed.replace(/[.!?…]+\s*$/u, '');
   return stripped;
 }
 
 function entryUrl(record: AwesomeReadmeRecord): string {
-  return record.homepageUrl ?? record.repoUrl ?? "";
+  return record.homepageUrl ?? record.repoUrl ?? '';
 }
 
 function entryLabel(record: AwesomeReadmeRecord): string {
@@ -77,28 +77,25 @@ function entryLabel(record: AwesomeReadmeRecord): string {
 
 function sortByName(a: AwesomeReadmeRecord, b: AwesomeReadmeRecord): number {
   return entryLabel(a).localeCompare(entryLabel(b), undefined, {
-    sensitivity: "base",
+    sensitivity: 'base',
   });
 }
 
-function categoryDisplayName(
-  id: string,
-  categories: AwesomeReadmeCategory[],
-): string {
+function categoryDisplayName(id: string, categories: AwesomeReadmeCategory[]): string {
   const match = categories.find((c) => c.id === id);
   if (match) return match.name;
   return id
-    .split("-")
-    .map((part) => (part ? part[0]!.toUpperCase() + part.slice(1) : ""))
-    .join(" ");
+    .split('-')
+    .map((part) => (part ? part[0]!.toUpperCase() + part.slice(1) : ''))
+    .join(' ');
 }
 
 function categoryAnchor(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, "-");
+    .replace(/\s+/g, '-');
 }
 
 function buildEntryLine(record: AwesomeReadmeRecord): string {
@@ -110,7 +107,7 @@ function buildEntryLine(record: AwesomeReadmeRecord): string {
 }
 
 function isVisible(record: AwesomeReadmeRecord): boolean {
-  return record.visibility !== "hide" && record.visibility !== "remove";
+  return record.visibility !== 'hide' && record.visibility !== 'remove';
 }
 
 function hasLabel(record: AwesomeReadmeRecord): boolean {
@@ -141,50 +138,47 @@ export function buildAwesomeReadme(input: AwesomeReadmeInput): string {
 
   const grouped = new Map<string, AwesomeReadmeRecord[]>();
   for (const record of visible) {
-    const id = record.category ?? "other";
+    const id = record.category ?? 'other';
     if (!grouped.has(id)) grouped.set(id, []);
     grouped.get(id)!.push(record);
   }
   for (const list of grouped.values()) list.sort(sortByName);
 
   const title = opts.title ?? input.site.name;
-  const tagline =
-    opts.tagline ?? opts.description ?? input.site.tagline ?? input.site.description;
+  const tagline = opts.tagline ?? opts.description ?? input.site.tagline ?? input.site.description;
   const browseUrl = opts.url ?? input.site.url;
-  const browseLabel = opts.browseLabel ?? "Browse the full directory →";
+  const browseLabel = opts.browseLabel ?? 'Browse the full directory →';
 
   const lines: string[] = [];
   lines.push(`# ${title}`);
-  lines.push("");
+  lines.push('');
   if (showBadge) {
-    lines.push(
-      "[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)",
-    );
-    lines.push("");
+    lines.push('[![Awesome](https://awesome.re/badge.svg)](https://awesome.re)');
+    lines.push('');
   }
   if (tagline) {
     lines.push(tagline);
-    lines.push("");
+    lines.push('');
   }
   if (showBrowseLink && browseUrl) {
     lines.push(`${browseLabel} ${browseUrl}`);
-    lines.push("");
+    lines.push('');
   }
 
   if (opts.intro) {
-    const introLines = opts.intro.replace(/\n+$/, "").split("\n");
+    const introLines = opts.intro.replace(/\n+$/, '').split('\n');
     lines.push(...introLines);
-    lines.push("");
+    lines.push('');
   }
 
   if (showToc) {
-    lines.push("## Contents");
-    lines.push("");
+    lines.push('## Contents');
+    lines.push('');
     for (const id of orderedIds) {
       const name = categoryDisplayName(id, input.categories);
       lines.push(`- [${name}](#${categoryAnchor(name)})`);
     }
-    lines.push("");
+    lines.push('');
   }
 
   for (const id of orderedIds) {
@@ -192,12 +186,12 @@ export function buildAwesomeReadme(input: AwesomeReadmeInput): string {
     const records = grouped.get(id) ?? [];
     if (records.length === 0) continue;
     lines.push(`## ${name}`);
-    lines.push("");
+    lines.push('');
     for (const record of records) lines.push(buildEntryLine(record));
-    lines.push("");
+    lines.push('');
   }
 
-  return lines.join("\n").replace(/\n+$/, "\n");
+  return lines.join('\n').replace(/\n+$/, '\n');
 }
 
 export interface AwesomeReadmeSections {
@@ -209,7 +203,7 @@ export interface AwesomeReadmeSections {
 export function parseAwesomeReadmeSections(readme: string): AwesomeReadmeSections {
   const match = readme.match(SENTINEL_PATTERN);
   if (!match || match.index === undefined) {
-    return { before: readme, entries: "", after: "" };
+    return { before: readme, entries: '', after: '' };
   }
   const start = match.index;
   const end = match.index + match[0].length;
@@ -223,11 +217,11 @@ export function parseAwesomeReadmeSections(readme: string): AwesomeReadmeSection
 }
 
 export function injectAwesomeReadmeBlock(readme: string, block: string): string {
-  const trimmed = block.replace(/\n+$/, "\n");
+  const trimmed = block.replace(/\n+$/, '\n');
   const wrapped = `${AWESOME_README_START}\n${trimmed}${AWESOME_README_END}`;
   if (SENTINEL_PATTERN.test(readme)) {
     return readme.replace(SENTINEL_PATTERN, wrapped);
   }
-  const trailing = readme.endsWith("\n") ? readme : `${readme}\n`;
+  const trailing = readme.endsWith('\n') ? readme : `${readme}\n`;
   return `${trailing}\n${wrapped}\n`;
 }

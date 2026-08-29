@@ -34,6 +34,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
 <script is:inline id="grove-index-config" type="application/json" set:html={clientConfigJson}></script>
 <script>
   import type { IndexRecord } from "@grove-dev/core";
+  import type { DirectoryFilterGroupKey } from "@grove-dev/core/directory";
   import {
     PAGE_SIZE,
     activeFilterChips,
@@ -47,6 +48,7 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
     filterRecords,
     filtersFromSearchParams,
     hasAnyFilter,
+    isDirectoryFilterGroupKey,
     hrefForClearedFilters,
     hrefForFilters,
     pagePathHref,
@@ -65,8 +67,10 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
 
   (() => {
       const configSource = document.querySelector("#grove-index-config");
-      const list = document.querySelector("#results-list");
-      if (!configSource || !list) return;
+      const listNode = document.querySelector<HTMLElement>("#results-list");
+      if (!configSource || !listNode) return;
+      // Closures below cannot see the guard above; bind the narrowed type once.
+      const list = listNode;
 
       const { slug, singular, plural, taxonomy, routePage } = JSON.parse(
         configSource.textContent || "{}",
@@ -261,9 +265,10 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
       const filterKeys = DIRECTORY_FILTER_KEYS;
       const filterLabels = DIRECTORY_FILTER_LABELS;
       const taxonomyKinds = DIRECTORY_TAXONOMY_KINDS;
-      const taxonomyName = (groupKey, value) =>
-        (taxonomy[taxonomyKinds[groupKey]] || []).find((entry) => entry.id === value)?.name ??
-        value;
+      const taxonomyName = (groupKey: DirectoryFilterGroupKey, value: string) =>
+        (taxonomy[taxonomyKinds[groupKey]] || []).find(
+          (entry: { id: string; name: string }) => entry.id === value,
+        )?.name ?? value;
 
       /** Chip labels and remove hrefs come from core — one definition. */
       function renderChips() {
@@ -315,7 +320,9 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
         const values = (key: string) => params.getAll(key).filter(Boolean);
         document.querySelectorAll(".grove-filter").forEach((group) => {
           if (!(group instanceof HTMLElement)) return;
-          const selected = values(filterKeys[group.dataset.filterGroupKey]);
+          const groupKey = group.dataset.filterGroupKey;
+          if (!groupKey || !isDirectoryFilterGroupKey(groupKey)) return;
+          const selected = values(filterKeys[groupKey]);
           group.querySelectorAll(".grove-filter-input").forEach((input) => {
             if (input instanceof HTMLInputElement) {
               input.checked = selected.includes(input.dataset.filterValue || "");
@@ -323,12 +330,12 @@ const clientConfigJson = JSON.stringify({ slug, singular, plural, taxonomy, rout
           });
           const triggerButton = group.querySelector(".grove-filter-trigger");
           const trigger = triggerButton?.querySelector("span");
-          const label = filterLabels[group.dataset.filterGroupKey];
+          const label = filterLabels[groupKey];
           if (trigger) {
             trigger.textContent = selected.length
               ? `${label}: ${
               selected.length === 1
-                ? taxonomyName(group.dataset.filterGroupKey, selected[0])
+                ? taxonomyName(groupKey, selected[0] ?? "")
                 : `${selected.length} selected`
                 }`
               : `${label}: Any`;

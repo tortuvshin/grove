@@ -2,13 +2,13 @@
 import type { MarkdownHeading } from 'astro';
 
 interface TocItem extends MarkdownHeading {
-    children: TocItem[];
+  children: TocItem[];
 }
 
 interface Props {
-    toc: TocItem[];
-    depth?: number;
-    isMobile?: boolean;
+  toc: TocItem[];
+  depth?: number;
+  isMobile?: boolean;
 }
 
 const { toc, depth = 0 } = Astro.props;

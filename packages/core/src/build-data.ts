@@ -1,22 +1,22 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
-import { parse as parseYaml } from "yaml";
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { basename, join, resolve } from 'node:path';
+import { parse as parseYaml } from 'yaml';
+import { loadConfig } from './config.js';
+import { classifyHealth } from './health.js';
 import {
   blueprintKind,
+  decisionsFileSchema,
+  type GroveConfig,
+  type HealthEntry,
+  healthFileSchema,
+  overridesFileSchema,
+  type Resource,
   recordsFileSchema,
   toIndexRecord,
   unwrapDecisions,
-  decisionsFileSchema,
   unwrapHealth,
-  healthFileSchema,
   unwrapOverrides,
-  overridesFileSchema,
-  type GroveConfig,
-  type HealthEntry,
-  type Resource,
-} from "./schema.js";
-import { classifyHealth } from "./health.js";
-import { loadConfig } from "./config.js";
+} from './schema.js';
 
 /**
  * Apply a minimal decisions.yml override to a normalized record. The
@@ -40,20 +40,20 @@ import { loadConfig } from "./config.js";
  * cannot flow through without a health block. Without the fabrication
  * the override would silently disappear from the rendered index.
  */
-function applyDecision(
-  record: Resource,
-  visibilityById: Map<string, string>,
-): Resource {
+function applyDecision(record: Resource, visibilityById: Map<string, string>): Resource {
   const override = visibilityById.get(record.slug);
   if (!override) return record;
-  if (record.kind === "project") {
+  if (record.kind === 'project') {
     const existing = record.health;
     // Fabricate a default "no signals" health block via the canonical
     // classifier. Keeps the threshold/format in lockstep with the rest
     // of the package — if `classifyHealth` ever changes its unknown
     // shape, this fabrication updates automatically.
     const fabricated = classifyHealth(record.slug).health;
-    const merged = { ...(existing ?? fabricated), visibility: override as typeof fabricated.visibility };
+    const merged = {
+      ...(existing ?? fabricated),
+      visibility: override as typeof fabricated.visibility,
+    };
     return { ...record, health: merged };
   }
   // Resource-hub / ecosystem-map: no `health` block; the top-level
@@ -73,11 +73,11 @@ function applyDecision(
 async function loadHealthEntries(
   healthPath: string,
   cwd: string,
-): Promise<Map<string, HealthEntry["health"]>> {
+): Promise<Map<string, HealthEntry['health']>> {
   try {
-    const raw = await readFile(resolve(cwd, healthPath), "utf8");
-    const parsed = healthFileSchema.parse(parseYaml(raw, { schema: "core" }) ?? {});
-    const out = new Map<string, HealthEntry["health"]>();
+    const raw = await readFile(resolve(cwd, healthPath), 'utf8');
+    const parsed = healthFileSchema.parse(parseYaml(raw, { schema: 'core' }) ?? {});
+    const out = new Map<string, HealthEntry['health']>();
     for (const entry of unwrapHealth(parsed)) out.set(entry.id, entry.health);
     return out;
   } catch {
@@ -95,8 +95,8 @@ async function loadOverridePatches(
   cwd: string,
 ): Promise<Map<string, Record<string, unknown>>> {
   try {
-    const raw = await readFile(resolve(cwd, overridesPath), "utf8");
-    const parsed = overridesFileSchema.parse(parseYaml(raw, { schema: "core" }) ?? {});
+    const raw = await readFile(resolve(cwd, overridesPath), 'utf8');
+    const parsed = overridesFileSchema.parse(parseYaml(raw, { schema: 'core' }) ?? {});
     const out = new Map<string, Record<string, unknown>>();
     for (const entry of unwrapOverrides(parsed)) out.set(entry.id, entry.patch);
     return out;
@@ -110,8 +110,8 @@ async function loadDecisionVisibility(
   cwd: string,
 ): Promise<Map<string, string>> {
   try {
-    const raw = await readFile(resolve(cwd, decisionsPath), "utf8");
-    const parsed = decisionsFileSchema.parse(parseYaml(raw, { schema: "core" }) ?? {});
+    const raw = await readFile(resolve(cwd, decisionsPath), 'utf8');
+    const parsed = decisionsFileSchema.parse(parseYaml(raw, { schema: 'core' }) ?? {});
     const decisions = unwrapDecisions(parsed);
     const out = new Map<string, string>();
     for (const d of decisions) out.set(d.id, d.decision.visibility);
@@ -159,16 +159,16 @@ async function loadTaxonomyFile(
   filename: string,
 ): Promise<GeneratedTaxonomyItem[]> {
   try {
-    const text = await readFile(resolve(cwd, taxonomyDir, filename), "utf8");
-    const raw = parseYaml(text, { schema: "core" });
+    const text = await readFile(resolve(cwd, taxonomyDir, filename), 'utf8');
+    const raw = parseYaml(text, { schema: 'core' });
     if (!Array.isArray(raw)) return [];
     const items = raw
       .filter(
         (item): item is Record<string, unknown> =>
           Boolean(item) &&
-          typeof item === "object" &&
-          typeof item.id === "string" &&
-          typeof item.name === "string",
+          typeof item === 'object' &&
+          typeof item.id === 'string' &&
+          typeof item.name === 'string',
       )
       .map(
         (item): GeneratedTaxonomyItem => ({
@@ -184,8 +184,8 @@ async function loadTaxonomyFile(
     return items
       .map((item, index) => ({ item, index }))
       .sort((a, b) => {
-        const orderA = typeof a.item.order === "number" ? a.item.order : Number.POSITIVE_INFINITY;
-        const orderB = typeof b.item.order === "number" ? b.item.order : Number.POSITIVE_INFINITY;
+        const orderA = typeof a.item.order === 'number' ? a.item.order : Number.POSITIVE_INFINITY;
+        const orderB = typeof b.item.order === 'number' ? b.item.order : Number.POSITIVE_INFINITY;
         return orderA - orderB || a.index - b.index;
       })
       .map(({ item }) => item);
@@ -212,10 +212,7 @@ export interface GenerateResult {
   errors: string[];
 }
 
-export async function generate(
-  cwd = process.cwd(),
-  config?: GroveConfig,
-): Promise<GenerateResult> {
+export async function generate(cwd = process.cwd(), config?: GroveConfig): Promise<GenerateResult> {
   const cfg = config ?? (await loadConfig(cwd));
   const recordsDir = resolve(cwd, cfg.paths.recordsDir);
   const outDir = resolve(cwd, cfg.paths.generatedDir);
@@ -223,7 +220,7 @@ export async function generate(
 
   const expectedKind = blueprintKind[cfg.blueprint];
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith(".yml")).sort();
+  const files = entries.filter((f) => f.endsWith('.yml')).sort();
 
   // Load the three side files once; a missing file is an empty map.
   // Precedence, lowest to highest: overrides patch the parsed record,
@@ -236,17 +233,17 @@ export async function generate(
   const out: Resource[] = [];
   const errors: string[] = [];
   for (const file of files) {
-    const fileSlug = basename(file, ".yml");
+    const fileSlug = basename(file, '.yml');
     try {
-      const text = await readFile(join(recordsDir, file), "utf8");
-      const raw = (parseYaml(text, { schema: "core" }) ?? {}) as Record<string, unknown>;
+      const text = await readFile(join(recordsDir, file), 'utf8');
+      const raw = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
       if (!raw.kind) raw.kind = expectedKind;
       const patch = patchBySlug.get(fileSlug);
       const normalized = recordsFileSchema.parse(patch ? { ...raw, ...patch } : raw);
       normalized.slug = fileSlug;
       // A health block written inline on the record wins; otherwise
       // take the one keyed by this slug in health.yml, if there is one.
-      if (normalized.kind === "project" && !normalized.health) {
+      if (normalized.kind === 'project' && !normalized.health) {
         const health = healthBySlug.get(fileSlug);
         if (health) normalized.health = health;
       }
@@ -270,16 +267,16 @@ export async function generate(
     .map((record) => toIndexRecord(record))
     .filter((r) => {
       const vis = (r as { visibility?: string }).visibility;
-      return vis !== "hide" && vis !== "remove";
+      return vis !== 'hide' && vis !== 'remove';
     });
 
   // ── Derive directory stats from the records themselves ──────────
   // Single source of truth for the hero/origin/contributors counts.
   // Pages and components read this from site-config.json so the
   // numbers are guaranteed to match what's actually rendered.
-  const projects = indexRecords.filter((r) => r.kind === "project");
-  const resources = indexRecords.filter((r) => r.kind === "resource");
-  const entities = indexRecords.filter((r) => r.kind === "entity");
+  const projects = indexRecords.filter((r) => r.kind === 'project');
+  const resources = indexRecords.filter((r) => r.kind === 'resource');
+  const entities = indexRecords.filter((r) => r.kind === 'entity');
 
   const categories = new Set<string>();
   const stacks = new Set<string>();
@@ -296,17 +293,17 @@ export async function generate(
     const ps = (r as { platforms?: string[] }).platforms ?? [];
     for (const p of ps) platforms.add(p);
     const gh = (r as { github?: { fullName?: string; stars?: number } }).github;
-    if (gh?.fullName && gh.fullName.includes("/")) {
-      const [owner] = gh.fullName.split("/");
+    if (gh?.fullName && gh.fullName.includes('/')) {
+      const [owner] = gh.fullName.split('/');
       if (owner) owners.add(owner);
     }
-    if (typeof gh?.stars === "number") totalStars += gh.stars;
+    if (typeof gh?.stars === 'number') totalStars += gh.stars;
   }
 
   // Try to merge in the optional repo-stats.json (origin / source repo).
   // This file is produced by the `sync:repo-stats` workflow, but the
   // generate step must not require it — fallback to a sane empty shape.
-  const repoStatsPath = join(outDir, "repo-stats.json");
+  const repoStatsPath = join(outDir, 'repo-stats.json');
   let repoStats: {
     repoUrl?: string;
     originalRepo?: string;
@@ -316,7 +313,7 @@ export async function generate(
     description?: string;
   } = {};
   try {
-    repoStats = JSON.parse(await readFile(repoStatsPath, "utf8"));
+    repoStats = JSON.parse(await readFile(repoStatsPath, 'utf8'));
   } catch {
     /* not present — pages render gracefully */
   }
@@ -344,61 +341,53 @@ export async function generate(
     // want a custom path that doesn't match the blueprint id.
     routeSlug:
       (cfg as { routes?: { directory?: string } }).routes?.directory ??
-      ({
-        project: "projects",
-        resource: "resources",
-        entity: "entities",
-      }[kind] ?? "items"),
+      {
+        project: 'projects',
+        resource: 'resources',
+        entity: 'entities',
+      }[kind] ??
+      'items',
     itemSlug:
       (cfg as { routes?: { item?: string } }).routes?.item ??
-      ({
-        project: "project",
-        resource: "resource",
-        entity: "entity",
-      }[kind] ?? "item"),
+      {
+        project: 'project',
+        resource: 'resource',
+        entity: 'entity',
+      }[kind] ??
+      'item',
     // Human-facing labels (e.g. "Browse projects", "Submit a project").
     labelSingular:
       (cfg as { labels?: { singular?: string } }).labels?.singular ??
-      ({
-        project: "project",
-        resource: "resource",
-        entity: "entity",
-      }[kind] ?? "item"),
+      {
+        project: 'project',
+        resource: 'resource',
+        entity: 'entity',
+      }[kind] ??
+      'item',
     labelPlural:
       (cfg as { labels?: { plural?: string } }).labels?.plural ??
-      ({
-        project: "projects",
-        resource: "resources",
-        entity: "entities",
-      }[kind] ?? "items"),
+      {
+        project: 'projects',
+        resource: 'resources',
+        entity: 'entities',
+      }[kind] ??
+      'items',
   };
   const taxonomy = {
-    categories: await loadTaxonomyFile(
-      cwd,
-      cfg.paths.taxonomyDir,
-      "categories.yml",
-    ),
-    stacks: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, "stacks.yml"),
-    platforms: await loadTaxonomyFile(
-      cwd,
-      cfg.paths.taxonomyDir,
-      "platforms.yml",
-    ),
+    categories: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'categories.yml'),
+    stacks: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'stacks.yml'),
+    platforms: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'platforms.yml'),
     // Curated tag vocabulary (data/taxonomy/topics.yml). Optional —
     // older sites without the file simply get an empty list. The
     // browse dropdown filters its Tag facet against this list so
     // arbitrary GitHub topics don't pollute the dropdown.
-    topics: await loadTaxonomyFile(
-      cwd,
-      cfg.paths.taxonomyDir,
-      "topics.yml",
-    ),
+    topics: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'topics.yml'),
     distributionChannels: await loadTaxonomyFile(
       cwd,
       cfg.paths.taxonomyDir,
-      "distribution-channels.yml",
+      'distribution-channels.yml',
     ),
-    licenses: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, "licenses.yml"),
+    licenses: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'licenses.yml'),
   };
 
   const siteConfigPayload = {
@@ -407,8 +396,8 @@ export async function generate(
     name: cfg.site.name,
     tagline: cfg.site.tagline,
     description: cfg.site.description ?? cfg.site.tagline,
-    siteUrl: cfg.site.url ?? "https://example.com",
-    repoUrl: cfg.site.repoUrl ?? "",
+    siteUrl: cfg.site.url ?? 'https://example.com',
+    repoUrl: cfg.site.repoUrl ?? '',
     logo: cfg.site.logo,
     favicon: cfg.site.favicon,
     locale: cfg.site.locale,
@@ -436,18 +425,16 @@ export async function generate(
       repositoryForks: repoStats.forks ?? 0,
       repositoryContributors: repoStats.contributors ?? 0,
       // origin / source repo — only present when sync:repo-stats has run
-      originalRepo: repoStats.originalRepo ?? "",
-      originalStars: repoStats.originalRepo ? repoStats.stars ?? 0 : 0,
-      originalForks: repoStats.originalRepo ? repoStats.forks ?? 0 : 0,
-      originalContributors: repoStats.originalRepo
-        ? repoStats.contributors ?? 0
-        : 0,
+      originalRepo: repoStats.originalRepo ?? '',
+      originalStars: repoStats.originalRepo ? (repoStats.stars ?? 0) : 0,
+      originalForks: repoStats.originalRepo ? (repoStats.forks ?? 0) : 0,
+      originalContributors: repoStats.originalRepo ? (repoStats.contributors ?? 0) : 0,
     },
   };
   await writeFile(
-    join(outDir, "site-config.json"),
+    join(outDir, 'site-config.json'),
     JSON.stringify(siteConfigPayload, null, 2),
-    "utf8",
+    'utf8',
   );
 
   const generatedAt = new Date().toISOString();
@@ -467,12 +454,12 @@ export async function generate(
     records: indexRecords as unknown as Array<Record<string, unknown>>,
   };
 
-  const fullPath = join(outDir, "records.full.json");
-  const indexPath = join(outDir, "records.index.json");
-  const aliasPath = join(outDir, "records.json");
-  await writeFile(fullPath, JSON.stringify(fullPayload, null, 2), "utf8");
-  await writeFile(indexPath, JSON.stringify(indexPayload, null, 2), "utf8");
-  await writeFile(aliasPath, JSON.stringify(fullPayload, null, 2), "utf8");
+  const fullPath = join(outDir, 'records.full.json');
+  const indexPath = join(outDir, 'records.index.json');
+  const aliasPath = join(outDir, 'records.json');
+  await writeFile(fullPath, JSON.stringify(fullPayload, null, 2), 'utf8');
+  await writeFile(indexPath, JSON.stringify(indexPayload, null, 2), 'utf8');
+  await writeFile(aliasPath, JSON.stringify(fullPayload, null, 2), 'utf8');
 
   return {
     totalRecords: out.length,
@@ -485,6 +472,6 @@ export async function generate(
 }
 
 function nameOf(record: Resource): string {
-  if (record.kind === "resource") return record.title;
+  if (record.kind === 'resource') return record.title;
   return record.name;
 }

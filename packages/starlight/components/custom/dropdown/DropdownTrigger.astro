@@ -3,27 +3,27 @@ import type { HTMLAttributes } from 'astro/types';
 import LinkButton, { type ButtonVariant, type LegacyButtonVariant } from '../LinkButton.astro';
 
 type Props = Omit<HTMLAttributes<'button'>, 'role' | 'type'> & {
-    /**
-     * When true, the component will render its child element with a simple wrapper instead of a button component
-     */
-    asChild?: boolean;
+  /**
+   * When true, the component will render its child element with a simple wrapper instead of a button component
+   */
+  asChild?: boolean;
 
-    variant?: ButtonVariant | LegacyButtonVariant;
-    size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'icon-sm' | 'icon-md' | 'icon-lg';
+  variant?: ButtonVariant | LegacyButtonVariant;
+  size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'icon-sm' | 'icon-md' | 'icon-lg';
 };
 
 const {
-    class: className,
-    variant = 'secondary',
-    size = 'sm',
-    asChild = false,
-    ...rest
+  class: className,
+  variant = 'secondary',
+  size = 'sm',
+  asChild = false,
+  ...rest
 } = Astro.props;
 
 // Get the first child element if asChild is true
 let hasChildren = false;
 if (Astro.slots.has('default')) {
-    hasChildren = true;
+  hasChildren = true;
 }
 ---
 

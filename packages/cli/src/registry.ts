@@ -22,20 +22,20 @@
  * — the two must agree byte-for-byte or `grove update` reports
  * phantom drift.
  */
-import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
-import { dirname, isAbsolute, join, resolve } from "node:path";
-import { type LockfileFile, type RegistryLockfile, sha256 } from "./hash.js";
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { type LockfileFile, type RegistryLockfile, sha256 } from './hash.js';
 
 /** The registry namespace consumers configure in `components.json`. */
-export const REGISTRY_NAMESPACE = "@grove";
+export const REGISTRY_NAMESPACE = '@grove';
 /** Where the built items are served; `{name}` is the shadcn placeholder. */
-export const REGISTRY_URL_TEMPLATE = "https://withgrove.dev/r/{name}.json";
+export const REGISTRY_URL_TEMPLATE = 'https://withgrove.dev/r/{name}.json';
 /** The shadcn CLI release `grove init` drives. Pinned: item install behavior is version-specific. */
-export const SHADCN_VERSION = "4.19.0";
+export const SHADCN_VERSION = '4.19.0';
 /** The generated full-scaffold item. */
-export const SCAFFOLD_ITEM = "default";
+export const SCAFFOLD_ITEM = 'default';
 /** What `.grove/registry.lock.json` records as `scaffold`. */
 export const SCAFFOLD_ID = `${REGISTRY_NAMESPACE}/${SCAFFOLD_ITEM}`;
 
@@ -70,17 +70,17 @@ export function resolveBundledItemPath(name = SCAFFOLD_ITEM): string {
   const require = createRequire(import.meta.url);
   let packageJson: string;
   try {
-    packageJson = require.resolve("@grove-dev/registry/package.json");
+    packageJson = require.resolve('@grove-dev/registry/package.json');
   } catch {
     throw new Error(
-      "@grove-dev/registry is not installed. Reinstall @grove-dev/cli (it depends on the registry package).",
+      '@grove-dev/registry is not installed. Reinstall @grove-dev/cli (it depends on the registry package).',
     );
   }
-  const itemPath = join(dirname(packageJson), "dist", "r", `${name}.json`);
+  const itemPath = join(dirname(packageJson), 'dist', 'r', `${name}.json`);
   if (!existsSync(itemPath)) {
     throw new Error(
       `Registry item "${name}" is missing at ${itemPath}. ` +
-        "In the Grove monorepo run `pnpm registry:build`; otherwise reinstall @grove-dev/cli.",
+        'In the Grove monorepo run `pnpm registry:build`; otherwise reinstall @grove-dev/cli.',
     );
   }
   return itemPath;
@@ -105,7 +105,7 @@ export async function loadItem(source: string): Promise<RegistryItem> {
     }
     raw = await response.text();
   } else {
-    raw = await readFile(isAbsolute(source) ? source : resolve(source), "utf8");
+    raw = await readFile(isAbsolute(source) ? source : resolve(source), 'utf8');
   }
   let parsed: unknown;
   try {
@@ -114,17 +114,17 @@ export async function loadItem(source: string): Promise<RegistryItem> {
     throw new Error(`Registry item ${source} is not valid JSON.`);
   }
   const item = parsed as Partial<RegistryItem>;
-  if (typeof item.name !== "string" || !Array.isArray(item.files)) {
+  if (typeof item.name !== 'string' || !Array.isArray(item.files)) {
     throw new Error(`Registry item ${source} is missing "name" or "files".`);
   }
   for (const file of item.files) {
-    if (typeof file.content !== "string") {
+    if (typeof file.content !== 'string') {
       throw new Error(
-        `Registry item ${source}: ${file.path ?? "a file"} has no inlined content (was it built with \`shadcn build\`?).`,
+        `Registry item ${source}: ${file.path ?? 'a file'} has no inlined content (was it built with \`shadcn build\`?).`,
       );
     }
-    if (typeof file.target !== "string" || file.target.length === 0) {
-      throw new Error(`Registry item ${source}: ${file.path ?? "a file"} has no target.`);
+    if (typeof file.target !== 'string' || file.target.length === 0) {
+      throw new Error(`Registry item ${source}: ${file.path ?? 'a file'} has no target.`);
     }
   }
   return item as RegistryItem;
@@ -132,7 +132,7 @@ export async function loadItem(source: string): Promise<RegistryItem> {
 
 /** `~/src/components/ui/button.astro` → `src/components/ui/button.astro` */
 export function targetToProjectPath(target: string): string {
-  return target.replace(/^~\//, "");
+  return target.replace(/^~\//, '');
 }
 
 /**
@@ -145,7 +145,7 @@ export function itemLockEntries(item: RegistryItem): LockfileFile[] {
       target: targetToProjectPath(file.target),
       source: file.path,
       hash: sha256(file.content),
-      bytes: Buffer.byteLength(file.content, "utf8"),
+      bytes: Buffer.byteLength(file.content, 'utf8'),
     }))
     .sort((a, b) => a.target.localeCompare(b.target));
 }
@@ -154,7 +154,7 @@ export function buildLockfile(item: RegistryItem): RegistryLockfile {
   const files = itemLockEntries(item);
   return {
     scaffold: SCAFFOLD_ID,
-    scaffoldVersion: item.meta?.version ?? "0.0.0",
+    scaffoldVersion: item.meta?.version ?? '0.0.0',
     installedAt: new Date().toISOString().slice(0, 10),
     fileCount: files.length,
     files,
@@ -178,7 +178,7 @@ export async function writeItemFiles(
     if (options.only && !options.only.has(projectPath)) continue;
     const dest = join(cwd, projectPath);
     await mkdir(dirname(dest), { recursive: true });
-    await writeFile(dest, file.content, "utf8");
+    await writeFile(dest, file.content, 'utf8');
     written.push(projectPath);
   }
   return written;
@@ -192,16 +192,16 @@ export async function writeItemFiles(
 export async function resolveRegistryTemplate(cwd: string): Promise<string | null> {
   let raw: string;
   try {
-    raw = await readFile(join(cwd, "components.json"), "utf8");
+    raw = await readFile(join(cwd, 'components.json'), 'utf8');
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw err;
   }
   const config = JSON.parse(raw) as {
     registries?: Record<string, string | { url?: string }>;
   };
   const entry = config.registries?.[REGISTRY_NAMESPACE];
-  if (typeof entry === "string") return entry;
-  if (entry && typeof entry.url === "string") return entry.url;
+  if (typeof entry === 'string') return entry;
+  if (entry && typeof entry.url === 'string') return entry.url;
   return null;
 }

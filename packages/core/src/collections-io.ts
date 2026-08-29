@@ -3,10 +3,10 @@
  * from `collections.ts` so the query/ranking engine stays pure and
  * importable in non-Node contexts.
  */
-import { readFile, readdir } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { parse as parseYaml } from "yaml";
-import type { Collection } from "./collections.js";
+import { readdir, readFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { parse as parseYaml } from 'yaml';
+import type { Collection } from './collections.js';
 
 /**
  * Load all `Collection` YAML files from `<cwd>/data/collections/*.yml`.
@@ -18,18 +18,18 @@ import type { Collection } from "./collections.js";
  * errors, etc.) are visible instead of silently producing empty output.
  */
 export async function loadCollections(cwd: string): Promise<Collection[]> {
-  const dir = resolve(cwd, "data/collections");
+  const dir = resolve(cwd, 'data/collections');
   let files: string[];
   try {
     files = await readdir(dir);
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
     throw err;
   }
   const out: Collection[] = [];
-  for (const f of files.filter((f) => f.endsWith(".yml"))) {
-    const raw = parseYaml(await readFile(join(dir, f), "utf8"));
-    if (!raw || typeof raw !== "object") {
+  for (const f of files.filter((f) => f.endsWith('.yml'))) {
+    const raw = parseYaml(await readFile(join(dir, f), 'utf8'));
+    if (!raw || typeof raw !== 'object') {
       throw new Error(`Invalid collection YAML: ${f}`);
     }
     out.push(raw as Collection);

@@ -13,9 +13,9 @@
  * `repoLabel` to change the visible text.
  */
 
-import ThemeToggle from "../components/site/theme-toggle.astro";
-import { buttonClass } from "../lib/classnames.ts";
-import { compact } from "@grove-dev/core";
+import { compact } from '@grove-dev/core';
+import ThemeToggle from '../components/site/theme-toggle.astro';
+import { buttonClass } from '../lib/classnames.ts';
 
 interface NavItem {
   label: string;
@@ -52,26 +52,20 @@ interface Props {
   class?: string;
 }
 
-const {
-  site,
-  submitLabel,
-  submitHref,
-  repoLabel = "Star",
-  class: className = "",
-} = Astro.props;
-const directoryPath = `/${site.blueprintConfig?.routeSlug ?? "items"}`;
+const { site, submitLabel, submitHref, repoLabel = 'Star', class: className = '' } = Astro.props;
+const directoryPath = `/${site.blueprintConfig?.routeSlug ?? 'items'}`;
 const defaultNavItems = site.blueprintConfig
   ? [
-      { label: "Recently added", href: `${directoryPath}?sort=recently-added` },
-      { label: "Trending", href: `${directoryPath}?label=hot` },
-      { label: "Categories", href: "/categories" },
-      { label: "Stacks", href: "/stacks" },
-      { label: "About", href: "/about" },
+      { label: 'Recently added', href: `${directoryPath}?sort=recently-added` },
+      { label: 'Trending', href: `${directoryPath}?label=hot` },
+      { label: 'Categories', href: '/categories' },
+      { label: 'Stacks', href: '/stacks' },
+      { label: 'About', href: '/about' },
     ]
   : [];
 const navItems = site.nav?.length ? site.nav : defaultNavItems;
 const stars = site.stats?.repositoryStars;
-const starsLabel = typeof stars === "number" ? compact(stars) : null;
+const starsLabel = typeof stars === 'number' ? compact(stars) : null;
 ---
 
 <header

@@ -19,19 +19,52 @@
  * native resvg binding is unavailable the build logs a warning and
  * pages fall back to the static `/og-image.svg`.
  */
-import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import type { GroveConfig } from "./schema.js";
-import { hostOf } from "./host.js";
+import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { hostOf } from './host.js';
+import type { GroveConfig } from './schema.js';
 
 export type OgTemplate =
-  | { kind: "home"; siteName: string; tagline?: string; host: string; metric?: string; accent?: string }
-  | { kind: "default"; siteName: string; tagline?: string; host: string; accent?: string }
-  | { kind: "record"; siteName: string; name: string; descriptor?: string; stars?: number; category?: string; host: string; accent?: string }
-  | { kind: "collection"; siteName: string; title: string; count: number; noun: string; host: string; accent?: string }
-  | { kind: "taxonomy"; siteName: string; label: string; facet: "category" | "stack" | "license"; count: number; noun: string; host: string; accent?: string };
+  | {
+      kind: 'home';
+      siteName: string;
+      tagline?: string;
+      host: string;
+      metric?: string;
+      accent?: string;
+    }
+  | { kind: 'default'; siteName: string; tagline?: string; host: string; accent?: string }
+  | {
+      kind: 'record';
+      siteName: string;
+      name: string;
+      descriptor?: string;
+      stars?: number;
+      category?: string;
+      host: string;
+      accent?: string;
+    }
+  | {
+      kind: 'collection';
+      siteName: string;
+      title: string;
+      count: number;
+      noun: string;
+      host: string;
+      accent?: string;
+    }
+  | {
+      kind: 'taxonomy';
+      siteName: string;
+      label: string;
+      facet: 'category' | 'stack' | 'license';
+      count: number;
+      noun: string;
+      host: string;
+      accent?: string;
+    };
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -42,9 +75,9 @@ function el(type: string, style: Record<string, unknown>, children?: El[] | stri
   return { type, props: { style, ...(children !== undefined ? { children } : {}) } };
 }
 
-const INK_100 = "#fafafa";
-const INK_400 = "#a1a1aa";
-const INK_300 = "#d4d4d8";
+const INK_100 = '#fafafa';
+const INK_400 = '#a1a1aa';
+const INK_300 = '#d4d4d8';
 
 /** Scale a headline down as it gets longer so it never overflows. */
 function headlineSize(text: string): number {
@@ -63,66 +96,62 @@ function layout(input: {
   accent: string;
 }): El {
   return el(
-    "div",
+    'div',
     {
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      padding: "72px 88px",
-      backgroundImage: "linear-gradient(135deg, #0a0a0c, #18181b)",
-      fontFamily: "Inter",
-      position: "relative",
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      padding: '72px 88px',
+      backgroundImage: 'linear-gradient(135deg, #0a0a0c, #18181b)',
+      fontFamily: 'Inter',
+      position: 'relative',
     },
     [
       // Accent glow — echoes the static og-image.svg so per-page and
       // site-wide cards read as one family.
-      el("div", {
-        position: "absolute",
-        top: "-180px",
-        right: "-120px",
-        width: "520px",
-        height: "520px",
-        borderRadius: "9999px",
+      el('div', {
+        position: 'absolute',
+        top: '-180px',
+        right: '-120px',
+        width: '520px',
+        height: '520px',
+        borderRadius: '9999px',
         backgroundColor: input.accent,
         opacity: 0.18,
       }),
-      el("div", { display: "flex", alignItems: "center", gap: "16px" }, [
-        el("div", {
-          width: "34px",
-          height: "34px",
-          borderRadius: "8px",
+      el('div', { display: 'flex', alignItems: 'center', gap: '16px' }, [
+        el('div', {
+          width: '34px',
+          height: '34px',
+          borderRadius: '8px',
           backgroundColor: input.accent,
         }),
-        el(
-          "div",
-          { fontSize: "26px", color: INK_300, letterSpacing: "0.5px" },
-          input.eyebrow,
-        ),
+        el('div', { fontSize: '26px', color: INK_300, letterSpacing: '0.5px' }, input.eyebrow),
       ]),
-      el("div", { display: "flex", flexDirection: "column", gap: "22px" }, [
+      el('div', { display: 'flex', flexDirection: 'column', gap: '22px' }, [
         el(
-          "div",
+          'div',
           {
             fontSize: `${headlineSize(input.headline)}px`,
             fontWeight: 600,
             color: INK_100,
-            letterSpacing: "-2px",
+            letterSpacing: '-2px',
             lineHeight: 1.08,
-            maxWidth: "1000px",
+            maxWidth: '1000px',
           },
           input.headline,
         ),
         ...(input.sub
           ? [
               el(
-                "div",
+                'div',
                 {
-                  fontSize: "30px",
+                  fontSize: '30px',
                   color: INK_400,
                   lineHeight: 1.4,
-                  maxWidth: "980px",
+                  maxWidth: '980px',
                 },
                 input.sub,
               ),
@@ -130,18 +159,16 @@ function layout(input: {
           : []),
       ]),
       el(
-        "div",
+        'div',
         {
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontSize: "22px",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '22px',
         },
         [
-          el("div", { color: INK_300 }, input.footerLeft),
-          ...(input.footerRight
-            ? [el("div", { color: input.accent }, input.footerRight)]
-            : []),
+          el('div', { color: INK_300 }, input.footerLeft),
+          ...(input.footerRight ? [el('div', { color: input.accent }, input.footerRight)] : []),
         ],
       ),
     ],
@@ -153,22 +180,22 @@ function truncate(value: string, max: number): string {
 }
 
 function templateToElement(t: OgTemplate): El {
-  const accent = t.accent ?? "#e5e5e5";
+  const accent = t.accent ?? '#e5e5e5';
   switch (t.kind) {
-    case "home":
-    case "default":
+    case 'home':
+    case 'default':
       return layout({
         eyebrow: t.host,
         headline: t.siteName,
         ...(t.tagline ? { sub: truncate(t.tagline, 120) } : {}),
         footerLeft: t.host,
-        ...(t.kind === "home" && t.metric ? { footerRight: t.metric } : {}),
+        ...(t.kind === 'home' && t.metric ? { footerRight: t.metric } : {}),
         accent,
       });
-    case "record": {
+    case 'record': {
       const stars =
-        typeof t.stars === "number" && t.stars > 0
-          ? `★ ${t.stars.toLocaleString("en-US")}`
+        typeof t.stars === 'number' && t.stars > 0
+          ? `★ ${t.stars.toLocaleString('en-US')}`
           : undefined;
       return layout({
         eyebrow: t.category ? `${t.siteName} · ${t.category}` : t.siteName,
@@ -179,7 +206,7 @@ function templateToElement(t: OgTemplate): El {
         accent,
       });
     }
-    case "collection":
+    case 'collection':
       return layout({
         eyebrow: `${t.siteName} · Collection`,
         headline: truncate(t.title, 70),
@@ -187,9 +214,9 @@ function templateToElement(t: OgTemplate): El {
         footerLeft: t.host,
         accent,
       });
-    case "taxonomy": {
+    case 'taxonomy': {
       const facetLabel =
-        t.facet === "category" ? "Category" : t.facet === "stack" ? "Stack" : "License";
+        t.facet === 'category' ? 'Category' : t.facet === 'stack' ? 'Stack' : 'License';
       return layout({
         eyebrow: `${t.siteName} · ${facetLabel}`,
         headline: truncate(t.label, 60),
@@ -201,7 +228,9 @@ function templateToElement(t: OgTemplate): El {
   }
 }
 
-let fontsPromise: Promise<Array<{ name: string; data: ArrayBuffer; weight: 400 | 600; style: "normal" }>> | null = null;
+let fontsPromise: Promise<
+  Array<{ name: string; data: ArrayBuffer; weight: 400 | 600; style: 'normal' }>
+> | null = null;
 async function loadFonts() {
   fontsPromise ??= (async () => {
     const load = async (file: string) => {
@@ -210,8 +239,18 @@ async function loadFonts() {
       return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
     };
     return [
-      { name: "Inter", data: await load("Inter-Regular.ttf"), weight: 400 as const, style: "normal" as const },
-      { name: "Inter", data: await load("Inter-SemiBold.ttf"), weight: 600 as const, style: "normal" as const },
+      {
+        name: 'Inter',
+        data: await load('Inter-Regular.ttf'),
+        weight: 400 as const,
+        style: 'normal' as const,
+      },
+      {
+        name: 'Inter',
+        data: await load('Inter-SemiBold.ttf'),
+        weight: 600 as const,
+        style: 'normal' as const,
+      },
     ];
   })();
   return fontsPromise;
@@ -224,12 +263,17 @@ async function loadFonts() {
 // native .node binary.
 async function importRenderer() {
   const [satoriMod, resvgMod] = await Promise.all([
-    import(/* @vite-ignore */ "satori"),
-    import(/* @vite-ignore */ "@resvg/resvg-js"),
+    import(/* @vite-ignore */ 'satori'),
+    import(/* @vite-ignore */ '@resvg/resvg-js'),
   ]);
   return {
-    satori: (satoriMod as { default: (element: unknown, options: unknown) => Promise<string> }).default,
-    Resvg: (resvgMod as { Resvg: new (svg: string, options?: unknown) => { render(): { asPng(): Uint8Array } } }).Resvg,
+    satori: (satoriMod as { default: (element: unknown, options: unknown) => Promise<string> })
+      .default,
+    Resvg: (
+      resvgMod as {
+        Resvg: new (svg: string, options?: unknown) => { render(): { asPng(): Uint8Array } };
+      }
+    ).Resvg,
   };
 }
 
@@ -242,14 +286,25 @@ export async function renderOgPng(t: OgTemplate): Promise<Uint8Array> {
     height: HEIGHT,
     fonts,
   });
-  const resvg = new Resvg(svg, { fitTo: { mode: "width", value: WIDTH } });
+  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: WIDTH } });
   return resvg.render().asPng();
 }
 
 export interface OgBuildInput {
-  records: Array<{ slug: string; name: string; descriptor?: string; stars?: number; category?: string }>;
+  records: Array<{
+    slug: string;
+    name: string;
+    descriptor?: string;
+    stars?: number;
+    category?: string;
+  }>;
   collections: Array<{ slug: string; title: string; count: number }>;
-  taxonomies: Array<{ facet: "category" | "stack" | "license"; id: string; label: string; count: number }>;
+  taxonomies: Array<{
+    facet: 'category' | 'stack' | 'license';
+    id: string;
+    label: string;
+    count: number;
+  }>;
   stats?: { totalRecords?: number; repositoryStars?: number };
   /** Item noun for captions (e.g. "projects"). Defaults to
    *  `config.labels.plural`, falling back to "items". */
@@ -262,10 +317,10 @@ export interface OgBuildResult {
   failed: boolean;
 }
 
-const FACET_DIR: Record<"category" | "stack" | "license", string> = {
-  category: "categories",
-  stack: "stacks",
-  license: "licenses",
+const FACET_DIR: Record<'category' | 'stack' | 'license', string> = {
+  category: 'categories',
+  stack: 'stacks',
+  license: 'licenses',
 };
 
 /**
@@ -282,37 +337,35 @@ export async function buildOgImages(
   input: OgBuildInput,
 ): Promise<OgBuildResult> {
   const publicDir = resolve(cwd, config.paths.publicDir);
-  const ogDir = join(publicDir, "og");
-  const manifestPath = resolve(cwd, config.paths.generatedDir, "og-manifest.json");
-  const accent = config.theme.primaryColor ?? "#e5e5e5";
+  const ogDir = join(publicDir, 'og');
+  const manifestPath = resolve(cwd, config.paths.generatedDir, 'og-manifest.json');
+  const accent = config.theme.primaryColor ?? '#e5e5e5';
   const host = hostOf(config.site.url);
   const siteName = config.site.name;
-  const noun = input.noun ?? config.labels.plural ?? "items";
+  const noun = input.noun ?? config.labels.plural ?? 'items';
 
   const count = input.stats?.totalRecords ?? input.records.length;
   const stars = input.stats?.repositoryStars ?? 0;
   const metric =
-    stars > 0
-      ? `${count} ${noun} · ${stars.toLocaleString("en-US")} stars`
-      : `${count} ${noun}`;
+    stars > 0 ? `${count} ${noun} · ${stars.toLocaleString('en-US')} stars` : `${count} ${noun}`;
 
   const jobs: Array<{ rel: string; template: OgTemplate }> = [
     {
-      rel: "home.png",
-      template: { kind: "home", siteName, tagline: config.site.tagline, host, metric, accent },
+      rel: 'home.png',
+      template: { kind: 'home', siteName, tagline: config.site.tagline, host, metric, accent },
     },
     {
-      rel: "default.png",
-      template: { kind: "default", siteName, tagline: config.site.tagline, host, accent },
+      rel: 'default.png',
+      template: { kind: 'default', siteName, tagline: config.site.tagline, host, accent },
     },
     ...input.records.map((r) => ({
       rel: `records/${r.slug}.png`,
       template: {
-        kind: "record" as const,
+        kind: 'record' as const,
         siteName,
         name: r.name,
         ...(r.descriptor ? { descriptor: r.descriptor } : {}),
-        ...(typeof r.stars === "number" ? { stars: r.stars } : {}),
+        ...(typeof r.stars === 'number' ? { stars: r.stars } : {}),
         ...(r.category ? { category: r.category } : {}),
         host,
         accent,
@@ -321,7 +374,7 @@ export async function buildOgImages(
     ...input.collections.map((c) => ({
       rel: `collections/${c.slug}.png`,
       template: {
-        kind: "collection" as const,
+        kind: 'collection' as const,
         siteName,
         title: c.title,
         count: c.count,
@@ -333,7 +386,7 @@ export async function buildOgImages(
     ...input.taxonomies.map((t) => ({
       rel: `${FACET_DIR[t.facet]}/${t.id}.png`,
       template: {
-        kind: "taxonomy" as const,
+        kind: 'taxonomy' as const,
         siteName,
         label: t.label,
         facet: t.facet,
@@ -347,7 +400,7 @@ export async function buildOgImages(
 
   let manifest: Record<string, string> = {};
   try {
-    manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, string>;
+    manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Record<string, string>;
   } catch {
     // Missing/corrupt manifest — regenerate everything.
   }
@@ -364,7 +417,7 @@ export async function buildOgImages(
       const batch = jobs.slice(i, i + CONCURRENCY);
       await Promise.all(
         batch.map(async (job) => {
-          const hash = createHash("sha1").update(JSON.stringify(job.template)).digest("hex");
+          const hash = createHash('sha1').update(JSON.stringify(job.template)).digest('hex');
           nextManifest[job.rel] = hash;
           const outPath = join(ogDir, job.rel);
           if (manifest[job.rel] === hash && existsSync(outPath)) {
@@ -379,7 +432,7 @@ export async function buildOgImages(
       );
     }
     await mkdir(dirname(manifestPath), { recursive: true });
-    await writeFile(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`, "utf8");
+    await writeFile(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`, 'utf8');
     return { written, skipped, failed: false };
   } catch (error) {
     console.warn(

@@ -6,47 +6,47 @@ type StarlightUserConfig = HookParameters<'config:setup'>['config'];
 type ComponentOverride = keyof NonNullable<StarlightUserConfig['components']>;
 
 export const COMPONENT_OVERRIDES: ComponentOverride[] = [
-    'ThemeSelect',
-    'PageFrame',
-    'Header',
-    'SiteTitle',
-    'Sidebar',
-    'TwoColumnContent',
-    'ContentPanel',
-    'PageTitle',
-    'MarkdownContent',
-    'Hero',
-    'Footer',
-    'SocialIcons',
-    'Pagination',
-    'Search',
-    'TableOfContents',
-    'PageSidebar',
+  'ThemeSelect',
+  'PageFrame',
+  'Header',
+  'SiteTitle',
+  'Sidebar',
+  'TwoColumnContent',
+  'ContentPanel',
+  'PageTitle',
+  'MarkdownContent',
+  'Hero',
+  'Footer',
+  'SocialIcons',
+  'Pagination',
+  'Search',
+  'TableOfContents',
+  'PageSidebar',
 ];
 
 export function override(
-    starlightConfig: StarlightUserConfig,
-    pluginConfig: GroveStarlightConfig,
-    overrides: ComponentOverride[],
-    logger: AstroIntegrationLogger
+  starlightConfig: StarlightUserConfig,
+  pluginConfig: GroveStarlightConfig,
+  overrides: ComponentOverride[],
+  logger: AstroIntegrationLogger,
 ): StarlightUserConfig['components'] {
-    const components = { ...starlightConfig.components };
-    for (const override of overrides) {
-        if (starlightConfig.components?.[override] != null) {
-            const fallback = `@grove-dev/starlight/components/overrides/${override}.astro`;
+  const components = { ...starlightConfig.components };
+  for (const override of overrides) {
+    if (starlightConfig.components?.[override] != null) {
+      const fallback = `@grove-dev/starlight/components/overrides/${override}.astro`;
 
-            if (pluginConfig.warnOverrides) {
-                logger.warn(
-                    `A \`<${override}>\` component override is already defined in your Starlight configuration.`
-                );
-                logger.warn(
-                    `To use \`@grove-dev/starlight/components\`, either remove this override or manually render the content from \`${fallback}\`.`
-                );
-            }
-            continue;
-        }
-        components[override] = `@grove-dev/starlight/components/overrides/${override}.astro`;
+      if (pluginConfig.warnOverrides) {
+        logger.warn(
+          `A \`<${override}>\` component override is already defined in your Starlight configuration.`,
+        );
+        logger.warn(
+          `To use \`@grove-dev/starlight/components\`, either remove this override or manually render the content from \`${fallback}\`.`,
+        );
+      }
+      continue;
     }
+    components[override] = `@grove-dev/starlight/components/overrides/${override}.astro`;
+  }
 
-    return components;
+  return components;
 }

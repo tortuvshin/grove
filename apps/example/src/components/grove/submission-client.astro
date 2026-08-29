@@ -5,13 +5,19 @@ import {
   recordSlugify,
   yamlLines,
   yamlQuote,
-} from "@grove-dev/core";
+} from '@grove-dev/core';
 
 interface Props {
   existingSlugs: string[];
   existingFullNames: string[];
   repoUrl: string;
-  fields: { category: boolean; stack: boolean; platforms: boolean; tags: boolean; license?: boolean };
+  fields: {
+    category: boolean;
+    stack: boolean;
+    platforms: boolean;
+    tags: boolean;
+    license?: boolean;
+  };
   /** Taxonomy ids for client-side validation. */
   taxonomy?: {
     categoryIds?: string[];

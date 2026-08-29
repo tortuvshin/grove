@@ -14,7 +14,7 @@
 interface WhyPoint {
   title: string;
   body: string;
-  icon: "item" | "code" | "search";
+  icon: 'item' | 'code' | 'search';
 }
 
 interface Props {
@@ -27,27 +27,27 @@ interface Props {
 
 const {
   points,
-  eyebrow = "Why this exists",
-  title = "Most directory discovery is fragmented.",
-  description = "Lists are useful, but they often become long, static pages without enough context to compare what is real, maintained, and worth exploring.",
-  class: className = "",
+  eyebrow = 'Why this exists',
+  title = 'Most directory discovery is fragmented.',
+  description = 'Lists are useful, but they often become long, static pages without enough context to compare what is real, maintained, and worth exploring.',
+  class: className = '',
 } = Astro.props;
 
 const defaultPoints: WhyPoint[] = [
   {
-    icon: "item",
-    title: "Real projects",
-    body: "Not SDKs, templates, or tiny demos. Focused on complete projects you can actually run.",
+    icon: 'item',
+    title: 'Real projects',
+    body: 'Not SDKs, templates, or tiny demos. Focused on complete projects you can actually run.',
   },
   {
-    icon: "code",
-    title: "Codebase context",
-    body: "Stack, platform, license, activity, maturity, and contribution signals in one place.",
+    icon: 'code',
+    title: 'Codebase context',
+    body: 'Stack, platform, license, activity, maturity, and contribution signals in one place.',
   },
   {
-    icon: "search",
-    title: "Searchable discovery",
-    body: "Browse by category, stack, platform, stars, recency, and status instead of scanning a flat list.",
+    icon: 'search',
+    title: 'Searchable discovery',
+    body: 'Browse by category, stack, platform, stars, recency, and status instead of scanning a flat list.',
   },
 ];
 

@@ -11,13 +11,18 @@
  * The list represents contributors to the directory's own source
  * repository. Project owners in the directory are a separate metric.
  */
-import siteConfig from "@grove/generated/site-config.json";
-import BaseLayout from "../layouts/base-layout.astro";
-import EmptyState from "../components/ui/empty-state.astro";
-import { getContributorsPageModel } from "@grove-dev/astro/server";
+import siteConfig from '@grove/generated/site-config.json';
+import { getContributorsPageModel } from '@grove-dev/astro/server';
+import EmptyState from '../components/ui/empty-state.astro';
+import BaseLayout from '../layouts/base-layout.astro';
 
-const { contributors: sorted, total, seo, contributorsGraphHref, showContributionCount } =
-  getContributorsPageModel(siteConfig);
+const {
+  contributors: sorted,
+  total,
+  seo,
+  contributorsGraphHref,
+  showContributionCount,
+} = getContributorsPageModel(siteConfig);
 ---
 
 <BaseLayout title={seo.title} description={seo.description} image={seo.image} jsonLd={seo.jsonLd} site={siteConfig}>

@@ -27,14 +27,12 @@ export interface InferStackInput {
  * topic signal at all.
  */
 export function inferStackFromTopics(input: InferStackInput): string | null {
-  const language = String(input.language || "").toLowerCase();
-  const topics = (input.topics || []).map((topic) =>
-    String(topic).toLowerCase(),
-  );
-  if (topics.includes("flutter") || language === "dart") return "flutter";
-  if (topics.includes("react-native")) return "react-native";
-  if (language === "swift" || language === "objective-c") return "ios";
-  if (language === "kotlin" || language === "java") return "android";
+  const language = String(input.language || '').toLowerCase();
+  const topics = (input.topics || []).map((topic) => String(topic).toLowerCase());
+  if (topics.includes('flutter') || language === 'dart') return 'flutter';
+  if (topics.includes('react-native')) return 'react-native';
+  if (language === 'swift' || language === 'objective-c') return 'ios';
+  if (language === 'kotlin' || language === 'java') return 'android';
   if (language) return language;
   return null;
 }

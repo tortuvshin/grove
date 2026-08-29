@@ -1,4 +1,22 @@
 ---
+import records from '@grove/generated/records.json';
+import siteConfig from '@grove/generated/site-config.json';
+import {
+  getCollectionTeaserModel,
+  getHomePageModel,
+  loadCollections,
+  recordsToCollectionEntries,
+} from '@grove-dev/astro/server';
+import CategoryGrid from '../components/grove/category-grid.astro';
+import CollectionTeaser from '../components/grove/collection-teaser.astro';
+import ContributorsGrid from '../components/grove/contributors-grid.astro';
+import FinalCta from '../components/grove/final-cta.astro';
+import Hero from '../components/grove/hero.astro';
+import OriginalCollection from '../components/grove/original-collection.astro';
+import PipelineStrip from '../components/grove/pipeline-strip.astro';
+import RecordSection from '../components/grove/record-section.astro';
+import StackGrid from '../components/grove/stack-grid.astro';
+import WhyThisExists from '../components/grove/why-this-exists.astro';
 /**
  * Home page — generic.
  *
@@ -11,26 +29,7 @@
  * to a specific blueprint — section copy uses singular/plural
  * labels from `itemLabel()`/`itemLabelPlural()`.
  */
-import BaseLayout from "../layouts/base-layout.astro";
-import Hero from "../components/grove/hero.astro";
-import WhyThisExists from "../components/grove/why-this-exists.astro";
-import PipelineStrip from "../components/grove/pipeline-strip.astro";
-import RecordSection from "../components/grove/record-section.astro";
-import StackGrid from "../components/grove/stack-grid.astro";
-import CategoryGrid from "../components/grove/category-grid.astro";
-import ContributorsGrid from "../components/grove/contributors-grid.astro";
-import OriginalCollection from "../components/grove/original-collection.astro";
-import FinalCta from "../components/grove/final-cta.astro";
-import CollectionTeaser from "../components/grove/collection-teaser.astro";
-
-import {
-  getHomePageModel,
-  getCollectionTeaserModel,
-  recordsToCollectionEntries,
-  loadCollections,
-} from "@grove-dev/astro/server";
-import records from "@grove/generated/records.json";
-import siteConfig from "@grove/generated/site-config.json";
+import BaseLayout from '../layouts/base-layout.astro';
 
 const home = getHomePageModel(siteConfig);
 const { slug, itemSingular, itemPlural } = home;

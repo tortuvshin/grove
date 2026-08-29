@@ -12,13 +12,13 @@ export function getOwnerAndRepoFromRepoUrl(repoUrl: string): {
   owner: string | null;
   repo: string | null;
 } {
-  if (!repoUrl || !repoUrl.includes("github.com/")) {
+  if (!repoUrl || !repoUrl.includes('github.com/')) {
     return { owner: null, repo: null };
   }
   const m = repoUrl.match(/github\.com\/([^/]+)\/([^/?#]+)/);
   if (!m) return { owner: null, repo: null };
   const owner = m[1] ?? null;
-  const repo = m[2]?.replace(/\.git$/, "") ?? null;
+  const repo = m[2]?.replace(/\.git$/, '') ?? null;
   return { owner, repo };
 }
 

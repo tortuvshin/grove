@@ -34,20 +34,20 @@
  * item's files inlined into one block, so `shadcn add <path-to-
  * default.json>` works offline with no registry lookups.
  */
-import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, normalize, relative, resolve } from "node:path";
+import { createHash } from 'node:crypto';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, normalize, relative, resolve } from 'node:path';
 
-export const ROOT = resolve(import.meta.dirname, "../..");
-export const REGISTRY_DIR = resolve(ROOT, "packages/registry");
-export const REGISTRY_JSON = resolve(REGISTRY_DIR, "registry.json");
-export const SOURCE_DIR = resolve(REGISTRY_DIR, "default");
+export const ROOT = resolve(import.meta.dirname, '../..');
+export const REGISTRY_DIR = resolve(ROOT, 'packages/registry');
+export const REGISTRY_JSON = resolve(REGISTRY_DIR, 'registry.json');
+export const SOURCE_DIR = resolve(REGISTRY_DIR, 'default');
 /** Generated registry (source items + `default`) that `shadcn build` reads. Gitignored. */
-export const BUILD_JSON = resolve(REGISTRY_DIR, "registry.build.json");
-export const DIST_DIR = resolve(REGISTRY_DIR, "dist/r");
+export const BUILD_JSON = resolve(REGISTRY_DIR, 'registry.build.json');
+export const DIST_DIR = resolve(REGISTRY_DIR, 'dist/r');
 
-export const NAMESPACE = "@grove";
-export const SCAFFOLD_ITEM = "default";
+export const NAMESPACE = '@grove';
+export const SCAFFOLD_ITEM = 'default';
 /** The name `grove init` records in `.grove/registry.lock.json`. */
 export const SCAFFOLD_ID = `${NAMESPACE}/${SCAFFOLD_ITEM}`;
 
@@ -57,26 +57,26 @@ export const SCAFFOLD_ID = `${NAMESPACE}/${SCAFFOLD_ITEM}`;
  */
 export const DEFAULT_ONLY_FILES = [
   // Empty-state fixture for `grove audit`'s "empty" page type.
-  "default/pages/empty.astro",
+  'default/pages/empty.astro',
 ];
 
 const VALID_FILE_TYPES = new Set([
-  "registry:page",
-  "registry:component",
-  "registry:ui",
-  "registry:lib",
-  "registry:hook",
-  "registry:file",
-  "registry:style",
+  'registry:page',
+  'registry:component',
+  'registry:ui',
+  'registry:lib',
+  'registry:hook',
+  'registry:file',
+  'registry:style',
 ]);
 const VALID_ITEM_TYPES = new Set([
-  "registry:block",
-  "registry:component",
-  "registry:ui",
-  "registry:lib",
-  "registry:style",
-  "registry:theme",
-  "registry:item",
+  'registry:block',
+  'registry:component',
+  'registry:ui',
+  'registry:lib',
+  'registry:style',
+  'registry:theme',
+  'registry:item',
 ]);
 /** Extensions the shadcn CLI runs through its ts-morph transformers. */
 const TRANSFORMED_EXTENSIONS = /\.(ts|tsx|js|jsx)$/;
@@ -89,11 +89,11 @@ const FORBIDDEN_IMPORTS = [
 const IGNORED_SOURCE = /(^|\/)(README\.md|\.DS_Store)$|\.(test|spec)\.[cm]?[jt]sx?$/;
 
 export function readRegistry() {
-  return JSON.parse(readFileSync(REGISTRY_JSON, "utf8"));
+  return JSON.parse(readFileSync(REGISTRY_JSON, 'utf8'));
 }
 
 export function readRegistryVersion() {
-  return JSON.parse(readFileSync(resolve(REGISTRY_DIR, "package.json"), "utf8")).version;
+  return JSON.parse(readFileSync(resolve(REGISTRY_DIR, 'package.json'), 'utf8')).version;
 }
 
 /** Every shippable source file, as a path relative to `packages/registry/` (`default/...`). */
@@ -101,7 +101,7 @@ export function listSourceFiles() {
   const out = [];
   const walk = (dir) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (entry.name === "node_modules") continue;
+      if (entry.name === 'node_modules') continue;
       const full = join(dir, entry.name);
       if (entry.isDirectory()) walk(full);
       else if (entry.isFile()) {
@@ -115,33 +115,36 @@ export function listSourceFiles() {
 }
 
 export function readSource(path) {
-  return readFileSync(resolve(REGISTRY_DIR, path), "utf8");
+  return readFileSync(resolve(REGISTRY_DIR, path), 'utf8');
 }
 
 /** `default/components/ui/button.astro` → `~/src/components/ui/button.astro` */
 export function expectedTarget(path) {
-  return `~/src/${path.replace(/^default\//, "")}`;
+  return `~/src/${path.replace(/^default\//, '')}`;
 }
 
 /** `~/src/components/ui/button.astro` → `src/components/ui/button.astro` */
 export function targetToProjectPath(target) {
-  return target.replace(/^~\//, "");
+  return target.replace(/^~\//, '');
 }
 
 /** Same digest format as `packages/cli/src/hash.ts`. */
 export function sha256(content) {
-  return `sha256-${createHash("sha256").update(content).digest("hex")}`;
+  return `sha256-${createHash('sha256').update(content).digest('hex')}`;
 }
 
 function toPosix(path) {
-  return path.split("\\").join("/");
+  return path.split('\\').join('/');
 }
 
 /** Resolve a relative import specifier to a registry source path, or null. */
 function resolveImport(fromPath, specifier) {
   const base = toPosix(normalize(join(dirname(fromPath), specifier)));
   for (const candidate of [base, `${base}.ts`, `${base}.astro`, `${base}/index.ts`]) {
-    if (existsSync(resolve(REGISTRY_DIR, candidate)) && statSync(resolve(REGISTRY_DIR, candidate)).isFile()) {
+    if (
+      existsSync(resolve(REGISTRY_DIR, candidate)) &&
+      statSync(resolve(REGISTRY_DIR, candidate)).isFile()
+    ) {
       return candidate;
     }
   }
@@ -175,19 +178,19 @@ export function validateRegistry(registry = readRegistry()) {
   const errors = [];
   const fail = (message) => errors.push(message);
 
-  if (registry.$schema !== "https://ui.shadcn.com/schema/registry.json") {
+  if (registry.$schema !== 'https://ui.shadcn.com/schema/registry.json') {
     fail(`registry.json: $schema must be the official shadcn schema URL`);
   }
-  if (!registry.name) fail("registry.json: missing name");
+  if (!registry.name) fail('registry.json: missing name');
   if (!Array.isArray(registry.items) || registry.items.length === 0) {
-    fail("registry.json: items[] is missing or empty");
+    fail('registry.json: items[] is missing or empty');
     return errors;
   }
 
   const names = new Set();
   const fileOwner = new Map();
   for (const item of registry.items) {
-    if (!item.name) fail("an item is missing its name");
+    if (!item.name) fail('an item is missing its name');
     if (names.has(item.name)) fail(`${item.name}: duplicate item name`);
     names.add(item.name);
     if (item.name === SCAFFOLD_ITEM) {
@@ -206,23 +209,31 @@ export function validateRegistry(registry = readRegistry()) {
         fail(`${item.name}: a file entry is missing its path`);
         continue;
       }
-      if (!file.path.startsWith("default/")) fail(`${label}: path must live under default/`);
+      if (!file.path.startsWith('default/')) fail(`${label}: path must live under default/`);
       if (!existsSync(resolve(REGISTRY_DIR, file.path))) fail(`${label}: does not exist on disk`);
       if (!VALID_FILE_TYPES.has(file.type)) fail(`${label}: invalid file type "${file.type}"`);
       if (file.target !== expectedTarget(file.path)) {
-        fail(`${label}: target must be "${expectedTarget(file.path)}" (got "${file.target ?? "none"}")`);
+        fail(
+          `${label}: target must be "${expectedTarget(file.path)}" (got "${file.target ?? 'none'}")`,
+        );
       }
       // The CLI rewrites imports, strips comments, and reformats
       // anything it treats as code. Registry files must land
       // byte-identical (grove update's three-way diff hashes them),
       // so code files opt out of the transformer via registry:file.
-      if (TRANSFORMED_EXTENSIONS.test(file.path) && file.type !== "registry:file") {
-        fail(`${label}: .ts/.js files must be type registry:file (the shadcn CLI transforms other types)`);
+      if (TRANSFORMED_EXTENSIONS.test(file.path) && file.type !== 'registry:file') {
+        fail(
+          `${label}: .ts/.js files must be type registry:file (the shadcn CLI transforms other types)`,
+        );
       }
-      if (file.path.endsWith(".css") && file.type !== "registry:file") {
+      if (file.path.endsWith('.css') && file.type !== 'registry:file') {
         fail(`${label}: .css files must be type registry:file`);
       }
-      if (file.path.startsWith("default/pages/") && file.path.endsWith(".astro") && file.type !== "registry:page") {
+      if (
+        file.path.startsWith('default/pages/') &&
+        file.path.endsWith('.astro') &&
+        file.type !== 'registry:page'
+      ) {
         fail(`${label}: route files must be type registry:page`);
       }
       if (fileOwner.has(file.path)) {
@@ -232,7 +243,9 @@ export function validateRegistry(registry = readRegistry()) {
     }
     for (const dep of item.registryDependencies ?? []) {
       if (!dep.startsWith(`${NAMESPACE}/`)) {
-        fail(`${item.name}: registryDependencies must be namespaced (${NAMESPACE}/…), got "${dep}"`);
+        fail(
+          `${item.name}: registryDependencies must be namespaced (${NAMESPACE}/…), got "${dep}"`,
+        );
       }
     }
   }
@@ -245,8 +258,10 @@ export function validateRegistry(registry = readRegistry()) {
     }
   }
   for (const path of DEFAULT_ONLY_FILES) {
-    if (!existsSync(resolve(REGISTRY_DIR, path))) fail(`DEFAULT_ONLY_FILES: ${path} does not exist`);
-    if (fileOwner.has(path)) fail(`${path}: listed in DEFAULT_ONLY_FILES but also shipped by "${fileOwner.get(path)}"`);
+    if (!existsSync(resolve(REGISTRY_DIR, path)))
+      fail(`DEFAULT_ONLY_FILES: ${path} does not exist`);
+    if (fileOwner.has(path))
+      fail(`${path}: listed in DEFAULT_ONLY_FILES but also shipped by "${fileOwner.get(path)}"`);
   }
 
   // Dependencies: derived from imports must equal what's declared.
@@ -255,8 +270,10 @@ export function validateRegistry(registry = readRegistry()) {
     const derived = new Set();
     for (const file of item.files ?? []) {
       for (const imported of graph.get(file.path) ?? []) {
-        if (imported.startsWith("<unresolved:")) {
-          fail(`${item.name}: ${file.path} imports ${imported.slice(1, -1)} which does not resolve inside the registry`);
+        if (imported.startsWith('<unresolved:')) {
+          fail(
+            `${item.name}: ${file.path} imports ${imported.slice(1, -1)} which does not resolve inside the registry`,
+          );
           continue;
         }
         const owner = fileOwner.get(imported);
@@ -269,10 +286,12 @@ export function validateRegistry(registry = readRegistry()) {
     }
     const declared = new Set(item.registryDependencies ?? []);
     for (const dep of derived) {
-      if (!declared.has(dep)) fail(`${item.name}: imports from ${dep} but does not declare it in registryDependencies`);
+      if (!declared.has(dep))
+        fail(`${item.name}: imports from ${dep} but does not declare it in registryDependencies`);
     }
     for (const dep of declared) {
-      if (!derived.has(dep)) fail(`${item.name}: declares ${dep} in registryDependencies but imports nothing from it`);
+      if (!derived.has(dep))
+        fail(`${item.name}: declares ${dep} in registryDependencies but imports nothing from it`);
     }
   }
 
@@ -281,7 +300,10 @@ export function validateRegistry(registry = readRegistry()) {
     const source = readSource(path);
     for (const pattern of FORBIDDEN_IMPORTS) {
       const hit = source.match(pattern);
-      if (hit) fail(`${path}: forbidden import ${hit[0]} — registry UI must not import runtime UI from @grove-dev/astro`);
+      if (hit)
+        fail(
+          `${path}: forbidden import ${hit[0]} — registry UI must not import runtime UI from @grove-dev/astro`,
+        );
     }
   }
 
@@ -294,7 +316,10 @@ export function validateRegistry(registry = readRegistry()) {
  * scaffold. Deterministic — no timestamps — so the output is stable.
  */
 export function buildFullRegistry(registry = readRegistry(), version = readRegistryVersion()) {
-  const items = registry.items.map((item) => ({ ...item, meta: { ...(item.meta ?? {}), version } }));
+  const items = registry.items.map((item) => ({
+    ...item,
+    meta: { ...(item.meta ?? {}), version },
+  }));
 
   const seen = new Set();
   const files = [];
@@ -310,17 +335,17 @@ export function buildFullRegistry(registry = readRegistry(), version = readRegis
   for (const path of DEFAULT_ONLY_FILES) {
     files.push({
       path,
-      type: path.startsWith("default/pages/") ? "registry:page" : "registry:file",
+      type: path.startsWith('default/pages/') ? 'registry:page' : 'registry:file',
       target: expectedTarget(path),
     });
   }
 
   items.push({
     name: SCAFFOLD_ITEM,
-    type: "registry:block",
-    title: "Grove default scaffold",
+    type: 'registry:block',
+    title: 'Grove default scaffold',
     description:
-      "The complete directory site — every item in this registry, inlined, so it installs in one step with no further registry lookups. This is what `grove init` installs.",
+      'The complete directory site — every item in this registry, inlined, so it installs in one step with no further registry lookups. This is what `grove init` installs.',
     dependencies: [...dependencies].sort(),
     files,
     meta: { version },
@@ -341,7 +366,7 @@ export function lockEntriesFor(item) {
         target: targetToProjectPath(file.target),
         source: file.path,
         hash: sha256(content),
-        bytes: Buffer.byteLength(content, "utf8"),
+        bytes: Buffer.byteLength(content, 'utf8'),
       };
     })
     .sort((a, b) => a.target.localeCompare(b.target));

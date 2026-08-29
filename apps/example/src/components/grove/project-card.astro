@@ -38,9 +38,9 @@
  * variant. Equal-height cards in the row are achieved at the grid
  * level (`CardGrid`: `grid` + `items-stretch`).
  */
-import type { ProjectCardModel } from "@grove-dev/astro/server";
-import CardIcon from "./card-icon.astro";
-import Icon from "./icon.astro";
+import type { ProjectCardModel } from '@grove-dev/astro/server';
+import CardIcon from './card-icon.astro';
+import Icon from './icon.astro';
 
 interface Props {
   /** Pre-built view-model — see `buildProjectCardModel`. */
@@ -55,14 +55,7 @@ interface Props {
   class?: string;
 }
 
-const {
-  model,
-  href,
-  eager = false,
-  event,
-  eventSource,
-  class: className = "",
-} = Astro.props;
+const { model, href, eager = false, event, eventSource, class: className = '' } = Astro.props;
 
 const {
   name,
@@ -85,8 +78,8 @@ const {
   hasStacks,
 } = model;
 
-const Root = isArticle ? "article" : "a";
-const rootAttrs = isArticle ? {} : { href, "aria-label": `Open ${name}` };
+const Root = isArticle ? 'article' : 'a';
+const rootAttrs = isArticle ? {} : { href, 'aria-label': `Open ${name}` };
 ---
 
 <Root

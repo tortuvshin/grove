@@ -10,7 +10,7 @@
  *   not "brand" and not "selected".
  */
 
-export type BadgeVariant = "neutral" | "selected" | "success" | "warning" | "danger" | "info";
+export type BadgeVariant = 'neutral' | 'selected' | 'success' | 'warning' | 'danger' | 'info';
 
 interface Props {
   variant?: BadgeVariant;
@@ -19,15 +19,15 @@ interface Props {
 }
 
 const VARIANTS: Record<BadgeVariant, string> = {
-  neutral: "border-border bg-secondary text-secondary-foreground",
-  selected: "border-transparent bg-selected text-selected-foreground",
-  success: "border-transparent bg-success text-success-foreground",
-  warning: "border-transparent bg-warning text-warning-foreground",
-  danger: "border-transparent bg-danger text-danger-foreground",
-  info: "border-transparent bg-info text-info-foreground",
+  neutral: 'border-border bg-secondary text-secondary-foreground',
+  selected: 'border-transparent bg-selected text-selected-foreground',
+  success: 'border-transparent bg-success text-success-foreground',
+  warning: 'border-transparent bg-warning text-warning-foreground',
+  danger: 'border-transparent bg-danger text-danger-foreground',
+  info: 'border-transparent bg-info text-info-foreground',
 };
 
-const { variant = "neutral", class: className = "", ...rest } = Astro.props;
+const { variant = 'neutral', class: className = '', ...rest } = Astro.props;
 ---
 
 <span

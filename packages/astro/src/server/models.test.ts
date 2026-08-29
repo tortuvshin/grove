@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { applySort, filterRecords, filtersFromSearchParams } from "@grove-dev/core";
+import { applySort, filterRecords, filtersFromSearchParams } from '@grove-dev/core';
+import { describe, expect, it } from 'vitest';
 
 /**
  * Regression tests for the homepage three-lens sectioning logic.
@@ -24,31 +24,31 @@ function record(
   options: { labels?: string[]; stars?: number; reviewedAt?: string } = {},
 ) {
   return {
-    kind: "project" as const,
+    kind: 'project' as const,
     slug,
     name: slug,
     description: `${slug} description`,
-    category: "tools",
+    category: 'tools',
     tags: [],
-    stack: "python",
-    stacks: ["python"],
-    platforms: ["linux"],
-    projectType: "real-app",
+    stack: 'python',
+    stacks: ['python'],
+    platforms: ['linux'],
+    projectType: 'real-app',
     bestFor: [],
     whyListed: [],
     caveats: [],
     links: {},
     distribution: { channels: [] },
-    source: { type: "manual" as const },
-    visibility: "keep" as const,
+    source: { type: 'manual' as const },
+    visibility: 'keep' as const,
     github: {
       stars: options.stars ?? 0,
       forks: 0,
       openIssues: 0,
-      language: "Python",
-      pushedAt: "2026-01-01T00:00:00Z",
+      language: 'Python',
+      pushedAt: '2026-01-01T00:00:00Z',
       archived: false,
-      license: "MIT",
+      license: 'MIT',
       fullName: `demo/${slug}`,
       topics: [],
     },
@@ -63,22 +63,22 @@ function record(
 
 function sectionLikeModel(records: ReturnType<typeof record>[]) {
   // Mirrors the filtering, sorting, and exclusion in `getHomePageModel`.
-  const projects = records.filter((r) => r.kind === "project");
+  const projects = records.filter((r) => r.kind === 'project');
   const hot = applySort(
-    filterRecords(projects, filtersFromSearchParams(new URLSearchParams("label=hot"))),
-    "most-starred",
+    filterRecords(projects, filtersFromSearchParams(new URLSearchParams('label=hot'))),
+    'most-starred',
   ).slice(0, 6);
   const hotSlugs = new Set(hot.map((r) => r.slug));
   const recentlyAdded = applySort(
     projects.filter((r) => !hotSlugs.has(r.slug)),
-    "recently-added",
+    'recently-added',
   ).slice(0, 6);
   const recentSlugs = new Set([...hotSlugs, ...recentlyAdded.map((r) => r.slug)]);
   const established = applySort(
-    filterRecords(projects, filtersFromSearchParams(new URLSearchParams("label=mature"))).filter(
+    filterRecords(projects, filtersFromSearchParams(new URLSearchParams('label=mature'))).filter(
       (r) => !recentSlugs.has(r.slug),
     ),
-    "most-starred",
+    'most-starred',
   ).slice(0, 6);
   return {
     hot: hot.map((r) => r.slug),
@@ -87,28 +87,28 @@ function sectionLikeModel(records: ReturnType<typeof record>[]) {
   };
 }
 
-describe("homepage lens sectioning", () => {
-  it("sorts hot by stars desc and surfaces mature-only items distinct from hot", () => {
+describe('homepage lens sectioning', () => {
+  it('sorts hot by stars desc and surfaces mature-only items distinct from hot', () => {
     const records = [
-      record("alpha", { labels: ["hot", "mature"], stars: 1000 }),
-      record("bravo", { labels: ["hot", "mature"], stars: 500 }),
-      record("charlie", { labels: ["mature"], stars: 50 }),
+      record('alpha', { labels: ['hot', 'mature'], stars: 1000 }),
+      record('bravo', { labels: ['hot', 'mature'], stars: 500 }),
+      record('charlie', { labels: ['mature'], stars: 50 }),
     ];
 
     const sections = sectionLikeModel(records);
-    expect(sections.hot).toEqual(["alpha", "bravo"]);
+    expect(sections.hot).toEqual(['alpha', 'bravo']);
     // Charlie is the only mature-only item; regardless of which lens
     // he lands in, he must not also appear in the hot panel.
-    expect(sections.hot).not.toContain("charlie");
-    expect([...sections.recentlyAdded, ...sections.established]).toContain("charlie");
+    expect(sections.hot).not.toContain('charlie');
+    expect([...sections.recentlyAdded, ...sections.established]).toContain('charlie');
   });
 
-  it("never repeats a record across the three lens panels", () => {
+  it('never repeats a record across the three lens panels', () => {
     const records = [
-      record("alpha", { labels: ["hot", "mature"], stars: 1000, reviewedAt: "2025-01-01" }),
-      record("bravo", { labels: ["hot", "mature"], stars: 500, reviewedAt: "2025-02-01" }),
-      record("charlie", { labels: ["hot", "mature"], stars: 250, reviewedAt: "2025-03-01" }),
-      record("delta", { labels: ["mature"], stars: 100, reviewedAt: "2024-01-01" }),
+      record('alpha', { labels: ['hot', 'mature'], stars: 1000, reviewedAt: '2025-01-01' }),
+      record('bravo', { labels: ['hot', 'mature'], stars: 500, reviewedAt: '2025-02-01' }),
+      record('charlie', { labels: ['hot', 'mature'], stars: 250, reviewedAt: '2025-03-01' }),
+      record('delta', { labels: ['mature'], stars: 100, reviewedAt: '2024-01-01' }),
     ];
 
     const sections = sectionLikeModel(records);
@@ -121,15 +121,15 @@ describe("homepage lens sectioning", () => {
     }
   });
 
-  it("keeps recently-added items out of the hot panel even when they share labels", () => {
+  it('keeps recently-added items out of the hot panel even when they share labels', () => {
     const records = [
-      record("alpha", { labels: ["hot"], stars: 100, reviewedAt: "2025-06-01" }),
-      record("bravo", { labels: [], stars: 50, reviewedAt: "2026-08-01" }),
+      record('alpha', { labels: ['hot'], stars: 100, reviewedAt: '2025-06-01' }),
+      record('bravo', { labels: [], stars: 50, reviewedAt: '2026-08-01' }),
     ];
 
     const sections = sectionLikeModel(records);
-    expect(sections.hot).toEqual(["alpha"]);
-    expect(sections.recentlyAdded).toEqual(["bravo"]);
+    expect(sections.hot).toEqual(['alpha']);
+    expect(sections.recentlyAdded).toEqual(['bravo']);
     expect(sections.established).toEqual([]);
   });
 });

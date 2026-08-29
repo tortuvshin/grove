@@ -1,4 +1,5 @@
 ---
+import type { IndexFilters } from '@grove-dev/core';
 /**
  * RefinePanel — multi-select facet dropdowns.
  *
@@ -12,11 +13,8 @@
  * The form is a GET to the list page base, with each facet as a
  * repeated key. Empty values are dropped, so the URL stays clean.
  */
-import { DIRECTORY_FILTER_KEYS } from "@grove-dev/core";
-
-import type { IndexFilters } from "@grove-dev/core";
-import { SORT_OPTIONS } from "@grove-dev/core";
-import FilterGroupMenu from "./filter-group-menu.astro";
+import { DIRECTORY_FILTER_KEYS, SORT_OPTIONS } from '@grove-dev/core';
+import FilterGroupMenu from './filter-group-menu.astro';
 
 interface FacetValue {
   value: string;
@@ -26,7 +24,7 @@ interface FacetValue {
 
 interface FacetGroupModel {
   id: string;
-  filterKey: "stacks" | "platforms" | "categories" | "tags" | "licenses";
+  filterKey: 'stacks' | 'platforms' | 'categories' | 'tags' | 'licenses';
   label: string;
   single?: boolean;
   options: FacetValue[];
@@ -49,14 +47,14 @@ interface Props {
    */
   layout?: boolean;
   /** Hide the sort select (e.g. when the page renders its own). */
-  hide?: Array<"sort">;
+  hide?: Array<'sort'>;
 }
 
 const {
   groups: groupModels,
   initial,
-  pathPrefix = "/",
-  class: className = "",
+  pathPrefix = '/',
+  class: className = '',
   layout = true,
   hide = [],
 } = Astro.props;

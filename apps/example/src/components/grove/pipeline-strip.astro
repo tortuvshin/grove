@@ -21,19 +21,15 @@ interface Props {
   class?: string;
 }
 
-const {
-  repoUrl,
-  samplePath,
-  class: className = "",
-} = Astro.props;
+const { repoUrl, samplePath, class: className = '' } = Astro.props;
 
-const sampleHref = repoUrl ? `${repoUrl.replace(/\/$/, "")}/blob/main/${samplePath}` : undefined;
+const sampleHref = repoUrl ? `${repoUrl.replace(/\/$/, '')}/blob/main/${samplePath}` : undefined;
 
 const outputs = [
-  { label: "This website", detail: "browse, search, filters" },
-  { label: "README", detail: "awesome-list generated" },
-  { label: "llms.txt", detail: "machine-readable index" },
-  { label: "Sitemap + SEO", detail: "structured data" },
+  { label: 'This website', detail: 'browse, search, filters' },
+  { label: 'README', detail: 'awesome-list generated' },
+  { label: 'llms.txt', detail: 'machine-readable index' },
+  { label: 'Sitemap + SEO', detail: 'structured data' },
 ];
 ---
 

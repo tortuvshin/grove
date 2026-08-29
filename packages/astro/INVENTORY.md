@@ -11,7 +11,7 @@ in Phase 4 of the plan. This table is the rename map.
 
 | Metric | Count |
 | --- | --- |
-| Total files inventoried | 3 |
+| Total files inventoried | 1 |
 | Files with business logic to extract | 0 |
 | Forbidden core subpath imports | 0 |
 
@@ -19,6 +19,4 @@ in Phase 4 of the plan. This table is the rename map.
 
 | Path | Kind | Lines | Business logic? | Forbidden imports | Destination |
 | --- | --- | ---: | :---: | --- | --- |
-| `packages/astro/src/layouts/index.ts` | layout | 25 |  |  | `registry/default/layouts/index.ts.astro` |
-| `packages/astro/src/styles.css` | styles | 1037 |  |  | `registry/default/styles/system.css` |
-| `packages/astro/src/ui/button.ts` | primitive | 108 |  |  | `registry/default/lib/classnames.ts` |
+| `packages/astro/src/styles.css` | styles | 1181 |  |  | `registry/default/styles/system.css` |

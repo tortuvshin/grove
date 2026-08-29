@@ -12,7 +12,7 @@
  * so consumers can customize the order and copy. Defaults are
  * provided so the footer still renders if no extra data is supplied.
  */
-import PoweredBy from "../components/grove/powered-by.astro";
+import PoweredBy from '../components/grove/powered-by.astro';
 
 interface NavItem {
   label: string;
@@ -55,7 +55,12 @@ interface Props {
   /** Project links — third content column. */
   project?: FooterColumn;
   /** Stats line under brand blurb. */
-  stats?: { totalApps?: number; totalCategories?: number; totalStacks?: number; totalOwners?: number };
+  stats?: {
+    totalApps?: number;
+    totalCategories?: number;
+    totalStacks?: number;
+    totalOwners?: number;
+  };
   /**
    * Plural label for the primary count stat. Default "items" so the
    * footer reads naturally regardless of blueprint.
@@ -76,15 +81,15 @@ interface Props {
 
 const {
   site,
-  discover = { heading: "Discover", items: [] },
-  contribute = { heading: "Contribute", items: [] },
-  project = { heading: "Project", items: [] },
+  discover = { heading: 'Discover', items: [] },
+  contribute = { heading: 'Contribute', items: [] },
+  project = { heading: 'Project', items: [] },
   stats,
-  itemsLabel = "items",
+  itemsLabel = 'items',
   copyrightHolder,
   licenseLine,
   poweredBy,
-  class: className = "",
+  class: className = '',
 } = Astro.props;
 
 const showPoweredBy = poweredBy ?? site.footer?.poweredBy ?? true;
@@ -96,21 +101,21 @@ const showOwners = (stats?.totalOwners ?? 0) > 0;
 
 const defaultDiscover: NavItem[] = gh
   ? [
-      { label: "Source on GitHub", href: gh, external: true },
-      { label: "Latest release", href: `${gh}/releases`, external: true },
+      { label: 'Source on GitHub', href: gh, external: true },
+      { label: 'Latest release', href: `${gh}/releases`, external: true },
     ]
   : [];
 const defaultContribute: NavItem[] = gh
   ? [
-      { label: "Submit via GitHub", href: `${gh}/blob/main/CONTRIBUTING.md`, external: true },
-      { label: "Report an issue", href: `${gh}/issues`, external: true },
-      { label: "Contributing guide", href: `${gh}/blob/main/CONTRIBUTING.md`, external: true },
+      { label: 'Submit via GitHub', href: `${gh}/blob/main/CONTRIBUTING.md`, external: true },
+      { label: 'Report an issue', href: `${gh}/issues`, external: true },
+      { label: 'Contributing guide', href: `${gh}/blob/main/CONTRIBUTING.md`, external: true },
     ]
   : [];
 const defaultProject: NavItem[] = gh
   ? [
-      { label: "README", href: `${gh}/blob/main/README.md`, external: true },
-      { label: "Changelog", href: `${gh}/blob/main/CHANGELOG.md`, external: true },
+      { label: 'README', href: `${gh}/blob/main/README.md`, external: true },
+      { label: 'Changelog', href: `${gh}/blob/main/CHANGELOG.md`, external: true },
     ]
   : [];
 

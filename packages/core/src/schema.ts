@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { parse, stringify } from "yaml";
-import { DEFAULT_FACETS, FACET_IDS } from "./directory-facets.js";
+import { parse, stringify } from 'yaml';
+import { z } from 'zod';
+import { DEFAULT_FACETS, FACET_IDS } from './directory-facets.js';
 
 // ──────────────────────────────────────────────────────────────────────
 // Blueprints and kinds
@@ -12,11 +12,7 @@ import { DEFAULT_FACETS, FACET_IDS } from "./directory-facets.js";
  * V1 ships three fixed blueprints. They are not extensible — no custom
  * blueprint API in V1.
  */
-export const blueprintSchema = z.enum([
-  "project-directory",
-  "resource-hub",
-  "ecosystem-map",
-]);
+export const blueprintSchema = z.enum(['project-directory', 'resource-hub', 'ecosystem-map']);
 
 export type Blueprint = z.infer<typeof blueprintSchema>;
 
@@ -25,14 +21,14 @@ export type Blueprint = z.infer<typeof blueprintSchema>;
  * discriminated by `kind`, which must match the blueprint of the site
  * that owns them.
  */
-export const resourceKindSchema = z.enum(["project", "resource", "entity"]);
+export const resourceKindSchema = z.enum(['project', 'resource', 'entity']);
 
 export type ResourceKind = z.infer<typeof resourceKindSchema>;
 
 export const blueprintKind: Record<Blueprint, ResourceKind> = {
-  "project-directory": "project",
-  "resource-hub": "resource",
-  "ecosystem-map": "entity",
+  'project-directory': 'project',
+  'resource-hub': 'resource',
+  'ecosystem-map': 'entity',
 };
 
 // ──────────────────────────────────────────────────────────────────────
@@ -40,80 +36,75 @@ export const blueprintKind: Record<Blueprint, ResourceKind> = {
 // ──────────────────────────────────────────────────────────────────────
 
 export const healthStatusSchema = z.enum([
-  "active",
-  "mature",
-  "stale",
-  "inactive",
-  "archived",
-  "unknown",
-  "historical",
-  "needs_review",
-  "quiet",
-  "unavailable",
+  'active',
+  'mature',
+  'stale',
+  'inactive',
+  'archived',
+  'unknown',
+  'historical',
+  'needs_review',
+  'quiet',
+  'unavailable',
 ]);
 
 export const decisionVisibilitySchema = z.enum([
-  "highlight",
-  "keep",
-  "needs_review",
-  "hide",
-  "remove",
-  "historical",
+  'highlight',
+  'keep',
+  'needs_review',
+  'hide',
+  'remove',
+  'historical',
 ]);
 
 export type DecisionVisibility = z.infer<typeof decisionVisibilitySchema>;
 
-export const healthTierSchema = z.enum([
-  "curated",
-  "listed",
-  "experimental",
-  "hidden",
-]);
+export const healthTierSchema = z.enum(['curated', 'listed', 'experimental', 'hidden']);
 
 // ──────────────────────────────────────────────────────────────────────
 // Curation enums (shared)
 // ──────────────────────────────────────────────────────────────────────
 
 export const projectTypeSchema = z.enum([
-  "real-app",
-  "production",
-  "reference",
-  "library",
-  "tool",
-  "demo",
-  "template",
-  "historical",
+  'real-app',
+  'production',
+  'reference',
+  'library',
+  'tool',
+  'demo',
+  'template',
+  'historical',
 ]);
 
 export const resourceTypeSchema = z.enum([
-  "guide",
-  "comparison",
-  "link",
-  "explainer",
-  "tool",
-  "video",
-  "article",
-  "course",
-  "book",
-  "podcast",
-  "other",
+  'guide',
+  'comparison',
+  'link',
+  'explainer',
+  'tool',
+  'video',
+  'article',
+  'course',
+  'book',
+  'podcast',
+  'other',
 ]);
 
 export const entityTypeSchema = z.enum([
-  "company",
-  "organization",
-  "community",
-  "school",
-  "university",
-  "research-lab",
-  "agency",
-  "service",
-  "product",
-  "person",
-  "other",
+  'company',
+  'organization',
+  'community',
+  'school',
+  'university',
+  'research-lab',
+  'agency',
+  'service',
+  'product',
+  'person',
+  'other',
 ]);
 
-export const appLabelSchema = z.enum(["new", "hot", "mature", "featured"]);
+export const appLabelSchema = z.enum(['new', 'hot', 'mature', 'featured']);
 
 export const scoreSchema = z.object({
   activity: z.number().min(0).max(100).optional(),
@@ -215,23 +206,18 @@ export const githubMetadataSchema = z.object({
   size: z.number().int().nonnegative().optional(),
   files: z.record(z.string(), z.boolean()).optional(),
   monthlyCommits: z
-    .array(
-      z.union([
-        z.number(),
-        z.object({ month: z.string(), commits: z.number() }),
-      ]),
-    )
+    .array(z.union([z.number(), z.object({ month: z.string(), commits: z.number() })]))
     .optional(),
 });
 
 export const healthBlockSchema = z.object({
-  status: healthStatusSchema.default("unknown"),
-  maturity: z.enum(["experimental", "useful", "mature", "unknown"]).default("unknown"),
-  tier: healthTierSchema.default("experimental"),
-  visibility: decisionVisibilitySchema.default("keep"),
+  status: healthStatusSchema.default('unknown'),
+  maturity: z.enum(['experimental', 'useful', 'mature', 'unknown']).default('unknown'),
+  tier: healthTierSchema.default('experimental'),
+  visibility: decisionVisibilitySchema.default('keep'),
   cleanupCandidate: z.boolean().default(false),
   staleReason: z.string().nullable().optional(),
-  confidence: z.enum(["low", "medium", "high"]).default("medium"),
+  confidence: z.enum(['low', 'medium', 'high']).default('medium'),
   reasons: z.array(z.string()).default([]),
 });
 
@@ -300,7 +286,7 @@ const curationBlockSchema = z
 
 const resourceBaseSchema = z.object({
   slug: z.string().min(1),
-  description: z.string().default(""),
+  description: z.string().default(''),
   /**
    * Open Apps-written summary, surfaced as the lead paragraph on the
    * detail page above the original (GitHub-sourced) description.
@@ -316,21 +302,22 @@ const resourceBaseSchema = z.object({
    * overwriting what GitHub says the project is.
    */
   sourceDescription: z.string().optional(),
-  category: z.string().min(1).default("uncategorized"),
+  category: z.string().min(1).default('uncategorized'),
   tags: z.array(z.string()).default([]),
   links: linksSchema,
   content: z.string().optional(), // path to markdown body under content/records/
   source: z
     .object({
-      type: z.enum(["manual", "github-topic", "awesome-list", "submit", "import"])
-        .default("manual"),
+      type: z
+        .enum(['manual', 'github-topic', 'awesome-list', 'submit', 'import'])
+        .default('manual'),
       file: z.string().optional(),
       url: z.string().optional(),
       provider: z.string().optional(),
       owner: z.string().optional(),
       repo: z.string().optional(),
     })
-    .default({ type: "manual" }),
+    .default({ type: 'manual' }),
   curation: curationBlockSchema,
   scores: scoreSchema.default({}),
   /**
@@ -341,7 +328,7 @@ const resourceBaseSchema = z.object({
    * Defaults to "keep" so existing YAML files without the field
    * continue to validate.
    */
-  visibility: decisionVisibilitySchema.default("keep"),
+  visibility: decisionVisibilitySchema.default('keep'),
 });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -349,7 +336,7 @@ const resourceBaseSchema = z.object({
 // ──────────────────────────────────────────────────────────────────────
 
 export const projectRecordSchema = resourceBaseSchema.extend({
-  kind: z.literal("project"),
+  kind: z.literal('project'),
   name: z.string().min(1),
   projectType: projectTypeSchema.optional(),
   stack: z.string().optional(),
@@ -359,8 +346,8 @@ export const projectRecordSchema = resourceBaseSchema.extend({
   // authored when a record is curated; otherwise derived from the
   // GitHub sync's `license.spdx_id` field at build time.
   licenses: z.array(z.string()).default([]),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-  codebaseSize: z.enum(["small", "medium", "large", "huge"]).optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+  codebaseSize: z.enum(['small', 'medium', 'large', 'huge']).optional(),
   // Canonical repo URL. Distinct from `links.github`, which is the
   // human-facing link on the page; `repoUrl` is the single source
   // for owner/repo extraction, avatar fallback, and "view repo" CTAs.
@@ -430,7 +417,7 @@ export type ProjectRecord = z.infer<typeof projectRecordSchema>;
 // ──────────────────────────────────────────────────────────────────────
 
 export const resourceRecordSchema = resourceBaseSchema.extend({
-  kind: z.literal("resource"),
+  kind: z.literal('resource'),
   title: z.string().min(1),
   type: resourceTypeSchema,
   topic: z.string().min(1),
@@ -446,7 +433,7 @@ export type ResourceRecord = z.infer<typeof resourceRecordSchema>;
 // ──────────────────────────────────────────────────────────────────────
 
 export const entityRecordSchema = resourceBaseSchema.extend({
-  kind: z.literal("entity"),
+  kind: z.literal('entity'),
   name: z.string().min(1),
   type: entityTypeSchema,
   founded: z.string().optional(),
@@ -461,7 +448,7 @@ export type EntityRecord = z.infer<typeof entityRecordSchema>;
 // Discriminated union: Resource
 // ──────────────────────────────────────────────────────────────────────
 
-export const resourceSchema = z.discriminatedUnion("kind", [
+export const resourceSchema = z.discriminatedUnion('kind', [
   projectRecordSchema,
   resourceRecordSchema,
   entityRecordSchema,
@@ -554,7 +541,7 @@ export interface GithubIntegrationFlags {
 export function normalizeGithubIntegration(
   value: z.infer<typeof githubIntegrationSchema> | undefined,
 ): GithubIntegrationFlags {
-  if (typeof value === "boolean") {
+  if (typeof value === 'boolean') {
     return { metadata: value, contributors: value, health: value };
   }
   return {
@@ -572,11 +559,11 @@ export const themeSchema = z.object({
    */
   primaryColor: z
     .string()
-    .regex(/^#[0-9a-fA-F]{3,8}$/, "theme.primaryColor must be a hex color such as #4f46e5")
+    .regex(/^#[0-9a-fA-F]{3,8}$/, 'theme.primaryColor must be a hex color such as #4f46e5')
     .optional(),
-  radius: z.enum(["none", "soft", "round"]).default("soft"),
-  density: z.enum(["compact", "comfortable", "spacious"]).default("comfortable"),
-  containerWidth: z.string().default("72rem"),
+  radius: z.enum(['none', 'soft', 'round']).default('soft'),
+  density: z.enum(['compact', 'comfortable', 'spacious']).default('comfortable'),
+  containerWidth: z.string().default('72rem'),
 });
 
 // ──────────────────────────────────────────────────────────────────────
@@ -584,13 +571,13 @@ export const themeSchema = z.object({
 // ──────────────────────────────────────────────────────────────────────
 
 const auditPageTypeSchema = z.enum([
-  "home",
-  "directory",
-  "collection",
-  "record",
-  "content",
-  "empty",
-  "404",
+  'home',
+  'directory',
+  'collection',
+  'record',
+  'content',
+  'empty',
+  '404',
 ]);
 
 const auditPageManifestEntrySchema = z.object({
@@ -631,11 +618,11 @@ export const readmeConfigSchema = z.object({
 });
 
 export const groveConfigSchema = z.object({
-  blueprint: blueprintSchema.default("project-directory"),
+  blueprint: blueprintSchema.default('project-directory'),
 
   site: z.object({
     name: z.string().min(1),
-    tagline: z.string().default("A growing community knowledge site."),
+    tagline: z.string().default('A growing community knowledge site.'),
     description: z.string().optional(),
     url: z.string().url().optional(),
     repoUrl: z.string().url().optional(),
@@ -655,7 +642,7 @@ export const groveConfigSchema = z.object({
      * BCP-47 language tag for the published site. Drives `<html lang>`,
      * `og:locale`, and JSON-LD `inLanguage`.
      */
-    locale: z.string().default("en"),
+    locale: z.string().default('en'),
     /**
      * Twitter/X handle for the site (e.g. `@grove`). Emitted as
      * `twitter:site` on every page when set.
@@ -667,7 +654,7 @@ export const groveConfigSchema = z.object({
     .object({
       googleAnalyticsId: z
         .string()
-        .regex(/^G-[A-Z0-9]+$/, "Expected a GA4 measurement ID such as G-XXXXXX")
+        .regex(/^G-[A-Z0-9]+$/, 'Expected a GA4 measurement ID such as G-XXXXXX')
         .optional(),
     })
     .default({}),
@@ -719,7 +706,7 @@ export const groveConfigSchema = z.object({
       facets: z
         .array(z.enum(FACET_IDS))
         .refine((facets) => new Set(facets).size === facets.length, {
-          message: "browse.facets contains duplicate entries",
+          message: 'browse.facets contains duplicate entries',
         })
         .default([...DEFAULT_FACETS]),
     })
@@ -737,8 +724,8 @@ export const groveConfigSchema = z.object({
     .optional()
     .refine((value) => value === undefined, {
       message:
-        "`facets` moved to `browse.facets` in grove.config.ts. " +
-        `Supported ids: ${FACET_IDS.join(", ")} (canonical spellings only).`,
+        '`facets` moved to `browse.facets` in grove.config.ts. ' +
+        `Supported ids: ${FACET_IDS.join(', ')} (canonical spellings only).`,
     }),
 
   integrations: z
@@ -783,30 +770,30 @@ export const groveConfigSchema = z.object({
 
   paths: z
     .object({
-      dataDir: z.string().default("data"),
-      contentDir: z.string().default("content"),
-      recordsDir: z.string().default("data/records"),
-      pagesDir: z.string().default("content/pages"),
-      bodiesDir: z.string().default("content/records"),
-      publicDir: z.string().default("public"),
-      taxonomyDir: z.string().default("data/taxonomy"),
-      generatedDir: z.string().default("data/generated"),
-      health: z.string().default("data/health.yml"),
-      decisions: z.string().default("data/decisions.yml"),
-      overrides: z.string().default("data/overrides.yml"),
+      dataDir: z.string().default('data'),
+      contentDir: z.string().default('content'),
+      recordsDir: z.string().default('data/records'),
+      pagesDir: z.string().default('content/pages'),
+      bodiesDir: z.string().default('content/records'),
+      publicDir: z.string().default('public'),
+      taxonomyDir: z.string().default('data/taxonomy'),
+      generatedDir: z.string().default('data/generated'),
+      health: z.string().default('data/health.yml'),
+      decisions: z.string().default('data/decisions.yml'),
+      overrides: z.string().default('data/overrides.yml'),
     })
     .default({
-      dataDir: "data",
-      contentDir: "content",
-      recordsDir: "data/records",
-      pagesDir: "content/pages",
-      bodiesDir: "content/records",
-      publicDir: "public",
-      taxonomyDir: "data/taxonomy",
-      generatedDir: "data/generated",
-      health: "data/health.yml",
-      decisions: "data/decisions.yml",
-      overrides: "data/overrides.yml",
+      dataDir: 'data',
+      contentDir: 'content',
+      recordsDir: 'data/records',
+      pagesDir: 'content/pages',
+      bodiesDir: 'content/records',
+      publicDir: 'public',
+      taxonomyDir: 'data/taxonomy',
+      generatedDir: 'data/generated',
+      health: 'data/health.yml',
+      decisions: 'data/decisions.yml',
+      overrides: 'data/overrides.yml',
     }),
 });
 
@@ -855,16 +842,13 @@ export function unwrapOverrides(value: OverridesFile): Override[] {
  * Parse a single record YAML mapping into a typed Resource. The
  * `kind` field on the YAML selects which blueprint schema to apply.
  */
-export function parseRecordYaml(
-  text: string,
-  fileSlug: string,
-): Record<string, unknown> {
+export function parseRecordYaml(text: string, fileSlug: string): Record<string, unknown> {
   // `schema: 'core'` opts out of custom-tag interpretation so a
   // record file cannot smuggle `!!binary` / `!!js/function` / etc.
   // into host objects. The default schema would interpret them.
   // (Implementation-checklist.md #27.)
-  const raw = parse(text, { schema: "core" }) ?? {};
-  if (typeof raw !== "object" || Array.isArray(raw)) {
+  const raw = parse(text, { schema: 'core' }) ?? {};
+  if (typeof raw !== 'object' || Array.isArray(raw)) {
     throw new Error(`${fileSlug}: record file must contain a YAML mapping`);
   }
   return raw;
@@ -874,7 +858,7 @@ export function stringifyRecordYaml(record: Record<string, unknown>): string {
   return stringify(record, {
     lineWidth: 100,
     singleQuote: false,
-    defaultStringType: "PLAIN",
+    defaultStringType: 'PLAIN',
   });
 }
 
@@ -887,7 +871,7 @@ export function getOwnerRepoFromUrl(
   const owner = m[1];
   const repo = m[2];
   if (!owner || !repo) return null;
-  return { owner, repo: repo.replace(/\.git$/, "") };
+  return { owner, repo: repo.replace(/\.git$/, '') };
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -918,7 +902,7 @@ export interface IndexBase {
    *  can write their own `summary` without overwriting it. */
   sourceDescription?: string | undefined;
   content?: string | undefined;
-  curation: ProjectRecord["curation"];
+  curation: ProjectRecord['curation'];
   licenses: string[];
 }
 
@@ -935,64 +919,61 @@ export interface IndexGithubSummary {
 }
 
 export interface IndexProjectRecord extends IndexBase {
-  kind: "project";
+  kind: 'project';
   name: string;
-  stack: ProjectRecord["stack"];
+  stack: ProjectRecord['stack'];
   stacks: string[];
   platforms: string[];
   licenses: string[];
-  projectType: ProjectRecord["projectType"];
-  repoUrl: ProjectRecord["repoUrl"];
-  logoUrl: ProjectRecord["logoUrl"];
-  screenshots: ProjectRecord["screenshots"];
-  difficulty: ProjectRecord["difficulty"];
-  codebaseSize: ProjectRecord["codebaseSize"];
+  projectType: ProjectRecord['projectType'];
+  repoUrl: ProjectRecord['repoUrl'];
+  logoUrl: ProjectRecord['logoUrl'];
+  screenshots: ProjectRecord['screenshots'];
+  difficulty: ProjectRecord['difficulty'];
+  codebaseSize: ProjectRecord['codebaseSize'];
   bestFor: string[];
   whyListed: string[];
   caveats: string[];
-  health: ProjectRecord["health"];
+  health: ProjectRecord['health'];
   /** Effective visibility — decisions.yml overrides win over health. */
   visibility: DecisionVisibility;
   github: IndexGithubSummary | undefined;
 }
 
 export interface IndexResourceRecord extends IndexBase {
-  kind: "resource";
+  kind: 'resource';
   title: string;
-  type: ResourceRecord["type"];
+  type: ResourceRecord['type'];
   topic: string;
   related: string[];
-  publishedAt: ResourceRecord["publishedAt"];
-  author: ResourceRecord["author"];
+  publishedAt: ResourceRecord['publishedAt'];
+  author: ResourceRecord['author'];
   /** Effective visibility — decisions.yml overrides win over the record default. */
   visibility: DecisionVisibility;
 }
 
 export interface IndexEntityRecord extends IndexBase {
-  kind: "entity";
+  kind: 'entity';
   name: string;
-  type: EntityRecord["type"];
-  founded: EntityRecord["founded"];
-  location: EntityRecord["location"];
-  members: EntityRecord["members"];
-  parent: EntityRecord["parent"];
+  type: EntityRecord['type'];
+  founded: EntityRecord['founded'];
+  location: EntityRecord['location'];
+  members: EntityRecord['members'];
+  parent: EntityRecord['parent'];
   /** Effective visibility — decisions.yml overrides win over the record default. */
   visibility: DecisionVisibility;
 }
 
-export type IndexRecord =
-  | IndexProjectRecord
-  | IndexResourceRecord
-  | IndexEntityRecord;
+export type IndexRecord = IndexProjectRecord | IndexResourceRecord | IndexEntityRecord;
 
 export function isIndexProject(r: IndexRecord): r is IndexProjectRecord {
-  return r.kind === "project";
+  return r.kind === 'project';
 }
 export function isIndexResource(r: IndexRecord): r is IndexResourceRecord {
-  return r.kind === "resource";
+  return r.kind === 'resource';
 }
 export function isIndexEntity(r: IndexRecord): r is IndexEntityRecord {
-  return r.kind === "entity";
+  return r.kind === 'entity';
 }
 
 /**
@@ -1017,16 +998,16 @@ export function toIndexRecord(record: Resource): IndexRecord {
     description: record.description,
     content: record.content,
     curation: record.curation,
-    licenses: record.kind === "project" ? record.licenses ?? [] : [],
+    licenses: record.kind === 'project' ? (record.licenses ?? []) : [],
     summary: record.summary,
     sourceDescription: record.sourceDescription,
   };
 
-  if (record.kind === "project") {
+  if (record.kind === 'project') {
     const r = record;
     return {
       ...base,
-      kind: "project" as const,
+      kind: 'project' as const,
       name: r.name,
       stack: r.stack,
       stacks: r.stacks ?? [],
@@ -1047,7 +1028,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
       // from signals) or the curation override (`decisions.yml`).
       // The generate step folds the latter in before serialising,
       // so this is a best-effort projection of the current state.
-      visibility: r.health?.visibility ?? "keep",
+      visibility: r.health?.visibility ?? 'keep',
       github: r.github?.repository
         ? {
             fullName: r.github.repository.full_name,
@@ -1064,11 +1045,11 @@ export function toIndexRecord(record: Resource): IndexRecord {
     };
   }
 
-  if (record.kind === "resource") {
+  if (record.kind === 'resource') {
     const r = record;
     return {
       ...base,
-      kind: "resource" as const,
+      kind: 'resource' as const,
       title: r.title,
       type: r.type,
       topic: r.topic,
@@ -1087,7 +1068,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
   const e = record;
   return {
     ...base,
-    kind: "entity" as const,
+    kind: 'entity' as const,
     name: e.name,
     type: e.type,
     founded: e.founded,

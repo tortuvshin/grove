@@ -2,11 +2,11 @@
 import type { HTMLAttributes } from 'astro/types';
 
 type Props = HTMLAttributes<'div'> & {
-    /** When true, the dropdown will open on hover in addition to click */
-    openOnHover?: boolean;
-    /** Time in milliseconds to wait before closing when hover open is enabled (defaults to 200) */
-    closeDelay?: number;
-    children: any;
+  /** When true, the dropdown will open on hover in addition to click */
+  openOnHover?: boolean;
+  /** Time in milliseconds to wait before closing when hover open is enabled (defaults to 200) */
+  closeDelay?: number;
+  children: any;
 };
 
 const { class: className, openOnHover = false, closeDelay = 200, ...rest } = Astro.props;

@@ -18,18 +18,18 @@
 // Exits 0 when the docs site documents everything the implementation
 // exports. Exits 1 with a stable diff table when anything is missing.
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const cliSrc = resolve(repoRoot, "packages/cli/src");
-const coreIndex = resolve(repoRoot, "packages/core/src/index.ts");
-const astroIndex = resolve(repoRoot, "packages/astro/src/index.ts");
-const coreSchema = resolve(repoRoot, "packages/core/src/schema.ts");
-const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const cliSrc = resolve(repoRoot, 'packages/cli/src');
+const coreIndex = resolve(repoRoot, 'packages/core/src/index.ts');
+const astroIndex = resolve(repoRoot, 'packages/astro/src/index.ts');
+const coreSchema = resolve(repoRoot, 'packages/core/src/schema.ts');
+const docsRoot = resolve(repoRoot, 'apps/docs/src/content/docs');
 
-const read = (p) => readFileSync(p, "utf8");
+const read = (p) => readFileSync(p, 'utf8');
 
 function walk(dir) {
   const out = [];
@@ -37,13 +37,13 @@ function walk(dir) {
     const full = join(dir, entry);
     const stat = statSync(full);
     if (stat.isDirectory()) out.push(...walk(full));
-    else if (entry.endsWith(".md") || entry.endsWith(".mdx")) out.push(full);
+    else if (entry.endsWith('.md') || entry.endsWith('.mdx')) out.push(full);
   }
   return out;
 }
 
 const allDocFiles = walk(docsRoot);
-const allDocsText = allDocFiles.map(read).join("\n\n");
+const allDocsText = allDocFiles.map(read).join('\n\n');
 
 const errors = [];
 const report = (header, rows) => {
@@ -69,20 +69,20 @@ function harvestCli(src, file) {
   }
 }
 
-harvestCli(read(join(cliSrc, "index.ts")), "index.ts");
+harvestCli(read(join(cliSrc, 'index.ts')), 'index.ts');
 for (const file of readdirSync(cliSrc)) {
-  if (file.endsWith("-cli.ts")) {
+  if (file.endsWith('-cli.ts')) {
     harvestCli(read(join(cliSrc, file)), file);
   }
 }
 
 // `grove sync github` is the user's invocation; `program.command("sync")` is the
 // registration. The argument is documented separately in the CLI ref.
-for (const target of ["github", "contributors"]) {
+for (const target of ['github', 'contributors']) {
   expectedPathCommands.add(`grove sync ${target}`);
 }
 for (const c of registered) expectedPathCommands.add(`grove ${c}`);
-for (const c of ["promote", "sync", "generate"]) {
+for (const c of ['promote', 'sync', 'generate']) {
   if (registered.has(c)) expectedPathCommands.add(`grove ${c}`);
 }
 
@@ -90,8 +90,8 @@ const cliMissing = [];
 for (const cmd of expectedPathCommands) {
   // Substrings are too noisy; require the form `grove X` to appear followed
   // by a non-letter (space, backtick, newline, etc.). Also accept code blocks.
-  const escaped = cmd.replace(/\s+/g, "\\s+");
-  const re = new RegExp(escaped + "(?=[\\s`.,)\\]\\|])", "m");
+  const escaped = cmd.replace(/\s+/g, '\\s+');
+  const re = new RegExp(escaped + '(?=[\\s`.,)\\]\\|])', 'm');
   if (!re.test(allDocsText)) {
     cliMissing.push(cmd);
   }
@@ -103,10 +103,8 @@ function extractNamedExports(src) {
   const types = new Set();
   // export { a, b as c } from "..."  — mixed (could be values or types).
   // Default to runtime; type-only re-exports are rare in this codebase.
-  for (const m of src.matchAll(
-    /^\s*export\s*\{\s*([^}]+)\s*\}\s*(?:from\s+["'][^"']+["'])?/gm,
-  )) {
-    for (const raw of m[1].split(",")) {
+  for (const m of src.matchAll(/^\s*export\s*\{\s*([^}]+)\s*\}\s*(?:from\s+["'][^"']+["'])?/gm)) {
+    for (const raw of m[1].split(',')) {
       const ident = raw.trim();
       if (!ident) continue;
       const renamed = ident.split(/\s+as\s+/);
@@ -122,7 +120,7 @@ function extractNamedExports(src) {
   }
   // export type { a, b } — type-only.
   for (const m of src.matchAll(/^\s*export\s+type\s*\{\s*([^}]+)\s*\}/gm)) {
-    for (const raw of m[1].split(",")) {
+    for (const raw of m[1].split(',')) {
       const ident = raw.trim();
       if (!ident) continue;
       const renamed = ident.split(/\s+as\s+/);
@@ -133,13 +131,11 @@ function extractNamedExports(src) {
   return { runtime, types };
 }
 
-const { runtime: coreRuntime, types: coreTypes } = extractNamedExports(
-  read(coreIndex),
-);
+const { runtime: coreRuntime, types: coreTypes } = extractNamedExports(read(coreIndex));
 const { runtime: astroRuntime } = extractNamedExports(read(astroIndex));
 
-const apiCore = read(join(docsRoot, "reference/api-core.md"));
-const componentsDoc = read(join(docsRoot, "reference/components.mdx"));
+const apiCore = read(join(docsRoot, 'reference/api-core.md'));
+const componentsDoc = read(join(docsRoot, 'reference/components.mdx'));
 
 const exportedButUndocumented = [];
 // Gate runtime exports only. Type exports (e.g. `ProjectType`, `Score`)
@@ -154,33 +150,33 @@ for (const name of coreRuntime) {
 }
 if (exportedButUndocumented.length > 0) {
   report(
-    "core runtime export(s) not mentioned in reference/api-core.md, reference/components.mdx, or any doc page",
+    'core runtime export(s) not mentioned in reference/api-core.md, reference/components.mdx, or any doc page',
     exportedButUndocumented,
   );
   errors.push(`undocumented core runtime exports: ${exportedButUndocumented.length}`);
 }
 
 // ── 3. Config schema top-level fields ──────────────────────────────
-const configDoc = read(join(docsRoot, "reference/config.md"));
+const configDoc = read(join(docsRoot, 'reference/config.md'));
 const schemaSrc = read(coreSchema);
 // Find the body of `export const groveConfigSchema = z.object({...})`.
 // Brace-aware extraction.
 function braceBody(src, header) {
   const idx = src.indexOf(header);
-  if (idx < 0) return "";
-  const bodyStart = src.indexOf("{", idx);
-  if (bodyStart < 0) return "";
+  if (idx < 0) return '';
+  const bodyStart = src.indexOf('{', idx);
+  if (bodyStart < 0) return '';
   let depth = 0;
   for (let i = bodyStart; i < src.length; i++) {
-    if (src[i] === "{") depth++;
-    else if (src[i] === "}") {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') {
       depth--;
       if (depth === 0) return src.slice(bodyStart + 1, i);
     }
   }
-  return "";
+  return '';
 }
-const schemaBody = braceBody(schemaSrc, "export const groveConfigSchema = z.object(");
+const schemaBody = braceBody(schemaSrc, 'export const groveConfigSchema = z.object(');
 const topLevelFields = new Set();
 for (const m of schemaBody.matchAll(/^\s{2}([a-z][a-zA-Z]+):/gm)) {
   topLevelFields.add(m[1]);
@@ -192,7 +188,7 @@ for (const field of topLevelFields) {
   configMissing.push(field);
 }
 if (configMissing.length > 0) {
-  report("top-level groveConfigSchema field(s) not mentioned in any doc page", configMissing);
+  report('top-level groveConfigSchema field(s) not mentioned in any doc page', configMissing);
   errors.push(`undocumented config fields: ${configMissing.length}`);
 }
 

@@ -128,11 +128,12 @@
   --color-amber-950: oklch(40.8% 0.123 38.172);
 
   /* ── Font stacks ─────────────────────────────────────────────── */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
 
   /* ── Starlight typography weight/rhythm ──────────────────────── */
   --font-weight-semibold: 500;
@@ -515,9 +516,15 @@
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
-.dark .grove-prose { color: var(--color-ink-200, #d4d4d4); }
-.grove-prose > :first-child { margin-top: 0; }
-.grove-prose > :last-child  { margin-bottom: 0; }
+.dark .grove-prose {
+  color: var(--color-ink-200, #d4d4d4);
+}
+.grove-prose > :first-child {
+  margin-top: 0;
+}
+.grove-prose > :last-child {
+  margin-bottom: 0;
+}
 
 /* Headings — full depth. */
 .grove-prose :where(h1, h2, h3, h4, h5, h6) {
@@ -533,74 +540,113 @@
 /* Page bodies open with a `# <Page name>` heading that duplicates
    the page title. Hide the first heading so the body flows from a
    top-level paragraph into sections. */
-.grove-prose > h1:first-child { display: none; }
+.grove-prose > h1:first-child {
+  display: none;
+}
 .grove-prose h1:not(:first-child) {
-  font-size: 2.5rem;        /* 40px */
-  margin-top: 2.5rem; margin-bottom: 1rem;
+  font-size: 2.5rem; /* 40px */
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
 }
 .grove-prose h2 {
-  font-size: 1.75rem;       /* 28px */
-  margin-top: 2.5rem; margin-bottom: 0.75rem;
+  font-size: 1.75rem; /* 28px */
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--color-ink-200, #e5e5e5);
 }
-.dark .grove-prose h2 { border-bottom-color: var(--color-ink-800, #2a2a2a); }
+.dark .grove-prose h2 {
+  border-bottom-color: var(--color-ink-800, #2a2a2a);
+}
 .grove-prose h3 {
-  font-size: 1.3125rem;     /* 21px */
-  margin-top: 2rem; margin-bottom: 0.5rem;
+  font-size: 1.3125rem; /* 21px */
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
 }
 .grove-prose h4 {
-  font-size: 1.0625rem;     /* 17px */
-  margin-top: 1.5rem; margin-bottom: 0.4rem;
+  font-size: 1.0625rem; /* 17px */
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
 }
 .grove-prose h5 {
-  font-size: 0.9375rem;     /* 15px */
-  margin-top: 1.25rem; margin-bottom: 0.4rem;
+  font-size: 0.9375rem; /* 15px */
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--color-ink-600, #555555);
 }
 .grove-prose h6 {
-  font-size: 0.875rem;      /* 14px */
-  margin-top: 1rem; margin-bottom: 0.35rem;
+  font-size: 0.875rem; /* 14px */
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-ink-500, #6a6a6a);
 }
-.dark .grove-prose h5 { color: var(--color-ink-400, #8a8a8a); }
-.dark .grove-prose h6 { color: var(--color-ink-500, #6a6a6a); }
+.dark .grove-prose h5 {
+  color: var(--color-ink-400, #8a8a8a);
+}
+.dark .grove-prose h6 {
+  color: var(--color-ink-500, #6a6a6a);
+}
 
 /* Paragraphs + lists. */
-.grove-prose p { margin: 0 0 1rem 0; }
+.grove-prose p {
+  margin: 0 0 1rem 0;
+}
 .grove-prose :where(ul, ol) {
   margin: 0 0 1rem 0;
   padding-left: 1.5rem;
 }
-.grove-prose ul { list-style: disc; }
-.grove-prose ol { list-style: decimal; }
-.grove-prose li { margin-bottom: 0.35rem; padding-left: 0.25rem; }
+.grove-prose ul {
+  list-style: disc;
+}
+.grove-prose ol {
+  list-style: decimal;
+}
+.grove-prose li {
+  margin-bottom: 0.35rem;
+  padding-left: 0.25rem;
+}
 .grove-prose li > :where(ul, ol) {
-  margin-top: 0.35rem; margin-bottom: 0;
+  margin-top: 0.35rem;
+  margin-bottom: 0;
 }
 
 /* Definition lists. */
-.grove-prose dl { margin: 0 0 1rem 0; }
+.grove-prose dl {
+  margin: 0 0 1rem 0;
+}
 .grove-prose dt {
   font-weight: 600;
   color: var(--color-ink-900, #1a1a1a);
   margin-top: 0.5rem;
 }
 .grove-prose dd {
-  margin-left: 1.5rem; margin-bottom: 0.5rem;
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
   color: var(--color-ink-700, #3a3a3a);
 }
-.dark .grove-prose dt { color: var(--color-ink-100, #f0f0f0); }
-.dark .grove-prose dd { color: var(--color-ink-200, #d4d4d4); }
+.dark .grove-prose dt {
+  color: var(--color-ink-100, #f0f0f0);
+}
+.dark .grove-prose dd {
+  color: var(--color-ink-200, #d4d4d4);
+}
 
 /* Inline emphasis. */
-.grove-prose strong { font-weight: 600; color: var(--color-ink-900, #1a1a1a); }
-.grove-prose em     { font-style: italic; }
-.grove-prose u      { text-decoration: underline; text-underline-offset: 2px; }
+.grove-prose strong {
+  font-weight: 600;
+  color: var(--color-ink-900, #1a1a1a);
+}
+.grove-prose em {
+  font-style: italic;
+}
+.grove-prose u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .grove-prose :where(s, del) {
   text-decoration: line-through;
   color: var(--color-ink-500, #6a6a6a);
@@ -614,8 +660,12 @@
   font-size: 0.85em;
   color: var(--color-ink-500, #6a6a6a);
 }
-.dark .grove-prose strong { color: var(--color-ink-100, #f0f0f0); }
-.dark .grove-prose small  { color: var(--color-ink-400, #8a8a8a); }
+.dark .grove-prose strong {
+  color: var(--color-ink-100, #f0f0f0);
+}
+.dark .grove-prose small {
+  color: var(--color-ink-400, #8a8a8a);
+}
 
 /* Inline marks / keys / abbreviations. */
 .grove-prose mark {
@@ -654,12 +704,20 @@
   cursor: help;
 }
 .grove-prose :where(sub, sup) {
-  font-size: 0.75em; line-height: 1;
-  position: relative; vertical-align: baseline;
+  font-size: 0.75em;
+  line-height: 1;
+  position: relative;
+  vertical-align: baseline;
 }
-.grove-prose sub { bottom: -0.25em; }
-.grove-prose sup { top: -0.5em; }
-.grove-prose time { font-variant-numeric: tabular-nums; }
+.grove-prose sub {
+  bottom: -0.25em;
+}
+.grove-prose sup {
+  top: -0.5em;
+}
+.grove-prose time {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Links. */
 .grove-prose a {
@@ -740,9 +798,15 @@
   color: var(--shiki-dark, var(--color-ink-100, #f0f0f0));
   border-color: var(--color-ink-800, #2a2a2a);
 }
-.grove-prose pre.shiki code { color: inherit; }
-.grove-prose pre.shiki span { color: var(--shiki-light); }
-.dark .grove-prose pre.shiki span { color: var(--shiki-dark); }
+.grove-prose pre.shiki code {
+  color: inherit;
+}
+.grove-prose pre.shiki span {
+  color: var(--shiki-light);
+}
+.dark .grove-prose pre.shiki span {
+  color: var(--shiki-dark);
+}
 
 /* Blockquotes — italic + left border + background tint. */
 .grove-prose blockquote {
@@ -754,9 +818,15 @@
   background-color: var(--color-ink-50, #fafafa);
   border-radius: 0 0.4rem 0.4rem 0;
 }
-.grove-prose blockquote > :first-child { margin-top: 0; }
-.grove-prose blockquote > :last-child  { margin-bottom: 0; }
-.grove-prose blockquote p { margin: 0 0 0.5rem 0; }
+.grove-prose blockquote > :first-child {
+  margin-top: 0;
+}
+.grove-prose blockquote > :last-child {
+  margin-bottom: 0;
+}
+.grove-prose blockquote p {
+  margin: 0 0 0.5rem 0;
+}
 .grove-prose blockquote blockquote {
   margin: 0.5rem 0;
   border-left-width: 2px;
@@ -773,7 +843,9 @@
   border-top: 1px solid var(--color-ink-200, #e5e5e5);
   margin: 2.25rem 0;
 }
-.dark .grove-prose hr { border-top-color: var(--color-ink-800, #2a2a2a); }
+.dark .grove-prose hr {
+  border-top-color: var(--color-ink-800, #2a2a2a);
+}
 
 /* Images — rounded border, full column width. */
 .grove-prose img {
@@ -784,18 +856,27 @@
   display: block;
   margin: 1.25rem 0;
 }
-.dark .grove-prose img { border-color: var(--color-ink-800, #2a2a2a); }
+.dark .grove-prose img {
+  border-color: var(--color-ink-800, #2a2a2a);
+}
 
 /* Figures + captions. */
-.grove-prose figure { margin: 1.25rem 0; padding: 0; }
-.grove-prose figure > img { margin: 0 0 0.5rem 0; }
+.grove-prose figure {
+  margin: 1.25rem 0;
+  padding: 0;
+}
+.grove-prose figure > img {
+  margin: 0 0 0.5rem 0;
+}
 .grove-prose figcaption {
   font-size: 0.85rem;
   color: var(--color-ink-500, #6a6a6a);
   text-align: center;
   margin-top: 0.4rem;
 }
-.dark .grove-prose figcaption { color: var(--color-ink-400, #8a8a8a); }
+.dark .grove-prose figcaption {
+  color: var(--color-ink-400, #8a8a8a);
+}
 
 /* GFM tables — the renderer wraps them in `.grove-prose-table-wrap`
    so the column-width overflow is contained. */
@@ -806,7 +887,9 @@
   border: 1px solid var(--color-ink-200, #e5e5e5);
   background-color: var(--grove-background, #ffffff);
 }
-.dark .grove-prose-table-wrap { border-color: var(--color-ink-800, #2a2a2a); }
+.dark .grove-prose-table-wrap {
+  border-color: var(--color-ink-800, #2a2a2a);
+}
 .grove-prose table {
   width: 100%;
   border-collapse: collapse;
@@ -841,25 +924,45 @@
   color: var(--color-ink-700, #3a3a3a);
   vertical-align: top;
 }
-.grove-prose th[align="center"], .grove-prose td[align="center"] { text-align: center; }
-.grove-prose th[align="right"],  .grove-prose td[align="right"]  { text-align: right; }
-.grove-prose tbody tr:last-child td { border-bottom: 0; }
-.grove-prose tbody tr:hover { background-color: var(--color-ink-50, #fafafa); }
-.dark .grove-prose th { color: var(--color-ink-100, #f0f0f0); border-bottom-color: var(--color-ink-700, #4a4a4a); }
-.dark .grove-prose td { color: var(--color-ink-200, #d4d4d4); border-bottom-color: var(--color-ink-800, #2a2a2a); }
-.dark .grove-prose tbody tr:hover { background-color: var(--color-ink-900, #1a1a1a); }
+.grove-prose th[align="center"],
+.grove-prose td[align="center"] {
+  text-align: center;
+}
+.grove-prose th[align="right"],
+.grove-prose td[align="right"] {
+  text-align: right;
+}
+.grove-prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+.grove-prose tbody tr:hover {
+  background-color: var(--color-ink-50, #fafafa);
+}
+.dark .grove-prose th {
+  color: var(--color-ink-100, #f0f0f0);
+  border-bottom-color: var(--color-ink-700, #4a4a4a);
+}
+.dark .grove-prose td {
+  color: var(--color-ink-200, #d4d4d4);
+  border-bottom-color: var(--color-ink-800, #2a2a2a);
+}
+.dark .grove-prose tbody tr:hover {
+  background-color: var(--color-ink-900, #1a1a1a);
+}
 
 /* GFM task-list checkboxes — read-only at runtime. */
 .grove-prose input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
-  width: 1em; height: 1em;
+  width: 1em;
+  height: 1em;
   border: 1.5px solid var(--color-ink-400, #999999);
   border-radius: 0.25rem;
   margin-right: 0.45rem;
   margin-top: 0.15rem;
   vertical-align: middle;
-  position: relative; top: -0.05em;
+  position: relative;
+  top: -0.05em;
   background-color: var(--grove-background, #ffffff);
   cursor: default;
   flex-shrink: 0;
@@ -871,13 +974,17 @@
 .grove-prose input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
-  left: 4px; top: 1px;
-  width: 4px; height: 8px;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
   border: solid var(--grove-background, #ffffff);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-.grove-prose input[type="checkbox"]:disabled { opacity: 0.7; }
+.grove-prose input[type="checkbox"]:disabled {
+  opacity: 0.7;
+}
 .dark .grove-prose input[type="checkbox"] {
   border-color: var(--color-ink-600, #555555);
   background-color: var(--grove-background, #1a1a1a);
@@ -892,11 +999,13 @@
 .grove-prose li:has(> input[type="checkbox"]) {
   list-style: none;
   margin-left: -1.25rem;
-  display: flex; align-items: flex-start;
+  display: flex;
+  align-items: flex-start;
   gap: 0.15rem;
 }
 .grove-prose li:has(> input[type="checkbox"]) > input[type="checkbox"] {
-  margin-right: 0.55rem; margin-left: 0.15rem;
+  margin-right: 0.55rem;
+  margin-left: 0.15rem;
 }
 
 /* Collapsibles (details / summary). */
@@ -907,13 +1016,19 @@
   background-color: var(--color-ink-50, #fafafa);
   overflow: hidden;
 }
-.grove-prose details[open] { background-color: var(--grove-background, #ffffff); }
-.grove-prose details + details { margin-top: -0.5rem; }
+.grove-prose details[open] {
+  background-color: var(--grove-background, #ffffff);
+}
+.grove-prose details + details {
+  margin-top: -0.5rem;
+}
 .dark .grove-prose details {
   border-color: var(--color-ink-800, #2a2a2a);
   background-color: var(--color-ink-900, #1a1a1a);
 }
-.dark .grove-prose details[open] { background-color: var(--grove-background, #1a1a1a); }
+.dark .grove-prose details[open] {
+  background-color: var(--grove-background, #1a1a1a);
+}
 .grove-prose summary {
   cursor: pointer;
   padding: 0.75rem 1rem;
@@ -921,26 +1036,45 @@
   color: var(--color-ink-900, #1a1a1a);
   list-style: none;
   user-select: none;
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   transition: background-color 120ms ease;
 }
-.grove-prose summary::-webkit-details-marker { display: none; }
+.grove-prose summary::-webkit-details-marker {
+  display: none;
+}
 .grove-prose summary::before {
   content: "";
-  width: 0; height: 0;
+  width: 0;
+  height: 0;
   border-style: solid;
   border-width: 0.35rem 0 0.35rem 0.55rem;
   border-color: transparent transparent transparent var(--color-ink-500, #6a6a6a);
   transition: transform 120ms ease;
   flex-shrink: 0;
 }
-.grove-prose details[open] > summary::before { transform: rotate(90deg); }
-.grove-prose summary:hover { background-color: var(--color-ink-100, #f0f0f0); }
-.grove-prose summary strong { font-weight: inherit; }
-.dark .grove-prose summary { color: var(--color-ink-100, #f0f0f0); }
-.dark .grove-prose summary:hover { background-color: var(--color-ink-800, #2a2a2a); }
-.grove-prose details > :not(summary) { padding: 0 1rem 1rem 1rem; }
-.grove-prose details > :not(summary):first-of-type { padding-top: 0; }
+.grove-prose details[open] > summary::before {
+  transform: rotate(90deg);
+}
+.grove-prose summary:hover {
+  background-color: var(--color-ink-100, #f0f0f0);
+}
+.grove-prose summary strong {
+  font-weight: inherit;
+}
+.dark .grove-prose summary {
+  color: var(--color-ink-100, #f0f0f0);
+}
+.dark .grove-prose summary:hover {
+  background-color: var(--color-ink-800, #2a2a2a);
+}
+.grove-prose details > :not(summary) {
+  padding: 0 1rem 1rem 1rem;
+}
+.grove-prose details > :not(summary):first-of-type {
+  padding-top: 0;
+}
 
 /* ──────────────────────────────────────────────────────────────────
  * On-page TOC component (`.grove-toc-*`)
@@ -948,9 +1082,13 @@
  * is set imperatively by the TableOfContents script via
  * `[data-toc-active]` on the matching anchor.
  * ────────────────────────────────────────────────────────────────── */
-.grove-toc summary { color: inherit; }
+.grove-toc summary {
+  color: inherit;
+}
 .grove-toc[open] .grove-toc-chevron,
-.grove-toc > summary:hover .grove-toc-chevron { transform: rotate(90deg); }
+.grove-toc > summary:hover .grove-toc-chevron {
+  transform: rotate(90deg);
+}
 /* Desktop (lg+): keep the TOC contents visible even before the
  * component script sets the `open` attribute (and with JS disabled).
  * Closed `<details>` content lives in a hidden UA shadow slot, so
@@ -1022,22 +1160,22 @@
   color: oklch(40% 0.13 40);
 }
 .dark [data-activity-tone="fresh"] {
-  border-color: oklch(35% 0.10 154);
+  border-color: oklch(35% 0.1 154);
   background-color: oklch(20% 0.05 156);
   color: oklch(85% 0.15 154);
 }
 .dark [data-activity-tone="ok"] {
-  border-color: oklch(30% 0.10 230);
+  border-color: oklch(30% 0.1 230);
   background-color: oklch(20% 0.05 255);
   color: oklch(80% 0.13 230);
 }
 .dark [data-activity-tone="low"] {
-  border-color: oklch(35% 0.10 60);
+  border-color: oklch(35% 0.1 60);
   background-color: oklch(20% 0.05 74);
   color: oklch(85% 0.13 70);
 }
 .dark [data-activity-tone="dead"] {
-  border-color: oklch(35% 0.10 40);
+  border-color: oklch(35% 0.1 40);
   background-color: oklch(20% 0.05 40);
   color: oklch(85% 0.13 40);
 }
@@ -1047,6 +1185,12 @@
  * Static selector (no dynamic class concatenation) — Tailwind ships
  * the CSS because the class string appears literally here.
  * ────────────────────────────────────────────────────────────────── */
-.grove-kv div { line-height: 1.4; }
-.grove-card-title { letter-spacing: 0.04em; }
-.grove-card--muted { background-color: color-mix(in oklab, var(--grove-background) 60%, transparent); }
+.grove-kv div {
+  line-height: 1.4;
+}
+.grove-card-title {
+  letter-spacing: 0.04em;
+}
+.grove-card--muted {
+  background-color: color-mix(in oklab, var(--grove-background) 60%, transparent);
+}

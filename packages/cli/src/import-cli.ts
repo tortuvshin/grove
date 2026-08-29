@@ -1,11 +1,11 @@
-import { Command } from "commander";
-import { resolve } from "node:path";
+import { resolve } from 'node:path';
 import {
+  type Blueprint,
   importAwesomeList,
   loadConfig,
   writeImportedRecords,
-  type Blueprint,
-} from "@grove-dev/core";
+} from '@grove-dev/core';
+import { Command } from 'commander';
 
 /**
  * `grove import` — turn an awesome-list README (or any Markdown file
@@ -33,14 +33,9 @@ import {
  * matters in practice.)
  */
 export function buildImportCommand(): Command {
-  return new Command("import")
-    .argument(
-      "<source>",
-      "GitHub awesome-list URL, raw README URL, or local README path",
-    )
-    .description(
-      "Turn an awesome-list README into data/records/<slug>.yml files.",
-    )
+  return new Command('import')
+    .argument('<source>', 'GitHub awesome-list URL, raw README URL, or local README path')
+    .description('Turn an awesome-list README into data/records/<slug>.yml files.')
     .action(async (source: string) => {
       const config = await loadConfig();
       const blueprint = config.blueprint as Blueprint;

@@ -21,49 +21,49 @@
  * `@grove-dev/astro/components/X.astro` to
  * `../components/grove/x.astro`.
  */
-import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { relative, resolve, dirname } from "node:path";
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, relative, resolve } from 'node:path';
 
-const root = resolve(import.meta.dirname, "..");
-const dryRun = process.argv.includes("--dry-run");
+const root = resolve(import.meta.dirname, '..');
+const dryRun = process.argv.includes('--dry-run');
 
-const inventoryPath = resolve(root, "packages/astro/INVENTORY.json");
-const astroSrc = resolve(root, "packages/astro/src");
-const registryDefault = resolve(root, "packages/registry/default");
-const exampleSrc = resolve(root, "apps/example/src");
+const inventoryPath = resolve(root, 'packages/astro/INVENTORY.json');
+const astroSrc = resolve(root, 'packages/astro/src');
+const registryDefault = resolve(root, 'packages/registry/default');
+const exampleSrc = resolve(root, 'apps/example/src');
 
 const KEBAB_OVERRIDES = new Map([
   // ThemeToggle lives under components/site/ per the spec (§18),
   // not components/ui/, because it is site chrome, not a primitive.
-  ["layouts/ThemeToggle.astro", "components/site/theme-toggle.astro"],
+  ['layouts/ThemeToggle.astro', 'components/site/theme-toggle.astro'],
   // The button helpers are classnames-style helpers, not primitives.
-  ["ui/button.ts", "lib/classnames.ts"],
-  ["ui/button.test.ts", "lib/classnames.test.ts"],
+  ['ui/button.ts', 'lib/classnames.ts'],
+  ['ui/button.test.ts', 'lib/classnames.test.ts'],
 ]);
 
 function targetFor(sourceRel) {
   const override = KEBAB_OVERRIDES.get(sourceRel);
   if (override) return override;
-  if (sourceRel === "styles.css") return "styles/system.css";
-  const file = sourceRel.split("/").pop();
-  if (sourceRel.startsWith("ui/")) {
-    const base = file.replace(/\.astro$/, "");
+  if (sourceRel === 'styles.css') return 'styles/system.css';
+  const file = sourceRel.split('/').pop();
+  if (sourceRel.startsWith('ui/')) {
+    const base = file.replace(/\.astro$/, '');
     return `components/ui/${kebab(base)}.astro`;
   }
-  if (sourceRel.startsWith("layouts/")) {
-    const base = file.replace(/\.astro$/, "");
+  if (sourceRel.startsWith('layouts/')) {
+    const base = file.replace(/\.astro$/, '');
     return `layouts/${kebab(base)}.astro`;
   }
-  if (sourceRel.startsWith("components/")) {
-    const base = file.replace(/\.astro$/, "");
+  if (sourceRel.startsWith('components/')) {
+    const base = file.replace(/\.astro$/, '');
     return `components/grove/${kebab(base)}.astro`;
   }
   return null;
 }
 
 function kebab(name) {
-  return name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
 function importRewrite(oldImport, nameMap) {
@@ -83,7 +83,7 @@ function importRewrite(oldImport, nameMap) {
       const key = `${rest}.astro`;
       const mapped = nameMap.get(key);
       if (!mapped) return whole;
-      return `from "${prefix}${mapped.replace(/\.astro$/, ".astro")}"`;
+      return `from "${prefix}${mapped.replace(/\.astro$/, '.astro')}"`;
     },
   );
   return result;
@@ -91,19 +91,19 @@ function importRewrite(oldImport, nameMap) {
 
 async function main() {
   if (!existsSync(inventoryPath)) {
-    throw new Error("Inventory missing — run `pnpm inventory` first.");
+    throw new Error('Inventory missing — run `pnpm inventory` first.');
   }
-  const inventory = JSON.parse(await readFile(inventoryPath, "utf8"));
+  const inventory = JSON.parse(await readFile(inventoryPath, 'utf8'));
   // Phase 4 sub-step 1: only `.astro` files. `styles.css` and the
   // package's own `index.ts` (the Astro integration) stay for a
   // dedicated sub-step — they need coordinated moves with tests
   // and the `exports` map, and splitting them keeps this script
   // single-purpose.
   const moveable = inventory.files.filter((f) => {
-    if (f.path.endsWith("index.ts")) return false;
-    if (f.path.includes("/server/")) return false;
-    if (f.path.includes("/lib/")) return false;
-    if (f.path === "packages/astro/src/styles.css") return false;
+    if (f.path.endsWith('index.ts')) return false;
+    if (f.path.includes('/server/')) return false;
+    if (f.path.includes('/lib/')) return false;
+    if (f.path === 'packages/astro/src/styles.css') return false;
     return /packages\/astro\/src\/(ui|layouts|components)\/[^/]+\.astro$/.test(f.path);
   });
 
@@ -118,11 +118,11 @@ async function main() {
   const basenameMap = new Map();
   const examplePathMap = new Map();
   for (const file of moveable) {
-    const source = file.path.replace(/^packages\/astro\/src\//, "");
+    const source = file.path.replace(/^packages\/astro\/src\//, '');
     const target = targetFor(source);
     if (!target) continue;
-    const fileBase = source.split("/").pop();
-    const targetBase = target.split("/").pop();
+    const fileBase = source.split('/').pop();
+    const targetBase = target.split('/').pop();
     basenameMap.set(fileBase, targetBase);
     // examplePathMap maps the original filename (e.g. BaseLayout.astro)
     // to its new home relative to apps/example/src, e.g. "layouts/base-layout.astro".
@@ -133,7 +133,7 @@ async function main() {
   if (dryRun) {
     console.log(`Would move ${moveable.length} files:`);
     for (const file of moveable) {
-      const source = file.path.replace(/^packages\/astro\/src\//, "");
+      const source = file.path.replace(/^packages\/astro\/src\//, '');
       const target = targetFor(source);
       console.log(`  ${source} -> registry/default/${target}`);
     }
@@ -145,14 +145,14 @@ async function main() {
   // land safely after a partial failure).
   let moved = 0;
   for (const file of moveable) {
-    const source = file.path.replace(/^packages\/astro\/src\//, "");
+    const source = file.path.replace(/^packages\/astro\/src\//, '');
     const target = targetFor(source);
     if (!target) continue;
     const sourcePath = resolve(astroSrc, source);
     if (!existsSync(sourcePath)) continue;
     const targetPath = resolve(registryDefault, target);
     await mkdir(dirname(targetPath), { recursive: true });
-    let sourceBody = await readFile(sourcePath, "utf8");
+    let sourceBody = await readFile(sourcePath, 'utf8');
     // Rewrite intra-registry relative imports inside the file.
     sourceBody = importRewrite(sourceBody, basenameMap);
     await writeFile(targetPath, sourceBody);
@@ -165,8 +165,8 @@ async function main() {
   const exampleRewrite = (relImport) => {
     // Convert e.g. "../components/grove/project-card.astro" and
     // "@grove-dev/astro/components/ProjectCard.astro" to the new path.
-    let m;
-    if ((m = relImport.match(/@grove-dev\/astro\/(components|ui|layouts)\/([A-Za-z][\w]*)\.astro/))) {
+    const m = relImport.match(/@grove-dev\/astro\/(components|ui|layouts)\/([A-Za-z][\w]*)\.astro/);
+    if (m) {
       const [, , name] = m;
       const newName = renameMap.get(`${name}.astro`);
       if (!newName) return relImport;
@@ -179,22 +179,22 @@ async function main() {
   };
 
   // ── 2. Rewrite apps/example page imports ──
-  const { readdir } = await import("node:fs/promises");
+  const { readdir } = await import('node:fs/promises');
   const pages = [];
   async function collectPages(dir) {
     for (const entry of await readdir(dir, { withFileTypes: true })) {
       const full = resolve(dir, entry.name);
       if (entry.isDirectory()) {
         await collectPages(full);
-      } else if (entry.name.endsWith(".astro")) {
+      } else if (entry.name.endsWith('.astro')) {
         pages.push(full);
       }
     }
   }
-  await collectPages(resolve(exampleSrc, "pages"));
+  await collectPages(resolve(exampleSrc, 'pages'));
 
   for (const page of pages) {
-    let body = await readFile(page, "utf8");
+    let body = await readFile(page, 'utf8');
     body = body.replace(
       /from\s+["']@grove-dev\/astro\/(components|ui|layouts)\/([A-Za-z][\w]*)\.astro["']/g,
       (whole, kind, name) => {
@@ -203,7 +203,7 @@ async function main() {
         // Compute the relative path from this page to
         // src/components/{grove,ui,site}/<name>.astro or src/layouts/<name>.astro.
         const rel = relative(dirname(page), resolve(exampleSrc, newPath));
-        return `from "${rel.split("\\").join("/")}"`;
+        return `from "${rel.split('\\').join('/')}"`;
       },
     );
     await writeFile(page, body);
@@ -211,10 +211,10 @@ async function main() {
 
   console.log(`Moved ${moved} UI files into packages/registry/default/.`);
   console.log(`Rewrote ${pages.length} apps/example page imports.`);
-  console.log("\nNext:");
-  console.log("  pnpm inventory          # refresh INVENTORY.{md,json}");
-  console.log("  pnpm registry:build     # rebuild registry.lock.json");
-  console.log("  pnpm -F @grove-dev/example build   # verify SEO parity");
+  console.log('\nNext:');
+  console.log('  pnpm inventory          # refresh INVENTORY.{md,json}');
+  console.log('  pnpm registry:build     # rebuild registry.lock.json');
+  console.log('  pnpm -F @grove-dev/example build   # verify SEO parity');
 }
 
 main().catch((err) => {

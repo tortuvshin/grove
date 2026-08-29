@@ -1,13 +1,13 @@
 ---
-import CollectionIndex from "../../components/grove/collection-index.astro";
-import BaseLayout from "../../layouts/base-layout.astro";
+import records from '@grove/generated/records.json';
+import siteConfig from '@grove/generated/site-config.json';
 import {
   getCollectionIndexModel,
-  recordsToCollectionEntries,
   loadCollections,
-} from "@grove-dev/astro/server";
-import records from "@grove/generated/records.json";
-import siteConfig from "@grove/generated/site-config.json";
+  recordsToCollectionEntries,
+} from '@grove-dev/astro/server';
+import CollectionIndex from '../../components/grove/collection-index.astro';
+import BaseLayout from '../../layouts/base-layout.astro';
 
 const collections = await loadCollections(process.cwd());
 const entries = recordsToCollectionEntries(
@@ -16,8 +16,8 @@ const entries = recordsToCollectionEntries(
 );
 const model = getCollectionIndexModel(collections, entries, siteConfig);
 const countNoun = {
-  singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
-  plural: siteConfig.blueprintConfig?.labelPlural ?? "items",
+  singular: siteConfig.blueprintConfig?.labelSingular ?? 'item',
+  plural: siteConfig.blueprintConfig?.labelPlural ?? 'items',
 };
 const seo = model.seo;
 ---

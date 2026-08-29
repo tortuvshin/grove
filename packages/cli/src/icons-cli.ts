@@ -1,7 +1,7 @@
-import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
-import { syncIconAssets } from "@grove-dev/core";
-import { Command } from "commander";
+import { createRequire } from 'node:module';
+import { dirname, join, resolve } from 'node:path';
+import { syncIconAssets } from '@grove-dev/core';
+import { Command } from 'commander';
 
 /**
  * `grove icons sync` — the explicit escape hatch for the icon set.
@@ -13,15 +13,15 @@ import { Command } from "commander";
  * (`--check`).
  */
 export function buildIconsCommand(): Command {
-  const icons = new Command("icons").description("Manage the packaged icon set.");
+  const icons = new Command('icons').description('Manage the packaged icon set.');
 
   icons
-    .command("sync")
-    .description("Copy the packaged icon set into public/icons/.")
-    .option("--force", "overwrite locally modified icons and drop extras")
-    .option("--check", "report drift without writing; exit 1 if anything is stale")
+    .command('sync')
+    .description('Copy the packaged icon set into public/icons/.')
+    .option('--force', 'overwrite locally modified icons and drop extras')
+    .option('--check', 'report drift without writing; exit 1 if anything is stale')
     .action(async (options: { force?: boolean; check?: boolean }) => {
-      const publicDir = resolve(process.cwd(), "public");
+      const publicDir = resolve(process.cwd(), 'public');
       const source = packagedIconsDir(process.cwd());
       const result = await syncIconAssets(source, publicDir, {
         force: options.force === true,
@@ -34,13 +34,13 @@ export function buildIconsCommand(): Command {
       const stale = result.written.length + result.pruned.length;
       if (options.check) {
         if (stale === 0 && result.skipped.length === 0) {
-          console.log("[icons] up to date");
+          console.log('[icons] up to date');
           return;
         }
         for (const file of result.written) console.log(`  stale:    ${file}`);
         for (const file of result.pruned) console.log(`  extra:    ${file}`);
         for (const file of result.skipped) console.log(`  modified: ${file}`);
-        console.error("[icons] out of date — run `grove icons sync`");
+        console.error('[icons] out of date — run `grove icons sync`');
         process.exitCode = 1;
         return;
       }
@@ -52,7 +52,7 @@ export function buildIconsCommand(): Command {
         console.log(`  kept (locally modified): ${file}`);
       }
       if (result.skipped.length > 0) {
-        console.log("Run `grove icons sync --force` to restore the packaged versions.");
+        console.log('Run `grove icons sync --force` to restore the packaged versions.');
       }
     });
 
@@ -67,14 +67,14 @@ export function buildIconsCommand(): Command {
  * whatever happens to sit next to this CLI.
  */
 function packagedIconsDir(cwd: string): string {
-  const require = createRequire(join(cwd, "package.json"));
+  const require = createRequire(join(cwd, 'package.json'));
   let packageJson: string;
   try {
-    packageJson = require.resolve("@grove-dev/astro/package.json");
+    packageJson = require.resolve('@grove-dev/astro/package.json');
   } catch {
     throw new Error(
       `@grove-dev/astro is not installed in ${cwd} — run \`pnpm install\` in your Grove project first.`,
     );
   }
-  return join(dirname(packageJson), "assets", "icons");
+  return join(dirname(packageJson), 'assets', 'icons');
 }

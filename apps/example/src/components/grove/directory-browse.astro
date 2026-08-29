@@ -23,22 +23,29 @@
  * `@grove-dev/core/directory` functions the server used. Filtered views
  * paginate with `?page=N` on the base route.
  */
-import siteConfig from "@grove/generated/site-config.json";
-import { getDirectoryIndexModel, itemLabel, itemLabelPlural, seoTitle, taxonomy, titleCaseFirst } from "@grove-dev/astro/server";
-import BaseLayout from "../../layouts/base-layout.astro";
-import CardGrid from "./card-grid.astro";
-import RefinePanel from "./refine-panel.astro";
-import IndexRow from "./index-row.astro";
-import Pagination from "./pagination.astro";
-import DirectoryIndexClient from "./directory-index-client.astro";
-import SmartLensTabs from "./smart-lens-tabs.astro";
-import { SORT_OPTIONS, sortDisplay } from "@grove-dev/astro";
-import { formatCount } from "@grove-dev/core";
-import { chipClass } from "../../lib/classnames.ts";
-import PageHeader from "../ui/page-header.astro";
-import SearchField from "../ui/search-field.astro";
-import FilterDrawer from "../ui/filter-drawer.astro";
-import Button from "../ui/button.astro";
+import siteConfig from '@grove/generated/site-config.json';
+import { SORT_OPTIONS, sortDisplay } from '@grove-dev/astro';
+import {
+  getDirectoryIndexModel,
+  itemLabel,
+  itemLabelPlural,
+  seoTitle,
+  taxonomy,
+  titleCaseFirst,
+} from '@grove-dev/astro/server';
+import { formatCount } from '@grove-dev/core';
+import BaseLayout from '../../layouts/base-layout.astro';
+import { chipClass } from '../../lib/classnames.ts';
+import Button from '../ui/button.astro';
+import FilterDrawer from '../ui/filter-drawer.astro';
+import PageHeader from '../ui/page-header.astro';
+import SearchField from '../ui/search-field.astro';
+import CardGrid from './card-grid.astro';
+import DirectoryIndexClient from './directory-index-client.astro';
+import IndexRow from './index-row.astro';
+import Pagination from './pagination.astro';
+import RefinePanel from './refine-panel.astro';
+import SmartLensTabs from './smart-lens-tabs.astro';
 
 interface Props {
   /** 1-based page this route renders. */
@@ -46,7 +53,7 @@ interface Props {
 }
 
 const { routePage = 1 } = Astro.props;
-const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+const slug = siteConfig.blueprintConfig?.routeSlug ?? 'projects';
 const {
   total,
   filters,

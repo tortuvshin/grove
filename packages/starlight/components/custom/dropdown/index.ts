@@ -9,21 +9,21 @@ import DropdownShortcut from './DropdownShortcut.astro';
 import DropdownTrigger from './DropdownTrigger.astro';
 
 export {
-    Dropdown,
-    DropdownContent,
-    DropdownItem,
-    DropdownLabel,
-    DropdownSeparator,
-    DropdownShortcut,
-    DropdownTrigger,
+  Dropdown,
+  DropdownContent,
+  DropdownItem,
+  DropdownLabel,
+  DropdownSeparator,
+  DropdownShortcut,
+  DropdownTrigger,
 };
 
 export default {
-    Root: Dropdown,
-    Trigger: DropdownTrigger,
-    Content: DropdownContent,
-    Item: DropdownItem,
-    Label: DropdownLabel,
-    Separator: DropdownSeparator,
-    Shortcut: DropdownShortcut,
+  Root: Dropdown,
+  Trigger: DropdownTrigger,
+  Content: DropdownContent,
+  Item: DropdownItem,
+  Label: DropdownLabel,
+  Separator: DropdownSeparator,
+  Shortcut: DropdownShortcut,
 };

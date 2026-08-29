@@ -1,4 +1,5 @@
 ---
+import { compact } from '@grove-dev/core';
 /**
  * OriginalCollection — legacy lineage card.
  *
@@ -10,8 +11,7 @@
  * Generic: takes plain `stats` and a `repoUrl`. No blueprint or
  * site-specific copy.
  */
-import { buttonClass } from "../../lib/classnames.ts";
-import { compact } from "@grove-dev/core";
+import { buttonClass } from '../../lib/classnames.ts';
 
 interface OriginStats {
   stars?: number;
@@ -31,17 +31,15 @@ interface Props {
 
 const {
   repoUrl,
-  repoLabel = "View on GitHub",
+  repoLabel = 'View on GitHub',
   stats = {},
-  title = "A growing list, forked from the original",
-  description = "This directory descends from an earlier curated collection. The original still lives on — same shape, same spirit, fresh data.",
-  class: className = "",
+  title = 'A growing list, forked from the original',
+  description = 'This directory descends from an earlier curated collection. The original still lives on — same shape, same spirit, fresh data.',
+  class: className = '',
 } = Astro.props;
 
 const hasStats =
-  stats.stars !== undefined ||
-  stats.forks !== undefined ||
-  stats.contributors !== undefined;
+  stats.stars !== undefined || stats.forks !== undefined || stats.contributors !== undefined;
 ---
 
 <section class:list={["py-12 sm:py-16", className]}>

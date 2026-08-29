@@ -15,10 +15,10 @@
  * or overridden per page with `gaId`. Omit both for privacy-first deployments.
  */
 import '../styles/system.css';
-import Header from "./header.astro";
-import Footer from "./footer.astro";
-import Seo from "./seo.astro";
-import { derivePrimaryPalette } from "@grove-dev/astro/server";
+import { derivePrimaryPalette } from '@grove-dev/astro/server';
+import Footer from './footer.astro';
+import Header from './header.astro';
+import Seo from './seo.astro';
 
 interface NavItem {
   label: string;
@@ -141,14 +141,14 @@ const effectiveGaId = gaId ?? site.analytics?.googleAnalyticsId;
 // <style>) so the override wins over the bundled stylesheet
 // regardless of how Vite orders the CSS output.
 const RADIUS_PRESETS: Record<string, [string, string, string]> = {
-  none: ["0rem", "0rem", "0rem"],
-  soft: ["0.625rem", "0.5rem", "0.75rem"],
-  round: ["0.875rem", "0.75rem", "1rem"],
+  none: ['0rem', '0rem', '0rem'],
+  soft: ['0.625rem', '0.5rem', '0.75rem'],
+  round: ['0.875rem', '0.75rem', '1rem'],
 };
 const DENSITY_SPACING: Record<string, string> = {
-  compact: "0.225rem",
-  comfortable: "0.25rem",
-  spacious: "0.28rem",
+  compact: '0.225rem',
+  comfortable: '0.25rem',
+  spacious: '0.28rem',
 };
 
 // Brand fill and text derive from ONE WCAG computation (contrast.ts)
@@ -157,23 +157,23 @@ const DENSITY_SPACING: Record<string, string> = {
 const themeConfig = site.theme;
 const themeStyleParts: string[] = [];
 if (themeConfig) {
-  const radius = RADIUS_PRESETS[themeConfig.radius ?? "soft"];
-  if (radius && themeConfig.radius && themeConfig.radius !== "soft") {
+  const radius = RADIUS_PRESETS[themeConfig.radius ?? 'soft'];
+  if (radius && themeConfig.radius && themeConfig.radius !== 'soft') {
     themeStyleParts.push(
       `--grove-radius: ${radius[0]}`,
       `--grove-radius-lg: ${radius[1]}`,
       `--grove-radius-xl: ${radius[2]}`,
     );
   }
-  const spacing = DENSITY_SPACING[themeConfig.density ?? "comfortable"];
-  if (spacing && themeConfig.density && themeConfig.density !== "comfortable") {
+  const spacing = DENSITY_SPACING[themeConfig.density ?? 'comfortable'];
+  if (spacing && themeConfig.density && themeConfig.density !== 'comfortable') {
     themeStyleParts.push(`--spacing: ${spacing}`);
   }
   if (themeConfig.containerWidth) {
     themeStyleParts.push(`--grove-container: ${themeConfig.containerWidth}`);
   }
   const primary = themeConfig.primaryColor;
-  if (typeof primary === "string" && /^#[0-9a-fA-F]{3,8}$/.test(primary)) {
+  if (typeof primary === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(primary)) {
     const palette = derivePrimaryPalette(primary);
     if (palette) {
       themeStyleParts.push(
@@ -185,13 +185,13 @@ if (themeConfig) {
     }
   }
 }
-const themeStyle = themeStyleParts.length > 0 ? `${themeStyleParts.join("; ")};` : undefined;
+const themeStyle = themeStyleParts.length > 0 ? `${themeStyleParts.join('; ')};` : undefined;
 
 // `site.favicon` points at a file the consumer owns under `public/`.
 // The fallback is a generated square — tinted with the configured
 // brand color rather than a hardcoded near-black, so an unconfigured
 // site still gets a tab mark that is recognisably its own.
-const faviconFill = (site.theme?.primaryColor ?? "#18181b").trim();
+const faviconFill = (site.theme?.primaryColor ?? '#18181b').trim();
 const favicon =
   site.favicon ??
   `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='${encodeURIComponent(faviconFill)}'/%3E%3C/svg%3E`;

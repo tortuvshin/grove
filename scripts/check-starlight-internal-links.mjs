@@ -21,18 +21,18 @@
 //
 // Roadmap: v0.5.0 "Strict internal-link lint".
 
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { resolve, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const docsRoot = resolve(repoRoot, 'apps/docs/src/content/docs');
 
 // Parse the Starlight `redirects:` block from astro.config.mjs so cross-
 // links that point at moved or merged URLs are accepted when the
 // destination file exists. Without this the link check would report
 // every "old → new" cross-reference as broken during the migration.
-const astroConfig = readFileSync(resolve(repoRoot, "apps/docs/astro.config.mjs"), "utf8");
+const astroConfig = readFileSync(resolve(repoRoot, 'apps/docs/astro.config.mjs'), 'utf8');
 const redirectsBlockMatch = astroConfig.match(/redirects:\s*\{([\s\S]*?)\n\s{12}\}/);
 const redirectMap = new Map();
 if (redirectsBlockMatch) {
@@ -42,8 +42,8 @@ if (redirectsBlockMatch) {
   }
 }
 function normalize(p) {
-  if (!p.startsWith("/")) p = `/${p}`;
-  if (!p.endsWith("/")) p = `${p}/`;
+  if (!p.startsWith('/')) p = `/${p}`;
+  if (!p.endsWith('/')) p = `${p}/`;
   return p;
 }
 
@@ -54,9 +54,9 @@ function walkMd(dir) {
     const path = join(dir, entry);
     const stat = statSync(path);
     if (stat.isDirectory()) {
-      if (entry === "node_modules" || entry.startsWith(".")) continue;
+      if (entry === 'node_modules' || entry.startsWith('.')) continue;
       out.push(...walkMd(path));
-    } else if (entry.endsWith(".md") || entry.endsWith(".mdx")) {
+    } else if (entry.endsWith('.md') || entry.endsWith('.mdx')) {
       out.push(path);
     }
   }
@@ -95,20 +95,20 @@ function extractLinks(src) {
 // URL → candidate on-disk paths. Return the first that exists, or
 // null if none do. Also returns whether the URL was external (so the
 // caller can report ignored externals separately if it wants to).
-function resolveLink(url, knownHomepages = new Set(["/"])) {
+function resolveLink(url, knownHomepages = new Set(['/'])) {
   // Strip trailing punctuation that Markdown often leaves behind —
   // `(/path/).` shows up when a sentence ends right after a link.
-  let u = url.replace(/[).,;]+$/, "");
+  let u = url.replace(/[).,;]+$/, '');
   // Trim surrounding whitespace.
   u = u.trim();
 
   // Skip schemes that aren't local paths.
-  if (!u.startsWith("/") || u.startsWith("//")) return { external: true, exists: null };
+  if (!u.startsWith('/') || u.startsWith('//')) return { external: true, exists: null };
   if (knownHomepages.has(u)) return { external: false, exists: true };
 
   // Drop fragment + query.
-  const pathOnly = u.split("#")[0].split("?")[0];
-  if (pathOnly === "" || pathOnly === "/") return { external: false, exists: true };
+  const pathOnly = u.split('#')[0].split('?')[0];
+  if (pathOnly === '' || pathOnly === '/') return { external: false, exists: true };
 
   // Honor the Starlight `redirects:` block from astro.config.mjs.
   // The destination file is the canonical truth; if it exists on disk,
@@ -124,7 +124,7 @@ function resolveLink(url, knownHomepages = new Set(["/"])) {
   // Strip the leading slash so `join` (not `resolve`) treats the path
   // as relative — `resolve(docsRoot, "/foo")` ignores `docsRoot` and
   // would return `/foo`, defeating the on-disk lookup.
-  const withoutSlash = pathOnly.replace(/^\//, "").replace(/\/$/, "");
+  const withoutSlash = pathOnly.replace(/^\//, '').replace(/\/$/, '');
   const candidates = [
     `${withoutSlash}.md`,
     `${withoutSlash}.mdx`,
@@ -144,7 +144,7 @@ let total = 0;
 let external = 0;
 
 for (const file of files) {
-  const src = readFileSync(file, "utf8");
+  const src = readFileSync(file, 'utf8');
   const links = extractLinks(src);
   for (const url of links) {
     total++;

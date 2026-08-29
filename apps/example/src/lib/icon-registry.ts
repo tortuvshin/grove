@@ -7,8 +7,8 @@
  * (and drifting from) the alias and folder rules.
  */
 
-export type IconCategory = "stack" | "platform" | "brand";
-export type IconFolder = "stacks" | "platforms" | "brands";
+export type IconCategory = 'stack' | 'platform' | 'brand';
+export type IconFolder = 'stacks' | 'platforms' | 'brands';
 
 /**
  * Normalize: lowercase + replace spaces/underscores with dashes.
@@ -21,7 +21,7 @@ export function slugifyIconName(s: string): string {
   return s
     .toLowerCase()
     .trim()
-    .replace(/[\s_]+/g, "-");
+    .replace(/[\s_]+/g, '-');
 }
 
 /**
@@ -31,28 +31,28 @@ export function slugifyIconName(s: string): string {
  */
 const defaultAliases: Partial<Record<IconCategory, Record<string, string>>> = {
   stack: {
-    ios: "apple",
-    "native-ios": "apple",
-    ipados: "apple",
-    macos: "apple",
-    "objective-c": "apple",
-    spritekit: "apple",
-    swiftui: "apple",
-    kmp: "kotlin",
-    "kotlin-multiplatform": "kotlin",
+    ios: 'apple',
+    'native-ios': 'apple',
+    ipados: 'apple',
+    macos: 'apple',
+    'objective-c': 'apple',
+    spritekit: 'apple',
+    swiftui: 'apple',
+    kmp: 'kotlin',
+    'kotlin-multiplatform': 'kotlin',
     // Names the shipped set covers under a different file.
-    "node.js": "nodejs",
-    node: "nodejs",
-    clojurescript: "clojure",
-    svelte: "sveltekit",
+    'node.js': 'nodejs',
+    node: 'nodejs',
+    clojurescript: 'clojure',
+    svelte: 'sveltekit',
   },
 };
 
 /** Stack marks that `category="platform"` should reuse rather than duplicate. */
-const platformStackIcons = new Set(["docker"]);
+const platformStackIcons = new Set(['docker']);
 
 /** Platforms with no mark at all — always render the initials chip. */
-export const textOnlyPlatforms = new Set(["self-host", "self-hosted"]);
+export const textOnlyPlatforms = new Set(['self-host', 'self-hosted']);
 
 export interface ResolvedIconAsset {
   /** Subfolder under the icon base path. */
@@ -80,17 +80,17 @@ export function resolveIconAsset(
 ): ResolvedIconAsset {
   const resolved = resolveName(name, category, aliases);
   const folder: IconFolder =
-    category === "stack" || (category === "platform" && platformStackIcons.has(resolved))
-      ? "stacks"
-      : category === "platform"
-        ? "platforms"
-        : "brands";
+    category === 'stack' || (category === 'platform' && platformStackIcons.has(resolved))
+      ? 'stacks'
+      : category === 'platform'
+        ? 'platforms'
+        : 'brands';
 
   return {
     folder,
     name: resolved,
     key: `${folder}/${resolved}`,
-    textOnly: category === "platform" && textOnlyPlatforms.has(resolved),
+    textOnly: category === 'platform' && textOnlyPlatforms.has(resolved),
   };
 }
 
@@ -99,7 +99,7 @@ function resolveName(
   category: IconCategory,
   aliases?: Record<string, string>,
 ): string {
-  if (!raw) return "";
+  if (!raw) return '';
   for (const registry of [aliases, defaultAliases[category]]) {
     if (!registry) continue;
     const lower = raw.toLowerCase();

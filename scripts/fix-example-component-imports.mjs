@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ROOTS = [
@@ -20,13 +20,17 @@ let changed = 0;
 for (const f of files) {
   let body = readFileSync(f, 'utf8');
   const before = body;
-  body = body.replace(/from ['"]\.\.\/lib\/(search|display|lenses|format|repo|taxonomy-counts|pagination|facets|scores)['"]/g, 'from "@grove-dev/core"');
-  body = body.replace(/from ['"]\.\.\/\.\.\/lib\/(search|display|lenses|format|repo|taxonomy-counts|pagination|facets|scores)['"]/g, 'from "@grove-dev/core"');
+  body = body.replace(
+    /from ['"]\.\.\/lib\/(search|display|lenses|format|repo|taxonomy-counts|pagination|facets|scores)['"]/g,
+    'from "@grove-dev/core"',
+  );
+  body = body.replace(
+    /from ['"]\.\.\/\.\.\/lib\/(search|display|lenses|format|repo|taxonomy-counts|pagination|facets|scores)['"]/g,
+    'from "@grove-dev/core"',
+  );
   if (body !== before) {
     writeFileSync(f, body);
     changed++;
   }
 }
 console.log(`Updated ${changed} files`);
-
-

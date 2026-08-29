@@ -9,15 +9,15 @@
  * `text-warning` for the star) to tint.
  */
 interface Props {
-  name: "star" | "clock" | "curated" | "arrow" | "external";
+  name: 'star' | 'clock' | 'curated' | 'arrow' | 'external';
   /** Square size in px. Defaults per-glyph to match card typography. */
   size?: number;
   class?: string;
 }
 
-const { name, size, class: className = "" } = Astro.props;
+const { name, size, class: className = '' } = Astro.props;
 
-const defaults: Record<Props["name"], number> = {
+const defaults: Record<Props['name'], number> = {
   star: 13,
   clock: 11,
   curated: 10,

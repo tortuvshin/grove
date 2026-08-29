@@ -11,23 +11,23 @@
  *       apps/example/.grove/registry.lock.json (what `grove update`
  *       compares against; .grove/ is gitignored, so this is local)
  */
-import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { relative, resolve } from 'node:path';
 import {
-  ROOT,
-  SCAFFOLD_ID,
-  SCAFFOLD_ITEM,
   buildFullRegistry,
   lockEntriesFor,
+  ROOT,
   readRegistryVersion,
   readSource,
+  SCAFFOLD_ID,
+  SCAFFOLD_ITEM,
   targetToProjectPath,
-} from "./lib/registry.mjs";
+} from './lib/registry.mjs';
 
-const exampleRoot = resolve(ROOT, "apps/example");
-const lockfilePath = resolve(exampleRoot, ".grove/registry.lock.json");
-const writeMode = process.argv.includes("--write");
+const exampleRoot = resolve(ROOT, 'apps/example');
+const lockfilePath = resolve(exampleRoot, '.grove/registry.lock.json');
+const writeMode = process.argv.includes('--write');
 
 const scaffold = buildFullRegistry().items.find((item) => item.name === SCAFFOLD_ITEM);
 
@@ -40,7 +40,7 @@ if (writeMode) {
     fileCount: files.length,
     files,
   };
-  await mkdir(resolve(exampleRoot, ".grove"), { recursive: true });
+  await mkdir(resolve(exampleRoot, '.grove'), { recursive: true });
   await writeFile(lockfilePath, `${JSON.stringify(lock, null, 2)}\n`);
   console.log(`Wrote ${relative(ROOT, lockfilePath)} (${files.length} files)`);
   process.exit(0);
@@ -56,14 +56,18 @@ for (const file of scaffold.files) {
     missing++;
     continue;
   }
-  if ((await readFile(examplePath, "utf8")) !== readSource(file.path)) {
+  if ((await readFile(examplePath, 'utf8')) !== readSource(file.path)) {
     console.error(`drifted: ${projectPath}  (registry: ${file.path})`);
     drifted++;
   }
 }
 if (missing + drifted > 0) {
-  console.error(`\n${missing + drifted} file(s) differ from the registry (${missing} missing, ${drifted} drifted).`);
-  console.error("Copy the registry version over apps/example (or the other way round), then re-run.");
+  console.error(
+    `\n${missing + drifted} file(s) differ from the registry (${missing} missing, ${drifted} drifted).`,
+  );
+  console.error(
+    'Copy the registry version over apps/example (or the other way round), then re-run.',
+  );
   process.exit(1);
 }
 console.log(`apps/example mirrors ${SCAFFOLD_ID} (${scaffold.files.length} files in lockstep).`);

@@ -5,7 +5,7 @@
  * registry.mjs); this is the fast CI gate and the local pre-commit
  * check.
  */
-import { validateRegistry } from "./lib/registry.mjs";
+import { validateRegistry } from './lib/registry.mjs';
 
 const errors = validateRegistry();
 if (errors.length > 0) {
@@ -13,4 +13,4 @@ if (errors.length > 0) {
   for (const error of errors) console.error(`  - ${error}`);
   process.exit(1);
 }
-console.log("Registry invariants OK.");
+console.log('Registry invariants OK.');

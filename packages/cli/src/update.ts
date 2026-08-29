@@ -26,13 +26,8 @@
  *   1  no lockfile (consumer was never initialized)
  *   2  conflicts present (caller decides whether to --force)
  */
-import { planUpdate, type UpdatePlan } from "./diff.js";
-import {
-  hashInstalledFile,
-  readLockfile,
-  type Sha256Hash,
-  writeLockfile,
-} from "./hash.js";
+import { planUpdate, type UpdatePlan } from './diff.js';
+import { hashInstalledFile, readLockfile, type Sha256Hash, writeLockfile } from './hash.js';
 import {
   buildLockfile,
   itemLockEntries,
@@ -41,7 +36,7 @@ import {
   resolveRegistryTemplate,
   SCAFFOLD_ITEM,
   writeItemFiles,
-} from "./registry.js";
+} from './registry.js';
 
 export interface UpdateOptions {
   cwd: string;
@@ -77,7 +72,7 @@ export interface UpdateSummary {
 async function resolveUpstreamSource(cwd: string, from?: string): Promise<string> {
   if (from) return from;
   const template = await resolveRegistryTemplate(cwd);
-  if (template) return template.replace("{name}", SCAFFOLD_ITEM);
+  if (template) return template.replace('{name}', SCAFFOLD_ITEM);
   const bundled = resolveBundledItemPath();
   console.error(
     `[update] no @grove registry in components.json — comparing against the bundled ${bundled}`,
@@ -97,7 +92,7 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
       plan: emptyPlan(),
       applied: [],
       preserved: [],
-      source: options.from ?? "",
+      source: options.from ?? '',
       exitCode: 1,
     };
   }
@@ -131,8 +126,7 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
   for (const target of plan.locally_modified) preserved.push(target);
   for (const target of plan.conflict) preserved.push(target);
 
-  const exitCode: 0 | 1 | 2 =
-    plan.conflict.length > 0 && !options.force ? 2 : 0;
+  const exitCode: 0 | 1 | 2 = plan.conflict.length > 0 && !options.force ? 2 : 0;
 
   return { plan, applied, preserved, source, exitCode };
 }
@@ -148,7 +142,9 @@ function emptyPlan(): UpdatePlan {
   };
 }
 
-function mapByTarget<T extends { target: string; hash: string }>(files: T[]): Map<string, Sha256Hash> {
+function mapByTarget<T extends { target: string; hash: string }>(
+  files: T[],
+): Map<string, Sha256Hash> {
   const map = new Map<string, Sha256Hash>();
   for (const file of files) map.set(file.target, file.hash as Sha256Hash);
   return map;
@@ -176,7 +172,7 @@ export function formatPlan(plan: UpdatePlan, applied: string[]): string {
   for (const t of plan.locally_modified) lines.push(`! ${t} locally modified — preserved`);
   for (const t of plan.conflict) lines.push(`✗ ${t} conflict — needs manual merge`);
   for (const t of plan.removed) lines.push(`- ${t} removed`);
-  lines.push("");
+  lines.push('');
   const applyCount = plan.upstream_changed.length + plan.new.length;
   lines.push(
     `${applyCount} to apply · ${plan.new.length} new · ${plan.locally_modified.length} preserved · ${plan.conflict.length} conflict`,
@@ -184,8 +180,8 @@ export function formatPlan(plan: UpdatePlan, applied: string[]): string {
   if (applied.length > 0) {
     lines.push(`\nApplied ${applied.length} file(s).`);
   }
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
-export { classify } from "./diff.js";
+export { classify } from './diff.js';
 export { planUpdate };

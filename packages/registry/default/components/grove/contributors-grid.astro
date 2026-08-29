@@ -11,8 +11,8 @@
  * state can be wired by a consumer via a slot).
  */
 
-import { compact } from "@grove-dev/core";
-import EmptyState from "../ui/empty-state.astro";
+import { compact } from '@grove-dev/core';
+import EmptyState from '../ui/empty-state.astro';
 
 interface Contributor {
   username: string;
@@ -40,16 +40,14 @@ const {
   contributors,
   total,
   viewAllHref,
-  viewAllLabel = "View all",
-  title = "Built by the community",
-  description = "The people improving this directory through code, curation, and review.",
+  viewAllLabel = 'View all',
+  title = 'Built by the community',
+  description = 'The people improving this directory through code, curation, and review.',
   showContributionCount = true,
-  class: className = "",
+  class: className = '',
 } = Astro.props;
 
-const visible = contributors
-  .filter((c) => c.username)
-  .slice(0, 100);
+const visible = contributors.filter((c) => c.username).slice(0, 100);
 ---
 
 <section

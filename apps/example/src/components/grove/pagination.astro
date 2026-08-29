@@ -6,14 +6,14 @@ interface Props {
   class?: string;
 }
 
-import { paginationPageList } from "@grove-dev/astro";
-import { buttonClass, PAGINATION_DISABLED, PAGINATION_EXTRA } from "../../lib/classnames.ts";
+import { paginationPageList } from '@grove-dev/astro';
+import { buttonClass, PAGINATION_DISABLED, PAGINATION_EXTRA } from '../../lib/classnames.ts';
 
-const { current, total, hrefFor, class: className = "" } = Astro.props;
+const { current, total, hrefFor, class: className = '' } = Astro.props;
 
 const pages = paginationPageList(current, total);
-const linkClass = buttonClass("secondary", "sm", PAGINATION_EXTRA);
-const currentClass = buttonClass("selected", "sm", PAGINATION_EXTRA);
+const linkClass = buttonClass('secondary', 'sm', PAGINATION_EXTRA);
+const currentClass = buttonClass('selected', 'sm', PAGINATION_EXTRA);
 ---
 
 {total > 1 && (

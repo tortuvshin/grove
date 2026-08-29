@@ -1,10 +1,10 @@
 ---
-import siteConfig from "@grove/generated/site-config.json";
-import { getSubmissionPageModel } from "@grove-dev/astro/server";
-import BaseLayout from "../layouts/base-layout.astro";
-import Container from "../layouts/container.astro";
-import SubmissionClient from "../components/grove/submission-client.astro";
-import { buttonClass } from "../lib/classnames.ts";
+import siteConfig from '@grove/generated/site-config.json';
+import { getSubmissionPageModel } from '@grove-dev/astro/server';
+import SubmissionClient from '../components/grove/submission-client.astro';
+import BaseLayout from '../layouts/base-layout.astro';
+import Container from '../layouts/container.astro';
+import { buttonClass } from '../lib/classnames.ts';
 
 const {
   singular,
@@ -22,20 +22,24 @@ const {
   taxonomy,
 } = getSubmissionPageModel(siteConfig);
 const goodSubmissions = [
-  ...(copy.good?.length ? copy.good : [
-    `A real, usable ${singular}, not a tutorial or one-screen demo`,
-    "A public repository with a clear open-source license",
-    "Enough documentation to understand, run, or contribute",
-    "Recent maintenance, releases, or meaningful project history",
-  ]),
+  ...(copy.good?.length
+    ? copy.good
+    : [
+        `A real, usable ${singular}, not a tutorial or one-screen demo`,
+        'A public repository with a clear open-source license',
+        'Enough documentation to understand, run, or contribute',
+        'Recent maintenance, releases, or meaningful project history',
+      ]),
 ];
 const pleaseAvoid = [
-  ...(copy.avoid?.length ? copy.avoid : [
-    "Snippets, exercises, abandoned experiments, or duplicate entries",
-    "Private repositories or projects without source",
-    "Marketing pages with no usable project behind them",
-    "Records with no license or verifiable repository",
-  ]),
+  ...(copy.avoid?.length
+    ? copy.avoid
+    : [
+        'Snippets, exercises, abandoned experiments, or duplicate entries',
+        'Private repositories or projects without source',
+        'Marketing pages with no usable project behind them',
+        'Records with no license or verifiable repository',
+      ]),
 ];
 ---
 

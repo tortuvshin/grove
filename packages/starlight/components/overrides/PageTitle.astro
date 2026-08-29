@@ -1,13 +1,13 @@
 ---
+import userConfig from 'virtual:grove-starlight-config';
 import { Icon } from '@astrojs/starlight/components';
 import { PAGE_TITLE_ID } from '../../core/config/constants';
-import userConfig from 'virtual:grove-starlight-config';
 import { Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from '../custom/dropdown';
 import LinkButton from '../custom/LinkButton.astro';
 
 const {
-    entry: { data },
-    pagination: { prev, next },
+  entry: { data },
+  pagination: { prev, next },
 } = Astro.locals.starlightRoute;
 
 const { title, description } = data;

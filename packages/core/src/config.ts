@@ -1,10 +1,6 @@
-import { resolve } from "node:path";
-import { createJiti } from "jiti";
-import {
-  groveConfigSchema,
-  type GroveConfig,
-  type GroveConfigInput,
-} from "./schema.js";
+import { resolve } from 'node:path';
+import { createJiti } from 'jiti';
+import { type GroveConfig, type GroveConfigInput, groveConfigSchema } from './schema.js';
 
 export type { GroveConfig, GroveConfigInput };
 
@@ -17,7 +13,7 @@ export type { GroveConfig, GroveConfigInput };
  */
 export async function loadConfig(
   cwd = process.cwd(),
-  configPath = "grove.config.ts",
+  configPath = 'grove.config.ts',
 ): Promise<GroveConfig> {
   const resolved = resolve(cwd, configPath);
   const jiti = createJiti(import.meta.url);

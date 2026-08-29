@@ -22,10 +22,10 @@
  * byte-identical.
  */
 export function recordSlugify(value: unknown): string {
-  return String(value || "")
+  return String(value || '')
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**
@@ -40,10 +40,10 @@ export interface ParsedRepo {
 }
 
 export function parseGithubRepo(value: unknown): ParsedRepo | null {
-  const match = String(value ?? "").match(/github\.com\/([^/]+)\/([^/?#]+)/);
+  const match = String(value ?? '').match(/github\.com\/([^/]+)\/([^/?#]+)/);
   if (!match) return null;
-  const owner = match[1] ?? "";
-  const repo = (match[2] ?? "").replace(/\.git$/, "");
+  const owner = match[1] ?? '';
+  const repo = (match[2] ?? '').replace(/\.git$/, '');
   return { owner, repo };
 }
 
@@ -54,8 +54,8 @@ export function parseGithubRepo(value: unknown): ParsedRepo | null {
  * a newline the YAML consumer must use folded/block style instead.
  */
 export function yamlQuote(value: unknown): string {
-  return `"${String(value ?? "")
-    .replace(/\\/g, "\\\\")
+  return `"${String(value ?? '')
+    .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')}"`;
 }
 
@@ -65,7 +65,5 @@ export function yamlQuote(value: unknown): string {
  * an empty string so the caller can choose to emit `[]` instead.
  */
 export function yamlLines(values: readonly string[], indent = 2): string {
-  return values
-    .map((value) => `${" ".repeat(indent)}- ${value}`)
-    .join("\n");
+  return values.map((value) => `${' '.repeat(indent)}- ${value}`).join('\n');
 }

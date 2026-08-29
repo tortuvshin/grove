@@ -1,4 +1,5 @@
 ---
+import type { CollectionPageModel } from '@grove-dev/astro/server';
 /**
  * CollectionPage — renders a single curated/generated collection.
  *
@@ -13,13 +14,12 @@
  * the consumer's content pipeline). `emptyLabel` matches
  * `RecordSection`'s API for empty-state copy.
  */
-import { formatCount } from "@grove-dev/core";
-import CardGrid from "./card-grid.astro";
-import CollectionRow from "./collection-row.astro";
-import Container from "../../layouts/container.astro";
-import SectionHeader from "../../layouts/section-header.astro";
-import EmptyState from "../ui/empty-state.astro";
-import type { CollectionPageModel } from "@grove-dev/astro/server";
+import { formatCount } from '@grove-dev/core';
+import Container from '../../layouts/container.astro';
+import SectionHeader from '../../layouts/section-header.astro';
+import EmptyState from '../ui/empty-state.astro';
+import CardGrid from './card-grid.astro';
+import CollectionRow from './collection-row.astro';
 
 interface Props {
   model: CollectionPageModel;
@@ -48,16 +48,17 @@ const {
   eyebrow,
   title,
   description,
-  emptyLabel = "This collection is currently empty.",
+  emptyLabel = 'This collection is currently empty.',
   id,
   level = 1,
-  countNoun = { singular: "item", plural: "items" },
-  class: className = "",
+  countNoun = { singular: 'item', plural: 'items' },
+  class: className = '',
 } = Astro.props;
 
 const finalTitle = title ?? model.collection.title;
 const finalDescription = description ?? model.collection.description;
-const finalEyebrow = eyebrow ?? (model.collection.kind === "curated" ? "Curated collection" : "Generated collection");
+const finalEyebrow =
+  eyebrow ?? (model.collection.kind === 'curated' ? 'Curated collection' : 'Generated collection');
 ---
 
 <section id={id} class={`py-12 sm:py-16 ${className}`}>

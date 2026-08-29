@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  LICENSE_NOT_DETECTED,
   labelDisplay,
   langColor,
   lensDisplay,
-  LICENSE_NOT_DETECTED,
   licenseDisplay,
   nameInitials,
   prettySlug,

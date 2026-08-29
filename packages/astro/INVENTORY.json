@@ -1,35 +1,17 @@
 {
   "sourceRoot": "packages/astro/src",
-  "fileCount": 3,
+  "fileCount": 1,
   "businessLogicCount": 0,
   "forbiddenImportCount": 0,
   "files": [
-    {
-      "path": "packages/astro/src/layouts/index.ts",
-      "kind": "layout",
-      "hasBusinessLogic": false,
-      "forbiddenImports": [],
-      "hash": "f36d5747df53159a1572d7f94ac63291971baad1cd267d4f293febd78a46ce32",
-      "lines": 25,
-      "target": "registry/default/layouts/index.ts.astro"
-    },
     {
       "path": "packages/astro/src/styles.css",
       "kind": "styles",
       "hasBusinessLogic": false,
       "forbiddenImports": [],
-      "hash": "d5b6051850d627267e4980adfe2725e7ee9c73b3f83c1bfc9538a537824dbc03",
-      "lines": 1037,
+      "hash": "92bc6e1da6c784fa1b235ff633a0b30ae9b0c24c331c8e8b5893f8f1e42ac79e",
+      "lines": 1181,
       "target": "registry/default/styles/system.css"
-    },
-    {
-      "path": "packages/astro/src/ui/button.ts",
-      "kind": "primitive",
-      "hasBusinessLogic": false,
-      "forbiddenImports": [],
-      "hash": "8623a9f48f6d719f4c0a864297c9acf6f1b89847a32b01693d3ca3afbd6c7d84",
-      "lines": 108,
-      "target": "registry/default/lib/classnames.ts"
     }
   ]
 }

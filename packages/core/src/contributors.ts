@@ -1,5 +1,5 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 
 export interface Contributor {
   username: string;
@@ -29,31 +29,31 @@ export interface ContributorSyncResult {
 function ownerRepo(record: Record<string, unknown>): { owner: string; repo: string } | null {
   const github = record.github as { fullName?: string } | undefined;
   const fullName = github?.fullName;
-  if (fullName?.includes("/")) {
-    const [owner, repo] = fullName.split("/", 2);
+  if (fullName?.includes('/')) {
+    const [owner, repo] = fullName.split('/', 2);
     if (owner && repo) return { owner, repo };
   }
   const links = record.links as { github?: string } | undefined;
-  const repoUrl = String(record.repoUrl ?? links?.github ?? "");
+  const repoUrl = String(record.repoUrl ?? links?.github ?? '');
   const match = /github\.com\/([^/]+)\/([^/?#]+)/i.exec(repoUrl);
   const owner = match?.[1];
   const repo = match?.[2];
-  return owner && repo ? { owner, repo: repo.replace(/\.git$/, "") } : null;
+  return owner && repo ? { owner, repo: repo.replace(/\.git$/, '') } : null;
 }
 
 export async function syncContributors(
   options: SyncContributorsOptions = {},
 ): Promise<ContributorSyncResult> {
   const cwd = options.cwd ?? process.cwd();
-  const generatedDir = options.generatedDir ?? "data/generated";
-  const indexPath = resolve(cwd, generatedDir, "records.index.json");
-  const outputPath = resolve(cwd, generatedDir, "contributors.json");
-  const repoStatsPath = resolve(cwd, generatedDir, "repo-stats.json");
-  const siteConfigPath = resolve(cwd, generatedDir, "site-config.json");
-  const siteConfig = JSON.parse(await readFile(siteConfigPath, "utf8")) as {
+  const generatedDir = options.generatedDir ?? 'data/generated';
+  const indexPath = resolve(cwd, generatedDir, 'records.index.json');
+  const outputPath = resolve(cwd, generatedDir, 'contributors.json');
+  const repoStatsPath = resolve(cwd, generatedDir, 'repo-stats.json');
+  const siteConfigPath = resolve(cwd, generatedDir, 'site-config.json');
+  const siteConfig = JSON.parse(await readFile(siteConfigPath, 'utf8')) as {
     repoUrl?: string;
   };
-  const repoUrl = options.repoUrl ?? siteConfig.repoUrl ?? "";
+  const repoUrl = options.repoUrl ?? siteConfig.repoUrl ?? '';
   const ref = ownerRepo({ repoUrl });
   if (!ref) {
     throw new Error(
@@ -61,21 +61,20 @@ export async function syncContributors(
     );
   }
   const fetchImpl = options.fetchImpl ?? fetch;
-  const token =
-    options.token ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN ?? "";
+  const token = options.token ?? process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN ?? '';
   const headers = {
-    Accept: "application/vnd.github+json",
-    "User-Agent": "grove-sync-contributors",
-    "X-GitHub-Api-Version": "2022-11-28",
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'grove-sync-contributors',
+    'X-GitHub-Api-Version': '2022-11-28',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
   const byUsername = new Map<string, Contributor>();
   let failed = 0;
   type GitHubContributor = {
-        login?: string;
-        avatar_url?: string;
-        html_url?: string;
-        contributions?: number;
+    login?: string;
+    avatar_url?: string;
+    html_url?: string;
+    contributions?: number;
   };
   const perPage = 100;
   for (let page = 1; ; page += 1) {
@@ -88,9 +87,10 @@ export async function syncContributors(
         `GitHub contributors request failed for ${ref.owner}/${ref.repo} (page ${page}): ${contributorsResponse.status}`,
       );
     }
-    const data = contributorsResponse.status === 204
-      ? []
-      : (await contributorsResponse.json()) as GitHubContributor[];
+    const data =
+      contributorsResponse.status === 204
+        ? []
+        : ((await contributorsResponse.json()) as GitHubContributor[]);
     for (const entry of data) {
       if (!entry.login) continue;
       // GitHub's contributors endpoint returns bot accounts (any
@@ -100,7 +100,7 @@ export async function syncContributors(
       // consumer sites and visually present as project members.
       // Filter them here so the cached `data/generated/contributors.json`
       // never lists automation as humans.
-      if (entry.login.endsWith("[bot]")) continue;
+      if (entry.login.endsWith('[bot]')) continue;
       byUsername.set(entry.login, {
         username: entry.login,
         ...(entry.avatar_url ? { avatarUrl: entry.avatar_url } : {}),
@@ -119,20 +119,18 @@ export async function syncContributors(
     failed += 1;
   }
   const repository = repositoryResponse.ok
-    ? await repositoryResponse.json() as {
+    ? ((await repositoryResponse.json()) as {
         stargazers_count?: number;
         forks_count?: number;
         subscribers_count?: number;
         open_issues_count?: number;
         default_branch?: string;
         pushed_at?: string;
-      }
+      })
     : {};
 
   const contributors = [...byUsername.values()].sort(
-    (a, b) =>
-      b.contributions - a.contributions ||
-      a.username.localeCompare(b.username),
+    (a, b) => b.contributions - a.contributions || a.username.localeCompare(b.username),
   );
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(
@@ -145,7 +143,7 @@ export async function syncContributors(
       null,
       2,
     ),
-    "utf8",
+    'utf8',
   );
   await writeFile(
     repoStatsPath,
@@ -163,7 +161,7 @@ export async function syncContributors(
       null,
       2,
     ),
-    "utf8",
+    'utf8',
   );
 
   return {

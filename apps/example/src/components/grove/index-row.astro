@@ -1,4 +1,5 @@
 ---
+import { buildProjectCardModel } from '@grove-dev/astro/server';
 /**
  * IndexRow — browse-page adapter around the canonical `ProjectCard`.
  *
@@ -14,9 +15,8 @@
  * stays this adapter's public contract (unaffected by `ProjectCard`'s
  * presentation-only rewrite).
  */
-import type { IndexRecord } from "@grove-dev/core";
-import { buildProjectCardModel } from "@grove-dev/astro/server";
-import ProjectCard from "./project-card.astro";
+import type { IndexRecord } from '@grove-dev/core';
+import ProjectCard from './project-card.astro';
 
 interface Props {
   record: IndexRecord;
@@ -30,7 +30,7 @@ interface Props {
   class?: string;
 }
 
-const { record, detailHref, eager = false, class: className = "" } = Astro.props;
+const { record, detailHref, eager = false, class: className = '' } = Astro.props;
 
 const model = buildProjectCardModel(record);
 ---

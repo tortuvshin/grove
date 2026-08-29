@@ -5,7 +5,7 @@
  * Collapsible on-page nav for a record's Markdown body.
  *
  * Behavior:
- *   - Mobile (<lg): rendered as a closed `<details>` dropdown.
+ *   - Mobile (below lg): rendered as a closed `<details>` dropdown.
  *   - Desktop (lg+): forced open by the `.grove-toc` media rule in
  *     `styles.css` (CSS reveals the list without the `open`
  *     attribute) so the nav stays visible while the user scrolls.
@@ -18,7 +18,7 @@
  * throttled). Active styling comes from the `data-toc-active`
  * attribute toggled in the script + CSS rules in `styles.css`.
  */
-import type { TocEntry } from "@grove-dev/core";
+import type { TocEntry } from '@grove-dev/core';
 
 interface Props {
   /** Heading entries from `extractToc`. */
@@ -27,7 +27,7 @@ interface Props {
   label?: string;
 }
 
-const { items, label = "On this page" } = Astro.props;
+const { items, label = 'On this page' } = Astro.props;
 const hasItems = items.length > 1;
 ---
 

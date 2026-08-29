@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
 /**
  * Smoke test for the `showContributionCount` site-config default.
@@ -9,11 +9,11 @@ import { describe, expect, it } from "vitest";
  * existing directories don't change silently — and consumers that
  * opt out get the quieter card.
  */
-describe("contributors showContributionCount default", () => {
-  it("defaults to true", async () => {
-    const { groveConfigSchema } = await import("./schema.js");
+describe('contributors showContributionCount default', () => {
+  it('defaults to true', async () => {
+    const { groveConfigSchema } = await import('./schema.js');
     const result = groveConfigSchema.safeParse({
-      site: { name: "T" },
+      site: { name: 'T' },
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -21,10 +21,10 @@ describe("contributors showContributionCount default", () => {
     }
   });
 
-  it("respects an explicit false opt-out", async () => {
-    const { groveConfigSchema } = await import("./schema.js");
+  it('respects an explicit false opt-out', async () => {
+    const { groveConfigSchema } = await import('./schema.js');
     const result = groveConfigSchema.safeParse({
-      site: { name: "T" },
+      site: { name: 'T' },
       contributors: { showContributionCount: false },
     });
     expect(result.success).toBe(true);
@@ -34,9 +34,9 @@ describe("contributors showContributionCount default", () => {
   });
 });
 
-describe("normalizeGithubIntegration", () => {
-  it("expands a blanket boolean into per-feature flags", async () => {
-    const { normalizeGithubIntegration } = await import("./schema.js");
+describe('normalizeGithubIntegration', () => {
+  it('expands a blanket boolean into per-feature flags', async () => {
+    const { normalizeGithubIntegration } = await import('./schema.js');
     expect(normalizeGithubIntegration(true)).toEqual({
       metadata: true,
       contributors: true,
@@ -49,8 +49,8 @@ describe("normalizeGithubIntegration", () => {
     });
   });
 
-  it("fills missing per-feature flags with false", async () => {
-    const { normalizeGithubIntegration } = await import("./schema.js");
+  it('fills missing per-feature flags with false', async () => {
+    const { normalizeGithubIntegration } = await import('./schema.js');
     expect(
       normalizeGithubIntegration({ metadata: true, contributors: false, health: false }),
     ).toEqual({ metadata: true, contributors: false, health: false });

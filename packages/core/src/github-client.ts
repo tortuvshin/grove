@@ -12,9 +12,9 @@
  */
 
 const DEFAULT_HEADERS: Record<string, string> = {
-  Accept: "application/vnd.github+json",
-  "X-GitHub-Api-Version": "2022-11-28",
-  "User-Agent": "grove-bot",
+  Accept: 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28',
+  'User-Agent': 'grove-bot',
 };
 
 export interface GhFetchOptions {
@@ -25,7 +25,7 @@ export interface GhFetchOptions {
 }
 
 export function rateLimitWaitMs(res: Response, capMs = 5 * 60_000): number {
-  const reset = res.headers.get("x-ratelimit-reset");
+  const reset = res.headers.get('x-ratelimit-reset');
   if (!reset) return 0;
   const resetMs = Number(reset) * 1000 - Date.now();
   if (!Number.isFinite(resetMs) || resetMs <= 0) return 0;
@@ -42,7 +42,7 @@ export async function ghFetch(path: string, options: GhFetchOptions = {}): Promi
   const headers: Record<string, string> = {
     ...DEFAULT_HEADERS,
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(userAgent ? { "User-Agent": userAgent } : {}),
+    ...(userAgent ? { 'User-Agent': userAgent } : {}),
   };
   let lastErr: Error | undefined;
   for (let i = 0; i < attempts; i++) {
@@ -59,7 +59,7 @@ export async function ghFetch(path: string, options: GhFetchOptions = {}): Promi
     }
     if (
       res.status === 429 ||
-      (res.status === 403 && res.headers.get("x-ratelimit-remaining") === "0")
+      (res.status === 403 && res.headers.get('x-ratelimit-remaining') === '0')
     ) {
       const wait = onRateLimited ? onRateLimited() : rateLimitWaitMs(res);
       if (wait > 0) {

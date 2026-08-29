@@ -19,42 +19,22 @@
  */
 
 /** Group key written into `data-filter-group-key` on a facet group. */
-export type DirectoryFilterGroupKey =
-  | "stacks"
-  | "platforms"
-  | "categories"
-  | "tags"
-  | "licenses";
+export type DirectoryFilterGroupKey = 'stacks' | 'platforms' | 'categories' | 'tags' | 'licenses';
 
 /**
  * The URL search-param key the group writes its selected values to.
  * Singular because each value is one record's id, not a multi.
  */
-export type DirectoryFilterParamKey =
-  | "stack"
-  | "platform"
-  | "category"
-  | "tag"
-  | "license";
+export type DirectoryFilterParamKey = 'stack' | 'platform' | 'category' | 'tag' | 'license';
 
 /**
  * The taxonomy kind the group belongs to. `tags` maps to the
  * `topics` taxonomy kind (per the schema in `schema.ts`).
  */
-export type DirectoryTaxonomyKind =
-  | "stacks"
-  | "platforms"
-  | "categories"
-  | "topics"
-  | "licenses";
+export type DirectoryTaxonomyKind = 'stacks' | 'platforms' | 'categories' | 'topics' | 'licenses';
 
 /** Singular, human-readable label rendered in chip/option UIs. */
-export type DirectoryFilterLabel =
-  | "Stack"
-  | "Platform"
-  | "Category"
-  | "Tag"
-  | "License";
+export type DirectoryFilterLabel = 'Stack' | 'Platform' | 'Category' | 'Tag' | 'License';
 
 /**
  * Group key → URL param key. Single definition; consumed by every
@@ -63,11 +43,11 @@ export type DirectoryFilterLabel =
 export const DIRECTORY_FILTER_KEYS: Readonly<
   Record<DirectoryFilterGroupKey, DirectoryFilterParamKey>
 > = Object.freeze({
-  stacks: "stack",
-  platforms: "platform",
-  categories: "category",
-  tags: "tag",
-  licenses: "license",
+  stacks: 'stack',
+  platforms: 'platform',
+  categories: 'category',
+  tags: 'tag',
+  licenses: 'license',
 });
 
 /**
@@ -76,22 +56,22 @@ export const DIRECTORY_FILTER_KEYS: Readonly<
 export const DIRECTORY_TAXONOMY_KINDS: Readonly<
   Record<DirectoryFilterGroupKey, DirectoryTaxonomyKind>
 > = Object.freeze({
-  stacks: "stacks",
-  platforms: "platforms",
-  categories: "categories",
-  tags: "topics",
-  licenses: "licenses",
+  stacks: 'stacks',
+  platforms: 'platforms',
+  categories: 'categories',
+  tags: 'topics',
+  licenses: 'licenses',
 });
 
 /** Group key → display label for chips, trigger buttons, headings. */
 export const DIRECTORY_FILTER_LABELS: Readonly<
   Record<DirectoryFilterGroupKey, DirectoryFilterLabel>
 > = Object.freeze({
-  stacks: "Stack",
-  platforms: "Platform",
-  categories: "Category",
-  tags: "Tag",
-  licenses: "License",
+  stacks: 'Stack',
+  platforms: 'Platform',
+  categories: 'Category',
+  tags: 'Tag',
+  licenses: 'License',
 });
 
 /**
@@ -103,11 +83,11 @@ export const DIRECTORY_FILTER_LABELS: Readonly<
 export const FACET_DIMENSION_FOR_KEY: Readonly<
   Record<DirectoryFilterParamKey, DirectoryFilterGroupKey>
 > = Object.freeze({
-  stack: "stacks",
-  platform: "platforms",
-  category: "categories",
-  tag: "tags",
-  license: "licenses",
+  stack: 'stacks',
+  platform: 'platforms',
+  category: 'categories',
+  tag: 'tags',
+  license: 'licenses',
 });
 
 /** Type guard. */

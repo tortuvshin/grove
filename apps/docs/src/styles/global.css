@@ -21,16 +21,16 @@
  * neutral docs palette from @grove-dev/starlight. Toning the chroma down keeps
  * the success/warn semantics readable without turning green into an accent
  * colour the docs never otherwise use. */
-:root[data-theme='dark'] {
-	--green-low: oklch(28% 0.03 152);
-	--green: oklch(74% 0.08 152);
-	--green-high: oklch(88% 0.06 152);
+:root[data-theme="dark"] {
+  --green-low: oklch(28% 0.03 152);
+  --green: oklch(74% 0.08 152);
+  --green-high: oklch(88% 0.06 152);
 }
 
-:root[data-theme='light'] {
-	--green-low: oklch(96% 0.025 152);
-	--green: oklch(48% 0.1 152);
-	--green-high: oklch(35% 0.06 152);
+:root[data-theme="light"] {
+  --green-low: oklch(96% 0.025 152);
+  --green: oklch(48% 0.1 152);
+  --green-high: oklch(35% 0.06 152);
 }
 
 /* No unlayered element rules live here.

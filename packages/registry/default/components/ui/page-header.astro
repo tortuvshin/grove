@@ -17,8 +17,8 @@ interface Props {
   class?: string;
 }
 
-const { eyebrow, title, description, level = 1, class: className = "" } = Astro.props;
-const Heading = `h${level}` as "h1" | "h2";
+const { eyebrow, title, description, level = 1, class: className = '' } = Astro.props;
+const Heading = `h${level}` as 'h1' | 'h2';
 ---
 
 <header class={`flex flex-col gap-1 ${className}`}>

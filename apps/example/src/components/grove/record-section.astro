@@ -1,4 +1,5 @@
 ---
+import { buildProjectCardModel } from '@grove-dev/astro/server';
 /**
  * RecordSection — generic lens-style section wrapper for the
  * home page.
@@ -23,13 +24,12 @@
  * Empty-state copy is rendered when the list has no items, so the
  * homepage never collapses to a blank section.
  */
-import type { IndexRecord } from "@grove-dev/core";
-import { buildProjectCardModel } from "@grove-dev/astro/server";
-import CardGrid from "./card-grid.astro";
-import ProjectCard from "./project-card.astro";
-import Container from "../../layouts/container.astro";
-import SectionHeader from "../../layouts/section-header.astro";
-import EmptyState from "../ui/empty-state.astro";
+import type { IndexRecord } from '@grove-dev/core';
+import Container from '../../layouts/container.astro';
+import SectionHeader from '../../layouts/section-header.astro';
+import EmptyState from '../ui/empty-state.astro';
+import CardGrid from './card-grid.astro';
+import ProjectCard from './project-card.astro';
 
 interface Props {
   /** Used as the section id (so deep links work) and a stable key. */
@@ -60,12 +60,12 @@ const {
   description,
   items,
   hrefFor,
-  pathPrefix = "/items",
+  pathPrefix = '/items',
   viewAllHref,
-  viewAllLabel = "View all",
+  viewAllLabel = 'View all',
   eyebrow,
-  emptyLabel = "No records yet.",
-  class: className = "",
+  emptyLabel = 'No records yet.',
+  class: className = '',
   limit = 3,
 } = Astro.props;
 

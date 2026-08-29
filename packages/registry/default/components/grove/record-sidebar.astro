@@ -1,4 +1,6 @@
 ---
+import type { RecordDetailModel } from '@grove-dev/astro/server';
+import { taxonomyLabel } from '@grove-dev/astro/server';
 /**
  * RecordSidebar.astro
  *
@@ -19,12 +21,10 @@
  * scrolls the body. Cards are individually rendered so the
  * sticky container's height is bounded by the actual content.
  */
-import { licenseDisplay } from "@grove-dev/core";
-import type { RecordDetailModel } from "@grove-dev/astro/server";
-import { taxonomyLabel } from "@grove-dev/astro/server";
-import Badge from "../ui/badge.astro";
-import Icon from "./icon.astro";
-import LanguageBreakdown from "./language-breakdown.astro";
+import { licenseDisplay } from '@grove-dev/core';
+import Badge from '../ui/badge.astro';
+import Icon from './icon.astro';
+import LanguageBreakdown from './language-breakdown.astro';
 
 interface Props {
   detail: RecordDetailModel;
@@ -39,10 +39,10 @@ interface Props {
    * "grid" lays them out in responsive columns for full-width
    * placement below the article.
    */
-  layout?: "column" | "grid";
+  layout?: 'column' | 'grid';
 }
 
-const { detail, sticky = true, layout = "column" } = Astro.props;
+const { detail, sticky = true, layout = 'column' } = Astro.props;
 const {
   sidebar,
   github,
@@ -68,6 +68,7 @@ const {
   lastFetchedLabel,
   reviewedAtLabel,
 } = detail;
+const alsoIn: Array<{ url: string; title: string }> = detail.collectionMembership ?? [];
 
 // Visibility helpers for individual rows inside the Activity card.
 // `hasRepo` is the discriminator between "GitHub data synced" and
@@ -75,20 +76,21 @@ const {
 // even when the field was never populated.
 const repo = github;
 const hasRepo = !!repo;
-const starsNumber = typeof stars === "number" && stars > 0 ? stars : null;
-const forksNumber = typeof forks === "number" && forks > 0 ? forks : null;
+const starsNumber = typeof stars === 'number' && stars > 0 ? stars : null;
+const forksNumber = typeof forks === 'number' && forks > 0 ? forks : null;
 // `repo` is a loosely-typed passthrough of the raw GitHub API response
 // (see `@grove-dev/astro/server`'s `getRecordDetailModel`) — `releases`
 // isn't in the normalized `githubMetadataSchema`, so it arrives as
 // `unknown` and needs a local shape for the three fields read below.
 const recentReleases = (
-  (repo?.releases as Array<{ html_url?: string; tag_name?: string; name?: string }> | undefined) ?? []
+  (repo?.releases as Array<{ html_url?: string; tag_name?: string; name?: string }> | undefined) ??
+  []
 ).slice(0, 1);
 const isArchived = !!repo?.archived;
 
 // Render a kv row only when both the label and value have content.
 function row(label: string, value: unknown) {
-  if (value === null || value === undefined || value === "") return null;
+  if (value === null || value === undefined || value === '') return null;
   return { label, value };
 }
 ---
@@ -377,12 +379,12 @@ function row(label: string, value: unknown) {
           {reviewedAtLabel ?? "—"}
         </time>.
       </p>
-      {detail.collectionMembership && detail.collectionMembership.length > 0 && (
+      {alsoIn.length > 0 && (
         <p class="m-0 mt-1.5 leading-relaxed">
           <span class="font-semibold">Also in: </span>
-          {detail.collectionMembership.map((c, i) => (
+          {alsoIn.map((c, i) => (
             <>
-              <a href={c.url} class="text-inherit no-underline hover:underline">{c.title}</a>{i < detail.collectionMembership.length - 1 ? ", " : ""}
+              <a href={c.url} class="text-inherit no-underline hover:underline">{c.title}</a>{i < alsoIn.length - 1 ? ", " : ""}
             </>
           ))}
         </p>

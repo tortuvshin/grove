@@ -5,8 +5,8 @@ import type { StarlightRouteData } from '@astrojs/starlight/route-data';
 import { isSidebarGroupOpen } from '../../../core/sidebar';
 
 interface Props {
-    sublist: StarlightRouteData['sidebar'];
-    nested?: boolean;
+  sublist: StarlightRouteData['sidebar'];
+  nested?: boolean;
 }
 
 const { sublist, nested = false } = Astro.props;

@@ -1,4 +1,5 @@
 ---
+import type { IconKind } from '../../lib/icon-kinds';
 /**
  * Icon — brand icon registry.
  *
@@ -42,10 +43,9 @@
  * `aliases` → the built-in stack aliases → the raw slug, then fails over
  * to the initials placeholder.
  */
-import { ICON_KINDS } from "../../lib/icon-kinds";
-import type { IconKind } from "../../lib/icon-kinds";
-import { resolveIconAsset, slugifyIconName } from "../../lib/icon-registry";
-import type { IconCategory } from "../../lib/icon-registry";
+import { ICON_KINDS } from '../../lib/icon-kinds';
+import type { IconCategory } from '../../lib/icon-registry';
+import { resolveIconAsset, slugifyIconName } from '../../lib/icon-registry';
 
 export type { IconCategory, IconKind };
 
@@ -54,7 +54,7 @@ export type { IconCategory, IconKind };
  * inherit `currentColor`. Accepted and ignored so consumers passing
  * `mode="auto"` do not hit a type error.
  */
-export type IconMode = "static" | "auto";
+export type IconMode = 'static' | 'auto';
 
 interface Props {
   /**
@@ -104,34 +104,32 @@ const {
   name,
   category,
   size = 16,
-  class: className = "",
+  class: className = '',
   title,
   kind,
   aliases,
   available,
   fallbackInitials,
-  base = "/icons",
+  base = '/icons',
 } = Astro.props;
 
 const asset = resolveIconAsset(name, category, aliases);
 const resolved = asset.name;
 const availableIcons = available?.map(slugifyIconName);
 const hasAsset =
-  category === "brand" ||
-  availableIcons === undefined ||
-  availableIcons.includes(resolved);
-const src = `${base.replace(/\/$/, "")}/${asset.folder}/${resolved}.svg`;
+  category === 'brand' || availableIcons === undefined || availableIcons.includes(resolved);
+const src = `${base.replace(/\/$/, '')}/${asset.folder}/${resolved}.svg`;
 
 // Initials fallback: first 1–2 alphanumerics, uppercased.
-const init = (fallbackInitials ?? name ?? "")
-  .replace(/[^a-z0-9]/gi, "")
+const init = (fallbackInitials ?? name ?? '')
+  .replace(/[^a-z0-9]/gi, '')
   .slice(0, 2)
   .toUpperCase();
 const showFallback = !resolved || !hasAsset || asset.textOnly;
 
 // Unknown names fall through to `<img>`, never to `mono` — a mask has
 // no `onerror`, so a missing file would render an invisible blank.
-const effectiveKind: IconKind = kind ?? ICON_KINDS[asset.key] ?? "color";
+const effectiveKind: IconKind = kind ?? ICON_KINDS[asset.key] ?? 'color';
 
 // `name` reaches the mask branch as part of a CSS `url()` token, and
 // slugifying does not remove the characters that would close it. Astro
@@ -141,11 +139,11 @@ const cssUrl = src.replace(/['"()\\\s]/g, encodeURIComponent);
 // Build aria-label.
 const ariaLabel = title ?? name;
 const a11y: Record<string, string> = title
-  ? { "aria-label": ariaLabel, role: "img" }
-  : { "aria-hidden": "true", "focusable": "false" };
+  ? { 'aria-label': ariaLabel, role: 'img' }
+  : { 'aria-hidden': 'true', focusable: 'false' };
 
 const fallbackClass = [
-  "inline-flex shrink-0 select-none items-center justify-center rounded-sm bg-ink-100 align-middle font-semibold uppercase leading-none text-ink-700 dark:bg-ink-800 dark:text-ink-200",
+  'inline-flex shrink-0 select-none items-center justify-center rounded-sm bg-ink-100 align-middle font-semibold uppercase leading-none text-ink-700 dark:bg-ink-800 dark:text-ink-200',
   className,
 ];
 const fallbackStyle = `width:${size}px;height:${size}px;font-size:${Math.max(10, size - 6)}px;`;

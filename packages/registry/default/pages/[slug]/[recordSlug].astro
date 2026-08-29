@@ -8,12 +8,12 @@
  */
 import siteConfig from '@grove/generated/site-config.json';
 import { getRecordDetailModel, recordDetailPaths } from '@grove-dev/astro/server';
-import BaseLayout from "../../layouts/base-layout.astro";
-import RecordHeader from "../../components/grove/record-header.astro";
-import EditorialSummary from "../../components/grove/editorial-summary.astro";
-import TableOfContents from "../../components/grove/table-of-contents.astro";
-import MarkdownBody from "../../components/grove/markdown-body.astro";
-import RecordSidebar from "../../components/grove/record-sidebar.astro";
+import EditorialSummary from '../../components/grove/editorial-summary.astro';
+import MarkdownBody from '../../components/grove/markdown-body.astro';
+import RecordHeader from '../../components/grove/record-header.astro';
+import RecordSidebar from '../../components/grove/record-sidebar.astro';
+import TableOfContents from '../../components/grove/table-of-contents.astro';
+import BaseLayout from '../../layouts/base-layout.astro';
 
 export function getStaticPaths() {
   return recordDetailPaths(siteConfig);

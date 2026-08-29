@@ -31,42 +31,42 @@ export function scoreTier(n: number): 0 | 1 | 2 | 3 | 4 {
 export function scoreTierLabel(n: number): string {
   switch (scoreTier(n)) {
     case 0:
-      return "Very low";
+      return 'Very low';
     case 1:
-      return "Low";
+      return 'Low';
     case 2:
-      return "Medium";
+      return 'Medium';
     case 3:
-      return "High";
+      return 'High';
     case 4:
-      return "Very high";
+      return 'Very high';
   }
 }
 
 /** Short numeric label used inline next to a score bar, e.g. "82". */
 export function scoreLabel(n: number | undefined): string {
-  if (typeof n !== "number") return "—";
+  if (typeof n !== 'number') return '—';
   return Math.round(n).toString();
 }
 
 /** Order of score dimensions, used by both list and detail. */
 export const SCORE_DIMENSIONS: (keyof AppScores)[] = [
-  "activity",
-  "maturity",
-  "learning",
-  "contribution",
-  "docs",
-  "overall",
+  'activity',
+  'maturity',
+  'learning',
+  'contribution',
+  'docs',
+  'overall',
 ];
 
 /** Human-readable label for a score dimension. */
 export const SCORE_LABELS: Record<keyof AppScores, string> = {
-  activity: "Activity",
-  maturity: "Maturity",
-  learning: "Learning",
-  contribution: "Contribution",
-  docs: "Docs",
-  overall: "Overall",
+  activity: 'Activity',
+  maturity: 'Maturity',
+  learning: 'Learning',
+  contribution: 'Contribution',
+  docs: 'Docs',
+  overall: 'Overall',
 };
 
 /**
@@ -75,16 +75,11 @@ export const SCORE_LABELS: Record<keyof AppScores, string> = {
  * curation.notes on each item carries the longer story.
  */
 export const SCORE_REASONING: Record<keyof AppScores, string> = {
-  activity:
-    "Recent commits, open and merged PRs, issue response time, release cadence.",
-  maturity:
-    "Repo age, stable structure, real-world production usage, contributor stability.",
-  learning:
-    "Codebase readability, useful architecture patterns, comment quality, examples.",
+  activity: 'Recent commits, open and merged PRs, issue response time, release cadence.',
+  maturity: 'Repo age, stable structure, real-world production usage, contributor stability.',
+  learning: 'Codebase readability, useful architecture patterns, comment quality, examples.',
   contribution:
-    "Open issues, recent merged PRs from new contributors, maintainer responsiveness, contribution guide.",
-  docs:
-    "README quality, architecture docs, contributing guide, examples, code comments.",
-  overall:
-    "Composite judgment — how likely this item is to satisfy a curious developer.",
+    'Open issues, recent merged PRs from new contributors, maintainer responsiveness, contribution guide.',
+  docs: 'README quality, architecture docs, contributing guide, examples, code comments.',
+  overall: 'Composite judgment — how likely this item is to satisfy a curious developer.',
 };

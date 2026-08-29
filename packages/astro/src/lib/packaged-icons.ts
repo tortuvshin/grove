@@ -6,10 +6,10 @@
  * carries the matching artwork with it, so a consumer can never end up
  * with a component asking for files their site does not have.
  */
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import type { IconSyncOptions, IconSyncResult } from "@grove-dev/core";
-import { syncIconAssets } from "@grove-dev/core";
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { IconSyncOptions, IconSyncResult } from '@grove-dev/core';
+import { syncIconAssets } from '@grove-dev/core';
 
 /**
  * `packages/astro/assets/icons` — two levels up, which holds for both
@@ -17,10 +17,10 @@ import { syncIconAssets } from "@grove-dev/core";
  */
 export const packagedIconsDir = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "assets",
-  "icons",
+  '..',
+  '..',
+  'assets',
+  'icons',
 );
 
 /** Copy the packaged icon set into a site's `public/`. */

@@ -4,16 +4,21 @@
  * default header nav; each tile opens the browse page pre-filtered to
  * the category (detail pages live at `/categories/<id>/`).
  */
-import siteConfig from "@grove/generated/site-config.json";
-import BaseLayout from "../../layouts/base-layout.astro";
+import siteConfig from '@grove/generated/site-config.json';
+import {
+  getTaxonomyIndexModel,
+  getTaxonomyIndexSeo,
+  itemLabel,
+  itemLabelPlural,
+} from '@grove-dev/astro/server';
 
-import CategoryGrid from "../../components/grove/category-grid.astro";
-import { getTaxonomyIndexModel, getTaxonomyIndexSeo, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
+import CategoryGrid from '../../components/grove/category-grid.astro';
+import BaseLayout from '../../layouts/base-layout.astro';
 
-const slug = siteConfig.blueprintConfig?.routeSlug ?? "projects";
+const slug = siteConfig.blueprintConfig?.routeSlug ?? 'projects';
 const { categories } = getTaxonomyIndexModel();
 const itemNoun = { singular: itemLabel(), plural: itemLabelPlural() };
-const seo = getTaxonomyIndexSeo("categories", siteConfig);
+const seo = getTaxonomyIndexSeo('categories', siteConfig);
 ---
 
 <BaseLayout

@@ -1,4 +1,5 @@
 ---
+import { compact } from '@grove-dev/core';
 /**
  * Hero — the home page banner.
  *
@@ -13,13 +14,12 @@
  * "apps indexed", a resource-hub renders "resources indexed",
  * an ecosystem-map renders "entities indexed".
  */
-import Container from "../../layouts/container.astro";
-import { compact } from "@grove-dev/core";
+import Container from '../../layouts/container.astro';
 
 interface CTA {
   label: string;
   href: string;
-  variant?: "primary" | "outline" | "ghost";
+  variant?: 'primary' | 'outline' | 'ghost';
   external?: boolean;
 }
 
@@ -64,13 +64,13 @@ const {
   tagline,
   description,
   stats = {},
-  searchHref = "/",
-  searchPlaceholder = "Search the directory...",
-  itemsLabel = "items",
+  searchHref = '/',
+  searchPlaceholder = 'Search the directory...',
+  itemsLabel = 'items',
   quickFilters = [],
   ctas = [],
-  class: className = "",
-  eyebrow = "A directory of curated knowledge",
+  class: className = '',
+  eyebrow = 'A directory of curated knowledge',
   eyebrowBadge,
 } = Astro.props;
 
@@ -96,10 +96,8 @@ const statParts: string[] = [
 
 // One primary CTA only — Submit already lives in the navbar
 // (BaseLayout → Header submitHref), so the hero never duplicates it.
-const primaryCta: CTA | undefined =
-  ctas.find((c) => c.variant === "primary") ??
-  ctas[0] ??
-  { label: `Browse ${itemsLabel}`, href: searchHref, variant: "primary" };
+const primaryCta: CTA | undefined = ctas.find((c) => c.variant === 'primary') ??
+  ctas[0] ?? { label: `Browse ${itemsLabel}`, href: searchHref, variant: 'primary' };
 ---
 
 <section

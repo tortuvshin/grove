@@ -18,9 +18,7 @@ const markdownLinkRe = /\[([^\]]+)\]\(([^)]+)\)/g;
 
 function extractLinks(text: string): Array<{ label: string; href: string }> {
   const out: Array<{ label: string; href: string }> = [];
-  let m: RegExpExecArray | null;
-  markdownLinkRe.lastIndex = 0;
-  while ((m = markdownLinkRe.exec(text)) !== null) {
+  for (const m of text.matchAll(markdownLinkRe)) {
     const label = m[1];
     const href = m[2];
     if (label === undefined || href === undefined) continue;
@@ -34,7 +32,7 @@ function extractLinks(text: string): Array<{ label: string; href: string }> {
  * Returns null on miss (no link, non-github URL, etc).
  */
 export function parseEntry(line: string): ParsedEntry | null {
-  const body = line.replace(/^\s*-\s+/, "").trim();
+  const body = line.replace(/^\s*-\s+/, '').trim();
   if (!body) return null;
 
   const links = extractLinks(body);
@@ -45,8 +43,8 @@ export function parseEntry(line: string): ParsedEntry | null {
   if (!/^https?:\/\/(github|gitlab)\.com\//i.test(app.href)) return null;
 
   let afterApp = body
-    .replace(/^\s*\[[^\]]+\]\([^)]+\)\s*/, "")
-    .replace(/^[-—–]\s*/, "")
+    .replace(/^\s*\[[^\]]+\]\([^)]+\)\s*/, '')
+    .replace(/^[-—–]\s*/, '')
     .trim();
 
   while (/\s*\([^)]*\)\s*$/.test(afterApp)) {
@@ -54,8 +52,8 @@ export function parseEntry(line: string): ParsedEntry | null {
     let i = afterApp.length;
     for (; i > 0; i--) {
       const c = afterApp[i - 1];
-      if (c === ")") depth++;
-      else if (c === "(") {
+      if (c === ')') depth++;
+      else if (c === '(') {
         depth--;
         if (depth === 0) break;
       }
@@ -67,10 +65,10 @@ export function parseEntry(line: string): ParsedEntry | null {
   let description = afterApp;
   let author: string | null = null;
 
-  const byLinkIdx = afterApp.lastIndexOf(" by [");
+  const byLinkIdx = afterApp.lastIndexOf(' by [');
   if (byLinkIdx >= 0) {
     description = afterApp.slice(0, byLinkIdx).trim();
-    const close = afterApp.indexOf("]", byLinkIdx);
+    const close = afterApp.indexOf(']', byLinkIdx);
     if (close > 0) {
       author = afterApp.slice(byLinkIdx + 5, close).trim();
     }
@@ -82,7 +80,7 @@ export function parseEntry(line: string): ParsedEntry | null {
     }
   }
 
-  description = description.replace(/[.\s]+$/, "").trim();
+  description = description.replace(/[.\s]+$/, '').trim();
   if (!description) description = app.label;
 
   return {

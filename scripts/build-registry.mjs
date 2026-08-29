@@ -18,29 +18,33 @@
  *      dist/r/<item>.json, which is what `shadcn add`, `grove init`,
  *      and `grove update` all consume.
  */
-import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { relative } from "node:path";
+import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { relative } from 'node:path';
 import {
   BUILD_JSON,
+  buildFullRegistry,
   DIST_DIR,
   REGISTRY_DIR,
   ROOT,
-  buildFullRegistry,
   validateRegistry,
-} from "./lib/registry.mjs";
+} from './lib/registry.mjs';
 
-const check = process.argv.includes("--check");
+const check = process.argv.includes('--check');
 
 const errors = validateRegistry();
 if (errors.length > 0) {
-  console.error(`registry.json is inconsistent with packages/registry/default/ (${errors.length} problem${errors.length === 1 ? "" : "s"}):\n`);
+  console.error(
+    `registry.json is inconsistent with packages/registry/default/ (${errors.length} problem${errors.length === 1 ? '' : 's'}):\n`,
+  );
   for (const error of errors) console.error(`  - ${error}`);
   process.exit(1);
 }
 const full = buildFullRegistry();
-console.log(`Registry OK — ${full.items.length - 1} items + generated default (${full.items.at(-1).files.length} files).`);
+console.log(
+  `Registry OK — ${full.items.length - 1} items + generated default (${full.items.at(-1).files.length} files).`,
+);
 if (check) process.exit(0);
 
 await writeFile(BUILD_JSON, `${JSON.stringify(full, null, 2)}\n`);
@@ -48,12 +52,19 @@ await rm(DIST_DIR, { recursive: true, force: true });
 await mkdir(DIST_DIR, { recursive: true });
 
 const result = spawnSync(
-  "pnpm",
-  ["exec", "shadcn", "build", relative(REGISTRY_DIR, BUILD_JSON), "--output", relative(REGISTRY_DIR, DIST_DIR)],
-  { cwd: REGISTRY_DIR, stdio: "inherit" },
+  'pnpm',
+  [
+    'exec',
+    'shadcn',
+    'build',
+    relative(REGISTRY_DIR, BUILD_JSON),
+    '--output',
+    relative(REGISTRY_DIR, DIST_DIR),
+  ],
+  { cwd: REGISTRY_DIR, stdio: 'inherit' },
 );
 if (result.status !== 0) {
-  console.error("shadcn build failed.");
+  console.error('shadcn build failed.');
   process.exit(result.status ?? 1);
 }
 
@@ -64,8 +75,8 @@ for (const item of full.items) {
     console.error(`shadcn build did not emit ${relative(ROOT, out)}`);
     process.exit(1);
   }
-  const built = JSON.parse(await readFile(out, "utf8"));
-  const missing = built.files.filter((file) => typeof file.content !== "string");
+  const built = JSON.parse(await readFile(out, 'utf8'));
+  const missing = built.files.filter((file) => typeof file.content !== 'string');
   if (missing.length > 0) {
     console.error(`${relative(ROOT, out)}: ${missing.length} file(s) have no inlined content`);
     process.exit(1);

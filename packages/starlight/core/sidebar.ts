@@ -6,9 +6,9 @@ export type SidebarLink = Extract<SidebarEntry, { type: 'link' }>;
 
 /** Every link reachable from `entries`, at any depth. */
 export function flattenSidebar(entries: SidebarEntry[]): SidebarLink[] {
-    return entries.flatMap((entry) =>
-        entry.type === 'group' ? flattenSidebar(entry.entries) : [entry]
-    );
+  return entries.flatMap((entry) =>
+    entry.type === 'group' ? flattenSidebar(entry.entries) : [entry],
+  );
 }
 
 /**
@@ -18,5 +18,5 @@ export function flattenSidebar(entries: SidebarEntry[]): SidebarLink[] {
  * the reader would land on a page with no idea where they are in the tree.
  */
 export function isSidebarGroupOpen(group: SidebarGroup): boolean {
-    return !group.collapsed || flattenSidebar(group.entries).some((link) => link.isCurrent);
+  return !group.collapsed || flattenSidebar(group.entries).some((link) => link.isCurrent);
 }

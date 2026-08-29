@@ -17,8 +17,8 @@ const { filterKey, options, initial, single = false } = Astro.props;
 function pretty(value: string): string {
   return value
     .split(/[-_]/)
-    .map((part) => part ? part[0].toUpperCase() + part.slice(1) : part)
-    .join(" ");
+    .map((part) => (part ? part[0].toUpperCase() + part.slice(1) : part))
+    .join(' ');
 }
 ---
 

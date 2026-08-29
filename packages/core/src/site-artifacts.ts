@@ -48,7 +48,7 @@ export function buildOgImageSvg(config: GroveConfig, stats: SiteArtifactStats = 
   const lines = wrapText(config.site.tagline).map(xml);
   // Neutral accent when no brand color is configured (the OG canvas
   // is dark, so a soft light gray reads as the brand-agnostic glow).
-  const accent = xml(config.theme.primaryColor ?? "#e5e5e5");
+  const accent = xml(config.theme.primaryColor ?? '#e5e5e5');
   const host = xml(hostOf(config.site.url));
   const plural = xml(config.labels.plural ?? 'items');
   const count = stats.totalRecords ?? 0;

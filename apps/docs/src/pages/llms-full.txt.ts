@@ -1,5 +1,5 @@
-import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import type { APIRoute } from 'astro';
 import { buildDocsLlmsFullTxt } from '../lib/llms';
 import { DOCS_SITE, toLlmsPage } from '../lib/llms-site';
 

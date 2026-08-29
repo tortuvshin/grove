@@ -1,6 +1,7 @@
 ---
-import { formatCount } from "@grove-dev/core";
-import Icon from "./icon.astro";
+import { formatCount } from '@grove-dev/core';
+import Icon from './icon.astro';
+
 /**
  * StackGrid — browse-by-stack grid for the home page.
  *
@@ -18,7 +19,7 @@ interface StackEntry {
   name: string;
   slug: string;
   blurb?: string;
-  status?: "live" | "expanding" | "planned";
+  status?: 'live' | 'expanding' | 'planned';
   count?: number;
 }
 
@@ -47,32 +48,32 @@ interface Props {
 
 const {
   stacks,
-  pathPrefix = "/",
+  pathPrefix = '/',
   iconAliases,
-  class: className = "",
+  class: className = '',
   bare = false,
-  itemLabelPlural = "items",
-  itemNoun = { singular: "item", plural: "items" },
+  itemLabelPlural = 'items',
+  itemNoun = { singular: 'item', plural: 'items' },
   level = 2,
   hrefFor,
 } = Astro.props;
 
-const Heading = `h${level}` as "h1" | "h2";
+const Heading = `h${level}` as 'h1' | 'h2';
 
 function buildHref(slug: string): string {
   if (hrefFor) return hrefFor(slug);
-  const base = pathPrefix.replace(/\/$/, "");
+  const base = pathPrefix.replace(/\/$/, '');
   return `${base}?stack=${encodeURIComponent(slug)}`;
 }
 
-function statusLabel(s: StackEntry["status"]): string | null {
+function statusLabel(s: StackEntry['status']): string | null {
   switch (s) {
-    case "live":
-      return "Available now";
-    case "expanding":
-      return "Expanding";
-    case "planned":
-      return "Planned";
+    case 'live':
+      return 'Available now';
+    case 'expanding':
+      return 'Expanding';
+    case 'planned':
+      return 'Planned';
     default:
       return null;
   }

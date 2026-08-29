@@ -1,4 +1,8 @@
 ---
+import { buildProjectCardModel, itemLabel, itemLabelPlural } from '@grove-dev/astro/server';
+import type { IndexRecord } from '@grove-dev/core';
+import { formatCount } from '@grove-dev/core';
+import EmptyState from '../ui/empty-state.astro';
 /**
  * TaxonomyList.astro
  *
@@ -12,12 +16,8 @@
  * `CardGrid`, so taxonomy pages read as the same site as the browse
  * and collection pages.
  */
-import CardGrid from "./card-grid.astro";
-import ProjectCard from "./project-card.astro";
-import EmptyState from "../ui/empty-state.astro";
-import { buildProjectCardModel, itemLabel, itemLabelPlural } from "@grove-dev/astro/server";
-import { formatCount } from "@grove-dev/core";
-import type { IndexRecord } from "@grove-dev/core";
+import CardGrid from './card-grid.astro';
+import ProjectCard from './project-card.astro';
 
 type TaxonomyRecord = IndexRecord;
 
@@ -51,12 +51,12 @@ const {
   lede,
   itemNoun = { singular: itemLabel(), plural: itemLabelPlural() },
   records,
-  backHref = "/projects",
+  backHref = '/projects',
   backLabel = `← Back to all ${itemLabelPlural()}`,
 } = Astro.props;
 
 const count = records.length;
-const hrefPrefix = backHref.replace(/\/$/, "");
+const hrefPrefix = backHref.replace(/\/$/, '');
 ---
 
 <section class="mx-auto w-full max-w-container px-5 py-12 sm:px-7 sm:py-16">

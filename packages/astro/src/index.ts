@@ -24,42 +24,41 @@
  * which is the classic "I changed the brand color in global.css
  * and nothing happened" surprise.
  */
-import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
-import type { AstroIntegration } from "astro";
-import { loadConfig, prepareDirectory } from "@grove-dev/core";
-import { syncPackagedIcons } from "./lib/packaged-icons.js";
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { loadConfig, prepareDirectory } from '@grove-dev/core';
+import type { AstroIntegration } from 'astro';
+import { syncPackagedIcons } from './lib/packaged-icons.js';
 
-export * from "@grove-dev/core";
+export * from '@grove-dev/core';
 
 // Generic lib helpers — repo URL parsing, formatting, search /
 // facet / sort / paginate, lens application, score tiers, taxonomy
 // counts, and pretty-print display maps. All dependency-free and
 // typed against `@grove-dev/core`.
-export * from "./lib/index.js";
+export * from './lib/index.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
 // Virtual module id used to inject the consumer's `src/styles/global.css`.
 // Resolved by the inline Vite plugin below to the absolute file path
 // when the file exists, or to an empty module when it doesn't.
-const CONSUMER_GLOBAL_CSS_VIRTUAL_ID = "virtual:grove-consumer-global-css";
-const CONSUMER_GLOBAL_CSS_EMPTY_ID =
-  "\0virtual:grove-consumer-global-css:empty";
+const CONSUMER_GLOBAL_CSS_VIRTUAL_ID = 'virtual:grove-consumer-global-css';
+const CONSUMER_GLOBAL_CSS_EMPTY_ID = '\0virtual:grove-consumer-global-css:empty';
 
 export default function groveAstro(): AstroIntegration {
   return {
-    name: "@grove-dev/astro",
+    name: '@grove-dev/astro',
     hooks: {
-      "astro:config:setup": async ({ config, updateConfig, injectScript, logger }) => {
+      'astro:config:setup': async ({ config, updateConfig, injectScript, logger }) => {
         // Alias the components/layouts source directories so
         // consumer builds can import from
         //   @grove-dev/astro/components/ProjectCard.astro
         // without us shipping a glob-shaped `exports` map that
         // Vite/Rollup does not expand reliably.
         const consumerRoot = fileURLToPath(config.root);
-        const groveConfigPath = resolve(consumerRoot, "grove.config.ts");
+        const groveConfigPath = resolve(consumerRoot, 'grove.config.ts');
         if (existsSync(groveConfigPath)) {
           await prepareDirectory(consumerRoot);
           // Data preparation and the icon sync below are the integration's
@@ -80,24 +79,24 @@ export default function groveAstro(): AstroIntegration {
             // control is what makes it recoverable.
             logger.info(
               `Adopted ${icons.written.length} icon(s) into public/icons/ and recorded them in ` +
-                ".grove-icons.json. Review with `git diff public/icons` if you had edited any.",
+                '.grove-icons.json. Review with `git diff public/icons` if you had edited any.',
             );
           }
           if (icons.skipped.length > 0) {
             logger.warn(
-              `Kept ${icons.skipped.length} locally modified icon(s): ${icons.skipped.join(", ")}. ` +
-                "Run `grove icons sync --force` to restore the packaged versions.",
+              `Kept ${icons.skipped.length} locally modified icon(s): ${icons.skipped.join(', ')}. ` +
+                'Run `grove icons sync --force` to restore the packaged versions.',
             );
           }
         }
-        const globalCssPath = resolve(consumerRoot, "src/styles/global.css");
+        const globalCssPath = resolve(consumerRoot, 'src/styles/global.css');
         const globalCssExists = existsSync(globalCssPath);
 
         updateConfig({
           vite: {
             resolve: {
               alias: {
-                "@grove/generated": resolve(consumerRoot, "data/generated"),
+                '@grove/generated': resolve(consumerRoot, 'data/generated'),
               },
             },
             // The OG image pipeline (`@grove-dev/core`'s og-image.ts)
@@ -106,22 +105,20 @@ export default function groveAstro(): AstroIntegration {
             // time) — never in page code — so keep the bundler away
             // from the .node binary.
             ssr: {
-              external: ["satori", "@resvg/resvg-js"],
+              external: ['satori', '@resvg/resvg-js'],
             },
             plugins: [
               {
-                name: "grove:consumer-global-css-resolver",
+                name: 'grove:consumer-global-css-resolver',
                 resolveId(id) {
                   if (id === CONSUMER_GLOBAL_CSS_VIRTUAL_ID) {
-                    return globalCssExists
-                      ? globalCssPath
-                      : CONSUMER_GLOBAL_CSS_EMPTY_ID;
+                    return globalCssExists ? globalCssPath : CONSUMER_GLOBAL_CSS_EMPTY_ID;
                   }
                   return null;
                 },
                 load(id) {
                   if (id === CONSUMER_GLOBAL_CSS_EMPTY_ID) {
-                    return "";
+                    return '';
                   }
                   return null;
                 },
@@ -134,10 +131,7 @@ export default function groveAstro(): AstroIntegration {
         // regardless of whether the consumer has a global.css yet.
         // Vite's CSS pipeline (with @tailwindcss/vite) handles the
         // resulting import as a stylesheet — no JS bundle weight.
-        injectScript(
-          "page-ssr",
-          `import "${CONSUMER_GLOBAL_CSS_VIRTUAL_ID}";`,
-        );
+        injectScript('page-ssr', `import "${CONSUMER_GLOBAL_CSS_VIRTUAL_ID}";`);
       },
     },
   };

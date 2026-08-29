@@ -15,14 +15,14 @@
  * sides can be joined on one key; this module keeps the I/O minimal
  * so `grove update` can run quickly even on large scaffolds.
  */
-import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 export type Sha256Hash = `sha256-${string}`;
 
 export function sha256(value: string): Sha256Hash {
-  return `sha256-${createHash("sha256").update(value).digest("hex")}` as Sha256Hash;
+  return `sha256-${createHash('sha256').update(value).digest('hex')}` as Sha256Hash;
 }
 
 export interface LockfileFile {
@@ -43,7 +43,13 @@ export interface RegistryLockfile {
   files: LockfileFile[];
 }
 
-const LOCKFILE_VERSION_KEYS = ["scaffold", "scaffoldVersion", "installedAt", "fileCount", "files"] as const;
+const LOCKFILE_VERSION_KEYS = [
+  'scaffold',
+  'scaffoldVersion',
+  'installedAt',
+  'fileCount',
+  'files',
+] as const;
 
 /**
  * Read and parse the consumer's lockfile. Returns null if absent —
@@ -51,9 +57,9 @@ const LOCKFILE_VERSION_KEYS = ["scaffold", "scaffoldVersion", "installedAt", "fi
  * nothing to update from.
  */
 export async function readLockfile(consumerRoot: string): Promise<RegistryLockfile | null> {
-  const lockfilePath = join(consumerRoot, ".grove", "registry.lock.json");
+  const lockfilePath = join(consumerRoot, '.grove', 'registry.lock.json');
   try {
-    const raw = await readFile(lockfilePath, "utf8");
+    const raw = await readFile(lockfilePath, 'utf8');
     const parsed = JSON.parse(raw) as RegistryLockfile;
     // Sanity-check the shape so we fail loud instead of silently
     // treating a malformed lockfile as "nothing installed".
@@ -64,7 +70,7 @@ export async function readLockfile(consumerRoot: string): Promise<RegistryLockfi
     }
     return parsed;
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw err;
   }
 }
@@ -79,10 +85,10 @@ export async function hashInstalledFile(
 ): Promise<Sha256Hash | null> {
   const filePath = join(consumerRoot, target);
   try {
-    const source = await readFile(filePath, "utf8");
+    const source = await readFile(filePath, 'utf8');
     return sha256(source);
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") return null;
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw err;
   }
 }
@@ -96,7 +102,11 @@ export async function writeLockfile(
   consumerRoot: string,
   lockfile: RegistryLockfile,
 ): Promise<void> {
-  const dir = join(consumerRoot, ".grove");
+  const dir = join(consumerRoot, '.grove');
   await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, "registry.lock.json"), `${JSON.stringify(lockfile, null, 2)}\n`, "utf8");
+  await writeFile(
+    join(dir, 'registry.lock.json'),
+    `${JSON.stringify(lockfile, null, 2)}\n`,
+    'utf8',
+  );
 }

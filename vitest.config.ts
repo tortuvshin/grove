@@ -28,9 +28,10 @@
  * projects are scanned (the integration scope is too slow to be in
  * the default coverage run).
  */
-import { defineConfig } from 'vitest/config';
+
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { defineConfig } from 'vitest/config';
 
 const TMPDIR = resolve('./.tmp-test');
 mkdirSync(TMPDIR, { recursive: true });

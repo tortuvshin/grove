@@ -11,7 +11,7 @@
  * so a subsequent token-backed sync can fill in the rest of the fields.
  */
 
-import { getOwnerRepoFromUrl } from "./schema.js";
+import { getOwnerRepoFromUrl } from './schema.js';
 
 export interface EnrichedFields {
   license: string | null;
@@ -21,13 +21,14 @@ export interface EnrichedFields {
 }
 
 const HEADERS: Record<string, string> = {
-  Accept: "text/html,application/xhtml+xml",
-  "User-Agent": "grove-enricher",
+  Accept: 'text/html,application/xhtml+xml',
+  'User-Agent': 'grove-enricher',
 };
 
-async function fetchHtml(owner: string, repo: string): Promise<
-  { notFound: true } | { rateLimited: true } | { error: string } | { html: string }
-> {
+async function fetchHtml(
+  owner: string,
+  repo: string,
+): Promise<{ notFound: true } | { rateLimited: true } | { error: string } | { html: string }> {
   try {
     const res = await fetch(`https://github.com/${owner}/${repo}`, { headers: HEADERS });
     if (res.status === 404) return { notFound: true };
@@ -57,13 +58,16 @@ async function fetchLicenseViaShields(owner: string, repo: string): Promise<stri
     const svg = await res.text();
     const m = svg.match(/<title>([^<]+)<\/title>/);
     if (!m || !m[1]) return null;
-    const id = m[1].trim().replace(/^license:\s*/i, "").trim();
+    const id = m[1]
+      .trim()
+      .replace(/^license:\s*/i, '')
+      .trim();
     if (
       !id ||
-      id === "not specified" ||
-      id === "not identifiable by github" ||
-      id === "unknown" ||
-      id.toLowerCase().includes("business source")
+      id === 'not specified' ||
+      id === 'not identifiable by github' ||
+      id === 'unknown' ||
+      id.toLowerCase().includes('business source')
     ) {
       return null;
     }
@@ -109,23 +113,23 @@ export async function enrichFromGithubHtml(repoUrl: string): Promise<EnrichResul
   if (!ref) {
     return {
       fields: { license: null, language: null, topics: [], homepage: null },
-      error: "invalid_repo_url",
+      error: 'invalid_repo_url',
     };
   }
   const res = await fetchHtml(ref.owner, ref.repo);
-  if ("notFound" in res) {
+  if ('notFound' in res) {
     return {
       fields: { license: null, language: null, topics: [], homepage: null },
       notFound: true,
     };
   }
-  if ("rateLimited" in res) {
+  if ('rateLimited' in res) {
     return {
       fields: { license: null, language: null, topics: [], homepage: null },
       rateLimited: true,
     };
   }
-  if ("error" in res) {
+  if ('error' in res) {
     return {
       fields: { license: null, language: null, topics: [], homepage: null },
       error: res.error,

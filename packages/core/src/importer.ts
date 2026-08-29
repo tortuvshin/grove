@@ -1,8 +1,4 @@
-import {
-  importAwesomeList,
-  writeImportedRecords,
-  type ImportResult,
-} from "./markdown.js";
+import { type ImportResult, importAwesomeList, writeImportedRecords } from './markdown.js';
 
-export { importAwesomeList, writeImportedRecords };
 export type { ImportResult };
+export { importAwesomeList, writeImportedRecords };

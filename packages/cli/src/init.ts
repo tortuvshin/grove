@@ -35,10 +35,10 @@
  * CLI wrapper in index.ts runs `pnpm install` and `git init` after
  * this returns, per its own `--no-install`/`--no-git` flags.
  */
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { writeLockfile } from "./hash.js";
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { writeLockfile } from './hash.js';
 import {
   buildLockfile,
   loadItem,
@@ -47,20 +47,20 @@ import {
   type RegistryItem,
   resolveBundledItemPath,
   SHADCN_VERSION,
-} from "./registry.js";
-import { run } from "./run.js";
+} from './registry.js';
+import { run } from './run.js';
 
-const SKIP_NAMES = new Set(["node_modules", "dist", ".astro", ".DS_Store", ".grove"]);
+const SKIP_NAMES = new Set(['node_modules', 'dist', '.astro', '.DS_Store', '.grove']);
 const GROVE_PACKAGES = [
-  "@grove-dev/core",
-  "@grove-dev/astro",
-  "@grove-dev/cli",
-  "@grove-dev/registry",
+  '@grove-dev/core',
+  '@grove-dev/astro',
+  '@grove-dev/cli',
+  '@grove-dev/registry',
 ] as const;
 const PROJECT_SCRIPTS = {
-  dev: "astro dev",
-  build: "astro build",
-  check: "astro check",
+  dev: 'astro dev',
+  build: 'astro build',
+  check: 'astro check',
 } as const;
 
 export interface InstallScaffoldContext {
@@ -88,7 +88,7 @@ export interface InitResult {
 
 export function readCliVersion(): string {
   const here = dirname(fileURLToPath(import.meta.url));
-  for (const candidate of [resolve(here, "package.json"), resolve(here, "../package.json")]) {
+  for (const candidate of [resolve(here, 'package.json'), resolve(here, '../package.json')]) {
     try {
       const pkg = JSON.parse(requireText(candidate)) as { version?: string };
       if (pkg.version) return pkg.version;
@@ -96,17 +96,17 @@ export function readCliVersion(): string {
       // Source and published layouts intentionally use different paths.
     }
   }
-  return "0.0.0-dev";
+  return '0.0.0-dev';
 }
 
 function requireText(path: string): string {
   // Synchronous version lookup happens once while constructing the CLI.
-  return globalThis.process.getBuiltinModule("node:fs").readFileSync(path, "utf8");
+  return globalThis.process.getBuiltinModule('node:fs').readFileSync(path, 'utf8');
 }
 
 function titleCase(value: string): string {
   return value
-    .replace(/[-_]+/g, " ")
+    .replace(/[-_]+/g, ' ')
     .replace(/\b\w/g, (letter) => letter.toUpperCase())
     .trim();
 }
@@ -115,8 +115,8 @@ function packageName(value: string): string {
   return (
     value
       .toLowerCase()
-      .replace(/[^a-z0-9._-]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "grove-directory"
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'grove-directory'
   );
 }
 
@@ -146,20 +146,20 @@ export async function installScaffoldWithShadcn({
   target,
   itemPath,
 }: InstallScaffoldContext): Promise<void> {
-  await writeFile(resolve(target, "pnpm-lock.yaml"), "", { encoding: "utf8", flag: "wx" }).catch(
+  await writeFile(resolve(target, 'pnpm-lock.yaml'), '', { encoding: 'utf8', flag: 'wx' }).catch(
     (err: NodeJS.ErrnoException) => {
-      if (err.code !== "EEXIST") throw err;
+      if (err.code !== 'EEXIST') throw err;
     },
   );
   await run(
-    "pnpm",
-    ["dlx", `shadcn@${SHADCN_VERSION}`, "add", itemPath, "--yes", "--cwd", target],
+    'pnpm',
+    ['dlx', `shadcn@${SHADCN_VERSION}`, 'add', itemPath, '--yes', '--cwd', target],
     target,
   );
 }
 
 async function writeJson(path: string, value: unknown): Promise<void> {
-  await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
 
 /**
@@ -176,7 +176,7 @@ export async function initDirectory(
   await ensureEmpty(target);
 
   const version = options.version ?? readCliVersion();
-  const fallbackName = target.split(/[\\/]/).at(-1) ?? "grove-directory";
+  const fallbackName = target.split(/[\\/]/).at(-1) ?? 'grove-directory';
   const rawName = options.projectName ?? fallbackName;
   const projectName = packageName(rawName);
   const installScaffold = options.installScaffold ?? installScaffoldWithShadcn;
@@ -184,10 +184,10 @@ export async function initDirectory(
   // 2. package.json. Scripts are fixed here — registry items carry
   //    files and npm dependency names, not scripts. Dependencies are
   //    filled in by shadcn (step 4) and by us (step 5).
-  const packagePath = resolve(target, "package.json");
+  const packagePath = resolve(target, 'package.json');
   await writeJson(packagePath, {
     name: projectName,
-    type: "module",
+    type: 'module',
     scripts: { ...PROJECT_SCRIPTS },
     dependencies: {},
   });
@@ -208,7 +208,7 @@ export async function initDirectory(
   //     should type-check the same way whichever TypeScript the
   //     package manager resolves for `astro check`.
   await writeFile(
-    resolve(target, "tsconfig.json"),
+    resolve(target, 'tsconfig.json'),
     `{
   "extends": "astro/tsconfigs/base",
   "compilerOptions": {
@@ -226,29 +226,29 @@ export async function initDirectory(
   "exclude": ["dist"]
 }
 `,
-    "utf8",
+    'utf8',
   );
 
   // 3b. components.json — the shadcn project config. shadcn needs it
   //     to install anything; the `registries` entry is what makes
   //     `npx shadcn add @grove/<item>` resolve later.
-  await writeJson(resolve(target, "components.json"), {
-    $schema: "https://ui.shadcn.com/schema.json",
-    style: "new-york",
+  await writeJson(resolve(target, 'components.json'), {
+    $schema: 'https://ui.shadcn.com/schema.json',
+    style: 'new-york',
     rsc: false,
     tsx: true,
     tailwind: {
-      config: "",
-      css: "src/styles/system.css",
-      baseColor: "neutral",
+      config: '',
+      css: 'src/styles/system.css',
+      baseColor: 'neutral',
       cssVariables: true,
     },
     aliases: {
-      components: "@/components",
-      utils: "@/lib/utils",
-      ui: "@/components/ui",
-      lib: "@/lib",
-      hooks: "@/hooks",
+      components: '@/components',
+      utils: '@/lib/utils',
+      ui: '@/components/ui',
+      lib: '@/lib',
+      hooks: '@/hooks',
     },
     registries: { [REGISTRY_NAMESPACE]: REGISTRY_URL_TEMPLATE },
   });
@@ -256,7 +256,7 @@ export async function initDirectory(
   // 3c. grove.config.ts. Project-specific, so the scaffold doesn't
   //     ship one — generate a fresh template with the project name.
   await writeFile(
-    resolve(target, "grove.config.ts"),
+    resolve(target, 'grove.config.ts'),
     `import { defineConfig } from "@grove-dev/core";
 
 export default defineConfig({
@@ -282,14 +282,14 @@ export default defineConfig({
   theme: { radius: "soft", density: "comfortable", containerWidth: "72rem" },
 });
 `,
-    "utf8",
+    'utf8',
   );
 
   // 3d. astro.config.mjs. Without this the scaffold's Tailwind v4
   //     styles (`@import "tailwindcss"` in styles/system.css) never get
   //     processed — the Vite plugin has to be registered somewhere.
   await writeFile(
-    resolve(target, "astro.config.mjs"),
+    resolve(target, 'astro.config.mjs'),
     `// @ts-check
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
@@ -313,19 +313,19 @@ export default defineConfig({
   },
 });
 `,
-    "utf8",
+    'utf8',
   );
 
   // 3e. Empty data/records/. `validateProject()` treats an ABSENT
   //     records directory as a hard error — deliberately — but a fresh
   //     scaffold with zero records is a supported starting state.
   //     Empty directories aren't tracked by git, hence the placeholder.
-  const recordsDir = resolve(target, "data", "records");
+  const recordsDir = resolve(target, 'data', 'records');
   await mkdir(recordsDir, { recursive: true });
   await writeFile(
-    resolve(recordsDir, ".gitkeep"),
-    "# Add one YAML file per record here — see /getting-started/first-record/.\n",
-    "utf8",
+    resolve(recordsDir, '.gitkeep'),
+    '# Add one YAML file per record here — see /getting-started/first-record/.\n',
+    'utf8',
   );
 
   // 4. Install the scaffold item.
@@ -334,7 +334,7 @@ export default defineConfig({
 
   // 5. Grove's own packages, pinned to this CLI's version. Read-modify-
   //    write: shadcn rewrote package.json with the item's dependencies.
-  const pkg = JSON.parse(await readFile(packagePath, "utf8")) as {
+  const pkg = JSON.parse(await readFile(packagePath, 'utf8')) as {
     dependencies?: Record<string, string>;
     [key: string]: unknown;
   };

@@ -1,7 +1,7 @@
 ---
+import { getRelativeLocaleUrl } from 'astro:i18n';
 import userConfig from 'virtual:grove-starlight-config';
 import starlightConfig from 'virtual:starlight/user-config';
-import { getRelativeLocaleUrl } from 'astro:i18n';
 import { createLocaleLookup, resolveNavLabel } from '../../../core/i18n';
 
 const { sidebar, lang, locale } = Astro.locals.starlightRoute;
@@ -9,10 +9,10 @@ const { sidebar, lang, locale } = Astro.locals.starlightRoute;
 const currentPath = Astro.url.pathname;
 
 const localeKeys = createLocaleLookup({
-    lang,
-    locale: Astro.currentLocale ?? locale,
-    defaultLang: starlightConfig.defaultLocale?.lang,
-    defaultLocale: starlightConfig.defaultLocale?.locale,
+  lang,
+  locale: Astro.currentLocale ?? locale,
+  defaultLang: starlightConfig.defaultLocale?.lang,
+  defaultLocale: starlightConfig.defaultLocale?.locale,
 });
 ---
 

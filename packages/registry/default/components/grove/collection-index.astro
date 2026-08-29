@@ -1,4 +1,8 @@
 ---
+import type { CollectionIndexModel } from '@grove-dev/astro/server';
+import Container from '../../layouts/container.astro';
+import SectionHeader from '../../layouts/section-header.astro';
+import EmptyState from '../ui/empty-state.astro';
 /**
  * CollectionIndex — renders a grid of every collection defined in
  * `data/collections/*.yml`. Each card links to the collection's
@@ -16,12 +20,8 @@
  *  - `<slot name="header-actions">` — custom buttons in header
  *  - `class` — extra class on the outer <section>
  */
-import CardGrid from "./card-grid.astro";
-import CollectionCard from "./collection-card.astro";
-import Container from "../../layouts/container.astro";
-import SectionHeader from "../../layouts/section-header.astro";
-import EmptyState from "../ui/empty-state.astro";
-import type { CollectionIndexModel } from "@grove-dev/astro/server";
+import CardGrid from './card-grid.astro';
+import CollectionCard from './collection-card.astro';
 
 interface Props {
   model: CollectionIndexModel;
@@ -49,20 +49,20 @@ interface Props {
 const {
   model,
   id,
-  eyebrow = "Collections",
-  title = "Collections",
-  description = "Curated and generated directories of related items.",
+  eyebrow = 'Collections',
+  title = 'Collections',
+  description = 'Curated and generated directories of related items.',
   viewAllHref,
-  viewAllLabel = "View all",
-  emptyLabel = "No collections yet.",
+  viewAllLabel = 'View all',
+  emptyLabel = 'No collections yet.',
   limit,
   level = 2,
   countNoun,
-  class: className = "",
+  class: className = '',
 } = Astro.props;
 
-const cards = typeof limit === "number" ? model.collections.slice(0, limit) : model.collections;
-const headerActions = Astro.slots.has("header-actions");
+const cards = typeof limit === 'number' ? model.collections.slice(0, limit) : model.collections;
+const headerActions = Astro.slots.has('header-actions');
 ---
 
 <section id={id} class={`py-12 sm:py-16 ${className}`}>

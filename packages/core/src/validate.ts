@@ -1,20 +1,20 @@
-import { access, readdir, readFile } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
-import { parse as parseYaml } from "yaml";
-import { ZodError } from "zod";
+import { access, readdir, readFile } from 'node:fs/promises';
+import { basename, join, resolve } from 'node:path';
+import { parse as parseYaml } from 'yaml';
+import { ZodError } from 'zod';
+import { readYamlFile } from './io.js';
 import {
   blueprintKind,
   decisionsFileSchema,
+  type GroveConfig,
   healthFileSchema,
+  type Resource,
   recordsFileSchema,
   unwrapDecisions,
   unwrapHealth,
-  type GroveConfig,
-  type Resource,
-} from "./schema.js";
-import { readYamlFile } from "./io.js";
+} from './schema.js';
 
-export type ValidationSeverity = "error" | "warning";
+export type ValidationSeverity = 'error' | 'warning';
 
 export interface ValidationIssue {
   code: string;
@@ -41,16 +41,14 @@ async function exists(path: string): Promise<boolean> {
 
 async function taxonomyIds(path: string): Promise<Set<string>> {
   try {
-    const raw = parseYaml(await readFile(path, "utf8"), { schema: "core" });
+    const raw = parseYaml(await readFile(path, 'utf8'), { schema: 'core' });
     if (!Array.isArray(raw)) return new Set();
     return new Set(
       raw
         .map((entry) =>
-          entry && typeof entry === "object"
-            ? (entry as { id?: unknown }).id
-            : undefined,
+          entry && typeof entry === 'object' ? (entry as { id?: unknown }).id : undefined,
         )
-        .filter((id): id is string => typeof id === "string"),
+        .filter((id): id is string => typeof id === 'string'),
     );
   } catch {
     return new Set();
@@ -77,28 +75,24 @@ export async function validateProject(
 
   if (!(await exists(recordsDir))) {
     errors.push({
-      code: "missing_records_dir",
+      code: 'missing_records_dir',
       message: `${config.paths.recordsDir} does not exist`,
-      severity: "error",
+      severity: 'error',
     });
     return finalize(errors, warnings);
   }
 
   const expectedKind = blueprintKind[config.blueprint];
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith(".yml")).sort();
+  const files = entries.filter((f) => f.endsWith('.yml')).sort();
   const slugs = new Set<string>();
   /** Slugs that have a github link and therefore need a health entry. */
   const slugsNeedingHealth = new Set<string>();
-  const taxonomyDir = config.paths.taxonomyDir ?? "data/taxonomy";
+  const taxonomyDir = config.paths.taxonomyDir ?? 'data/taxonomy';
   const taxonomy = {
-    categories: await taxonomyIds(
-      resolve(process.cwd(), taxonomyDir, "categories.yml"),
-    ),
-    stacks: await taxonomyIds(resolve(process.cwd(), taxonomyDir, "stacks.yml")),
-    platforms: await taxonomyIds(
-      resolve(process.cwd(), taxonomyDir, "platforms.yml"),
-    ),
+    categories: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'categories.yml')),
+    stacks: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'stacks.yml')),
+    platforms: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'platforms.yml')),
   };
 
   const warnUnknownTaxonomy = (
@@ -110,25 +104,25 @@ export async function validateProject(
   ) => {
     if (ids.size === 0 || ids.has(value)) return;
     warnings.push({
-      code: "unknown_taxonomy_value",
+      code: 'unknown_taxonomy_value',
       message: `${fileSlug}: ${field} "${value}" is not defined in ${taxonomyDir}/${filename}`,
-      severity: "warning",
+      severity: 'warning',
     });
   };
 
   for (const file of files) {
-    const fileSlug = basename(file, ".yml");
-    const text = await readFile(join(recordsDir, file), "utf8");
+    const fileSlug = basename(file, '.yml');
+    const text = await readFile(join(recordsDir, file), 'utf8');
     // `schema: 'core'` disables custom-tag interpretation; a malicious
     // record with `!!binary` / `!!js/function` would otherwise be parsed
     // into a host object by the YAML package's default schema.
     // Implementation-checklist.md #27.
-    const raw = parseYaml(text, { schema: "core" }) as Record<string, unknown> | null;
-    if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    const raw = parseYaml(text, { schema: 'core' }) as Record<string, unknown> | null;
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
       errors.push({
-        code: "schema_error",
+        code: 'schema_error',
         message: `${fileSlug}: record file is empty or not a YAML mapping`,
-        severity: "error",
+        severity: 'error',
       });
       slugs.add(fileSlug);
       continue;
@@ -139,9 +133,9 @@ export async function validateProject(
     // still need to flag a duplicate filename as an error.
     if (slugs.has(fileSlug)) {
       errors.push({
-        code: "duplicate_slug",
+        code: 'duplicate_slug',
         message: `Duplicate record slug: ${fileSlug}`,
-        severity: "error",
+        severity: 'error',
       });
     }
     slugs.add(fileSlug);
@@ -158,18 +152,18 @@ export async function validateProject(
     } catch (err) {
       if (err instanceof ZodError) {
         for (const issue of err.issues) {
-          const where = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+          const where = issue.path.length > 0 ? issue.path.join('.') : '(root)';
           errors.push({
-            code: "zod_error",
+            code: 'zod_error',
             message: `${fileSlug}: ${where} ${issue.message}`,
-            severity: "error",
+            severity: 'error',
           });
         }
       } else {
         errors.push({
-          code: "schema_error",
+          code: 'schema_error',
           message: `${fileSlug}: ${(err as Error).message}`,
-          severity: "error",
+          severity: 'error',
         });
       }
       continue;
@@ -179,38 +173,26 @@ export async function validateProject(
     // and record.slug must agree; mismatch is itself a warning.
     if (parsed.slug !== fileSlug) {
       warnings.push({
-        code: "slug_mismatch",
+        code: 'slug_mismatch',
         message: `${fileSlug}: record slug "${parsed.slug}" does not match filename`,
-        severity: "warning",
+        severity: 'warning',
       });
     }
     warnUnknownTaxonomy(
       fileSlug,
-      "category",
+      'category',
       parsed.category,
       taxonomy.categories,
-      "categories.yml",
+      'categories.yml',
     );
-    if (parsed.kind === "project") {
+    if (parsed.kind === 'project') {
       // `stack` is the canonical browse taxonomy. `stacks` contains
       // supporting technologies and is intentionally open-ended.
       if (parsed.stack) {
-        warnUnknownTaxonomy(
-          fileSlug,
-          "stack",
-          parsed.stack,
-          taxonomy.stacks,
-          "stacks.yml",
-        );
+        warnUnknownTaxonomy(fileSlug, 'stack', parsed.stack, taxonomy.stacks, 'stacks.yml');
       }
       for (const platform of parsed.platforms) {
-        warnUnknownTaxonomy(
-          fileSlug,
-          "platform",
-          platform,
-          taxonomy.platforms,
-          "platforms.yml",
-        );
+        warnUnknownTaxonomy(fileSlug, 'platform', platform, taxonomy.platforms, 'platforms.yml');
       }
     }
     // Records that link to a GitHub repo need a matching health entry
@@ -226,23 +208,21 @@ export async function validateProject(
   if (await exists(resolve(process.cwd(), config.paths.health))) {
     let health: ReturnType<typeof unwrapHealth> = [];
     try {
-      health = unwrapHealth(
-        healthFileSchema.parse(await readYamlFile(config.paths.health)),
-      );
+      health = unwrapHealth(healthFileSchema.parse(await readYamlFile(config.paths.health)));
     } catch (err) {
       errors.push({
-        code: "health_file_invalid",
+        code: 'health_file_invalid',
         message: `${config.paths.health}: ${(err as Error).message}`,
-        severity: "error",
+        severity: 'error',
       });
     }
     const healthIds = new Set(health.map((entry) => entry.id));
     for (const slug of slugsNeedingHealth) {
       if (healthIds.has(slug)) continue;
       errors.push({
-        code: "missing_health",
+        code: 'missing_health',
         message: `${slug} has a GitHub link but no health entry`,
-        severity: "error",
+        severity: 'error',
       });
     }
   } else if (slugsNeedingHealth.size > 0) {
@@ -250,9 +230,9 @@ export async function validateProject(
     // repo we expect a health file to exist (or `sync github` to
     // produce one). Flag it as a warning so the operator knows.
     warnings.push({
-      code: "missing_health_file",
+      code: 'missing_health_file',
       message: `${config.paths.health} is missing but ${slugsNeedingHealth.size} record(s) link to GitHub repos`,
-      severity: "warning",
+      severity: 'warning',
     });
   }
 
@@ -264,17 +244,17 @@ export async function validateProject(
       );
     } catch (err) {
       errors.push({
-        code: "decisions_file_invalid",
+        code: 'decisions_file_invalid',
         message: `${config.paths.decisions}: ${(err as Error).message}`,
-        severity: "error",
+        severity: 'error',
       });
     }
     for (const decision of decisions) {
       if (!slugs.has(decision.id)) {
         errors.push({
-          code: "unknown_decision_record",
+          code: 'unknown_decision_record',
           message: `Decision references unknown record: ${decision.id}`,
-          severity: "error",
+          severity: 'error',
         });
       }
     }
@@ -314,23 +294,23 @@ function finalize(
  */
 export async function loadRecords(
   config: GroveConfig,
-  opts: { onError?: "skip" | "throw"; cwd?: string } = {},
+  opts: { onError?: 'skip' | 'throw'; cwd?: string } = {},
 ): Promise<Resource[]> {
-  const onError = opts.onError ?? "skip";
+  const onError = opts.onError ?? 'skip';
   const cwd = opts.cwd ?? process.cwd();
   const recordsDir = resolve(cwd, config.paths.recordsDir);
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith(".yml")).sort();
+  const files = entries.filter((f) => f.endsWith('.yml')).sort();
   const expectedKind = blueprintKind[config.blueprint];
   const out: Resource[] = [];
   for (const file of files) {
-    const fileSlug = basename(file, ".yml");
-    const text = await readFile(join(recordsDir, file), "utf8");
+    const fileSlug = basename(file, '.yml');
+    const text = await readFile(join(recordsDir, file), 'utf8');
     // `schema: 'core'` disables custom-tag interpretation. Same
     // rationale as the `readRecords` block above.
-    const raw = parseYaml(text, { schema: "core" }) as Record<string, unknown> | null;
-    if (!raw || typeof raw !== "object") {
-      if (onError === "throw") {
+    const raw = parseYaml(text, { schema: 'core' }) as Record<string, unknown> | null;
+    if (!raw || typeof raw !== 'object') {
+      if (onError === 'throw') {
         throw new Error(`${fileSlug}: record file is empty or not a YAML mapping`);
       }
       continue;
@@ -341,7 +321,7 @@ export async function loadRecords(
       parsed.slug = fileSlug;
       out.push(parsed);
     } catch (err) {
-      if (onError === "throw") throw err;
+      if (onError === 'throw') throw err;
       // skip — validation should have caught this
     }
   }
@@ -358,5 +338,5 @@ export function loadRecordsOrThrow(
   config: GroveConfig,
   opts: { cwd?: string } = {},
 ): Promise<Resource[]> {
-  return loadRecords(config, { ...opts, onError: "throw" });
+  return loadRecords(config, { ...opts, onError: 'throw' });
 }

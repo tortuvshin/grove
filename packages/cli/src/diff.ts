@@ -20,15 +20,15 @@
  * differs from lock and the registry state matches lock; callers
  * that want to override anyway must do so explicitly.
  */
-import type { Sha256Hash } from "./hash.js";
+import type { Sha256Hash } from './hash.js';
 
 export type UpdateClassification =
-  | "unchanged"
-  | "upstream_changed"
-  | "new"
-  | "locally_modified"
-  | "conflict"
-  | "removed";
+  | 'unchanged'
+  | 'upstream_changed'
+  | 'new'
+  | 'locally_modified'
+  | 'conflict'
+  | 'removed';
 
 export interface FileState {
   installed: Sha256Hash | null;
@@ -38,26 +38,50 @@ export interface FileState {
 
 export function classify(state: FileState): UpdateClassification {
   const { installed, lock, registry } = state;
-  if (installed === null && lock === null && registry !== null) return "new";
-  if (installed !== null && lock !== null && registry === null) return "removed";
-  if (installed === null && lock === null && registry === null) return "unchanged";
-  if (installed !== null && lock === null && registry !== null) return "new";
-  if (installed !== null && lock !== null && registry !== null && installed === lock && lock === registry) {
-    return "unchanged";
+  if (installed === null && lock === null && registry !== null) return 'new';
+  if (installed !== null && lock !== null && registry === null) return 'removed';
+  if (installed === null && lock === null && registry === null) return 'unchanged';
+  if (installed !== null && lock === null && registry !== null) return 'new';
+  if (
+    installed !== null &&
+    lock !== null &&
+    registry !== null &&
+    installed === lock &&
+    lock === registry
+  ) {
+    return 'unchanged';
   }
-  if (installed !== null && lock !== null && registry !== null && installed === lock && lock !== registry) {
-    return "upstream_changed";
+  if (
+    installed !== null &&
+    lock !== null &&
+    registry !== null &&
+    installed === lock &&
+    lock !== registry
+  ) {
+    return 'upstream_changed';
   }
-  if (installed !== null && lock !== null && registry !== null && installed !== lock && registry === lock) {
-    return "locally_modified";
+  if (
+    installed !== null &&
+    lock !== null &&
+    registry !== null &&
+    installed !== lock &&
+    registry === lock
+  ) {
+    return 'locally_modified';
   }
-  if (installed !== null && lock !== null && registry !== null && installed !== lock && registry !== lock) {
-    return "conflict";
+  if (
+    installed !== null &&
+    lock !== null &&
+    registry !== null &&
+    installed !== lock &&
+    registry !== lock
+  ) {
+    return 'conflict';
   }
   // Fallback for states we haven't enumerated (e.g. installed === null
   // with lock !== null + registry === null): conservatively mark as
   // removed so the user sees something actionable.
-  return "removed";
+  return 'removed';
 }
 
 export interface UpdatePlan {
@@ -78,11 +102,7 @@ export function planUpdate(
   lock: Map<string, Sha256Hash | null>,
   registry: Map<string, Sha256Hash | null>,
 ): UpdatePlan {
-  const keys = new Set<string>([
-    ...installed.keys(),
-    ...lock.keys(),
-    ...registry.keys(),
-  ]);
+  const keys = new Set<string>([...installed.keys(), ...lock.keys(), ...registry.keys()]);
   const plan: UpdatePlan = {
     unchanged: [],
     upstream_changed: [],

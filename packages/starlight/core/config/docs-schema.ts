@@ -12,11 +12,11 @@ const LOADED = Symbol.for('@grove-dev/starlight.docs-schema-loaded');
 
 /** Called by `@grove-dev/starlight/schema` on import. */
 export function markDocsSchemaLoaded(): void {
-    (globalThis as Record<symbol, unknown>)[LOADED] = true;
+  (globalThis as Record<symbol, unknown>)[LOADED] = true;
 }
 
 export function isDocsSchemaExtended(): boolean {
-    return (globalThis as Record<symbol, unknown>)[LOADED] === true;
+  return (globalThis as Record<symbol, unknown>)[LOADED] === true;
 }
 
 let warned = false;
@@ -27,32 +27,32 @@ let warned = false;
  * several splash pages does not repeat the same advice once per page.
  */
 export function warnAboutMissingDocsSchemaOnce(
-    hero: unknown,
-    warn: (message: string) => void = console.warn
+  hero: unknown,
+  warn: (message: string) => void = console.warn,
 ): boolean {
-    if (warned || hero == null || isDocsSchemaExtended()) return false;
+  if (warned || hero == null || isDocsSchemaExtended()) return false;
 
-    warned = true;
-    warn(missingDocsSchemaWarning());
-    return true;
+  warned = true;
+  warn(missingDocsSchemaWarning());
+  return true;
 }
 
 /** Test seam: clears the once-per-process guard used by {@link warnAboutMissingDocsSchemaOnce}. */
 export function resetDocsSchemaWarning(): void {
-    warned = false;
+  warned = false;
 }
 
 /** The advice printed when the schema extension is missing. */
 export function missingDocsSchemaWarning(): string {
-    return [
-        '[@grove-dev/starlight] This page sets `hero` frontmatter, but the docs schema is not extended,',
-        "so Starlight is dropping the theme's hero fields. `hero.layout`, `hero.announcement` and the",
-        'extra `hero.actions[].variant` values have no effect until you extend it:',
-        '',
-        "    import { ExtendDocsSchema } from '@grove-dev/starlight/schema';",
-        '',
-        '    schema: docsSchema({ extend: ExtendDocsSchema }),',
-        '',
-        'See https://withgrove.dev/reference/plugin-api/#frontmatter-extension',
-    ].join('\n');
+  return [
+    '[@grove-dev/starlight] This page sets `hero` frontmatter, but the docs schema is not extended,',
+    "so Starlight is dropping the theme's hero fields. `hero.layout`, `hero.announcement` and the",
+    'extra `hero.actions[].variant` values have no effect until you extend it:',
+    '',
+    "    import { ExtendDocsSchema } from '@grove-dev/starlight/schema';",
+    '',
+    '    schema: docsSchema({ extend: ExtendDocsSchema }),',
+    '',
+    'See https://withgrove.dev/reference/plugin-api/#frontmatter-extension',
+  ].join('\n');
 }

@@ -41,9 +41,9 @@
  * `parseReadme.ts` and `markdown.ts`.
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { uniqueSlug } from "./slug.js";
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { uniqueSlug } from './slug.js';
 
 // ── Path resolution ──────────────────────────────────────────────────
 
@@ -65,7 +65,7 @@ function defaultCandidates(contentPath: string): string[] {
   return [
     resolve(contentPath),
     resolve(process.cwd(), contentPath),
-    resolve(process.cwd(), "apps", "example", contentPath),
+    resolve(process.cwd(), 'apps', 'example', contentPath),
   ];
 }
 
@@ -74,10 +74,7 @@ function defaultCandidates(contentPath: string): string[] {
  * roots. Returns the absolute path of the first existing candidate,
  * or null when none match.
  */
-export function resolveContentPath(
-  contentPath: string,
-  candidates?: string[],
-): string | null {
+export function resolveContentPath(contentPath: string, candidates?: string[]): string | null {
   const list = candidates ?? defaultCandidates(contentPath);
   for (const c of list) {
     if (existsSync(c)) return c;
@@ -99,10 +96,10 @@ export function resolveContentPath(
  */
 export function stripFrontmatter(text: string): string {
   const lines = text.split(/\r?\n/);
-  if (lines[0]?.trim() !== "---") return text;
-  const close = lines.slice(1, 200).findIndex((l) => l.trim() === "---");
+  if (lines[0]?.trim() !== '---') return text;
+  const close = lines.slice(1, 200).findIndex((l) => l.trim() === '---');
   if (close < 0) return text;
-  return lines.slice(close + 2).join("\n");
+  return lines.slice(close + 2).join('\n');
 }
 
 // ── File read ────────────────────────────────────────────────────────
@@ -128,18 +125,18 @@ export function readContentFile(
   if (!found) return null;
   let raw: string;
   try {
-    raw = readFileSync(found, "utf8");
+    raw = readFileSync(found, 'utf8');
   } catch {
     return null;
   }
   const lines = raw.split(/\r?\n/);
-  let frontmatter = "";
+  let frontmatter = '';
   let body = raw;
-  if (lines[0]?.trim() === "---") {
-    const close = lines.slice(1, 200).findIndex((l) => l.trim() === "---");
+  if (lines[0]?.trim() === '---') {
+    const close = lines.slice(1, 200).findIndex((l) => l.trim() === '---');
     if (close >= 0) {
-      frontmatter = lines.slice(1, close + 1).join("\n");
-      body = lines.slice(close + 2).join("\n");
+      frontmatter = lines.slice(1, close + 1).join('\n');
+      body = lines.slice(close + 2).join('\n');
     }
   }
   return { body, frontmatter, path: found };
@@ -170,11 +167,11 @@ export function readContentFile(
 export function headingSlug(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[‘’]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/[‘’]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 // ── Table of Contents ────────────────────────────────────────────────
@@ -199,10 +196,7 @@ export interface ExtractTocOptions {
  * via `uniqueSlug` so the returned IDs match what a markdown→HTML
  * renderer (configured with the same slug rules) will emit.
  */
-export function extractToc(
-  body: string,
-  options: ExtractTocOptions = {},
-): TocEntry[] {
+export function extractToc(body: string, options: ExtractTocOptions = {}): TocEntry[] {
   const maxDepth = options.maxDepth ?? 2;
   const lines = body.split(/\r?\n/);
   const seen = new Map<string, number>();
@@ -211,11 +205,11 @@ export function extractToc(
   // becomes a phantom TOC entry — the markdown renderer won't emit a
   // heading (or an id) for it, which would leave a dead anchor link.
   let inFence = false;
-  let fenceMarker = "";
+  let fenceMarker = '';
   for (const line of lines) {
     const fence = line.match(/^\s*(```+|~~~+)/);
     if (fence?.[1]) {
-      const marker = fence[1][0] === "`" ? "```" : "~~~";
+      const marker = fence[1][0] === '`' ? '```' : '~~~';
       if (!inFence) {
         inFence = true;
         fenceMarker = marker;
@@ -229,9 +223,9 @@ export function extractToc(
     if (!m || !m[1] || !m[2]) continue;
     const depth = m[1].length as 2 | 3 | 4 | 5 | 6;
     if (depth > maxDepth) continue;
-    const text = m[2].replace(/[`*_~\[\]()]/g, "").trim();
+    const text = m[2].replace(/[`*_~\[\]()]/g, '').trim();
     if (!text) continue;
-    const id = uniqueSlug(headingSlug(text) || "section", seen);
+    const id = uniqueSlug(headingSlug(text) || 'section', seen);
     out.push({ text, id, depth });
   }
   return out;
@@ -257,10 +251,7 @@ export interface ReadingMetricsOptions {
  * floor prevents detail pages from rendering "0 min" for short
  * placeholder bodies.
  */
-export function readingMetrics(
-  body: string,
-  options: ReadingMetricsOptions = {},
-): ReadingMetrics {
+export function readingMetrics(body: string, options: ReadingMetricsOptions = {}): ReadingMetrics {
   const wpm = options.wpm ?? 200;
   const trimmed = body.trim();
   if (!trimmed) return { wordCount: 0, minutes: 1 };

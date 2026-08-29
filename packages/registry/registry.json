@@ -9,13 +9,41 @@
       "title": "UI primitives",
       "description": "Grove's stateless presentation primitives — button, badge, empty-state, filter-drawer, page-header, search-field — plus the classnames builders that keep server-rendered and client-rebuilt controls byte-identical.",
       "files": [
-        { "path": "default/components/ui/badge.astro", "type": "registry:ui", "target": "~/src/components/ui/badge.astro" },
-        { "path": "default/components/ui/button.astro", "type": "registry:ui", "target": "~/src/components/ui/button.astro" },
-        { "path": "default/components/ui/empty-state.astro", "type": "registry:ui", "target": "~/src/components/ui/empty-state.astro" },
-        { "path": "default/components/ui/filter-drawer.astro", "type": "registry:ui", "target": "~/src/components/ui/filter-drawer.astro" },
-        { "path": "default/components/ui/page-header.astro", "type": "registry:ui", "target": "~/src/components/ui/page-header.astro" },
-        { "path": "default/components/ui/search-field.astro", "type": "registry:ui", "target": "~/src/components/ui/search-field.astro" },
-        { "path": "default/lib/classnames.ts", "type": "registry:file", "target": "~/src/lib/classnames.ts" }
+        {
+          "path": "default/components/ui/badge.astro",
+          "type": "registry:ui",
+          "target": "~/src/components/ui/badge.astro"
+        },
+        {
+          "path": "default/components/ui/button.astro",
+          "type": "registry:ui",
+          "target": "~/src/components/ui/button.astro"
+        },
+        {
+          "path": "default/components/ui/empty-state.astro",
+          "type": "registry:ui",
+          "target": "~/src/components/ui/empty-state.astro"
+        },
+        {
+          "path": "default/components/ui/filter-drawer.astro",
+          "type": "registry:ui",
+          "target": "~/src/components/ui/filter-drawer.astro"
+        },
+        {
+          "path": "default/components/ui/page-header.astro",
+          "type": "registry:ui",
+          "target": "~/src/components/ui/page-header.astro"
+        },
+        {
+          "path": "default/components/ui/search-field.astro",
+          "type": "registry:ui",
+          "target": "~/src/components/ui/search-field.astro"
+        },
+        {
+          "path": "default/lib/classnames.ts",
+          "type": "registry:file",
+          "target": "~/src/lib/classnames.ts"
+        }
       ]
     },
     {
@@ -26,15 +54,51 @@
       "dependencies": ["astro", "@astrojs/check", "tailwindcss", "@tailwindcss/vite"],
       "registryDependencies": ["@grove/ui"],
       "files": [
-        { "path": "default/layouts/base-layout.astro", "type": "registry:component", "target": "~/src/layouts/base-layout.astro" },
-        { "path": "default/layouts/container.astro", "type": "registry:component", "target": "~/src/layouts/container.astro" },
-        { "path": "default/layouts/footer.astro", "type": "registry:component", "target": "~/src/layouts/footer.astro" },
-        { "path": "default/layouts/header.astro", "type": "registry:component", "target": "~/src/layouts/header.astro" },
-        { "path": "default/layouts/section-header.astro", "type": "registry:component", "target": "~/src/layouts/section-header.astro" },
-        { "path": "default/layouts/seo.astro", "type": "registry:component", "target": "~/src/layouts/seo.astro" },
-        { "path": "default/components/site/theme-toggle.astro", "type": "registry:component", "target": "~/src/components/site/theme-toggle.astro" },
-        { "path": "default/components/grove/powered-by.astro", "type": "registry:component", "target": "~/src/components/grove/powered-by.astro" },
-        { "path": "default/styles/system.css", "type": "registry:file", "target": "~/src/styles/system.css" }
+        {
+          "path": "default/layouts/base-layout.astro",
+          "type": "registry:component",
+          "target": "~/src/layouts/base-layout.astro"
+        },
+        {
+          "path": "default/layouts/container.astro",
+          "type": "registry:component",
+          "target": "~/src/layouts/container.astro"
+        },
+        {
+          "path": "default/layouts/footer.astro",
+          "type": "registry:component",
+          "target": "~/src/layouts/footer.astro"
+        },
+        {
+          "path": "default/layouts/header.astro",
+          "type": "registry:component",
+          "target": "~/src/layouts/header.astro"
+        },
+        {
+          "path": "default/layouts/section-header.astro",
+          "type": "registry:component",
+          "target": "~/src/layouts/section-header.astro"
+        },
+        {
+          "path": "default/layouts/seo.astro",
+          "type": "registry:component",
+          "target": "~/src/layouts/seo.astro"
+        },
+        {
+          "path": "default/components/site/theme-toggle.astro",
+          "type": "registry:component",
+          "target": "~/src/components/site/theme-toggle.astro"
+        },
+        {
+          "path": "default/components/grove/powered-by.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/powered-by.astro"
+        },
+        {
+          "path": "default/styles/system.css",
+          "type": "registry:file",
+          "target": "~/src/styles/system.css"
+        }
       ]
     },
     {
@@ -43,12 +107,36 @@
       "title": "Project card",
       "description": "The canonical record card every listing surface renders through, with its grid host, metadata glyphs, and the brand-mark Icon component plus its generated icon registry.",
       "files": [
-        { "path": "default/components/grove/project-card.astro", "type": "registry:component", "target": "~/src/components/grove/project-card.astro" },
-        { "path": "default/components/grove/card-grid.astro", "type": "registry:component", "target": "~/src/components/grove/card-grid.astro" },
-        { "path": "default/components/grove/card-icon.astro", "type": "registry:component", "target": "~/src/components/grove/card-icon.astro" },
-        { "path": "default/components/grove/icon.astro", "type": "registry:component", "target": "~/src/components/grove/icon.astro" },
-        { "path": "default/lib/icon-kinds.ts", "type": "registry:file", "target": "~/src/lib/icon-kinds.ts" },
-        { "path": "default/lib/icon-registry.ts", "type": "registry:file", "target": "~/src/lib/icon-registry.ts" }
+        {
+          "path": "default/components/grove/project-card.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/project-card.astro"
+        },
+        {
+          "path": "default/components/grove/card-grid.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/card-grid.astro"
+        },
+        {
+          "path": "default/components/grove/card-icon.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/card-icon.astro"
+        },
+        {
+          "path": "default/components/grove/icon.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/icon.astro"
+        },
+        {
+          "path": "default/lib/icon-kinds.ts",
+          "type": "registry:file",
+          "target": "~/src/lib/icon-kinds.ts"
+        },
+        {
+          "path": "default/lib/icon-registry.ts",
+          "type": "registry:file",
+          "target": "~/src/lib/icon-registry.ts"
+        }
       ]
     },
     {
@@ -58,14 +146,46 @@
       "description": "Browse-by-category, -stack, and -license: the three index/detail route pairs, the shared list body, and the stack/category grids the home page also renders.",
       "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui"],
       "files": [
-        { "path": "default/pages/categories/index.astro", "type": "registry:page", "target": "~/src/pages/categories/index.astro" },
-        { "path": "default/pages/categories/[name].astro", "type": "registry:page", "target": "~/src/pages/categories/[name].astro" },
-        { "path": "default/pages/stacks/index.astro", "type": "registry:page", "target": "~/src/pages/stacks/index.astro" },
-        { "path": "default/pages/stacks/[name].astro", "type": "registry:page", "target": "~/src/pages/stacks/[name].astro" },
-        { "path": "default/pages/licenses/[name].astro", "type": "registry:page", "target": "~/src/pages/licenses/[name].astro" },
-        { "path": "default/components/grove/taxonomy-list.astro", "type": "registry:component", "target": "~/src/components/grove/taxonomy-list.astro" },
-        { "path": "default/components/grove/stack-grid.astro", "type": "registry:component", "target": "~/src/components/grove/stack-grid.astro" },
-        { "path": "default/components/grove/category-grid.astro", "type": "registry:component", "target": "~/src/components/grove/category-grid.astro" }
+        {
+          "path": "default/pages/categories/index.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/categories/index.astro"
+        },
+        {
+          "path": "default/pages/categories/[name].astro",
+          "type": "registry:page",
+          "target": "~/src/pages/categories/[name].astro"
+        },
+        {
+          "path": "default/pages/stacks/index.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/stacks/index.astro"
+        },
+        {
+          "path": "default/pages/stacks/[name].astro",
+          "type": "registry:page",
+          "target": "~/src/pages/stacks/[name].astro"
+        },
+        {
+          "path": "default/pages/licenses/[name].astro",
+          "type": "registry:page",
+          "target": "~/src/pages/licenses/[name].astro"
+        },
+        {
+          "path": "default/components/grove/taxonomy-list.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/taxonomy-list.astro"
+        },
+        {
+          "path": "default/components/grove/stack-grid.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/stack-grid.astro"
+        },
+        {
+          "path": "default/components/grove/category-grid.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/category-grid.astro"
+        }
       ]
     },
     {
@@ -75,13 +195,41 @@
       "description": "Curated and generated collections: the index and detail routes, collection cards and rows, and the featured-collections teaser.",
       "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui"],
       "files": [
-        { "path": "default/pages/collections/index.astro", "type": "registry:page", "target": "~/src/pages/collections/index.astro" },
-        { "path": "default/pages/collections/[slug].astro", "type": "registry:page", "target": "~/src/pages/collections/[slug].astro" },
-        { "path": "default/components/grove/collection-index.astro", "type": "registry:component", "target": "~/src/components/grove/collection-index.astro" },
-        { "path": "default/components/grove/collection-page.astro", "type": "registry:component", "target": "~/src/components/grove/collection-page.astro" },
-        { "path": "default/components/grove/collection-card.astro", "type": "registry:component", "target": "~/src/components/grove/collection-card.astro" },
-        { "path": "default/components/grove/collection-row.astro", "type": "registry:component", "target": "~/src/components/grove/collection-row.astro" },
-        { "path": "default/components/grove/collection-teaser.astro", "type": "registry:component", "target": "~/src/components/grove/collection-teaser.astro" }
+        {
+          "path": "default/pages/collections/index.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/collections/index.astro"
+        },
+        {
+          "path": "default/pages/collections/[slug].astro",
+          "type": "registry:page",
+          "target": "~/src/pages/collections/[slug].astro"
+        },
+        {
+          "path": "default/components/grove/collection-index.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-index.astro"
+        },
+        {
+          "path": "default/components/grove/collection-page.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-page.astro"
+        },
+        {
+          "path": "default/components/grove/collection-card.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-card.astro"
+        },
+        {
+          "path": "default/components/grove/collection-row.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-row.astro"
+        },
+        {
+          "path": "default/components/grove/collection-teaser.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-teaser.astro"
+        }
       ]
     },
     {
@@ -89,16 +237,54 @@
       "type": "registry:block",
       "title": "Home page",
       "description": "The landing route: hero with search and trust stats, the why-this-exists and pipeline story sections, three lens sections (trending / new / established), contributors, lineage, and the closing CTA.",
-      "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui", "@grove/taxonomy", "@grove/collections"],
+      "registryDependencies": [
+        "@grove/shell",
+        "@grove/project-card",
+        "@grove/ui",
+        "@grove/taxonomy",
+        "@grove/collections"
+      ],
       "files": [
-        { "path": "default/pages/index.astro", "type": "registry:page", "target": "~/src/pages/index.astro" },
-        { "path": "default/components/grove/hero.astro", "type": "registry:component", "target": "~/src/components/grove/hero.astro" },
-        { "path": "default/components/grove/why-this-exists.astro", "type": "registry:component", "target": "~/src/components/grove/why-this-exists.astro" },
-        { "path": "default/components/grove/pipeline-strip.astro", "type": "registry:component", "target": "~/src/components/grove/pipeline-strip.astro" },
-        { "path": "default/components/grove/record-section.astro", "type": "registry:component", "target": "~/src/components/grove/record-section.astro" },
-        { "path": "default/components/grove/contributors-grid.astro", "type": "registry:component", "target": "~/src/components/grove/contributors-grid.astro" },
-        { "path": "default/components/grove/original-collection.astro", "type": "registry:component", "target": "~/src/components/grove/original-collection.astro" },
-        { "path": "default/components/grove/final-cta.astro", "type": "registry:component", "target": "~/src/components/grove/final-cta.astro" }
+        {
+          "path": "default/pages/index.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/index.astro"
+        },
+        {
+          "path": "default/components/grove/hero.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/hero.astro"
+        },
+        {
+          "path": "default/components/grove/why-this-exists.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/why-this-exists.astro"
+        },
+        {
+          "path": "default/components/grove/pipeline-strip.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/pipeline-strip.astro"
+        },
+        {
+          "path": "default/components/grove/record-section.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/record-section.astro"
+        },
+        {
+          "path": "default/components/grove/contributors-grid.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/contributors-grid.astro"
+        },
+        {
+          "path": "default/components/grove/original-collection.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/original-collection.astro"
+        },
+        {
+          "path": "default/components/grove/final-cta.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/final-cta.astro"
+        }
       ]
     },
     {
@@ -108,18 +294,66 @@
       "description": "The list/discovery page and its paginated routes: search and sort, facet filters, active-filter chips, curated lens tabs, the results grid, pagination, and the client controller that re-derives all of it from the query string.",
       "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui"],
       "files": [
-        { "path": "default/pages/[slug]/index.astro", "type": "registry:page", "target": "~/src/pages/[slug]/index.astro" },
-        { "path": "default/pages/[slug]/page/[page].astro", "type": "registry:page", "target": "~/src/pages/[slug]/page/[page].astro" },
-        { "path": "default/pages/[slug]/page/cards.astro", "type": "registry:page", "target": "~/src/pages/[slug]/page/cards.astro" },
-        { "path": "default/pages/[slug]/page/records.json.ts", "type": "registry:file", "target": "~/src/pages/[slug]/page/records.json.ts" },
-        { "path": "default/components/grove/directory-browse.astro", "type": "registry:component", "target": "~/src/components/grove/directory-browse.astro" },
-        { "path": "default/components/grove/directory-index-client.astro", "type": "registry:component", "target": "~/src/components/grove/directory-index-client.astro" },
-        { "path": "default/components/grove/refine-panel.astro", "type": "registry:component", "target": "~/src/components/grove/refine-panel.astro" },
-        { "path": "default/components/grove/filter-group-menu.astro", "type": "registry:component", "target": "~/src/components/grove/filter-group-menu.astro" },
-        { "path": "default/components/grove/filter-options.astro", "type": "registry:component", "target": "~/src/components/grove/filter-options.astro" },
-        { "path": "default/components/grove/pagination.astro", "type": "registry:component", "target": "~/src/components/grove/pagination.astro" },
-        { "path": "default/components/grove/smart-lens-tabs.astro", "type": "registry:component", "target": "~/src/components/grove/smart-lens-tabs.astro" },
-        { "path": "default/components/grove/index-row.astro", "type": "registry:component", "target": "~/src/components/grove/index-row.astro" }
+        {
+          "path": "default/pages/[slug]/index.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/[slug]/index.astro"
+        },
+        {
+          "path": "default/pages/[slug]/page/[page].astro",
+          "type": "registry:page",
+          "target": "~/src/pages/[slug]/page/[page].astro"
+        },
+        {
+          "path": "default/pages/[slug]/page/cards.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/[slug]/page/cards.astro"
+        },
+        {
+          "path": "default/pages/[slug]/page/records.json.ts",
+          "type": "registry:file",
+          "target": "~/src/pages/[slug]/page/records.json.ts"
+        },
+        {
+          "path": "default/components/grove/directory-browse.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/directory-browse.astro"
+        },
+        {
+          "path": "default/components/grove/directory-index-client.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/directory-index-client.astro"
+        },
+        {
+          "path": "default/components/grove/refine-panel.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/refine-panel.astro"
+        },
+        {
+          "path": "default/components/grove/filter-group-menu.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/filter-group-menu.astro"
+        },
+        {
+          "path": "default/components/grove/filter-options.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/filter-options.astro"
+        },
+        {
+          "path": "default/components/grove/pagination.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/pagination.astro"
+        },
+        {
+          "path": "default/components/grove/smart-lens-tabs.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/smart-lens-tabs.astro"
+        },
+        {
+          "path": "default/components/grove/index-row.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/index-row.astro"
+        }
       ]
     },
     {
@@ -129,13 +363,41 @@
       "description": "The per-record route: identity header, editorial summary, table of contents, rendered Markdown body, and the sticky sidebar of repository, freshness, ecosystem, and source facts.",
       "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui"],
       "files": [
-        { "path": "default/pages/[slug]/[recordSlug].astro", "type": "registry:page", "target": "~/src/pages/[slug]/[recordSlug].astro" },
-        { "path": "default/components/grove/record-header.astro", "type": "registry:component", "target": "~/src/components/grove/record-header.astro" },
-        { "path": "default/components/grove/record-sidebar.astro", "type": "registry:component", "target": "~/src/components/grove/record-sidebar.astro" },
-        { "path": "default/components/grove/editorial-summary.astro", "type": "registry:component", "target": "~/src/components/grove/editorial-summary.astro" },
-        { "path": "default/components/grove/table-of-contents.astro", "type": "registry:component", "target": "~/src/components/grove/table-of-contents.astro" },
-        { "path": "default/components/grove/markdown-body.astro", "type": "registry:component", "target": "~/src/components/grove/markdown-body.astro" },
-        { "path": "default/components/grove/language-breakdown.astro", "type": "registry:component", "target": "~/src/components/grove/language-breakdown.astro" }
+        {
+          "path": "default/pages/[slug]/[recordSlug].astro",
+          "type": "registry:page",
+          "target": "~/src/pages/[slug]/[recordSlug].astro"
+        },
+        {
+          "path": "default/components/grove/record-header.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/record-header.astro"
+        },
+        {
+          "path": "default/components/grove/record-sidebar.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/record-sidebar.astro"
+        },
+        {
+          "path": "default/components/grove/editorial-summary.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/editorial-summary.astro"
+        },
+        {
+          "path": "default/components/grove/table-of-contents.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/table-of-contents.astro"
+        },
+        {
+          "path": "default/components/grove/markdown-body.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/markdown-body.astro"
+        },
+        {
+          "path": "default/components/grove/language-breakdown.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/language-breakdown.astro"
+        }
       ]
     },
     {
@@ -145,8 +407,16 @@
       "description": "The submission route and its client: fetch a repository, validate against the taxonomy, and draft a record YAML for a pull request.",
       "registryDependencies": ["@grove/shell", "@grove/ui"],
       "files": [
-        { "path": "default/pages/submit.astro", "type": "registry:page", "target": "~/src/pages/submit.astro" },
-        { "path": "default/components/grove/submission-client.astro", "type": "registry:component", "target": "~/src/components/grove/submission-client.astro" }
+        {
+          "path": "default/pages/submit.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/submit.astro"
+        },
+        {
+          "path": "default/components/grove/submission-client.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/submission-client.astro"
+        }
       ]
     },
     {
@@ -156,7 +426,11 @@
       "description": "The narrative about route — what the site is, how it's built from files, how to contribute — with a Markdown override via content/pages/about.md.",
       "registryDependencies": ["@grove/shell", "@grove/ui"],
       "files": [
-        { "path": "default/pages/about.astro", "type": "registry:page", "target": "~/src/pages/about.astro" }
+        {
+          "path": "default/pages/about.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/about.astro"
+        }
       ]
     },
     {
@@ -166,7 +440,11 @@
       "description": "The full contributors route with per-user contribution counts, read from the synced contributors data.",
       "registryDependencies": ["@grove/shell", "@grove/ui"],
       "files": [
-        { "path": "default/pages/contributors.astro", "type": "registry:page", "target": "~/src/pages/contributors.astro" }
+        {
+          "path": "default/pages/contributors.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/contributors.astro"
+        }
       ]
     },
     {
@@ -176,7 +454,11 @@
       "description": "The on-brand fallback route: the normal shell, a short message, and a search form pointing at the browse page.",
       "registryDependencies": ["@grove/shell", "@grove/ui"],
       "files": [
-        { "path": "default/pages/404.astro", "type": "registry:page", "target": "~/src/pages/404.astro" }
+        {
+          "path": "default/pages/404.astro",
+          "type": "registry:page",
+          "target": "~/src/pages/404.astro"
+        }
       ]
     }
   ]

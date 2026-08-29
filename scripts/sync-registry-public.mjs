@@ -8,14 +8,14 @@
  *
  * Runs before `astro build` in apps/docs. public/r/ is gitignored.
  */
-import { existsSync } from "node:fs";
-import { cp, rm } from "node:fs/promises";
-import { relative, resolve } from "node:path";
-import { DIST_DIR, ROOT } from "./lib/registry.mjs";
+import { existsSync } from 'node:fs';
+import { cp, rm } from 'node:fs/promises';
+import { relative, resolve } from 'node:path';
+import { DIST_DIR, ROOT } from './lib/registry.mjs';
 
-const target = resolve(ROOT, "apps/docs/public/r");
+const target = resolve(ROOT, 'apps/docs/public/r');
 
-if (!existsSync(resolve(DIST_DIR, "registry.json"))) {
+if (!existsSync(resolve(DIST_DIR, 'registry.json'))) {
   console.error(`${relative(ROOT, DIST_DIR)} is missing — run \`pnpm registry:build\` first.`);
   process.exit(1);
 }

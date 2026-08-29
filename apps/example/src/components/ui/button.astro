@@ -8,13 +8,18 @@
  * definition. Pass layout-only extras (widths, one-off spacing)
  * through `class`.
  */
-import { buttonClass, PAGINATION_DISABLED, type ButtonSize, type ButtonVariant } from "../../lib/classnames.ts";
+import {
+  type ButtonSize,
+  type ButtonVariant,
+  buttonClass,
+  PAGINATION_DISABLED,
+} from '../../lib/classnames.ts';
 
 interface Props {
   variant?: ButtonVariant;
   size?: ButtonSize;
   href?: string;
-  type?: "button" | "submit" | "reset";
+  type?: 'button' | 'submit' | 'reset';
   rel?: string;
   target?: string;
   disabled?: boolean;
@@ -24,12 +29,12 @@ interface Props {
 }
 
 const {
-  variant = "secondary",
-  size = "sm",
+  variant = 'secondary',
+  size = 'sm',
   href,
-  type = "button",
+  type = 'button',
   disabled,
-  class: className = "",
+  class: className = '',
   ...rest
 } = Astro.props;
 
