@@ -113,6 +113,14 @@ export async function loadManifest(scaffold = "@grove/default"): Promise<Install
   for await (const full of walk(snapshotDir)) {
     const rel = relative(snapshotDir, full).split("\\").join("/");
     if (rel === "registry.json" || rel === "registry.lock.json" || rel === "README.md") continue;
+    // *.test.ts (e.g. lib/classnames.test.ts) exists to protect the
+    // registry's own source inside this monorepo — a real consumer
+    // has no vitest dependency (`grove init` doesn't install one),
+    // so shipping it makes `astro check` fail on an unresolvable
+    // `from "vitest"` import in every fresh scaffold. It stays part
+    // of the canonical registry (and the example mirror, which does
+    // have vitest) but is never materialized into a consumer's src/.
+    if (/\.(test|spec)\.tsx?$/.test(rel)) continue;
     const source = await readFile(full, "utf8");
     files.push({
       target: rel, // snapshot layout already matches consumer's src/ for these.

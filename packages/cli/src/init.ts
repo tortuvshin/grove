@@ -14,17 +14,26 @@
  *      doesn't ship one — this generates a fresh template).
  *   4. Write astro.config.mjs (registers the Grove integration and
  *      the Tailwind v4 Vite plugin the scaffold's styles need).
+ *   5. Write tsconfig.json (Bundler resolution + the @grove/generated
+ *      path alias — the scaffold's own code needs both).
+ *   6. Create an empty data/records/ (with a .gitkeep placeholder,
+ *      since git doesn't track empty directories) — required so
+ *      `grove check` doesn't fail on a project nobody has added a
+ *      record to yet.
  *
- * The scaffold is shipped from `@grove-dev/registry` and materialized
- * by `materializeRegistry()`. There is no second template to maintain
- * in this repo and no fallback path — if the registry snapshot is
- * missing, init fails fast with a clear message.
+ * The scaffold — including its page routes — is shipped from
+ * `@grove-dev/registry` and materialized by `materializeRegistry()`.
+ * There is no second template to maintain in this repo and no
+ * fallback path — if the registry snapshot is missing, init fails
+ * fast with a clear message.
  *
- * `grove init` does NOT scaffold `data/`, `content/`, `public/`, or
- * `.github/` — those are content/workflow concerns, not UI-registry
- * concerns, and are out of scope here. (The CLI wrapper in index.ts
- * runs `pnpm install` and `git init` after this returns, per its own
- * `--no-install`/`--no-git` flags.)
+ * `grove init` does NOT scaffold `content/`, `public/`, `.github/`,
+ * or anything under `data/` besides the empty `records/` directory
+ * (no `data/taxonomy/`, `data/collections/`) — those are
+ * content/workflow concerns, not UI-registry concerns, and are out
+ * of scope here. (The CLI wrapper in index.ts runs `pnpm install`
+ * and `git init` after this returns, per its own `--no-install`/
+ * `--no-git` flags.)
  */
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -205,6 +214,51 @@ export default defineConfig({
 });
 `;
   await writeFile(astroConfigPath, astroConfigTemplate, "utf8");
+
+  // 5. Write tsconfig.json. Not shipped via the registry — everything
+  //    materializeRegistry() writes lands under src/, but a tsconfig
+  //    has to sit at the project root to be picked up at all. The
+  //    scaffold's own code relies on two settings Astro's own default
+  //    (when no tsconfig exists) doesn't set: "Bundler" resolution
+  //    (registry components import package subpaths like
+  //    `@grove-dev/astro/server` whose declaration file lives in the
+  //    package's own src/, which classic/node resolution can't follow)
+  //    and the `@grove/generated/*` path alias (so `astro check`
+  //    resolves the JSON `prepareDirectory()` writes to `data/generated/`).
+  const tsconfigPath = resolve(target, "tsconfig.json");
+  const tsconfigTemplate = `{
+  "extends": "astro/tsconfigs/base",
+  "compilerOptions": {
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@grove/generated/*": ["data/generated/*"]
+    }
+  },
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}
+`;
+  await writeFile(tsconfigPath, tsconfigTemplate, "utf8");
+
+  // 6. Create an empty data/records/ directory. `validateProject()`
+  //    (packages/core/src/validate.ts) treats an ABSENT records
+  //    directory as a hard error — deliberately, so a user who really
+  //    did forget to create it gets told — but a fresh scaffold with
+  //    zero records is a supported, documented starting state (the
+  //    registry's pages/empty.astro fixture exists for exactly this).
+  //    Without this, `grove check` fails on a project that has never
+  //    been touched. Empty directories aren't tracked by git, hence
+  //    the placeholder file.
+  const recordsDir = resolve(target, "data", "records");
+  await mkdir(recordsDir, { recursive: true });
+  await writeFile(
+    resolve(recordsDir, ".gitkeep"),
+    "# Add one YAML file per record here — see /getting-started/first-record/.\n",
+    "utf8",
+  );
 
   return { targetDir: target, projectName, installedScaffold: installed };
 }

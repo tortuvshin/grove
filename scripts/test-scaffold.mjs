@@ -20,7 +20,7 @@ function run(command, args, cwd = root) {
 
 await run("pnpm", ["--filter", "@grove-dev/cli", "build"]);
 await mkdir(packs);
-for (const name of ["core", "astro", "cli"]) {
+for (const name of ["core", "astro", "cli", "registry"]) {
   await run("pnpm", ["--filter", `@grove-dev/${name}`, "pack", "--pack-destination", packs]);
 }
 await run(process.execPath, [resolve(root, "packages/cli/dist/index.js"), "init", target, "--no-install", "--no-git"]);
@@ -28,7 +28,7 @@ await run(process.execPath, [resolve(root, "packages/cli/dist/index.js"), "init"
 const packagePath = join(target, "package.json");
 const pkg = JSON.parse(await readFile(packagePath, "utf8"));
 const localPackages = {};
-for (const name of ["core", "astro", "cli"]) {
+for (const name of ["core", "astro", "cli", "registry"]) {
   const manifest = JSON.parse(
     await readFile(resolve(root, "packages", name, "package.json"), "utf8"),
   );

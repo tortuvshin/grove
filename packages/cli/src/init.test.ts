@@ -41,11 +41,23 @@ describe("grove init (registry bootstrapper)", () => {
     expect(pkg.scripts.dev).toBe("astro dev");
     expect(pkg.scripts.build).toBe("astro build");
 
-    // The scaffold landed in src/.
+    // The scaffold landed in src/ — pages included, not just components.
     expect(existsSync(join(target, "src/components/grove/project-card.astro"))).toBe(true);
     expect(existsSync(join(target, "src/layouts/base-layout.astro"))).toBe(true);
     expect(existsSync(join(target, "src/lib/classnames.ts"))).toBe(true);
     expect(existsSync(join(target, "src/styles/system.css"))).toBe(true);
+    expect(existsSync(join(target, "src/pages/index.astro"))).toBe(true);
+    expect(existsSync(join(target, "src/pages/[slug]/[recordSlug].astro"))).toBe(true);
+
+    // Empty data/records/ exists so `grove check` doesn't fail on a
+    // project nobody has added a record to yet.
+    expect(existsSync(join(target, "data/records/.gitkeep"))).toBe(true);
+
+    // tsconfig.json — Bundler resolution + the @grove/generated alias
+    // the scaffold's own code needs.
+    const tsconfig = JSON.parse(await readFile(join(target, "tsconfig.json"), "utf8"));
+    expect(tsconfig.compilerOptions.moduleResolution).toBe("Bundler");
+    expect(tsconfig.compilerOptions.paths["@grove/generated/*"]).toEqual(["data/generated/*"]);
 
     // Lockfile was written with the install-time hashes.
     const lockfile = JSON.parse(
