@@ -19,7 +19,7 @@
     "audit": "grove audit --runs 1"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "@grove-dev/astro": "workspace:*",
     "@grove-dev/cli": "workspace:*",
     "@grove-dev/core": "workspace:*",

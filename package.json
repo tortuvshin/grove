@@ -36,7 +36,7 @@
     "postinstall": "pnpm --filter @grove-dev/cli... build"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "@biomejs/biome": "^2.5.8",
     "@iconify-json/logos": "^1.2.13",
     "@iconify-json/simple-icons": "^1.2.93",
