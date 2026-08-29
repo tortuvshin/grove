@@ -23,25 +23,25 @@
  */
 
 export type DocumentPageType =
-  | "home"
-  | "directory"
-  | "collection"
-  | "record"
-  | "content"
-  | "empty"
-  | "404";
+  | 'home'
+  | 'directory'
+  | 'collection'
+  | 'record'
+  | 'content'
+  | 'empty'
+  | '404';
 
 export interface OpenGraphMetadata {
   title: string;
   description: string;
   url: string;
   image: string;
-  type: "website" | "article";
+  type: 'website' | 'article';
   siteName?: string;
 }
 
 export interface TwitterMetadata {
-  card: "summary" | "summary_large_image";
+  card: 'summary' | 'summary_large_image';
   site?: string;
   creator?: string;
 }
@@ -61,9 +61,9 @@ export interface LinkedDocument {
 }
 
 export interface JsonLdNode {
-  "@context": "https://schema.org";
-  "@type": string | string[];
-  "@id"?: string;
+  '@context': 'https://schema.org';
+  '@type': string | string[];
+  '@id'?: string;
   [key: string]: unknown;
 }
 
@@ -89,16 +89,16 @@ export interface PageDocument {
 
 export function definePageDocument(input: PageDocument): PageDocument {
   if (!input.metadata.title.trim()) {
-    throw new Error("PageDocument: title is required");
+    throw new Error('PageDocument: title is required');
   }
   if (!input.metadata.description.trim()) {
-    throw new Error("PageDocument: description is required");
+    throw new Error('PageDocument: description is required');
   }
   if (input.metadata.title === input.metadata.description) {
-    throw new Error("PageDocument: title and description must differ");
+    throw new Error('PageDocument: title and description must differ');
   }
   if (input.metadata.openGraph.url !== input.identity.canonical.toString()) {
-    throw new Error("PageDocument: openGraph.url must equal identity.canonical");
+    throw new Error('PageDocument: openGraph.url must equal identity.canonical');
   }
   return input;
 }
@@ -124,16 +124,16 @@ export interface SiteInput {
 export function siteSchema(input: SiteInput): JsonLdNode[] {
   return [
     {
-      "@context": "https://schema.org",
-      "@type": ["WebSite", "Organization"],
-      "@id": `${input.url}#site`,
+      '@context': 'https://schema.org',
+      '@type': ['WebSite', 'Organization'],
+      '@id': `${input.url}#site`,
       url: input.url,
       name: input.name,
       ...(input.description ? { description: input.description } : {}),
       ...(input.inLanguage ? { inLanguage: input.inLanguage } : {}),
       publisher: {
-        "@type": "Organization",
-        "@id": `${input.orgUrl}#org`,
+        '@type': 'Organization',
+        '@id': `${input.orgUrl}#org`,
         name: input.orgName,
         url: input.orgUrl,
         ...(input.orgLogo ? { logo: input.orgLogo } : {}),
@@ -150,10 +150,10 @@ export function siteSchema(input: SiteInput): JsonLdNode[] {
  */
 export function breadcrumbSchema(crumbs: Crumb[]): JsonLdNode {
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
     itemListElement: crumbs.map((c, i) => ({
-      "@type": "ListItem",
+      '@type': 'ListItem',
       position: i + 1,
       name: c.name,
       item: c.url,
@@ -171,24 +171,22 @@ export interface CollectionInput {
 
 export function collectionSchema(input: CollectionInput): JsonLdNode[] {
   if (input.crumbs.length < 2) {
-    throw new Error(
-      "collectionSchema: breadcrumbs must contain at least 2 items",
-    );
+    throw new Error('collectionSchema: breadcrumbs must contain at least 2 items');
   }
   const page: JsonLdNode = {
-    "@context": "https://schema.org",
-    "@type": ["CollectionPage", "WebPage"],
-    "@id": `${input.url}#page`,
+    '@context': 'https://schema.org',
+    '@type': ['CollectionPage', 'WebPage'],
+    '@id': `${input.url}#page`,
     url: input.url,
     name: input.name,
     description: input.description,
   };
   const list: JsonLdNode = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
     numberOfItems: input.items.length,
     itemListElement: input.items.map((item, i) => ({
-      "@type": "ListItem",
+      '@type': 'ListItem',
       position: i + 1,
       url: item.url,
       name: item.name,
@@ -202,20 +200,18 @@ export interface RecordInput {
   url: string;
   name: string;
   description: string;
-  kind: "application" | "article";
+  kind: 'application' | 'article';
   repoUrl?: string;
   license?: string;
   crumbs: Crumb[];
 }
 
 export function recordSchema(input: RecordInput): JsonLdNode[] {
-  const isApp = input.kind === "application";
+  const isApp = input.kind === 'application';
   const main: JsonLdNode = {
-    "@context": "https://schema.org",
-    "@type": isApp
-      ? ["SoftwareApplication", "SoftwareSourceCode"]
-      : ["CreativeWork", "WebPage"],
-    "@id": `${input.url}#record`,
+    '@context': 'https://schema.org',
+    '@type': isApp ? ['SoftwareApplication', 'SoftwareSourceCode'] : ['CreativeWork', 'WebPage'],
+    '@id': `${input.url}#record`,
     url: input.url,
     name: input.name,
     description: input.description,
@@ -237,13 +233,13 @@ export interface ContentInput {
 export function contentSchema(input: ContentInput): JsonLdNode[] {
   return [
     {
-      "@context": "https://schema.org",
-      "@type": ["Article", "WebPage"],
-      "@id": `${input.url}#article`,
+      '@context': 'https://schema.org',
+      '@type': ['Article', 'WebPage'],
+      '@id': `${input.url}#article`,
       url: input.url,
       headline: input.headline,
       description: input.description,
-      author: { "@type": "Organization", name: input.author },
+      author: { '@type': 'Organization', name: input.author },
       ...(input.datePublished ? { datePublished: input.datePublished } : {}),
     },
     breadcrumbSchema(input.crumbs),
@@ -254,69 +250,58 @@ export function buildJsonLd(input: SiteInput): JsonLdNode[];
 export function buildJsonLd(input: CollectionInput): JsonLdNode[];
 export function buildJsonLd(input: RecordInput): JsonLdNode[];
 export function buildJsonLd(input: ContentInput): JsonLdNode[];
-export function buildJsonLd(input: SiteInput | CollectionInput | RecordInput | ContentInput): JsonLdNode[] {
-  if ("orgName" in input) return siteSchema(input);
-  if ("items" in input) return collectionSchema(input);
-  if ("kind" in input) return recordSchema(input);
-  if ("headline" in input) return contentSchema(input);
-  throw new Error("buildJsonLd: unknown schema input");
+export function buildJsonLd(
+  input: SiteInput | CollectionInput | RecordInput | ContentInput,
+): JsonLdNode[] {
+  if ('orgName' in input) return siteSchema(input);
+  if ('items' in input) return collectionSchema(input);
+  if ('kind' in input) return recordSchema(input);
+  if ('headline' in input) return contentSchema(input);
+  throw new Error('buildJsonLd: unknown schema input');
 }
 
 export interface JsonLdValidationIssue {
-  code:
-    | "missing-context"
-    | "missing-type"
-    | "relative-url"
-    | "duplicate-id"
-    | "invalid-date";
+  code: 'missing-context' | 'missing-type' | 'relative-url' | 'duplicate-id' | 'invalid-date';
   field?: string;
   message: string;
 }
 
-const URL_FIELDS = new Set(["url", "codeRepository", "logo", "image", "sameAs"]);
+const URL_FIELDS = new Set(['url', 'codeRepository', 'logo', 'image', 'sameAs']);
 
 export function validateJsonLd(nodes: JsonLdNode[]): JsonLdValidationIssue[] {
   const issues: JsonLdValidationIssue[] = [];
   const seen = new Set<string>();
   for (const node of nodes) {
-    if (node["@context"] !== "https://schema.org") {
+    if (node['@context'] !== 'https://schema.org') {
       issues.push({
-        code: "missing-context",
-        message: "@context must be https://schema.org",
+        code: 'missing-context',
+        message: '@context must be https://schema.org',
       });
     }
-    if (!node["@type"]) {
-      issues.push({ code: "missing-type", message: "@type is required" });
+    if (!node['@type']) {
+      issues.push({ code: 'missing-type', message: '@type is required' });
     }
-    if (node["@id"]) {
-      if (seen.has(node["@id"])) {
+    if (node['@id']) {
+      if (seen.has(node['@id'])) {
         issues.push({
-          code: "duplicate-id",
-          message: `Duplicate @id: ${node["@id"]}`,
+          code: 'duplicate-id',
+          message: `Duplicate @id: ${node['@id']}`,
         });
       }
-      seen.add(node["@id"]);
+      seen.add(node['@id']);
     }
     for (const [field, value] of Object.entries(node)) {
-      if (field.startsWith("@")) continue;
-      if (
-        URL_FIELDS.has(field) &&
-        typeof value === "string" &&
-        !/^https?:\/\//.test(value)
-      ) {
+      if (field.startsWith('@')) continue;
+      if (URL_FIELDS.has(field) && typeof value === 'string' && !/^https?:\/\//.test(value)) {
         issues.push({
-          code: "relative-url",
+          code: 'relative-url',
           field,
           message: `${field} must be absolute: ${value}`,
         });
       }
-      if (
-        field === "datePublished" &&
-        typeof value === "string" &&
-        isNaN(Date.parse(value))
-      ) {
+      if (field === 'datePublished' && typeof value === 'string' && isNaN(Date.parse(value))) {
         issues.push({
-          code: "invalid-date",
+          code: 'invalid-date',
           field,
           message: `datePublished invalid: ${value}`,
         });

@@ -3,7 +3,7 @@ title: Scheduled maintenance
 description: The cadence that keeps a Grove site fresh without day-to-day maintainer intervention.
 ---
 
-`grove init` scaffolds a project from `apps/example`, and that scaffold ships six workflow files under `.github/workflows/`: `ci.yml`, `deploy.yml`, `sync-github.yml`, `sync-contributors.yml`, `readme.yml`, and `cleanup.yml`. They land in a new project automatically — there's no separate template to opt into.
+Grove's reference app (`apps/example` in the Grove repository) ships six workflow files under `.github/workflows/`: `ci.yml`, `deploy.yml`, `sync-github.yml`, `sync-contributors.yml`, `readme.yml`, and `cleanup.yml`. `grove init` installs the UI registry and config files only — it does not write workflows — so copy these into your own `.github/workflows/` as a starting point.
 
 For the full inventory, see [GitHub workflows](/outputs/workflows/). This page covers what's actually scheduled, how each one delivers its result, and what to check before relying on it.
 

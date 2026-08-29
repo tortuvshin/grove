@@ -1,6 +1,6 @@
-import { Command } from 'commander';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { Command } from 'commander';
 import { stringify as yamlStringify } from 'yaml';
 
 export function buildCollectionCommand(): Command {

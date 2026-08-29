@@ -17,12 +17,12 @@
  * payload and the `Score` / `HealthStatus` unions).
  */
 
-export * from "./repo.js";
-export * from "./format.js";
-export * from "./lenses.js";
-export * from "./search.js";
-export * from "./taxonomy-counts.js";
-export * from "./display.js";
-export * from "./icon-registry.js";
-export * from "./icon-kinds.js";
-export * from "./packaged-icons.js";
+export * from './display.js';
+export * from './format.js';
+export * from './icon-kinds.js';
+export * from './icon-registry.js';
+export * from './lenses.js';
+export * from './packaged-icons.js';
+export * from './repo.js';
+export * from './search.js';
+export * from './taxonomy-counts.js';

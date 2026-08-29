@@ -1,53 +1,45 @@
-import { readdir, readFile, stat } from "node:fs/promises";
-import { join, relative, resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { join, relative, resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
 
-const repoRoot = resolve(import.meta.dirname, "../../..");
+const repoRoot = resolve(import.meta.dirname, '../../..');
 
 // The sidebar was extracted to src/data/docs-sidebar.mjs (shared with the
 // llms.txt endpoint); sidebar assertions read it together with the config,
 // which still owns navLinks and everything else.
 const readConfigWithSidebar = async () =>
-  (await readFile(resolve(repoRoot, "apps/docs/astro.config.mjs"), "utf8")) +
-  (await readFile(
-    resolve(repoRoot, "apps/docs/src/data/docs-sidebar.mjs"),
-    "utf8",
-  ));
+  (await readFile(resolve(repoRoot, 'apps/docs/astro.config.mjs'), 'utf8')) +
+  (await readFile(resolve(repoRoot, 'apps/docs/src/data/docs-sidebar.mjs'), 'utf8'));
 
-describe("docs Astro config", () => {
-  it("uses the local Starlight plugin and existing stylesheet", async () => {
-    const config = await readFile(
-      resolve(repoRoot, "apps/docs/astro.config.mjs"),
-      "utf8",
-    );
+describe('docs Astro config', () => {
+  it('uses the local Starlight plugin and existing stylesheet', async () => {
+    const config = await readFile(resolve(repoRoot, 'apps/docs/astro.config.mjs'), 'utf8');
 
     expect(config).toContain("import grove from '@grove-dev/starlight'");
     expect(config).toContain("customCss: ['./src/styles/global.css']");
-    expect(config).toContain("grove({");
-    expect(config).not.toContain("starlightLinksValidator(");
-    expect(config).not.toContain("starlightOpenInGH(");
-    expect(config).not.toContain("starlightAi(");
-    expect(config).not.toContain("./src/styles/custom.css");
+    expect(config).toContain('grove({');
+    expect(config).not.toContain('starlightLinksValidator(');
+    expect(config).not.toContain('starlightOpenInGH(');
+    expect(config).not.toContain('starlightAi(');
+    expect(config).not.toContain('./src/styles/custom.css');
   });
 
-  it("declares 9 sidebar sections matching the IA redesign", async () => {
+  it('declares 9 sidebar sections matching the IA redesign', async () => {
     const config = await readConfigWithSidebar();
 
     const sectionLabels = [
-      "Start here",
-      "Guides",
-      "Automation",
-      "Deploy",
-      "Customization",
-      "Outputs",
-      "Reference",
-      "Extend",
-      "Project",
+      'Start here',
+      'Guides',
+      'Automation',
+      'Deploy',
+      'Customization',
+      'Outputs',
+      'Reference',
+      'Extend',
+      'Project',
     ];
     for (const label of sectionLabels) {
-      expect(config, `sidebar section "${label}" missing`).toContain(
-        `label: '${label}'`,
-      );
+      expect(config, `sidebar section "${label}" missing`).toContain(`label: '${label}'`);
     }
   });
 
@@ -56,10 +48,10 @@ describe("docs Astro config", () => {
    * junk drawer mixing three audiences, and "Resources" held nav-bar
    * duplicates. Comparable docs sites name sections by subject instead.
    */
-  it("no longer declares the retired catch-all sections", async () => {
+  it('no longer declares the retired catch-all sections', async () => {
     const config = await readConfigWithSidebar();
 
-    for (const label of ["Walkthroughs", "Advanced", "Resources", "Customize"]) {
+    for (const label of ['Walkthroughs', 'Advanced', 'Resources', 'Customize']) {
       expect(config, `retired section "${label}" still present`).not.toContain(
         `label: '${label}',`,
       );
@@ -67,20 +59,20 @@ describe("docs Astro config", () => {
   });
 });
 
-describe("docs sidebar coverage", () => {
+describe('docs sidebar coverage', () => {
   async function* walk(dir: string): AsyncGenerator<string> {
     for (const entry of await readdir(dir, { withFileTypes: true })) {
       const full = join(dir, entry.name);
       if (entry.isDirectory()) {
         yield* walk(full);
-      } else if (entry.name.endsWith(".md") || entry.name.endsWith(".mdx")) {
+      } else if (entry.name.endsWith('.md') || entry.name.endsWith('.mdx')) {
         yield full;
       }
     }
   }
 
-  it("every content file under apps/docs/src/content/docs is referenced from sidebar or navLinks", async () => {
-    const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
+  it('every content file under apps/docs/src/content/docs is referenced from sidebar or navLinks', async () => {
+    const docsRoot = resolve(repoRoot, 'apps/docs/src/content/docs');
     const config = await readConfigWithSidebar();
 
     const slugRe = /\bslug:\s*['"]([^'"]+)['"]/g;
@@ -103,19 +95,19 @@ describe("docs sidebar coverage", () => {
 
     expect(
       orphans,
-      `orphans must be added to the sidebar or removed: ${orphans.join(", ")}`,
+      `orphans must be added to the sidebar or removed: ${orphans.join(', ')}`,
     ).toEqual([]);
   });
 
-  it("every sidebar slug resolves to an existing file", async () => {
-    const docsRoot = resolve(repoRoot, "apps/docs/src/content/docs");
+  it('every sidebar slug resolves to an existing file', async () => {
+    const docsRoot = resolve(repoRoot, 'apps/docs/src/content/docs');
     const config = await readConfigWithSidebar();
     const slugRe = /\bslug:\s*['"]([^'"]+)['"]/g;
     const slugs = [...config.matchAll(slugRe)].map((m) => m[1]);
 
     const missing: string[] = [];
     for (const slug of slugs) {
-      if (slug.startsWith("http")) continue;
+      if (slug.startsWith('http')) continue;
       const md = join(docsRoot, `${slug}.md`);
       const mdx = join(docsRoot, `${slug}.mdx`);
       try {
@@ -129,9 +121,6 @@ describe("docs sidebar coverage", () => {
       }
     }
 
-    expect(
-      missing,
-      `slugs must point to existing files: ${missing.join(", ")}`,
-    ).toEqual([]);
+    expect(missing, `slugs must point to existing files: ${missing.join(', ')}`).toEqual([]);
   });
 });

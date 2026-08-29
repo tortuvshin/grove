@@ -3,10 +3,10 @@
 // URL is configured and falls back to a regex strip when the input
 // lacks a scheme, since `site.url` accepts either form.
 export function hostOf(rawUrl?: string): string {
-  if (!rawUrl) return "example.com";
+  if (!rawUrl) return 'example.com';
   try {
     return new URL(rawUrl).host;
   } catch {
-    return rawUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    return rawUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
   }
 }

@@ -1,4 +1,4 @@
-import type { GithubMetadata } from "./schema.js";
+import type { GithubMetadata } from './schema.js';
 
 export interface GithubRepoRef {
   owner: string;
@@ -14,22 +14,22 @@ export function parseGithubRepoUrl(url: string | undefined): GithubRepoRef | und
   if (!owner || !repo) return undefined;
   return {
     owner,
-    repo: repo.replace(/\.git$/, ""),
+    repo: repo.replace(/\.git$/, ''),
   };
 }
 
 async function githubJson(path: string, token?: string): Promise<unknown | null> {
   const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
-    "User-Agent": "grove",
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'grove',
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const response = await fetch(`https://api.github.com${path}`, { headers });
   if (response.status === 404) return null;
-  if (response.status === 403 && response.headers.get("x-ratelimit-remaining") === "0") {
-    throw new Error("GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze.");
+  if (response.status === 403 && response.headers.get('x-ratelimit-remaining') === '0') {
+    throw new Error('GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze.');
   }
   if (!response.ok) {
     throw new Error(`GitHub API ${response.status} ${response.statusText} for ${path}`);
@@ -38,15 +38,17 @@ async function githubJson(path: string, token?: string): Promise<unknown | null>
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function asString(value: unknown): string | undefined {
-  return typeof value === "string" ? value : undefined;
+  return typeof value === 'string' ? value : undefined;
 }
 
 function asNumber(value: unknown): number | undefined {
-  return typeof value === "number" ? value : undefined;
+  return typeof value === 'number' ? value : undefined;
 }
 
 /**
@@ -60,11 +62,16 @@ export function resolveGithubToken(): string | undefined {
   return process.env.GH_TOKEN ?? process.env.GITHUB_TOKEN ?? undefined;
 }
 
-export async function fetchGithubMetadata(ref: GithubRepoRef, token = resolveGithubToken()): Promise<GithubMetadata | undefined> {
+export async function fetchGithubMetadata(
+  ref: GithubRepoRef,
+  token = resolveGithubToken(),
+): Promise<GithubMetadata | undefined> {
   const repo = asRecord(await githubJson(`/repos/${ref.owner}/${ref.repo}`, token));
   if (Object.keys(repo).length === 0) return undefined;
 
-  const latestRelease = asRecord(await githubJson(`/repos/${ref.owner}/${ref.repo}/releases/latest`, token));
+  const latestRelease = asRecord(
+    await githubJson(`/repos/${ref.owner}/${ref.repo}/releases/latest`, token),
+  );
   const license = asRecord(repo.license);
 
   return {
@@ -83,7 +90,9 @@ export async function fetchGithubMetadata(ref: GithubRepoRef, token = resolveGit
     createdAt: asString(repo.created_at) ?? null,
     latestReleaseAt: asString(latestRelease.published_at) ?? null,
     license: asString(license.spdx_id) ?? asString(license.name) ?? null,
-    topics: Array.isArray(repo.topics) ? repo.topics.filter((topic): topic is string => typeof topic === "string") : [],
+    topics: Array.isArray(repo.topics)
+      ? repo.topics.filter((topic): topic is string => typeof topic === 'string')
+      : [],
     language: asString(repo.language) ?? null,
     defaultBranch: asString(repo.default_branch),
     htmlUrl: asString(repo.html_url),
@@ -109,7 +118,8 @@ export function buildGithubSyncPatch(
   metadata: GithubMetadata,
   existingGithub: Record<string, unknown> | undefined,
 ): Record<string, unknown> {
-  const existingRepository = (existingGithub?.repository as Record<string, unknown> | undefined) ?? {};
+  const existingRepository =
+    (existingGithub?.repository as Record<string, unknown> | undefined) ?? {};
   const patch: Record<string, unknown> = {
     repository: {
       ...existingRepository,
@@ -123,9 +133,7 @@ export function buildGithubSyncPatch(
       archived: metadata.archived,
       disabled: metadata.disabled,
       default_branch: metadata.defaultBranch,
-      license: metadata.license
-        ? { spdx_id: metadata.license, name: metadata.license }
-        : null,
+      license: metadata.license ? { spdx_id: metadata.license, name: metadata.license } : null,
       topics: metadata.topics,
     },
   };
@@ -137,4 +145,3 @@ export function buildGithubSyncPatch(
   }
   return patch;
 }
-

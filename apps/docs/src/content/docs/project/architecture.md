@@ -5,16 +5,17 @@ description: The Grove monorepo's package boundaries, and the single build pipel
 
 ## The packages
 
-Grove is a pnpm monorepo under `packages/` — `astro`, `cli`, `core`, `starlight` — publishing four packages to npm under the `@grove-dev/*` scope, currently all at the same version (`0.6.1`):
+Grove is a pnpm monorepo under `packages/` — `astro`, `cli`, `core`, `registry`, `starlight` — publishing four packages to npm under the `@grove-dev/*` scope:
 
 | Package | What it owns |
 |---|---|
-| `@grove-dev/core` | Headless engine: resource schema, config, importers, validators, taxonomy, sitemap, `llms.txt`, OG images, and the build pipeline. |
-| `@grove-dev/astro` | Astro integration + UI: components, layouts, server view-models, and framework-agnostic `lib/` helpers (search, lenses, scores, repo-URL parsing, formatting, taxonomy counts). |
-| `@grove-dev/cli` | The `grove` command — scaffolds a Grove-powered space and orchestrates `@grove-dev/core`. |
+| `@grove-dev/core` | Headless engine: resource schema, config, importers, validators, taxonomy, search, ranking, sitemap, `llms.txt`, OG images, and the build pipeline. Pure TypeScript — no Astro, no HTML, no DOM assumptions. |
+| `@grove-dev/astro` | Astro integration + server view-models. **No `.astro` files in this package** — UI source ships from `@grove-dev/registry`. |
+| `@grove-dev/registry` | Canonical UI source. Ships registry scaffolds (currently `@grove/default`) that `grove init` installs and `grove update` reconciles. Versioned and released independently of `@grove-dev/astro`. |
+| `@grove-dev/cli` | The `grove` command — `init`, `update`, `check`, `sync`, `cleanup`, `audit`, `collection promote`, `readme generate`. |
 | `@grove-dev/starlight` | Grove's theme for Starlight — the package this docs site itself runs on. |
 
-`@grove-dev/astro` and `@grove-dev/cli` both depend on `@grove-dev/core` (`workspace:*`) — every generated artifact ultimately flows out of the core package. `@grove-dev/starlight` has no dependency on `@grove-dev/core`; it's a standalone Starlight theme and does not touch the pipeline below.
+`@grove-dev/astro` and `@grove-dev/cli` depend on `@grove-dev/core`. `@grove-dev/registry` is versioned independently per §21 of the v1 spec — engine and UI releases are independent lifecycles. `@grove-dev/starlight` is standalone.
 
 ## The single build pipeline
 
@@ -44,7 +45,7 @@ The function returns `{ generated, sitemap, llms, siteArtifacts, ogImages }` —
 
 There is no third path. Other CLI commands either call `prepareDirectory()` themselves where they need generated data (`grove sync contributors`) or work directly against `data/records/*.yml` without it (`grove sync github`, `grove import`).
 
-`grove init` scaffolds a new space from `scaffoldSource()` (`packages/cli/src/init.ts:40-42`), which prefers the packaged `dist/site` copy and falls back to `apps/example` in this repo — both carry the same six GitHub Actions workflows a scaffolded space ships with.
+`grove init` is a registry bootstrapper — it installs `@grove/default` into the consumer's `src/`, pins `@grove-dev/{core,astro,cli}` as dependencies, writes `grove.config.ts`, and emits `.grove/registry.lock.json` with the install-time hashes. Update reconciliation lives in `grove update`.
 
 ## Related
 

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   detectGithubRepo,
   extractDescription,
-  parseAwesomeMarkdown,
   type ImportedRecord,
+  parseAwesomeMarkdown,
 } from './markdown.js';
 
 describe('detectGithubRepo', () => {

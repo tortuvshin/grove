@@ -28,9 +28,10 @@
  * projects are scanned (the integration scope is too slow to be in
  * the default coverage run).
  */
-import { defineConfig } from 'vitest/config';
+
 import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { defineConfig } from 'vitest/config';
 
 const TMPDIR = resolve('./.tmp-test');
 mkdirSync(TMPDIR, { recursive: true });
@@ -51,7 +52,15 @@ export default defineConfig({
           // brief calls for "include the packages/* directories";
           // the `{test,spec}.ts` suffix keeps `.d.ts` and the
           // test files co-located in the same directory.
-          include: ['packages/*/src/**/*.{test,spec}.ts', 'apps/docs/src/**/*.{test,spec}.ts'],
+          include: [
+            'packages/*/src/**/*.{test,spec}.ts',
+            'apps/docs/src/**/*.{test,spec}.ts',
+            // The registry scaffold's source lives at
+            // packages/registry/default/ (not */src/, since `default`
+            // is itself what `grove init` installs) — its own tests
+            // (classnames.test.ts etc.) need an explicit include.
+            'packages/registry/default/**/*.{test,spec}.ts',
+          ],
           // Several core tests use process.chdir() into a tmpdir;
           // parallel test files would race on the global CWD.
           // Serialize per-package runs (each package is still its

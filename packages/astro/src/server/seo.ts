@@ -8,9 +8,9 @@
  * between pages. The pure helpers take every input as an argument —
  * no generated-data imports — so they are unit-testable in isolation.
  */
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-import { breadcrumbSchema, type JsonLdNode } from "@grove-dev/core";
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { breadcrumbSchema, type JsonLdNode } from '@grove-dev/core';
 
 /** Everything a page passes to BaseLayout for its `<head>`. */
 export interface PageSeo {
@@ -48,11 +48,11 @@ export function seoTitle(main: string, siteName: string): string {
  * whitespace, and truncate on a word boundary near 160 chars.
  */
 export function seoDescription(raw: string | undefined, fallback: string): string {
-  const source = (raw ?? "").replace(/\s+/g, " ").trim() || fallback.replace(/\s+/g, " ").trim();
+  const source = (raw ?? '').replace(/\s+/g, ' ').trim() || fallback.replace(/\s+/g, ' ').trim();
   if (source.length <= DESCRIPTION_MAX) return source;
   const cut = source.slice(0, DESCRIPTION_MAX - 1);
-  const lastSpace = cut.lastIndexOf(" ");
-  return `${(lastSpace > 80 ? cut.slice(0, lastSpace) : cut).replace(/[,;:\s]+$/, "")}…`;
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 80 ? cut.slice(0, lastSpace) : cut).replace(/[,;:\s]+$/, '')}…`;
 }
 
 /** Capitalize the first character (for titles like "Browse Projects"). */
@@ -71,34 +71,34 @@ export function recordSeoDescriptor(input: {
   categoryLabel?: string;
   singular: string;
 }): string {
-  const clause = (input.summary ?? "")
+  const clause = (input.summary ?? '')
     .split(/[.!?\n]|\s[—–]\s/)[0]
-    ?.replace(/\s+/g, " ")
+    ?.replace(/\s+/g, ' ')
     .trim();
   if (clause && clause.length > 0 && clause.length <= 45) return clause;
   const category = input.categoryLabel?.trim();
-  return category && category.toLowerCase() !== "uncategorized"
+  return category && category.toLowerCase() !== 'uncategorized'
     ? `Open-source ${category} ${input.singular}`
     : `Open-source ${input.singular}`;
 }
 
 export type OgKind =
-  | "home"
-  | "default"
-  | "record"
-  | "collection"
-  | "category"
-  | "stack"
-  | "license";
+  | 'home'
+  | 'default'
+  | 'record'
+  | 'collection'
+  | 'category'
+  | 'stack'
+  | 'license';
 
 const OG_DIR: Record<OgKind, string> = {
-  home: "home.png",
-  default: "default.png",
-  record: "records",
-  collection: "collections",
-  category: "categories",
-  stack: "stacks",
-  license: "licenses",
+  home: 'home.png',
+  default: 'default.png',
+  record: 'records',
+  collection: 'collections',
+  category: 'categories',
+  stack: 'stacks',
+  license: 'licenses',
 };
 
 /**
@@ -109,22 +109,22 @@ const OG_DIR: Record<OgKind, string> = {
  */
 export function ogPath(kind: OgKind, slug?: string, cwd = process.cwd()): string {
   const rel =
-    kind === "home" || kind === "default"
+    kind === 'home' || kind === 'default'
       ? `og/${OG_DIR[kind]}`
       : slug
         ? `og/${OG_DIR[kind]}/${slug}.png`
-        : "og/default.png";
-  if (existsSync(resolve(cwd, "public", rel))) return `/${rel}`;
+        : 'og/default.png';
+  if (existsSync(resolve(cwd, 'public', rel))) return `/${rel}`;
   // Per-page image missing — try the generated default before the SVG.
-  if (rel !== "og/default.png" && existsSync(resolve(cwd, "public", "og/default.png"))) {
-    return "/og/default.png";
+  if (rel !== 'og/default.png' && existsSync(resolve(cwd, 'public', 'og/default.png'))) {
+    return '/og/default.png';
   }
-  return "/og-image.svg";
+  return '/og-image.svg';
 }
 
 /** Join a site-relative path onto the site URL (trailing-slash safe). */
 export function absoluteUrl(siteUrl: string, path: string): string {
-  return `${siteUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+  return `${siteUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 }
 
 /**
@@ -136,6 +136,9 @@ export function breadcrumbs(
   crumbs: Array<{ path: string; name: string }>,
 ): JsonLdNode {
   return breadcrumbSchema(
-    crumbs.map((c) => ({ url: absoluteUrl(siteUrl, c.path.endsWith("/") || c.path === "" ? c.path : `${c.path}/`), name: c.name })),
+    crumbs.map((c) => ({
+      url: absoluteUrl(siteUrl, c.path.endsWith('/') || c.path === '' ? c.path : `${c.path}/`),
+      name: c.name,
+    })),
   );
 }

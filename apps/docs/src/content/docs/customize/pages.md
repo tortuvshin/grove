@@ -19,7 +19,7 @@ Create `src/pages/<page>.astro`:
 
 ```astro
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import BaseLayout from "../layouts/base-layout.astro";
 import { records } from "@grove-dev/astro/server";
 
 const recent = records
@@ -74,8 +74,8 @@ Render it from an Astro wrapper:
 
 ```astro
 ---
-import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";
-import Container from "@grove-dev/astro/layouts/Container.astro";
+import BaseLayout from "../layouts/base-layout.astro";
+import Container from "../layouts/container.astro";
 import { getPageContentHtml } from "@grove-dev/astro/server";
 import siteConfig from "@grove/generated/site-config.json";
 

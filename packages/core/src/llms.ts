@@ -1,7 +1,7 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { type GroveConfig, loadConfig } from "./config.js";
-import { slugify } from "./slug.js";
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { type GroveConfig, loadConfig } from './config.js';
+import { slugify } from './slug.js';
 
 export interface LlmsRecordInput {
   slug: string;
@@ -32,23 +32,23 @@ export interface LlmsResult {
 }
 
 const BLUEPRINT_INDEX: Record<string, string> = {
-  "project-directory": "projects",
-  "resource-hub": "resources",
-  "ecosystem-map": "entities",
+  'project-directory': 'projects',
+  'resource-hub': 'resources',
+  'ecosystem-map': 'entities',
 };
 
 const BLUEPRINT_PLURAL: Record<string, string> = {
-  "project-directory": "Projects",
-  "resource-hub": "Resources",
-  "ecosystem-map": "Entities",
+  'project-directory': 'Projects',
+  'resource-hub': 'Resources',
+  'ecosystem-map': 'Entities',
 };
 
 function directorySlug(config: GroveConfig): string {
-  return config.routes.directory ?? BLUEPRINT_INDEX[config.blueprint] ?? "items";
+  return config.routes.directory ?? BLUEPRINT_INDEX[config.blueprint] ?? 'items';
 }
 
 function pluralLabel(config: GroveConfig): string {
-  const label = config.labels.plural ?? BLUEPRINT_PLURAL[config.blueprint] ?? "Items";
+  const label = config.labels.plural ?? BLUEPRINT_PLURAL[config.blueprint] ?? 'Items';
   return label.replace(/^./, (value) => value.toUpperCase());
 }
 
@@ -61,50 +61,44 @@ function slug(value: string): string {
 }
 
 function truncate(value: string, max: number): string {
-  return value.replace(/\s+/g, " ").slice(0, max);
+  return value.replace(/\s+/g, ' ').slice(0, max);
 }
 
 function buildIndexLine(record: LlmsRecordInput): string {
-  const desc = truncate(record.description ?? "", 120);
-  const cat = record.category ?? "—";
-  const stack = record.stack ?? "—";
+  const desc = truncate(record.description ?? '', 120);
+  const cat = record.category ?? '—';
+  const stack = record.stack ?? '—';
   const stars = record.stars ?? 0;
   return `- [${record.name}](#${slug(record.slug)}) — ${cat} · ${stack} · ${stars}★ — ${desc}`;
 }
 
-function buildDetailSection(
-  record: LlmsRecordInput,
-  siteUrl: string,
-  indexSlug: string,
-): string {
+function buildDetailSection(record: LlmsRecordInput, siteUrl: string, indexSlug: string): string {
   const lines: string[] = [
     `### ${record.name}`,
-    "",
-    record.description ? `${record.description}` : "",
-    "",
+    '',
+    record.description ? `${record.description}` : '',
+    '',
     `- slug: ${record.slug}`,
-    `- category: ${record.category ?? "—"}`,
-    `- stack: ${record.stack ?? "—"}`,
+    `- category: ${record.category ?? '—'}`,
+    `- stack: ${record.stack ?? '—'}`,
     `- stars: ${record.stars ?? 0}`,
-    record.license ? `- license: ${record.license}` : "",
-    record.repoUrl ? `- repo: ${record.repoUrl}` : "",
-    record.homepageUrl ? `- homepage: ${record.homepageUrl}` : "",
+    record.license ? `- license: ${record.license}` : '',
+    record.repoUrl ? `- repo: ${record.repoUrl}` : '',
+    record.homepageUrl ? `- homepage: ${record.homepageUrl}` : '',
     `- url: ${siteUrl}/${indexSlug}/${record.slug}`,
-    record.lastCommitAt ? `- lastCommit: ${record.lastCommitAt.slice(0, 10)}` : "",
-    record.addedAt ? `- added: ${record.addedAt.slice(0, 10)}` : "",
+    record.lastCommitAt ? `- lastCommit: ${record.lastCommitAt.slice(0, 10)}` : '',
+    record.addedAt ? `- added: ${record.addedAt.slice(0, 10)}` : '',
   ].filter(Boolean);
   if (record.detail) {
-    lines.push("", "#### Detail", "", record.detail);
+    lines.push('', '#### Detail', '', record.detail);
   }
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 export function buildLlmsTxt(input: LlmsInput, config: GroveConfig): string {
-  const siteUrl = (input.siteUrl ?? config.site.url ?? "").replace(/\/$/, "");
+  const siteUrl = (input.siteUrl ?? config.site.url ?? '').replace(/\/$/, '');
   const indexSlug = directorySlug(config);
-  const visible = input.records.filter(
-    (r) => r.visibility !== "hide" && r.visibility !== "remove",
-  );
+  const visible = input.records.filter((r) => r.visibility !== 'hide' && r.visibility !== 'remove');
   return `# ${config.site.name}
 
 ${config.site.description ?? config.site.tagline}
@@ -149,68 +143,68 @@ export function buildLlmsFullTxt(
   // Discriminate on input shape rather than `config` presence: a caller that
   // mistakenly passes a catalog-shaped input alongside a config would otherwise
   // be routed into the legacy path and crash on missing legacy fields.
-  if ("generatedAt" in input) {
+  if ('generatedAt' in input) {
     const legacyInput = input as LlmsInput;
-    const siteUrl = (legacyInput.siteUrl ?? config?.site.url ?? "").replace(/\/$/, "");
-    const indexSlug = config ? directorySlug(config) : "items";
+    const siteUrl = (legacyInput.siteUrl ?? config?.site.url ?? '').replace(/\/$/, '');
+    const indexSlug = config ? directorySlug(config) : 'items';
     const visible = legacyInput.records.filter(
-      (r) => r.visibility !== "hide" && r.visibility !== "remove",
+      (r) => r.visibility !== 'hide' && r.visibility !== 'remove',
     );
-    const plural = config ? pluralLabel(config) : "Records";
-    const index = visible.map(buildIndexLine).join("\n");
+    const plural = config ? pluralLabel(config) : 'Records';
+    const index = visible.map(buildIndexLine).join('\n');
     const sections = visible
       .map((record) => buildDetailSection(record, siteUrl, indexSlug))
-      .join("\n\n");
+      .join('\n\n');
     return [
-      `# ${config?.site.name ?? legacyInput.siteUrl ?? "Directory"} — full directory`,
-      "",
+      `# ${config?.site.name ?? legacyInput.siteUrl ?? 'Directory'} — full directory`,
+      '',
       // Count the visible records, not every parsed one — llms.txt's
       // "Records indexed" line already reports the filtered count, and
       // the two disagreeing on the same build was confusing.
       `> Generated ${legacyInput.generatedAt} from ${visible.length} records.`,
       `> Source: ${siteUrl}/${indexSlug} · Regenerate with \`pnpm build\`.`,
-      "",
-      "Each section below mirrors one record detail page.",
-      "",
-      "## Index",
-      "",
+      '',
+      'Each section below mirrors one record detail page.',
+      '',
+      '## Index',
+      '',
       index,
-      "",
-      sections ? `## ${plural}` : "",
-      "",
+      '',
+      sections ? `## ${plural}` : '',
+      '',
       sections,
-      "",
-    ].join("\n");
+      '',
+    ].join('\n');
   }
 
   const catalogInput = input as LlmsFullCatalogInput;
   const lines: string[] = [];
   lines.push(`# ${catalogInput.site.name} — full catalog`);
-  lines.push("");
+  lines.push('');
   lines.push(`> ${catalogInput.site.description}`);
   lines.push(`Updated: ${catalogInput.updatedAt}`);
-  lines.push("");
+  lines.push('');
   lines.push(`Site: ${catalogInput.site.url}`);
-  lines.push("");
-  lines.push("## Taxonomies");
+  lines.push('');
+  lines.push('## Taxonomies');
   for (const taxonomy of catalogInput.taxonomies) {
     lines.push(`### ${taxonomy.title}`);
-    lines.push("");
+    lines.push('');
     if (taxonomy.description) lines.push(taxonomy.description);
     lines.push(`URL: ${taxonomy.url}`);
-    lines.push("");
+    lines.push('');
   }
-  lines.push("## Records");
+  lines.push('## Records');
   for (const record of catalogInput.records) {
     lines.push(`### ${record.title}`);
-    lines.push("");
+    lines.push('');
     lines.push(record.description);
     if (record.stack) lines.push(`Stack: ${record.stack}`);
     if (record.license) lines.push(`License: ${record.license}`);
     lines.push(`URL: ${record.url}`);
-    lines.push("");
+    lines.push('');
   }
-  return lines.join("\n");
+  return lines.join('\n');
 }
 
 export async function buildLlmsFiles(
@@ -221,15 +215,14 @@ export async function buildLlmsFiles(
   const cfg = config ?? (await loadConfig(cwd));
   const publicDir = resolve(cwd, cfg.paths.publicDir);
   await mkdir(publicDir, { recursive: true });
-  const txtPath = join(publicDir, "llms.txt");
-  const fullPath = join(publicDir, "llms-full.txt");
-  await writeFile(txtPath, buildLlmsTxt(input, cfg), "utf8");
-  await writeFile(fullPath, buildLlmsFullTxt(input, cfg), "utf8");
+  const txtPath = join(publicDir, 'llms.txt');
+  const fullPath = join(publicDir, 'llms-full.txt');
+  await writeFile(txtPath, buildLlmsTxt(input, cfg), 'utf8');
+  await writeFile(fullPath, buildLlmsFullTxt(input, cfg), 'utf8');
   return {
     txtPath,
     fullPath,
-    indexed: input.records.filter(
-      (r) => r.visibility !== "hide" && r.visibility !== "remove",
-    ).length,
+    indexed: input.records.filter((r) => r.visibility !== 'hide' && r.visibility !== 'remove')
+      .length,
   };
 }

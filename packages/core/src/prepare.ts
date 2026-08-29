@@ -1,27 +1,16 @@
-import { readFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { readFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 
-import { generate, type GenerateResult } from "./build-data.js";
-import { readContentFile } from "./content-body.js";
-import type { CollectionEntry } from "./collections.js";
-import { loadCollections } from "./collections-io.js";
-import { runCollection } from "./collector.js";
-import { loadConfig } from "./config.js";
-import {
-  buildLlmsFiles,
-  type LlmsRecordInput,
-  type LlmsResult,
-} from "./llms.js";
-import {
-  buildSitemap,
-  type SitemapInput,
-  type SitemapResult,
-} from "./sitemap.js";
-import { buildOgImages, type OgBuildResult } from "./og-image.js";
-import {
-  buildSiteArtifacts,
-  type SiteArtifactsResult,
-} from "./site-artifacts.js";
+import { type GenerateResult, generate } from './build-data.js';
+import type { CollectionEntry } from './collections.js';
+import { loadCollections } from './collections-io.js';
+import { runCollection } from './collector.js';
+import { loadConfig } from './config.js';
+import { readContentFile } from './content-body.js';
+import { buildLlmsFiles, type LlmsRecordInput, type LlmsResult } from './llms.js';
+import { buildOgImages, type OgBuildResult } from './og-image.js';
+import { buildSiteArtifacts, type SiteArtifactsResult } from './site-artifacts.js';
+import { buildSitemap, type SitemapInput, type SitemapResult } from './sitemap.js';
 
 export interface PrepareDirectoryResult {
   generated: GenerateResult;
@@ -60,12 +49,10 @@ type GeneratedRecord = {
   health?: { visibility?: string };
 };
 
-function toSitemapItem(record: GeneratedRecord): SitemapInput["items"][number] {
+function toSitemapItem(record: GeneratedRecord): SitemapInput['items'][number] {
   const visibility = record.health?.visibility ?? record.visibility;
   const lastCommitAt =
-    record.lastCommitAt ??
-    record.github?.pushedAt ??
-    record.github?.repository?.pushed_at;
+    record.lastCommitAt ?? record.github?.pushedAt ?? record.github?.repository?.pushed_at;
   return {
     slug: record.slug,
     ...(visibility !== undefined ? { visibility } : {}),
@@ -84,32 +71,25 @@ function readDetailBody(root: string, record: GeneratedRecord): string | undefin
   if (!record.content) return undefined;
   const found = readContentFile(record.content, [
     resolve(root, record.content),
-    join(root, record.content.replace(/^\.\//, "")),
+    join(root, record.content.replace(/^\.\//, '')),
   ]);
   const body = found?.body.trim();
   return body ? body : undefined;
 }
 
 function toLlmsRecord(root: string, record: GeneratedRecord): LlmsRecordInput {
-  const stars =
-    record.github?.stars ?? record.github?.repository?.stargazers_count;
+  const stars = record.github?.stars ?? record.github?.repository?.stargazers_count;
   const visibility = record.health?.visibility ?? record.visibility;
   const repoUrl = record.repoUrl ?? record.links?.github;
   const homepageUrl = record.homepageUrl ?? record.links?.website;
   const license =
-    record.github?.license ??
-    record.github?.repository?.license?.spdx_id ??
-    undefined;
+    record.github?.license ?? record.github?.repository?.license?.spdx_id ?? undefined;
   const lastCommitAt =
-    record.lastCommitAt ??
-    record.github?.pushedAt ??
-    record.github?.repository?.pushed_at;
+    record.lastCommitAt ?? record.github?.pushedAt ?? record.github?.repository?.pushed_at;
   return {
     slug: record.slug,
     name: record.name ?? record.title ?? record.slug,
-    ...(record.description !== undefined
-      ? { description: record.description }
-      : {}),
+    ...(record.description !== undefined ? { description: record.description } : {}),
     ...(record.category !== undefined ? { category: record.category } : {}),
     ...(record.stack !== undefined ? { stack: record.stack } : {}),
     ...(stars !== undefined ? { stars } : {}),
@@ -134,26 +114,18 @@ function toLlmsRecord(root: string, record: GeneratedRecord): LlmsRecordInput {
  * therefore run `astro dev`, `astro check`, and `astro build` directly;
  * it does not need consumer-owned prebuild scripts.
  */
-export async function prepareDirectory(
-  cwd = process.cwd(),
-): Promise<PrepareDirectoryResult> {
+export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDirectoryResult> {
   const root = resolve(cwd);
   const config = await loadConfig(root);
   const generated = await generate(root, config);
   const payload = JSON.parse(
-    await readFile(
-      join(root, config.paths.generatedDir, "records.full.json"),
-      "utf8",
-    ),
+    await readFile(join(root, config.paths.generatedDir, 'records.full.json'), 'utf8'),
   ) as { generatedAt?: string; records?: GeneratedRecord[] };
   const generatedAt = payload.generatedAt ?? new Date().toISOString();
   const records = payload.records ?? [];
 
   const sitePayload = JSON.parse(
-    await readFile(
-      join(root, config.paths.generatedDir, "site-config.json"),
-      "utf8",
-    ),
+    await readFile(join(root, config.paths.generatedDir, 'site-config.json'), 'utf8'),
   ) as {
     stats?: { totalRecords?: number; repositoryStars?: number };
     blueprintConfig?: { labelPlural?: string };
@@ -173,9 +145,7 @@ export async function prepareDirectory(
       collections: collections.map((c) => ({
         slug: c.slug,
         index: c.seo?.index !== false,
-        ...(c.editorial?.lastReviewedAt
-          ? { lastReviewedAt: c.editorial.lastReviewedAt }
-          : {}),
+        ...(c.editorial?.lastReviewedAt ? { lastReviewedAt: c.editorial.lastReviewedAt } : {}),
       })),
       taxonomies: {
         categories: (sitePayload.taxonomy?.categories ?? []).map((t) => t.id),
@@ -195,11 +165,7 @@ export async function prepareDirectory(
     root,
     config,
   );
-  const siteArtifacts = await buildSiteArtifacts(
-    root,
-    config,
-    sitePayload.stats,
-  );
+  const siteArtifacts = await buildSiteArtifacts(root, config, sitePayload.stats);
 
   // ── Per-page OG images ────────────────────────────────────────────
   // Everything below is derived data for social cards; a wrong count
@@ -207,7 +173,7 @@ export async function prepareDirectory(
   // is internally non-fatal).
   const visible = records.filter((r) => {
     const visibility = r.health?.visibility ?? r.visibility;
-    return visibility !== "hide" && visibility !== "remove";
+    return visibility !== 'hide' && visibility !== 'remove';
   });
   const licenseOf = (r: GeneratedRecord) =>
     r.github?.license ?? r.github?.repository?.license?.spdx_id ?? undefined;
@@ -227,13 +193,12 @@ export async function prepareDirectory(
   const collectionEntries: CollectionEntry[] = visible.map((r) => {
     const status = r.health?.visibility ?? r.visibility;
     const stars = r.github?.stars ?? r.github?.repository?.stargazers_count;
-    const pushedAt =
-      r.lastCommitAt ?? r.github?.pushedAt ?? r.github?.repository?.pushed_at;
+    const pushedAt = r.lastCommitAt ?? r.github?.pushedAt ?? r.github?.repository?.pushed_at;
     const license = licenseOf(r);
     return {
       slug: r.slug,
       title: r.name ?? r.title ?? r.slug,
-      description: r.description ?? "",
+      description: r.description ?? '',
       url: `/${r.slug}/`,
       ...(r.stack !== undefined ? { stack: r.stack } : {}),
       ...(license !== undefined ? { license } : {}),
@@ -245,19 +210,19 @@ export async function prepareDirectory(
   });
   const taxonomyJobs = [
     ...(sitePayload.taxonomy?.categories ?? []).map((t) => ({
-      facet: "category" as const,
+      facet: 'category' as const,
       id: t.id,
       label: t.name ?? t.id,
       count: categoryCounts.get(t.id.toLowerCase()) ?? 0,
     })),
     ...(sitePayload.taxonomy?.stacks ?? []).map((t) => ({
-      facet: "stack" as const,
+      facet: 'stack' as const,
       id: t.id,
       label: t.name ?? t.id,
       count: stackCounts.get(t.id.toLowerCase()) ?? 0,
     })),
     ...(sitePayload.taxonomy?.licenses ?? []).map((t) => ({
-      facet: "license" as const,
+      facet: 'license' as const,
       id: t.id,
       label: t.name ?? t.id,
       count: licenseCounts.get(t.id.toLowerCase()) ?? 0,
@@ -271,7 +236,7 @@ export async function prepareDirectory(
       const descriptor = r.summary ?? r.description;
       const stars = r.github?.stars ?? r.github?.repository?.stargazers_count;
       const category = r.category
-        ? categoryNames.get(r.category.toLowerCase()) ?? r.category
+        ? (categoryNames.get(r.category.toLowerCase()) ?? r.category)
         : undefined;
       return {
         slug: r.slug,

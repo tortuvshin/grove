@@ -21,11 +21,11 @@ export function buildLastmodMap(contentDir = CONTENT_MARKER, cwd = process.cwd()
       encoding: 'utf8',
     }).trim();
     if (shallow === 'true') return map;
-    const out = execFileSync(
-      'git',
-      ['log', '--format=%x00%cI', '--name-only', '--', contentDir],
-      { cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
-    );
+    const out = execFileSync('git', ['log', '--format=%x00%cI', '--name-only', '--', contentDir], {
+      cwd,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+    });
     let current;
     for (const rawLine of out.split('\n')) {
       if (rawLine.startsWith('\0')) {

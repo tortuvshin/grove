@@ -10,22 +10,22 @@ export type ButtonVariant = 'default' | 'link' | 'secondary' | 'outline' | 'ghos
 export type LegacyButtonVariant = 'primary' | 'minimal';
 
 const LEGACY_VARIANTS = {
-    primary: 'default',
-    minimal: 'ghost',
+  primary: 'default',
+  minimal: 'ghost',
 } as const satisfies Record<LegacyButtonVariant, ButtonVariant>;
 
 type Props = (Omit<HTMLAttributes<'a'>, 'href'> | HTMLAttributes<'button'>) & {
-    /** Renders an `<a>` when set, a `<button>` otherwise. */
-    href?: string | URL | null | undefined;
-    variant?: ButtonVariant | LegacyButtonVariant;
-    size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'icon-sm' | 'icon-md' | 'icon-lg';
+  /** Renders an `<a>` when set, a `<button>` otherwise. */
+  href?: string | URL | null | undefined;
+  variant?: ButtonVariant | LegacyButtonVariant;
+  size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'icon-sm' | 'icon-md' | 'icon-lg';
 };
 
 const { class: className, variant = 'default', size = 'md', ...attrs } = Astro.props;
 
 // Normalise so the stylesheet only ever has to know about the canonical variant names.
 const resolvedVariant: ButtonVariant =
-    LEGACY_VARIANTS[variant as LegacyButtonVariant] ?? (variant as ButtonVariant);
+  LEGACY_VARIANTS[variant as LegacyButtonVariant] ?? (variant as ButtonVariant);
 
 const Tag = attrs.href ? 'a' : 'button';
 ---

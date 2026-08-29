@@ -2,14 +2,14 @@
 import type { HTMLTag, Polymorphic } from 'astro/types';
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
-    /**
-     * Whether the item is inset (has left padding)
-     */
-    inset?: boolean;
-    /**
-     * Whether the item is disabled
-     */
-    disabled?: boolean;
+  /**
+   * Whether the item is inset (has left padding)
+   */
+  inset?: boolean;
+  /**
+   * Whether the item is disabled
+   */
+  disabled?: boolean;
 };
 
 const { class: className, inset = false, disabled = false, as: Tag = 'div', ...rest } = Astro.props;

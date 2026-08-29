@@ -1,5 +1,5 @@
-export type PageType = "home" | "directory" | "collection" | "record" | "content" | "empty" | "404";
-export type Profile = "mobile" | "desktop";
+export type PageType = 'home' | 'directory' | 'collection' | 'record' | 'content' | 'empty' | '404';
+export type Profile = 'mobile' | 'desktop';
 
 export interface PageManifestEntry {
   path: string;
@@ -44,7 +44,7 @@ export interface BudgetConfig {
 export interface BudgetViolation {
   page: PageManifestEntry;
   profile: Profile;
-  category: "score" | "metric";
+  category: 'score' | 'metric';
   name: keyof LighthouseScores | keyof LighthouseMetrics;
   expected: number;
   actual: number;
@@ -79,8 +79,13 @@ export const DEFAULT_BUDGET: BudgetConfig = {
   metrics: { lcp: 2500, cls: 0.25, tbt: 200 },
 };
 
-const SCORE_KEYS: (keyof LighthouseScores)[] = ["performance", "accessibility", "bestPractices", "seo"];
-const METRIC_KEYS: (keyof LighthouseMetrics)[] = ["lcp", "cls", "tbt"];
+const SCORE_KEYS: (keyof LighthouseScores)[] = [
+  'performance',
+  'accessibility',
+  'bestPractices',
+  'seo',
+];
+const METRIC_KEYS: (keyof LighthouseMetrics)[] = ['lcp', 'cls', 'tbt'];
 
 export function evaluateBudget(
   result: AuditResult,
@@ -90,7 +95,7 @@ export function evaluateBudget(
   // Lighthouse cannot meaningfully measure 404 responses — all scores come
   // back as 0 and all metrics as Infinity. The audit still runs the page
   // for completeness, but the 100×4 budget does not apply.
-  if (page.type === "404") return [];
+  if (page.type === '404') return [];
 
   const violations: BudgetViolation[] = [];
   for (const key of SCORE_KEYS) {
@@ -98,14 +103,28 @@ export function evaluateBudget(
     // Lighthouse's SEO category fails its is-crawlable audit on any
     // noindex page — so the SEO score can never reach 1 there. The
     // other three categories still apply in full.
-    if (key === "seo" && page.type === "empty") continue;
+    if (key === 'seo' && page.type === 'empty') continue;
     if (result.scores[key] < budget.scores[key]) {
-      violations.push({ page, profile: result.profile, category: "score", name: key, expected: budget.scores[key], actual: result.scores[key] });
+      violations.push({
+        page,
+        profile: result.profile,
+        category: 'score',
+        name: key,
+        expected: budget.scores[key],
+        actual: result.scores[key],
+      });
     }
   }
   for (const key of METRIC_KEYS) {
     if (result.metrics[key] > budget.metrics[key]) {
-      violations.push({ page, profile: result.profile, category: "metric", name: key, expected: budget.metrics[key], actual: result.metrics[key] });
+      violations.push({
+        page,
+        profile: result.profile,
+        category: 'metric',
+        name: key,
+        expected: budget.metrics[key],
+        actual: result.metrics[key],
+      });
     }
   }
   return violations;

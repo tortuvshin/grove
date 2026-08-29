@@ -1,4 +1,4 @@
-import type { Collection, CollectionQuery } from "./collections.js";
+import type { Collection, CollectionQuery } from './collections.js';
 
 export function findRelated(target: Collection, all: Collection[], limit: number): Collection[] {
   const targetKeys = queryKeys(target.query);

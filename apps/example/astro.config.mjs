@@ -1,9 +1,10 @@
 // @ts-check
 // SPDX-License-Identifier: MIT
-import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
+
 import groveAstro from '@grove-dev/astro';
 import { loadConfig } from '@grove-dev/core';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'astro/config';
 
 // `site` is the canonical URL the build uses for absolute links
 // (sitemap, OpenGraph, canonical tags, JSON-LD). It is read directly

@@ -3,13 +3,15 @@
   "files": {
     "includes": [
       "**",
-      "!node_modules",
-      "!dist",
-      "!coverage",
-      "!.tmp-test",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/coverage",
+      "!**/.tmp-test",
       "!**/*.gen.ts",
-      "!.astro",
-      "!.cache"
+      "!**/.astro",
+      "!**/.cache",
+      "!.grove",
+      "!**/data/generated"
     ]
   },
   "formatter": {
@@ -47,5 +49,17 @@
       "indentWidth": 2,
       "trailingCommas": "none"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.svg"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noSvgWithoutTitle": "off"
+          }
+        }
+      }
+    }
+  ]
 }

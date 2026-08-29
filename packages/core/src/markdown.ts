@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { stringify as stringifyYaml } from 'yaml';
-import { blueprintKind, type Blueprint, type ProjectRecord } from './schema.js';
+import { type Blueprint, blueprintKind, type ProjectRecord } from './schema.js';
 import { uniqueSlug } from './slug.js';
 
 export interface ImportedRecord {

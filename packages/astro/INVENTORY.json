@@ -1,0 +1,17 @@
+{
+  "sourceRoot": "packages/astro/src",
+  "fileCount": 1,
+  "businessLogicCount": 0,
+  "forbiddenImportCount": 0,
+  "files": [
+    {
+      "path": "packages/astro/src/styles.css",
+      "kind": "styles",
+      "hasBusinessLogic": false,
+      "forbiddenImports": [],
+      "hash": "92bc6e1da6c784fa1b235ff633a0b30ae9b0c24c331c8e8b5893f8f1e42ac79e",
+      "lines": 1181,
+      "target": "registry/default/styles/system.css"
+    }
+  ]
+}

@@ -18,9 +18,9 @@
  * state and never mutate their input.
  */
 
-export type CollectionKind = "curated" | "generated";
+export type CollectionKind = 'curated' | 'generated';
 
-export type RankingPreset = "quality" | "active" | "curated" | "recency" | "stars";
+export type RankingPreset = 'quality' | 'active' | 'curated' | 'recency' | 'stars';
 
 export interface CollectionQuery {
   stacks?: string[];
@@ -97,7 +97,7 @@ export function filterEntries(
   query: CollectionQuery,
 ): CollectionEntry[] {
   return entries.filter((entry) => {
-    if (query.stacks?.length && !query.stacks.includes(entry.stack ?? "")) {
+    if (query.stacks?.length && !query.stacks.includes(entry.stack ?? '')) {
       return false;
     }
     if (query.platforms?.length) {
@@ -119,13 +119,10 @@ export function filterEntries(
       for (const l of entry.licenses ?? []) candidates.add(l.toLowerCase());
       if (!wanted.some((w) => candidates.has(w))) return false;
     }
-    if (query.kinds?.length && !query.kinds.includes(entry.status ?? "")) {
+    if (query.kinds?.length && !query.kinds.includes(entry.status ?? '')) {
       return false;
     }
-    if (
-      query.excludeStatuses?.length &&
-      query.excludeStatuses.includes(entry.status ?? "")
-    ) {
+    if (query.excludeStatuses?.length && query.excludeStatuses.includes(entry.status ?? '')) {
       return false;
     }
     if (query.minStars != null && (entry.stars ?? 0) < query.minStars) {
@@ -148,15 +145,15 @@ export function rankEntries(
 ): CollectionEntry[] {
   const copy = [...entries];
   switch (ranking.preset) {
-    case "quality":
+    case 'quality':
       return copy.sort((a, b) => score(b) - score(a));
-    case "active":
+    case 'active':
       return copy.sort((a, b) => activeScore(b) - activeScore(a));
-    case "recency":
+    case 'recency':
       return copy.sort((a, b) => parseTime(b.pushedAt) - parseTime(a.pushedAt));
-    case "stars":
+    case 'stars':
       return copy.sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0));
-    case "curated":
+    case 'curated':
       return copy;
   }
 }

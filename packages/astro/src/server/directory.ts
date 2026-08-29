@@ -30,27 +30,28 @@
  *  resolution error, which is the correct signal — a build that
  *  silently renders an empty directory hides real config mistakes.
  */
+
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import fullPayload from '@grove/generated/records.full.json';
 import indexPayload from '@grove/generated/records.index.json';
 import siteConfigPayload from '@grove/generated/site-config.json';
-import { existsSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import type {
+  EntityRecord,
+  IndexEntityRecord,
+  IndexProjectRecord,
+  IndexRecord,
+  IndexResourceRecord,
+  ProjectRecord,
+  Resource,
+  ResourceRecord,
+} from '@grove-dev/core';
+import { headingSlug, readContentFile, stripFrontmatter, uniqueSlug } from '@grove-dev/core';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { getSingletonHighlighter } from 'shiki';
 import { prettySlug } from '../lib/display.js';
-import { headingSlug, readContentFile, stripFrontmatter, uniqueSlug } from '@grove-dev/core';
-import type {
-  ProjectRecord,
-  ResourceRecord,
-  EntityRecord,
-  Resource,
-  IndexRecord,
-  IndexProjectRecord,
-  IndexResourceRecord,
-  IndexEntityRecord,
-} from '@grove-dev/core';
 
 interface FullPayload {
   schemaVersion?: number;
@@ -676,10 +677,14 @@ const SUPPORTED_LANGS = [
   'properties',
 ];
 const globalAny = globalThis as GlobalWithShiki;
-const highlighter = await (globalAny[SHIKI_HIGHLIGHTER] ??= getSingletonHighlighter({
-  themes: ['github-light', 'github-dark-default'],
-  langs: SUPPORTED_LANGS,
-}));
+const pendingHighlighter =
+  globalAny[SHIKI_HIGHLIGHTER] ??
+  getSingletonHighlighter({
+    themes: ['github-light', 'github-dark-default'],
+    langs: SUPPORTED_LANGS,
+  });
+globalAny[SHIKI_HIGHLIGHTER] = pendingHighlighter;
+const highlighter = await pendingHighlighter;
 
 // Release the previous engine's WASM heap on HMR. Without this the
 // old engine is unreachable but not disposed, which is the leak

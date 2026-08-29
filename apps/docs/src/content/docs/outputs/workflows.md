@@ -1,12 +1,14 @@
 ---
 title: GitHub workflows
-description: The six workflows grove init scaffolds, what each one actually runs, and how each commits its result back.
+description: The six workflows Grove's reference app ships, what each one actually runs, and how each commits its result back.
 ---
 
-`grove init` copies six workflows into your space's `.github/workflows/`. Two
-are CI and deploy; four are the maintenance cadence that keeps generated data
-and the README from drifting. Every scheduled one is also
-`workflow_dispatch`-able.
+Grove's reference app (`apps/example` in the Grove repository) ships six
+workflows under `.github/workflows/` — copy them into your own space as a
+starting point; `grove init` installs the UI registry and config files and
+does not write workflows itself. Two are CI and deploy; four are the
+maintenance cadence that keeps generated data and the README from drifting.
+Every scheduled one is also `workflow_dispatch`-able.
 
 ## The shipped workflows
 

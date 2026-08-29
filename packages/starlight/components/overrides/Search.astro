@@ -3,12 +3,12 @@ import '@pagefind/default-ui/css/ui.css';
 import project from 'virtual:starlight/project-context';
 
 const pagefindTranslations = {
-    placeholder: Astro.locals.t('search.label'),
-    ...Object.fromEntries(
-        Object.entries(Astro.locals.t.all())
-            .filter(([key]) => key.startsWith('pagefind.'))
-            .map(([key, value]) => [key.replace('pagefind.', ''), value])
-    ),
+  placeholder: Astro.locals.t('search.label'),
+  ...Object.fromEntries(
+    Object.entries(Astro.locals.t.all())
+      .filter(([key]) => key.startsWith('pagefind.'))
+      .map(([key, value]) => [key.replace('pagefind.', ''), value]),
+  ),
 };
 
 const dataAttributes: DOMStringMap = { 'data-translations': JSON.stringify(pagefindTranslations) };

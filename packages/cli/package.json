@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/cli",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Grove CLI — scaffolds Grove-powered spaces and orchestrates @grove-dev/core commands.",
   "license": "MIT",
@@ -42,13 +42,14 @@
     "README.md"
   ],
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\" && node ../../scripts/package-site.mjs",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\"",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/cli",
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
     "@grove-dev/core": "workspace:*",
+    "@grove-dev/registry": "workspace:*",
     "chrome-launcher": "^1.2.1",
     "commander": "^15.0.0",
     "lighthouse": "^12.8.2",

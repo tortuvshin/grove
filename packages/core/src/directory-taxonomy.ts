@@ -12,14 +12,12 @@ type TaxonomyRecord = {
  * use this helper instead of concatenating both fields directly.
  */
 export function projectStackIds(
-  project?: Pick<TaxonomyRecord, "stack" | "stacks"> | null,
+  project?: Pick<TaxonomyRecord, 'stack' | 'stacks'> | null,
 ): string[] {
   if (!project) return [];
   return [
     ...new Set(
-      [project.stack, ...(project.stacks ?? [])].filter(
-        (stack): stack is string => Boolean(stack),
-      ),
+      [project.stack, ...(project.stacks ?? [])].filter((stack): stack is string => Boolean(stack)),
     ),
   ];
 }
@@ -28,7 +26,7 @@ export function projectStackIds(
 export function countByCategory(items: TaxonomyRecord[] = []): Map<string, number> {
   const m = new Map<string, number>();
   for (const a of items) {
-    const k = a.category || "Other";
+    const k = a.category || 'Other';
     m.set(k, (m.get(k) ?? 0) + 1);
   }
   return m;
@@ -39,7 +37,7 @@ export function countByStack(items: TaxonomyRecord[] = []): Map<string, number> 
   const m = new Map<string, number>();
   for (const a of items) {
     const stacks = new Set(projectStackIds(a));
-    if (stacks.size === 0) stacks.add("Other");
+    if (stacks.size === 0) stacks.add('Other');
     for (const stack of stacks) m.set(stack, (m.get(stack) ?? 0) + 1);
   }
   return m;

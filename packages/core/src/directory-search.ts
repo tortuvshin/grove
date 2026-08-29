@@ -1,5 +1,5 @@
-import type { IndexRecord } from "./schema.js";
-import { labelDisplay, lensDisplay, statusDisplay } from "./directory-display.js";
+import { labelDisplay, lensDisplay, statusDisplay } from './directory-display.js';
+import type { IndexRecord } from './schema.js';
 
 /**
  * URL-driven filter state for the /items discovery page.
@@ -26,31 +26,31 @@ export type IndexFilters = {
 
 /** Available sort orders, in UI order. */
 export const SORT_OPTIONS = [
-  { value: "recently-updated", label: "Recently updated" },
-  { value: "most-starred", label: "Most starred" },
-  { value: "recently-added", label: "Recently added" },
-  { value: "best-overall", label: "Best overall" },
-  { value: "alphabetical", label: "Alphabetical" },
+  { value: 'recently-updated', label: 'Recently updated' },
+  { value: 'most-starred', label: 'Most starred' },
+  { value: 'recently-added', label: 'Recently added' },
+  { value: 'best-overall', label: 'Best overall' },
+  { value: 'alphabetical', label: 'Alphabetical' },
 ] as const;
 
-export type IndexSort = (typeof SORT_OPTIONS)[number]["value"];
+export type IndexSort = (typeof SORT_OPTIONS)[number]['value'];
 
-const DEFAULT_SORT: IndexSort = "recently-updated";
+const DEFAULT_SORT: IndexSort = 'recently-updated';
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 
 const KEYS = {
-  q: "q",
-  stacks: "stack",
-  platforms: "platform",
-  categories: "category",
-  tags: "tag",
-  labels: "label",
-  licenses: "license",
-  statuses: "status",
-  lens: "lens",
-  sort: "sort",
-  page: "page",
+  q: 'q',
+  stacks: 'stack',
+  platforms: 'platform',
+  categories: 'category',
+  tags: 'tag',
+  labels: 'label',
+  licenses: 'license',
+  statuses: 'status',
+  lens: 'lens',
+  sort: 'sort',
+  page: 'page',
 } as const;
 
 /**
@@ -60,9 +60,10 @@ const KEYS = {
 export function filtersFromSearchParams(sp: URLSearchParams): IndexFilters {
   const rawSort = sp.get(KEYS.sort);
   // Backwards-compat: old "most-mature" sort now maps to "best-overall".
-  const normalizedSort = rawSort === "most-mature" ? "best-overall" : rawSort;
+  const normalizedSort = rawSort === 'most-mature' ? 'best-overall' : rawSort;
   const sort: IndexSort | undefined =
-    normalizedSort && (SORT_OPTIONS as readonly { value: string }[]).some((o) => o.value === normalizedSort)
+    normalizedSort &&
+    (SORT_OPTIONS as readonly { value: string }[]).some((o) => o.value === normalizedSort)
       ? (normalizedSort as IndexSort)
       : undefined;
   const rawPage = Number(sp.get(KEYS.page));
@@ -77,7 +78,10 @@ export function filtersFromSearchParams(sp: URLSearchParams): IndexFilters {
     tags: sp.getAll(KEYS.tags).filter(Boolean),
     labels: sp.getAll(KEYS.labels).filter(Boolean),
     licenses: sp.getAll(KEYS.licenses).filter(Boolean),
-    statuses: sp.getAll(KEYS.statuses).flatMap((s) => s.split(",")).filter(Boolean),
+    statuses: sp
+      .getAll(KEYS.statuses)
+      .flatMap((s) => s.split(','))
+      .filter(Boolean),
     ...(lens !== null ? { lens } : {}),
     ...(sort !== undefined ? { sort } : {}),
     ...(page !== undefined ? { page } : {}),
@@ -98,7 +102,7 @@ export function searchParamsFromFilters(f: IndexFilters): URLSearchParams {
   for (const v of f.tags ?? []) sp.append(KEYS.tags, v);
   for (const v of f.labels ?? []) sp.append(KEYS.labels, v);
   for (const v of f.licenses ?? []) sp.append(KEYS.licenses, v);
-  if (f.statuses?.length) sp.set(KEYS.statuses, f.statuses.join(","));
+  if (f.statuses?.length) sp.set(KEYS.statuses, f.statuses.join(','));
   if (f.lens) sp.set(KEYS.lens, f.lens);
   if (f.sort && f.sort !== DEFAULT_SORT) sp.set(KEYS.sort, f.sort);
   if (f.page && f.page !== DEFAULT_PAGE) sp.set(KEYS.page, String(f.page));
@@ -129,16 +133,16 @@ export const PAGE_SIZE = DEFAULT_PAGE_SIZE;
  * than vanishing.
  */
 function recordName(record: IndexRecord): string {
-  return record.kind === "resource" ? record.title : record.name;
+  return record.kind === 'resource' ? record.title : record.name;
 }
 
 function projectStars(record: IndexRecord): number {
-  return record.kind === "project" ? record.github?.stars ?? 0 : 0;
+  return record.kind === 'project' ? (record.github?.stars ?? 0) : 0;
 }
 
 function recordUpdatedAt(record: IndexRecord): string | null {
-  if (record.kind === "project") return record.github?.pushedAt ?? null;
-  if (record.kind === "resource") return record.publishedAt ?? null;
+  if (record.kind === 'project') return record.github?.pushedAt ?? null;
+  if (record.kind === 'resource') return record.publishedAt ?? null;
   return null;
 }
 
@@ -150,18 +154,18 @@ export function applySort(items: IndexRecord[], sort: IndexSort): IndexRecord[] 
   const arr = items.slice();
   const ts = (s?: string | null): number => (s ? new Date(s).valueOf() : 0);
   switch (sort) {
-    case "most-starred":
+    case 'most-starred':
       arr.sort((a, b) => projectStars(b) - projectStars(a));
       break;
-    case "recently-updated":
+    case 'recently-updated':
       arr.sort((a, b) => ts(recordUpdatedAt(b)) - ts(recordUpdatedAt(a)));
       break;
-    case "recently-added":
+    case 'recently-added':
       arr.sort((a, b) => ts(recordAddedAt(b)) - ts(recordAddedAt(a)));
       break;
-    case "best-overall": {
+    case 'best-overall': {
       const reviewed = (a: IndexRecord) => (a.curation?.reviewed ? 1 : 0);
-      const visible = (a: IndexRecord) => (a.visibility === "keep" ? 1 : 0);
+      const visible = (a: IndexRecord) => (a.visibility === 'keep' ? 1 : 0);
       arr.sort((a, b) => {
         const reviewedDelta = reviewed(b) - reviewed(a);
         if (reviewedDelta !== 0) return reviewedDelta;
@@ -171,7 +175,7 @@ export function applySort(items: IndexRecord[], sort: IndexSort): IndexRecord[] 
       });
       break;
     }
-    case "alphabetical":
+    case 'alphabetical':
       arr.sort((a, b) => recordName(a).localeCompare(recordName(b)));
       break;
   }
@@ -196,17 +200,14 @@ export function totalPages(itemCount: number, pageSize = PAGE_SIZE): number {
  * component and the client-side rebuild in `DirectoryIndexClient`
  * so the two never drift.
  */
-export function paginationPageList(
-  active: number,
-  count: number,
-): Array<number | "ellipsis"> {
+export function paginationPageList(active: number, count: number): Array<number | 'ellipsis'> {
   if (count <= 7) return Array.from({ length: count }, (_, index) => index + 1);
   const pages = new Set([1, count, active - 1, active, active + 1]);
   const sorted = [...pages].filter((page) => page >= 1 && page <= count).sort((a, b) => a - b);
-  const result: Array<number | "ellipsis"> = [];
+  const result: Array<number | 'ellipsis'> = [];
   for (const page of sorted) {
     const previous = result.at(-1);
-    if (typeof previous === "number" && page - previous > 1) result.push("ellipsis");
+    if (typeof previous === 'number' && page - previous > 1) result.push('ellipsis');
     result.push(page);
   }
   return result;
@@ -239,9 +240,7 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
   // License ids are case-insensitive (GitHub emits `MIT`, curated ids
   // are lowercase). Normalize the filter side too so `?license=MIT`
   // and `?license=mit` are equivalent.
-  const licenses = f.licenses?.length
-    ? new Set(f.licenses.map((l) => l.toLowerCase()))
-    : null;
+  const licenses = f.licenses?.length ? new Set(f.licenses.map((l) => l.toLowerCase())) : null;
   const statuses = f.statuses?.length ? new Set(f.statuses) : null;
 
   return items.filter((a) => {
@@ -249,32 +248,25 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
     // stacks, platforms, tags, backend, architecture, stateManagement,
     // bestFor, whyListed, license, status.
     if (q) {
-      const repoUrl = a.kind === "project" ? a.repoUrl : a.links.github ?? "";
-      const ownerMatch =
-        /github\.com\/([^/]+)\//.exec(repoUrl ?? "")?.[1]?.toLowerCase() ?? "";
+      const repoUrl = a.kind === 'project' ? a.repoUrl : (a.links.github ?? '');
+      const ownerMatch = /github\.com\/([^/]+)\//.exec(repoUrl ?? '')?.[1]?.toLowerCase() ?? '';
       const projectFields =
-        a.kind === "project"
+        a.kind === 'project'
           ? [
               a.stack,
               ...a.stacks,
               ...a.platforms,
               a.projectType,
-              a.difficulty ?? "",
-              a.codebaseSize ?? "",
+              a.difficulty ?? '',
+              a.codebaseSize ?? '',
               ...a.bestFor,
               ...a.whyListed,
-              a.github?.license ?? "",
-              a.health?.status ? statusDisplay(a.health.status) : "",
+              a.github?.license ?? '',
+              a.health?.status ? statusDisplay(a.health.status) : '',
             ]
           : [];
-      const resourceFields =
-        a.kind === "resource"
-          ? [a.type, a.topic, a.author ?? ""]
-          : [];
-      const entityFields =
-        a.kind === "entity"
-          ? [a.type, a.location ?? "", a.parent ?? ""]
-          : [];
+      const resourceFields = a.kind === 'resource' ? [a.type, a.topic, a.author ?? ''] : [];
+      const entityFields = a.kind === 'entity' ? [a.type, a.location ?? '', a.parent ?? ''] : [];
       const haystack = [
         recordName(a),
         ownerMatch,
@@ -285,21 +277,19 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
         ...resourceFields,
         ...entityFields,
       ]
-        .join(" ")
+        .join(' ')
         .toLowerCase();
       if (!haystack.includes(q)) return false;
     }
 
     if (stacks) {
-      if (a.kind !== "project") return false;
-      const allStacks = [a.stack, ...a.stacks].filter(
-        (stack): stack is string => Boolean(stack),
-      );
+      if (a.kind !== 'project') return false;
+      const allStacks = [a.stack, ...a.stacks].filter((stack): stack is string => Boolean(stack));
       if (!allStacks.some((s) => stacks.has(s))) return false;
     }
 
     if (platforms) {
-      if (a.kind !== "project") return false;
+      if (a.kind !== 'project') return false;
       if (!a.platforms.some((p) => platforms.has(p))) return false;
     }
 
@@ -314,7 +304,7 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
     }
 
     if (licenses) {
-      if (a.kind !== "project") return false;
+      if (a.kind !== 'project') return false;
       // Curated `licenses` array takes precedence; fall back to the
       // GitHub sync's `github.license.spdx_id` (recorded as the
       // raw spdx_id string by `directory-repo.ts`).
@@ -329,7 +319,7 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
       // `[]`-suppresses-fallback semantic tested below.
       const curated = (a.licenses ?? []) as string[];
       const hasCurated = Array.isArray(a.licenses);
-      const synced = (a.github?.license ?? "").toLowerCase();
+      const synced = (a.github?.license ?? '').toLowerCase();
       const candidates = new Set<string>();
       if (hasCurated) {
         for (const l of curated) candidates.add(l.toLowerCase());
@@ -341,7 +331,7 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
     }
 
     if (statuses) {
-      if (a.kind !== "project") return false;
+      if (a.kind !== 'project') return false;
       const status = a.health?.status;
       if (!status || !statuses.has(status)) return false;
     }
@@ -355,9 +345,9 @@ export function filterRecords(items: IndexRecord[], f: IndexFilters): IndexRecor
 }
 
 /** Serialize filters back to a browsable URL under `pathPrefix`. */
-export function hrefForFilters(f: IndexFilters, pathPrefix = ""): string {
+export function hrefForFilters(f: IndexFilters, pathPrefix = ''): string {
   const params = searchParamsFromFilters(f);
-  return `${pathPrefix}${params.size ? `?${params}` : ""}`;
+  return `${pathPrefix}${params.size ? `?${params}` : ''}`;
 }
 
 /**
@@ -365,12 +355,12 @@ export function hrefForFilters(f: IndexFilters, pathPrefix = ""): string {
  * definition for the server render and the client rebuild — they had
  * drifted as two hand-rolled copies.
  */
-export function hrefForPage(f: IndexFilters, page: number, pathPrefix = ""): string {
+export function hrefForPage(f: IndexFilters, page: number, pathPrefix = ''): string {
   return hrefForFilters({ ...f, page }, pathPrefix);
 }
 
 /** URL that drops every filter but keeps the chosen sort. */
-export function hrefForClearedFilters(f: IndexFilters, pathPrefix = ""): string {
+export function hrefForClearedFilters(f: IndexFilters, pathPrefix = ''): string {
   return hrefForFilters({ sort: f.sort }, pathPrefix);
 }
 
@@ -404,19 +394,19 @@ export interface FilterChip {
 
 /** Which taxonomy file backs each filter key. `tags` live in topics.yml. */
 const CHIP_TAXONOMY_KIND: Partial<Record<keyof IndexFilters, string>> = {
-  stacks: "stacks",
-  platforms: "platforms",
-  categories: "categories",
-  tags: "topics",
-  licenses: "licenses",
+  stacks: 'stacks',
+  platforms: 'platforms',
+  categories: 'categories',
+  tags: 'topics',
+  licenses: 'licenses',
 };
 
 const CHIP_PREFIX: Partial<Record<keyof IndexFilters, string>> = {
-  stacks: "Stack",
-  platforms: "Platform",
-  categories: "Category",
-  tags: "Tag",
-  licenses: "License",
+  stacks: 'Stack',
+  platforms: 'Platform',
+  categories: 'Category',
+  tags: 'Tag',
+  licenses: 'License',
 };
 
 /**
@@ -431,49 +421,47 @@ export function activeFilterChips(
   f: IndexFilters,
   context: { taxonomy?: TaxonomyNames; pathPrefix?: string } = {},
 ): FilterChip[] {
-  const { taxonomy, pathPrefix = "" } = context;
-  const out: Omit<FilterChip, "href">[] = [];
+  const { taxonomy, pathPrefix = '' } = context;
+  const out: Omit<FilterChip, 'href'>[] = [];
 
   const display = (key: keyof IndexFilters, value: string): string => {
     const kind = CHIP_TAXONOMY_KIND[key];
-    const name = kind
-      ? taxonomy?.[kind]?.find((entry) => entry.id === value)?.name
-      : undefined;
+    const name = kind ? taxonomy?.[kind]?.find((entry) => entry.id === value)?.name : undefined;
     return `${CHIP_PREFIX[key]}: ${name ?? value}`;
   };
 
   if (f.q && f.q.trim()) {
-    out.push({ key: "q", value: "", label: `“${f.q}”` });
+    out.push({ key: 'q', value: '', label: `“${f.q}”` });
   }
   for (const v of f.stacks ?? []) {
-    out.push({ key: "stacks", value: v, label: display("stacks", v) });
+    out.push({ key: 'stacks', value: v, label: display('stacks', v) });
   }
   for (const v of f.platforms ?? []) {
-    out.push({ key: "platforms", value: v, label: display("platforms", v) });
+    out.push({ key: 'platforms', value: v, label: display('platforms', v) });
   }
   for (const v of f.categories ?? []) {
-    out.push({ key: "categories", value: v, label: display("categories", v) });
+    out.push({ key: 'categories', value: v, label: display('categories', v) });
   }
   for (const v of f.tags ?? []) {
-    out.push({ key: "tags", value: v, label: display("tags", v) });
+    out.push({ key: 'tags', value: v, label: display('tags', v) });
   }
   for (const v of f.labels ?? []) {
-    out.push({ key: "labels", value: v, label: labelDisplay(v) ?? v });
+    out.push({ key: 'labels', value: v, label: labelDisplay(v) ?? v });
   }
   for (const v of f.licenses ?? []) {
-    out.push({ key: "licenses", value: v, label: display("licenses", v) });
+    out.push({ key: 'licenses', value: v, label: display('licenses', v) });
   }
   if (f.lens) {
-    out.push({ key: "lens", value: f.lens, label: lensDisplay(f.lens) });
+    out.push({ key: 'lens', value: f.lens, label: lensDisplay(f.lens) });
   }
   // Status: collapse the "stale,quiet" composite into a single chip.
   if (f.statuses && f.statuses.length) {
-    const joined = f.statuses.join(",");
-    if (joined === "stale,quiet") {
-      out.push({ key: "statuses", value: "stale,quiet", label: statusDisplay("needs-maintainer") });
+    const joined = f.statuses.join(',');
+    if (joined === 'stale,quiet') {
+      out.push({ key: 'statuses', value: 'stale,quiet', label: statusDisplay('needs-maintainer') });
     } else {
       for (const v of f.statuses) {
-        out.push({ key: "statuses", value: v, label: statusDisplay(v) });
+        out.push({ key: 'statuses', value: v, label: statusDisplay(v) });
       }
     }
   }
@@ -498,7 +486,7 @@ export function removeFilter(
   value: string,
 ): IndexFilters {
   let next: IndexFilters;
-  if (key === "q" || key === "lens") {
+  if (key === 'q' || key === 'lens') {
     // Scalar filters are removed entirely rather than treated like arrays.
     const { [key]: _drop, ...rest } = f;
     next = rest;
@@ -508,9 +496,7 @@ export function removeFilter(
     // `needs-maintainer` is represented internally by the composite
     // statuses `stale,quiet`, but is displayed as one removable chip.
     const filtered =
-      key === "statuses" && value === "stale,quiet"
-        ? []
-        : current.filter((v) => v !== value);
+      key === 'statuses' && value === 'stale,quiet' ? [] : current.filter((v) => v !== value);
     if (filtered.length === 0) {
       const { [key]: _drop, ...rest } = f;
       next = rest;
@@ -548,9 +534,7 @@ export function buildFacets(
      * in the default count-desc-then-alpha order. Curated tag ids
      * (topics.yml) flow through the `tags` key the same way.
      */
-    order?: Partial<
-      Record<"stacks" | "platforms" | "categories" | "tags" | "licenses", string[]>
-    >;
+    order?: Partial<Record<'stacks' | 'platforms' | 'categories' | 'tags' | 'licenses', string[]>>;
   },
 ) {
   const curatedTagIds = options?.curatedTagIds;
@@ -563,17 +547,17 @@ export function buildFacets(
   // platform / category / license filters, but we ignore the
   // currently selected stacks. This is the "intersection count"
   // UX the audit asked for.
-  const subFiltersFor = (facet: "stacks" | "platforms" | "categories" | "tags" | "licenses") => {
+  const subFiltersFor = (facet: 'stacks' | 'platforms' | 'categories' | 'tags' | 'licenses') => {
     if (!filters) return null;
     const next = { ...filters };
-    if (facet === "stacks") delete next.stacks;
-    if (facet === "platforms") delete next.platforms;
-    if (facet === "categories") delete next.categories;
-    if (facet === "tags") delete next.tags;
-    if (facet === "licenses") delete next.licenses;
+    if (facet === 'stacks') delete next.stacks;
+    if (facet === 'platforms') delete next.platforms;
+    if (facet === 'categories') delete next.categories;
+    if (facet === 'tags') delete next.tags;
+    if (facet === 'licenses') delete next.licenses;
     return next;
   };
-  const itemsForFacet = (facet: "stacks" | "platforms" | "categories" | "tags" | "licenses") => {
+  const itemsForFacet = (facet: 'stacks' | 'platforms' | 'categories' | 'tags' | 'licenses') => {
     const sub = subFiltersFor(facet);
     return sub ? filterRecords(items, sub) : items;
   };
@@ -586,14 +570,14 @@ export function buildFacets(
     label: new Map<string, number>(),
     license: new Map<string, number>(),
   };
-  const stackScoped = itemsForFacet("stacks");
-  const platformScoped = itemsForFacet("platforms");
-  const categoryScoped = itemsForFacet("categories");
-  const tagScoped = itemsForFacet("tags");
-  const licenseScoped = itemsForFacet("licenses");
+  const stackScoped = itemsForFacet('stacks');
+  const platformScoped = itemsForFacet('platforms');
+  const categoryScoped = itemsForFacet('categories');
+  const tagScoped = itemsForFacet('tags');
+  const licenseScoped = itemsForFacet('licenses');
 
   for (const a of stackScoped) {
-    if (a.kind === "project") {
+    if (a.kind === 'project') {
       const allStacks = new Set(
         [a.stack, ...a.stacks].filter((stack): stack is string => Boolean(stack)),
       );
@@ -601,7 +585,7 @@ export function buildFacets(
     }
   }
   for (const a of platformScoped) {
-    if (a.kind === "project") {
+    if (a.kind === 'project') {
       for (const p of a.platforms) counts.platform.set(p, (counts.platform.get(p) ?? 0) + 1);
     }
   }
@@ -614,15 +598,13 @@ export function buildFacets(
     }
   }
   for (const a of licenseScoped) {
-    if (a.kind === "project") {
+    if (a.kind === 'project') {
       // Consult the curated `licenses` array first (lowercased for
       // facet-key consistency), then fall back to the GitHub-synced
       // SPDX id. Mirrors the filterRecords branch so facet counts
       // and filter results can never disagree.
-      const curated = ((a.licenses ?? []) as string[])
-        .map((l) => l.toLowerCase())
-        .filter(Boolean);
-      const synced = (a.github?.license ?? "").toLowerCase();
+      const curated = ((a.licenses ?? []) as string[]).map((l) => l.toLowerCase()).filter(Boolean);
+      const synced = (a.github?.license ?? '').toLowerCase();
       const ids = curated.length ? curated : synced ? [synced] : [];
       for (const id of ids) {
         counts.license.set(id, (counts.license.get(id) ?? 0) + 1);
@@ -640,10 +622,7 @@ export function buildFacets(
       .map(([value, count]) => ({ value, count }));
   // Taxonomy order wins when provided: known ids keep their YAML
   // position, data-only ids append in the count-desc fallback order.
-  const applyOrder = (
-    entries: Array<{ value: string; count: number }>,
-    orderedIds?: string[],
-  ) => {
+  const applyOrder = (entries: Array<{ value: string; count: number }>, orderedIds?: string[]) => {
     if (!orderedIds || orderedIds.length === 0) return entries;
     const position = new Map(orderedIds.map((id, index) => [id, index]));
     return [...entries].sort((a, b) => {

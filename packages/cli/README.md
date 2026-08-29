@@ -7,10 +7,10 @@ files you own.
 
 Grove does not replace Astro. Use Astro's normal `pnpm dev` and
 `pnpm build` — the `@grove-dev/astro` integration prepares data
-automatically. The CLI bundles a release snapshot of the
-repository's real `apps/example/`, so the scaffolded project and
-the site this repository builds and tests cannot drift into separate
-implementations.
+automatically. `grove init` installs the `@grove/default` scaffold
+from `@grove-dev/registry` (a shadcn registry) with the official
+shadcn CLI, and `grove update` reconciles that install against the
+registry later without overwriting files you have edited.
 
 ## Install
 

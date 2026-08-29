@@ -15,61 +15,63 @@
  *
  * Order (dependency graph): core -> astro -> cli -> starlight.
  */
-import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
-import { readFile, unlink, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const ROOT = resolve(__dirname, "..");
-const LOCK_FILE = resolve(ROOT, ".release-in-progress");
-const WORKSPACE_LOCK_FILE = resolve(ROOT, "pnpm-lock.yaml");
+const ROOT = resolve(__dirname, '..');
+const LOCK_FILE = resolve(ROOT, '.release-in-progress');
+const WORKSPACE_LOCK_FILE = resolve(ROOT, 'pnpm-lock.yaml');
 
 const args = parseArgs(process.argv.slice(2));
 if (args.help) {
   printHelp();
   process.exit(0);
 }
-const RELEASE_KIND = args.kind ?? "patch";
+const RELEASE_KIND = args.kind ?? 'patch';
 const EXPLICIT_VERSION = args.bump;
-const DRY_RUN = Boolean(args["dry-run"]);
-const SKIP_BUILD = Boolean(args["skip-build"]);
-const SKIP_BUMP = Boolean(args["skip-bump"]);
+const DRY_RUN = Boolean(args['dry-run']);
+const SKIP_BUILD = Boolean(args['skip-build']);
+const SKIP_BUMP = Boolean(args['skip-bump']);
 
 const PACKAGES = [
-  { name: "@grove-dev/core", dir: "packages/core" },
-  { name: "@grove-dev/astro", dir: "packages/astro" },
-  { name: "@grove-dev/cli", dir: "packages/cli" },
-  { name: "@grove-dev/starlight", dir: "packages/starlight" },
+  { name: '@grove-dev/core', dir: 'packages/core' },
+  { name: '@grove-dev/astro', dir: 'packages/astro' },
+  { name: '@grove-dev/cli', dir: 'packages/cli' },
+  { name: '@grove-dev/starlight', dir: 'packages/starlight' },
 ];
 
 async function snapshotReleaseFiles() {
   const paths = [
-    ...PACKAGES.map((pkg) => resolve(ROOT, pkg.dir, "package.json")),
+    ...PACKAGES.map((pkg) => resolve(ROOT, pkg.dir, 'package.json')),
     WORKSPACE_LOCK_FILE,
   ];
-  return new Map(await Promise.all(paths.map(async (path) => [path, await readFile(path, "utf8")])));
+  return new Map(
+    await Promise.all(paths.map(async (path) => [path, await readFile(path, 'utf8')])),
+  );
 }
 
 async function restoreReleaseFiles(snapshot) {
-  await Promise.all([...snapshot].map(([path, contents]) => writeFile(path, contents, "utf8")));
+  await Promise.all([...snapshot].map(([path, contents]) => writeFile(path, contents, 'utf8')));
 }
 
 function parseArgs(argv) {
   const out = {};
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--minor") out.kind = "minor";
-    else if (a === "--major") out.kind = "major";
-    else if (a === "--patch") out.kind = "patch";
-    else if (a === "--dry-run") out["dry-run"] = true;
-    else if (a === "--skip-build") out["skip-build"] = true;
-    else if (a === "--skip-bump") out["skip-bump"] = true;
-    else if (a === "--help" || a === "-h") out.help = true;
-    else if (a.startsWith("--bump=")) out.bump = a.slice("--bump=".length);
-    else if (a.startsWith("--otp=")) out.otp = a.slice("--otp=".length);
+    if (a === '--minor') out.kind = 'minor';
+    else if (a === '--major') out.kind = 'major';
+    else if (a === '--patch') out.kind = 'patch';
+    else if (a === '--dry-run') out['dry-run'] = true;
+    else if (a === '--skip-build') out['skip-build'] = true;
+    else if (a === '--skip-bump') out['skip-bump'] = true;
+    else if (a === '--help' || a === '-h') out.help = true;
+    else if (a.startsWith('--bump=')) out.bump = a.slice('--bump='.length);
+    else if (a.startsWith('--otp=')) out.otp = a.slice('--otp='.length);
   }
   return out;
 }
@@ -106,9 +108,9 @@ Order (dependency graph):
 }
 
 function bumpVersion(current, kind) {
-  const [maj, min, pat] = current.split(".").map((n) => parseInt(n, 10));
-  if (kind === "major") return `${maj + 1}.0.0`;
-  if (kind === "minor") return `${maj}.${min + 1}.0`;
+  const [maj, min, pat] = current.split('.').map((n) => parseInt(n, 10));
+  if (kind === 'major') return `${maj + 1}.0.0`;
+  if (kind === 'minor') return `${maj}.${min + 1}.0`;
   return `${maj}.${min}.${pat + 1}`;
 }
 
@@ -124,33 +126,29 @@ function logErr(msg) {
 }
 
 async function readPkg(dir) {
-  return JSON.parse(await readFile(resolve(ROOT, dir, "package.json"), "utf8"));
+  return JSON.parse(await readFile(resolve(ROOT, dir, 'package.json'), 'utf8'));
 }
 async function writePkg(dir, pkg) {
-  await writeFile(
-    resolve(ROOT, dir, "package.json"),
-    `${JSON.stringify(pkg, null, 2)}\n`,
-    "utf8",
-  );
+  await writeFile(resolve(ROOT, dir, 'package.json'), `${JSON.stringify(pkg, null, 2)}\n`, 'utf8');
 }
 
 function run(cmd, args, opts = {}) {
   return new Promise((resolveP, rejectP) => {
     const child = spawn(cmd, args, {
-      stdio: "inherit",
+      stdio: 'inherit',
       cwd: ROOT,
-      shell: process.platform === "win32",
+      shell: process.platform === 'win32',
       ...opts,
     });
-    child.on("exit", (code) => {
+    child.on('exit', (code) => {
       if (code === 0) resolveP();
-      else rejectP(new Error(`${cmd} ${args.join(" ")} exited with code ${code}`));
+      else rejectP(new Error(`${cmd} ${args.join(' ')} exited with code ${code}`));
     });
   });
 }
 
 async function bumpAll() {
-  logSection("Bumping versions");
+  logSection('Bumping versions');
   const updates = [];
 
   for (const p of PACKAGES) {
@@ -189,27 +187,27 @@ async function installAll() {
   // ones. We don't pass `--frozen-lockfile` because the version
   // bump necessarily invalidates the lockfile's
   // `packages/<x>:name` / `version` rows.
-  logSection("Refreshing node_modules");
-  await run("pnpm", ["install"]);
+  logSection('Refreshing node_modules');
+  await run('pnpm', ['install']);
 }
 
 async function buildAll() {
-  logSection("Building all packages");
-  await run("pnpm", ["-r", "build"]);
+  logSection('Building all packages');
+  await run('pnpm', ['-r', 'build']);
 }
 
 async function publishAll() {
-  logSection(`Publishing (${DRY_RUN ? "dry-run" : "live"})`);
+  logSection(`Publishing (${DRY_RUN ? 'dry-run' : 'live'})`);
   // If the npm account has 2FA enabled, the user can pass a one-time
   // password via the NPM_OTP env var or the --otp=<code> flag. The
   // release script forwards it to every `pnpm publish` invocation.
   const otp = process.env.NPM_OTP ?? args.otp;
   for (const p of PACKAGES) {
-    const args = ["--filter", p.name, "publish", "--no-git-checks", "--access", "public"];
-    if (DRY_RUN) args.push("--dry-run");
+    const args = ['--filter', p.name, 'publish', '--no-git-checks', '--access', 'public'];
+    if (DRY_RUN) args.push('--dry-run');
     if (otp) args.push(`--otp=${otp}`);
     try {
-      await run("pnpm", args);
+      await run('pnpm', args);
       logOk(`Published ${p.name}`);
     } catch (err) {
       logErr(`Failed to publish ${p.name}: ${err.message}`);
@@ -219,12 +217,14 @@ async function publishAll() {
 }
 
 async function main() {
-  console.log("Grove release script");
-  console.log(`  kind:       ${RELEASE_KIND}${EXPLICIT_VERSION ? ` (explicit ${EXPLICIT_VERSION})` : ""}`);
+  console.log('Grove release script');
+  console.log(
+    `  kind:       ${RELEASE_KIND}${EXPLICIT_VERSION ? ` (explicit ${EXPLICIT_VERSION})` : ''}`,
+  );
   console.log(`  dry-run:    ${DRY_RUN}`);
   console.log(`  skip-build: ${SKIP_BUILD}`);
   console.log(`  skip-bump:  ${SKIP_BUMP}`);
-  console.log(`  order:      ${PACKAGES.map((p) => p.name).join(" → ")}`);
+  console.log(`  order:      ${PACKAGES.map((p) => p.name).join(' → ')}`);
 
   // Idempotency guard (audit finding: release script is not
   // idempotent on failure). We write `.release-in-progress` at the
@@ -250,7 +250,7 @@ async function main() {
     process.exit(1);
   }
   const dryRunSnapshot = DRY_RUN ? await snapshotReleaseFiles() : null;
-  await writeFile(LOCK_FILE, `${new Date().toISOString()}\n`, "utf8");
+  await writeFile(LOCK_FILE, `${new Date().toISOString()}\n`, 'utf8');
 
   let completed = false;
   try {
@@ -271,7 +271,7 @@ async function main() {
     // maintainer cannot accidentally double-bump by re-running blindly.
     if (dryRunSnapshot) {
       await restoreReleaseFiles(dryRunSnapshot);
-      logOk("Restored versions and lockfile after dry-run");
+      logOk('Restored versions and lockfile after dry-run');
     }
     if (completed || dryRunSnapshot) {
       try {
@@ -282,8 +282,8 @@ async function main() {
     }
   }
 
-  logSection("Done");
-  console.log(DRY_RUN ? "Dry-run complete — no actual publishes." : "All packages published.");
+  logSection('Done');
+  console.log(DRY_RUN ? 'Dry-run complete — no actual publishes.' : 'All packages published.');
 }
 
 main().catch((err) => {

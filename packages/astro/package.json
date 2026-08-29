@@ -1,8 +1,8 @@
 {
   "name": "@grove-dev/astro",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "type": "module",
-  "description": "Composable Astro UI, data adapters, and integration for Grove directories.",
+  "description": "Astro integration + server view-models for Grove directories. UI ships from @grove-dev/registry, not from this package.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -10,9 +10,7 @@
   "keywords": [
     "grove",
     "astro",
-    "ui",
     "directory",
-    "components",
     "static-site"
   ],
   "homepage": "https://github.com/tortuvshin/grove#readme",
@@ -31,11 +29,8 @@
   "files": [
     "assets",
     "dist",
-    "src/components",
-    "src/layouts",
     "src/lib",
     "src/server",
-    "src/ui",
     "src/index.ts",
     "src/styles.css",
     "README.md"
@@ -46,14 +41,9 @@
       "import": "./dist/index.js"
     },
     "./styles.css": "./src/styles.css",
-    "./components/*.astro": "./src/components/*.astro",
-    "./components/*": "./src/components/*.astro",
     "./server": "./src/server/index.ts",
     "./server/*": "./dist/server/*.js",
-    "./ui/*.astro": "./src/ui/*.astro",
-    "./ui/*": "./src/ui/*.ts",
-    "./layouts/*.astro": "./src/layouts/*.astro",
-    "./layouts/*": "./src/layouts/*.astro"
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json",

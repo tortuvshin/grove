@@ -1,13 +1,8 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
-import { parse as parseYaml } from "yaml";
-import {
-  blueprintKind,
-  recordsFileSchema,
-  type GroveConfig,
-  type Resource,
-} from "./schema.js";
-import { loadConfig } from "./config.js";
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { basename, join, resolve } from 'node:path';
+import { parse as parseYaml } from 'yaml';
+import { loadConfig } from './config.js';
+import { blueprintKind, type GroveConfig, type Resource, recordsFileSchema } from './schema.js';
 
 export interface CleanupCandidate {
   slug: string;
@@ -28,19 +23,20 @@ export interface CleanupReport {
 }
 
 function toCandidate(record: Resource): CleanupCandidate {
-  const name = record.kind === "resource" ? record.title : record.name;
-  const url =
-    record.links?.github ?? record.links?.website ?? record.links?.source ?? "";
-  const health = (record as { health?: { status?: string; tier?: string; staleReason?: string | null } })
-    .health;
-  const gh = (record as { github?: { repository?: { pushed_at?: string; stargazers_count?: number } } })
-    .github?.repository;
+  const name = record.kind === 'resource' ? record.title : record.name;
+  const url = record.links?.github ?? record.links?.website ?? record.links?.source ?? '';
+  const health = (
+    record as { health?: { status?: string; tier?: string; staleReason?: string | null } }
+  ).health;
+  const gh = (
+    record as { github?: { repository?: { pushed_at?: string; stargazers_count?: number } } }
+  ).github?.repository;
   return {
     slug: record.slug,
     name,
     url,
-    status: health?.status ?? "unknown",
-    tier: health?.tier ?? "experimental",
+    status: health?.status ?? 'unknown',
+    tier: health?.tier ?? 'experimental',
     staleReason: health?.staleReason ?? null,
     lastCommitAt: gh?.pushed_at ?? null,
     stars: gh?.stargazers_count ?? 0,
@@ -52,7 +48,7 @@ export function pickCleanupCandidates(records: Resource[]): Resource[] {
   return records.filter((r) => {
     const health = (r as { health?: { cleanupCandidate?: boolean; status?: string } }).health;
     if (health?.cleanupCandidate) return true;
-    if (health?.status === "unknown" || health?.status === "needs_review") return true;
+    if (health?.status === 'unknown' || health?.status === 'needs_review') return true;
     return false;
   });
 }
@@ -75,13 +71,13 @@ export async function cleanupStale(
 
   const expectedKind = blueprintKind[cfg.blueprint];
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith(".yml")).sort();
+  const files = entries.filter((f) => f.endsWith('.yml')).sort();
 
   const records: Resource[] = [];
   for (const file of files) {
-    const fileSlug = basename(file, ".yml");
-    const text = await readFile(join(recordsDir, file), "utf8");
-    const raw = (parseYaml(text, { schema: "core" }) ?? {}) as Record<string, unknown>;
+    const fileSlug = basename(file, '.yml');
+    const text = await readFile(join(recordsDir, file), 'utf8');
+    const raw = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
     if (!raw.kind) raw.kind = expectedKind;
     try {
       const normalized = recordsFileSchema.parse(raw);
@@ -99,7 +95,7 @@ export async function cleanupStale(
     totalCandidates: candidates.length,
     candidates,
   };
-  const path = join(outDir, "cleanup-report.json");
-  await writeFile(path, JSON.stringify(report, null, 2), "utf8");
+  const path = join(outDir, 'cleanup-report.json');
+  await writeFile(path, JSON.stringify(report, null, 2), 'utf8');
   return { report, path };
 }

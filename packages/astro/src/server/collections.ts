@@ -1,10 +1,10 @@
-import type { Collection, CollectionEntry } from "@grove-dev/core";
-import { collectionSchema, findRelated, runCollection } from "@grove-dev/core";
-import { absoluteUrl, ogPath, type PageSeo, seoDescription, seoTitle } from "./seo.js";
+import type { Collection, CollectionEntry } from '@grove-dev/core';
+import { collectionSchema, findRelated, runCollection } from '@grove-dev/core';
+import { absoluteUrl, ogPath, type PageSeo, seoDescription, seoTitle } from './seo.js';
 
 // Collection YAML loading lives in @grove-dev/core (it also feeds the
 // sitemap and OG-image pipelines there); re-exported for page code.
-export { loadCollections } from "@grove-dev/core";
+export { loadCollections } from '@grove-dev/core';
 
 interface RouteHint {
   routeSlug?: string;
@@ -65,19 +65,18 @@ export function recordsToCollectionEntries(
   records: RawRecord[],
   site: RouteHint,
 ): CollectionEntry[] {
-  const routeSlug = site.routeSlug ?? site.blueprintConfig?.routeSlug ?? "projects";
+  const routeSlug = site.routeSlug ?? site.blueprintConfig?.routeSlug ?? 'projects';
   const out: CollectionEntry[] = [];
   for (const r of records) {
-    if (r.visibility === "hide") continue;
+    if (r.visibility === 'hide') continue;
     if (!r.slug) continue;
-    const categories = [
-      ...(r.category ? [r.category] : []),
-      ...(r.tags ?? []),
-    ].filter((value, index, self) => self.indexOf(value) === index);
+    const categories = [...(r.category ? [r.category] : []), ...(r.tags ?? [])].filter(
+      (value, index, self) => self.indexOf(value) === index,
+    );
     out.push({
       slug: r.slug,
       title: r.name ?? r.title ?? r.slug,
-      description: r.description ?? "",
+      description: r.description ?? '',
       url: `/${routeSlug}/${r.slug}/`,
       repoHref: r.repoUrl ?? r.links?.github,
       homepageHref: r.links?.website,
@@ -89,11 +88,7 @@ export function recordsToCollectionEntries(
       // If only `license` (singular, GitHub-synced) is present, mirror
       // it into the array so the filter still matches it.
       licenses:
-        r.licenses && r.licenses.length > 0
-          ? r.licenses
-          : r.license
-            ? [r.license]
-            : undefined,
+        r.licenses && r.licenses.length > 0 ? r.licenses : r.license ? [r.license] : undefined,
       status: r.visibility,
       stars: r.stars ?? r.github?.repository?.stargazers_count,
       forks: r.forks ?? r.github?.repository?.forks_count,
@@ -118,7 +113,7 @@ export interface CollectionPageModel {
     slug: string;
     title: string;
     description: string;
-    kind: "curated" | "generated";
+    kind: 'curated' | 'generated';
     selectionNote?: string;
     introduction?: string;
   };
@@ -140,7 +135,7 @@ export interface CollectionIndexModel {
     slug: string;
     title: string;
     description: string;
-    kind: "curated" | "generated";
+    kind: 'curated' | 'generated';
     count: number;
     url: string;
   }>;
@@ -151,14 +146,19 @@ export interface CollectionIndexModel {
 
 export interface CollectionTeaserModel {
   total: number;
-  collections: CollectionIndexModel["collections"];
+  collections: CollectionIndexModel['collections'];
 }
 
 export function getCollectionPageModel(
   collection: Collection,
   entries: CollectionEntry[],
   allCollections: Collection[],
-  site?: { name?: string; url?: string; siteUrl?: string; blueprintConfig?: { labelPlural?: string } },
+  site?: {
+    name?: string;
+    url?: string;
+    siteUrl?: string;
+    blueprintConfig?: { labelPlural?: string };
+  },
 ): CollectionPageModel {
   const result = runCollection(collection, entries);
   const related = findRelated(collection, allCollections, 4).map((c) => ({
@@ -166,9 +166,9 @@ export function getCollectionPageModel(
     title: c.title,
     url: `/collections/${c.slug}/`,
   }));
-  const siteUrl = (site?.siteUrl ?? site?.url ?? "https://example.com").replace(/\/$/, "");
-  const siteName = site?.name ?? "";
-  const plural = site?.blueprintConfig?.labelPlural ?? "items";
+  const siteUrl = (site?.siteUrl ?? site?.url ?? 'https://example.com').replace(/\/$/, '');
+  const siteName = site?.name ?? '';
+  const plural = site?.blueprintConfig?.labelPlural ?? 'items';
   const pageUrl = absoluteUrl(siteUrl, `collections/${collection.slug}/`);
   // CollectionPage + ItemList + BreadcrumbList. The ItemList is capped
   // at 50 entries to keep the payload bounded; search engines don't
@@ -178,13 +178,13 @@ export function getCollectionPageModel(
     name: collection.seo?.title ?? collection.title,
     description: collection.seo?.description ?? collection.description,
     items: result.entries.slice(0, 50).map((entry) => ({
-      url: entry.url.startsWith("http") ? entry.url : absoluteUrl(siteUrl, entry.url),
+      url: entry.url.startsWith('http') ? entry.url : absoluteUrl(siteUrl, entry.url),
       name: entry.title,
       ...(entry.description ? { description: entry.description } : {}),
     })),
     crumbs: [
-      { url: `${siteUrl}/`, name: "Home" },
-      { url: absoluteUrl(siteUrl, "collections/"), name: "Collections" },
+      { url: `${siteUrl}/`, name: 'Home' },
+      { url: absoluteUrl(siteUrl, 'collections/'), name: 'Collections' },
       { url: pageUrl, name: collection.title },
     ],
   });
@@ -195,11 +195,8 @@ export function getCollectionPageModel(
     title:
       collection.seo?.title ??
       seoTitle(`${collection.title} — ${result.entries.length} ${plural}`, siteName),
-    description: seoDescription(
-      collection.seo?.description,
-      collection.description,
-    ),
-    image: ogPath("collection", collection.slug),
+    description: seoDescription(collection.seo?.description, collection.description),
+    image: ogPath('collection', collection.slug),
     ...(siteName ? { imageAlt: `${collection.title} — ${siteName}` } : {}),
     jsonLd: jsonLd as unknown as Record<string, unknown>[],
     noindex: collection.seo?.index === false,
@@ -225,7 +222,12 @@ export function getCollectionPageModel(
 export function getCollectionIndexModel(
   collections: Collection[],
   entries: CollectionEntry[],
-  site?: { name?: string; url?: string; siteUrl?: string; blueprintConfig?: { labelPlural?: string } },
+  site?: {
+    name?: string;
+    url?: string;
+    siteUrl?: string;
+    blueprintConfig?: { labelPlural?: string };
+  },
 ): CollectionIndexModel {
   const rows = collections.map((c) => {
     const result = runCollection(c, entries);
@@ -240,20 +242,20 @@ export function getCollectionIndexModel(
   });
   let seo: PageSeo | undefined;
   if (site) {
-    const siteUrl = (site.siteUrl ?? site.url ?? "https://example.com").replace(/\/$/, "");
-    const siteName = site.name ?? "";
-    const plural = site.blueprintConfig?.labelPlural ?? "items";
-    const title = seoTitle("Collections", siteName);
+    const siteUrl = (site.siteUrl ?? site.url ?? 'https://example.com').replace(/\/$/, '');
+    const siteName = site.name ?? '';
+    const plural = site.blueprintConfig?.labelPlural ?? 'items';
+    const title = seoTitle('Collections', siteName);
     const description = seoDescription(
       undefined,
-      `${rows.length} curated and generated collections of ${plural} on ${siteName || "this site"} — hand-picked lists kept in sync with the source files.`,
+      `${rows.length} curated and generated collections of ${plural} on ${siteName || 'this site'} — hand-picked lists kept in sync with the source files.`,
     );
     seo = {
       title,
       description,
-      image: ogPath("default"),
+      image: ogPath('default'),
       jsonLd: collectionSchema({
-        url: absoluteUrl(siteUrl, "collections/"),
+        url: absoluteUrl(siteUrl, 'collections/'),
         name: title,
         description,
         items: rows.map((row) => ({
@@ -262,8 +264,8 @@ export function getCollectionIndexModel(
           ...(row.description ? { description: row.description } : {}),
         })),
         crumbs: [
-          { url: `${siteUrl}/`, name: "Home" },
-          { url: absoluteUrl(siteUrl, "collections/"), name: "Collections" },
+          { url: `${siteUrl}/`, name: 'Home' },
+          { url: absoluteUrl(siteUrl, 'collections/'), name: 'Collections' },
         ],
       }) as unknown as Record<string, unknown>[],
     };
@@ -300,7 +302,16 @@ export function getCollectionTeaserModel(
  * label without re-loading the collection YAML.
  */
 export function findCollectionsFor(
-  target: { slug?: string; stack?: string; stacks?: string[]; platforms?: string[]; licenses?: string[]; category?: string; visibility?: string; status?: string },
+  target: {
+    slug?: string;
+    stack?: string;
+    stacks?: string[];
+    platforms?: string[];
+    licenses?: string[];
+    category?: string;
+    visibility?: string;
+    status?: string;
+  },
   collections: Collection[],
   entries: CollectionEntry[],
 ): { slug: string; title: string; url: string }[] {

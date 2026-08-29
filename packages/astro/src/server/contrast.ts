@@ -9,16 +9,22 @@
  * values are plain hex.
  */
 
-const INK_950 = "#0a0a0a";
-const WHITE = "#ffffff";
+const INK_950 = '#0a0a0a';
+const WHITE = '#ffffff';
 const AA_NORMAL = 4.5;
 
 export type Rgb = [number, number, number];
 
 /** Parse #rgb / #rrggbb (also tolerates #rrggbbaa, alpha ignored). */
 export function hexToRgb(hex: string): Rgb | null {
-  const raw = hex.replace("#", "");
-  const full = raw.length === 3 ? raw.split("").map((c) => c + c).join("") : raw;
+  const raw = hex.replace('#', '');
+  const full =
+    raw.length === 3
+      ? raw
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : raw;
   if (!/^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(full)) return null;
   const int = Number.parseInt(full.slice(0, 6), 16);
   return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
@@ -26,7 +32,7 @@ export function hexToRgb(hex: string): Rgb | null {
 
 export function rgbToHex([r, g, b]: Rgb): string {
   const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
-  return `#${[r, g, b].map((v) => clamp(v).toString(16).padStart(2, "0")).join("")}`;
+  return `#${[r, g, b].map((v) => clamp(v).toString(16).padStart(2, '0')).join('')}`;
 }
 
 /** WCAG relative luminance (sRGB linearization, not the quick luma). */
@@ -104,14 +110,13 @@ export function derivePrimaryPalette(hex: string): PrimaryPalette | null {
   } else if (contrastRatio(hex, INK_950) >= AA_NORMAL) {
     solidForeground = INK_950;
   } else {
-    solid = adjustUntilAA(hex, "#000000", WHITE);
+    solid = adjustUntilAA(hex, '#000000', WHITE);
     solidForeground = WHITE;
   }
 
   const lifted = rgbToHex(mix(rgb, hexToRgb(WHITE) as Rgb, 0.28));
-  const dark = contrastRatio(lifted, INK_950) >= AA_NORMAL
-    ? lifted
-    : adjustUntilAA(lifted, WHITE, INK_950);
+  const dark =
+    contrastRatio(lifted, INK_950) >= AA_NORMAL ? lifted : adjustUntilAA(lifted, WHITE, INK_950);
 
   return { solid, solidForeground, dark, darkForeground: INK_950 };
 }

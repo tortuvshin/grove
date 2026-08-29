@@ -2,35 +2,35 @@
 import type { HTMLAttributes } from 'astro/types';
 
 type Props = HTMLAttributes<'div'> & {
-    /**
-     * Side of the dropdown
-     * @default bottom
-     */
-    side?: 'top' | 'bottom' | 'left' | 'right';
-    /**
-     * Alignment of the dropdown
-     * @default start
-     */
-    align?: 'start' | 'center' | 'end';
-    /**
-     * Offset distance in pixels
-     * @default 4
-     */
-    sideOffset?: number;
-    /**
-     * Open and close animation duration in milliseconds
-     * @default 150
-     */
-    animationDuration?: number;
+  /**
+   * Side of the dropdown
+   * @default bottom
+   */
+  side?: 'top' | 'bottom' | 'left' | 'right';
+  /**
+   * Alignment of the dropdown
+   * @default start
+   */
+  align?: 'start' | 'center' | 'end';
+  /**
+   * Offset distance in pixels
+   * @default 4
+   */
+  sideOffset?: number;
+  /**
+   * Open and close animation duration in milliseconds
+   * @default 150
+   */
+  animationDuration?: number;
 };
 
 const {
-    class: className,
-    side = 'bottom',
-    align = 'start',
-    sideOffset = 4,
-    animationDuration = 150,
-    ...rest
+  class: className,
+  side = 'bottom',
+  align = 'start',
+  sideOffset = 4,
+  animationDuration = 150,
+  ...rest
 } = Astro.props;
 ---
 

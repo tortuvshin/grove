@@ -8,14 +8,7 @@ interface Props {
   maxWidth?: 'narrow' | 'normal' | 'wide';
 }
 
-const {
-  eyebrow,
-  title,
-  titleId,
-  lede,
-  align = 'left',
-  maxWidth = 'normal',
-} = Astro.props;
+const { eyebrow, title, titleId, lede, align = 'left', maxWidth = 'normal' } = Astro.props;
 
 const alignClass = align === 'center' ? 'mx-auto text-center' : '';
 const widthClass =

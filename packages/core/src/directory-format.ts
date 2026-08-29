@@ -12,7 +12,7 @@
 export function compact(n: number): string {
   if (n >= 1000) {
     const k = n / 1000;
-    return (k >= 10 ? Math.round(k).toString() : k.toFixed(1)) + "k";
+    return (k >= 10 ? Math.round(k).toString() : k.toFixed(1)) + 'k';
   }
   return n.toString();
 }
@@ -22,7 +22,7 @@ export function compact(n: number): string {
  * finite number, so callers can render "—" without an extra guard.
  */
 export function formatStars(n: number | null | undefined): string | null {
-  if (typeof n !== "number" || !Number.isFinite(n)) return null;
+  if (typeof n !== 'number' || !Number.isFinite(n)) return null;
   return compact(n);
 }
 
@@ -32,18 +32,18 @@ export function formatStars(n: number | null | undefined): string | null {
  * dates (which can happen with bad upstream timestamps).
  */
 export function formatRelative(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return '—';
   const d = new Date(iso);
-  if (Number.isNaN(d.valueOf())) return "—";
+  if (Number.isNaN(d.valueOf())) return '—';
   const days = Math.floor((Date.now() - d.valueOf()) / (1000 * 60 * 60 * 24));
-  if (days <= 0) return "today";
-  if (days === 1) return "1d ago";
+  if (days <= 0) return 'today';
+  if (days === 1) return '1d ago';
   if (days < 30) return `${days}d ago`;
   const months = Math.floor(days / 30);
-  if (months === 1) return "1mo ago";
+  if (months === 1) return '1mo ago';
   if (months < 12) return `${months}mo ago`;
   const years = Math.floor(months / 12);
-  if (years === 1) return "1y ago";
+  if (years === 1) return '1y ago';
   return `${years}y ago`;
 }
 
@@ -60,11 +60,11 @@ export function truncateWords(text: string, max = 140): string {
   const value = text.trim();
   if (value.length <= max) return value;
   const window = value.slice(0, max);
-  const lastSpace = window.lastIndexOf(" ");
+  const lastSpace = window.lastIndexOf(' ');
   // A single word longer than the budget has no boundary to cut on;
   // the hard slice is the honest fallback.
   const head = lastSpace > max * 0.5 ? window.slice(0, lastSpace) : window;
-  return `${head.replace(/[\s.,;:!?—-]+$/, "")}…`;
+  return `${head.replace(/[\s.,;:!?—-]+$/, '')}…`;
 }
 
 /**
@@ -82,10 +82,7 @@ export function pluralize(count: number, singular: string, plural: string): stri
  * from the blueprint labels, so every surface (grids, collection
  * cards, browse results) counts with the same vocabulary.
  */
-export function formatCount(
-  count: number,
-  noun: { singular: string; plural: string },
-): string {
+export function formatCount(count: number, noun: { singular: string; plural: string }): string {
   return `${count} ${pluralize(count, noun.singular, noun.plural)}`;
 }
 
@@ -95,12 +92,12 @@ export function formatCount(
  * no value is provided.
  */
 export function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return '—';
   const d = new Date(iso);
   if (Number.isNaN(d.valueOf())) return iso;
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
 }

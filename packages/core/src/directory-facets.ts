@@ -10,11 +10,11 @@
  */
 
 /** Canonical facet ids accepted by `browse.facets` (validated by zod). */
-export const FACET_IDS = ["category", "stack", "platform", "tags", "license"] as const;
+export const FACET_IDS = ['category', 'stack', 'platform', 'tags', 'license'] as const;
 export type FacetId = (typeof FACET_IDS)[number];
 
 /** Keys of the `buildFacets()` result / `IndexFilters` dimensions. */
-export type FacetDimension = "categories" | "stacks" | "platforms" | "tags" | "licenses";
+export type FacetDimension = 'categories' | 'stacks' | 'platforms' | 'tags' | 'licenses';
 
 export interface FacetDef {
   id: FacetId;
@@ -29,27 +29,45 @@ export interface FacetDef {
 }
 
 export const FACET_DEFS: Record<FacetId, FacetDef> = {
-  category: { id: "category", dimension: "categories", label: "Category", urlParam: "category", single: false },
-  stack: { id: "stack", dimension: "stacks", label: "Stack", urlParam: "stack", single: false },
-  platform: { id: "platform", dimension: "platforms", label: "Platform", urlParam: "platform", single: false },
-  tags: { id: "tags", dimension: "tags", label: "Tag", urlParam: "tag", single: false },
-  license: { id: "license", dimension: "licenses", label: "License", urlParam: "license", single: true },
+  category: {
+    id: 'category',
+    dimension: 'categories',
+    label: 'Category',
+    urlParam: 'category',
+    single: false,
+  },
+  stack: { id: 'stack', dimension: 'stacks', label: 'Stack', urlParam: 'stack', single: false },
+  platform: {
+    id: 'platform',
+    dimension: 'platforms',
+    label: 'Platform',
+    urlParam: 'platform',
+    single: false,
+  },
+  tags: { id: 'tags', dimension: 'tags', label: 'Tag', urlParam: 'tag', single: false },
+  license: {
+    id: 'license',
+    dimension: 'licenses',
+    label: 'License',
+    urlParam: 'license',
+    single: true,
+  },
 };
 
 /** Default facet set when `browse.facets` is not configured. */
-export const DEFAULT_FACETS: readonly FacetId[] = ["category", "tags"];
+export const DEFAULT_FACETS: readonly FacetId[] = ['category', 'tags'];
 
 const FACET_ALIASES: Record<string, FacetId> = {
-  category: "category",
-  categories: "category",
-  stack: "stack",
-  stacks: "stack",
-  platform: "platform",
-  platforms: "platform",
-  tag: "tags",
-  tags: "tags",
-  license: "license",
-  licenses: "license",
+  category: 'category',
+  categories: 'category',
+  stack: 'stack',
+  stacks: 'stack',
+  platform: 'platform',
+  platforms: 'platform',
+  tag: 'tags',
+  tags: 'tags',
+  license: 'license',
+  licenses: 'license',
 };
 
 /**

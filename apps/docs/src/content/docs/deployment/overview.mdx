@@ -69,7 +69,7 @@ import { Aside, Badge, Card, CardGrid, LinkButton, LinkCard, Steps } from '@astr
   </Card>
 </CardGrid>
 
-Grove's own scaffold (what `grove init` writes, and what `apps/example/` in the repo mirrors) ships only one deploy workflow: `.github/workflows/deploy.yml`, targeting GitHub Pages. Cloudflare, Netlify, and self-hosted are all "bring your own host config" — Grove ships no `wrangler.toml`, `netlify.toml`, or `Dockerfile`. Every host, including GitHub Pages, is just serving the same `dist/` folder — the differences are in CI setup, headers, and edge features, not in what Astro produces.
+Grove's reference app (`apps/example/` in the repo — `grove init` itself writes no workflows, so copy from there) ships only one deploy workflow: `.github/workflows/deploy.yml`, targeting GitHub Pages. Cloudflare, Netlify, and self-hosted are all "bring your own host config" — Grove ships no `wrangler.toml`, `netlify.toml`, or `Dockerfile`. Every host, including GitHub Pages, is just serving the same `dist/` folder — the differences are in CI setup, headers, and edge features, not in what Astro produces.
 
 ## Pre-deploy checklist
 
@@ -89,7 +89,7 @@ Before you point your domain at a new deploy:
 
 ## Continuous deployment
 
-The scaffold ships six GitHub Actions workflows (`grove init` writes all of them into `.github/workflows/`); only `deploy.yml` deploys:
+The reference app ships six GitHub Actions workflows under `.github/workflows/` (copy the ones you want — `grove init` doesn't write them); only `deploy.yml` deploys:
 
 <CardGrid>
   <Card title="deploy.yml" icon="rocket">

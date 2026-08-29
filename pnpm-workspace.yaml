@@ -2,6 +2,7 @@ packages:
   - packages/core
   - packages/astro
   - packages/cli
+  - packages/registry
   - packages/starlight
   - apps/example
   - apps/docs
