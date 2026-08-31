@@ -37,6 +37,12 @@ const EXPLICIT_VERSION = args.bump;
 const DRY_RUN = Boolean(args['dry-run']);
 const SKIP_BUILD = Boolean(args['skip-build']);
 const SKIP_BUMP = Boolean(args['skip-bump']);
+// npm publishes to the `latest` dist-tag unless told otherwise — including
+// for prerelease versions, which would hand every `npm install @grove-dev/x`
+// a release candidate. Default the tag off the version instead, and let
+// --tag override.
+const RESOLVED_VERSION = EXPLICIT_VERSION ?? null;
+const DIST_TAG = args.tag ?? (RESOLVED_VERSION?.includes('-') ? 'next' : 'latest');
 
 const PACKAGES = [
   { name: '@grove-dev/core', dir: 'packages/core' },
@@ -88,6 +94,8 @@ Options:
   --major          bump major version (0.1.0 -> 1.0.0)
   --patch          bump patch version (0.1.0 -> 0.1.1, default)
   --bump=2.3.4     pin an explicit version for every package
+  --tag=next       npm dist-tag to publish under (default: latest,
+                   or next when --bump carries a prerelease suffix)
   --dry-run        build + bump + dry-run publish (no actual publish)
   --skip-build     skip the pnpm -r build step
   --skip-bump      skip the version bump step
@@ -203,11 +211,20 @@ async function publishAll() {
   // release script forwards it to every `pnpm publish` invocation.
   const otp = process.env.NPM_OTP ?? args.otp;
   for (const p of PACKAGES) {
-    const args = ['--filter', p.name, 'publish', '--no-git-checks', '--access', 'public'];
-    if (DRY_RUN) args.push('--dry-run');
-    if (otp) args.push(`--otp=${otp}`);
+    const publishArgs = [
+      '--filter',
+      p.name,
+      'publish',
+      '--no-git-checks',
+      '--access',
+      'public',
+      '--tag',
+      DIST_TAG,
+    ];
+    if (DRY_RUN) publishArgs.push('--dry-run');
+    if (otp) publishArgs.push(`--otp=${otp}`);
     try {
-      await run('pnpm', args);
+      await run('pnpm', publishArgs);
       logOk(`Published ${p.name}`);
     } catch (err) {
       logErr(`Failed to publish ${p.name}: ${err.message}`);
@@ -221,6 +238,7 @@ async function main() {
   console.log(
     `  kind:       ${RELEASE_KIND}${EXPLICIT_VERSION ? ` (explicit ${EXPLICIT_VERSION})` : ''}`,
   );
+  console.log(`  dist-tag:   ${DIST_TAG}`);
   console.log(`  dry-run:    ${DRY_RUN}`);
   console.log(`  skip-build: ${SKIP_BUILD}`);
   console.log(`  skip-bump:  ${SKIP_BUMP}`);
