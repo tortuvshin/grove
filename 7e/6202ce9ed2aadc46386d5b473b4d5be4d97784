@@ -1,0 +1,26 @@
+CHANGELOG.md
+  s_4c1b7b69ae3c15::t_51c207818c3b67 78-84
+packages/astro/src/theme.test.ts
+  s_4c1b7b69ae3c15::t_d83b1fe93750dd 150-154
+  s_4c1b7b69ae3c15::t_c078bcdae18514 144-149,155-156
+apps/example/src/styles/global.css
+  s_4c1b7b69ae3c15::t_8c6fecfeab4a15 2-6,8-12,14-18
+apps/docs/src/content/docs/customize/template-customization.md
+  s_4c1b7b69ae3c15::t_be68807db8ed11 106-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7e6202ce9ed2aadc46386d5b473b4d5be4d97784",
+  "prompts": {},
+  "sessions": {
+    "s_4c1b7b69ae3c15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ac56d4-baa8-46ad-881b-d193a1132376",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
