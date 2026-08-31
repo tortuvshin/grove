@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, v1]
   pull_request:
-    branches: [main]
+    branches: [main, v1]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -90,7 +90,17 @@ jobs:
         run: pnpm -r build
 
       - name: Run scaffold test
+        # Two passes: the default scaffold, then the same install on
+        # non-default `routes.directory` with real records — the shape a
+        # component hardcoding `/projects` cannot survive.
         run: pnpm test:scaffold
+
+      - name: Single registry items install with their dependencies
+        # `grove init` only ever installs `@grove/default`, which inlines
+        # everything and declares no registryDependencies. This installs
+        # `@grove/browse` off a loopback server so the documented
+        # `shadcn add @grove/<item>` flow is exercised for real.
+        run: pnpm registry:install-check
 
   unit:
     name: Unit tests (vitest)
@@ -166,12 +176,14 @@ jobs:
             exit 1
           fi
 
-      - name: Check for workspace:* in published packages
-        # The release script rewrites these, but a stray one in a published
-        # `files` glob would still leak. Sanity check.
-        run: |
-          ! grep -rEn '"workspace:\*"' packages/*/package.json package.json \
-            | grep -v 'peerDependencies\|peerDependenciesMeta\|workspace:'
+      - name: Published packages depend only on publishable packages
+        # `pnpm publish` rewrites `workspace:*` to the dependency's version.
+        # If that dependency is private, the tarball points at a version that
+        # was never released and `npm install` 404s — while the monorepo keeps
+        # working, because pnpm resolves the link locally. The grep this
+        # replaced could never fail: its own `\|workspace:` filter matched
+        # every line the first grep could emit.
+        run: node scripts/check-publishable.mjs
 
       - name: Docs slugs + internal links
         # Catches broken /guides/... cross-links that would otherwise ship

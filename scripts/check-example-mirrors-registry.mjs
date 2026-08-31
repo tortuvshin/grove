@@ -6,14 +6,21 @@
  * for the registry — a component edited in one place but not the
  * other shows up here as a gate failure.
  *
+ * The check runs both ways. Registry → example catches an upstream file
+ * the example never picked up; example → registry catches a file sitting
+ * in apps/example that the scaffold does not ship, which a consumer who
+ * ran `grove init` would never have. Both directions matter, because
+ * `apps/example` is what type-checks the registry's `.astro` sources.
+ *
  *   node scripts/check-example-mirrors-registry.mjs          verify
- *   node scripts/check-example-mirrors-registry.mjs --write  refresh
+ *   node scripts/check-example-mirrors-registry.mjs --write  copy the
+ *       scaffold over apps/example and refresh
  *       apps/example/.grove/registry.lock.json (what `grove update`
  *       compares against; .grove/ is gitignored, so this is local)
  */
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { relative, resolve } from 'node:path';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, relative, resolve } from 'node:path';
 import {
   buildFullRegistry,
   lockEntriesFor,
@@ -32,6 +39,19 @@ const writeMode = process.argv.includes('--write');
 const scaffold = buildFullRegistry().items.find((item) => item.name === SCAFFOLD_ITEM);
 
 if (writeMode) {
+  // Copy the scaffold over the example first — refreshing only the
+  // lockfile would record hashes for files that are not on disk.
+  let copied = 0;
+  for (const file of scaffold.files) {
+    const examplePath = resolve(exampleRoot, targetToProjectPath(file.target));
+    const source = readSource(file.path);
+    if (existsSync(examplePath) && (await readFile(examplePath, 'utf8')) === source) continue;
+    await mkdir(dirname(examplePath), { recursive: true });
+    await writeFile(examplePath, source);
+    copied++;
+  }
+  console.log(`Copied ${copied} file(s) into apps/example.`);
+
   const files = lockEntriesFor(scaffold);
   const lock = {
     scaffold: SCAFFOLD_ID,
@@ -61,12 +81,44 @@ for (const file of scaffold.files) {
     drifted++;
   }
 }
-if (missing + drifted > 0) {
+// The other direction: anything under apps/example/src that the scaffold
+// does not ship. A `grove init` project would not have it, so it is drift
+// — and it type-checks under the example's settings, hiding the fact that
+// the registry never sees it.
+const shipped = new Set(scaffold.files.map((file) => targetToProjectPath(file.target)));
+// Files a real consumer legitimately owns on top of the scaffold. Keep
+// this list short and justified — every entry is something `grove init`
+// does NOT create, so it must earn its place.
+const CONSUMER_OWNED = new Set([
+  // The override stylesheet the Grove integration auto-loads after
+  // system.css. `packages/astro/src/theme.test.ts` reads this exact file
+  // to assert an override file never redeclares the design tokens.
+  'src/styles/global.css',
+]);
+let extra = 0;
+async function walk(dir) {
+  for (const entry of await readdir(resolve(exampleRoot, dir), { withFileTypes: true })) {
+    const projectPath = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      await walk(projectPath);
+      continue;
+    }
+    if (!shipped.has(projectPath) && !CONSUMER_OWNED.has(projectPath)) {
+      console.error(`extra:   ${projectPath}  (not shipped by ${SCAFFOLD_ID})`);
+      extra++;
+    }
+  }
+}
+await walk('src');
+
+if (missing + drifted + extra > 0) {
   console.error(
-    `\n${missing + drifted} file(s) differ from the registry (${missing} missing, ${drifted} drifted).`,
+    `\n${missing + drifted + extra} file(s) differ from the registry ` +
+      `(${missing} missing, ${drifted} drifted, ${extra} extra).`,
   );
   console.error(
-    'Copy the registry version over apps/example (or the other way round), then re-run.',
+    'Run `pnpm example:sync` to copy the registry over apps/example, ' +
+      'or delete the extra files / add them to the registry.',
   );
   process.exit(1);
 }

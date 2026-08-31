@@ -31,7 +31,7 @@ Grove is not a CMS. There's no admin UI, no live preview, no workflow engine. Cu
 
 ## How do I deploy?
 
-Any static host — `pnpm build` writes a plain directory of files. `grove init` ships a working GitHub Pages workflow; for other hosts you write the config yourself. See [Deploy your site](/deployment/overview/), [GitHub Pages](/deployment/github-pages/), [Cloudflare](/deployment/cloudflare/), [Netlify](/deployment/netlify/), or [self-hosted](/deployment/self-hosted/).
+Any static host — `pnpm build` writes a plain directory of files. `grove init` writes no CI workflows; the reference app in the repo (`apps/example/.github/workflows/`) has a working GitHub Pages `deploy.yml` to copy, and for other hosts you write the config yourself. See [Deploy your site](/deployment/overview/), [GitHub Pages](/deployment/github-pages/), [Cloudflare](/deployment/cloudflare/), [Netlify](/deployment/netlify/), or [self-hosted](/deployment/self-hosted/).
 
 ## How do I extend Grove?
 

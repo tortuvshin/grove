@@ -15,7 +15,7 @@ import {
 } from './registry.js';
 
 describe('registry item access', () => {
-  it('resolves the bundled default item inside @grove-dev/registry', () => {
+  it('resolves the bundled default item shipped inside the CLI', () => {
     const path = resolveBundledItemPath();
     expect(path.endsWith(join('dist', 'r', 'default.json'))).toBe(true);
     expect(existsSync(path)).toBe(true);

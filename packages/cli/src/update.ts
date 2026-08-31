@@ -7,7 +7,7 @@
  *   1. Read `.grove/registry.lock.json` (the install-time snapshot).
  *   2. Load the upstream `default` item — `--from <path-or-url>`,
  *      else the `@grove` registry URL in components.json, else the
- *      copy bundled with `@grove-dev/registry`.
+ *      copy bundled inside the CLI.
  *   3. Hash every file on disk the lockfile or the item names.
  *   4. Diff installed vs lock vs upstream per file → classification.
  *   5. Apply rules per the table in apps/docs/concepts/registry.md:
@@ -26,17 +26,28 @@
  *   1  no lockfile (consumer was never initialized)
  *   2  conflicts present (caller decides whether to --force)
  */
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { planUpdate, type UpdatePlan } from './diff.js';
-import { hashInstalledFile, readLockfile, type Sha256Hash, writeLockfile } from './hash.js';
 import {
-  buildLockfile,
+  hashInstalledFile,
+  type RegistryLockfile,
+  readLockfile,
+  type Sha256Hash,
+  writeLockfile,
+} from './hash.js';
+import {
   itemLockEntries,
   loadItem,
+  type RegistryItem,
   resolveBundledItemPath,
   resolveRegistryTemplate,
+  SCAFFOLD_ID,
   SCAFFOLD_ITEM,
+  targetToProjectPath,
   writeItemFiles,
 } from './registry.js';
+import { unifiedDiff } from './unified-diff.js';
 
 export interface UpdateOptions {
   cwd: string;
@@ -52,12 +63,19 @@ export interface UpdateOptions {
   from?: string;
 }
 
+export interface FileDiff {
+  target: string;
+  patch: string;
+}
+
 export interface UpdateSummary {
   plan: UpdatePlan;
   /** Files we wrote to disk during this run. */
   applied: string[];
   /** Files we preserved despite upstream changes. */
   preserved: string[];
+  /** Unified diffs for the rows upstream moved, when `--diff` is set. */
+  diffs: FileDiff[];
   /** Where the upstream item came from (path or URL). */
   source: string;
   exitCode: 0 | 1 | 2;
@@ -92,6 +110,7 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
       plan: emptyPlan(),
       applied: [],
       preserved: [],
+      diffs: [],
       source: options.from ?? '',
       exitCode: 1,
     };
@@ -111,24 +130,99 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
 
   const plan = planUpdate(installedHashes, lockMap, upstreamMap);
 
-  let applied: string[] = [];
-  const preserved: string[] = [];
+  // `--force` takes the upstream side of a conflict, which is what the
+  // flag has always claimed to do. `locally_modified` is never in this
+  // set: the user edited a file upstream did not touch, so there is
+  // nothing to merge and overwriting would only destroy their work.
+  const toWrite = new Set([...plan.upstream_changed, ...plan.new]);
+  if (options.force) for (const target of plan.conflict) toWrite.add(target);
 
+  const diskBefore = options.diff
+    ? await readInstalled(options.cwd, [...plan.upstream_changed, ...plan.conflict])
+    : new Map<string, string>();
+
+  let applied: string[] = [];
   if (!options.check) {
-    // Apply upstream_changed and new — never locally_modified or conflict.
-    applied = await writeItemFiles(item, options.cwd, {
-      only: new Set([...plan.upstream_changed, ...plan.new]),
-    });
-    // Refresh the lockfile so the next update sees the new hashes.
-    await writeLockfile(options.cwd, buildLockfile(item));
+    applied = await writeItemFiles(item, options.cwd, { only: toWrite });
+    await writeLockfile(options.cwd, nextLockfile(lock, item, plan, new Set(applied)));
   }
 
+  const preserved: string[] = [];
   for (const target of plan.locally_modified) preserved.push(target);
-  for (const target of plan.conflict) preserved.push(target);
+  for (const target of plan.conflict) if (!toWrite.has(target)) preserved.push(target);
+
+  // Diffs are computed before anything is written when `--check` is on,
+  // and against the pre-write content otherwise — either way they show
+  // what the upstream change does to the file the user has today.
+  const diffs = options.diff ? await buildDiffs(item, options.cwd, plan, diskBefore) : [];
 
   const exitCode: 0 | 1 | 2 = plan.conflict.length > 0 && !options.force ? 2 : 0;
 
-  return { plan, applied, preserved, source, exitCode };
+  return { plan, applied, preserved, diffs, source, exitCode };
+}
+
+/**
+ * Unified diffs for every row where upstream moved — `upstream_changed`
+ * and `conflict`. A `locally_modified` row has no upstream change to
+ * show, and `new` has nothing to diff against.
+ */
+async function buildDiffs(
+  item: RegistryItem,
+  cwd: string,
+  plan: UpdatePlan,
+  before: Map<string, string>,
+): Promise<FileDiff[]> {
+  const upstream = new Map(
+    item.files.map((file) => [targetToProjectPath(file.target), file.content]),
+  );
+  const diffs: FileDiff[] = [];
+  for (const target of [...plan.upstream_changed, ...plan.conflict]) {
+    const after = upstream.get(target);
+    if (after === undefined) continue;
+    const patch = unifiedDiff(before.get(target) ?? '', after, target);
+    if (patch) diffs.push({ target, patch });
+  }
+  return diffs;
+}
+
+/**
+ * The lockfile records what this project is reconciled to — not what
+ * upstream happens to ship.
+ *
+ * Stamping the whole upstream item, including files we deliberately
+ * refused to overwrite, made the lock claim content that was never
+ * written. The next run then saw `registry === lock` for those files and
+ * reclassified a `conflict` as a mere `locally_modified`, dropping the
+ * exit code from 2 to 0. A pending upstream change was reported exactly
+ * once and then never again, and `scaffoldVersion` advertised a version
+ * the project was not on.
+ *
+ * So: upstream entries for files we wrote, previous entries for files we
+ * preserved, and `scaffoldVersion` only advances once no conflict is
+ * left unresolved.
+ */
+function nextLockfile(
+  lock: RegistryLockfile,
+  item: RegistryItem,
+  plan: UpdatePlan,
+  written: Set<string>,
+): RegistryLockfile {
+  const previous = new Map(lock.files.map((file) => [file.target, file]));
+  const preserved = new Set(
+    [...plan.locally_modified, ...plan.conflict].filter((target) => !written.has(target)),
+  );
+  const files = itemLockEntries(item).map((entry) => {
+    const carried = preserved.has(entry.target) ? previous.get(entry.target) : undefined;
+    return carried ?? entry;
+  });
+  const unresolved = plan.conflict.some((target) => !written.has(target));
+  return {
+    scaffold: SCAFFOLD_ID,
+    scaffoldVersion: unresolved ? lock.scaffoldVersion : (item.meta?.version ?? '0.0.0'),
+    installedAt: new Date().toISOString().slice(0, 10),
+    fileCount: files.length,
+    files,
+  };
 }
 
 function emptyPlan(): UpdatePlan {
@@ -150,6 +244,18 @@ function mapByTarget<T extends { target: string; hash: string }>(
   return map;
 }
 
+async function readInstalled(cwd: string, targets: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  for (const target of targets) {
+    try {
+      out.set(target, await readFile(resolve(cwd, target), 'utf8'));
+    } catch {
+      // Missing on disk — the diff renders as an addition.
+    }
+  }
+  return out;
+}
+
 async function hashAllInstalled(
   cwd: string,
   targets: Iterable<string>,
@@ -163,22 +269,35 @@ async function hashAllInstalled(
 
 /**
  * Human-readable summary used by the CLI subcommand's default output.
+ *
+ * The tallies describe the run that actually happened: a conflict taken
+ * by `--force` counts as applied, not as an outstanding conflict, so the
+ * footer never reads "0 to apply" above "Applied 1 file(s)".
  */
-export function formatPlan(plan: UpdatePlan, applied: string[]): string {
+export function formatPlan(summary: UpdateSummary): string {
+  const { plan, applied, diffs } = summary;
+  const wrote = new Set(applied);
+  const forced = plan.conflict.filter((target) => wrote.has(target));
+  const outstanding = plan.conflict.filter((target) => !wrote.has(target));
+
   const lines: string[] = [];
   for (const t of plan.unchanged) lines.push(`✓ ${t} unchanged`);
   for (const t of plan.upstream_changed) lines.push(`↑ ${t} upstream changed`);
   for (const t of plan.new) lines.push(`+ ${t} new`);
   for (const t of plan.locally_modified) lines.push(`! ${t} locally modified — preserved`);
-  for (const t of plan.conflict) lines.push(`✗ ${t} conflict — needs manual merge`);
+  for (const t of forced) lines.push(`✗ ${t} conflict — took upstream (--force)`);
+  for (const t of outstanding) lines.push(`✗ ${t} conflict — needs manual merge`);
   for (const t of plan.removed) lines.push(`- ${t} removed`);
   lines.push('');
-  const applyCount = plan.upstream_changed.length + plan.new.length;
+  const applyCount = plan.upstream_changed.length + plan.new.length + forced.length;
   lines.push(
-    `${applyCount} to apply · ${plan.new.length} new · ${plan.locally_modified.length} preserved · ${plan.conflict.length} conflict`,
+    `${applyCount} to apply · ${plan.new.length} new · ${summary.preserved.length} preserved · ${outstanding.length} conflict`,
   );
   if (applied.length > 0) {
     lines.push(`\nApplied ${applied.length} file(s).`);
+  }
+  for (const diff of diffs) {
+    lines.push('', diff.patch);
   }
   return lines.join('\n');
 }

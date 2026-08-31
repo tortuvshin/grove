@@ -5,17 +5,17 @@ description: The Grove monorepo's package boundaries, and the single build pipel
 
 ## The packages
 
-Grove is a pnpm monorepo under `packages/` — `astro`, `cli`, `core`, `registry`, `starlight` — publishing four packages to npm under the `@grove-dev/*` scope:
+Grove is a pnpm monorepo under `packages/` — `astro`, `cli`, `core`, `registry`, `starlight`. Four of those publish to npm under the `@grove-dev/*` scope; `registry` does not, because nothing installs it (see below):
 
 | Package | What it owns |
 |---|---|
 | `@grove-dev/core` | Headless engine: resource schema, config, importers, validators, taxonomy, search, ranking, sitemap, `llms.txt`, OG images, and the build pipeline. Pure TypeScript — no Astro, no HTML, no DOM assumptions. |
-| `@grove-dev/astro` | Astro integration + server view-models. **No `.astro` files in this package** — UI source ships from `@grove-dev/registry`. |
-| `@grove-dev/registry` | Canonical UI source. Ships registry scaffolds (currently `@grove/default`) that `grove init` installs and `grove update` reconciles. Versioned and released independently of `@grove-dev/astro`. |
+| `@grove-dev/astro` | Astro integration + server view-models. **No `.astro` files in this package** — UI source ships through the registry. |
+| `packages/registry` (private) | Canonical UI source. `shadcn build` turns it into the registry items (`@grove/default` and the feature blocks) that `grove init` installs and `grove update` reconciles. Not published: the shadcn CLI fetches items over HTTP from `withgrove.dev/r/`, and the CLI carries its own copy in `dist/r/` for offline `init`. |
 | `@grove-dev/cli` | The `grove` command — `init`, `update`, `check`, `sync`, `cleanup`, `audit`, `collection promote`, `readme generate`. |
 | `@grove-dev/starlight` | Grove's theme for Starlight — the package this docs site itself runs on. |
 
-`@grove-dev/astro` and `@grove-dev/cli` depend on `@grove-dev/core`. `@grove-dev/registry` is versioned independently per §21 of the v1 spec — engine and UI releases are independent lifecycles. `@grove-dev/starlight` is standalone.
+`@grove-dev/astro` and `@grove-dev/cli` depend on `@grove-dev/core`. The registry is versioned independently per §21 of the v1 spec — engine and UI releases are independent lifecycles — and `@grove-dev/cli` depends on it only as a **dev** dependency, for build ordering and to copy the built items into its own `dist/`. A runtime dependency would be unpublishable: `pnpm publish` rewrites `workspace:*` to a concrete version, and a private package has no version on npm to point at. `scripts/check-publishable.mjs` enforces this. `@grove-dev/starlight` is standalone.
 
 ## The single build pipeline
 

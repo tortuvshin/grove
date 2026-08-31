@@ -30,10 +30,11 @@
     "assets",
     "dist",
     "src/lib",
-    "src/server",
     "src/index.ts",
     "src/styles.css",
-    "README.md"
+    "README.md",
+    "src/server/**/*.ts",
+    "!src/server/**/*.test.ts"
   ],
   "exports": {
     ".": {
@@ -42,7 +43,6 @@
     },
     "./styles.css": "./src/styles.css",
     "./server": "./src/server/index.ts",
-    "./server/*": "./dist/server/*.js",
     "./package.json": "./package.json"
   },
   "scripts": {

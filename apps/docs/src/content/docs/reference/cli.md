@@ -35,9 +35,9 @@ from Grove's [shadcn registry](/concepts/registry/).
 | `--no-install` | Skip Grove's own `pnpm install` after scaffolding. The shadcn step still installs the scaffold's dependencies. | install runs |
 | `--no-git` | Skip `git init` after scaffolding | git init runs |
 
-**Reads:** the copy of `@grove/default` bundled with the CLI (via
-its `@grove-dev/registry` dependency) — no registry request, so
-`init` works offline.
+**Reads:** the copy of `@grove/default` bundled with the CLI itself
+(`dist/r/default.json`, copied in at build time) — no registry
+request, so `init` works offline.
 
 **Writes:**
 

@@ -1,5 +1,10 @@
 ---
-import { buildProjectCardModel, itemLabel, itemLabelPlural } from '@grove-dev/astro/server';
+import {
+  buildProjectCardModel,
+  indexSlug,
+  itemLabel,
+  itemLabelPlural,
+} from '@grove-dev/astro/server';
 import type { IndexRecord } from '@grove-dev/core';
 import { formatCount } from '@grove-dev/core';
 import EmptyState from '../ui/empty-state.astro';
@@ -22,8 +27,6 @@ import ProjectCard from './project-card.astro';
 type TaxonomyRecord = IndexRecord;
 
 interface Props {
-  /** URL slug from `Astro.params`. Echoed in the back link. */
-  name: string;
   /** Eyebrow label above the heading ("Stack", "Category", "License"). */
   eyebrow: string;
   /** Display name shown in the heading and intro copy. */
@@ -38,20 +41,23 @@ interface Props {
   itemNoun?: { singular: string; plural: string };
   /** Records filtered by `filterRecords` upstream. */
   records: TaxonomyRecord[];
-  /** Index route (e.g. "/projects") for the back link and card hrefs. */
+  /**
+   * Index route for the back link and card hrefs. Defaults to the
+   * configured directory route (`routes.directory` in `grove.config.ts`),
+   * so a site that browses at `/apps` links to `/apps`, not `/projects`.
+   */
   backHref?: string;
   /** Back-link label. */
   backLabel?: string;
 }
 
 const {
-  name,
   eyebrow,
   displayName,
   lede,
   itemNoun = { singular: itemLabel(), plural: itemLabelPlural() },
   records,
-  backHref = '/projects',
+  backHref = `/${indexSlug()}`,
   backLabel = `← Back to all ${itemLabelPlural()}`,
 } = Astro.props;
 

@@ -1,21 +1,23 @@
 @import "tailwindcss";
 
 /*
- * Grove V1 scaffold overrides. The package's `@grove-dev/astro/styles.css`
- * owns the full design system (`.grove-prose`, sidebar, table wrap,
- * task list, details, kbd, activity-tone selectors, etc.). This file
- * only ships brand-level overrides and theme remap.
+ * Consumer overrides. `src/styles/system.css` — installed by the registry
+ * and imported by `base-layout.astro` — owns the full design system
+ * (tokens, light/dark values, base elements, `.grove-prose`). The Grove
+ * integration auto-loads this file after it, so anything here wins.
  *
- * NOTE: do NOT add `@custom-variant dark` here. `@grove-dev/astro`'s
- * `styles.css` already declares the `.dark`-class variant, and
- * Tailwind v4 only honors one definition per build — adding a
- * second one in this consumer file has been observed to confuse
- * the variant resolution and produce utilities that key off
- * `prefers-color-scheme` instead of the `.dark` class on <html>.
- */
-/*
- * Brand color, radius, density, and container width all come from
- * `theme` in grove.config.ts — BaseLayout resolves them into
- * `--grove-*` custom properties on <html>. Add page-level overrides
- * here only when a token needs to differ from the config.
+ * `grove update` never touches this file. Put brand-level tweaks here
+ * rather than editing system.css, and upstream design-system changes
+ * keep applying cleanly.
+ *
+ * NOTE: do NOT add `@custom-variant dark` here. `system.css` already
+ * declares the `.dark`-class variant, and Tailwind v4 only honors one
+ * definition per build — a second one has been observed to confuse
+ * variant resolution and emit utilities keyed off `prefers-color-scheme`
+ * instead of the `.dark` class on <html>.
+ *
+ * Brand color, radius, density, and container width come from `theme` in
+ * grove.config.ts — base-layout resolves them into `--grove-*` custom
+ * properties on <html>. Override a token here only when it must differ
+ * from the config.
  */

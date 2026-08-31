@@ -1,23 +1,13 @@
 {
   "name": "@grove-dev/registry",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "private": false,
   "description": "Grove's UI as a shadcn registry — feature blocks (home, browse, record, …) plus the full `default` scaffold, installable with `npx shadcn add @grove/<item>` or by `grove init`.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "files": [
-    "dist",
-    "default",
-    "registry.json",
-    "README.md"
-  ],
   "exports": {
     ".": "./dist/r/registry.json",
     "./r/*": "./dist/r/*",

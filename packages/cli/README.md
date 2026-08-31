@@ -8,9 +8,10 @@ files you own.
 Grove does not replace Astro. Use Astro's normal `pnpm dev` and
 `pnpm build` — the `@grove-dev/astro` integration prepares data
 automatically. `grove init` installs the `@grove/default` scaffold
-from `@grove-dev/registry` (a shadcn registry) with the official
-shadcn CLI, and `grove update` reconciles that install against the
-registry later without overwriting files you have edited.
+(a shadcn registry item, shipped inside this CLI so `init` works
+offline) with the official shadcn CLI, and `grove update` reconciles
+that install against the hosted registry later without overwriting
+files you have edited.
 
 ## Install
 
@@ -32,11 +33,12 @@ Requires Node.js `>=22.12.0`.
 
 | Command | Purpose |
 | --- | --- |
-| `grove init [directory]` | Copy the canonical Grove site into `[directory]` and install dependencies. |
+| `grove init [directory]` | Scaffold a project in `[directory]`: config files, then the `@grove/default` registry item installed through the shadcn CLI. |
 | `grove check [--strict]` | Validate YAML sources, prepare artifacts, and run `astro check`. |
+| `grove update` | Reconcile the installed UI scaffold against the registry upstream, preserving files you edited. |
 | `grove sync github` | Refresh repository metadata for records that point at a GitHub repo. |
 | `grove sync contributors` | Refresh directory-community metadata from configured sources. |
-| `grove sync icons` | Reconcile the consumer's `public/icons/` with the packaged set. |
+| `grove icons sync` | Reconcile the consumer's `public/icons/` with the packaged set. |
 | `grove cleanup [--strict]` | Write the human-review report listing stale or archived records. |
 | `grove collection promote` | Write a curated collection YAML from a filter URL. |
 | `grove import` | Import records from an external source (for example, an awesome-list README). |
@@ -83,16 +85,34 @@ grove sync contributors
 Refreshes the contributor list rendered on the contributors page
 from the configured sources.
 
-### `grove sync icons`
+### `grove icons sync`
 
 ```bash
-grove sync icons
-grove sync icons --force
+grove icons sync
+grove icons sync --force
+grove icons sync --check
 ```
 
 Reconciles the consumer's `public/icons/` with the packaged set.
 Locally edited files are left alone and reported. `--force` restores
-the packaged versions.
+the packaged versions; `--check` exits non-zero on any drift, which is
+what CI should run.
+
+### `grove update`
+
+```bash
+grove update            # apply what is safe
+grove update --check    # print the plan, touch nothing
+grove update --diff     # unified diff for every file upstream moved
+grove update --force    # take the upstream side of a conflict
+grove update --json     # machine-readable summary
+```
+
+Three-way reconcile of your installed UI against the registry upstream.
+Files you edited are never overwritten; files where both sides moved are
+reported as conflicts and left alone unless you pass `--force`. Exits `2`
+while a conflict is unresolved, and keeps doing so on every subsequent
+run until it is merged.
 
 ### `grove cleanup`
 

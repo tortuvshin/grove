@@ -53,9 +53,11 @@ describe('grove init integration', () => {
       build: 'astro build',
       check: 'astro check',
     });
-    for (const dep of ['core', 'astro', 'cli', 'registry']) {
+    for (const dep of ['core', 'astro', 'cli']) {
       expect(pkg.dependencies[`@grove-dev/${dep}`]).toMatch(/^\^\d+\.\d+\.\d+/);
     }
+    // The registry is a workspace build unit, never a consumer dependency.
+    expect(pkg.dependencies['@grove-dev/registry']).toBeUndefined();
     // shadcn installed the item's npm dependencies with real ranges.
     expect(pkg.dependencies.astro).toMatch(/^\^\d/);
     expect(pkg.dependencies.tailwindcss).toMatch(/^\^\d/);
