@@ -1,0 +1,19 @@
+pnpm-lock.yaml
+  s_4c1b7b69ae3c15::t_4279686d6818ee 142-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "1ecff9d271196adf044584803a850fc5f07a6b4b",
+  "prompts": {},
+  "sessions": {
+    "s_4c1b7b69ae3c15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ac56d4-baa8-46ad-881b-d193a1132376",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
