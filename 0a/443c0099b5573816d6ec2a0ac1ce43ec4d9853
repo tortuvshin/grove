@@ -1,0 +1,113 @@
+packages/cli/package.json
+  s_4c1b7b69ae3c15::t_0621e066236327 45,59
+packages/cli/README.md
+  s_4c1b7b69ae3c15::t_49222f8de5862c 36,38,41,88,91-93,98-115
+  s_4c1b7b69ae3c15::t_eb94a89697e11b 11-14
+scripts/check-example-mirrors-registry.mjs
+  s_4c1b7b69ae3c15::t_eacee2fcfd5f2d 9-14,16-17,22-23,42-54,84-88,98-105,107-114,116-117,120-121
+  s_4c1b7b69ae3c15::t_08f532b623467e 89-97,106
+packages/registry/default/components/grove/taxonomy-list.astro
+  s_4c1b7b69ae3c15::t_85998fb67305fd 44-48,60
+  s_4c1b7b69ae3c15::t_2cc1af6b958c50 2-7
+apps/example/src/styles/system.css
+  s_4c1b7b69ae3c15::t_eacee2fcfd5f2d 2,4-8,10-12
+apps/docs/src/content/docs/project/faq.md
+  s_4c1b7b69ae3c15::t_4164f3283803ce 34
+packages/cli/src/init.ts
+  s_4c1b7b69ae3c15::t_23b28f81732834 24
+  s_4c1b7b69ae3c15::t_2bcd2d1f39a137 122-136,191-196
+  s_4c1b7b69ae3c15::t_d5cd9fc064df37 38
+  s_4c1b7b69ae3c15::t_32960256611133 55-58
+apps/docs/src/content/docs/reference/cli.md
+  s_4c1b7b69ae3c15::t_28cc072c17e856 38-40
+packages/cli/src/unified-diff.ts
+  s_4c1b7b69ae3c15::t_7bf810cd4e6653 21-23,27,38
+  s_4c1b7b69ae3c15::t_82bae9670a3850 1-6,8-12,18,24-25,28-37,39-60,64,67-75,77,80-81,86-106
+  s_4c1b7b69ae3c15::t_309b5b6f702fbf 7,13-17,19-20,26,61-63,65-66,76,78-79,82-85
+apps/example/src/styles/global.css
+  s_4c1b7b69ae3c15::t_5f70809db9ceab 4-7,9-22
+packages/cli/src/update.test.ts
+  s_4c1b7b69ae3c15::t_98312cd9122bda 86-88,94,97-98,100-102,104-106,110-160
+  s_4c1b7b69ae3c15::t_d8dbfb178c8db0 161
+apps/docs/src/content/docs/project/architecture.md
+  s_4c1b7b69ae3c15::t_28cc072c17e856 8,13-14,18
+tests/integration/grove-init.test.ts
+  s_4c1b7b69ae3c15::t_f32c2b6aa8d675 56,59-60
+apps/example/src/components/grove/taxonomy-list.astro
+  s_4c1b7b69ae3c15::t_eacee2fcfd5f2d 44-48,60
+  s_4c1b7b69ae3c15::t_2cc1af6b958c50 2-7
+packages/cli/src/unified-diff.test.ts
+  s_4c1b7b69ae3c15::t_33cf27bdb1f4b2 1-43
+.github/workflows/ci.yml
+  s_4c1b7b69ae3c15::t_c8e1cf18bd9790 5,7
+  s_4c1b7b69ae3c15::t_ab226bd6b191c5 93-95,98-103
+  s_4c1b7b69ae3c15::t_4ba0a41604da31 179-186
+  s_4c1b7b69ae3c15::t_cb10538c7f3711 104
+scripts/test-scaffold.mjs
+  s_4c1b7b69ae3c15::t_e96a28334a6158 4,7,64-147
+  s_4c1b7b69ae3c15::t_2cc1af6b958c50 5
+  s_4c1b7b69ae3c15::t_73b579f280dcda 26,40
+packages/cli/src/update.ts
+  s_4c1b7b69ae3c15::t_b96e12c51fee97 10,33-34,36-39,42,45,133-138,144,146-147,150,152,186-225,257
+  s_4c1b7b69ae3c15::t_56dbebfd8b9045 29-30,47,50,66-70,77-78,113,140-143,153-157,161-185,247-256,299-301
+  s_4c1b7b69ae3c15::t_6b1d34a1c13638 272-275,277-282,288-289,292,294
+  s_4c1b7b69ae3c15::t_2cc1af6b958c50 35
+  s_4c1b7b69ae3c15::t_3bc0fb396081cc 258
+apps/docs/src/content/docs/concepts/registry.md
+  s_4c1b7b69ae3c15::t_5c4f1dfc6a0d01 32,49,69,110,113-117
+  s_4c1b7b69ae3c15::t_397035042a7897 88-89
+packages/cli/src/index.ts
+  s_4c1b7b69ae3c15::t_caffc8878ca352 265-270
+  s_4c1b7b69ae3c15::t_6b1d34a1c13638 276
+apps/docs/src/content/docs/guides/walkthrough-sync-github.mdx
+  s_4c1b7b69ae3c15::t_4164f3283803ce 159
+apps/docs/src/content/docs/getting-started/install-cli.mdx
+  s_4c1b7b69ae3c15::t_14575b00d1d5d7 57-60
+packages/cli/src/init.test.ts
+  s_4c1b7b69ae3c15::t_f32c2b6aa8d675 32,35-36
+CHANGELOG.md
+  s_4c1b7b69ae3c15::t_dce80ea65cf701 27-97
+package.json
+  s_4c1b7b69ae3c15::t_f015ce7da31c40 20
+packages/cli/src/registry.test.ts
+  s_4c1b7b69ae3c15::t_f32c2b6aa8d675 18
+packages/cli/src/registry.ts
+  s_4c1b7b69ae3c15::t_32960256611133 5-6,17
+  s_4c1b7b69ae3c15::t_020bbbb8581d95 76-85,87-89,92
+  s_4c1b7b69ae3c15::t_d76ac7cb908d9b 29,66-72,75
+packages/astro/package.json
+  s_4c1b7b69ae3c15::t_26525f24af8027 35-37
+apps/docs/src/content/docs/deployment/overview.mdx
+  s_4c1b7b69ae3c15::t_4164f3283803ce 51-52
+scripts/check-publishable.mjs
+  s_4c1b7b69ae3c15::t_e0657fe3bcc39b 1-57
+scripts/check-registry-install.mjs
+  s_4c1b7b69ae3c15::t_e937985678e527 1-24,27-46,52-119,132-139,145-162
+  s_4c1b7b69ae3c15::t_2cc1af6b958c50 25-26,47-51,120-131,140-144
+packages/registry/registry.json
+  s_4c1b7b69ae3c15::t_0940846a45a5f1 54-59
+packages/registry/default/styles/system.css
+  s_4c1b7b69ae3c15::t_65a9484e781ee3 2,4-8,10-12
+packages/registry/package.json
+  s_4c1b7b69ae3c15::t_e536aa2dae7cc6 4
+apps/docs/src/content/docs/deployment/github-pages.mdx
+  s_4c1b7b69ae3c15::t_66498ebd9e4be5 9,14
+biome.json
+  s_4c1b7b69ae3c15::t_2cc1af6b958c50 14-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0a443c0099b5573816d6ec2a0ac1ce43ec4d9853",
+  "prompts": {},
+  "sessions": {
+    "s_4c1b7b69ae3c15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ac56d4-baa8-46ad-881b-d193a1132376",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
