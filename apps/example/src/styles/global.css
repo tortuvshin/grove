@@ -1,20 +1,21 @@
-@import "tailwindcss";
-
 /*
- * Consumer overrides. `src/styles/system.css` — installed by the registry
- * and imported by `base-layout.astro` — owns the full design system
- * (tokens, light/dark values, base elements, `.grove-prose`). The Grove
- * integration auto-loads this file after it, so anything here wins.
+ * Consumer overrides. `src/styles/system.css` — installed by the Grove
+ * registry and imported by `base-layout.astro` — owns the full design
+ * system (tokens, light/dark values, base elements, `.grove-prose`).
+ * The Grove integration auto-loads this file after it, so anything here
+ * wins, and `grove update` never touches it.
  *
- * `grove update` never touches this file. Put brand-level tweaks here
- * rather than editing system.css, and upstream design-system changes
- * keep applying cleanly.
+ * NOTE: do NOT `@import "tailwindcss"` here. system.css already does, and
+ * Tailwind v4's Vite plugin treats every file that imports it as its own
+ * entry point — a second import emits a second complete Tailwind build
+ * (≈35 KB on this site) that every page then downloads on top of the first.
+ * Add the import back only if this file needs `@apply` or `theme()`.
  *
- * NOTE: do NOT add `@custom-variant dark` here. `system.css` already
- * declares the `.dark`-class variant, and Tailwind v4 only honors one
- * definition per build — a second one has been observed to confuse
- * variant resolution and emit utilities keyed off `prefers-color-scheme`
- * instead of the `.dark` class on <html>.
+ * NOTE: do NOT add `@custom-variant dark` here either. system.css declares
+ * the `.dark`-class variant, and Tailwind v4 honors one definition per
+ * build — a second one has been observed to confuse variant resolution and
+ * emit utilities keyed off `prefers-color-scheme` instead of the `.dark`
+ * class on <html>.
  *
  * Brand color, radius, density, and container width come from `theme` in
  * grove.config.ts — base-layout resolves them into `--grove-*` custom

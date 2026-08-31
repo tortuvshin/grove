@@ -75,6 +75,13 @@ copy. Four of the bugs below made it through every existing gate.
   They were bare names, so shadcn installed whatever `latest` happened to
   be — a new Astro major could land silently in a fresh scaffold.
 
+- **Scaffold:** the consumer override stylesheet no longer imports
+  Tailwind. `src/styles/system.css` already does, and Tailwind v4's Vite
+  plugin treats every file that imports it as its own entry point — so
+  `src/styles/global.css` was emitting a second complete Tailwind build.
+  Every page downloaded ~35 KB of duplicate CSS on top of the real
+  stylesheet. Found while migrating a real site onto v1.
+
 ### Changed
 
 - **CI:** a new `scripts/check-publishable.mjs` fails when a published
