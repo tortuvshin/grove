@@ -1,0 +1,21 @@
+scripts/release.mjs
+  s_4c1b7b69ae3c15::t_3b301ecc71f2cc 40-44,214-225,227,241
+  s_4c1b7b69ae3c15::t_33089b085a197b 97-98
+  s_4c1b7b69ae3c15::t_f11f5e33704a40 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "48310eca49c05cd8079c2c93bb5f7e993efbaf3a",
+  "prompts": {},
+  "sessions": {
+    "s_4c1b7b69ae3c15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ac56d4-baa8-46ad-881b-d193a1132376",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
