@@ -24,6 +24,77 @@ For the developer workflow that produces these entries, see
 > [`apps/docs/src/content/docs/project/roadmap.md`](./apps/docs/src/content/docs/project/roadmap.md)
 > until they ship.
 
+The v1 registry model was verified against a real consumer install for the
+first time, rather than against `apps/example` — which is a byte-identical
+copy of the registry source and so could only ever confirm that a copy is a
+copy. Four of the bugs below made it through every existing gate.
+
+**Packages:** `@grove-dev/cli`, `@grove-dev/astro`
+
+### Fixed
+
+- **`@grove-dev/cli`:** the published package no longer depends on
+  `@grove-dev/registry`. That package is not on npm, and `pnpm publish`
+  rewrites `workspace:*` to a concrete version — so `pnpm dlx
+  @grove-dev/cli@1 init` would have failed to install at all. The registry
+  is now a private workspace build unit; the CLI's build copies the built
+  items into its own `dist/r/`, which is also what makes `init` work
+  offline. `grove init` no longer adds a registry dependency to the
+  projects it scaffolds, because nothing there ever imported it.
+- **Registry:** taxonomy pages built dead links on any site whose
+  `routes.directory` is not the default. `taxonomy-list.astro` defaulted
+  its back link — and every card `href` derived from it — to a hardcoded
+  `/projects`, and no page passed the prop. On a directory that browses at
+  `/apps`, that was 33 broken links across twelve pages. The default now
+  comes from `indexSlug()`. The unused required `name` prop is gone.
+- **`grove update`:** `--diff` did nothing. It was declared, typed, and
+  documented, but never read. It now prints a unified diff for every file
+  upstream moved.
+- **`grove update`:** `--force` did not apply conflicts. It only changed
+  the exit code. It now takes the upstream side of a conflict, and still
+  never overwrites a `locally modified` file — upstream did not change
+  that one, so there is nothing to merge.
+- **`grove update`:** a conflict was reported once and then went quiet.
+  The lockfile was stamped with the whole upstream item including files
+  that were deliberately not written, so the next run reclassified the
+  conflict as a plain local edit and dropped the exit code from `2` to
+  `0` — and `scaffoldVersion` claimed a version the project was not on.
+  The lock now carries the previous entry for any file that was
+  preserved, and the version advances only once nothing is left
+  unresolved.
+- **`@grove-dev/astro`:** dropped the `./server/*` export, which pointed
+  at `dist/server/*.js` — a directory the build excludes and has never
+  produced. Nine `*.test.ts` files under `src/server/` no longer ship to
+  consumers.
+- **`grove init`:** checks for pnpm before writing anything. It drives
+  pnpm for the shadcn install and the dependency install; without it the
+  run used to die partway through with `spawn pnpm ENOENT`, leaving a
+  half-written directory that then failed the "not empty" guard on
+  retry.
+- **Registry:** the scaffold's npm dependencies carry version ranges.
+  They were bare names, so shadcn installed whatever `latest` happened to
+  be — a new Astro major could land silently in a fresh scaffold.
+
+### Changed
+
+- **CI:** a new `scripts/check-publishable.mjs` fails when a published
+  package depends on a private one. The `grep` that was supposed to catch
+  this could never fail: its own filter matched every line the search
+  could emit. CI also now runs on the `v1` branch, and `pnpm
+  test:scaffold` builds a second site on non-default routes with real
+  records — the shape that surfaces a hardcoded route.
+- **CI:** `pnpm registry:install-check` installs `@grove/browse` off a
+  loopback server, exercising the documented `shadcn add @grove/<item>`
+  flow and its `registryDependencies` resolution. Only `@grove/default`,
+  which inlines everything and declares no dependencies, had ever been
+  installed by a test.
+- **`pnpm example:sync`** copies the scaffold over `apps/example` instead
+  of only rewriting the lockfile, and `pnpm example:check` now also
+  reports files in the example that the registry does not ship.
+- Removed four migration-era scripts that no workflow ran, one of which
+  carried an absolute path from another machine, along with the
+  `INVENTORY.{md,json}` artifacts they produced.
+
 ---
 
 ## [0.7.0] — 2026-08-21

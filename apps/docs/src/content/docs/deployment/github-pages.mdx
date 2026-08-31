@@ -6,12 +6,12 @@ description: Deploy a Grove space to GitHub Pages with the bundled deploy.yml wo
 import { Aside, CardGrid, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="Recommended">
-  GitHub Pages is the default deploy target: `grove init` already writes `.github/workflows/deploy.yml` into your repo, so there is nothing extra to copy in. You only need to enable Pages and point the workflow at your domain.
+  GitHub Pages is the default deploy target. `grove init` writes no CI workflows, so copy `.github/workflows/deploy.yml` from the reference app (`apps/example/` in the Grove repo) into your own repository, then enable Pages and point the workflow at your domain.
 </Aside>
 
 ## Prerequisites
 
-- A GitHub repository containing your Grove space (created by `grove init`, which includes `.github/workflows/deploy.yml`).
+- A GitHub repository containing your Grove space (created by `grove init`), with `.github/workflows/deploy.yml` copied in from `apps/example/`.
 - GitHub Pages enabled in repository settings, source = "GitHub Actions".
 - A `SITE_URL` repository variable set to your production domain (below).
 

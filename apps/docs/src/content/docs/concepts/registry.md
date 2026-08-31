@@ -29,7 +29,7 @@ This is the opposite of how a typical component library works. Grove does not sh
 ```
 
 - **Engine packages** (`@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`) are imported at runtime. They contain domain logic, server-side view-model builders, and the Astro integration.
-- **UI registry** (`@grove-dev/registry`) is the canonical source for consumer-installed UI — a shadcn registry whose full-site item is `@grove/default`.
+- **UI registry** is the canonical source for consumer-installed UI — a shadcn registry whose full-site item is `@grove/default`. It is built from `packages/registry` and served at `withgrove.dev/r/`; it is deliberately **not** an npm package. The shadcn CLI resolves `@grove/<item>` through the URL in your `components.json` and writes files into your `src/` — it never looks in `node_modules`, so there is nothing for you to install.
 - **Consumer project** owns every `.astro` file under its `src/`. Business logic is imported; UI source is installed.
 
 ## What Grove owns
@@ -46,7 +46,7 @@ This is the opposite of how a typical component library works. Grove does not sh
 - Pages (`src/pages/**`)
 - Layouts (`src/layouts/**`)
 - Components (`src/components/ui/**`, `src/components/grove/**`, `src/components/site/**`)
-- Styles (`src/styles/global.css` — import the registry's design tokens, override what you need)
+- Styles (`src/styles/system.css`, the design system the registry installs; add `src/styles/global.css` for overrides you want kept clear of upstream — the Grove integration auto-loads it and `grove update` never touches it)
 - Branding, design tokens, presentation behavior, custom routes, custom themes
 
 ## How it works
@@ -66,7 +66,7 @@ This:
    ```
 
 2. Runs the shadcn CLI (`shadcn add`) against the copy of `@grove/default` bundled with the CLI — no registry request, so `init` works offline. This lands every component, layout, page, and stylesheet in `src/`, and shadcn installs the scaffold's own dependencies (astro, tailwindcss, and friends).
-3. Adds `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`, and `@grove-dev/registry`, pinned to the CLI version.
+3. Adds `@grove-dev/core`, `@grove-dev/astro`, and `@grove-dev/cli`, pinned to the CLI version. There is no registry package to add — the UI is now source in your repository.
 4. Writes `.grove/registry.lock.json` with the version installed and a sha256 per file.
 
 ### Customize
@@ -84,6 +84,8 @@ npx shadcn@latest add @grove/project-card --overwrite  # reset one item's files 
 ```
 
 `add` on files that already exist and differ only offers a yes/no overwrite; that's fine for a deliberate reset of one item, but for keeping a whole site current use `grove update`, which knows which files you've edited.
+
+One requirement, if you are writing `components.json` by hand rather than letting `grove init` do it: keep `"tsx": true`. With `tsx: false` the shadcn CLI runs its TypeScript→JavaScript transformer over every file it installs, which cannot parse `.astro` — the install fails with a bare `Unexpected token (13:0)` and no indication of which file or why. Grove's UI is Astro, not React, but `tsx: true` is what tells shadcn to write files through untouched.
 
 ### Update
 
@@ -105,10 +107,14 @@ It classifies every file as one of:
 | ↑ upstream changed | Lock and registry differ; installed matches lock | apply |
 | + new | Registry has it, you don't | install |
 | ! locally modified | Installed differs from lock | **preserve, never overwrite** |
-| ✗ conflict | Both sides moved | preserve, warn |
+| ✗ conflict | Both sides moved | preserve, warn (`--force` takes upstream) |
 | − removed | Lock has it, registry no longer ships it | report, never delete |
 
-The locally-modified rule is load-bearing. If you hand-tuned `project-card.astro`, `grove update` will tell you there's a new upstream version of that file and refuse to overwrite yours. You merge on your own schedule. Safe changes are applied and the lock is refreshed; `--check` prints the plan without writing, `--diff` shows each upstream change, `--json` emits a machine-readable summary, and `--force` applies past conflicts (locally modified files are still preserved).
+The locally-modified rule is load-bearing. If you hand-tuned `project-card.astro`, `grove update` will tell you there's a new upstream version of that file and refuse to overwrite yours. You merge on your own schedule.
+
+`--check` prints the plan without writing, `--diff` prints a unified diff for every file upstream moved, `--json` emits a machine-readable summary, and `--force` takes the upstream side of a conflict. `--force` never touches a `locally modified` file: upstream did not change it, so there is nothing to merge and overwriting would only destroy your work.
+
+**The lock records what you are reconciled to, not what upstream ships.** A file `grove update` refused to write keeps its previous lock entry, and `scaffoldVersion` only advances once no conflict is left unresolved. That is what makes the conflict signal survive: run `grove update --check` in CI and it keeps exiting `2` until someone actually merges, rather than reporting the conflict once and then going quiet.
 
 ## Why this matters
 

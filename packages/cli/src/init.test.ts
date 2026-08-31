@@ -29,9 +29,11 @@ describe('grove init (registry scaffold)', () => {
     const pkg = JSON.parse(await readFile(join(target, 'package.json'), 'utf8'));
     expect(pkg.name).toBe('ai-stack');
     expect(pkg.type).toBe('module');
-    for (const dep of ['core', 'astro', 'cli', 'registry']) {
+    for (const dep of ['core', 'astro', 'cli']) {
       expect(pkg.dependencies[`@grove-dev/${dep}`]).toBe('^9.8.7');
     }
+    // The registry is a workspace build unit, never a consumer dependency.
+    expect(pkg.dependencies['@grove-dev/registry']).toBeUndefined();
     expect(pkg.scripts).toEqual({ dev: 'astro dev', build: 'astro build', check: 'astro check' });
 
     // components.json registers the @grove registry for later `shadcn add`s.

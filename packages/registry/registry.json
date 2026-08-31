@@ -51,7 +51,12 @@
       "type": "registry:block",
       "title": "Site shell",
       "description": "The document shell every page renders inside: base layout, header, footer, container, section header, SEO head, theme toggle, the Powered-by-Grove mark, and system.css (design tokens, light/dark theme, Tailwind theme).",
-      "dependencies": ["astro", "@astrojs/check", "tailwindcss", "@tailwindcss/vite"],
+      "dependencies": [
+        "astro@^7.1.3",
+        "@astrojs/check@^0.9.9",
+        "tailwindcss@^4.3.3",
+        "@tailwindcss/vite@^4.3.0"
+      ],
       "registryDependencies": ["@grove/ui"],
       "files": [
         {

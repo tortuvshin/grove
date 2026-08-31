@@ -1,14 +1,15 @@
 /*
- * Grove showcase design system.
+ * Grove design system — your copy.
  *
- * Public CSS API for `@grove-dev/astro`. Consumers (templates, examples)
- * import this once at the top of their stack:
+ * The registry installed this file into your project; it is yours to
+ * edit. `base-layout.astro` imports it, so it is the single entry point
+ * for the whole stack. It owns Tailwind theme tokens, runtime light/dark
+ * values, base element defaults, and rendered Markdown styles. Astro
+ * components keep their presentation in HTML with Tailwind utilities.
  *
- *     import "@grove-dev/astro/styles.css";
- *
- * This file owns only Tailwind theme tokens, runtime light/dark values,
- * base element defaults, and rendered Markdown styles. Astro components
- * keep their presentation in HTML with Tailwind utilities.
+ * For overrides you would rather keep separate from upstream, create
+ * `src/styles/global.css` — the Grove integration auto-loads it after
+ * this file, and `grove update` never touches it.
  */
 
 @import "tailwindcss";

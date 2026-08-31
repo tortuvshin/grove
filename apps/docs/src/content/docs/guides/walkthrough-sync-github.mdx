@@ -156,7 +156,7 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
 </Steps>
 
 <Aside type="tip" title="Schedule the sync">
-  Don't run `grove sync github` by hand every week. `grove init` ships a `.github/workflows/sync-github.yml` that runs on a schedule and opens a pull request with the result rather than pushing to `main`:
+  Don't run `grove sync github` by hand every week. Copy `apps/example/.github/workflows/sync-github.yml` from the Grove repo — `grove init` writes no workflows — and it runs on a schedule, opening a pull request with the result rather than pushing to `main`:
 
   ```yaml
   # .github/workflows/sync-github.yml (already in the scaffold)

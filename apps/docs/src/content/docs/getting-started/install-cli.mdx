@@ -54,6 +54,10 @@ Pick whichever matches your workflow.
      Run any command without permanently installing anything. `dlx` fetches the latest CLI on demand and uses a cache for repeat calls.
    </Aside>
 
+   <Aside type="caution" title="pnpm is required">
+     You can *launch* the CLI with npm or bun, but `grove init` itself drives pnpm — it runs `pnpm dlx shadcn` to install the UI registry item and `pnpm install` afterwards. Without pnpm on your PATH, `init` stops before writing anything and tells you so. Install it with `npm install -g pnpm` or `corepack enable pnpm`.
+   </Aside>
+
    <Tabs syncKey="pkg">
      <TabItem label="pnpm" icon="pnpm">
        ```bash

@@ -42,14 +42,13 @@
     "README.md"
   ],
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\"",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\" && node -e \"require('fs').cpSync('../registry/dist/r','dist/r',{recursive:true})\"",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "cd ../.. && pnpm exec vitest run --project unit packages/cli",
     "dev": "tsx src/index.ts --help"
   },
   "dependencies": {
     "@grove-dev/core": "workspace:*",
-    "@grove-dev/registry": "workspace:*",
     "chrome-launcher": "^1.2.1",
     "commander": "^15.0.0",
     "lighthouse": "^12.8.2",
@@ -57,6 +56,7 @@
     "yaml": "^2.6.0"
   },
   "devDependencies": {
+    "@grove-dev/registry": "workspace:*",
     "tsx": "^4.23.0"
   }
 }

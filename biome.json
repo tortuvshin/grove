@@ -11,7 +11,9 @@
       "!**/.astro",
       "!**/.cache",
       "!.grove",
-      "!**/data/generated"
+      "!**/data/generated",
+      "!**/public/r",
+      "!**/registry.build.json"
     ]
   },
   "formatter": {

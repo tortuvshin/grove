@@ -21,7 +21,7 @@
  *      shadcn writes every scaffold file under src/ and runs the
  *      package manager to install the item's npm dependencies
  *      (astro, tailwindcss, …) with real version ranges.
- *   5. Add `@grove-dev/{core,astro,cli,registry}` to package.json,
+ *   5. Add `@grove-dev/{core,astro,cli}` to package.json,
  *      pinned to this CLI's version. After step 4 on purpose: shadcn
  *      installs whatever package.json declares, and Grove's own
  *      packages may not be resolvable at that moment (the scaffold
@@ -35,6 +35,7 @@
  * CLI wrapper in index.ts runs `pnpm install` and `git init` after
  * this returns, per its own `--no-install`/`--no-git` flags.
  */
+import { spawnSync } from 'node:child_process';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -51,12 +52,10 @@ import {
 import { run } from './run.js';
 
 const SKIP_NAMES = new Set(['node_modules', 'dist', '.astro', '.DS_Store', '.grove']);
-const GROVE_PACKAGES = [
-  '@grove-dev/core',
-  '@grove-dev/astro',
-  '@grove-dev/cli',
-  '@grove-dev/registry',
-] as const;
+// The registry is not in this list on purpose: shadcn installed the UI
+// source into `src/`, so the consumer owns those files outright and never
+// imports a registry package at runtime.
+const GROVE_PACKAGES = ['@grove-dev/core', '@grove-dev/astro', '@grove-dev/cli'] as const;
 const PROJECT_SCRIPTS = {
   dev: 'astro dev',
   build: 'astro build',
@@ -120,6 +119,21 @@ function packageName(value: string): string {
   );
 }
 
+/**
+ * `grove init` drives pnpm — for the shadcn `dlx` call, for the
+ * dependency install, and for the lockfile shadcn's package-manager
+ * detector reads. Check for it before writing anything.
+ */
+function requirePnpm(): void {
+  const probe = spawnSync('pnpm', ['--version'], { stdio: 'ignore' });
+  if (probe.error || probe.status !== 0) {
+    throw new Error(
+      'grove init needs pnpm on your PATH (it runs `pnpm dlx shadcn` and `pnpm install`).\n' +
+        'Install it with `npm install -g pnpm` or `corepack enable pnpm`, then run grove init again.',
+    );
+  }
+}
+
 async function ensureEmpty(targetDir: string): Promise<void> {
   await mkdir(targetDir, { recursive: true });
   const entries = (await readdir(targetDir)).filter((entry) => !SKIP_NAMES.has(entry));
@@ -174,6 +188,12 @@ export async function initDirectory(
   const target = resolve(targetDir);
   // 1. Never install over someone's work.
   await ensureEmpty(target);
+  // 1b. And never leave half a project behind. `installScaffoldWithShadcn`
+  //     shells out to pnpm; without it the run used to die partway through
+  //     with `spawn pnpm ENOENT`, after package.json and friends were
+  //     already on disk — so the obvious retry then failed `ensureEmpty`
+  //     with "not empty" and the user had to clean up by hand.
+  if (options.installScaffold === undefined) requirePnpm();
 
   const version = options.version ?? readCliVersion();
   const fallbackName = target.split(/[\\/]/).at(-1) ?? 'grove-directory';

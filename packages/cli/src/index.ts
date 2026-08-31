@@ -262,13 +262,18 @@ program
       if (options.json) {
         console.log(
           JSON.stringify(
-            { plan: summary.plan, applied: summary.applied, preserved: summary.preserved },
+            {
+              plan: summary.plan,
+              applied: summary.applied,
+              preserved: summary.preserved,
+              ...(summary.diffs.length > 0 ? { diffs: summary.diffs } : {}),
+            },
             null,
             2,
           ),
         );
       } else {
-        console.log(formatPlan(summary.plan, summary.applied));
+        console.log(formatPlan(summary));
       }
       if (summary.exitCode !== 0) process.exitCode = summary.exitCode;
     },

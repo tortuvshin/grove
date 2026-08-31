@@ -2,7 +2,8 @@
 /**
  * The CLI's view of the Grove UI registry.
  *
- * Grove's UI ships as an ordinary shadcn registry (`@grove-dev/registry`):
+ * Grove's UI ships as an ordinary shadcn registry (built from
+ * `packages/registry`, a workspace-private build unit):
  * hand-authored `registry.json`, built by the official `shadcn build`
  * into one JSON document per item with every file's content inlined.
  * The full scaffold — every item in the registry, in one block — is
@@ -13,7 +14,7 @@
  *                   then this module records the install-time hashes
  *                   in `.grove/registry.lock.json`.
  *   grove update  → loads the upstream `default` item (a URL, a path,
- *                   or the copy bundled with `@grove-dev/registry`),
+ *                   or the copy bundled inside the CLI itself),
  *                   three-way diffs it against the lockfile and disk,
  *                   and writes the safe subset of files itself.
  *
@@ -24,8 +25,8 @@
  */
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { type LockfileFile, type RegistryLockfile, sha256 } from './hash.js';
 
 /** The registry namespace consumers configure in `components.json`. */
@@ -62,28 +63,33 @@ export interface RegistryItem {
 }
 
 /**
- * Locate a built item inside the `@grove-dev/registry` package the CLI
- * depends on. Resolved through Node's resolver so it works from source
- * (workspace link) and from a published install alike.
+ * Locate a built item in the copy the CLI ships beside its own code.
+ *
+ * `@grove-dev/registry` is a workspace build unit, not a published
+ * package — nothing installs it, and consumers never import it. The
+ * CLI's build step copies `packages/registry/dist/r/` to
+ * `packages/cli/dist/r/`, so the scaffold travels inside the CLI
+ * tarball and `grove init` works offline.
  */
 export function resolveBundledItemPath(name = SCAFFOLD_ITEM): string {
-  const require = createRequire(import.meta.url);
-  let packageJson: string;
-  try {
-    packageJson = require.resolve('@grove-dev/registry/package.json');
-  } catch {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    // Published / built: dist/index.js sits beside dist/r/.
+    join(here, 'r', `${name}.json`),
+    // Running from source (vitest, tsx): src/ has no r/, dist/ does.
+    join(here, '..', 'dist', 'r', `${name}.json`),
+    // Monorepo source before the CLI has been rebuilt.
+    join(here, '..', '..', 'registry', 'dist', 'r', `${name}.json`),
+  ];
+  const found = candidates.find((candidate) => existsSync(candidate));
+  if (!found) {
     throw new Error(
-      '@grove-dev/registry is not installed. Reinstall @grove-dev/cli (it depends on the registry package).',
+      `Registry item "${name}" is not bundled with this CLI. Looked in:\n` +
+        candidates.map((candidate) => `  ${candidate}`).join('\n') +
+        '\nIn the Grove monorepo run `pnpm registry:build`; otherwise reinstall @grove-dev/cli.',
     );
   }
-  const itemPath = join(dirname(packageJson), 'dist', 'r', `${name}.json`);
-  if (!existsSync(itemPath)) {
-    throw new Error(
-      `Registry item "${name}" is missing at ${itemPath}. ` +
-        'In the Grove monorepo run `pnpm registry:build`; otherwise reinstall @grove-dev/cli.',
-    );
-  }
-  return itemPath;
+  return found;
 }
 
 function isUrl(source: string): boolean {
