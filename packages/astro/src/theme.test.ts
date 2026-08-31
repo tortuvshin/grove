@@ -141,6 +141,19 @@ describe('Astro theme contract', () => {
     expect(scaffoldTheme).not.toContain('color-scheme: dark light');
   });
 
+  it('does not start a second Tailwind build from the consumer override file', () => {
+    // Tailwind v4's Vite plugin treats every file that imports Tailwind as
+    // its own entry point. `system.css` already imports it, so an import
+    // here emits a SECOND complete Tailwind build — an extra ~35 KB of CSS
+    // that every page downloads on top of the first. The override file
+    // needs plain CSS, not the engine.
+    // Both files document the rule in prose, so strip comments first and
+    // assert on the directives that actually reach the compiler.
+    const directives = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(directives(scaffoldTheme)).not.toMatch(/@import\s+["']tailwindcss["']/);
+    expect(directives(astroTheme)).toMatch(/@import\s+["']tailwindcss["']/);
+  });
+
   it('styles components in HTML with Starlight-aligned Tailwind utilities', () => {
     expect(tailwindMarkup).toContain('rounded-[calc(var(--radius)+0.25rem)]');
     expect(tailwindMarkup).toContain('rounded-full');

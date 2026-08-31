@@ -103,8 +103,10 @@ The override is a direct edit — open the file in `src/components/grove/`, chan
 Three layers, increasing effort:
 
 1. **`grove.config.ts` `theme` block** — primary color, radius, density, container width. See [Theme](/customize/theme/).
-2. **`src/styles/global.css`** — override `--grove-*` design tokens or add custom utilities. The Astro integration auto-loads this file if it exists (`packages/astro/src/index.ts`) — no manual `<style>` import needed.
-3. **Tailwind** — already installed and wired in the scaffold (`@tailwindcss/vite` in `astro.config.mjs`, `@import "tailwindcss";` in `global.css`), not an opt-in step. Use its utilities directly in your own components.
+2. **`src/styles/global.css`** — override `--grove-*` design tokens or add custom rules. The Astro integration auto-loads this file if it exists (`packages/astro/src/index.ts`) — no manual `<style>` import needed, and `grove update` never touches it.
+
+   Do **not** put `@import "tailwindcss";` in it. `src/styles/system.css` already imports Tailwind, and Tailwind v4's Vite plugin treats every file that imports it as a separate entry point — so a second import emits a second complete Tailwind build (~35 KB on the reference site) that every page downloads on top of the first. Add the import only if this file needs `@apply` or `theme()`, and accept the duplicate build if so.
+3. **Tailwind** — already installed and wired in the scaffold (`@tailwindcss/vite` in `astro.config.mjs`, `@import "tailwindcss";` in `src/styles/system.css`), not an opt-in step. Use its utilities directly in your own components.
 
 ## What NOT to customize
 
