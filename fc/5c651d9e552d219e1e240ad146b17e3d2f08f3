@@ -1,0 +1,26 @@
+packages/core/src/index.ts
+  s_6a9d550eec8fb2::t_968169cbd5bac6 140-153
+packages/core/src/evidence.test.ts
+  s_6a9d550eec8fb2::t_b4848497c7d0b8 1-186
+packages/core/src/evidence.ts
+  s_6a9d550eec8fb2::t_ba9e9e4444b901 1-169,172-211,217-218,220-221,223,226,232-233,239-241
+  s_6a9d550eec8fb2::t_04d7f75bce7d72 225
+  s_6a9d550eec8fb2::t_897678cfae236c 170-171
+  s_6a9d550eec8fb2::t_27438f56ed813b 212-216,219,222,224,227-231,234-238
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "fc5c651d9e552d219e1e240ad146b17e3d2f08f3",
+  "prompts": {},
+  "sessions": {
+    "s_6a9d550eec8fb2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3fdeca9a-af37-4679-8480-047d7a9a7764",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
