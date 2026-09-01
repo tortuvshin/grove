@@ -1,0 +1,27 @@
+packages/core/src/repository-health.ts
+  s_6a9d550eec8fb2::t_578f1e947a6739 1-93,100-123
+  s_6a9d550eec8fb2::t_65a7f2b833a772 94-99
+packages/core/src/repository-health.test.ts
+  s_6a9d550eec8fb2::t_cf15fd874a05b2 1-105,109-111,118,120-130,132,134-145,147,149-206
+  s_6a9d550eec8fb2::t_436819558c679e 112-117,119
+  s_6a9d550eec8fb2::t_53fefd00a7854c 131,133,146,148
+  s_6a9d550eec8fb2::t_65a7f2b833a772 106-108
+packages/core/src/index.ts
+  s_6a9d550eec8fb2::t_c1b1decf19cf73 227-233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "1a561f092c0d3bf15c657a22d3406c575254c570",
+  "prompts": {},
+  "sessions": {
+    "s_6a9d550eec8fb2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3fdeca9a-af37-4679-8480-047d7a9a7764",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
