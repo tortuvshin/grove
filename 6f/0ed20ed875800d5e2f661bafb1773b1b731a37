@@ -1,0 +1,44 @@
+packages/core/src/import-types.ts
+  s_6a9d550eec8fb2::t_638571d05b8df5 1-21
+packages/core/src/index.ts
+  s_6a9d550eec8fb2::t_a04efeabb86b19 49-55
+  s_6a9d550eec8fb2::t_821947f94273f3 48
+packages/core/package.json
+  s_6a9d550eec8fb2::t_72f767a970f17f 56,58
+packages/core/src/candidate.ts
+  s_6a9d550eec8fb2::t_c45c64fee4e390 2-83,85-93,95-97,99-165
+  s_6a9d550eec8fb2::t_6a7aa83c80591a 1
+  s_6a9d550eec8fb2::t_ddb86f1a82624b 94,98
+  s_6a9d550eec8fb2::t_e5394641615130 84
+packages/core/src/candidate.test.ts
+  s_6a9d550eec8fb2::t_6d389011676385 1-78
+packages/core/src/markdown.ts
+  s_6a9d550eec8fb2::t_2c74ef4c3b78ae 1,5
+  s_6a9d550eec8fb2::t_4e2e746e1437ed 2
+  s_6a9d550eec8fb2::t_c0918bb75d64f5 59
+packages/core/src/importer.ts
+  s_6a9d550eec8fb2::t_8c6a3cc2a2587b 1-8
+  s_6a9d550eec8fb2::t_6a7aa83c80591a 9,11-18
+packages/core/src/importer.test.ts
+  s_6a9d550eec8fb2::t_4bf0f265a2c9fb 2,4-7,20-21
+packages/core/src/import-write.ts
+  s_6a9d550eec8fb2::t_8fa86ddf42401b 1-43
+pnpm-lock.yaml
+  s_6a9d550eec8fb2::t_8a5b680c725e6e 84,103,157-159,163-165,172-175,190,5382-5389,5425-5439,5462-5468,5584-5605,5654-5689,6509-6515,7597-7602,7614-7706
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6f0ed20ed875800d5e2f661bafb1773b1b731a37",
+  "prompts": {},
+  "sessions": {
+    "s_6a9d550eec8fb2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3fdeca9a-af37-4679-8480-047d7a9a7764",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
