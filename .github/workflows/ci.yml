@@ -102,6 +102,62 @@ jobs:
         # `shadcn add @grove/<item>` flow is exercised for real.
         run: pnpm registry:install-check
 
+  test-pnpm-next:
+    name: Scaffold smoke test (pnpm next)
+    # Consumers do not run the pnpm this repo pins. pnpm 11 turned an
+    # unapproved dependency build script into a hard error, which killed
+    # the `pnpm add` inside `shadcn add` and shipped a `grove init` that
+    # left every consumer with a package.json and no src/ — invisible to
+    # every job above, all of which pin 10.12.1. This job runs the
+    # consumer path on the newest pnpm so the next such break fails here
+    # instead of on someone's machine.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+    # The scaffold has to work on the pinned pnpm; whether it works on an
+    # unreleased one is a warning, not a merge gate.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        # The repo's own install stays on the pinned version — only the
+        # scaffold the CLI creates is exercised under the newer one.
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.12.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (needed for the CLI to run from dist)
+        run: pnpm -r build
+
+      - name: Switch pnpm to the latest release
+        # pnpm self-manages versions: inside this repo it re-execs the
+        # `packageManager` pin, so test-scaffold.mjs's repo-root steps
+        # keep running on 10.12.1 no matter what is installed here. The
+        # scaffold it creates carries no pin, so everything run inside it
+        # — `grove init`'s `pnpm dlx shadcn`, its `pnpm install`, the
+        # final `pnpm build` — picks up this version. That is the part
+        # under test. The temp-dir check prints which version that is.
+        run: |
+          npm install -g pnpm@latest
+          cd "$(mktemp -d)" && pnpm --version
+
+      - name: Run scaffold test
+        # `node`, not `pnpm test:scaffold`: a pnpm-run script puts its own
+        # pnpm first on the child PATH, so going through the script alias
+        # would silently hand the scaffold 10.12.1 again and this job
+        # would test nothing.
+        run: node scripts/test-scaffold.mjs
+
   unit:
     name: Unit tests (vitest)
     # Runs the workspace vitest suite — 22 unit-test files across

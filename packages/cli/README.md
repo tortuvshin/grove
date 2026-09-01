@@ -51,9 +51,29 @@ Requires Node.js `>=22.12.0`.
 grove init my-space
 ```
 
-Copies the canonical working Grove site into `my-space/` and runs
-`pnpm install`. Use `--no-install` to skip dependency installation or
-`--no-git` to skip the initial `git init`.
+Creates `my-space/` from the `@grove/default` registry item — the full
+scaffold, bundled inside this package, so `grove init` makes no registry
+request. It writes the project-root files the item cannot carry
+(`package.json`, `tsconfig.json`, `components.json`, `grove.config.ts`,
+`astro.config.mjs`, an empty `data/records/`), installs the item's 70
+files into `src/` with the official shadcn CLI, pins
+`@grove-dev/{core,astro,cli}` to this CLI's version, records the
+install-time file hashes in `.grove/registry.lock.json` for `grove
+update`, and finishes with `<your package manager> install` and
+`git init`.
+
+**Package manager.** pnpm, npm, yarn and bun all work. `grove init`
+takes the one the surrounding project declares (`packageManager` field,
+then lockfile), else the one that launched the command, else the first
+it finds installed. It records the choice as `packageManager` in the
+generated `package.json` and uses it for every install from then on.
+pnpm projects also get a `pnpm-workspace.yaml` approving the scaffold's
+dependency build scripts, which pnpm 11 refuses to skip silently.
+
+It does not scaffold `content/`, `public/`, or `.github/` — those are
+yours. Use `--no-install` to skip the final dependency install or
+`--no-git` to skip the initial `git init`. If a step fails, the partial
+scaffold is removed again, so the retry is just `grove init`.
 
 ### `grove check`
 

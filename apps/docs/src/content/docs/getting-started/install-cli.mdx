@@ -48,14 +48,14 @@ Pick whichever matches your workflow.
 
 <Steps>
 
-1. ## Path A — `pnpm dlx` (recommended; zero install)
+1. ## Path A — `dlx` / `npx` / `bunx` (recommended; zero install)
 
    <Aside type="tip" title="Zero-install path">
      Run any command without permanently installing anything. `dlx` fetches the latest CLI on demand and uses a cache for repeat calls.
    </Aside>
 
-   <Aside type="caution" title="pnpm is required">
-     You can *launch* the CLI with npm or bun, but `grove init` itself drives pnpm — it runs `pnpm dlx shadcn` to install the UI registry item and `pnpm install` afterwards. Without pnpm on your PATH, `init` stops before writing anything and tells you so. Install it with `npm install -g pnpm` or `corepack enable pnpm`.
+   <Aside type="note" title="The CLI follows your package manager">
+     `grove init` detects whether you are on pnpm, npm, yarn or bun — from the project you run it in, or from the command that launched it — and scaffolds for that one. It records the choice as `packageManager` in the generated `package.json`, installs the UI registry item with it, and prints the next steps in its wording. No package manager is required beyond the one you already use.
    </Aside>
 
    <Tabs syncKey="pkg">
