@@ -24,7 +24,7 @@
     "@grove-dev/cli": "workspace:*",
     "@grove-dev/core": "workspace:*",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^7.1.3",
+    "astro": "^7.2.9",
     "tailwindcss": "^4.3.3",
     "yaml": "^2.9.0"
   },
