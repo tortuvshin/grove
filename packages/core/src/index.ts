@@ -46,6 +46,14 @@ export type { GenerateResult, RecordsFullPayload, RecordsIndexPayload } from './
 // ── Build pipeline ───────────────────────────────────────────────────
 export { generate } from './build-data.js';
 export type {
+  CandidateEntry,
+  CandidateLink,
+  CandidateSource,
+  ExtractCandidatesOptions,
+} from './candidate.js';
+// ── Candidate extraction (AST-based, source-preserving) ──────────────
+export { extractCandidates } from './candidate.js';
+export type {
   Collection,
   CollectionEditorial,
   CollectionEntry,

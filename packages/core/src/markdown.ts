@@ -1,30 +1,8 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
-import { stringify as stringifyYaml } from 'yaml';
-import { type Blueprint, blueprintKind, type ProjectRecord } from './schema.js';
+import { basename, resolve } from 'node:path';
+import type { ImportedRecord, ImportResult } from './import-types.js';
 import { uniqueSlug } from './slug.js';
 
-export interface ImportedRecord {
-  slug: string;
-  name: string;
-  description: string;
-  category: string;
-  links: { github?: string; website?: string; source?: string };
-}
-
-export interface ImportSummary {
-  imported: number;
-  skipped: number;
-  categories: string[];
-  duplicateSlugs: number;
-  tocSkipped: number;
-  anchorLinksSkipped: number;
-}
-
-export interface ImportResult {
-  records: ImportedRecord[];
-  report: ImportSummary;
-}
+export type { ImportedRecord, ImportResult, ImportSummary } from './import-types.js';
 
 const markdownLinkPattern = /\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
@@ -78,7 +56,7 @@ function isExternalUrl(url: string): boolean {
 const MALFORMED_OPEN_LINK = /\[[^\]\n]+\]\s*(?=$|\n)/g;
 const MALFORMED_BARE_BRACKET = /\[[^\]\n]{1,80}\]/g;
 
-function extractDescription(body: string): string {
+export function extractDescription(body: string): string {
   return body
     .replace(markdownLinkPattern, '')
     .replace(MALFORMED_OPEN_LINK, '')
@@ -243,42 +221,4 @@ export async function importAwesomeList(input: string): Promise<ImportResult> {
     file = basename(path);
   }
   return parseAwesomeMarkdown(text, sourceUrl !== undefined ? { file, sourceUrl } : { file });
-}
-
-/**
- * Write imported records out as `data/records/<slug>.yml`, one per
- * record. Each file is shaped for the `project-directory` blueprint
- * (kind: project). Other blueprints should use a separate importer.
- */
-export async function writeImportedRecords(
-  result: ImportResult,
-  cwd = process.cwd(),
-  blueprint: Blueprint = 'project-directory',
-): Promise<{ written: number; dir: string }> {
-  const expectedKind = blueprintKind[blueprint];
-  const dir = resolve(cwd, 'data', 'records');
-  await mkdir(dir, { recursive: true });
-  let written = 0;
-  for (const record of result.records) {
-    let yamlObj: Record<string, unknown>;
-    if (expectedKind === 'project') {
-      const project: Partial<ProjectRecord> = {
-        kind: 'project',
-        slug: record.slug,
-        name: record.name,
-        description: record.description,
-        category: record.category,
-        tags: [],
-        links: record.links,
-        source: { type: 'import' },
-      };
-      yamlObj = project as Record<string, unknown>;
-    } else {
-      yamlObj = { ...record, kind: expectedKind };
-    }
-    const path = join(dir, `${record.slug}.yml`);
-    await writeFile(path, stringifyYaml(yamlObj, { lineWidth: 100 }), 'utf8');
-    written++;
-  }
-  return { written, dir };
 }

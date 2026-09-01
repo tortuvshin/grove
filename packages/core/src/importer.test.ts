@@ -1,9 +1,10 @@
 /**
- * @grove-dev/core — markdown.ts importer unit tests.
+ * @grove-dev/core — importer unit tests.
  *
- * The `markdown.ts` module houses `parseAwesomeMarkdown`,
- * `detectGithubRepo`, `importAwesomeList`, and
- * `writeImportedRecords`. `importer.ts` re-exports the last two.
+ * `markdown.ts` houses `parseAwesomeMarkdown`, `detectGithubRepo`, and
+ * `importAwesomeList` (parsing). `import-write.ts` houses
+ * `writeImportedRecords` (the YAML-writing side effect). `importer.ts`
+ * re-exports all of these plus `extractCandidates`.
  *
  * Tests cover:
  *   - detectGithubRepo: URL + slug derivation, edge cases
@@ -16,12 +17,8 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import {
-  detectGithubRepo,
-  importAwesomeList,
-  parseAwesomeMarkdown,
-  writeImportedRecords,
-} from './markdown.js';
+import { writeImportedRecords } from './import-write.js';
+import { detectGithubRepo, importAwesomeList, parseAwesomeMarkdown } from './markdown.js';
 
 describe('detectGithubRepo', () => {
   it('returns the canonical GitHub URL for a github.com URL', () => {
