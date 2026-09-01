@@ -224,6 +224,13 @@ export { parseEntry, parseSections } from './parseReadme.js';
 export type { PrepareDirectoryResult } from './prepare.js';
 export { prepareDirectory } from './prepare.js';
 export { findRelated } from './related.js';
+export type {
+  RepositoryHealthConfidence,
+  RepositoryHealthResult,
+  RepositoryHealthStatus,
+} from './repository-health.js';
+// ── Repository health classification (evidence → explainable status, README-health) ──
+export { classifyRepositoryHealth } from './repository-health.js';
 // ── Robots + filter URL policy ───────────────────────────────────────
 export { buildRobotsTxt, isIndexableFilterPath } from './robots.js';
 // ── Schema-derived types ─────────────────────────────────────────────
