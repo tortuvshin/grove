@@ -1,0 +1,55 @@
+packages/core/src/build-data.ts
+  s_cfc282f225f4ed::t_57985c08fe0391 286-296,299-302,304-307,309-312,315-316,324-325
+  s_cfc282f225f4ed::t_1c7fba3ec4d9ec 401-412,424-427
+packages/astro/src/server/models.ts
+  s_cfc282f225f4ed::t_e83c029cd06fc8 759
+  s_cfc282f225f4ed::t_de53812e51916f 760-761,767
+  s_cfc282f225f4ed::t_3cf5f70a3a6590 616
+apps/example/src/pages/categories/[name].astro
+  s_cfc282f225f4ed::t_7178ada31aca62 9-17
+apps/example/src/pages/stacks/[name].astro
+  s_cfc282f225f4ed::t_7178ada31aca62 9-17
+apps/example/src/pages/licenses/[name].astro
+  s_cfc282f225f4ed::t_7178ada31aca62 9-17
+packages/core/src/prepare.ts
+  s_cfc282f225f4ed::t_4649b8e2099527 133-135,140-143,155-157
+packages/registry/default/pages/stacks/[name].astro
+  s_cfc282f225f4ed::t_6f3cea58790a9d 9-17
+packages/astro/src/server/record-detail-model.test.ts
+  s_cfc282f225f4ed::t_34a2122f581a94 61-70
+  s_cfc282f225f4ed::t_07ceb545403d6e 110-136
+packages/registry/default/pages/categories/[name].astro
+  s_cfc282f225f4ed::t_0c9bbef8f96275 9-17
+apps/example/src/components/grove/record-sidebar.astro
+  s_cfc282f225f4ed::t_7178ada31aca62 292,319,331
+packages/core/src/build-data.test.ts
+  s_cfc282f225f4ed::t_d18c3b46c3b209 406-411
+  s_cfc282f225f4ed::t_f39e584720ec0f 423-430
+  s_cfc282f225f4ed::t_69c80732dbee0d 172-215,413
+  s_cfc282f225f4ed::t_bf9079498997bb 412,415-422,431-477,481-492
+  s_cfc282f225f4ed::t_684a2c7f9c1951 414
+packages/core/src/schema.ts
+  s_cfc282f225f4ed::t_370636a88e01c3 332-344
+packages/registry/default/components/grove/record-sidebar.astro
+  s_cfc282f225f4ed::t_c625e5745e864a 292
+  s_cfc282f225f4ed::t_8572928c4a3e46 331
+  s_cfc282f225f4ed::t_029543893468dc 319
+packages/registry/default/pages/licenses/[name].astro
+  s_cfc282f225f4ed::t_5314c66b181ef5 9-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "994a3049dcd93bb972f31d896e718fbfaf26e5e0",
+  "prompts": {},
+  "sessions": {
+    "s_cfc282f225f4ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e2e1bb4-1ee3-41b6-bb0f-6bdfb143d4a7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
