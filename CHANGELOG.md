@@ -24,12 +24,73 @@ For the developer workflow that produces these entries, see
 > [`apps/docs/src/content/docs/project/roadmap.md`](./apps/docs/src/content/docs/project/roadmap.md)
 > until they ship.
 
-The v1 registry model was verified against a real consumer install for the
-first time, rather than against `apps/example` — which is a byte-identical
-copy of the registry source and so could only ever confirm that a copy is a
-copy. Four of the bugs below made it through every existing gate.
+---
 
-**Packages:** `@grove-dev/cli`, `@grove-dev/astro`
+## [0.8.0] — 2026-09-01
+
+Grove's UI stops being something you import and starts being something you
+own. `@grove-dev/astro` no longer exports a single `.astro` file; the same
+components ship through a [shadcn registry](https://withgrove.dev/r/) that
+installs their source into your project. From then on the files are yours,
+and `grove update` reconciles new upstream versions against your edits
+instead of a package upgrade silently changing your site.
+
+**This is a breaking change for every existing consumer.** See
+[Migration guide](https://withgrove.dev/reference/migration/) before upgrading.
+
+**Packages:** `@grove-dev/core`, `@grove-dev/astro`, `@grove-dev/cli`,
+`@grove-dev/starlight`
+
+### Removed
+
+- **`@grove-dev/astro` exports no UI.** `./components/*`, `./ui/*` and
+  `./layouts/*` are gone, along with the `.astro` sources behind them. Every
+  `import X from "@grove-dev/astro/components/X.astro"` (and the `ui/` and
+  `layouts/` equivalents) stops resolving. The package now exports only the
+  Astro integration, the server-side view-model builders (`./server`), and
+  `./styles.css`. The components did not disappear — they moved to the
+  registry, which installs them into your `src/`.
+
+### Added
+
+- **A real shadcn registry.** Thirteen items — `ui`, `shell`, `project-card`,
+  `taxonomy`, `collections`, `home`, `browse`, `record`, `submit`, `about`,
+  `contributors`, `not-found`, and `default` (the whole 70-file site in one
+  item) — served at `https://withgrove.dev/r/<item>.json` under the `@grove`
+  namespace. It speaks the official schema, so `npx shadcn add @grove/browse`
+  and `npx shadcn view @grove/home` work unchanged, with no React and no
+  `shadcn init`.
+- **`grove update`** — a three-way reconcile of your installed UI against the
+  registry. Every file is classified against three states (what is on disk,
+  what `.grove/registry.lock.json` recorded, what upstream now ships) as
+  unchanged, upstream-changed, new, locally modified, conflicting, or removed.
+  Upstream changes are applied; **files you edited are never overwritten**.
+  `--check` prints the plan without writing, `--diff` prints a unified diff
+  per changed file, `--json` emits a machine-readable summary, and `--force`
+  takes the upstream side of a conflict. It exits `2` while a conflict is
+  unresolved and keeps doing so until someone merges, so CI can gate on it.
+- **`grove init` is a registry bootstrapper.** It writes `package.json`,
+  `tsconfig.json`, `grove.config.ts`, `astro.config.mjs`, `components.json`
+  and an empty `data/records/`, then drives the official shadcn CLI to install
+  `@grove/default` from a copy bundled inside the CLI — so `init` needs no
+  registry request and works offline. It finishes by recording a sha256 per
+  installed file in `.grove/registry.lock.json`.
+
+### Changed
+
+These change the output or the structure of an existing site. Read them
+before upgrading.
+
+- **Your `src/` is plain Astro.** Pages, layouts and components are ordinary
+  files in your repository with relative imports. You can remove
+  `@grove-dev/astro` and the site still builds — you would lose the data
+  pipeline, not the UI.
+- **Engine and UI release independently.** A `@grove-dev/core` patch cannot
+  change your UI, and a registry release does not require a package bump.
+- **Server-side derivation moved into `@grove-dev/astro/server`.** Card and
+  record-detail view models (`buildProjectCardModel`, `getRecordDetailModel`,
+  `getTaxonomyPageModel`, and friends) are built there rather than inside
+  components, so the installed `.astro` files stay presentational.
 
 ### Fixed
 
@@ -80,16 +141,18 @@ copy. Four of the bugs below made it through every existing gate.
   plugin treats every file that imports it as its own entry point — so
   `src/styles/global.css` was emitting a second complete Tailwind build.
   Every page downloaded ~35 KB of duplicate CSS on top of the real
-  stylesheet. Found while migrating a real site onto v1.
+  stylesheet. Found while migrating a real site onto this release.
 
-### Changed
+### Internal
+
+Gates that would have caught the bugs above, and did not exist.
 
 - **CI:** a new `scripts/check-publishable.mjs` fails when a published
   package depends on a private one. The `grep` that was supposed to catch
   this could never fail: its own filter matched every line the search
-  could emit. CI also now runs on the `v1` branch, and `pnpm
-  test:scaffold` builds a second site on non-default routes with real
-  records — the shape that surfaces a hardcoded route.
+  could emit. `pnpm test:scaffold` also builds a second site on
+  non-default routes with real records — the shape that surfaces a
+  hardcoded route.
 - **CI:** `pnpm registry:install-check` installs `@grove/browse` off a
   loopback server, exercising the documented `shadcn add @grove/<item>`
   flow and its `registryDependencies` resolution. Only `@grove/default`,

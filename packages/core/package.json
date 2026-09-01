@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/core",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "type": "module",
   "description": "Headless engine for Grove: resource schema, config, importers, validators, taxonomy, sitemap, llms.txt, and the data build pipeline.",
   "license": "MIT",

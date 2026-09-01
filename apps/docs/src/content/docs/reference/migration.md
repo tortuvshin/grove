@@ -14,6 +14,48 @@ what's new in each release. The roadmap is at [Project > Roadmap](/project/roadm
 
 ## Breaking changes
 
+### 0.8.0 — `@grove-dev/astro` no longer exports UI
+
+This is the largest breaking change Grove has shipped. `./components/*`,
+`./ui/*` and `./layouts/*` are gone from the package, so every import of the
+form below stops resolving:
+
+```ts
+import ProjectCard from "@grove-dev/astro/components/ProjectCard.astro"; // gone
+import { buttonClass } from "@grove-dev/astro/ui/button";               // gone
+import BaseLayout from "@grove-dev/astro/layouts/BaseLayout.astro";     // gone
+```
+
+The components did not disappear — they moved into a
+[registry](/concepts/registry/) that installs their source into your project.
+`@grove-dev/astro` still exports the integration, `./server` (the view-model
+builders), and `./styles.css`; imports of those are unaffected, as are all
+`@grove-dev/core` imports.
+
+To migrate an existing site:
+
+1. Bump `@grove-dev/{core,astro,cli}` to `0.8.0`.
+2. Add a `components.json` pointing the `@grove` namespace at the registry,
+   and give `tsconfig.json` an `"@/*": ["./src/*"]` path plus
+   `"allowImportingTsExtensions": true` — the installed components import
+   `../lib/classnames.ts` by full path.
+3. Install the scaffold: `npx shadcn@4.19.0 add @grove/default`. Keep
+   `"tsx": true` in `components.json`; with `false` the shadcn CLI runs its
+   TypeScript→JavaScript transformer over every file and fails on the first
+   `.astro` with a bare `Unexpected token`.
+4. Rewrite the dead imports to the installed paths — `../components/grove/…`,
+   `../components/ui/…`, `../layouts/…`.
+5. Delete any component you had copied out of the package to customise; the
+   registry's version is now in your `src/` and is yours to edit.
+
+From then on, `grove update` brings upstream changes in without overwriting
+anything you have edited.
+
+If you had forked a component, the fork wins: `grove update` reports it as
+locally modified and leaves it alone, every run, until you merge it yourself.
+
+### Earlier releases
+
 - **`Astro.site` is required.** `Seo.astro` (used by every scaffold page) throws a build error if
   `astro.config.mjs` doesn't set `site: 'https://your-domain'`, instead of silently falling back to
   a placeholder URL in canonical/OG/Twitter/JSON-LD output. This applies to Astro's own `site`
