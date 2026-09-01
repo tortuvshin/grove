@@ -1,0 +1,50 @@
+packages/core/src/github.ts
+  s_cfc282f225f4ed::t_40d7dc09392963 148-175
+packages/core/src/index.ts
+  s_cfc282f225f4ed::t_8cc51d673dc93b 134-139
+apps/docs/src/content/docs/automation/sync-github.md
+  s_cfc282f225f4ed::t_82700c2691b552 190
+  s_cfc282f225f4ed::t_be3329507cd14a 26-27
+  s_cfc282f225f4ed::t_186a267e92452b 221
+  s_cfc282f225f4ed::t_4c82c367c2cf88 110-117,125
+apps/docs/src/content/docs/content/health-classification.mdx
+  s_cfc282f225f4ed::t_cf7a012aed18ca 18,20-21,23
+packages/cli/src/index.ts
+  s_cfc282f225f4ed::t_68cd2e9df843e0 192-194,196
+  s_cfc282f225f4ed::t_2706081b13515f 195
+  s_cfc282f225f4ed::t_abf200b3b737ea 140-143,149
+  s_cfc282f225f4ed::t_27ac32703f4054 16
+apps/docs/src/content/docs/guides/walkthrough-sync-github.mdx
+  s_cfc282f225f4ed::t_1910dea4dfe80f 131-132
+  s_cfc282f225f4ed::t_4dc0816f330563 92
+packages/core/src/github.test.ts
+  s_cfc282f225f4ed::t_d101b788112a2e 13-18
+  s_cfc282f225f4ed::t_b0af9ec36b29f0 185
+  s_cfc282f225f4ed::t_7001553fbcb038 179-184,186-213
+apps/docs/src/content/docs/reference/api-core.md
+  s_cfc282f225f4ed::t_cc80128a95d301 232,239,244
+  s_cfc282f225f4ed::t_ba70bddd01c82f 245
+apps/docs/src/content/docs/reference/record-schema.md
+  s_cfc282f225f4ed::t_5f75d50687ab0e 241-248
+  s_cfc282f225f4ed::t_c11036225f5234 218-219
+packages/core/src/validate.ts
+  s_cfc282f225f4ed::t_93186e59dd91b5 198-201,204-205
+packages/core/src/validate.test.ts
+  s_cfc282f225f4ed::t_d75e39b1106c47 349-372
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7e4f665721811e609fe16e738f36ee742a82cf28",
+  "prompts": {},
+  "sessions": {
+    "s_cfc282f225f4ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7e2e1bb4-1ee3-41b6-bb0f-6bdfb143d4a7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
