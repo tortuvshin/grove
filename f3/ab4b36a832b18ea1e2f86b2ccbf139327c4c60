@@ -1,0 +1,22 @@
+CHANGELOG.md
+  s_4c1b7b69ae3c15::t_7278fed8af0dbf 144,146-148,153-155
+  s_4c1b7b69ae3c15::t_0b658649726a24 27-79,81-93
+apps/docs/src/content/docs/reference/migration.md
+  s_4c1b7b69ae3c15::t_05ab6701f601e1 17-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "f3ab4b36a832b18ea1e2f86b2ccbf139327c4c60",
+  "prompts": {},
+  "sessions": {
+    "s_4c1b7b69ae3c15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "15ac56d4-baa8-46ad-881b-d193a1132376",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
