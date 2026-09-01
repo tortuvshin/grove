@@ -195,12 +195,14 @@ export async function validateProject(
         warnUnknownTaxonomy(fileSlug, 'platform', platform, taxonomy.platforms, 'platforms.yml');
       }
     }
-    // Records that link to a GitHub repo need a matching health entry
-    // so list/detail UIs can render staleness signals. Track here and
-    // cross-check against health.yml below.
+    // Records that link to a GitHub repo need a health entry — either
+    // inline on the record itself (what `sync github` now writes) or,
+    // for records synced before that change, in health.yml — so
+    // list/detail UIs can render staleness signals.
     const repoUrl = (parsed as { repoUrl?: string }).repoUrl;
     const linksGithub = (parsed.links as { github?: string } | undefined)?.github;
-    if (repoUrl || linksGithub) {
+    const hasInlineHealth = parsed.kind === 'project' && Boolean(parsed.health);
+    if ((repoUrl || linksGithub) && !hasInlineHealth) {
       slugsNeedingHealth.add(fileSlug);
     }
   }

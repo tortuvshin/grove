@@ -14,6 +14,7 @@ import {
   normalizeGithubIntegration,
   parseGithubRepoUrl,
   prepareDirectory,
+  pruneLegacyGithubFields,
   stringifyRecordYaml,
   syncContributors,
   validateProject,
@@ -139,11 +140,6 @@ program
     let updated = 0;
     let htmlOnly = 0;
     let failed = 0;
-    // `integrations.github.health` used to resolve to a flag nothing
-    // read. When it is on, derive a health entry per record from the
-    // metadata this sync just fetched and write data/health.yml —
-    // the file `grove check` already validates and the build reads.
-    const healthEntries: HealthEntry[] = [];
 
     for (const file of selected) {
       const filePath = join(recordsDir, file);
@@ -162,12 +158,16 @@ program
 
       const github = (raw.github as Record<string, unknown> | undefined) ?? {};
       const patch: Record<string, unknown> = {};
+      // Health is written inline onto the record (not to a shared
+      // data/health.yml) so two records syncing at once never touch
+      // the same file.
+      let health: HealthEntry['health'] | undefined;
       let source: 'api' | 'html' | undefined;
       try {
         const metadata = await fetchGithubMetadata(ref);
         if (metadata) {
           if (githubFlags.health) {
-            healthEntries.push(classifyHealth(basename(file, '.yml'), metadata));
+            health = classifyHealth(basename(file, '.yml'), metadata).health;
           }
           // Merge into the existing repository block rather than
           // replacing it wholesale. Sync only owns the fields it
@@ -210,20 +210,15 @@ program
       patch.sync = { syncedAt: new Date().toISOString(), source };
       await writeFile(
         filePath,
-        stringifyRecordYaml({ ...raw, github: { ...github, ...patch } }),
+        stringifyRecordYaml({
+          ...raw,
+          ...(health ? { health } : {}),
+          github: { ...pruneLegacyGithubFields(github), ...patch },
+        }),
         'utf8',
       );
       updated += 1;
       console.log(`[sync github] ${file}: ${source}`);
-    }
-    if (githubFlags.health && healthEntries.length > 0) {
-      const healthPath = resolve(process.cwd(), config.paths.health);
-      await writeFile(
-        healthPath,
-        stringifyRecordYaml({ health: healthEntries } as unknown as Record<string, unknown>),
-        'utf8',
-      );
-      console.log(`[sync github] ${healthEntries.length} health entries → ${config.paths.health}`);
     }
     console.log(`[sync github] ${updated} updated (${htmlOnly} HTML fallback), ${failed} failed`);
     if (options.strict && failed > 0) process.exitCode = 1;

@@ -229,15 +229,19 @@ import {
   fetchGithubMetadata,
   enrichFromGithubHtml,
   buildGithubSyncPatch,
+  pruneLegacyGithubFields,
 } from "@grove-dev/core";
 
 const ref = parseGithubRepoUrl("https://github.com/ollama/ollama"); // { owner, repo } | undefined
 const metadata = await fetchGithubMetadata(ref, process.env.GITHUB_TOKEN);
 const enriched = await enrichFromGithubHtml("https://github.com/ollama/ollama");
 const patch = buildGithubSyncPatch(metadata, existingRecord.github);
+const cleanedGithub = pruneLegacyGithubFields(existingRecord.github);
 ```
 
 The token-free HTML fallback (`enrichFromGithubHtml`) fetches the public GitHub page, parses it, and returns `homepage`, `license`, `language`, `topics` — only fields the REST API didn't reach.
+
+`pruneLegacyGithubFields` drops fields an older `sync github` wrote but nothing reads today (`latestRelease`, `files`, `labels` — see [Sync GitHub metadata](/automation/sync-github/)); `sync github` calls it on the existing `github` block before merging `buildGithubSyncPatch`'s output on top, so a record self-heals on its next sync.
 
 `rateLimitWaitMs` and `sleep` are exported for backoff scheduling in long-running sync loops.
 

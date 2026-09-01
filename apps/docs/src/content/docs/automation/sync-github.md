@@ -23,8 +23,8 @@ integrations: {
 
 `integrations.github` can also be a single boolean (`github: true`), which expands to all three sub-flags via `normalizeGithubIntegration`.
 
-:::caution[The `health` flag currently does nothing]
-`normalizeGithubIntegration` (`packages/core/src/schema.ts`) resolves `metadata`, `contributors`, and `health` into three booleans, but the `sync` command in `packages/cli/src/index.ts` only reads `githubFlags.metadata` and `githubFlags.contributors`. Nothing in the CLI branches on `githubFlags.health`. Setting `health: false` does not turn off anything today — health classification (`classifyHealth` in `packages/core/src/health.ts`) is a separate function that `grove sync github` never calls.
+:::note[`health: true` writes `health:` inline on each record]
+When `integrations.github.health` is enabled, every record synced via the API path gets a `health:` block written directly onto it (derived by `classifyHealth` in `packages/core/src/health.ts`) — one write per record, alongside the `github` patch, so two records syncing at once never contend for the same file. `data/health.yml` is only read as a fallback for records that don't carry an inline block.
 :::
 
 If `integrations.github.metadata` is `false`, running `grove sync github` prints `[sync github] disabled by integrations.github.metadata — skipping` and exits without reading any files.
@@ -107,6 +107,14 @@ github:
   sync:
     syncedAt: "2026-08-14T03:11:42.000Z"
     source: api
+health:                                      # written alongside github, when enabled
+  status: active
+  maturity: mature
+  tier: curated
+  visibility: keep
+  cleanupCandidate: false
+  confidence: high
+  reasons: [active-development]
 ```
 
 Notes on this shape:
@@ -114,6 +122,7 @@ Notes on this shape:
 - `license.spdx_id` and `license.name` are both set to the **same** string (whichever GitHub returned — SPDX id preferred, falling back to the license's display name). The API's own `license.name` (which can differ from the SPDX id) is not fetched into a separate field.
 - `latestReleaseAt` and `homepage` live at the top level of `github`, not nested inside `repository` — that's deliberate (see the comment on `buildGithubSyncPatch`).
 - Fields `fetchGithubMetadata` fetches from the API but that `buildGithubSyncPatch` never writes back: `watchers_count`, `created_at`, `description`, `html_url`, `size`, `visibility`, `fork`, `private`. If you need one of those, it isn't part of the sync's write surface today.
+- A sync also drops `github.latestRelease`, `github.files`, and `github.labels` from the record if they're present — leftover full-blob fields an older sync version wrote that nothing reads today. `github.languages` and `github.activity` are kept; they're read by the record page.
 
 For an HTML-fallback sync:
 
@@ -178,7 +187,7 @@ The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on 
 - **Issues / PRs** — `open_issues_count` is written, but no per-issue or per-PR data.
 - **Private repositories** — the HTML fallback scrapes a public page, so it won't work on a private repo; the API path needs a token with access.
 - **Non-GitHub hosts** — GitLab, Codeberg, Bitbucket, etc. don't match `parseGithubRepoUrl` and are skipped.
-- **`health`** — `grove sync github` never calls `classifyHealth` and never writes a record's `health` block. Whatever `health` a record carries has to come from somewhere else.
+- **Health when the flag is off** — with `integrations.github.health` disabled (or unset), `grove sync github` never calls `classifyHealth`. Whatever `health` a record carries has to come from somewhere else.
 - **Contributors** — a separate command, [`grove sync contributors`](/automation/sync-contributors/), handles that.
 
 ## Programmatic API
@@ -209,7 +218,7 @@ The full programmatic surface is in [Programmatic API](/reference/api-core/).
 ## Related
 
 - [Record schema](/reference/record-schema/) — every field a record file may carry, including `github.*`
-- [Maintain health signals](/content/health-classification/) — why `health.*` is not part of this sync
+- [Maintain health signals](/content/health-classification/) — how `health.*` is derived and where it lands when the `health` flag is on or off
 - [Decisions](/concepts/decisions/) — the curator layer that overrides visibility
 - [Cleanup report](/automation/cleanup/) — the command that flags stale/archived records for review
 - [Scheduled maintenance](/automation/scheduled/) — the workflow cadence this runs on

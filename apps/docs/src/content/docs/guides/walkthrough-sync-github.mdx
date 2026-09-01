@@ -89,7 +89,7 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
    - `github.latestReleaseAt` and `github.homepage` — written only when GitHub returned them.
    - `github.sync` — `{ syncedAt, source }` provenance, where `source` is `api` or `html`.
 
-   Everything it writes lands under `github.`. It does not touch `health`, `curation`, or any prose you wrote — the patch is merged into the existing `github` block, so fields outside the sync surface survive a re-run.
+   Everything above lands under `github.`. It never touches `curation` or any prose you wrote — the patch is merged into the existing `github` block, so fields outside the sync surface survive a re-run. `health` is separate: it's only written when `integrations.github.health` is enabled (off by default), and lands as a top-level `health:` block on the record, not under `github.`.
 
    <Aside type="note" title="What you should see">
      One line per record: `[sync github] <file>: api`, or `html` when the fallback handled it, or `no repository, skipped` / `invalid GitHub URL, skipped` / `unavailable`. The run ends with a count of updated, HTML-fallback, and failed records.
@@ -128,8 +128,8 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
        source: api
    ```
 
-   <Aside type="caution" title="The sync does not derive a health block">
-     Star counts do not promote a record's `tier`, and nothing here writes `health.*`. Health entries live in `data/health.yml` and are authored separately — see [Maintain health signals](/content/health-classification/).
+   <Aside type="note" title="Health is opt-in">
+     With `integrations.github.health` left off (the default shown above), star counts do not promote a record's `tier` and nothing writes `health.*` here — health entries live in `data/health.yml` and are authored separately. Turn the flag on and a `health:` block is written inline on the record instead — see [Maintain health signals](/content/health-classification/).
    </Aside>
 
    <FileTree>

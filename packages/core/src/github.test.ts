@@ -10,7 +10,12 @@
  * which is offline).
  */
 import { describe, expect, it } from 'vitest';
-import { buildGithubSyncPatch, type GithubRepoRef, parseGithubRepoUrl } from './github.js';
+import {
+  buildGithubSyncPatch,
+  type GithubRepoRef,
+  parseGithubRepoUrl,
+  pruneLegacyGithubFields,
+} from './github.js';
 import type { GithubMetadata } from './schema.js';
 
 describe('parseGithubRepoUrl', () => {
@@ -169,5 +174,40 @@ describe('buildGithubSyncPatch', () => {
   it('writes null license when metadata has no license', () => {
     const patch = buildGithubSyncPatch({ ...baseMetadata, license: null }, undefined);
     expect((patch.repository as Record<string, unknown>).license).toBeNull();
+  });
+});
+
+describe('pruneLegacyGithubFields', () => {
+  it('drops latestRelease, files, and labels', () => {
+    const pruned = pruneLegacyGithubFields({
+      repository: { full_name: 'owner/repo' },
+      latestRelease: { tag_name: 'v1.0.0', assets: [{ browser_download_url: 'x' }] },
+      files: { Dockerfile: true },
+      labels: [{ name: 'bug', color: 'red' }],
+    });
+    expect(pruned).not.toHaveProperty('latestRelease');
+    expect(pruned).not.toHaveProperty('files');
+    expect(pruned).not.toHaveProperty('labels');
+  });
+
+  it('keeps every other field untouched, including ones sync does not know about', () => {
+    const pruned = pruneLegacyGithubFields({
+      repository: { full_name: 'owner/repo' },
+      languages: { TypeScript: 100 },
+      activity: { monthlyCommits: [1, 2, 3] },
+      sync: { syncedAt: '2026-01-01T00:00:00Z', source: 'api' },
+      curatorAdded: { custom: 'value' },
+    });
+    expect(pruned).toEqual({
+      repository: { full_name: 'owner/repo' },
+      languages: { TypeScript: 100 },
+      activity: { monthlyCommits: [1, 2, 3] },
+      sync: { syncedAt: '2026-01-01T00:00:00Z', source: 'api' },
+      curatorAdded: { custom: 'value' },
+    });
+  });
+
+  it('handles an undefined github block', () => {
+    expect(pruneLegacyGithubFields(undefined)).toEqual({});
   });
 });

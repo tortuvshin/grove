@@ -215,8 +215,8 @@ survives a re-run.
 - `github.repository` — the raw GitHub REST repository object
   (`full_name`, `stargazers_count`, `pushed_at`, `license`, `topics`, and
   the rest). Passthrough, so unknown keys are kept.
-- `github.languages`, `github.latestRelease`, `github.activity`,
-  `github.files`, `github.labels` — optional records written by sync.
+- `github.languages`, `github.activity` — optional records written by
+  sync.
 - `github.sync` — `{ syncedAt, source }`, where `source` is `"api"` or
   `"html"`.
 - `github.html` and `github.homepage` — written only when the API path
@@ -238,11 +238,14 @@ its shape is:
 | `confidence` | `low` \| `medium` \| `high` | `"medium"` |
 | `reasons` | `string[]` | `[]` |
 
-:::note[Health usually lives in `data/health.yml`, not on the record]
-An inline `health:` block on the record always wins. When a record has
-none, the build looks up its slug in `data/health.yml` and merges that
-entry in. That file is written by `grove sync github` when
-`integrations.github.health` is enabled, and hand-authored otherwise.
+:::note[Health is written inline on the record]
+`grove sync github` writes `health:` directly onto each record it syncs
+when `integrations.github.health` is enabled — one file write per
+record, so two records syncing at once never touch the same file. An
+inline `health:` block always wins over `data/health.yml`, which is
+kept only as a fallback for records synced before this change (or
+hand-authored). When a record has no inline block, the build looks up
+its slug there instead.
 
 `classifyHealth` in `packages/core/src/health.ts` is the derivation, and
 it is exported from `@grove-dev/core` if you would rather drive it from

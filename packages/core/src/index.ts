@@ -131,7 +131,12 @@ export type { EnrichedFields, EnrichResult } from './enrich.js';
 export { enrichFromGithubHtml } from './enrich.js';
 export type { GithubRepoRef } from './github.js';
 // ── GitHub: parsing + REST metadata ──────────────────────────────────
-export { buildGithubSyncPatch, fetchGithubMetadata, parseGithubRepoUrl } from './github.js';
+export {
+  buildGithubSyncPatch,
+  fetchGithubMetadata,
+  parseGithubRepoUrl,
+  pruneLegacyGithubFields,
+} from './github.js';
 export type { GhFetchOptions } from './github-client.js';
 // ── GitHub: client helpers (V1 public subset) ────────────────────────
 export { rateLimitWaitMs, sleep } from './github-client.js';

@@ -399,10 +399,7 @@ export const projectRecordSchema = resourceBaseSchema.extend({
     .object({
       repository: githubRepositorySchema.optional(),
       languages: z.record(z.string(), z.number()).optional(),
-      latestRelease: z.record(z.string(), z.unknown()).nullable().optional(),
       activity: z.record(z.string(), z.unknown()).optional(),
-      files: z.record(z.string(), z.boolean()).optional(),
-      labels: z.array(z.record(z.string(), z.unknown())).optional(),
       sync: z.record(z.string(), z.unknown()).optional(),
     })
     .passthrough()

@@ -145,3 +145,31 @@ export function buildGithubSyncPatch(
   }
   return patch;
 }
+
+/**
+ * Fields under `record.github` that an older `sync github` wrote but
+ * that nothing reads today. `github.languages` and
+ * `github.activity.monthlyCommits` are still read by the astro
+ * package's record page and are deliberately not in this list.
+ * `github.latestRelease` in particular is the full GitHub REST
+ * "latest release" response — its `assets` array alone can run to
+ * tens of KB per record — so a record that was ever synced by that
+ * older version carries it forward on every re-run unless something
+ * drops it.
+ */
+const LEGACY_GITHUB_FIELDS = ['latestRelease', 'files', 'labels'] as const;
+
+/**
+ * Drop the fields in {@link LEGACY_GITHUB_FIELDS} from a record's
+ * existing `github` block before `sync github` merges its patch on
+ * top. Self-heals a record on its next sync instead of letting the
+ * dead weight compound — everything else (including keys `sync`
+ * doesn't know about) passes through untouched.
+ */
+export function pruneLegacyGithubFields(
+  existingGithub: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  const pruned = { ...existingGithub };
+  for (const field of LEGACY_GITHUB_FIELDS) delete pruned[field];
+  return pruned;
+}

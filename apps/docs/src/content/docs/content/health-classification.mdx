@@ -15,12 +15,12 @@ This guide is for site maintainers triaging the periodic cleanup report. If you'
 
 A health block — `status`, `maturity`, `tier`, `visibility`, `cleanupCandidate`, `staleReason`, `confidence`, and `reasons` — is derived from a record's GitHub metadata by `classifyHealth` (`packages/core/src/health.ts`). That function is the single source of truth for the rules, and the rest of this page documents exactly what it does.
 
-Health entries live in `data/health.yml`, keyed by record slug — that is the file `grove check` validates, and the file the reference space in `apps/example/` ships. A record may also carry an inline `health:` block in its own YAML; the build reads `record.health.visibility` from there.
+A record carries its health block inline, in its own YAML, under `health:` — the build reads `record.health.visibility` from there. `data/health.yml`, keyed by record slug, is a legacy fallback: `grove check` and the build still read it for records that have no inline block, and the reference space in `apps/example/` still ships one.
 
-<Aside type="tip" title="Who writes the file">
-`grove sync github` writes `data/health.yml` for you — but only when `integrations.github.health` is `true` in `grove.config.ts`. With the flag on, each record whose metadata the sync fetched gets a fresh entry derived by `classifyHealth`. With it off, the file is yours to author by hand, or to generate with a script that imports `classifyHealth` from `@grove-dev/core`.
+<Aside type="tip" title="Who writes it">
+`grove sync github` writes `health:` inline on each record whose metadata it fetched — but only when `integrations.github.health` is `true` in `grove.config.ts`. Each gets a fresh block derived by `classifyHealth`, written alongside the `github` patch in the same file write, so a scheduled sync never rewrites one shared file that every contributor PR also has to touch. With the flag off, a record's health is yours to author by hand (inline, or in `data/health.yml`), or to generate with a script that imports `classifyHealth` from `@grove-dev/core`.
 
-Either way `grove check` holds you to it: if any record links to a GitHub repo and `data/health.yml` is missing, you get a `missing_health_file` warning; if the file exists but a GitHub-linked record has no entry, that is a `missing_health` error.
+Either way `grove check` holds you to it: a GitHub-linked record needs a health entry somewhere — inline on the record, or in `data/health.yml` — or you get a `missing_health` error (or a `missing_health_file` warning if the file doesn't exist at all and nothing has an inline block).
 </Aside>
 
 To change a record's effective visibility, write a [decision](/concepts/decisions/) in `data/decisions.yml` rather than editing `health.visibility` by hand — the decision is folded in at build time and leaves the rest of the block alone.

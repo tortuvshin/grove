@@ -346,4 +346,28 @@ describe('validateProject — decision / health cross-references', () => {
       expect(w).toBeDefined();
     });
   });
+
+  it('does not emit missing_health when the record carries an inline health block', async () => {
+    await withTmpCwd('grove-validate-inline-health-', async (cwd) => {
+      await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+      await writeFile(
+        join(cwd, 'data', 'records', 'has-inline-health.yml'),
+        [
+          'kind: project',
+          'slug: has-inline-health',
+          'name: Has Inline Health',
+          'description: this record points at GitHub and carries its own health block',
+          'category: tools',
+          "links: { github: 'https://github.com/owner/repo' }",
+          'curation: { reviewed: false, labels: [], lenses: [] }',
+          'scores: {}',
+          'health: { status: active, maturity: useful, tier: listed, visibility: keep, cleanupCandidate: false, confidence: high, reasons: [] }',
+        ].join('\n'),
+      );
+
+      const result = await validateProject(makeConfig());
+      expect(result.errors.find((err) => err.code === 'missing_health')).toBeUndefined();
+      expect(result.warnings.find((warn) => warn.code === 'missing_health_file')).toBeUndefined();
+    });
+  });
 });
