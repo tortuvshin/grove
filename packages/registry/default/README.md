@@ -1,6 +1,6 @@
 # `@grove` registry
 
-Grove's UI is a [shadcn registry](https://ui.shadcn.com/docs/registry) — namespace `@grove`, published as `@grove-dev/registry`. Consumers install items with the standard shadcn CLI; `grove init` installs the full scaffold in one step, and `grove update` reconciles upstream changes against the consumer's edits without overwriting local files.
+Grove's UI is a [shadcn registry](https://ui.shadcn.com/docs/registry) — namespace `@grove`, built from the workspace-private `@grove-dev/registry`. Consumers install items with the standard shadcn CLI; `grove init` installs the full scaffold in one step, and `grove update` reconciles upstream changes against the consumer's edits without overwriting local files.
 
 ## `registry.json`
 
@@ -66,7 +66,7 @@ The build then stamps every item with `meta.version` from this package's version
 
 ## Hosting
 
-`@grove-dev/registry` on npm ships `dist/r/` (exported as `./r/*`). The docs site copies `dist/r` into `apps/docs/public/r/` before each build (`scripts/sync-registry-public.mjs`), so items are served at `https://withgrove.dev/r/<item>.json`.
+`@grove-dev/registry` is `private: true` and is never published to npm — `dist/r/` reaches consumers two ways. The docs site copies it into `apps/docs/public/r/` before each build (`scripts/sync-registry-public.mjs`), so items are served at `https://withgrove.dev/r/<item>.json`; and the CLI's build copies it into `packages/cli/dist/r/`, so the `default` scaffold travels inside the `@grove-dev/cli` tarball and `grove init` works offline.
 
 ## Installing items
 

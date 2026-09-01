@@ -41,7 +41,7 @@ program
   .description('Create a Grove project by installing the @grove/default registry scaffold.')
   .option(
     '--no-install',
-    "skip the final pnpm install (shadcn still installs the scaffold's own npm dependencies)",
+    "skip the final pnpm install (the scaffold's own npm dependencies are recorded in package.json either way)",
   )
   .option('--no-git', 'skip git init')
   .action(async (directory: string, options: { install: boolean; git: boolean }) => {

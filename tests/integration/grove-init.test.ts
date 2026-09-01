@@ -65,6 +65,13 @@ describe('grove init integration', () => {
     const components = JSON.parse(await readFile(join(target, 'components.json'), 'utf8'));
     expect(components.registries['@grove']).toBe('https://withgrove.dev/r/{name}.json');
 
+    // The approval that lets shadcn's `pnpm add` finish at all: pnpm 11
+    // fails an install that skipped a build script, and esbuild ships
+    // one. Without this file nothing below would exist.
+    const workspace = await readFile(join(target, 'pnpm-workspace.yaml'), 'utf8');
+    expect(workspace).toContain('allowBuilds:\n  esbuild: true'); // pnpm 11's spelling
+    expect(workspace).toContain('onlyBuiltDependencies:\n  - esbuild'); // pnpm 10's
+
     expect(await readFile(join(target, 'src/pages/index.astro'), 'utf8')).toContain(
       'getHomePageModel(siteConfig)',
     );

@@ -46,9 +46,14 @@ for (const name of ['core', 'astro', 'cli']) {
 }
 Object.assign(pkg.dependencies, localPackages);
 await writeFile(packagePath, `${JSON.stringify(pkg, null, 2)}\n`);
+// Append, never replace: `grove init` already wrote this file to approve
+// the scaffold's dependency build scripts, and pnpm 11 fails the install
+// below with ERR_PNPM_IGNORED_BUILDS if that approval goes missing.
+const scaffoldWorkspace = await readFile(join(target, 'pnpm-workspace.yaml'), 'utf8');
 await writeFile(
   join(target, 'pnpm-workspace.yaml'),
   [
+    scaffoldWorkspace.trimEnd(),
     'packages:',
     '  - .',
     'overrides:',
