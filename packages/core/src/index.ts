@@ -137,6 +137,20 @@ export * from './directory-taxonomy.js';
 export type { EnrichedFields, EnrichResult } from './enrich.js';
 // ── GitHub: HTML enrichment (token-free fallback) ────────────────────
 export { enrichFromGithubHtml } from './enrich.js';
+export type {
+  InspectRepositoriesOptions,
+  InspectRepositoryOptions,
+  RepositoryEvidence,
+  RepositoryEvidenceCache,
+  RepositoryFetchStatus,
+} from './evidence.js';
+// ── GitHub: repository evidence (orchestrates fetch + fallback + cache) ──
+export {
+  canonicalRepoKey,
+  createMemoryCache,
+  inspectRepositories,
+  inspectRepository,
+} from './evidence.js';
 export type { GithubRepoRef } from './github.js';
 // ── GitHub: parsing + REST metadata ──────────────────────────────────
 export {
