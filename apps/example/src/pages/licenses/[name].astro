@@ -6,10 +6,15 @@ import BaseLayout from '../../layouts/base-layout.astro';
 
 export function getStaticPaths() {
   const licenses = siteConfig.taxonomy?.licenses ?? [];
-  return licenses.map(({ id, name }) => ({
-    params: { name: id },
-    props: { displayName: name },
-  }));
+  // A license no record currently uses gets no page at all — the
+  // static host 404s the request instead of publishing a thin,
+  // indexable "0 apps" page for it.
+  return licenses
+    .filter(({ count }) => (count ?? 0) > 0)
+    .map(({ id, name }) => ({
+      params: { name: id },
+      props: { displayName: name },
+    }));
 }
 
 const { displayName } = Astro.props;

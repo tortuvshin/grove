@@ -283,15 +283,37 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
   const platforms = new Set<string>();
   const owners = new Set<string>();
   let totalStars = 0;
+  // Per-taxonomy-id record counts (case-insensitive, since license ids
+  // are lowercase SPDX identifiers). Used below to keep an empty
+  // category/stack/license out of the generated taxonomy pages and
+  // sitemap entirely, instead of publishing a "0 apps" page for it.
+  const categoryCounts = new Map<string, number>();
+  const stackCounts = new Map<string, number>();
+  const licenseCounts = new Map<string, number>();
+  const bump = (counts: Map<string, number>, id: string) => {
+    const key = id.toLowerCase();
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  };
   for (const r of indexRecords) {
     const cat = (r as { category?: string }).category;
-    if (cat) categories.add(cat);
+    if (cat) {
+      categories.add(cat);
+      bump(categoryCounts, cat);
+    }
     const s1 = (r as { stack?: string }).stack;
-    if (s1) stacks.add(s1);
+    if (s1) {
+      stacks.add(s1);
+      bump(stackCounts, s1);
+    }
     const s2 = (r as { stacks?: string[] }).stacks ?? [];
-    for (const s of s2) stacks.add(s);
+    for (const s of s2) {
+      stacks.add(s);
+      bump(stackCounts, s);
+    }
     const ps = (r as { platforms?: string[] }).platforms ?? [];
     for (const p of ps) platforms.add(p);
+    const lics = (r as { licenses?: string[] }).licenses ?? [];
+    for (const l of lics) bump(licenseCounts, l);
     const gh = (r as { github?: { fullName?: string; stars?: number } }).github;
     if (gh?.fullName && gh.fullName.includes('/')) {
       const [owner] = gh.fullName.split('/');
@@ -299,6 +321,8 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
     }
     if (typeof gh?.stars === 'number') totalStars += gh.stars;
   }
+  const withCounts = (items: GeneratedTaxonomyItem[], counts: Map<string, number>) =>
+    items.map((item) => ({ ...item, count: counts.get(item.id.toLowerCase()) ?? 0 }));
 
   // Try to merge in the optional repo-stats.json (origin / source repo).
   // This file is produced by the `sync:repo-stats` workflow, but the
@@ -374,8 +398,18 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
       'items',
   };
   const taxonomy = {
-    categories: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'categories.yml'),
-    stacks: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'stacks.yml'),
+    // `count` is how many visible records actually use each id — the
+    // categories/stacks/licenses detail pages (`[name].astro`) filter
+    // on it so a taxonomy entry nobody uses yet doesn't get published
+    // as an empty, indexable "0 apps" page.
+    categories: withCounts(
+      await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'categories.yml'),
+      categoryCounts,
+    ),
+    stacks: withCounts(
+      await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'stacks.yml'),
+      stackCounts,
+    ),
     platforms: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'platforms.yml'),
     // Curated tag vocabulary (data/taxonomy/topics.yml). Optional —
     // older sites without the file simply get an empty list. The
@@ -387,7 +421,10 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
       cfg.paths.taxonomyDir,
       'distribution-channels.yml',
     ),
-    licenses: await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'licenses.yml'),
+    licenses: withCounts(
+      await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'licenses.yml'),
+      licenseCounts,
+    ),
   };
 
   const siteConfigPayload = {

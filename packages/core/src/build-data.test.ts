@@ -169,6 +169,50 @@ describe('generate — filesystem round-trip', () => {
     expect(full.records.find((r) => r.slug === 'demo')?.health?.status).toBe('active');
   });
 
+  it('parses an inline seo.title/seo.description override and leaves it undefined when absent', async () => {
+    await writeFile(
+      join(cwd, 'data', 'records', 'with-seo.yml'),
+      [
+        'kind: project',
+        'slug: with-seo',
+        'name: With Seo',
+        'description: a demo',
+        'category: tools',
+        'links: {}',
+        'curation: { reviewed: false, labels: [], lenses: [] }',
+        'scores: {}',
+        'seo:',
+        '  title: A hand-written title',
+        '  description: A hand-written description.',
+      ].join('\n'),
+    );
+    await writeFile(
+      join(cwd, 'data', 'records', 'without-seo.yml'),
+      [
+        'kind: project',
+        'slug: without-seo',
+        'name: Without Seo',
+        'description: a demo',
+        'category: tools',
+        'links: {}',
+        'curation: { reviewed: false, labels: [], lenses: [] }',
+        'scores: {}',
+      ].join('\n'),
+    );
+
+    await generate(cwd);
+    const full = JSON.parse(
+      await readFile(join(cwd, 'data', 'generated', 'records.full.json'), 'utf8'),
+    ) as {
+      records: Array<{ slug: string; seo?: { title?: string; description?: string } }>;
+    };
+    expect(full.records.find((r) => r.slug === 'with-seo')?.seo).toEqual({
+      title: 'A hand-written title',
+      description: 'A hand-written description.',
+    });
+    expect(full.records.find((r) => r.slug === 'without-seo')?.seo).toBeUndefined();
+  });
+
   it('applies a data/overrides.yml patch over the parsed record', async () => {
     await writeFile(
       join(cwd, 'data', 'records', 'demo.yml'),
@@ -359,12 +403,93 @@ describe('generate — filesystem round-trip', () => {
     const site = JSON.parse(
       await readFile(join(cwd, 'data', 'generated', 'site-config.json'), 'utf8'),
     ) as {
-      taxonomy?: { categories?: Array<{ id: string; name: string }> };
+      taxonomy?: { categories?: Array<{ id: string; name: string; count: number }> };
     };
 
     expect(site.taxonomy?.categories).toEqual([
-      { id: 'news', name: 'News and Magazine' },
-      { id: 'tools', name: 'Developer Tools' },
+      { id: 'news', name: 'News and Magazine', count: 1 },
+      { id: 'tools', name: 'Developer Tools', count: 0 },
+    ]);
+  });
+
+  it('counts records per taxonomy id for categories, stacks (singular + array), and licenses', async () => {
+    await mkdir(join(cwd, 'data', 'taxonomy'), { recursive: true });
+    await writeFile(
+      join(cwd, 'data', 'taxonomy', 'categories.yml'),
+      ['- id: tools', '  name: Tools', '- id: travel', '  name: Travel'].join('\n'),
+    );
+    await writeFile(
+      join(cwd, 'data', 'taxonomy', 'stacks.yml'),
+      [
+        '- id: flutter',
+        '  name: Flutter',
+        '- id: rust',
+        '  name: Rust',
+        '- id: go',
+        '  name: Go',
+      ].join('\n'),
+    );
+    await writeFile(
+      join(cwd, 'data', 'taxonomy', 'licenses.yml'),
+      ['- id: mit', '  name: MIT', '- id: gpl-3.0', '  name: GPL-3.0'].join('\n'),
+    );
+    // travel has zero records, go has zero records, gpl-3.0 has zero
+    // records — those should all come back with count: 0.
+    await writeFile(
+      join(cwd, 'data', 'records', 'one.yml'),
+      [
+        'kind: project',
+        'slug: one',
+        'name: One',
+        'description: a',
+        'category: tools',
+        'stack: flutter',
+        'licenses: [mit]',
+        'links: {}',
+        'curation: { reviewed: false, labels: [], lenses: [] }',
+        'scores: {}',
+      ].join('\n'),
+    );
+    await writeFile(
+      join(cwd, 'data', 'records', 'two.yml'),
+      [
+        'kind: project',
+        'slug: two',
+        'name: Two',
+        'description: b',
+        'category: tools',
+        'stacks: [flutter, rust]',
+        'licenses: [mit]',
+        'links: {}',
+        'curation: { reviewed: false, labels: [], lenses: [] }',
+        'scores: {}',
+      ].join('\n'),
+    );
+
+    await generate(cwd);
+    const site = JSON.parse(
+      await readFile(join(cwd, 'data', 'generated', 'site-config.json'), 'utf8'),
+    ) as {
+      taxonomy?: {
+        categories?: Array<{ id: string; count: number }>;
+        stacks?: Array<{ id: string; count: number }>;
+        licenses?: Array<{ id: string; count: number }>;
+      };
+    };
+
+    expect(site.taxonomy?.categories).toEqual([
+      { id: 'tools', name: 'Tools', count: 2 },
+      { id: 'travel', name: 'Travel', count: 0 },
+    ]);
+    // "flutter" comes from both records.stack and records.stacks[].
+    expect(site.taxonomy?.stacks).toEqual([
+      { id: 'flutter', name: 'Flutter', count: 2 },
+      { id: 'rust', name: 'Rust', count: 1 },
+      { id: 'go', name: 'Go', count: 0 },
+    ]);
+    expect(site.taxonomy?.licenses).toEqual([
+      { id: 'mit', name: 'MIT', count: 2 },
+      { id: 'gpl-3.0', name: 'GPL-3.0', count: 0 },
     ]);
   });
 

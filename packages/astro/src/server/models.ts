@@ -613,7 +613,7 @@ export function getRecordDetailModel(
     siteName: site.name,
   });
   const description = seoDescription(
-    (record.summary && record.summary.trim()) || record.description,
+    record.seo?.description || (record.summary && record.summary.trim()) || record.description,
     fallbackSentence,
   );
   const repoUrl = proj?.repoUrl ?? record.links?.github ?? '';
@@ -756,13 +756,15 @@ export function getRecordDetailModel(
   }
 
   // "<Name> — <descriptor> | <Site>": the descriptor gives the search
-  // snippet a reason to exist beyond the bare project name.
+  // snippet a reason to exist beyond the bare project name. A curator's
+  // `record.seo.title` (when set) is used verbatim, same override
+  // pattern as `getCollectionPageModel`'s `collection.seo?.title`.
   const descriptor = recordSeoDescriptor({
     summary: record.summary,
     ...(categoryLabel ? { categoryLabel } : {}),
     singular,
   });
-  const title = seoTitle(`${name} — ${descriptor}`, site.name);
+  const title = record.seo?.title ?? seoTitle(`${name} — ${descriptor}`, site.name);
   const pluralTitle = titleCaseFirst(site.blueprintConfig?.labelPlural ?? itemLabelPlural());
   const jsonLd = [
     recordLd,

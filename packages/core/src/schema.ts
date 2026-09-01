@@ -329,6 +329,19 @@ const resourceBaseSchema = z.object({
    * continue to validate.
    */
   visibility: decisionVisibilitySchema.default('keep'),
+  /**
+   * Curator override for the detail page's `<title>`/meta description.
+   * Mirrors `CollectionSeo` (`collections.ts`) — when set, it wins
+   * verbatim over the computed title/descriptor so a curator can hand-
+   * write a sharper title than the generic "Open-source {category}
+   * {noun}" fallback for a specific record.
+   */
+  seo: z
+    .object({
+      title: z.string().optional(),
+      description: z.string().optional(),
+    })
+    .optional(),
 });
 
 // ──────────────────────────────────────────────────────────────────────

@@ -130,13 +130,17 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
     stats?: { totalRecords?: number; repositoryStars?: number };
     blueprintConfig?: { labelPlural?: string };
     taxonomy?: {
-      categories?: Array<{ id: string; name?: string }>;
-      stacks?: Array<{ id: string; name?: string }>;
-      licenses?: Array<{ id: string; name?: string }>;
+      categories?: Array<{ id: string; name?: string; count?: number }>;
+      stacks?: Array<{ id: string; name?: string; count?: number }>;
+      licenses?: Array<{ id: string; name?: string; count?: number }>;
     };
   };
 
   const collections = await loadCollections(root);
+  // A taxonomy id with no matching record gets no detail page at all
+  // (see `[name].astro`'s `getStaticPaths`) — keep it out of the
+  // sitemap too, instead of advertising a URL that 404s.
+  const hasRecords = (t: { count?: number }) => (t.count ?? 0) > 0;
 
   const sitemap = await buildSitemap(
     {
@@ -148,9 +152,9 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
         ...(c.editorial?.lastReviewedAt ? { lastReviewedAt: c.editorial.lastReviewedAt } : {}),
       })),
       taxonomies: {
-        categories: (sitePayload.taxonomy?.categories ?? []).map((t) => t.id),
-        stacks: (sitePayload.taxonomy?.stacks ?? []).map((t) => t.id),
-        licenses: (sitePayload.taxonomy?.licenses ?? []).map((t) => t.id),
+        categories: (sitePayload.taxonomy?.categories ?? []).filter(hasRecords).map((t) => t.id),
+        stacks: (sitePayload.taxonomy?.stacks ?? []).filter(hasRecords).map((t) => t.id),
+        licenses: (sitePayload.taxonomy?.licenses ?? []).filter(hasRecords).map((t) => t.id),
       },
     },
     root,
