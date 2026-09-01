@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { existsSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import {
@@ -24,6 +25,12 @@ import { buildCollectionCommand } from './collection-cli.js';
 import { buildIconsCommand } from './icons-cli.js';
 import { buildImportCommand } from './import-cli.js';
 import { initDirectory, readCliVersion } from './init.js';
+import {
+  detectPackageManager,
+  installCommand,
+  localBin,
+  runScriptCommand,
+} from './package-manager.js';
 import { buildReadmeCommand } from './readme-cli.js';
 import { run } from './run.js';
 import { formatPlan, runUpdate } from './update.js';
@@ -41,7 +48,7 @@ program
   .description('Create a Grove project by installing the @grove/default registry scaffold.')
   .option(
     '--no-install',
-    "skip the final pnpm install (the scaffold's own npm dependencies are recorded in package.json either way)",
+    "skip the final dependency install (the scaffold's own npm dependencies are recorded in package.json either way)",
   )
   .option('--no-git', 'skip git init')
   .action(async (directory: string, options: { install: boolean; git: boolean }) => {
@@ -50,9 +57,13 @@ program
       ...(directory === '.' ? {} : { projectName: basename(resolve(directory)) }),
     });
     console.log(`Created ${result.projectName} in ${result.targetDir}`);
-    if (options.install) await run('pnpm', ['install'], target);
+    // Whatever scaffolded the project finishes it: `grove init` picked
+    // the package manager from the user's own environment, and every
+    // instruction from here on has to name that same one.
+    const pm = result.packageManager;
+    if (options.install) await run(...installCommand(pm), target);
     if (options.git) await run('git', ['init'], target);
-    console.log(`\nNext:\n  cd ${directory}\n  pnpm dev`);
+    console.log(`\nNext:\n  cd ${directory}\n  ${runScriptCommand(pm, 'dev')}`);
   });
 
 program
@@ -76,7 +87,17 @@ program
     console.log(
       `[grove] ${prepared.generated.totalRecords} records prepared; sitemap and llms files updated.`,
     );
-    await run('pnpm', ['exec', 'astro', 'check']);
+    // astro is installed in the project; run it straight from
+    // node_modules/.bin. Going through a package manager here used to
+    // mean `grove check` died with `spawn pnpm ENOENT` for anyone who
+    // had installed with npm, yarn or bun.
+    const astro = localBin(process.cwd(), 'astro');
+    if (!existsSync(astro)) {
+      throw new Error(
+        `astro is not installed in ${process.cwd()} — run \`${installCommand(detectPackageManager())[0]} install\` first.`,
+      );
+    }
+    await run(astro, ['check']);
   });
 
 program

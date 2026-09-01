@@ -17,11 +17,13 @@
  *      `npx shadcn add @grove/<item>` works later) — plus the files
  *      the scaffold does not ship because they are project-specific:
  *      grove.config.ts, astro.config.mjs, and an empty data/records/.
- *      Last of these is pnpm-workspace.yaml, which approves the
- *      dependency build scripts pnpm 11 refuses to skip silently.
- *   4. `pnpm dlx shadcn@<pinned> add <bundled default.json> --yes`.
- *      shadcn writes every scaffold file under src/ and runs the
- *      package manager to install the item's npm dependencies
+ *      Last of these, for pnpm projects only, is pnpm-workspace.yaml,
+ *      which approves the dependency build scripts pnpm 11 refuses to
+ *      skip silently.
+ *   4. `<pm> dlx shadcn@<pinned> add <bundled default.json> --yes`,
+ *      where `<pm>` is whichever package manager the user has —
+ *      detected, not assumed. shadcn writes every scaffold file under
+ *      src/ and runs the package manager to install the item's deps
  *      (astro, tailwindcss, …) with real version ranges. If shadcn
  *      fails, the bundled item is written in-process instead — it
  *      inlines every file and names its own dependencies, so nothing
@@ -37,18 +39,23 @@
  * `grove init` does NOT scaffold `content/`, `public/`, `.github/`, or
  * anything under `data/` besides the empty `records/` directory —
  * those are content/workflow concerns, not UI-registry concerns. The
- * CLI wrapper in index.ts runs `pnpm install` and `git init` after
+ * CLI wrapper in index.ts runs `<pm> install` and `git init` after
  * this returns, per its own `--no-install`/`--no-git` flags.
  *
  * Steps 2-6 are transactional: if any of them throws, everything
  * written since step 1 is removed again, so the obvious retry is just
  * `grove init` and not `rm -rf` first.
  */
-import { spawnSync } from 'node:child_process';
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeLockfile } from './hash.js';
+import {
+  detectPackageManager,
+  dlxCommand,
+  type PackageManager,
+  requirePackageManager,
+} from './package-manager.js';
 import {
   buildLockfile,
   loadItem,
@@ -88,6 +95,8 @@ export interface InstallScaffoldContext {
   target: string;
   /** Absolute path to the built `default` item JSON being installed. */
   itemPath: string;
+  /** The package manager to fetch shadcn with. */
+  packageManager: PackageManager;
 }
 
 export interface InitOptions {
@@ -103,6 +112,11 @@ export interface InitOptions {
    * CLI; tests point it elsewhere to exercise the failure path.
    */
   itemPath?: string;
+  /**
+   * Which package manager to scaffold for. Defaults to whatever
+   * `detectPackageManager()` finds in the current directory.
+   */
+  packageManager?: PackageManager;
 }
 
 /** The subset of a consumer package.json this module reads and writes. */
@@ -115,6 +129,8 @@ export interface InitResult {
   targetDir: string;
   projectName: string;
   installedScaffold: RegistryItem;
+  /** What the caller should run `install` and the next steps with. */
+  packageManager: PackageManager;
 }
 
 export function readCliVersion(): string {
@@ -149,21 +165,6 @@ function packageName(value: string): string {
       .replace(/[^a-z0-9._-]+/g, '-')
       .replace(/^-+|-+$/g, '') || 'grove-directory'
   );
-}
-
-/**
- * `grove init` drives pnpm — for the shadcn `dlx` call, for the
- * dependency install, and for the lockfile shadcn's package-manager
- * detector reads. Check for it before writing anything.
- */
-function requirePnpm(): void {
-  const probe = spawnSync('pnpm', ['--version'], { stdio: 'ignore' });
-  if (probe.error || probe.status !== 0) {
-    throw new Error(
-      'grove init needs pnpm on your PATH (it runs `pnpm dlx shadcn` and `pnpm install`).\n' +
-        'Install it with `npm install -g pnpm` or `corepack enable pnpm`, then run grove init again.',
-    );
-  }
 }
 
 async function ensureEmpty(targetDir: string): Promise<void> {
@@ -264,29 +265,32 @@ async function rollback(target: string, preexisting: Set<string>): Promise<void>
 }
 
 /**
- * Default scaffold installer: the official shadcn CLI, pinned. The
- * item path must be absolute — shadcn rejects relative local paths as
- * unsafe. `--yes` skips the confirmation prompts; stdio is inherited
- * so the user sees the package manager's install output.
+ * Default scaffold installer: the official shadcn CLI, pinned, fetched
+ * with whichever package manager this project is being scaffolded for.
+ * The item path must be absolute — shadcn rejects relative local paths
+ * as unsafe. `--yes` skips the confirmation prompts; stdio is inherited
+ * so the user sees the install output.
  *
- * shadcn picks the package manager for the item's dependencies from
- * the lockfile (or `packageManager` field) it finds in the project —
- * neither exists in a fresh directory, and its `add` path has no
- * user-agent fallback, so it would default to npm and leave a
- * package-lock.json behind in a project the rest of this CLI drives
- * with pnpm. An empty pnpm-lock.yaml is enough for the detector; pnpm
- * itself accepts the empty file and replaces it with a real one.
+ * shadcn picks the package manager for the item's dependencies from the
+ * lockfile or the `packageManager` field it finds in the project, and
+ * its `add` path has no user-agent fallback — a fresh directory has
+ * neither, so it would silently default to npm. Step 2 writes
+ * `packageManager` for exactly that reason; without it a bun project
+ * would come back with a package-lock.json in it.
  */
 export async function installScaffoldWithShadcn({
   target,
   itemPath,
+  packageManager,
 }: InstallScaffoldContext): Promise<void> {
-  await writeIfAbsent(resolve(target, 'pnpm-lock.yaml'), '');
-  await run(
-    'pnpm',
-    ['dlx', `shadcn@${SHADCN_VERSION}`, 'add', itemPath, '--yes', '--cwd', target],
+  const [command, args] = dlxCommand(packageManager, `shadcn@${SHADCN_VERSION}`, [
+    'add',
+    itemPath,
+    '--yes',
+    '--cwd',
     target,
-  );
+  ]);
+  await run(command, args, target);
 }
 
 async function writeJson(path: string, value: unknown): Promise<void> {
@@ -305,16 +309,18 @@ export async function initDirectory(
   const target = resolve(targetDir);
   // 1. Never install over someone's work.
   await ensureEmpty(target);
-  // 1b. And fail before writing anything when the tool the next step
-  //     shells out to is missing, rather than partway through.
-  if (options.installScaffold === undefined) requirePnpm();
+  // 1b. Settle the package manager and confirm it is really there before
+  //     writing anything, rather than dying partway through.
+  const detected = options.packageManager ?? detectPackageManager();
+  const packageManager =
+    options.installScaffold === undefined ? requirePackageManager(detected, target) : detected;
 
   // 1c. Whatever is here now (only SKIP_NAMES entries, per ensureEmpty)
   //     is not ours; everything else that appears is, and comes back off
   //     again if a later step throws.
   const preexisting = new Set(await readdir(target));
   try {
-    return await scaffold(target, options);
+    return await scaffold(target, options, packageManager);
   } catch (error) {
     await rollback(target, preexisting);
     console.error(
@@ -326,7 +332,11 @@ export async function initDirectory(
 }
 
 /** Steps 2-6. Only called through `initDirectory`, which owns the rollback. */
-async function scaffold(target: string, options: InitOptions): Promise<InitResult> {
+async function scaffold(
+  target: string,
+  options: InitOptions,
+  packageManager: PackageManager,
+): Promise<InitResult> {
   const version = options.version ?? readCliVersion();
   const fallbackName = target.split(/[\\/]/).at(-1) ?? 'grove-directory';
   const rawName = options.projectName ?? fallbackName;
@@ -336,10 +346,16 @@ async function scaffold(target: string, options: InitOptions): Promise<InitResul
   // 2. package.json. Scripts are fixed here — registry items carry
   //    files and npm dependency names, not scripts. Dependencies are
   //    filled in by shadcn (step 4) and by us (step 5).
+  //    `packageManager` is the one signal shadcn's package-manager
+  //    detector can read in an otherwise empty directory, and it is
+  //    what keeps a bun or yarn scaffold from being installed by npm.
   const packagePath = resolve(target, 'package.json');
   await writeJson(packagePath, {
     name: projectName,
     type: 'module',
+    ...(packageManager.version
+      ? { packageManager: `${packageManager.name}@${packageManager.version}` }
+      : {}),
     scripts: { ...PROJECT_SCRIPTS },
     dependencies: {},
   });
@@ -480,11 +496,15 @@ export default defineConfig({
     'utf8',
   );
 
-  // 3f. pnpm-workspace.yaml. Every install this project will ever run —
-  //     shadcn's in the next step, the `pnpm install` in index.ts, and
-  //     the consumer's own later on — needs the scaffold's dependency
-  //     build scripts approved, or pnpm 11 aborts the lot.
-  await writeIfAbsent(resolve(target, 'pnpm-workspace.yaml'), pnpmWorkspaceYaml());
+  // 3f. pnpm-workspace.yaml. Every install a pnpm project will ever run
+  //     — shadcn's in the next step, the one in index.ts, and the
+  //     consumer's own later on — needs the scaffold's dependency build
+  //     scripts approved, or pnpm 11 aborts the lot. npm, yarn and bun
+  //     run install scripts without asking, so this file is pnpm's
+  //     alone and would only be noise in their projects.
+  if (packageManager.name === 'pnpm') {
+    await writeIfAbsent(resolve(target, 'pnpm-workspace.yaml'), pnpmWorkspaceYaml());
+  }
 
   // 4. Install the scaffold item. shadcn is the installer of record;
   //    when it fails, finish the job in-process rather than hand back a
@@ -492,7 +512,7 @@ export default defineConfig({
   const itemPath = options.itemPath ?? resolveBundledItemPath();
   const item = await loadItem(itemPath);
   try {
-    await installScaffold({ target, itemPath });
+    await installScaffold({ target, itemPath, packageManager });
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     console.warn(
@@ -511,5 +531,5 @@ export default defineConfig({
   // 6. Record what was installed for `grove update`.
   await writeLockfile(target, buildLockfile(item));
 
-  return { targetDir: target, projectName, installedScaffold: item };
+  return { targetDir: target, projectName, installedScaffold: item, packageManager };
 }

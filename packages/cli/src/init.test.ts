@@ -16,6 +16,9 @@ const installScaffold = async ({ target, itemPath }: { target: string; itemPath:
   await writeItemFiles(await loadItem(itemPath), target);
 };
 
+/** Pinned so the assertions do not depend on the developer's own setup. */
+const pnpm = { name: 'pnpm', version: '10.12.1' } as const;
+
 describe('grove init (registry scaffold)', () => {
   it('scaffolds a project around the @grove/default item', async () => {
     const parent = await mkdtemp(join(tmpdir(), 'grove-init-'));
@@ -24,6 +27,7 @@ describe('grove init (registry scaffold)', () => {
       projectName: 'AI Stack',
       version: '9.8.7',
       installScaffold,
+      packageManager: pnpm,
     });
 
     // package.json: Grove packages pinned to the CLI version, fixed scripts.
@@ -36,6 +40,8 @@ describe('grove init (registry scaffold)', () => {
     // The registry is a workspace build unit, never a consumer dependency.
     expect(pkg.dependencies['@grove-dev/registry']).toBeUndefined();
     expect(pkg.scripts).toEqual({ dev: 'astro dev', build: 'astro build', check: 'astro check' });
+    // The one signal shadcn can read in an otherwise empty directory.
+    expect(pkg.packageManager).toBe('pnpm@10.12.1');
 
     // components.json registers the @grove registry for later `shadcn add`s.
     const components = JSON.parse(await readFile(join(target, 'components.json'), 'utf8'));
@@ -96,6 +102,7 @@ describe('grove init (registry scaffold)', () => {
       projectName: 'Shadcn Down',
       version: '9.8.7',
       installScaffold: () => Promise.reject(new Error('pnpm exited with 1')),
+      packageManager: pnpm,
     });
 
     // Every scaffold file still lands…
@@ -126,6 +133,7 @@ describe('grove init (registry scaffold)', () => {
       initDirectory(target, {
         projectName: 'Retry',
         installScaffold,
+        packageManager: pnpm,
         itemPath: join(parent, 'no-such-item.json'),
       }),
     ).rejects.toThrow();
@@ -135,9 +143,34 @@ describe('grove init (registry scaffold)', () => {
     expect(await readdir(target)).toEqual([]);
 
     // So the obvious retry works, with no manual cleanup in between.
-    const result = await initDirectory(target, { projectName: 'Retry', installScaffold });
+    const result = await initDirectory(target, {
+      projectName: 'Retry',
+      installScaffold,
+      packageManager: pnpm,
+    });
     expect(result.installedScaffold.files).toHaveLength(70);
     expect(existsSync(join(target, 'src/pages/index.astro'))).toBe(true);
+  });
+
+  it('scaffolds for the package manager the user actually has', async () => {
+    const parent = await mkdtemp(join(tmpdir(), 'grove-init-'));
+    const target = join(parent, 'bun-space');
+    const result = await initDirectory(target, {
+      projectName: 'Bun Space',
+      installScaffold,
+      packageManager: { name: 'bun', version: '1.2.21' },
+    });
+
+    const pkg = JSON.parse(await readFile(join(target, 'package.json'), 'utf8'));
+    expect(pkg.packageManager).toBe('bun@1.2.21');
+    // pnpm-workspace.yaml approves build scripts only pnpm asks about;
+    // in a bun project it would be dead config.
+    expect(existsSync(join(target, 'pnpm-workspace.yaml'))).toBe(false);
+    // Everything else is identical — the scaffold itself is not
+    // package-manager-specific.
+    expect(result.installedScaffold.files).toHaveLength(70);
+    expect(existsSync(join(target, 'src/pages/index.astro'))).toBe(true);
+    expect(result.packageManager.name).toBe('bun');
   });
 
   it('refuses to install into a non-empty target', async () => {
@@ -146,8 +179,8 @@ describe('grove init (registry scaffold)', () => {
     // Pre-create an arbitrary file the policy should reject on.
     await mkdir(target, { recursive: true });
     await writeFile(join(target, 'README.md'), 'occupied');
-    await expect(initDirectory(target, { projectName: 'x', installScaffold })).rejects.toThrow(
-      /not empty/,
-    );
+    await expect(
+      initDirectory(target, { projectName: 'x', installScaffold, packageManager: pnpm }),
+    ).rejects.toThrow(/not empty/);
   });
 });

@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { syncIconAssets } from '@grove-dev/core';
 import { Command } from 'commander';
+import { detectPackageManager } from './package-manager.js';
 
 /**
  * `grove icons sync` — the explicit escape hatch for the icon set.
@@ -73,7 +74,7 @@ function packagedIconsDir(cwd: string): string {
     packageJson = require.resolve('@grove-dev/astro/package.json');
   } catch {
     throw new Error(
-      `@grove-dev/astro is not installed in ${cwd} — run \`pnpm install\` in your Grove project first.`,
+      `@grove-dev/astro is not installed in ${cwd} — run \`${detectPackageManager(cwd).name} install\` in your Grove project first.`,
     );
   }
   return join(dirname(packageJson), 'assets', 'icons');
