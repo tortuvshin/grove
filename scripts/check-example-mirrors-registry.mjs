@@ -16,7 +16,9 @@
  *   node scripts/check-example-mirrors-registry.mjs --write  copy the
  *       scaffold over apps/example and refresh
  *       apps/example/.grove/registry.lock.json (what `grove update`
- *       compares against; .grove/ is gitignored, so this is local)
+ *       compares against). The lockfile is committed — it is the
+ *       install-time snapshot a real consumer ships, and the example
+ *       is only a faithful consumer if it carries one.
  */
 import { existsSync } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
