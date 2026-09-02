@@ -1,0 +1,29 @@
+apps/docs/src/content/docs/reference/record-schema.md
+  s_2125b9f45e0719::t_463ef76917f02d 35-53
+packages/core/src/directory-search.test.ts
+  s_2125b9f45e0719::t_fd308b04cb5096 27-28,35-36,111-114,116-117,120-143
+packages/core/src/directory-search.ts
+  s_2125b9f45e0719::t_b8b11f10de5792 149-164,166-169,179-182,184-188,191-194
+packages/core/src/schema.ts
+  s_2125b9f45e0719::t_03b2b58178a258 289-299,915-916,934-937,1022,1063
+packages/core/src/validate.test.ts
+  s_2125b9f45e0719::t_f3a6709850f28d 122,146,163-187
+packages/core/src/validate.ts
+  s_2125b9f45e0719::t_68d2ec2708beeb 181-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "9e87a695d35f6e1f4f0c304dc533ef43af0fc08c",
+  "prompts": {},
+  "sessions": {
+    "s_2125b9f45e0719": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f82d8744-91c7-478e-8e0d-39e967546924",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
