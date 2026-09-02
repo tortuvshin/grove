@@ -178,6 +178,17 @@ export async function validateProject(
         severity: 'warning',
       });
     }
+    // A record with no `addedAt` still builds — `recordAddedAt` falls
+    // back — but it can never sort correctly in `recently-added`, and
+    // nothing else in the pipeline will ever fill the field in. Say so
+    // once, at the point the record is read.
+    if (!parsed.addedAt) {
+      warnings.push({
+        code: 'missing_added_at',
+        message: `${fileSlug}: no addedAt — the recently-added sort will fall back to the review or repo date`,
+        severity: 'warning',
+      });
+    }
     warnUnknownTaxonomy(
       fileSlug,
       'category',

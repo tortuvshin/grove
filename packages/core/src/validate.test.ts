@@ -119,6 +119,7 @@ describe('validateProject — happy path', () => {
         [
           'kind: project',
           'slug: reader',
+          'addedAt: 2026-01-01',
           'name: Reader',
           'description: a reader',
           'stack: ios',
@@ -142,6 +143,7 @@ describe('validateProject — happy path', () => {
         [
           'kind: project',
           'slug: demo',
+          'addedAt: 2026-01-01',
           'name: Demo',
           'description: a demo',
           'category: tools',
@@ -155,6 +157,31 @@ describe('validateProject — happy path', () => {
       expect(result.ok).toBe(true);
       expect(result.errors).toEqual([]);
       expect(result.warnings).toEqual([]);
+    });
+  });
+
+  it('warns when a record has no addedAt', async () => {
+    await withTmpCwd('grove-validate-no-added-at-', async (cwd) => {
+      await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+      await writeFile(
+        join(cwd, 'data', 'records', 'demo.yml'),
+        [
+          'kind: project',
+          'slug: demo',
+          'name: Demo',
+          'description: a demo',
+          'category: tools',
+          'links: {}',
+          'curation: { reviewed: false, labels: [], lenses: [] }',
+          'scores: {}',
+        ].join('\n'),
+      );
+
+      const result = await validateProject(makeConfig());
+      // A warning, not an error: the record still builds, it just
+      // cannot sort correctly in `recently-added`.
+      expect(result.ok).toBe(true);
+      expect(result.warnings.map((w) => w.code)).toContain('missing_added_at');
     });
   });
 

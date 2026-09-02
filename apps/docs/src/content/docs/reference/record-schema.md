@@ -32,6 +32,25 @@ The unique identifier. It is the URL segment for the detail page, the key
 used by `data/decisions.yml` and `data/overrides.yml`, and the id carried
 into every generated output. Must equal the filename.
 
+### `addedAt`
+
+**Type:** `string` (ISO date or date-time) · **Optional**
+
+When this record joined the directory. `grove init`'s submission form stamps
+it with the current date; `grove import` carries over whatever the source
+knows. Write it by hand for a record you add manually.
+
+This is what `sort=recently-added` (and the `new` lens) orders on, what
+llms.txt reports as `added:`, and the middle fallback for a record URL's
+sitemap `lastmod`.
+
+**Not the same as [`curation.reviewedAt`](#curation).** `addedAt`
+is when the record appeared; `reviewedAt` is when a human last looked at it.
+A record added today and never reviewed has an `addedAt` and no
+`reviewedAt`. When `addedAt` is absent the sort falls back to `reviewedAt`,
+then to the repository's own creation date, so older records still order
+sensibly — but only `addedAt` is actually correct.
+
 ### `name`
 
 **Type:** `string`, min length 1 · **Required**

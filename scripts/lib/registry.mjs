@@ -96,6 +96,23 @@ export function readRegistryVersion() {
   return JSON.parse(readFileSync(resolve(REGISTRY_DIR, 'package.json'), 'utf8')).version;
 }
 
+/**
+ * The `@grove-dev/*` version this scaffold's source expects.
+ *
+ * The scaffold is not standalone: its components read a typed model
+ * built by `@grove-dev/astro`. Scaffold 1.1.0's record sidebar reads
+ * `addedAtLabel`, which `@grove-dev/astro` only started returning in
+ * 0.9.0 — a consumer who runs `grove update` without also upgrading the
+ * packages gets a type error with nothing to point at. Stamping the
+ * requirement into the item lets `grove update` say so instead.
+ *
+ * The four packages release in lockstep, so core's version speaks for
+ * all of them.
+ */
+export function readGroveVersion() {
+  return JSON.parse(readFileSync(resolve(ROOT, 'packages/core/package.json'), 'utf8')).version;
+}
+
 /** Every shippable source file, as a path relative to `packages/registry/` (`default/...`). */
 export function listSourceFiles() {
   const out = [];
@@ -315,10 +332,14 @@ export function validateRegistry(registry = readRegistry()) {
  * stamped with the package version in `meta`, plus the generated full
  * scaffold. Deterministic — no timestamps — so the output is stable.
  */
-export function buildFullRegistry(registry = readRegistry(), version = readRegistryVersion()) {
+export function buildFullRegistry(
+  registry = readRegistry(),
+  version = readRegistryVersion(),
+  requiresGrove = readGroveVersion(),
+) {
   const items = registry.items.map((item) => ({
     ...item,
-    meta: { ...(item.meta ?? {}), version },
+    meta: { ...(item.meta ?? {}), version, requiresGrove },
   }));
 
   const seen = new Set();
@@ -348,7 +369,7 @@ export function buildFullRegistry(registry = readRegistry(), version = readRegis
       'The complete directory site — every item in this registry, inlined, so it installs in one step with no further registry lookups. This is what `grove init` installs.',
     dependencies: [...dependencies].sort(),
     files,
-    meta: { version },
+    meta: { version, requiresGrove },
   });
 
   return { ...registry, items };

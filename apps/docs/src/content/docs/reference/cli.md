@@ -101,6 +101,7 @@ without overwriting files you have edited. Implementation in
 
 | Option | Description | Default |
 |---|---|---|
+| `--adopt` | Write `.grove/registry.lock.json` from what is on disk when the project has none | off |
 | `--check` | Print the plan only; exit non-zero if anything needs applying | off |
 | `--diff` | Include a unified diff for every `upstream_changed` file | off |
 | `--force` | Apply changes even when conflicts exist (locally modified files are still preserved) | off |
@@ -109,7 +110,10 @@ without overwriting files you have edited. Implementation in
 
 **Reads:**
 
-- `.grove/registry.lock.json` — required; written by `grove init`.
+- `.grove/registry.lock.json` — required unless `--adopt` is passed;
+  written by `grove init`. **Commit it** — it is the install-time
+  snapshot every later update diffs against, like a package lock. A
+  `.gitignore` entry of `.grove/` (unanchored) will swallow it.
 - `components.json` — the `@grove` registry URL.
 - `@grove/default` from that URL (or `--from`); falls back to the
   copy bundled with the CLI.
@@ -127,12 +131,27 @@ never overwritten; `conflict` files are preserved and reported (or
 applied with `--force`); `removed` files are reported, never deleted.
 See [the registry model](/concepts/registry/) for the full table.
 
+**Adopting a project that has no lockfile.** A space scaffolded before
+the lockfile existed — or one whose `.gitignore` swallowed `.grove/` —
+cannot run `grove update` at all: it exits 1, and `grove init` is the
+wrong tool because it installs a scaffold over a live project.
+`grove update --adopt` writes the lockfile from the files already
+there, then proceeds as a normal update.
+
+Adoption locks every upstream file that exists on disk at *upstream's*
+hash. That is deliberate: a file matching upstream classifies as
+`unchanged`, a file you have edited classifies as `locally_modified`
+and is preserved forever, and a file you never had classifies as `new`
+and gets installed. Nothing you wrote is overwritten. Running `--adopt`
+on a project that already has a lockfile does nothing special.
+
 To reset one item to upstream regardless of local edits, use the
 shadcn CLI instead: `npx shadcn@latest add @grove/<item> --overwrite`.
 
 **Example:**
 
 ```bash
+grove update --adopt     # first run in a project with no lockfile
 grove update --check     # CI gate: is the scaffold current?
 grove update --diff      # review every upstream change
 grove update             # apply safe changes, keep local edits

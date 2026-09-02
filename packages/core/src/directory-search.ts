@@ -146,8 +146,27 @@ function recordUpdatedAt(record: IndexRecord): string | null {
   return null;
 }
 
+/**
+ * When the record joined the directory.
+ *
+ * `addedAt` is the honest answer and the only one a record can state
+ * outright. The two fallbacks exist for records written before the
+ * field did:
+ *
+ *  - `curation.reviewedAt` — what this function used to return on its
+ *    own. It answers "when did a human last review this", not "when
+ *    was this added", so a brand-new record (reviewed: false, no date)
+ *    scored 0 and sank to the bottom of the one sort whose entire job
+ *    is to surface it. Kept only as a second-best signal.
+ *  - `github.createdAt` — the repository's own creation date. Wrong in
+ *    absolute terms (the repo predates the directory entry) but it
+ *    keeps unstamped records in a defensible order instead of a heap.
+ */
 function recordAddedAt(record: IndexRecord): string | null {
-  return record.curation?.reviewedAt ?? null;
+  if (record.addedAt) return record.addedAt;
+  if (record.curation?.reviewedAt) return record.curation.reviewedAt;
+  if (record.kind === 'project') return record.github?.createdAt ?? null;
+  return null;
 }
 
 export function applySort(items: IndexRecord[], sort: IndexSort): IndexRecord[] {
@@ -157,11 +176,22 @@ export function applySort(items: IndexRecord[], sort: IndexSort): IndexRecord[] 
     case 'most-starred':
       arr.sort((a, b) => projectStars(b) - projectStars(a));
       break;
+    // Date sorts break ties by name. Without it every record missing
+    // the key shares score 0 and the tail comes out in whatever order
+    // the index happened to be built in — stable, but arbitrary, and
+    // it reads as a bug to anyone paging that far.
     case 'recently-updated':
-      arr.sort((a, b) => ts(recordUpdatedAt(b)) - ts(recordUpdatedAt(a)));
+      arr.sort(
+        (a, b) =>
+          ts(recordUpdatedAt(b)) - ts(recordUpdatedAt(a)) ||
+          recordName(a).localeCompare(recordName(b)),
+      );
       break;
     case 'recently-added':
-      arr.sort((a, b) => ts(recordAddedAt(b)) - ts(recordAddedAt(a)));
+      arr.sort(
+        (a, b) =>
+          ts(recordAddedAt(b)) - ts(recordAddedAt(a)) || recordName(a).localeCompare(recordName(b)),
+      );
       break;
     case 'best-overall': {
       const reviewed = (a: IndexRecord) => (a.curation?.reviewed ? 1 : 0);

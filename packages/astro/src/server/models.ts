@@ -639,6 +639,9 @@ export function getRecordDetailModel(
   const reviewedAtLabel = record.curation?.reviewedAt
     ? new Date(String(record.curation.reviewedAt)).toLocaleDateString()
     : null;
+  const addedAtLabel = record.addedAt
+    ? new Date(String(record.addedAt)).toLocaleDateString()
+    : null;
   const isArchived = !!github?.archived;
   const isDisabled = !!github?.disabled;
   const ownerRepo = repoUrl ? getOwnerAndRepoFromRepoUrl(repoUrl) : null;
@@ -682,7 +685,11 @@ export function getRecordDetailModel(
   let recordLd: Record<string, unknown>;
   if (isProject && proj) {
     const sameAs = [repoUrl, homepageUrl].filter(Boolean);
-    const dateCreated = record.curation?.reviewedAt;
+    // schema.org `dateCreated` is when the *work* was created, so the
+    // repository's own creation date is the honest answer. This used to
+    // read `curation.reviewedAt` and published the review date as the
+    // project's birthday — off by years on most records.
+    const dateCreated = github?.created_at ? String(github.created_at) : undefined;
     recordLd = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareSourceCode',
@@ -808,6 +815,7 @@ export function getRecordDetailModel(
     firstCommitYear,
     lastFetchedLabel,
     reviewedAtLabel,
+    addedAtLabel,
     ownerRepo,
     avatarSrc,
     initials: name
@@ -869,6 +877,7 @@ export function getRecordDetailModel(
       category: record.category,
       contributionSignals,
       reviewedAt: record.curation?.reviewedAt,
+      addedAt: record.addedAt,
     }),
     // ── Body-derived fields ──────────────────────────────────
     // Both depend on the sidecar Markdown; the body is re-read
@@ -978,6 +987,7 @@ export function computeSidebarVisibility(input: {
   category: string | undefined;
   contributionSignals: Array<{ key: string; label: string; ok: boolean }>;
   reviewedAt: string | undefined;
+  addedAt: string | undefined;
 }): {
   showActivity: boolean;
   showFreshness: boolean;
@@ -996,7 +1006,11 @@ export function computeSidebarVisibility(input: {
       input.tags.length > 0 ||
       !!input.category ||
       input.contributionSignals.length > 0,
-    showSource: !!input.reviewedAt,
+    // Was `!!input.reviewedAt`, which hid the whole Source card — and
+    // with it "Also in" and the notes word count — on every record a
+    // curator had not stamped. `addedAt` is set on every record, so the
+    // card now renders for all of them.
+    showSource: !!input.addedAt || !!input.reviewedAt,
   };
 }
 

@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -39,6 +39,76 @@ describe('grove update', () => {
     expect(summary.plan.conflict).toEqual([]);
     expect(summary.plan.removed).toEqual([]);
     expect(summary.applied).toEqual([]);
+  });
+
+  it('refuses to run without a lockfile unless --adopt is passed', async () => {
+    const cwd = await scaffold();
+    await rm(join(cwd, '.grove/registry.lock.json'));
+
+    const summary = await runUpdate({ cwd, from: resolveBundledItemPath(), check: true });
+    expect(summary.exitCode).toBe(1);
+    expect(summary.plan.unchanged).toEqual([]);
+  });
+
+  it('adopts a lockfile-less project without overwriting local edits', async () => {
+    // The Open Apps case: a project Grove already powers, whose
+    // .gitignore swallowed .grove/, with one file edited locally and
+    // one never installed.
+    const cwd = await scaffold();
+    await rm(join(cwd, '.grove/registry.lock.json'));
+    const mine = '---\n// my edit\n---\n';
+    await writeFile(join(cwd, EDITED), mine);
+    await rm(join(cwd, UNTOUCHED));
+
+    const summary = await runUpdate({ cwd, from: resolveBundledItemPath(), adopt: true });
+
+    expect(summary.adopted).toBe(true);
+    expect(summary.exitCode).toBe(0);
+    // Drifted file is preserved, never overwritten.
+    expect(summary.plan.locally_modified).toEqual([EDITED]);
+    expect(await readFile(join(cwd, EDITED), 'utf8')).toBe(mine);
+    // The file the project was missing gets installed.
+    expect(summary.plan.new).toEqual([UNTOUCHED]);
+    expect(summary.applied).toEqual([UNTOUCHED]);
+    // The lockfile now exists and omits nothing the project has.
+    const lock = JSON.parse(await readFile(join(cwd, '.grove/registry.lock.json'), 'utf8'));
+    expect(lock.files.length).toBe(70);
+  });
+
+  it('adoption is idempotent — the second run reports no adoption and no work', async () => {
+    const cwd = await scaffold();
+    await rm(join(cwd, '.grove/registry.lock.json'));
+    await runUpdate({ cwd, from: resolveBundledItemPath(), adopt: true });
+
+    const second = await runUpdate({ cwd, from: resolveBundledItemPath(), adopt: true });
+    expect(second.adopted).toBeUndefined();
+    expect(second.plan.unchanged).toHaveLength(70);
+    expect(second.applied).toEqual([]);
+  });
+
+  it('flags a scaffold that needs a newer @grove-dev than the project has', async () => {
+    const cwd = await scaffold();
+    await mkdir(join(cwd, 'node_modules/@grove-dev/astro'), { recursive: true });
+    await writeFile(
+      join(cwd, 'node_modules/@grove-dev/astro/package.json'),
+      JSON.stringify({ name: '@grove-dev/astro', version: '0.8.0' }),
+    );
+
+    const upstream = await loadItem(resolveBundledItemPath());
+    upstream.meta = { version: '1.1.0', requiresGrove: '0.9.0' };
+    const from = join(await mkdtemp(join(tmpdir(), 'grove-upstream-')), 'default.json');
+    await writeFile(from, JSON.stringify(upstream));
+
+    const summary = await runUpdate({ cwd, from, check: true });
+    expect(summary.requiresGroveUpgrade).toEqual({ required: '0.9.0', installed: '0.8.0' });
+
+    // Same scaffold, packages already current — no nag.
+    await writeFile(
+      join(cwd, 'node_modules/@grove-dev/astro/package.json'),
+      JSON.stringify({ name: '@grove-dev/astro', version: '0.9.0' }),
+    );
+    const current = await runUpdate({ cwd, from, check: true });
+    expect(current.requiresGroveUpgrade).toBeUndefined();
   });
 
   it('preserves a locally modified file when upstream is unchanged', async () => {

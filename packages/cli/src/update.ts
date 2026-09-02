@@ -51,6 +51,17 @@ import { unifiedDiff } from './unified-diff.js';
 
 export interface UpdateOptions {
   cwd: string;
+  /**
+   * Write a lockfile for a project that has none, instead of failing.
+   *
+   * A space scaffolded before the lockfile existed — or one whose
+   * `.gitignore` swallowed `.grove/` — can never run `grove update`:
+   * step 1 finds no lockfile and exits 1, and `grove init` is the wrong
+   * tool because it installs a scaffold over a live project. Adoption
+   * closes that door by deriving the lockfile from what is already on
+   * disk. See `adoptionLockfile` for why it records upstream's hash.
+   */
+  adopt?: boolean;
   /** Print the plan and exit; don't touch disk. */
   check?: boolean;
   /** Print unified diff for every upstream_changed row. */
@@ -69,6 +80,16 @@ export interface FileDiff {
 }
 
 export interface UpdateSummary {
+  /** True when this run wrote the project's first lockfile. */
+  adopted?: boolean;
+  /**
+   * Set when the scaffold needs a newer `@grove-dev/*` than the project
+   * has installed. The scaffold's components read a typed model built by
+   * `@grove-dev/astro`; applying registry files without the matching
+   * package upgrade fails the type-check inside a component, which points
+   * at the symptom rather than at the cause.
+   */
+  requiresGroveUpgrade?: { required: string; installed: string };
   plan: UpdatePlan;
   /** Files we wrote to disk during this run. */
   applied: string[];
@@ -103,9 +124,62 @@ async function resolveUpstreamSource(cwd: string, from?: string): Promise<string
  * root and option flags, returns a structured summary. Printing and
  * exit codes live in `grove update`'s subcommand handler.
  */
+/**
+ * Derive a lockfile for a project that never had one.
+ *
+ * One rule: every upstream file that exists on disk is locked at
+ * *upstream's* hash — not at the hash of the file sitting there. That
+ * looks backwards until you run it through `classify`:
+ *
+ *   file matches upstream    installed == lock == registry  → unchanged
+ *   file drifted locally     installed != lock, registry == lock
+ *                                                          → locally_modified
+ *   file absent (no entry)   installed/lock null, registry set → new
+ *
+ * So adoption preserves every local edit by construction, installs only
+ * what the project is genuinely missing, and never overwrites anything.
+ * Locking the on-disk hash instead would classify drifted files as
+ * `upstream_changed` on the next run and quietly clobber them.
+ */
+async function adoptionLockfile(cwd: string, item: RegistryItem): Promise<RegistryLockfile> {
+  const upstream = itemLockEntries(item);
+  const present: typeof upstream = [];
+  for (const entry of upstream) {
+    if ((await hashInstalledFile(cwd, entry.target)) !== null) present.push(entry);
+  }
+  return {
+    scaffold: SCAFFOLD_ID,
+    scaffoldVersion: item.meta?.version ?? '0.0.0',
+    installedAt: new Date().toISOString().slice(0, 10),
+    fileCount: present.length,
+    files: present,
+  };
+}
+
+/** Numeric compare of two dotted versions; prerelease suffixes are ignored. */
+function isOlder(a: string, b: string): boolean {
+  const parts = (v: string) =>
+    (v.split('-')[0] ?? '').split('.').map((n) => Number.parseInt(n, 10) || 0);
+  const [x, y] = [parts(a), parts(b)];
+  for (let i = 0; i < 3; i += 1) {
+    if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) < (y[i] ?? 0);
+  }
+  return false;
+}
+
+/** The `@grove-dev/astro` version the consumer actually has installed. */
+async function installedGroveVersion(cwd: string): Promise<string | null> {
+  try {
+    const raw = await readFile(resolve(cwd, 'node_modules/@grove-dev/astro/package.json'), 'utf8');
+    return (JSON.parse(raw) as { version?: string }).version ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> {
-  const lock = await readLockfile(options.cwd);
-  if (!lock) {
+  const existingLock = await readLockfile(options.cwd);
+  if (!existingLock && !options.adopt) {
     return {
       plan: emptyPlan(),
       applied: [],
@@ -117,6 +191,12 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
   }
   const source = await resolveUpstreamSource(options.cwd, options.from);
   const item = await loadItem(source);
+  const lock = existingLock ?? (await adoptionLockfile(options.cwd, item));
+  const adopted = !existingLock;
+  // Adoption has to land on disk even under `--check`; otherwise the
+  // caller gets a plan derived from a lockfile that does not exist and
+  // the next run starts over from nothing.
+  if (adopted) await writeLockfile(options.cwd, lock);
 
   const lockMap = mapByTarget(lock.files);
   const upstreamMap = mapByTarget(itemLockEntries(item));
@@ -158,7 +238,23 @@ export async function runUpdate(options: UpdateOptions): Promise<UpdateSummary> 
 
   const exitCode: 0 | 1 | 2 = plan.conflict.length > 0 && !options.force ? 2 : 0;
 
-  return { plan, applied, preserved, diffs, source, exitCode };
+  const required = item.meta?.requiresGrove;
+  const installedGrove = required ? await installedGroveVersion(options.cwd) : null;
+  const staleGrove =
+    required && installedGrove && isOlder(installedGrove, required)
+      ? { required, installed: installedGrove }
+      : undefined;
+
+  return {
+    ...(adopted ? { adopted: true } : {}),
+    ...(staleGrove ? { requiresGroveUpgrade: staleGrove } : {}),
+    plan,
+    applied,
+    preserved,
+    diffs,
+    source,
+    exitCode,
+  };
 }
 
 /**
@@ -281,6 +377,13 @@ export function formatPlan(summary: UpdateSummary): string {
   const outstanding = plan.conflict.filter((target) => !wrote.has(target));
 
   const lines: string[] = [];
+  if (summary.adopted) {
+    lines.push(
+      'Adopted this project: wrote .grove/registry.lock.json from what was already on disk.',
+      'Files that differ from upstream are recorded as locally modified and will never be overwritten.',
+      '',
+    );
+  }
   for (const t of plan.unchanged) lines.push(`✓ ${t} unchanged`);
   for (const t of plan.upstream_changed) lines.push(`↑ ${t} upstream changed`);
   for (const t of plan.new) lines.push(`+ ${t} new`);
@@ -295,6 +398,15 @@ export function formatPlan(summary: UpdateSummary): string {
   );
   if (applied.length > 0) {
     lines.push(`\nApplied ${applied.length} file(s).`);
+  }
+  if (summary.requiresGroveUpgrade) {
+    const { required, installed } = summary.requiresGroveUpgrade;
+    lines.push(
+      '',
+      `This scaffold expects @grove-dev/* ${required}; this project has ${installed}.`,
+      'The scaffold reads a typed model the packages build, so upgrade them too:',
+      `  pnpm add @grove-dev/core@${required} @grove-dev/astro@${required} @grove-dev/cli@${required}`,
+    );
   }
   for (const diff of diffs) {
     lines.push('', diff.patch);

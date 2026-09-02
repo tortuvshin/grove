@@ -24,12 +24,16 @@ function record(
     platforms?: string[];
     tags?: string[];
     reviewedAt?: string;
+    addedAt?: string;
+    repoCreatedAt?: string;
   } = {},
 ): IndexRecord {
   return {
     kind: 'project',
     slug,
     name: slug,
+    addedAt: options.addedAt,
+    github: options.repoCreatedAt ? { createdAt: options.repoCreatedAt } : undefined,
     description: `${slug} description`,
     category: options.category ?? 'tools',
     tags: options.tags ?? [],
@@ -104,16 +108,39 @@ describe('directory discovery state', () => {
     ).toEqual(['agent-ui']);
   });
 
-  it('recently added is a sort and never removes unlabeled records', () => {
+  it('recently added sorts on addedAt, not on when a human reviewed the record', () => {
+    // The regression this guards: `recently-added` used to read
+    // `curation.reviewedAt`. A record added today and not yet reviewed
+    // scored 0 and landed last — in the one sort built to surface it.
     const dated = [
-      record('older', { reviewedAt: '2026-01-01' }),
-      record('newer', { reviewedAt: '2026-07-01' }),
-      record('unreviewed'),
+      record('reviewed-long-ago', { addedAt: '2026-01-01', reviewedAt: '2026-09-01' }),
+      record('added-today', { addedAt: '2026-07-01' }),
     ];
     expect(applySort(dated, 'recently-added').map((item) => item.slug)).toEqual([
-      'newer',
-      'older',
-      'unreviewed',
+      'added-today',
+      'reviewed-long-ago',
+    ]);
+  });
+
+  it('recently added falls back to reviewedAt, then to the repo creation date', () => {
+    const mixed = [
+      record('has-added-at', { addedAt: '2026-08-01' }),
+      record('only-reviewed-at', { reviewedAt: '2026-06-01' }),
+      record('only-repo-date', { repoCreatedAt: '2026-07-01' }),
+    ];
+    expect(applySort(mixed, 'recently-added').map((item) => item.slug)).toEqual([
+      'has-added-at',
+      'only-repo-date',
+      'only-reviewed-at',
+    ]);
+  });
+
+  it('recently added keeps dateless records, ordered by name rather than by index order', () => {
+    const dateless = [record('zulu'), record('alpha'), record('mike')];
+    expect(applySort(dateless, 'recently-added').map((item) => item.slug)).toEqual([
+      'alpha',
+      'mike',
+      'zulu',
     ]);
   });
 

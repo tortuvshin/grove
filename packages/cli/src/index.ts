@@ -23,6 +23,7 @@ import { Command } from 'commander';
 import { parse as parseYaml } from 'yaml';
 import { buildAuditCommand } from './audit-cli.js';
 import { buildCollectionCommand } from './collection-cli.js';
+import { buildHealthCommand } from './health-cli.js';
 import { buildIconsCommand } from './icons-cli.js';
 import { buildImportCommand } from './import-cli.js';
 import { initDirectory, readCliVersion } from './init.js';
@@ -243,6 +244,11 @@ program
     "Reconcile the consumer's installed scaffold against the registry upstream. " +
       'Never overwrites locally modified files.',
   )
+  .option(
+    '--adopt',
+    'write .grove/registry.lock.json from what is on disk when the project has none ' +
+      '(local edits are preserved; nothing is overwritten)',
+  )
   .option('--check', 'print the plan only; exit non-zero if anything needs applying')
   .option('--diff', 'include a unified diff for every upstream_changed row')
   .option(
@@ -256,6 +262,7 @@ program
   )
   .action(
     async (options: {
+      adopt?: boolean;
       check?: boolean;
       diff?: boolean;
       force?: boolean;
@@ -264,6 +271,7 @@ program
     }) => {
       const summary = await runUpdate({
         cwd: process.cwd(),
+        adopt: options.adopt === true,
         check: options.check === true,
         diff: options.diff === true,
         force: options.force === true,
@@ -271,7 +279,11 @@ program
         ...(options.from === undefined ? {} : { from: options.from }),
       });
       if (summary.exitCode === 1) {
-        console.error('No .grove/registry.lock.json found. Run `grove init` first.');
+        console.error(
+          'No .grove/registry.lock.json found.\n' +
+            'For a project Grove already powers, run `grove update --adopt` to write one\n' +
+            'from the files on disk. For a new project, run `grove init`.',
+        );
         process.exitCode = 1;
         return;
       }
@@ -279,6 +291,7 @@ program
         console.log(
           JSON.stringify(
             {
+              ...(summary.adopted ? { adopted: true } : {}),
               plan: summary.plan,
               applied: summary.applied,
               preserved: summary.preserved,
@@ -297,6 +310,7 @@ program
 
 program.addCommand(buildAuditCommand());
 program.addCommand(buildCollectionCommand());
+program.addCommand(buildHealthCommand());
 program.addCommand(buildIconsCommand());
 program.addCommand(buildImportCommand());
 program.addCommand(buildReadmeCommand());

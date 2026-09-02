@@ -69,6 +69,14 @@ This:
 3. Adds `@grove-dev/core`, `@grove-dev/astro`, and `@grove-dev/cli`, pinned to the CLI version. There is no registry package to add — the UI is now source in your repository.
 4. Writes `.grove/registry.lock.json` with the version installed and a sha256 per file.
 
+**Commit the lockfile.** It is the install-time snapshot every later
+`grove update` diffs against — a build input, like a package lock, not a
+cache. Watch your `.gitignore`: a bare `.grove/` entry matches at every
+depth and will swallow it, leaving `grove update` with nothing to
+compare and no way to run. If that already happened, or the project
+predates the lockfile, `grove update --adopt` writes one from the files
+on disk without overwriting any of your edits.
+
 ### Customize
 
 Edit any file in your `src/`. The registry no longer touches it.

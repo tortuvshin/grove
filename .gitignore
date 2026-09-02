@@ -28,7 +28,14 @@ test-tmp-*/
 # under <monorepo>/.grove/run/, and the release script writes a
 # `.release-in-progress` lock file at the repo root. None of this
 # should be committed. (Audit finding #10.)
-.grove/
+#
+# Anchored to the repo root on purpose. A bare `.grove/` matches at
+# every depth, which also swallowed `apps/example/.grove/registry.lock.json`
+# — the install-time snapshot `grove update` diffs against. A consumer
+# that copies this file (Open Apps did) ends up unable to run
+# `grove update` at all: no lockfile, exit 1. The lockfile is a
+# committed artifact, like a package lock.
+/.grove/
 .worktrees/
 .release-in-progress
 
