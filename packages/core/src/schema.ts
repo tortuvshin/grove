@@ -286,6 +286,17 @@ const curationBlockSchema = z
 
 const resourceBaseSchema = z.object({
   slug: z.string().min(1),
+  /**
+   * When this record joined the directory — an ISO date or date-time.
+   *
+   * Distinct from `curation.reviewedAt`, which records when a human
+   * last reviewed the record. A record can be added today and reviewed
+   * never, or added last year and reviewed this morning; the
+   * `recently-added` sort and llms.txt's `added:` line want the former.
+   * Optional so records written before this field existed still
+   * validate — `recordAddedAt` falls back for them.
+   */
+  addedAt: z.string().optional(),
   description: z.string().default(''),
   /**
    * Open Apps-written summary, surfaced as the lead paragraph on the
@@ -901,6 +912,8 @@ export function getOwnerRepoFromUrl(
 export interface IndexBase {
   slug: string;
   kind: ResourceKind;
+  /** When the record joined the directory. See `resourceBaseSchema.addedAt`. */
+  addedAt?: string | undefined;
   category: string;
   tags: string[];
   links: Links;
@@ -918,6 +931,10 @@ export interface IndexBase {
 
 export interface IndexGithubSummary {
   fullName: string | undefined;
+  /** Repository creation date, straight from the GitHub API. The
+   *  honest source for JSON-LD `dateCreated`, and the last-resort
+   *  fallback for the `recently-added` sort. */
+  createdAt: string | null;
   stars: number;
   forks: number;
   openIssues: number;
@@ -1002,6 +1019,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
   const base = {
     slug: record.slug,
     kind: record.kind,
+    addedAt: record.addedAt,
     category: record.category,
     tags: record.tags ?? [],
     links: record.links,
@@ -1042,6 +1060,7 @@ export function toIndexRecord(record: Resource): IndexRecord {
       github: r.github?.repository
         ? {
             fullName: r.github.repository.full_name,
+            createdAt: r.github.repository.created_at ?? null,
             stars: r.github.repository.stargazers_count ?? 0,
             forks: r.github.repository.forks_count ?? 0,
             openIssues: r.github.repository.open_issues_count ?? 0,
