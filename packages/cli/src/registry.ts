@@ -58,7 +58,15 @@ export interface RegistryItem {
   description?: string;
   dependencies?: string[];
   registryDependencies?: string[];
-  meta?: { version?: string };
+  meta?: {
+    version?: string;
+    /**
+     * The `@grove-dev/*` version this scaffold's source expects. The
+     * components read a typed model built by `@grove-dev/astro`, so a
+     * scaffold can outrun the packages a project has installed.
+     */
+    requiresGrove?: string;
+  };
   files: RegistryItemFile[];
 }
 
