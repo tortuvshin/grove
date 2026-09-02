@@ -1,0 +1,23 @@
+apps/example/src/components/grove/record-sidebar.astro
+  s_2125b9f45e0719::t_76b9d69c47bc3c 70,377-392
+packages/astro/src/server/models.ts
+  s_2125b9f45e0719::t_76c1925fcd7736 642-644,688-692,818,880,990,1009-1013
+packages/registry/default/components/grove/record-sidebar.astro
+  s_2125b9f45e0719::t_0fc8d6d7f8e90d 70,377-392
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "722bc5ad5b23daa19e30d15f24f39cb1f876b786",
+  "prompts": {},
+  "sessions": {
+    "s_2125b9f45e0719": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f82d8744-91c7-478e-8e0d-39e967546924",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
