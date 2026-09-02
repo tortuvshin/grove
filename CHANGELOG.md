@@ -26,6 +26,67 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.9.0] — Unreleased
+
+A record can finally say when it joined the directory, and the update
+channel a consumer needs to receive that change is reachable again.
+
+### Added
+
+- **`addedAt` on every record** (`resourceBaseSchema`). The date the record
+  joined the directory, distinct from `curation.reviewedAt` (when a human
+  last reviewed it). Optional; carried into the index payload, llms.txt's
+  `added:` line, and the sitemap `lastmod` chain — all three of which read
+  the field already but had nothing writing it.
+  **Packages:** `@grove-dev/core`
+- **`grove update --adopt`** — writes `.grove/registry.lock.json` from the
+  files already on disk, so a project scaffolded before the lockfile existed
+  can join the registry update channel. Adoption locks every upstream file
+  at upstream's hash, which classifies local edits as `locally_modified`
+  (preserved forever) and missing files as `new`. Nothing is overwritten.
+  **Packages:** `@grove-dev/cli`
+- **Registry items declare the `@grove-dev/*` version they need**
+  (`meta.requiresGrove`). The scaffold's components read a typed model the
+  packages build, so a `grove update` that runs ahead of the package upgrade
+  used to fail the type-check inside a component with nothing pointing at the
+  cause. `grove update` now names the mismatch and the command that fixes it.
+  **Packages:** `@grove-dev/cli`, `@grove-dev/registry`
+- The record sidebar's Source card shows an **Added on** line.
+  **Packages:** `@grove-dev/registry` (scaffold 1.1.0)
+- The submission form stamps `addedAt` on the YAML it generates, so a record
+  arrives sortable instead of needing a hand-written date.
+  **Packages:** `@grove-dev/registry` (scaffold 1.1.0)
+
+### Fixed
+
+- **`sort=recently-added` sorted on the wrong field.** It read
+  `curation.reviewedAt`, so a record added today and not yet reviewed scored
+  0 and landed *last* — in the one sort whose job is to surface it. It now
+  reads `addedAt`, falling back to `reviewedAt` and then the repository's
+  creation date for records written before the field existed.
+  **Packages:** `@grove-dev/core`
+- **JSON-LD `dateCreated` published the review date as the project's
+  birthday.** It now uses the repository's `created_at`, which is what
+  schema.org means by the field — the previous value was off by years on
+  most records.
+  **Packages:** `@grove-dev/astro`
+- **The record sidebar's Source card was hidden whenever `reviewedAt` was
+  absent**, taking the "Also in" collection list and the notes word count
+  with it. Visibility no longer hinges on the review date, and the
+  "Reviewed by" line renders only when there is a review to report.
+  **Packages:** `@grove-dev/astro`, `@grove-dev/registry`
+- **Date sorts break ties by name.** Records missing the sort key all scored
+  0 and came out in index-build order — stable, but arbitrary enough to read
+  as a bug.
+  **Packages:** `@grove-dev/core`
+- **`.gitignore` swallowed consumer lockfiles.** The repo's `.grove/` entry
+  was meant for `<root>/.grove/run/` scratch projects but matched at every
+  depth, including `apps/example/.grove/registry.lock.json`. Consumers that
+  copied the line could not run `grove update` at all. Now anchored as
+  `/.grove/`.
+
+---
+
 ## [0.8.0] — 2026-09-01
 
 Grove's UI stops being something you import and starts being something you

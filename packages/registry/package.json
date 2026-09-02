@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/registry",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Grove's UI as a shadcn registry — feature blocks (home, browse, record, …) plus the full `default` scaffold, installable with `npx shadcn add @grove/<item>` or by `grove init`.",
