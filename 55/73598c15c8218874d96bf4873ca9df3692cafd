@@ -1,0 +1,21 @@
+apps/example/src/components/grove/submission-client.astro
+  s_2125b9f45e0719::t_090dbe816fd5c6 103-106
+packages/registry/default/components/grove/submission-client.astro
+  s_2125b9f45e0719::t_ea53fcc776ded8 103-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "5573598c15c8218874d96bf4873ca9df3692cafd",
+  "prompts": {},
+  "sessions": {
+    "s_2125b9f45e0719": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f82d8744-91c7-478e-8e0d-39e967546924",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
