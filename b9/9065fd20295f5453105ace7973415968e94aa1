@@ -1,0 +1,25 @@
+.gitignore
+  s_2125b9f45e0719::t_b96a7bf55baf5b 31-38
+apps/docs/src/content/docs/concepts/registry.md
+  s_2125b9f45e0719::t_ba73a77b09d507 72-79
+apps/example/.grove/registry.lock.json
+  s_2125b9f45e0719::t_394258a06e3a9c 1-428
+scripts/check-example-mirrors-registry.mjs
+  s_2125b9f45e0719::t_3e80332a16256e 19-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "b99065fd20295f5453105ace7973415968e94aa1",
+  "prompts": {},
+  "sessions": {
+    "s_2125b9f45e0719": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f82d8744-91c7-478e-8e0d-39e967546924",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
