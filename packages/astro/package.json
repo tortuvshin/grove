@@ -33,6 +33,7 @@
     "src/index.ts",
     "src/styles.css",
     "README.md",
+    "LICENSE",
     "src/server/**/*.ts",
     "!src/server/**/*.test.ts"
   ],

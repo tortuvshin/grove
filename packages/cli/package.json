@@ -39,7 +39,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.json && node -e \"require('fs').copyFileSync('package.json','dist/package.json')\" && node -e \"require('fs').cpSync('../registry/dist/r','dist/r',{recursive:true})\"",

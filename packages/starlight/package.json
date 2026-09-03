@@ -12,15 +12,24 @@
   "homepage": "https://withgrove.dev/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tortuvshin/grove.git",
+    "url": "git+https://github.com/tortuvshin/grove.git",
     "directory": "packages/starlight"
   },
   "bugs": {
     "url": "https://github.com/tortuvshin/grove/issues"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
+  "files": [
+    "components",
+    "core",
+    "styles",
+    "*.ts",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema.ts",
