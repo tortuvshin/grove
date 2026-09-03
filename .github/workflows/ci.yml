@@ -38,7 +38,7 @@ jobs:
         # pinned version via corepack in one step.
         uses: pnpm/action-setup@v6
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -75,7 +75,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -108,7 +108,7 @@ jobs:
     # unapproved dependency build script into a hard error, which killed
     # the `pnpm add` inside `shadcn add` and shipped a `grove init` that
     # left every consumer with a package.json and no src/ — invisible to
-    # every job above, all of which pin 10.12.1. This job runs the
+    # every job above, all of which pin 10.34.5. This job runs the
     # consumer path on the newest pnpm so the next such break fails here
     # instead of on someone's machine.
     runs-on: ubuntu-latest
@@ -125,7 +125,7 @@ jobs:
         # scaffold the CLI creates is exercised under the newer one.
         uses: pnpm/action-setup@v6
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -142,7 +142,7 @@ jobs:
       - name: Switch pnpm to the latest release
         # pnpm self-manages versions: inside this repo it re-execs the
         # `packageManager` pin, so test-scaffold.mjs's repo-root steps
-        # keep running on 10.12.1 no matter what is installed here. The
+        # keep running on 10.34.5 no matter what is installed here. The
         # scaffold it creates carries no pin, so everything run inside it
         # — `grove init`'s `pnpm dlx shadcn`, its `pnpm install`, the
         # final `pnpm build` — picks up this version. That is the part
@@ -154,7 +154,7 @@ jobs:
       - name: Run scaffold test
         # `node`, not `pnpm test:scaffold`: a pnpm-run script puts its own
         # pnpm first on the child PATH, so going through the script alias
-        # would silently hand the scaffold 10.12.1 again and this job
+        # would silently hand the scaffold 10.34.5 again and this job
         # would test nothing.
         run: node scripts/test-scaffold.mjs
 
@@ -174,7 +174,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -209,7 +209,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
         uses: actions/setup-node@v7

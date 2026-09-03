@@ -57,7 +57,7 @@ editorial judgment away from maintainers.
 
 ## Quick start
 
-Requirements: Node.js `>=22.12.0` and pnpm `10.12.1`.
+Requirements: Node.js `>=22.12.0` and pnpm `10.34.5`.
 
 ```bash
 pnpm dlx @grove-dev/cli@latest init my-space
