@@ -50,7 +50,7 @@ The "Repo hygiene" job (`lint` in the workflow file) runs:
 
 ## Dependency management
 
-`.github/dependabot.yml` is configured — weekly, Mondays, two ecosystems: `npm` at the repo root (with a `grove-internal` dependency group for `@grove-dev/*`, which is then explicitly `ignore`-d, since the release script owns `workspace:*` rewrites) and `github-actions`. Renovate is not configured.
+`.github/dependabot.yml` is configured — weekly, Mondays, two ecosystems: `npm` at the repo root (with a `grove-internal` dependency group for `@grove-dev/*`, which is then explicitly `ignore`-d, since `pnpm publish` resolves `workspace:*` at pack time) and `github-actions`. Renovate is not configured.
 
 ## Supply-chain security
 
@@ -58,7 +58,7 @@ The supply-chain automation that actually runs is **`pnpm audit`** in `audit.yml
 
 ## Release automation
 
-`scripts/release.mjs` is a hand-rolled script, not a CI workflow — no GitHub Actions job publishes a release. It builds every package, bumps the four published package manifests together, and publishes them in dependency order: `core → astro → cli → starlight`. See [Release process](/maintainers/release-process/) for the full mechanics, and for why Grove hasn't (yet) adopted Changesets.
+`.github/workflows/release.yml` owns releases end to end; there is no local release script and no `NPM_TOKEN`. On a push to `main`, release-please keeps a release pull request open with the version bumps and a generated `CHANGELOG.md` section; merging it tags `vX.Y.Z` and, in the same workflow run, publishes all four packages to npm over trusted publishing (OIDC) with provenance attestations. The publish job re-runs `scripts/check-publishable.mjs` and `scripts/check-packaging.mjs` before it ships and asserts `dist.attestations` afterwards. The two jobs share a workflow because a tag pushed by `GITHUB_TOKEN` does not trigger a second one. See [Release process](/maintainers/release-process/) for the full mechanics, and for why release-please rather than Changesets.
 
 ## Related
 

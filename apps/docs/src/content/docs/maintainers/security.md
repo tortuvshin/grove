@@ -194,8 +194,9 @@ collect telemetry. The only network calls the CLI makes are:
 1. **To the GitHub API** (`api.github.com`) — during
    `grove sync github`. The call uses the token from the
    `GITHUB_TOKEN` environment variable, when set.
-2. **To `registry.npmjs.org`** — when you run `pnpm publish` (via
-   the release script). The framework itself does not initiate this.
+2. **To `registry.npmjs.org`** — from the release workflow, which
+   publishes over trusted publishing (OIDC) rather than a stored
+   token. The framework itself does not initiate this.
 3. **To the host of any URL in a record's `links`** — when the
    rendered page is loaded in a browser.
 
