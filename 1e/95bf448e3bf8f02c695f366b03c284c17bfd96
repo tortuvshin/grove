@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_df13f66e5c2c89::t_b7a695d8cac185 309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "1e95bf448e3bf8f02c695f366b03c284c17bfd96",
+  "prompts": {},
+  "sessions": {
+    "s_df13f66e5c2c89": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fc789f5d-5225-439f-9dcd-ba6bfaac35f0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
