@@ -1,0 +1,28 @@
+.github/workflows/audit.yml
+  s_df13f66e5c2c89::t_f3646ebc6013a6 41,49,54
+.github/workflows/release.yml
+  s_df13f66e5c2c89::t_f40049ada44319 37-41,80-83
+  s_df13f66e5c2c89::t_f3646ebc6013a6 62,87,96,101
+apps/docs/src/content/docs/project/roadmap.md
+  s_df13f66e5c2c89::t_620b15ebed862c 118-129
+.github/workflows/lighthouse-audit.yml
+  s_df13f66e5c2c89::t_f3646ebc6013a6 42,49,52,116,131
+.github/workflows/ci.yml
+  s_df13f66e5c2c89::t_f3646ebc6013a6 31,39,44,73,76,81,121,126,131,172,175,180,207,210,215,281,284,289,309
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "3441933a2a8bbed6184e2243bf1aecf652500a73",
+  "prompts": {},
+  "sessions": {
+    "s_df13f66e5c2c89": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fc789f5d-5225-439f-9dcd-ba6bfaac35f0",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Turtuvshin Byambaa <toroo.byamba@gmail.com>"
+    }
+  }
+}
