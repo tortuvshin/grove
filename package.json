@@ -1,6 +1,6 @@
 {
   "name": "grove",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "type": "module",
   "description": "Grove monorepo — a file-first publishing system for structured knowledge. Sources in files, outputs to web, llms.txt, JSON-LD, OG images, JSON datasets.",

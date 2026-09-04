@@ -22,6 +22,30 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.10.0](https://github.com/tortuvshin/grove/compare/v0.9.0...v0.10.0) (2026-09-04)
+
+
+### Features
+
+* tokenless, provenance-backed release pipeline ([926de86](https://github.com/tortuvshin/grove/commit/926de864e86c384a5d12b7746968d08a3e9747c8))
+
+
+### Bug Fixes
+
+* **astro:** declare astro as a peer dependency, not a dependency ([7ea36ee](https://github.com/tortuvshin/grove/commit/7ea36ee229e03fc45c4913f21390eb8e518bcb35))
+* ship a LICENSE in every published tarball, and check what gets packed ([206eaa2](https://github.com/tortuvshin/grove/commit/206eaa267f09d92ea39234b0ed94da67cef8e41e))
+
+
+### Documentation
+
+* catch the product surface up to 0.9.0, and stop it drifting again ([2e645fb](https://github.com/tortuvshin/grove/commit/2e645fb1ed12952051f61a600fb5c9d65c311452))
+* describe the automated release pipeline ([4207eaf](https://github.com/tortuvshin/grove/commit/4207eaf8df526550cb0925d6ec85f268a9038c40))
+
+
+### Chores
+
+* release the new pipeline as 0.10.0 ([6a7f3d2](https://github.com/tortuvshin/grove/commit/6a7f3d2588e0ac05e18cb2dd7ded6bd44d559b4f))
+
 ## [0.9.0] — 2026-09-03
 
 A record can finally say when it joined the directory, and the update
