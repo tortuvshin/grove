@@ -32,4 +32,20 @@ When the scaffold changes, edit files under `packages/registry/default/`. `apps/
 
 Keep commits focused, explain the behavior change, and include the commands used to verify it. Add or update tests for schema, CLI, route, or packaging behavior. Never commit generated site data, build output, secrets, or local editor files.
 
+### Commit messages
+
+Commit subjects are [Conventional Commits](https://www.conventionalcommits.org/), and they are the input to the release. release-please reads them to pick the next version and to write `CHANGELOG.md`, so the subject you write is the changelog line a user reads:
+
+```
+feat(cli): add `grove update --adopt`
+fix(astro): keep the record header legible on narrow viewports
+feat(core)!: drop the deprecated `resourceSchema` export
+```
+
+- `feat:` is a minor bump, `fix:` / `perf:` / `refactor:` a patch, and a trailing `!` or a `BREAKING CHANGE:` footer a major.
+- The scope names the package (`core`, `astro`, `cli`, `starlight`, `registry`), which is how the generated changelog attributes a change.
+- `chore:`, `ci:`, `build:`, `test:`, and `style:` are hidden from the changelog. Use them for work with no user-visible effect — and not for work that has one.
+
+There is no `.changeset/` file to add and no `[Unreleased]` section to edit. See [`apps/docs/RELEASING.md`](./apps/docs/RELEASING.md) for what happens after your commit lands.
+
 MIT-licensed contributions are accepted under the repository license.

@@ -25,9 +25,8 @@ test-tmp-*/
 
 
 # Local Grove state — `grove run` writes timestamped scratch projects
-# under <monorepo>/.grove/run/, and the release script writes a
-# `.release-in-progress` lock file at the repo root. None of this
-# should be committed. (Audit finding #10.)
+# under <monorepo>/.grove/run/. None of this should be committed.
+# (Audit finding #10.)
 #
 # Anchored to the repo root on purpose. A bare `.grove/` matches at
 # every depth, which also swallowed `apps/example/.grove/registry.lock.json`
@@ -37,7 +36,11 @@ test-tmp-*/
 # committed artifact, like a package lock.
 /.grove/
 .worktrees/
-.release-in-progress
+
+# `node scripts/check-packaging.mjs --out packed` — tarballs built to be
+# looked at, never to be committed. CI uploads them as an artifact instead.
+packed/
+*.tgz
 
 # Local scaffold smoke tests — never commit a `grove new` scratch site.
 examples/*/

@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
         # Must run BEFORE setup-node: actions/setup-node@v7 with
@@ -36,12 +36,12 @@ jobs:
         # and errors with "Unable to locate executable file: pnpm" if
         # pnpm isn't on PATH yet. pnpm/action-setup@v6 activates the
         # pinned version via corepack in one step.
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -70,15 +70,15 @@ jobs:
     timeout-minutes: 20
     needs: build
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -108,7 +108,7 @@ jobs:
     # unapproved dependency build script into a hard error, which killed
     # the `pnpm add` inside `shadcn add` and shipped a `grove init` that
     # left every consumer with a package.json and no src/ — invisible to
-    # every job above, all of which pin 10.12.1. This job runs the
+    # every job above, all of which pin 10.34.5. This job runs the
     # consumer path on the newest pnpm so the next such break fails here
     # instead of on someone's machine.
     runs-on: ubuntu-latest
@@ -118,17 +118,17 @@ jobs:
     # unreleased one is a warning, not a merge gate.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
         # The repo's own install stays on the pinned version — only the
         # scaffold the CLI creates is exercised under the newer one.
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -142,7 +142,7 @@ jobs:
       - name: Switch pnpm to the latest release
         # pnpm self-manages versions: inside this repo it re-execs the
         # `packageManager` pin, so test-scaffold.mjs's repo-root steps
-        # keep running on 10.12.1 no matter what is installed here. The
+        # keep running on 10.34.5 no matter what is installed here. The
         # scaffold it creates carries no pin, so everything run inside it
         # — `grove init`'s `pnpm dlx shadcn`, its `pnpm install`, the
         # final `pnpm build` — picks up this version. That is the part
@@ -154,7 +154,7 @@ jobs:
       - name: Run scaffold test
         # `node`, not `pnpm test:scaffold`: a pnpm-run script puts its own
         # pnpm first on the child PATH, so going through the script alias
-        # would silently hand the scaffold 10.12.1 again and this job
+        # would silently hand the scaffold 10.34.5 again and this job
         # would test nothing.
         run: node scripts/test-scaffold.mjs
 
@@ -169,15 +169,15 @@ jobs:
     timeout-minutes: 15
     needs: build
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -204,15 +204,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
-          version: 10.12.1
+          version: 10.34.5
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -232,20 +232,26 @@ jobs:
             exit 1
           fi
 
-      - name: Published packages depend only on publishable packages
-        # `pnpm publish` rewrites `workspace:*` to the dependency's version.
-        # If that dependency is private, the tarball points at a version that
-        # was never released and `npm install` 404s — while the monorepo keeps
-        # working, because pnpm resolves the link locally. The grep this
-        # replaced could never fail: its own `\|workspace:` filter matched
-        # every line the first grep could emit.
+      - name: Published packages are publishable
+        # Two invariants. (1) `pnpm publish` rewrites `workspace:*` to the
+        # dependency's version. If that dependency is private, the tarball
+        # points at a version that was never released and `npm install` 404s —
+        # while the monorepo keeps working, because pnpm resolves the link
+        # locally. The grep this replaced could never fail: its own
+        # `\|workspace:` filter matched every line the first grep could emit.
+        # (2) Every published package carries its own LICENSE and an explicit
+        # `files` array — npm never pulls the root LICENSE into a subpackage
+        # tarball, and a missing `files` packs the whole directory.
         run: node scripts/check-publishable.mjs
 
-      - name: Docs slugs + internal links
+      - name: Docs slugs, internal links, version references
         # Catches broken /guides/... cross-links that would otherwise ship
         # to production (the Starlight build only surfaces them per-page).
         # Sibling to `scripts/check-starlight-sidebar.mjs`; together they
         # implement the v0.5.0 "Strict internal-link lint" roadmap item.
+        # `check-version-refs.mjs` additionally holds the landing page and
+        # roadmap to the released version: those strings are rewritten by
+        # release-please, which fails silently if an annotation is dropped.
         run: pnpm docs:check
 
       - name: Icon set is regenerable
@@ -257,3 +263,51 @@ jobs:
         # run in `pnpm test`; this is the byte-for-byte check that needs
         # the Iconify devDependencies.
         run: pnpm icons:check
+
+  packaging:
+    name: Tarball hygiene
+    # What ships is not what the repo looks like: `pnpm pack` applies the
+    # `files` filter and resolves `workspace:*` to a concrete version. This
+    # job packs all four publishable packages and inspects the tarballs —
+    # LICENSE present, no tests, no build caches, no leftover `workspace:`
+    # ranges — then runs publint and @arethetypeswrong/cli over them.
+    # `@grove-dev/astro` and `@grove-dev/starlight` are advisory-only there:
+    # both export raw `.ts`/`.astro` for Vite to compile, which both tools
+    # correctly report and which is the intended design.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.34.5
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # `@grove-dev/cli`'s build copies `../registry/dist/r` into its own
+      # dist/, so the registry has to be built before the CLI can be packed
+      # into anything resembling the real tarball.
+      - name: Build all workspaces
+        run: pnpm -r build
+
+      - name: Inspect the tarballs
+        run: node scripts/check-packaging.mjs --out packed
+
+      - name: Upload the tarballs
+        # Keeps the exact bytes a reviewer would otherwise have to rebuild
+        # locally to answer "what would this PR publish?".
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: tarballs
+          path: packed/*.tgz
+          retention-days: 14

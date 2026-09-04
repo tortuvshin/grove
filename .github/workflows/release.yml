@@ -1,0 +1,151 @@
+name: Release
+
+# Two jobs, one workflow, on purpose.
+#
+# release-please opens a release pull request; merging it bumps the four
+# package versions, writes CHANGELOG.md, creates the `vX.Y.Z` tag and the
+# GitHub Release. Publishing then has to happen in *this same workflow run*:
+# a tag pushed with `GITHUB_TOKEN` does not trigger another workflow, so a
+# separate tag-triggered publish workflow would sit there and never fire.
+#
+# Authentication is npm trusted publishing (OIDC) — there is no NPM_TOKEN.
+# npm matches the incoming OIDC claim against the trusted publisher configured
+# on each package: owner `tortuvshin`, repo `grove`, workflow file
+# `release.yml`. **Renaming this file breaks publishing** until the four
+# npmjs.com configurations are updated to match.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Tag or SHA to publish (e.g. v0.10.0-rc.1)'
+        required: true
+        type: string
+      dist_tag:
+        description: 'npm dist-tag'
+        required: true
+        default: next
+        type: choice
+        options: [next, latest]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+# Nothing by default. The two jobs below want different things — one writes
+# to the repo, the other mints an OIDC token — so an inherited default would
+# only ever be too much for one of them, and any job added later would start
+# out with a scope nobody chose for it.
+permissions: {}
+
+env:
+  COREPACK_ENABLE_STRICT: 0
+
+jobs:
+  release-please:
+    name: Release PR / tag
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      released: ${{ steps.rp.outputs.release_created }}
+      tag: ${{ steps.rp.outputs.tag_name }}
+    steps:
+      # The release pull request is opened by GITHUB_TOKEN, so CI does not run
+      # on it. Its diff is only version bumps plus CHANGELOG.md; if that ever
+      # stops being true, swap in a PAT here so the PR gets checked.
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+        id: rp
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish to npm
+    needs: [release-please]
+    # `always()` because release-please is skipped on workflow_dispatch, and a
+    # skipped dependency would otherwise skip this job too.
+    if: >-
+      always() &&
+      (needs.release-please.outputs.released == 'true' ||
+       github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      # Job-level, and it has to be: if `id-token` is declared at workflow
+      # level instead, the publish still succeeds and provenance is silently
+      # dropped — the single most common way this pipeline "works" while
+      # producing nothing verifiable.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || needs.release-please.outputs.tag }}
+
+      - name: Setup pnpm
+        # Must run before setup-node, which hashes the pnpm store for its
+        # cache and cannot find pnpm otherwise. This version also has to be
+        # new enough to speak OIDC — 10.12.1 predates npm's trusted
+        # publishing entirely.
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.34.5
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+          # Deliberately no `registry-url`: it writes an .npmrc containing
+          # `_authToken=${NODE_AUTH_TOKEN}`, and that unresolved placeholder
+          # gets sent as a bearer token, which the registry rejects as a
+          # misleading E404 instead of falling through to OIDC.
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -r build
+
+      - name: Published packages are publishable
+        run: node scripts/check-publishable.mjs
+
+      - name: Inspect the tarballs
+        # Last look inside the bytes before they leave the runner: LICENSE
+        # present, no tests, no `workspace:` ranges left unresolved.
+        run: node scripts/check-packaging.mjs
+
+      - name: Publish
+        # `-r` skips private packages (so @grove-dev/registry never goes out)
+        # and skips versions already on the registry, which makes a re-run
+        # after a partial failure safe. `--no-git-checks` because this is a
+        # detached checkout of the tag.
+        run: >-
+          pnpm -r publish
+          --access public
+          --provenance
+          --no-git-checks
+          --tag ${{ github.event_name == 'workflow_dispatch' && inputs.dist_tag || 'latest' }}
+
+      - name: Confirm provenance attached
+        # A publish that succeeds without provenance is the failure mode this
+        # whole pipeline exists to prevent, and npm reports it as success.
+        # Fail loudly here instead of finding out from a user.
+        run: |
+          set -euo pipefail
+          for pkg in core astro cli starlight; do
+            name="@grove-dev/$pkg"
+            version="$(node -p "require('./packages/$pkg/package.json').version")"
+            attestations="$(npm view "$name@$version" dist.attestations --json 2>/dev/null || echo null)"
+            if [ "$attestations" = "null" ] || [ -z "$attestations" ]; then
+              echo "::error::$name@$version published without provenance attestations."
+              exit 1
+            fi
+            echo "$name@$version — provenance OK"
+          done

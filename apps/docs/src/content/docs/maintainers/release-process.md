@@ -1,264 +1,258 @@
 ---
 title: Release process
-description: How a Grove release is cut — version bumps across packages, the publish order, the changelog, and how breaking changes are communicated.
+description: How a Grove release is cut — conventional commits, the release pull request, trusted publishing with provenance, and how breaking changes are communicated.
 ---
 
 This page documents the developer workflow for cutting a release of the
 `@grove-dev/*` packages. If you maintain a *Grove-powered directory*
 (not the framework), see [Governance](/maintainers/governance/) instead.
 
-The release is run by a maintainer with npm publish access. The full
-mechanics are in `scripts/release.mjs`; the narrative is below.
+Releases run in GitHub Actions. Nobody holds a credential that can publish
+a Grove package from a laptop, and every published tarball carries a signed
+attestation naming the commit and workflow run it came from. The mechanics
+are in `.github/workflows/release.yml` and `release-please-config.json`;
+the narrative is below.
 
 ## TL;DR
 
 ```bash
-# 1. Cut a release candidate
-pnpm release --dry-run --minor
+# 1. Land the work with a Conventional Commit subject.
+git commit -m "feat(cli): add \`grove update --adopt\`"
 
-# 2. If the dry-run is clean, run it for real
-pnpm release --minor
+# 2. release-please keeps a release pull request open on main.
+#    Read its diff, then merge it when the batch is worth shipping.
 
-# 3. Push the version-bump commit
-git push --follow-tags
-
-# 4. Write the release notes
-# Open the GitHub release draft, paste the relevant section
-# of CHANGELOG.md, publish.
+# 3. Merging tags vX.Y.Z, publishes the GitHub Release,
+#    and publishes all four packages to npm with provenance.
 ```
 
-## What the release script does
+## The two jobs
 
-`scripts/release.mjs` is the single entrypoint. It does four things,
-in order:
+`.github/workflows/release.yml` contains both halves of a release, and it
+has to: a tag pushed with `GITHUB_TOKEN` does not trigger another workflow,
+so a separate tag-triggered publish workflow would sit there and never fire.
 
-1. **Bumps versions** in the four published package manifests. The
-   default is a patch bump (e.g. `0.6.1 → 0.6.2`); `--minor` and
-   `--major` set the kind, and `--bump=2.3.4` sets an explicit
-   version.
-2. **Builds every package** with `pnpm -r build`. This surfaces any
-   cross-package breakage before publish.
-3. **Publishes every package** in dependency order:
-   `core → astro → cli → starlight` (see
-   `scripts/release.mjs:41-46`).
-4. **Stops on the first failure.** A failed real release keeps
-   `.release-in-progress` and the bumped files for explicit recovery
-   instead of silently double-bumping on a retry.
+**`release-please`** runs on every push to `main`. It reads the Conventional
+Commit subjects since the last release, computes the next version, and keeps
+a release pull request open containing the version bumps and a generated
+`CHANGELOG.md` section. Merging it creates the `vX.Y.Z` tag and the GitHub
+Release.
 
-`--skip-build` and `--skip-bump` are available for advanced flows —
-for example, re-running the publish step after a bump has already
-landed. `NPM_OTP` env or `--otp=<code>` forwards the one-time
-password to `pnpm publish`. No GitHub Actions workflow runs this
-script; every release today is a manual, local invocation by a
-maintainer with npm publish access.
+**`publish`** runs in the same workflow run, gated on
+`release_created == 'true'`. It checks out the tag, builds, runs both
+pre-flight checks, publishes with `pnpm -r publish --provenance`, and then
+asserts that provenance actually attached.
 
 ## The version-bump model
 
-By default, the release script bumps the **four published packages**
-in lockstep: Core, Astro, CLI, and Starlight. This keeps the CLI
-scaffold and its Core/Astro dependencies on one release line.
+The four published packages — Core, Astro, CLI, and Starlight — move in
+lockstep on a single version line. This keeps the CLI scaffold and its
+Core/Astro dependencies on one release line.
 
-`@grove-dev/ui`, `@grove-dev/svelte`, and `@grove-dev/nextjs` do not
-exist in the workspace and have never been published. If you see a
-release note that references one of them, it's stale — file a PR.
+release-please is configured with a **single root component**
+(`release-please-config.json`), not four linked ones. The private root
+`package.json` carries the version; each package manifest is bumped by an
+`extra-files` entry pointing at its `$.version`. That is what produces one
+`CHANGELOG.md` and one `vX.Y.Z` tag instead of four of each.
 
-For published changes:
+`@grove-dev/registry` is deliberately absent: it is `private: true` and
+versioned on its own lifecycle. `@grove-dev/ui`, `@grove-dev/svelte`, and
+`@grove-dev/nextjs` do not exist in the workspace and have never been
+published. If you see a release note that references one of them, it's
+stale — file a PR.
 
-- **Bug fixes and package docs changes** ship as a patch bump
-  (e.g. `0.6.1 → 0.6.2`).
-- **Public API additions** ship as a minor bump (e.g. `0.6.1 → 0.7.0`).
-- **Breaking changes** ship as a major bump (e.g. `0.6.1 → 1.0.0`)
-  with migration notes.
+The commit subject selects the bump:
+
+- **`fix:`, `perf:`, `refactor:`** → patch (e.g. `0.9.0 → 0.9.1`).
+- **`feat:`** → minor (e.g. `0.9.0 → 0.10.0`).
+- **`feat!:`** or a `BREAKING CHANGE:` footer → major, with migration notes.
+
+The scope names the affected package, so `feat(cli):` reads as a CLI change
+in the generated changelog.
+
+## Authentication: there isn't any
+
+Publishing uses **npm trusted publishing** (OIDC). There is no `NPM_TOKEN`
+in the repository, in an environment, or in a maintainer's `~/.npmrc`. Each
+package has a trusted publisher configured on npmjs.com:
+
+| Field | Value |
+| --- | --- |
+| Organization or user | `tortuvshin` |
+| Repository | `grove` |
+| Workflow filename | `release.yml` |
+| Environment | *(blank)* |
+
+Every field is a case-sensitive exact match. **Renaming
+`.github/workflows/release.yml` breaks publishing** until all four npmjs.com
+configurations are updated; the failure surfaces as a `404`, which reads
+like the package does not exist.
+
+Trusted publishing cannot create a package's *first* version. That does not
+affect the four existing packages, but a new fifth package would need one
+manual publish before its trusted publisher can take over.
+
+## Provenance
+
+Every version from **0.10.0 onward** carries a signed provenance attestation.
+
+```bash
+npm view @grove-dev/core@0.10.0 --json | jq '.dist.attestations'
+```
+
+Versions up to and including 0.9.0 have none and **cannot be attested
+retroactively**. They must not be unpublished either — Open Apps and other
+consumers resolve against them.
+
+The publish job checks `dist.attestations` for all four packages and fails
+the run if any comes back null. A publish that drops provenance still
+reports success, and the usual cause is a one-line mistake: `id-token: write`
+must be declared **on the publish job**, not at workflow level where the
+`contents: read` default shadows it.
 
 ## The CHANGELOG
 
-`CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
-and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-The structure:
+`CHANGELOG.md` at the repository root is generated from 0.10.0 onward.
+release-please writes a new section at the top of the file when the release
+pull request is created; the hand-written history below it is untouched.
 
-```markdown
-## [Unreleased]
+Entries up to and including 0.9.0 were written by hand in
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) form, with
+**Packages** lines calling out which of the four a change affected. Newer
+entries carry the same information in the Conventional Commit scope.
 
-## [0.6.0] — 2026-08-16
-### Added
-- `@grove-dev/core`: the JSON-LD registry — `siteSchema`,
-  `breadcrumbSchema`, `collectionSchema`, ...
-### Changed
-- `@grove-dev/astro`: every scaffold page consumes the new `seo`
-  blocks ...
-```
+There is no `[Unreleased]` section any more. Unreleased work lives in the
+open release pull request, where you can read the exact notes that will
+ship. If a commit subject was sloppy, edit the section in that pull
+request — release-please preserves hand edits to what it generated.
 
-(the real structure, from `CHANGELOG.md` at the repo root — as of
-this writing `[Unreleased]` is the working buffer above the `0.6.0`
-entry; there is no `0.6.1` entry yet even though the package
-manifests are already bumped to `0.6.1`, which is expected — the
-CHANGELOG entry lands with the next real release, not with every
-patch to the manifests in between).
-
-The `[Unreleased]` section is the working buffer. PRs that change
-user-visible behaviour add a line to the appropriate `### Added` /
-`### Changed` / `### Fixed` subsection.
-
-The maintainer cutting the release:
-
-1. Renames `[Unreleased]` to the new version + date.
-2. Adds a fresh, empty `[Unreleased]` block above it.
-3. Tags every line with the affected `@grove-dev/*` package(s).
-4. Commits the CHANGELOG as part of the release commit (or as a
-   follow-up commit before the publish).
+`changelogs/*.md` is unaffected and keeps its role: narrative,
+blog-style release write-ups. `CHANGELOG.md` is the mechanical record;
+`changelogs/` is where the story goes.
 
 ## Breaking changes
 
 A breaking change requires more than a major version bump. It requires
 a **migration path**.
 
-The mechanics:
-
 1. **The PR that introduces the breaking change** must include a
    `Migration notes` section in the PR description. The template
    (`.github/PULL_REQUEST_TEMPLATE.md`) has a checkbox for this.
-2. **The release notes** for the major version include a `Migration`
+2. **The commit subject** carries `!` (e.g. `feat(cli)!:`) or a
+   `BREAKING CHANGE:` footer, so release-please selects a major bump and
+   surfaces the note in the changelog.
+3. **The release notes** for the major version include a `Migration`
    section that pulls the PR's notes together.
-3. **The CHANGELOG** marks the breaking change with a `**BREAKING**`
-   prefix in the bullet.
 4. **A deprecation cycle** is preferred to a hard break. Mark the
    old API as `@deprecated` in the JSDoc, ship it in a minor
    release, remove it in the next major.
 5. **A `migration-codemod`** is encouraged for large-scale renames.
-
-## The release commit
-
-The version-bump commit is one commit per release. The script writes
-the new versions to each `packages/*/package.json`; the maintainer
-commits them with a message like:
-
-```
-chore(release): cut X.Y.Z
-
-- @grove-dev/core PREV → X.Y.Z
-- @grove-dev/astro PREV → X.Y.Z
-- @grove-dev/cli PREV → X.Y.Z
-- @grove-dev/starlight PREV → X.Y.Z
-
-See CHANGELOG.md for the user-visible changes.
-```
-
-Tag the release explicitly after publishing; the script does not
-create Git tags.
-
-## The GitHub release
-
-After the publish, the maintainer drafts a GitHub release:
-
-- **Tag:** `vX.Y.Z` — the release script does not create Git tags
-  (see above), so the maintainer creates it locally (`git tag vX.Y.Z`)
-  before `git push --follow-tags`.
-- **Title:** `vX.Y.Z` (or `vX.Y.Z — <one-line summary>`).
-- **Body:** the corresponding section of `CHANGELOG.md`, with the
-  `### Added` / `### Changed` / `### Fixed` sections preserved.
 
 ## Cadence
 
 There is no fixed cadence. The historical pattern is roughly:
 
 - **Patch releases** ship as needed, when a fix is ready.
-- **Minor releases** batch the accumulated `[Unreleased]` changes.
+- **Minor releases** batch the accumulated features.
 - **Major releases** ship when there is a *user-visible* breaking
   change worth the migration.
 
-The `[Unreleased]` section is the backlog. When it grows past ~10
-entries or includes a feature that users are waiting on, it's time
-for a minor release.
+An open release pull request is not a commitment to release. Leave it
+sitting until the batch is worth shipping — the version it proposes updates
+itself as more commits land.
 
 ## What "ready to release" looks like
 
-Before running `pnpm release`, check:
+Before merging the release pull request:
 
-1. **`main` is green.** All CI checks pass on the latest commit.
-2. **`[Unreleased]` is in shape.** Every entry is a real change,
-   scoped to a package, and written in the present tense.
-3. **No half-done migrations.** If a deprecation was added in a
-   previous release, the code that uses it is updated.
-4. **The dry-run is clean.** `pnpm release --dry-run --minor`
-   (or `--patch` / `--major`) runs the build, the bump, and the
-   dry-run publish.
+1. **`main` is green.** All CI checks pass on the commit the release PR is
+   based on. A release that ships with a red main branch is a "yank it"
+   situation, and yanking is a coordination headache. Don't ship on red.
+2. **The diff is only version bumps and `CHANGELOG.md`.** Anything else
+   means a misconfigured `extra-files` entry.
+3. **The proposed version is the one you expect.** A surprise major usually
+   means a stray `!` in a commit subject.
+4. **No half-done migrations.** If a deprecation was added in a previous
+   release, the code that uses it is updated.
+5. **The `Tarball hygiene` job passed** and its `tarballs` artifact contains
+   what you expect.
 
-A release that ships with a red main branch is a "yank it" situation.
-The npm registry supports unpublishing within 72 hours, but it's a
-coordination headache. Don't ship on red.
+## The pre-flight checks
+
+Both run in PR CI and again in the publish job:
+
+- **`scripts/check-publishable.mjs`** — no published package may
+  runtime-depend on a private workspace package, and every published package
+  carries its own `LICENSE` plus an explicit `files` array. The first
+  invariant is how `@grove-dev/cli` once shipped a hard dependency on the
+  unpublished `@grove-dev/registry`. The second is why every tarball up to
+  0.9.0 declared `"license": "MIT"` with no license text inside it: npm's
+  automatic license inclusion only looks inside the directory being packed,
+  never at the monorepo root.
+- **`scripts/check-packaging.mjs`** — packs all four packages and inspects
+  the tarballs: `LICENSE` present, no test files, no build caches, no
+  `workspace:` ranges left unresolved in the shipped manifest. Then
+  `publint` and `@arethetypeswrong/cli`, gating on `core` and `cli` and
+  advisory on `astro` and `starlight`, which deliberately export raw
+  `.ts`/`.astro` source for Vite to compile.
+
+Run them locally with `node scripts/check-publishable.mjs` and
+`pnpm packaging:check`. Add `--out packed` to the latter to keep the
+tarballs around for inspection.
+
+## Release candidates
+
+`workflow_dispatch` on the Release workflow runs the publish job alone,
+against a ref you name:
+
+```bash
+git tag -a v0.11.0-rc.1 -m "v0.11.0-rc.1" && git push origin v0.11.0-rc.1
+gh workflow run release.yml -f ref=v0.11.0-rc.1 -f dist_tag=next
+```
+
+`dist_tag` defaults to `next`. npm publishes to `latest` unless told
+otherwise, including for prerelease versions — dispatching a release
+candidate with `latest` would hand every `npm install @grove-dev/core` a
+release candidate.
 
 ## What goes wrong, and what to do
 
-- **A package fails to publish mid-script.** Inspect
-  `.release-in-progress`, the registry, and the bumped files.
-- **`pnpm publish` asks for an OTP.** The script reads `NPM_OTP`
-  from the env or `--otp=<code>` from the CLI.
-- **The build fails on a package you didn't expect.** A cross-package
-  change broke the build of an adapter you didn't touch. Fix the
-  regression, commit, re-run the release from the top.
-- **A user reports a regression within hours of a release.** The
-  fastest fix is a patch release with the regression fix.
+- **A package fails to publish mid-job.** Re-run the job. `pnpm -r publish`
+  skips versions already on the registry, so a partial publish resolves
+  itself rather than needing manual publishes of the remainder.
+- **`404` at the publish step.** The OIDC claim did not match. In order of
+  likelihood: the workflow filename on npmjs.com no longer matches this
+  file, `id-token: write` is missing from the publish job, or an environment
+  name is configured on npmjs.com that the workflow does not set.
+- **The provenance assertion fails.** The publish succeeded but nothing was
+  attested. Same causes as above; the version is already on npm and cannot
+  be re-published, so fix the workflow and ship the next patch.
+- **The build fails on a package you didn't expect.** A cross-package change
+  broke the build of a package you didn't touch. Fix the regression on
+  `main`; the release PR picks it up.
+- **A user reports a regression within hours of a release.** The fastest fix
+  is a patch release with the regression fix.
 
-## Considering Changesets
+## Why release-please and not Changesets
 
-Grove currently uses a hand-rolled `scripts/release.mjs` for the
-reason that the four published packages (`core`, `astro`, `cli`,
-`starlight`) always release together as a single version line.
-[Changesets](https://github.com/changesets/changesets) is the
-de-facto standard for JS package releases; we evaluated it.
+Both were considered. The deciding factor is author friction against what
+Grove actually needs.
 
-### Why we did not adopt Changesets (yet)
+- **Single version line.** Grove's four packages move together. Changesets
+  bumps each package independently by default, producing four diffs and four
+  changelogs to reconcile. release-please's single-root-component
+  configuration produces one of each.
+- **No per-PR ceremony.** Changesets requires a `.changeset/*.md` file in
+  every PR that touches a public API. Grove's commit subjects have been
+  Conventional Commits from the start, so release-please reads the intent
+  that is already there rather than asking for it a second time.
+- **One CHANGELOG.md.** The repository publishes one changelog, not
+  per-package. That is release-please's default shape here and Changesets'
+  non-default one.
 
-- **Single-version line.** Grove's packages move together. A
-  Changesets workflow that bumps each package independently
-  produces four diffs and four changelogs to reconcile, where
-  `scripts/release.mjs` produces one.
-- **Author friction.** Changesets requires a `.changeset/*.md`
-  file in every PR that touches a public API — an extra step that
-  doesn't pay for itself for a small maintainer team on a single
-  version line.
-- **Single CHANGELOG.md.** The repository publishes one
-  CHANGELOG.md, not per-package. Changesets' per-package
-  changelog files would have to be aggregated by the release
-  script — adding the work it removes.
-
-### What we will re-evaluate
-
-- **Multi-version lines.** If a package splits off (say,
-  `@grove-dev/starlight` ships independently), Changesets
-  becomes the better fit.
-- **External contributors.** If the maintainer team grows to > 5
-  and a Changesets bot removes the "who bumps the version"
-  conversation, the trade-off shifts.
-- **Dependents.** If other packages in the JS ecosystem start
-  depending on individual Grove packages with their own release
-  schedules, per-package versions matter.
-
-### Migration plan
-
-The migration from `scripts/release.mjs` to Changesets is
-mechanical:
-
-1. `pnpm add -Dw @changesets/cli` (and `@changesets/changelog-github`).
-2. Add `.changeset/config.json` with the linked-package preset:
-   ```json
-   {
-     "linked": [
-       ["@grove-dev/core", "@grove-dev/astro", "@grove-dev/cli", "@grove-dev/starlight"]
-     ]
-   }
-   ```
-3. Add a `version-packages` workflow (`changesets/action`) on push
-   to `main`.
-4. Add a `publish-packages` workflow that runs `pnpm publish` after
-   the version PR merges.
-5. Retire `scripts/release.mjs`.
-
-The CHANGELOG.md can stay (Changesets can be configured to
-aggregate into a single file) or split per-package (the default).
-
-For now, the hand-rolled script is fine; the migration is a
-day's work when the trade-off shifts.
+This would be re-evaluated if a package split off onto its own release
+schedule — `@grove-dev/starlight` is the plausible candidate — since
+per-package versions are where Changesets earns its overhead.
 
 ## What is not in the release process
 
@@ -267,6 +261,8 @@ day's work when the trade-off shifts.
   `@grove-dev/*` packages. A docs change does not require a release.
 - **The example application (`apps/example/`)** is not published
   independently; `@grove-dev/cli` bundles it as the init scaffold.
+- **`@grove-dev/registry`** is private, versioned independently, and reaches
+  consumers through the docs site and the copy baked into the CLI tarball.
 - **The CLI itself** does not self-update. A user stays on the
   installed version until they run `pnpm dlx @grove-dev/cli@latest`
   again.
