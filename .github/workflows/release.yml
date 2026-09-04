@@ -34,8 +34,11 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-permissions:
-  contents: read
+# Nothing by default. The two jobs below want different things — one writes
+# to the repo, the other mints an OIDC token — so an inherited default would
+# only ever be too much for one of them, and any job added later would start
+# out with a scope nobody chose for it.
+permissions: {}
 
 env:
   COREPACK_ENABLE_STRICT: 0
@@ -56,7 +59,7 @@ jobs:
       # The release pull request is opened by GITHUB_TOKEN, so CI does not run
       # on it. Its diff is only version bumps plus CHANGELOG.md; if that ever
       # stops being true, swap in a PAT here so the PR gets checked.
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: rp
         with:
           config-file: release-please-config.json
@@ -74,15 +77,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      # Job-level, not workflow-level. The workflow default above is
-      # `contents: read`; if id-token is only declared there, the publish
-      # still succeeds and provenance is silently dropped — which is the
-      # single most common way this pipeline "works" while producing nothing
-      # verifiable.
+      # Job-level, and it has to be: if `id-token` is declared at workflow
+      # level instead, the publish still succeeds and provenance is silently
+      # dropped — the single most common way this pipeline "works" while
+      # producing nothing verifiable.
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || needs.release-please.outputs.tag }}
 
@@ -91,12 +93,12 @@ jobs:
         # cache and cannot find pnpm otherwise. This version also has to be
         # new enough to speak OIDC — 10.12.1 predates npm's trusted
         # publishing entirely.
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 10.34.5
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm

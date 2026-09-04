@@ -115,15 +115,18 @@ the `README.md` sentinel block (`grove readme generate`).
 
 ### Audit findings from the post-launch review
 
-The internal audit catalogue still lists verified items the shipped surface
-does not address — third-party action SHA pinning among them. Each release
-closes as many as fit; the rest carry forward enumerated rather than
-dropped.
+The internal audit catalogue carries verified items forward, enumerated
+rather than dropped, and each release closes as many as fit. The two
+supply-chain items are now closed:
 
-OIDC trusted publishing is closed: releases run from
-`.github/workflows/release.yml`, no npm token exists in the repository, and
-every version from 0.10.0 onward carries a provenance attestation. See
-[Release process](/maintainers/release-process/).
+- **OIDC trusted publishing.** Releases run from
+  `.github/workflows/release.yml`; no npm token exists in the repository,
+  and every version from 0.10.0 onward carries a provenance attestation.
+  See [Release process](/maintainers/release-process/).
+- **Third-party action SHA pinning.** Every `uses:` in every workflow is
+  pinned to a commit SHA with the version as a trailing comment. Dependabot
+  tracks `github-actions` and updates the pins, so the version comments stay
+  accurate without hand maintenance.
 
 ## Later — directional
 
