@@ -13,7 +13,7 @@
     "build": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r build && pnpm --dir apps/example build",
     "check": "pnpm --filter @grove-dev/core --filter @grove-dev/astro --filter @grove-dev/cli -r check && pnpm --dir apps/example check",
     "packaging:check": "node scripts/check-packaging.mjs",
-    "docs:check": "node scripts/check-docs-contract.mjs && node scripts/check-starlight-sidebar.mjs --check-orphans && node scripts/check-starlight-internal-links.mjs",
+    "docs:check": "node scripts/check-version-refs.mjs && node scripts/check-docs-contract.mjs && node scripts/check-starlight-sidebar.mjs --check-orphans && node scripts/check-starlight-internal-links.mjs",
     "icons:sync": "node scripts/sync-icons.mjs",
     "icons:check": "node scripts/sync-icons.mjs --check",
     "registry:build": "pnpm --filter @grove-dev/registry build",

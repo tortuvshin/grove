@@ -1,6 +1,6 @@
 ---
 title: Roadmap
-description: What Grove 0.6.1 ships today, what is being worked on, what may happen later, and what will never be built.
+description: What Grove ships today, what is being worked on, what may happen later, and what will never be built.
 ---
 
 This page is the shipping state, not a schedule. It is grouped by status:
@@ -11,7 +11,9 @@ For per-version detail, read
 [`CHANGELOG.md`](https://github.com/tortuvshin/grove/blob/main/CHANGELOG.md)
 at the repo root.
 
-## Shipped — `0.6.1`
+<!-- x-release-please-start-version -->
+## Shipped — `0.9.0`
+<!-- x-release-please-end -->
 
 Four packages, released in lockstep at the same version.
 
@@ -19,8 +21,12 @@ Four packages, released in lockstep at the same version.
 |---|---|
 | `@grove-dev/core` | Schema, config, importers, validation, taxonomy, sync, the build pipeline, the awesome-list README generator, and the audit budget |
 | `@grove-dev/cli` | The `grove` command |
-| `@grove-dev/astro` | The renderer — 33 components, 7 layouts, and the server-side view models |
+| `@grove-dev/astro` | The Astro integration and the server-side view models. It ships no `.astro` components or layouts — those moved to the registry in 0.8.0 |
 | `@grove-dev/starlight` | The Starlight theme plugin this documentation site runs on |
+
+A fifth workspace package, `@grove-dev/registry`, is the canonical UI
+source. It is `private: true`, is never published to npm, and is versioned
+on its own line — see [The registry](#the-registry) below.
 
 `@grove-dev/ui`, `@grove-dev/svelte`, and `@grove-dev/nextjs` do not exist
 in the workspace and have never been published.
@@ -32,13 +38,37 @@ Astro is the only renderer. `pnpm dev` and `pnpm build` are `astro dev` and
 `astro:config:setup` and runs the whole data pipeline from there, so a
 build needs no prebuild script of its own.
 
+### The registry
+
+The UI a space renders is not imported from a package — it is installed
+into the space's own `src/` and owned there, shadcn-style.
+`@grove-dev/registry` builds the items, the docs site serves them at
+`https://withgrove.dev/r/<item>.json`, and `@grove-dev/cli` bakes a
+snapshot of the same items into its own tarball so `grove init` works
+without a network round-trip to the docs site.
+
+`grove init` installs `@grove/default`, which inlines every item.
+Individual items (`@grove/browse`, `@grove/record`, …) install through
+`shadcn add @grove/<item>` with their dependency chain resolved.
+
+`grove update` reconciles an installed scaffold against upstream: it diffs
+the registry against what is in the space, and **never overwrites a file
+the space has modified**. `.grove/registry.lock.json` is the install-time
+snapshot it diffs against, and it is a committed artifact — like a package
+lock. `--adopt` re-opens the update channel for a space whose lockfile
+went missing.
+
+`apps/example` mirrors the generated `default` scaffold byte-for-byte,
+enforced in CI, so the reference consumer and the registry cannot drift.
+
 ### CLI surface
 
-Nine top-level commands:
+Ten top-level commands:
 
 ```
 grove init [directory] [--no-install] [--no-git]
 grove check [--strict]
+grove update [--adopt] [--diff] [--dry-run]
 grove sync github [--limit N] [--strict]
 grove sync contributors [--strict]
 grove cleanup [--strict]
@@ -86,9 +116,14 @@ the `README.md` sentinel block (`grove readme generate`).
 ### Audit findings from the post-launch review
 
 The internal audit catalogue still lists verified items the shipped surface
-does not address — third-party action SHA pinning and OIDC trusted
-publishing among them. Each release closes as many as fit; the rest carry
-forward enumerated rather than dropped.
+does not address — third-party action SHA pinning among them. Each release
+closes as many as fit; the rest carry forward enumerated rather than
+dropped.
+
+OIDC trusted publishing is closed: releases run from
+`.github/workflows/release.yml`, no npm token exists in the repository, and
+every version from 0.10.0 onward carries a provenance attestation. See
+[Release process](/maintainers/release-process/).
 
 ## Later — directional
 

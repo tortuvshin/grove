@@ -79,6 +79,7 @@ Grove prepares generated artifacts automatically before `astro dev`,
 
 ```bash
 pnpm exec grove check               # validate sources and rebuild outputs
+pnpm exec grove update              # take upstream UI changes, keeping local edits
 pnpm exec grove sync github         # refresh repository metadata
 pnpm exec grove sync contributors   # refresh community metadata
 pnpm exec grove cleanup             # write the human-review queue
@@ -164,23 +165,31 @@ system underneath it.
 ```text
 packages/
   core/       framework-free schemas, validation, generation, and maintenance
-  astro/      Astro integration, data adapters, components, and layouts
+  astro/      Astro integration, data adapters, and server view models
   cli/        project creation and maintenance commands
+  registry/   the UI source `grove init` installs and `grove update` reconciles
   starlight/  Grove's documentation theme and integration
 apps/
-  example/    canonical working site and the only source for `grove init`
+  example/    reference consumer; mirrors the generated scaffold byte-for-byte
   docs/       product site and documentation at withgrove.dev
 ```
 
 | Package                                      | Role                                                                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | [`@grove-dev/core`](packages/core)           | Config, schemas, validation, generated data, collections, health, sitemap, AI outputs, and maintenance logic. |
-| [`@grove-dev/astro`](packages/astro)         | Astro integration, generated-data adapters, server view models, and composable UI.                            |
+| [`@grove-dev/astro`](packages/astro)         | Astro integration, generated-data adapters, and server view models. Ships no components — UI lives in the registry. |
 | [`@grove-dev/cli`](packages/cli)             | Scaffolding, checks, synchronization, cleanup, imports, audits, icons, collections, and README generation.    |
 | [`@grove-dev/starlight`](packages/starlight) | The Starlight theme and documentation integration used by Grove.                                              |
 
-There is no template registry or hidden hosted backend. The CLI packages a
-release snapshot of `apps/example`, keeping the project users create aligned
+`@grove-dev/registry` is a fifth workspace package. It is private and never
+published to npm; its built items are served from the docs site and baked
+into the CLI tarball.
+
+There is no hidden hosted backend. The UI a space renders is installed into
+that space's own `src/` and owned there — `grove init` writes it, and
+`grove update` reconciles it against upstream without ever overwriting a
+file the space has modified. `apps/example` mirrors the generated scaffold
+byte-for-byte, enforced in CI, so the project users create stays aligned
 with the site this repository builds and tests.
 
 ## Develop Grove

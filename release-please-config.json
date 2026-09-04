@@ -24,7 +24,10 @@
         { "type": "json", "path": "packages/core/package.json", "jsonpath": "$.version" },
         { "type": "json", "path": "packages/astro/package.json", "jsonpath": "$.version" },
         { "type": "json", "path": "packages/cli/package.json", "jsonpath": "$.version" },
-        { "type": "json", "path": "packages/starlight/package.json", "jsonpath": "$.version" }
+        { "type": "json", "path": "packages/starlight/package.json", "jsonpath": "$.version" },
+        { "type": "generic", "path": "apps/docs/src/components/home/Hero.astro" },
+        { "type": "generic", "path": "apps/docs/src/layouts/HomeLayout.astro" },
+        { "type": "generic", "path": "apps/docs/src/content/docs/project/roadmap.md" }
       ]
     }
   }

@@ -244,11 +244,14 @@ jobs:
         # tarball, and a missing `files` packs the whole directory.
         run: node scripts/check-publishable.mjs
 
-      - name: Docs slugs + internal links
+      - name: Docs slugs, internal links, version references
         # Catches broken /guides/... cross-links that would otherwise ship
         # to production (the Starlight build only surfaces them per-page).
         # Sibling to `scripts/check-starlight-sidebar.mjs`; together they
         # implement the v0.5.0 "Strict internal-link lint" roadmap item.
+        # `check-version-refs.mjs` additionally holds the landing page and
+        # roadmap to the released version: those strings are rewritten by
+        # release-please, which fails silently if an annotation is dropped.
         run: pnpm docs:check
 
       - name: Icon set is regenerable
