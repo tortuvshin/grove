@@ -306,7 +306,7 @@ jobs:
       - name: Upload the tarballs
         # Keeps the exact bytes a reviewer would otherwise have to rebuild
         # locally to answer "what would this PR publish?".
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: tarballs
           path: packed/*.tgz
