@@ -223,6 +223,14 @@ export type { ParsedEntry, ParsedSection } from './parseReadme.js';
 export { parseEntry, parseSections } from './parseReadme.js';
 export type { PrepareDirectoryResult } from './prepare.js';
 export { prepareDirectory } from './prepare.js';
+export type {
+  ReadmeHealthEntryResult,
+  ReadmeHealthReport,
+  ReadmeHealthSummary,
+  RunReadmeHealthCheckOptions,
+} from './readme-health.js';
+// ── README health: batch orchestration (candidates → evidence → health) ──
+export { runReadmeHealthCheck } from './readme-health.js';
 export { findRelated } from './related.js';
 export type {
   RepositoryHealthConfidence,
