@@ -59,7 +59,7 @@ jobs:
       # The release pull request is opened by GITHUB_TOKEN, so CI does not run
       # on it. Its diff is only version bumps plus CHANGELOG.md; if that ever
       # stops being true, swap in a PAT here so the PR gets checked.
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: rp
         with:
           config-file: release-please-config.json
