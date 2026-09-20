@@ -74,7 +74,7 @@ export default defineConfig({
       // from the home header as the Docs entry.
       title: 'Grove',
       description:
-        'Grove is a file-first publishing system for structured knowledge. Source files in, many useful outputs out — web pages, llms.txt, sitemap, JSON-LD, OG images, JSON datasets.',
+        'Grove is a file-first framework for curated directories and catalogs, built on Astro. Records in YAML and Markdown in; a searchable site, llms.txt, sitemap, JSON-LD, OG images, and JSON datasets out.',
       logo: {
         replacesTitle: false,
         alt: 'Grove',
@@ -182,14 +182,14 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             property: 'og:image:alt',
-            content: 'Grove — The framework for community knowledge',
+            content: 'Grove — the open-source directory framework for Astro',
           },
         },
         {
           tag: 'meta',
           attrs: {
             name: 'twitter:image:alt',
-            content: 'Grove — The framework for community knowledge',
+            content: 'Grove — the open-source directory framework for Astro',
           },
         },
         // JSON-LD WebSite schema (organization + search action) on
@@ -204,7 +204,7 @@ export default defineConfig({
             name: 'Grove',
             url: 'https://withgrove.dev',
             description:
-              'Grove is an open-source framework for growing useful community knowledge — collect, structure, maintain, and improve the projects, tools, resources, and knowledge a community relies on.',
+              'Grove is an open-source framework for building curated directories and catalogs from files — project directories, awesome lists, and resource sites, with search, taxonomy, collections, GitHub sync, SEO, and machine-readable outputs.',
             inLanguage: 'en',
             publisher: {
               '@type': 'Organization',

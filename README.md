@@ -2,11 +2,13 @@
 
 # 🌱 Grove
 
-**Maintain structured knowledge in files. Publish it everywhere. Keep it in sync.**
+**Build a curated directory from files. Publish it everywhere. Keep it in sync.**
 
-Grove turns YAML, Markdown, and other user-owned sources into fast websites,
-curated collections, repository content, SEO metadata, and machine-readable
-outputs. No database, no CMS, and no runtime server required.
+Grove is an open-source Astro framework for project directories, open-source
+catalogs, and curated resource sites. Keep records in YAML and Markdown; Grove
+generates the searchable site, detail pages, collections, README lists, SEO
+metadata, GitHub-enriched data, and machine-readable outputs. No database, no
+CMS, and no runtime server required.
 
 [![npm](https://img.shields.io/npm/v/@grove-dev/cli?label=%40grove-dev%2Fcli&color=0f766e&style=flat-square)](https://www.npmjs.com/package/@grove-dev/cli)
 [![CI](https://img.shields.io/github/actions/workflow/status/tortuvshin/grove/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/tortuvshin/grove/actions/workflows/ci.yml)

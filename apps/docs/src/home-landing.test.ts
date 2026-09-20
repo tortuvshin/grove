@@ -15,11 +15,12 @@ describe('docs homepage (standalone Astro route)', () => {
 
     const indexAstro = await readFile(indexAstroPath, 'utf8');
 
-    // Imports the home layout and all 9 section components from src/components/home/
+    // Imports the home layout and every section component from src/components/home/
     expect(indexAstro).toContain("import Layout from '../layouts/HomeLayout.astro'");
     for (const name of [
       'Header',
       'Hero',
+      'Audience',
       'Features',
       'Demo',
       'OpenApps',
@@ -30,11 +31,12 @@ describe('docs homepage (standalone Astro route)', () => {
       expect(indexAstro).toContain(`import ${name} from '../components/home/${name}.astro'`);
     }
 
-    // Renders every section in the vite.dev-style order: hero (which now
-    // carries the transformation diagram in its right column) → feature
-    // grid → live demo → production story → FAQ → gradient CTA band.
+    // Renders every section in message order — what it is, who it is for,
+    // the pain, how it works, the proof, then the start: hero (which
+    // carries the transformation diagram in its right column) → built for
+    // → feature grid → live demo → production story → FAQ → CTA band.
     expect(indexAstro).toMatch(
-      /<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
+      /<Header\s*\/>\s*<main id="main-content">\s*<Hero\s*\/>\s*<Audience\s*\/>\s*<Features\s*\/>\s*<Demo\s*\/>\s*<OpenApps\s*\/>\s*<Faq\s*\/>\s*<FinalCta\s*\/>\s*<\/main>\s*<Footer\s*\/>/,
     );
 
     // Superseded sections from earlier iterations must stay deleted.
@@ -157,15 +159,20 @@ describe('docs homepage (standalone Astro route)', () => {
     // Micro badge + positioning line, closing phrase in the animated
     // signature gradient.
     expect(hero).toContain('Open source');
-    expect(hero).toContain('Publish structured knowledge');
-    expect(hero).toContain('that stays current.');
+    expect(hero).toContain('Build a curated directory');
+    expect(hero).toContain('from files.');
     expect(hero).toContain('text-gradient-live');
 
-    // Positioned as file-first publishing, with a directory as one example
-    // among several — not as a directory builder. See CLAUDE.md.
-    expect(hero).toContain('Directories, catalogs, handbooks, reference sites');
-    expect(hero).toContain('machine-readable output');
-    expect(hero).not.toContain('Build directories');
+    // The front door is the directory a maintainer came to build; the
+    // file-first model is what the subhead explains. See CLAUDE.md, "How
+    // Grove is positioned". The first fold names the input and the
+    // outputs, and does not widen to the use cases Grove only could serve.
+    expect(hero).toContain('project directories, open-source catalogs, and curated resource sites');
+    expect(hero).toContain('YAML and Markdown');
+    expect(hero).toContain('machine-readable outputs');
+    for (const widened of ['knowledge base', 'content hub', 'publishing platform', 'CMS for']) {
+      expect(hero, widened).not.toContain(widened);
+    }
 
     // Three calls to action pointing at real destinations. The install
     // command is deliberately not one of them — it belongs in the docs,
@@ -203,8 +210,10 @@ describe('docs homepage (standalone Astro route)', () => {
     const features = await readComponent('Features');
 
     expect(features).toContain('id="features"');
-    expect(features).toContain('Write it once.');
-    expect(features).toContain('Publish it everywhere.');
+    // The pain, in the maintainer's words, before the feature list.
+    expect(features).toContain('Stop maintaining your directory');
+    expect(features).toContain('in five places.');
+    expect(features).toContain('one source of truth in Git');
     expect(features).not.toContain('directory maintenance');
 
     // Eight benefit-first cards; each maps to shipped behavior.
@@ -381,7 +390,7 @@ describe('docs homepage (standalone Astro route)', () => {
   it('keeps the Open Apps production story with a real product screenshot', async () => {
     const openApps = await readComponent('OpenApps');
 
-    expect(openApps).toContain('Grove grew out of maintaining Open Apps.');
+    expect(openApps).toContain('Open App Scout is built with Grove.');
     expect(openApps).toContain('id="open-apps"');
 
     // The live space is openappscout.com, in both the links and the mock
@@ -433,7 +442,7 @@ describe('docs homepage (standalone Astro route)', () => {
   it('closes with a full-bleed gradient CTA band and a package-manager tabbed install command', async () => {
     const finalCta = await readComponent('FinalCta');
 
-    expect(finalCta).toContain('Start growing with Grove.');
+    expect(finalCta).toContain('Start your directory with Grove.');
     expect(finalCta).toContain('cta-gradient');
     expect(finalCta).toContain('href="/getting-started/scaffold/"');
     expect(finalCta).toContain('href="https://github.com/tortuvshin/grove"');
@@ -460,7 +469,7 @@ describe('docs homepage (standalone Astro route)', () => {
     expect(hero).toMatch(/<section[^>]+aria-labelledby=/);
     expect(hero).toMatch(/<h1[^>]+id=/);
 
-    for (const name of ['Features', 'Demo', 'OpenApps', 'Faq', 'FinalCta']) {
+    for (const name of ['Audience', 'Features', 'Demo', 'OpenApps', 'Faq', 'FinalCta']) {
       const src = await readComponent(name);
       expect(src, name).toMatch(/<section[^>]+aria-labelledby=/);
     }
@@ -538,7 +547,7 @@ describe('docs homepage (standalone Astro route)', () => {
     expect(home).toContain('rel="sitemap"');
     expect(home).toContain('href="/llms.txt"');
     // Social alt text follows the positioning brand line.
-    expect(home).toContain('Grove — Publish structured knowledge that stays current');
+    expect(home).toContain('Grove – Open Source Directory Framework for Astro');
 
     // Starlight head config wires the same metadata via object literals so
     // Starlight content pages render the same preview cards. We only assert
@@ -611,9 +620,10 @@ describe('docs homepage (standalone Astro route)', () => {
     expect(faq).toMatch(/faqs\.map/);
 
     const faqData = await readFile(resolve(docsRoot, 'src/data/faq.ts'), 'utf8');
-    // Six Q&A pairs in the shared module.
+    // Seven Q&A pairs in the shared module, opening with "What is Grove?".
+    expect(faqData).toContain("q: 'What is Grove?'");
     const itemCount = (faqData.match(/\bq:\s*['"]/g) ?? []).length;
-    expect(itemCount).toBe(6);
+    expect(itemCount).toBe(7);
 
     const homeLayout = await readFile(resolve(docsRoot, 'src/layouts/HomeLayout.astro'), 'utf8');
     // FAQPage schema.org block is emitted, sourced from the same module.

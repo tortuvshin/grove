@@ -17,6 +17,10 @@ export interface FaqItem {
 
 export const FAQ_ITEMS: ReadonlyArray<FaqItem> = [
   {
+    q: 'What is Grove?',
+    a: 'A file-first framework for building curated directories and catalogs with Astro. You keep records in YAML and Markdown; Grove generates the website, taxonomy pages, collections, SEO metadata, GitHub-enriched data, and machine-readable outputs — and keeps them in sync as the files change.',
+  },
+  {
     q: 'Is Grove a CMS?',
     a: 'No. Grove is a build-time framework. Your content lives as YAML files in your repository, not in a database. There is no admin UI to maintain — editors open pull requests like any other code change, and the framework generates the static site on every merge.',
   },

@@ -1,0 +1,36 @@
+---
+// "Built for" — the second thing a visitor needs after the headline:
+// whether the thing they maintain is the thing Grove is for. Three
+// shapes, each named the way its maintainer would name it. Deliberately
+// no icons and no hover state: this is a label row, not a feature grid.
+const audiences = [
+  {
+    title: 'Open-source directories',
+    body: 'Projects, frameworks, self-hosted apps, packages — listed with live stars, activity, releases, and license from GitHub.',
+  },
+  {
+    title: 'Curated resource sites',
+    body: 'An awesome list that outgrew its README: tools, datasets, and learning resources with search, filters, and a page per entry.',
+  },
+  {
+    title: 'Technical catalogs',
+    body: 'Public or internal inventories backed by a Git repository, where a change is a pull request and the history is the audit log.',
+  },
+];
+---
+
+<section id="built-for" class="relative border-t border-border/60" aria-labelledby="built-for-title">
+  <div class="mx-auto max-w-6xl px-6 py-14 sm:py-16">
+    <h2 id="built-for-title" class="text-xs font-semibold uppercase tracking-widest text-subtle">
+      Built for
+    </h2>
+    <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+      {audiences.map((audience) => (
+        <article class="rounded-xl border border-border bg-card p-6">
+          <h3 class="text-base font-semibold text-fg">{audience.title}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-muted">{audience.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
