@@ -217,8 +217,9 @@ describe('SEO + page-structure parity', () => {
     'categories/interfaces/index.html',
     'categories/local-models/index.html',
     'categories/orchestration/index.html',
+    // Only licenses a record actually uses get a page — an unused term
+    // (apache-2.0 here) is deliberately not built, so it is not listed.
     'licenses/mit/index.html',
-    'licenses/apache-2.0/index.html',
     'about/index.html',
     'contributors/index.html',
     'submit/index.html',
