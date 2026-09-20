@@ -5,7 +5,9 @@ description: Common questions about Grove — what it is, how it works, and how 
 
 ## What is Grove?
 
-Grove is a **file-first publishing system for structured knowledge**. You write YAML records and Markdown bodies; Grove produces a website, an `llms.txt`, a sitemap, JSON-LD, OG images, and other machine-readable artifacts from those sources. It's a directory builder, but also a knowledge-base generator, a content hub, and an LLM-oriented publishing system — all driven by files you control.
+Grove is a **file-first framework for building curated directories and catalogs with Astro**. You keep records in YAML and Markdown; Grove generates the website, taxonomy pages, collections, SEO metadata, GitHub-enriched data, and machine-readable outputs such as `llms.txt`, a sitemap, JSON-LD, and OG images.
+
+Underneath, that is file-first publishing of structured knowledge: one set of source files, many outputs, kept in sync. The data layer can support broader structured-publishing use cases, but directories are the primary product surface today — see [Introduction](/introduction/) for the model.
 
 ## Is Grove a static site generator?
 

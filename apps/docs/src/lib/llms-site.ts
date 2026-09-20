@@ -6,7 +6,7 @@ export const DOCS_SITE: LlmsSite = {
   name: 'Grove',
   url: 'https://withgrove.dev',
   description:
-    'Grove is a file-first publishing system for structured knowledge. Source files in, many useful outputs out — web pages, llms.txt, sitemap, JSON-LD, OG images, JSON datasets.',
+    'Grove is a file-first framework for curated directories and catalogs, built on Astro. Records in YAML and Markdown in; a searchable site, llms.txt, sitemap, JSON-LD, OG images, and JSON datasets out.',
 };
 
 export function toLlmsPage(entry: CollectionEntry<'docs'>): LlmsPage {

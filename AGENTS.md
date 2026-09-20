@@ -22,17 +22,26 @@ Automation keeps these outputs synchronized with the source files and reduces st
 - Static-first workflows are the default.
 - Avoid adding infrastructure (databases, servers, abstractions) without a real use case.
 
+## How Grove is positioned
+
+Grove has one model and one front door.
+
+- **The model** — what Grove is: file-first publishing of structured knowledge. Source files → Grove → many outputs → ongoing maintenance.
+- **The front door** — what people come for: curated directories and catalogs. Open-source project directories, awesome lists that outgrew a README, curated resource sites, technical catalogs.
+
+Nobody searches for a "structured knowledge publishing system". They search for a way to build and maintain a directory. So market-facing surfaces — the landing hero, site title and meta description, the README lead, "What is Grove?" — lead with the front door, in the words a maintainer would use: _build a curated directory from files_. The model is the explanation underneath, and it stays whole in the Introduction, the concept docs, and every "how it works" section.
+
 ## What Grove is not
 
-A directory is one possible use case — not the product definition.
+Do not position Grove as a:
 
-Do not position Grove primarily as a:
-
-- directory starter, generator, or template
+- CMS or database-backed directory service
 - YAML website builder
 - Astro theme
 
-When writing product copy, describe what Grove **enables** — file-first publishing of structured knowledge into multiple outputs — not just one presentation format.
+Do not widen the first fold to "knowledge base", "content hub", or "LLM publishing platform". The data layer supports more than directories; say so once, further down the page, not in the pitch.
+
+The directory framing is for copy, not for architecture. Engine packages stay use-case neutral — see the guardrails below.
 
 ## Architecture guardrails
 
@@ -50,10 +59,12 @@ Do not turn Grove into a traditional CMS or generic platform unless explicitly r
 
 For landing pages, README, docs, examples, and onboarding:
 
-- Keep the full mental model intact: source content → Grove → multiple outputs → ongoing maintenance.
-- Do not reduce Grove to directories.
+- Order the message: use case → pain → solution → architecture. Not the reverse.
+- Lead with the directory or catalog the reader wants to build, then the pain of maintaining it in several places.
+- Keep the full mental model intact where the product is explained: source content → Grove → multiple outputs → ongoing maintenance.
 - Show the relationship between source files, generated outputs, and automation.
 - Prefer concrete outcomes over abstract technical terminology.
+- Open App Scout is the proof. Point at it rather than describing what Grove could do.
 
 ## Mental model
 

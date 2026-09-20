@@ -19,13 +19,13 @@ const REPO_URL = 'https://github.com/tortuvshin/open-apps';
     <div>
       <SectionHeader
         eyebrow="Production reference"
-        title="Grove grew out of maintaining Open Apps."
+        title="Open App Scout is built with Grove."
         titleId="open-apps-title"
-        lede="Every step you just scrolled through runs in production at Open Apps: file-backed records, repository refresh, search, filters, detail pages, a sitemap, and AI-readable outputs. Grove turns that operating model into a reusable framework."
+        lede="A directory of 90+ open-source apps across 14 categories, run from a folder of YAML files: weekly GitHub refresh, search and filters, a page per app, rule-based collections, a generated README, a sitemap, and llms.txt. Grove grew out of maintaining it, and turns that operating model into a reusable framework."
         maxWidth="narrow"
       />
       <p class="mt-5 max-w-xl border-l-2 border-accent-orange/50 pl-4 text-sm leading-relaxed text-subtle">
-        The migration is done: Open Apps runs on the published packages, pinned to exact versions with a committed lockfile, and takes UI changes through <code class="font-mono text-xs">grove update</code> like any other space.
+        The migration is done: Open App Scout runs on the published Grove packages, pinned to exact versions with a committed lockfile, and takes UI changes through <code class="font-mono text-xs">grove update</code> like any other space.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
         <Button href={LIVE_URL} external>Explore the live space</Button>
@@ -35,7 +35,7 @@ const REPO_URL = 'https://github.com/tortuvshin/open-apps';
 
     <div class="relative isolate">
     <div class="grove-glow" aria-hidden="true"></div>
-    <div class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(39_183_200_/_0.2)] backdrop-blur" aria-label="Open Apps product preview">
+    <div class="overflow-hidden rounded-2xl border border-border-strong bg-bg/95 shadow-[0_40px_100px_-30px_rgb(39_183_200_/_0.2)] backdrop-blur" aria-label="Open App Scout product preview">
       <div class="flex items-center gap-2 border-b border-border px-4 py-3">
         <span class="size-3 rounded-full bg-[#ff5f57]"></span><span class="size-3 rounded-full bg-[#febc2e]"></span><span class="size-3 rounded-full bg-[#28c840]"></span>
         <span class="mx-auto rounded-full border border-border bg-surface px-6 py-1 font-mono text-[11px] text-subtle">openappscout.com</span>
@@ -43,7 +43,7 @@ const REPO_URL = 'https://github.com/tortuvshin/open-apps';
       </div>
       <Image
         src={openAppsShot}
-        alt="The Open Apps home page: a search box over a curated directory, ecosystem counts for indexed apps, categories, stacks and owners, and a row of actively developed applications"
+        alt="The Open App Scout home page: a search box over a curated directory, ecosystem counts for indexed apps, categories, stacks and owners, and a row of actively developed applications"
         widths={[640, 960, 1280]}
         sizes="(min-width: 1024px) 640px, 100vw"
         format="webp"

@@ -74,6 +74,12 @@ This language is the brand. We don't say "directory", "awesome list", "catalog",
 
 ## Positioning
 
+> **Superseded.** The hero and one-liner below, and the rule above against
+> saying "directory" in hero copy, are kept as history. Current positioning
+> lives in [`AGENTS.md`](../../AGENTS.md#how-grove-is-positioned):
+> market-facing copy leads with curated directories and catalogs, and the
+> file-first model is the explanation underneath.
+
 ```txt
 Hero:        Grow useful community knowledge.
 Subhead:     Grove is an open-source framework that helps communities collect,
