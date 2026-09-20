@@ -313,6 +313,43 @@ const entry = classifyHealth(record.slug, githubSignal); // { id, health }
 
 `classifyHealth` is the function `grove sync github` runs per record. Exposed for custom importer flows that need to compute the `health` block without doing a full sync.
 
+## README health check
+
+```ts
+import { runReadmeHealthCheck } from "@grove-dev/core";
+
+const report = await runReadmeHealthCheck(markdown, {
+  file: "README.md",
+  token: process.env.GITHUB_TOKEN, // optional; raises the rate limit
+  concurrency: 4,
+});
+console.log(report.summary.healthyPercent, report.summary.archived);
+```
+
+`runReadmeHealthCheck` is what `grove health [readme]` runs. It checks every repository linked from a Markdown list — an awesome list, a README — and needs no Grove project, so it works on a list that has not been imported yet. `report.entries` keeps one result per list item; `report.summary` counts entries detected, repositories resolved, archived, unavailable, moved, duplicates, likely stale, and unresolved.
+
+It is three steps, each exported for callers that need only part of the pipeline:
+
+```ts
+import {
+  extractCandidates,
+  inspectRepositories,
+  inspectRepository,
+  classifyRepositoryHealth,
+  createMemoryCache,
+  canonicalRepoKey,
+} from "@grove-dev/core";
+
+const candidates = extractCandidates(markdown, { file: "README.md" });
+const evidence = await inspectRepository("https://github.com/immich-app/immich", { token });
+const verdict = classifyRepositoryHealth(evidence); // { status, confidence, evidence, counterEvidence }
+```
+
+- `extractCandidates(markdown, options?)` turns every list item into a `CandidateEntry`. Unlike `parseAwesomeMarkdown` it drops nothing: an item with no link still becomes a candidate, with a low confidence and a warning.
+- `inspectRepository(url, options?)` fetches the evidence for one GitHub repository — API first, HTML as a fallback when the API is unavailable (flagged `partial-evidence-html-fallback`). `inspectRepositories(urls, { concurrency, cache })` does the same for a batch, fetching each repository once however many times it is linked.
+- `createMemoryCache()` is the default in-process `RepositoryEvidenceCache`; pass your own `{ get, set }` to persist evidence between runs. `canonicalRepoKey(owner, repo)` is the lowercase `owner/repo` key the cache and duplicate detection share.
+- `classifyRepositoryHealth(evidence)` returns an explainable verdict — `active`, `maintained`, `stable`, `likely-stale`, `archived`, `broken`, or `unknown` — with a confidence and the evidence for and against it. Its cutoffs match `classifyHealth`, so "stale" means the same thing in a README check and in a synced record.
+
 ## Collections
 
 ```ts
