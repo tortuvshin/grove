@@ -391,11 +391,14 @@ describe('docs homepage (standalone Astro route)', () => {
     expect(openApps).not.toContain('https://open-apps.dev.mn');
     expect(openApps).not.toContain('open-apps.dev.mn/apps');
 
-    // A real screenshot (astro:assets) replaced the hand-built mock; the
-    // honesty caveat about the pending package migration stays.
+    // A real screenshot (astro:assets) replaced the hand-built mock. The
+    // note under the lede used to be a caveat about a pending migration;
+    // the migration is done, so it now says the space runs on the
+    // published packages and takes UI changes through `grove update`.
     expect(openApps).toContain('astro:assets');
     expect(openApps).toContain('open-apps-home.png');
-    expect(openApps).toContain('published Grove packages');
+    expect(openApps).toMatch(/published (Grove )?packages/);
+    expect(openApps).toContain('grove update');
   });
 
   it('renders every landing call to action through the shared Button', async () => {
