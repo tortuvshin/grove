@@ -166,6 +166,24 @@ For project records the signal that actually drives the index is
 `health.visibility`, not this field. This top-level `visibility` exists on
 the base schema for the kinds that have no `health` block.
 
+### `relations`
+
+Optional, defaults to `[]`. How the record relates to a *subject* — something people search for that is not itself a record, defined in `data/taxonomy/subjects.yml`.
+
+```yaml
+relations:
+  - type: alternative-to        # the only relation type today
+    to: notion                  # subject id
+    note: Closest to Notion's block editor.
+    evidence:
+      type: self-described      # self-described | repo-topic | editorial
+      url: https://github.com/AppFlowy-IO/AppFlowy
+      quote: The open source Notion alternative
+      checkedAt: "2026-09-01"
+```
+
+`relationSchema`, `relationTypeSchema`, `relationEvidenceSchema` and `subjectSchema` are exported from `@grove-dev/core`, with the `Relation`, `RelationType` and `Subject` types. The index projection keeps only `{ type, to }` per relation; `note` and `evidence` stay on the full record. A relation to an id that is not in `subjects.yml` is an `unknown_subject` error. See [Subjects and relations](/concepts/relations/).
+
 ## Project fields
 
 ```yaml

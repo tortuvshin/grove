@@ -3,8 +3,8 @@
  * EditorialSummary.astro
  *
  * Compact card at the top of the record body that surfaces the
- * curator's "Best for" and "Consider before using" notes. Renders
- * nothing when both arrays are empty.
+ * curator's "Why it's listed", "Best for" and "Consider before using"
+ * notes. Renders nothing when all three are empty.
  *
  * This is the editorial half of the page: the sidebar (right) is
  * auto-generated facts; the summary (left) is human-authored
@@ -13,15 +13,29 @@
 interface Props {
   bestFor: string[];
   caveats: string[];
+  /** Why the curator included this record. Optional for older pages. */
+  whyListed?: string[];
 }
 
-const { bestFor, caveats } = Astro.props;
-const hasAny = bestFor.length > 0 || caveats.length > 0;
+const { bestFor, caveats, whyListed = [] } = Astro.props;
+const hasAny = bestFor.length > 0 || caveats.length > 0 || whyListed.length > 0;
 ---
 
 {hasAny && (
   <section class="grove-editorial mb-10 rounded-[var(--radius-lg)] border border-ink-200 bg-card p-5 dark:border-ink-800" aria-label="Editorial summary">
     <h2 class="sr-only">Editorial summary</h2>
+    {whyListed.length > 0 && (
+      <div class:list={[(bestFor.length > 0 || caveats.length > 0) && 'mb-5 border-b border-ink-200 pb-5 dark:border-ink-800']}>
+        <h3 class="m-0 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Why it's listed
+        </h3>
+        <ul class="mt-2 m-0 flex list-none flex-col gap-1.5 p-0 text-sm text-ink-700 dark:text-ink-200">
+          {whyListed.map((w) => (
+            <li class="leading-relaxed">{w}</li>
+          ))}
+        </ul>
+      </div>
+    )}
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
       {bestFor.length > 0 && (
         <div>

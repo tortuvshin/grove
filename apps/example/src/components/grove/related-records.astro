@@ -1,0 +1,64 @@
+---
+/**
+ * RelatedRecords.astro
+ *
+ * Where a record page leads next: sibling records that share a subject
+ * ("Other alternatives to Notion") and the collections the record
+ * appears in. Both come from `getRecordContextModel`. Before this, a
+ * detail page linked to its stack and its category and nothing else.
+ *
+ * Renders nothing when there is neither.
+ */
+import type { RecordContextModel } from '@grove-dev/astro/server';
+
+interface Props {
+  context: RecordContextModel;
+}
+
+const { context } = Astro.props;
+const hasAny = context.relatedRecords.length > 0 || context.collectionMembership.length > 0;
+---
+
+{hasAny && (
+  <section class="mt-12 border-t border-border pt-8" aria-label="Related">
+    {context.relatedRecords.map((group) => (
+      <div class="mb-8">
+        <h2 class="m-0 text-[1.125rem] font-semibold tracking-tight text-foreground">
+          Other {group.label.toLowerCase().replace(/ to$/, 's to')} {group.subject.name}
+        </h2>
+        <ul class="m-0 mt-3 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2">
+          {group.records.map((r) => (
+            <li class="m-0 rounded-md border border-border bg-card px-3 py-2.5">
+              <a href={r.url} class="text-sm font-medium text-foreground no-underline hover:underline">{r.title}</a>
+              {r.description && (
+                <p class="m-0 mt-1 line-clamp-2 text-[0.8125rem] leading-relaxed text-muted-foreground">{r.description}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+        {group.hub && (
+          <p class="m-0 mt-3 text-sm">
+            <a href={group.hub.url} class="font-medium text-foreground underline underline-offset-2">
+              Compare them all: {group.hub.title} →
+            </a>
+          </p>
+        )}
+      </div>
+    ))}
+
+    {context.collectionMembership.length > 0 && (
+      <div>
+        <h2 class="m-0 text-[1.125rem] font-semibold tracking-tight text-foreground">Featured in</h2>
+        <ul class="m-0 mt-3 flex list-none flex-wrap gap-2 p-0">
+          {context.collectionMembership.map((c) => (
+            <li class="m-0">
+              <a href={c.url} class="inline-flex rounded-full border border-border bg-card px-3 py-1 text-sm text-foreground no-underline hover:border-ink-400">
+                {c.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </section>
+)}

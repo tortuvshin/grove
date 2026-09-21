@@ -13,6 +13,7 @@ import {
   healthFileSchema,
   type Resource,
   recordsFileSchema,
+  subjectSchema,
   unwrapDecisions,
   unwrapHealth,
 } from './schema.js';
@@ -32,6 +33,9 @@ export interface ValidationResult {
   /** Flattened list of all issues (errors first, then warnings). */
   issues: ValidationIssue[];
 }
+
+/** Related records a subject needs before a missing hub is worth a warning. */
+const SUBJECT_HUB_MIN_RECORDS = 3;
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -97,6 +101,57 @@ export async function validateProject(
     stacks: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'stacks.yml')),
     platforms: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'platforms.yml')),
   };
+  // ── Subjects ───────────────────────────────────────────────────────
+  // `data/taxonomy/subjects.yml` is optional. When a site has none, a
+  // record relation or a collection `subject` has nothing to resolve
+  // against, which is an error rather than something to skip quietly.
+  const subjectsFile = `${taxonomyDir}/subjects.yml`;
+  const subjectIds = new Set<string>();
+  if (await exists(resolve(process.cwd(), subjectsFile))) {
+    let rawSubjects: unknown;
+    try {
+      rawSubjects = parseYaml(await readFile(resolve(process.cwd(), subjectsFile), 'utf8'), {
+        schema: 'core',
+      });
+    } catch (err) {
+      errors.push({
+        code: 'subject_invalid',
+        message: `${subjectsFile}: ${(err as Error).message}`,
+        severity: 'error',
+      });
+    }
+    if (rawSubjects !== undefined && rawSubjects !== null && !Array.isArray(rawSubjects)) {
+      errors.push({
+        code: 'subject_invalid',
+        message: `${subjectsFile}: expected a YAML list of subjects`,
+        severity: 'error',
+      });
+    }
+    for (const [index, item] of (Array.isArray(rawSubjects) ? rawSubjects : []).entries()) {
+      const parsedSubject = subjectSchema.safeParse(item);
+      if (!parsedSubject.success) {
+        for (const issue of parsedSubject.error.issues) {
+          errors.push({
+            code: 'subject_invalid',
+            message: `${subjectsFile}[${index}]: ${issue.path.join('.') || '(root)'} ${issue.message}`,
+            severity: 'error',
+          });
+        }
+        continue;
+      }
+      if (subjectIds.has(parsedSubject.data.id)) {
+        errors.push({
+          code: 'duplicate_subject',
+          message: `${subjectsFile}: subject "${parsedSubject.data.id}" is defined twice`,
+          severity: 'error',
+        });
+      }
+      subjectIds.add(parsedSubject.data.id);
+    }
+  }
+  /** Subject id → slugs of the records related to it. */
+  const relatedRecords = new Map<string, Set<string>>();
+
   /** Every record that parsed — the stream collections are checked against. */
   const parsedRecords: Resource[] = [];
 
@@ -174,6 +229,19 @@ export async function validateProject(
       continue;
     }
     parsedRecords.push({ ...parsed, slug: fileSlug });
+    for (const relation of parsed.relations) {
+      if (!subjectIds.has(relation.to)) {
+        errors.push({
+          code: 'unknown_subject',
+          message: `${fileSlug}: relations → "${relation.to}" is not defined in ${subjectsFile}`,
+          severity: 'error',
+        });
+        continue;
+      }
+      const related = relatedRecords.get(relation.to) ?? new Set<string>();
+      related.add(fileSlug);
+      relatedRecords.set(relation.to, related);
+    }
     // Override the filename-derived slug with the record's own slug
     // before downstream checks (links/health) consume it. Filename
     // and record.slug must agree; mismatch is itself a warning.
@@ -292,6 +360,8 @@ export async function validateProject(
     routeSlug: config.routes?.directory ?? 'projects',
   });
   const inStream = new Set(collectionEntries.map((entry) => entry.slug));
+  /** Subject id → the collection file that is its hub. */
+  const hubs = new Map<string, string>();
   for (const file of collectionFiles) {
     const where = `collections/${file}`;
     let collection: ReturnType<typeof parseCollectionFile>;
@@ -324,6 +394,31 @@ export async function validateProject(
         message: `${where}: slug "${collection.slug}" does not match the file name`,
         severity: 'warning',
       });
+    }
+    const referenced = [
+      ...(collection.subject ? [collection.subject] : []),
+      ...(collection.query.relatedTo?.subjects ?? []),
+    ];
+    for (const id of new Set(referenced)) {
+      if (!subjectIds.has(id)) {
+        errors.push({
+          code: 'collection_unknown_subject',
+          message: `${where}: subject "${id}" is not defined in ${subjectsFile}`,
+          severity: 'error',
+        });
+      }
+    }
+    if (collection.subject) {
+      const otherHub = hubs.get(collection.subject);
+      if (otherHub) {
+        errors.push({
+          code: 'duplicate_subject_hub',
+          message: `${where}: subject "${collection.subject}" already has a hub, collections/${otherHub}`,
+          severity: 'error',
+        });
+      } else {
+        hubs.set(collection.subject, file);
+      }
     }
     for (const id of collection.query.categories ?? []) {
       warnUnknownTaxonomy(where, 'query.categories', id, taxonomy.categories, 'categories.yml');
@@ -360,6 +455,19 @@ export async function validateProject(
       warnings.push({
         code: 'collection_empty',
         message: `${where}: no record matches this collection's query`,
+        severity: 'warning',
+      });
+    }
+  }
+
+  // A subject several records relate to, with no page that gathers
+  // them: the records each say "alternative to X" and nothing answers
+  // "what are the alternatives to X".
+  for (const [subject, related] of relatedRecords) {
+    if (related.size >= SUBJECT_HUB_MIN_RECORDS && !hubs.has(subject)) {
+      warnings.push({
+        code: 'subject_without_collection',
+        message: `subject "${subject}" has ${related.size} related records and no collection declares \`subject: ${subject}\``,
         severity: 'warning',
       });
     }

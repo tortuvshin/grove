@@ -98,6 +98,10 @@ editorial:
     Optional lead paragraph, selection-criteria callout, and last-reviewed date. All three render on the collection page; `lastReviewedAt` is also the page's sitemap `lastmod`.
   </Card>
 
+  <Card title="subject / query.relatedTo">
+    `subject: <id>` makes the collection the hub for a subject from `data/taxonomy/subjects.yml`; `query.relatedTo: { type?, subjects: [] }` selects the records related to those subjects. Together they are an "alternatives to X" page — see [Subjects and relations](/concepts/relations/).
+  </Card>
+
   <Card title="entries">
     Optional hand-picked records: `[{ slug, note?, pinned? }]`. See [Hand-picked entries](#hand-picked-entries).
   </Card>

@@ -389,6 +389,16 @@
           "target": "~/src/components/grove/editorial-summary.astro"
         },
         {
+          "path": "default/components/grove/record-relations.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/record-relations.astro"
+        },
+        {
+          "path": "default/components/grove/related-records.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/related-records.astro"
+        },
+        {
           "path": "default/components/grove/table-of-contents.astro",
           "type": "registry:component",
           "target": "~/src/components/grove/table-of-contents.astro"

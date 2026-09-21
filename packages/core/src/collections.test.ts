@@ -100,3 +100,42 @@ describe('rankEntries', () => {
     expect(rankEntries(entries, { preset: 'curated' })).toEqual(entries);
   });
 });
+
+describe('filterEntries — relatedTo', () => {
+  const related: CollectionEntry[] = [
+    {
+      slug: 'x',
+      title: 'X',
+      description: '',
+      url: '/x/',
+      relations: [{ type: 'alternative-to', to: 'notion' }],
+    },
+    {
+      slug: 'y',
+      title: 'Y',
+      description: '',
+      url: '/y/',
+      relations: [{ type: 'built-on', to: 'notion' }],
+    },
+    {
+      slug: 'z',
+      title: 'Z',
+      description: '',
+      url: '/z/',
+      relations: [{ type: 'alternative-to', to: 'slack' }],
+    },
+    { slug: 'w', title: 'W', description: '', url: '/w/' },
+  ];
+
+  it('matches any relation to one of the subjects', () => {
+    const out = filterEntries(related, { relatedTo: { subjects: ['notion'] } });
+    expect(out.map((e) => e.slug)).toEqual(['x', 'y']);
+  });
+
+  it('narrows to a relation type when one is given', () => {
+    const out = filterEntries(related, {
+      relatedTo: { type: 'alternative-to', subjects: ['notion', 'slack'] },
+    });
+    expect(out.map((e) => e.slug)).toEqual(['x', 'z']);
+  });
+});

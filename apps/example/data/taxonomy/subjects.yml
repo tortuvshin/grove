@@ -1,0 +1,9 @@
+# Things records relate to that are not records themselves — usually a
+# proprietary product a record is an alternative to. A subject gets no
+# page of its own; a collection that declares `subject: <id>` is its hub.
+- id: chatgpt
+  name: ChatGPT
+  kind: product
+  url: https://chatgpt.com
+  description: OpenAI's hosted chat assistant.
+  aliases: [Chat GPT]
