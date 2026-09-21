@@ -1,0 +1,27 @@
+slug: visual-llm-app-builders
+kind: curated
+title: Visual LLM App Builders
+description: Open-source tools for building LLM workflows on a canvas instead of in code.
+content: ./content/collections/visual-llm-app-builders.md
+# Hand-picked: no query, so only the listed records are in the collection.
+entries:
+  - slug: dify
+    pinned: true
+    note: The most complete of the three. Pick it when you need a workflow editor, a retrieval pipeline and a hosted API for the result in one deployment, and can run a multi-service Docker stack.
+  - slug: flowise
+    note: Lighter than Dify and quicker to stand up. Pick it for node-based agent flows when a single Node.js service is all you want to operate.
+ranking:
+  preset: curated
+editorial:
+  introduction: Dify and Flowise both turn prompt chains and tool calls into a node graph. They differ in how much they expect you to operate.
+  selectionNote: Open-source, self-hostable, and built around a visual editor rather than an SDK. Code-first frameworks are listed in Top Open Source AI Agents instead.
+  lastReviewedAt: "2026-09-01"
+faq:
+  - q: Can these run without a hosted account?
+    a: Yes. Both ship a Docker Compose setup and keep prompts, keys and documents on your own infrastructure.
+  - q: Do I still need to write code?
+    a: Not for the flow itself. Custom tools and integrations are where code comes back in.
+seo:
+  index: true
+  title: Open Source Visual LLM App Builders Compared
+  description: Dify and Flowise compared — two open-source, self-hostable canvases for building LLM workflows and agents without writing the orchestration code.

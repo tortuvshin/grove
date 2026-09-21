@@ -180,9 +180,51 @@ describe('getCollectionPageModel', () => {
     expect(model.related[0].slug).toBe('top-tools');
   });
 
-  it('reports empty when no entries match', () => {
+  it('reports empty when no entries match, and keeps the empty page out of the index', () => {
     const model = getCollectionPageModel(emptyCollection, entries, [collection, otherCollection]);
     expect(model.isEmpty).toBe(true);
+    expect(model.seo.noindex).toBe(true);
+  });
+
+  it('describes a hand-picked entry with its note and reports the full list size', () => {
+    const picked: Collection = {
+      ...collection,
+      query: {},
+      entries: [{ slug: 'dify', note: 'Pick it for the workflow editor.', pinned: true }],
+    };
+    const model = getCollectionPageModel(picked, entries, [picked], {
+      siteUrl: 'https://example.com',
+    });
+    expect(model.entries.map((e) => e.slug)).toEqual(['dify']);
+    expect(model.entries[0]?.note).toBe('Pick it for the workflow editor.');
+    const list = (model.jsonLd as Array<Record<string, unknown>>).find(
+      (node) => node['@type'] === 'ItemList',
+    ) as { numberOfItems: number; itemListElement: Array<{ description?: string }> };
+    expect(list.numberOfItems).toBe(1);
+    expect(list.itemListElement[0]?.description).toBe('Pick it for the workflow editor.');
+  });
+
+  it('exposes faq, review date and body path, and emits FAQPage only when there are questions', () => {
+    const withFaq: Collection = {
+      ...collection,
+      content: './content/collections/top.md',
+      editorial: { ...collection.editorial, lastReviewedAt: '2026-09-01' },
+      faq: [{ q: 'Is it free?', a: 'Yes.' }],
+    };
+    const model = getCollectionPageModel(withFaq, entries, [withFaq], {
+      siteUrl: 'https://example.com',
+    });
+    expect(model.faq).toEqual([{ q: 'Is it free?', a: 'Yes.' }]);
+    expect(model.collection.lastReviewedAt).toBe('2026-09-01');
+    expect(model.collection.content).toBe('./content/collections/top.md');
+    const types = (model.jsonLd as Array<Record<string, unknown>>).map((node) => node['@type']);
+    expect(types).toContain('FAQPage');
+
+    const plain = getCollectionPageModel(collection, entries, [collection]);
+    expect(plain.faq).toEqual([]);
+    expect(
+      (plain.jsonLd as Array<Record<string, unknown>>).map((node) => node['@type']),
+    ).not.toContain('FAQPage');
   });
 });
 

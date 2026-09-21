@@ -202,6 +202,34 @@ export function collectionSchema(input: CollectionInput): JsonLdNode[] {
   return [page, list, breadcrumbSchema(input.crumbs)];
 }
 
+export interface FaqInput {
+  /** Canonical URL of the page the questions are answered on. */
+  url: string;
+  items: Array<{ question: string; answer: string }>;
+}
+
+/**
+ * `FAQPage` node for a page that answers questions in its visible
+ * content. Emit it only for questions the page actually shows — markup
+ * for hidden text is a structured-data violation.
+ *
+ * Google limits FAQ rich results to a small set of authoritative sites,
+ * so don't expect the expandable SERP treatment; the node still tells
+ * crawlers and LLM pipelines which text is a question and which its answer.
+ */
+export function faqSchema(input: FaqInput): JsonLdNode {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${input.url}#faq`,
+    mainEntity: input.items.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  };
+}
+
 export interface RecordInput {
   url: string;
   name: string;

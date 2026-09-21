@@ -54,9 +54,11 @@ depends on what that page is.
 | `recordSchema` | `["SoftwareApplication", "SoftwareSourceCode"]` for `kind: "application"`, `["CreativeWork", "WebPage"]` for `kind: "article"` — plus `codeRepository` and `license` when present |
 | `collectionSchema` | `["CollectionPage", "WebPage"]`, an `ItemList` of the members, and breadcrumbs |
 | `contentSchema` | `["Article", "WebPage"]` with `author` and optional `datePublished`, plus breadcrumbs |
+| `faqSchema` | A single `FAQPage` node with one `Question` / `acceptedAnswer` per item. Not part of the `buildJsonLd` overload — call it directly. A collection with a `faq` block gets it automatically. |
 
 Every one of those returns a `BreadcrumbList` alongside the main node, so
-breadcrumb structured data is emitted by default, not opt-in.
+breadcrumb structured data is emitted by default, not opt-in. `faqSchema` is the
+exception: it returns only the `FAQPage` node, to append to a page's existing graph.
 `breadcrumbSchema` is also exported on its own for pages that need nothing
 else.
 
@@ -125,6 +127,14 @@ Rendering is non-fatal. A failure logs
 `data/generated/og-manifest.json` maps each card path to a content hash so
 unchanged cards are skipped on the next build — it is not a lookup table,
 since the path is derivable from the slug.
+
+## A note on FAQ markup
+
+`FAQPage` is emitted for collections that declare `faq`. Google restricts the
+expandable FAQ rich result to a small set of authoritative government and
+health sites, so do not expect it on a directory. The markup is still worth
+having: it labels question and answer text for crawlers and LLM pipelines.
+Only mark up questions the page visibly answers.
 
 ## Not emitted
 

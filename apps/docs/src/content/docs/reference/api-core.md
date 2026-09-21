@@ -153,7 +153,7 @@ The command `grove readme generate` is `buildAwesomeReadme` + `injectAwesomeRead
 ## JSON-LD
 
 ```ts
-import { buildJsonLd, definePageDocument, validateJsonLd } from "@grove-dev/core";
+import { buildJsonLd, definePageDocument, faqSchema, validateJsonLd } from "@grove-dev/core";
 
 // buildJsonLd is overloaded per page kind — this branch takes a RecordInput
 const structuredData = buildJsonLd({
@@ -175,7 +175,7 @@ const doc = definePageDocument({
 const issues = validateJsonLd(doc.structuredData);
 ```
 
-`definePageDocument(input: PageDocument): PageDocument` (`packages/core/src/page-document.ts:90`) validates and returns the full page contract — `identity`, `metadata`, `structuredData`, `discovery`. `PageIdentity.type` is `home | directory | collection | record | content | empty | 404`. `buildJsonLd` is a separate, overloaded builder for the `structuredData` array itself — it takes a `SiteInput | CollectionInput | RecordInput | ContentInput`, not a `PageDocument` (`packages/core/src/page-document.ts:253-260`). `validateJsonLd(nodes)` returns a `JsonLdValidationIssue[]` directly — an empty array means the graph is valid (`packages/core/src/page-document.ts:278`).
+`definePageDocument(input: PageDocument): PageDocument` (`packages/core/src/page-document.ts:90`) validates and returns the full page contract — `identity`, `metadata`, `structuredData`, `discovery`. `PageIdentity.type` is `home | directory | collection | record | content | empty | 404`. `buildJsonLd` is a separate, overloaded builder for the `structuredData` array itself — it takes a `SiteInput | CollectionInput | RecordInput | ContentInput`, not a `PageDocument` (`packages/core/src/page-document.ts:253-260`). `faqSchema({ url, items })` takes a `FaqInput` (`items: { question, answer }[]`) and returns one `FAQPage` node to append to a page graph; it is not part of the `buildJsonLd` overload. `validateJsonLd(nodes)` returns a `JsonLdValidationIssue[]` directly — an empty array means the graph is valid (`packages/core/src/page-document.ts:278`).
 
 ## Schemas
 
@@ -385,6 +385,8 @@ const tier = scoreTier(record.curationScore ?? 0);
 `filterEntries`/`rankEntries` take a `CollectionQuery`/`CollectionRanking` (`packages/core/src/collections.ts`). `runCollection(collection, entries)` filters and ranks in one call (`packages/core/src/collector.ts:12`). `findRelated(target, all, limit)` finds other collections with overlapping query facets — it operates on collections, not records (`packages/core/src/related.ts:3`). `LENSES` is a plain array of lens definitions; `lensById(id)` looks one up by id (`packages/core/src/directory-lenses.ts:46,134-137`) — there is no `LENSES.<id>()` call form. `scoreTier(n)` buckets a 0-100 score into a 0-4 tier (`packages/core/src/directory-scores.ts:22`). These are the building blocks of every curated page — the collection runner pre-resolves entries and ranking so the page render is a pure read.
 
 `loadCollections` parses every `data/collections/*.yml` with `collectionDefinitionSchema` — defaults applied (`kind: curated`, `query: {}`, `ranking.preset: curated`, `seo.index: true`), unknown top-level keys kept. A file that is not a YAML mapping or fails the schema throws a `CollectionFileError` carrying the `file` and a `problems[]` list, one `path: message` string per failing field. `parseCollectionFile(file, text)` is the single-file form; `grove check` uses it to report the same problems as `collection_invalid` issues instead of a thrown build.
+
+`runCollection` resolves hand-picked `entries` as well as the `query`: membership is the union of both, an empty query only takes part when there are no picks, `pinned` picks lead in file order, and a pick's `note` lands on the returned entry (`CollectionEntry.note`, `CollectionEntry.pinned`). `CollectionPick` and `CollectionFaqItem` are the element types of `Collection['entries']` and `Collection['faq']`.
 
 `toCollectionEntries(records, { routeSlug, now? })` is the one record → `CollectionEntry` projection, shared by the collection page model and the OG-image pipeline so both count a collection the same way. It drops records hidden or removed by either `visibility` or `health.visibility`, reads `status` from `health.status` (the value `excludeStatuses` matches — the record's own `visibility` only ever says `keep`), and fills the ranking inputs: a curated `scores.activity` / `scores.curation` wins; otherwise activity is the mean of release freshness (180 days), push freshness (90 days) and the share of synced commits from the last three months, and curation is GitHub stars on a log scale (`log10(stars + 1) / 5`, capped at 1). `now` is injectable for tests.
 

@@ -16,7 +16,7 @@ A collection is different from a lens in two ways:
 
 ## Two kinds
 
-`CollectionKind` is `"curated" | "generated"` (`packages/core/src/collections.ts`). Both kinds have the exact same shape — a `query` and a `ranking` — and are resolved the same way at build time: `runCollection` filters the record set with `query` and orders the result with `ranking` (`packages/core/src/collector.ts:12-17`). There is no field for hand-listing record ids; `kind` only changes the eyebrow label the collection page renders (`packages/astro/src/pages/collections/[slug].astro:52`: `"Curated collection"` vs `"Generated collection"`).
+`CollectionKind` is `"curated" | "generated"` (`packages/core/src/collections.ts`). Both kinds have the exact same shape — a `query` and a `ranking` — and are resolved the same way at build time: `runCollection` filters the record set with `query` and orders the result with `ranking` (`packages/core/src/collector.ts:12-17`). Records can also be hand-picked with `entries` (see [Hand-picked entries](#hand-picked-entries)); `kind` only changes the eyebrow label the collection page renders (`packages/astro/src/pages/collections/[slug].astro:52`: `"Curated collection"` vs `"Generated collection"`).
 
 <Tabs syncKey="kind">
   <TabItem label="curated" icon="seti:notebook">
@@ -95,9 +95,59 @@ editorial:
   </Card>
 
   <Card title="editorial.introduction / editorial.selectionNote / editorial.lastReviewedAt">
-    Optional editorial intro, selection note, and last-reviewed date (`packages/core/src/collections.ts`).
+    Optional lead paragraph, selection-criteria callout, and last-reviewed date. All three render on the collection page; `lastReviewedAt` is also the page's sitemap `lastmod`.
+  </Card>
+
+  <Card title="entries">
+    Optional hand-picked records: `[{ slug, note?, pinned? }]`. See [Hand-picked entries](#hand-picked-entries).
+  </Card>
+
+  <Card title="content">
+    Optional path to a Markdown body, by convention `./content/collections/<slug>.md`. Rendered below the list through the same sanitizing pipeline as a record body, so tables and code blocks work. An opening `# Title` is dropped — the page already has its `<h1>`.
+  </Card>
+
+  <Card title="faq">
+    Optional `[{ q, a }]`. Rendered as a question list on the page and emitted as `FAQPage` JSON-LD.
   </Card>
 </CardGrid>
+
+## Hand-picked entries
+
+A query can only say "every Flutter app over 500 stars". A page that answers *"which of these should I pick?"* needs a curator to choose the records and say something about each one:
+
+```yaml
+# data/collections/visual-llm-app-builders.yml
+slug: visual-llm-app-builders
+title: Visual LLM App Builders
+description: Open-source tools for building LLM workflows on a canvas instead of in code.
+content: ./content/collections/visual-llm-app-builders.md
+entries:
+  - slug: dify
+    pinned: true
+    note: The most complete of the three. Pick it when you need a workflow editor, retrieval and a hosted API in one deployment.
+  - slug: flowise
+    note: Lighter and quicker to stand up. Pick it when a single Node.js service is all you want to operate.
+ranking:
+  preset: curated
+faq:
+  - q: Can these run without a hosted account?
+    a: Yes. Both ship a Docker Compose setup.
+```
+
+How `runCollection` resolves it (`packages/core/src/collector.ts`):
+
+- **Membership is picks ∪ query matches.** An empty `query` matches every record, so it only takes part when it states at least one criterion — or when there are no `entries` at all. The example above lists exactly two records. Add `query: { stacks: [python] }` and every Python record joins after the picks.
+- **A pick skips the query**, `excludeStatuses` included — it is the curator's call. It cannot bring back a record hidden or removed by `visibility`; those never reach a collection.
+- **Order:** `pinned` picks first, in file order; everything else by `ranking`. Under `preset: curated` that means picks in file order, then query matches.
+- **`note` replaces the record's description** for that entry, on the page and in the `ItemList` JSON-LD. When any entry has a note the page renders a numbered verdict list instead of the card grid, because a card clamps its description to two lines.
+
+`grove check` reports a pick that is not a record (`collection_unknown_entry`, error), a pick that is hidden (`collection_hidden_entry`, warning) and a `content` path that does not exist (`collection_body_missing`, error).
+
+A collection with no entries renders `noindex` and stays out of the sitemap — an empty list has nothing to rank for.
+
+<Aside type="note" title="About FAQ rich results">
+  Google shows the expandable FAQ treatment only for a small set of authoritative government and health sites. Add `faq` because the questions help the reader and because the markup tells crawlers and LLM pipelines which text is a question and which its answer — not for a SERP feature.
+</Aside>
 
 ## `grove collection promote`
 

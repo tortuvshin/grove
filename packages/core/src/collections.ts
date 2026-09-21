@@ -7,7 +7,9 @@
  *   - a `query` that filters an entry stream (stacks, platforms, categories,
  *     licenses, kinds, excludeStatuses, free-text q)
  *   - a `ranking` that decides order (quality, active, recency, stars, curated)
- *   - optional `editorial` intro/selection notes and review metadata
+ *   - optional hand-picked `entries` (with per-record notes and pinning)
+ *   - optional `editorial` intro/selection notes, a Markdown `content`
+ *     body and `faq`
  *   - `seo` policy (indexable flag, optional overrides)
  *
  * `CollectionEntry` is the lightweight record shape that flows through
@@ -54,7 +56,30 @@ export const collectionDefinitionSchema = z.looseObject({
   kind: z.enum(['curated', 'generated']).default('curated'),
   title: z.string().min(1),
   description: z.string().min(1),
+  /**
+   * Path to the collection's long-form Markdown body, relative to the
+   * project root (convention: `./content/collections/<slug>.md`).
+   */
+  content: z.string().min(1).optional(),
   query: collectionQuerySchema.prefault({}),
+  /**
+   * Hand-picked records. A pick is in the collection whatever the
+   * `query` says; `note` is the curator's verdict for that record on
+   * this page and replaces the record's own description in the list;
+   * `pinned` keeps a pick at the top, in file order, above the ranking.
+   *
+   * Optional rather than defaulted so an existing `Collection` literal
+   * keeps type-checking.
+   */
+  entries: z
+    .array(
+      z.object({
+        slug: z.string().min(1),
+        note: z.string().min(1).optional(),
+        pinned: z.boolean().optional(),
+      }),
+    )
+    .optional(),
   ranking: z
     .object({
       preset: rankingPresetSchema,
@@ -68,6 +93,8 @@ export const collectionDefinitionSchema = z.looseObject({
       lastReviewedAt: z.string().optional(),
     })
     .optional(),
+  /** Questions answered on the page; also emitted as `FAQPage` JSON-LD. */
+  faq: z.array(z.object({ q: z.string().min(1), a: z.string().min(1) })).optional(),
   seo: z
     .object({
       index: z.boolean().default(true),
@@ -84,6 +111,8 @@ export type CollectionQuery = Collection['query'];
 export type CollectionRanking = Collection['ranking'];
 export type CollectionEditorial = NonNullable<Collection['editorial']>;
 export type CollectionSeo = Collection['seo'];
+export type CollectionPick = NonNullable<Collection['entries']>[number];
+export type CollectionFaqItem = NonNullable<Collection['faq']>[number];
 
 export interface CollectionEntry {
   slug: string;
@@ -111,6 +140,10 @@ export interface CollectionEntry {
   curationScore?: number;
   activityScore?: number;
   categories?: string[];
+  /** The curator's note for this record in the collection being run. */
+  note?: string;
+  /** True when the collection pins this record above the ranking. */
+  pinned?: boolean;
 }
 
 export function filterEntries(

@@ -1,6 +1,6 @@
 {
   "scaffold": "@grove/default",
-  "scaffoldVersion": "1.1.0",
+  "scaffoldVersion": "1.2.0",
   "installedAt": "2026-09-21",
   "fileCount": 70,
   "files": [
@@ -37,8 +37,8 @@
     {
       "target": "src/components/grove/collection-page.astro",
       "source": "default/components/grove/collection-page.astro",
-      "hash": "sha256-f698ea171533dce95073846e0232eea5cfd7b2ca278ce9ccde79dbcac4b96b37",
-      "bytes": 4753
+      "hash": "sha256-5e31c1c966051d4b6abe38d86b82f844a5a8b3b228f736e0873a3d437f7ad597",
+      "bytes": 7943
     },
     {
       "target": "src/components/grove/collection-row.astro",
@@ -367,8 +367,8 @@
     {
       "target": "src/pages/collections/[slug].astro",
       "source": "default/pages/collections/[slug].astro",
-      "hash": "sha256-38558107472a247f861aa1f7a1619c5ecac18e10823f128c920f52d68da21944",
-      "bytes": 1468
+      "hash": "sha256-3c1a3c551cff7df784bc4f462463f9c0d0e02be1939fb994023fa011e5556889",
+      "bytes": 1577
     },
     {
       "target": "src/pages/collections/index.astro",

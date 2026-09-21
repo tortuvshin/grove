@@ -1,5 +1,11 @@
 import type { Collection, CollectionEntry, CollectionSourceRecord } from '@grove-dev/core';
-import { collectionSchema, findRelated, runCollection, toCollectionEntries } from '@grove-dev/core';
+import {
+  collectionSchema,
+  faqSchema,
+  findRelated,
+  runCollection,
+  toCollectionEntries,
+} from '@grove-dev/core';
 import { absoluteUrl, ogPath, type PageSeo, seoDescription, seoTitle } from './seo.js';
 
 // Collection YAML loading lives in @grove-dev/core (it also feeds the
@@ -43,7 +49,12 @@ export interface CollectionPageModel {
     kind: 'curated' | 'generated';
     selectionNote?: string;
     introduction?: string;
+    lastReviewedAt?: string;
+    /** Path of the Markdown body; render it with `getCollectionBodyHtml`. */
+    content?: string;
   };
+  /** Questions rendered on the page and emitted as `FAQPage` JSON-LD. */
+  faq: Array<{ q: string; a: string }>;
   total: number;
   isEmpty: boolean;
   entries: CollectionEntry[];
@@ -107,7 +118,9 @@ export function getCollectionPageModel(
     items: result.entries.slice(0, 50).map((entry) => ({
       url: entry.url.startsWith('http') ? entry.url : absoluteUrl(siteUrl, entry.url),
       name: entry.title,
-      ...(entry.description ? { description: entry.description } : {}),
+      // The curator's note is what the page shows for a hand-picked
+      // entry, so it is what the markup describes it with too.
+      ...(entry.note || entry.description ? { description: entry.note ?? entry.description } : {}),
     })),
     totalItems: result.entries.length,
     crumbs: [
@@ -116,6 +129,15 @@ export function getCollectionPageModel(
       { url: pageUrl, name: collection.title },
     ],
   });
+  const faq = collection.faq ?? [];
+  if (faq.length > 0) {
+    jsonLd.push(
+      faqSchema({
+        url: pageUrl,
+        items: faq.map((item) => ({ question: item.q, answer: item.a })),
+      }),
+    );
+  }
   // The curator's `seo.title` / `seo.description` overrides win
   // verbatim; the fallback pattern advertises the list size. A
   // collection marked `seo.index: false` renders with noindex.
@@ -127,7 +149,9 @@ export function getCollectionPageModel(
     image: ogPath('collection', collection.slug),
     ...(siteName ? { imageAlt: `${collection.title} — ${siteName}` } : {}),
     jsonLd: jsonLd as unknown as Record<string, unknown>[],
-    noindex: collection.seo?.index === false,
+    // An empty collection has nothing to rank for; it also stays out of
+    // the sitemap (see `prepareDirectory`).
+    noindex: collection.seo?.index === false || result.isEmpty,
   };
   return {
     collection: {
@@ -137,7 +161,10 @@ export function getCollectionPageModel(
       kind: collection.kind,
       selectionNote: collection.editorial?.selectionNote,
       introduction: collection.editorial?.introduction,
+      lastReviewedAt: collection.editorial?.lastReviewedAt,
+      content: collection.content,
     },
+    faq,
     total: result.entries.length,
     isEmpty: result.isEmpty,
     entries: result.entries,

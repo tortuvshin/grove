@@ -2,6 +2,7 @@
 import records from '@grove/generated/records.json';
 import siteConfig from '@grove/generated/site-config.json';
 import {
+  getCollectionBodyHtml,
   getCollectionPageModel,
   loadCollections,
   recordsToCollectionEntries,
@@ -24,6 +25,7 @@ const entries = recordsToCollectionEntries(
   siteConfig,
 );
 const model = getCollectionPageModel(collection, entries, collections, siteConfig);
+const bodyHtml = getCollectionBodyHtml(collection.content);
 ---
 <BaseLayout
   title={model.seo.title}
@@ -36,6 +38,7 @@ const model = getCollectionPageModel(collection, entries, collections, siteConfi
 >
   <CollectionPage
     model={model}
+    bodyHtml={bodyHtml}
     eyebrow={model.collection.kind === "curated" ? "Curated collection" : "Generated collection"}
     countNoun={{
       singular: siteConfig.blueprintConfig?.labelSingular ?? "item",

@@ -765,6 +765,32 @@ export function getContentHtml(slug: string): string | null {
   return contentHtmlBySlug.get(slug) ?? null;
 }
 
+const collectionBodyHtmlByPath = new Map<string, string | null>();
+
+/**
+ * Sanitized HTML for a collection's long-form body — the Markdown file
+ * its `content` field points at (convention:
+ * `content/collections/<slug>.md`). Uses the record-body allowlist, so
+ * comparison tables render. An opening `# Title` is dropped: the page
+ * already renders the collection title as its `<h1>`. Returns `null`
+ * when the collection has no `content`, the file is missing, or the
+ * render fails.
+ */
+export function getCollectionBodyHtml(contentPath: string | undefined): string | null {
+  if (!contentPath) return null;
+  const cached = collectionBodyHtmlByPath.get(contentPath);
+  if (cached !== undefined) return cached;
+  let html: string | null = null;
+  try {
+    const read = readContentFile(contentPath);
+    if (read) html = renderMarkdownToSafeHtml(stripLeadingH1(read.body));
+  } catch {
+    html = null;
+  }
+  collectionBodyHtmlByPath.set(contentPath, html);
+  return html;
+}
+
 /**
  * Sanitized Markdown for a consumer-authored page under
  * `content/pages/<page>.md`. Default template pages use this to
