@@ -290,7 +290,7 @@ function row(label: string, value: unknown) {
           <ul class="m-0 flex list-none flex-wrap gap-1.5 p-0">
             {stacks.map((s) => (
               <li>
-                <a href={`/stacks/${s}`} class="inline-flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pl-1.5 pr-2 text-2xs font-medium text-secondary-foreground no-underline">
+                <a href={`/stacks/${s}/`} class="inline-flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pl-1.5 pr-2 text-2xs font-medium text-secondary-foreground no-underline">
                   <Icon name={s} category="stack" size={12} />
                   {taxonomyLabel("stacks", s)}
                 </a>
@@ -317,7 +317,7 @@ function row(label: string, value: unknown) {
       {category && (
         <div class="mb-3">
           <h3 class="m-0 mb-1.5 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">Category</h3>
-          <a href={`/categories/${category}`} class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground no-underline">
+          <a href={`/categories/${category}/`} class="rounded-full bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground no-underline">
             {taxonomyLabel("categories", category)}
           </a>
         </div>

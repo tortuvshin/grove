@@ -2,7 +2,7 @@
  * Content body helpers — pure, dependency-free logic for reading and
  * shaping the Markdown sidecar that sits next to each record.
  *
- * Five concerns live here, all framework-agnostic so any renderer
+ * Six concerns live here, all framework-agnostic so any renderer
  * (Astro today, future options) can compose them:
  *
  *   1. `resolveContentPath(contentPath, candidates?)`
@@ -32,6 +32,11 @@
  *   5. `readingMetrics(body, { wpm })` — word count + minutes for the
  *      "X min read" pill on a detail page. Returns zeros (not throws)
  *      for empty input.
+ *
+ *   6. `stripLeadingH1(body)` / `shiftHeadings(body, by)` — keep a
+ *      body's headings subordinate to the page or document that embeds
+ *      it: one `<h1>` on a detail page, no `#` outranking the record's
+ *      `###` in llms-full.txt.
  *
  * Why a separate module instead of tacking these onto `markdown.ts`?
  * That file is the **awesome-list importer** (parses READMEs into
@@ -100,6 +105,66 @@ export function stripFrontmatter(text: string): string {
   const close = lines.slice(1, 200).findIndex((l) => l.trim() === '---');
   if (close < 0) return text;
   return lines.slice(close + 2).join('\n');
+}
+
+// ── Heading normalisation ────────────────────────────────────────────
+
+/**
+ * Walk a Markdown body line by line, calling `onLine` for every line
+ * outside a fenced code block. Shared by the heading helpers so a
+ * `# comment` inside a ``` fence is never mistaken for a heading —
+ * the same rule `extractToc` applies.
+ */
+function mapOutsideFences(body: string, onLine: (line: string) => string): string {
+  let inFence = false;
+  let fenceMarker = '';
+  return body
+    .split(/\r?\n/)
+    .map((line) => {
+      const fence = line.match(/^\s*(```+|~~~+)/);
+      if (fence?.[1]) {
+        const marker = fence[1][0] === '`' ? '```' : '~~~';
+        if (!inFence) {
+          inFence = true;
+          fenceMarker = marker;
+        } else if (marker === fenceMarker) {
+          inFence = false;
+        }
+        return line;
+      }
+      return inFence ? line : onLine(line);
+    })
+    .join('\n');
+}
+
+/**
+ * Drop a body's opening `# Title` line. A record detail page already
+ * renders the record name as its `<h1>`, so a sidecar that opens with
+ * its own title would put a second `<h1>` on the page. Only the first
+ * non-blank line is considered, and only an ATX heading of depth 1 —
+ * a `#` further down the body is the author's to keep.
+ */
+export function stripLeadingH1(body: string): string {
+  const lines = body.split(/\r?\n/);
+  const first = lines.findIndex((l) => l.trim() !== '');
+  if (first < 0 || !/^#\s+\S/.test(lines[first] ?? '')) return body;
+  const rest = lines.slice(first + 1);
+  while (rest.length && rest[0]?.trim() === '') rest.shift();
+  return rest.join('\n');
+}
+
+/**
+ * Push every ATX heading `by` levels deeper (capped at `######`) so a
+ * body can be embedded under an existing heading without its own
+ * headings outranking the section that contains it.
+ */
+export function shiftHeadings(body: string, by: number): string {
+  if (by <= 0) return body;
+  return mapOutsideFences(body, (line) => {
+    const m = line.match(/^(#{1,6})(\s+.*)$/);
+    if (!m?.[1]) return line;
+    return `${'#'.repeat(Math.min(6, m[1].length + by))}${m[2] ?? ''}`;
+  });
 }
 
 // ── File read ────────────────────────────────────────────────────────

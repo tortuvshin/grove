@@ -166,6 +166,12 @@ export interface CollectionInput {
   name: string;
   description: string;
   items: Array<{ url: string; name: string; description?: string }>;
+  /**
+   * Size of the full list when `items` is a capped slice of it.
+   * `numberOfItems` reports this so the markup never claims fewer
+   * entries than the page renders. Defaults to `items.length`.
+   */
+  totalItems?: number;
   crumbs: Crumb[];
 }
 
@@ -184,7 +190,7 @@ export function collectionSchema(input: CollectionInput): JsonLdNode[] {
   const list: JsonLdNode = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    numberOfItems: input.items.length,
+    numberOfItems: Math.max(input.totalItems ?? 0, input.items.length),
     itemListElement: input.items.map((item, i) => ({
       '@type': 'ListItem',
       position: i + 1,

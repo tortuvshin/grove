@@ -104,7 +104,7 @@ const visible = items.slice(0, limit);
           // right is the difference between a working home page
           // and a 404-storm of `/items/<slug>` links.
           const base = pathPrefix.replace(/\/$/, "");
-          const fallbackHref = `${base}/${item.slug}`;
+          const fallbackHref = `${base}/${item.slug}/`;
           const finalHref =
             typeof hrefFor === "function" ? hrefFor(item) : fallbackHref;
           const model = buildProjectCardModel(item);

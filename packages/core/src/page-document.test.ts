@@ -115,6 +115,23 @@ describe('JSON-LD schemas', () => {
     expect((nodes[1] as { numberOfItems?: number }).numberOfItems).toBe(2);
   });
 
+  it('collectionSchema reports the full list size when items are a capped slice', () => {
+    const nodes = collectionSchema({
+      url: 'https://example.com/c/',
+      name: 'Top',
+      description: 'x',
+      items: [{ url: 'https://example.com/a/', name: 'A' }],
+      totalItems: 79,
+      crumbs: [
+        { url: 'https://example.com/', name: 'Home' },
+        { url: 'https://example.com/c/', name: 'Top' },
+      ],
+    });
+    const list = nodes[1] as { numberOfItems?: number; itemListElement?: unknown[] };
+    expect(list.numberOfItems).toBe(79);
+    expect(list.itemListElement).toHaveLength(1);
+  });
+
   it('collectionSchema passes item descriptions through', () => {
     const nodes = collectionSchema({
       url: 'https://example.com/c/',

@@ -170,9 +170,9 @@ export function getCollectionPageModel(
   const siteName = site?.name ?? '';
   const plural = site?.blueprintConfig?.labelPlural ?? 'items';
   const pageUrl = absoluteUrl(siteUrl, `collections/${collection.slug}/`);
-  // CollectionPage + ItemList + BreadcrumbList. The ItemList is capped
-  // at 50 entries to keep the payload bounded; search engines don't
-  // index list markup beyond that anyway.
+  // CollectionPage + ItemList + BreadcrumbList. `itemListElement` is
+  // capped at 50 entries to keep the payload bounded; `numberOfItems`
+  // still reports the full list so it matches what the page renders.
   const jsonLd = collectionSchema({
     url: pageUrl,
     name: collection.seo?.title ?? collection.title,
@@ -182,6 +182,7 @@ export function getCollectionPageModel(
       name: entry.title,
       ...(entry.description ? { description: entry.description } : {}),
     })),
+    totalItems: result.entries.length,
     crumbs: [
       { url: `${siteUrl}/`, name: 'Home' },
       { url: absoluteUrl(siteUrl, 'collections/'), name: 'Collections' },

@@ -47,7 +47,13 @@ import type {
   Resource,
   ResourceRecord,
 } from '@grove-dev/core';
-import { headingSlug, readContentFile, stripFrontmatter, uniqueSlug } from '@grove-dev/core';
+import {
+  headingSlug,
+  readContentFile,
+  stripFrontmatter,
+  stripLeadingH1,
+  uniqueSlug,
+} from '@grove-dev/core';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 import { getSingletonHighlighter } from 'shiki';
@@ -444,12 +450,21 @@ const COMMON_BODY_ATTRIBUTES = {
 const SHIKI_VALUE = /.+/;
 const COLOR_VALUE = /^(?:#[0-9a-f]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\))$/i;
 
-/** `<a>` tag normalization — open in a new tab, no opener. */
-const ANCHOR_TRANSFORM = sanitizeHtml.simpleTransform(
-  'a',
-  { rel: 'noopener noreferrer', target: '_blank' },
-  true,
-);
+/**
+ * `<a>` tag normalization. External links open in a new tab with no
+ * opener. Links that stay on the site — root-relative paths, relative
+ * paths and `#fragment` anchors — keep the default same-tab behaviour:
+ * a new tab per internal link breaks the back button and tells
+ * crawlers nothing the href doesn't.
+ */
+const ANCHOR_TRANSFORM = (tagName: string, attribs: Record<string, string>) => {
+  const href = attribs.href ?? '';
+  const external = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(href);
+  return {
+    tagName,
+    attribs: external ? { ...attribs, rel: 'noopener noreferrer', target: '_blank' } : attribs,
+  };
+};
 
 /** Hardens `<img>` to lazy-load + async-decode. */
 const IMG_TRANSFORM = (tagName: string, attribs: Record<string, string>) => ({
@@ -729,7 +744,9 @@ for (const r of fullRecords) {
   // loop would inherit the first record's counters and duplicate-
   // heading IDs would collide across records.
   try {
-    contentHtmlBySlug.set(r.slug, renderMarkdownToSafeHtml(read.body));
+    // The detail page renders the record name as its `<h1>`; a sidecar
+    // that opens with its own `# Title` would add a second one.
+    contentHtmlBySlug.set(r.slug, renderMarkdownToSafeHtml(stripLeadingH1(read.body)));
   } catch {
     // Missing / unreadable / parse-failed content: skip the record
     // rather than render broken HTML. The page treats `null` as

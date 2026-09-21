@@ -85,7 +85,7 @@ function buildDetailSection(record: LlmsRecordInput, siteUrl: string, indexSlug:
     record.license ? `- license: ${record.license}` : '',
     record.repoUrl ? `- repo: ${record.repoUrl}` : '',
     record.homepageUrl ? `- homepage: ${record.homepageUrl}` : '',
-    `- url: ${siteUrl}/${indexSlug}/${record.slug}`,
+    `- url: ${siteUrl}/${indexSlug}/${record.slug}/`,
     record.lastCommitAt ? `- lastCommit: ${record.lastCommitAt.slice(0, 10)}` : '',
     record.addedAt ? `- added: ${record.addedAt.slice(0, 10)}` : '',
   ].filter(Boolean);

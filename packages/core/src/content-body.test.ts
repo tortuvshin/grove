@@ -11,6 +11,8 @@
  *     smart-quote / punctuation cleanup, empty body
  *   - readingMetrics: empty body, whitespace, long body, wpm option,
  *     minutes always ≥ 1
+ *   - stripLeadingH1: only the opening title, never a later `#`
+ *   - shiftHeadings: depth shift, `######` cap, fenced code untouched
  */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -22,7 +24,9 @@ import {
   readContentFile,
   readingMetrics,
   resolveContentPath,
+  shiftHeadings,
   stripFrontmatter,
+  stripLeadingH1,
 } from './content-body.js';
 
 let cwd = process.cwd();
@@ -253,5 +257,50 @@ describe('readingMetrics', () => {
 
   it('never returns minutes: 0 for short bodies', () => {
     expect(readingMetrics('hi')).toEqual({ wordCount: 1, minutes: 1 });
+  });
+});
+
+describe('stripLeadingH1', () => {
+  it('drops an opening title and the blank lines after it', () => {
+    expect(stripLeadingH1('# Immich\n\nA photo backup.\n\n## Setup')).toBe(
+      'A photo backup.\n\n## Setup',
+    );
+  });
+
+  it('skips blank lines before the title', () => {
+    expect(stripLeadingH1('\n\n# Immich\nBody')).toBe('Body');
+  });
+
+  it('leaves a body that does not open with a title untouched', () => {
+    const body = 'Intro paragraph.\n\n# Later heading\n\nText';
+    expect(stripLeadingH1(body)).toBe(body);
+  });
+
+  it('does not treat `##` or a bare `#tag` as a title', () => {
+    expect(stripLeadingH1('## Section\n\nText')).toBe('## Section\n\nText');
+    expect(stripLeadingH1('#hashtag first')).toBe('#hashtag first');
+  });
+
+  it('returns an empty body unchanged', () => {
+    expect(stripLeadingH1('')).toBe('');
+  });
+});
+
+describe('shiftHeadings', () => {
+  it('pushes every heading deeper by the given amount', () => {
+    expect(shiftHeadings('## A\n\ntext\n\n### B', 2)).toBe('#### A\n\ntext\n\n##### B');
+  });
+
+  it('caps at six levels', () => {
+    expect(shiftHeadings('##### Deep', 3)).toBe('###### Deep');
+  });
+
+  it('leaves fenced code blocks alone', () => {
+    const body = '## A\n\n```sh\n# a comment\n```\n';
+    expect(shiftHeadings(body, 1)).toBe('### A\n\n```sh\n# a comment\n```\n');
+  });
+
+  it('is a no-op for a non-positive shift', () => {
+    expect(shiftHeadings('## A', 0)).toBe('## A');
   });
 });
