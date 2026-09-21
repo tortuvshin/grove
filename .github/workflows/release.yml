@@ -172,6 +172,7 @@ jobs:
         run: node scripts/check-packaging.mjs
 
       - name: Publish
+        id: publish
         # `-r` skips private packages (so @grove-dev/registry never goes out)
         # and skips versions already on the registry, which makes a re-run
         # after a partial failure safe. `--no-git-checks` because this is a
@@ -190,6 +191,16 @@ jobs:
           --access public
           --no-git-checks
           --tag ${{ github.event_name == 'workflow_dispatch' && inputs.dist_tag || 'latest' }}
+
+      - name: Why the publish failed
+        # When the OIDC exchange fails, npm prints ENEEDAUTH or E404 and keeps
+        # the reason to itself: the registry's actual answer is logged at
+        # `verbose`/`silly`, below what reaches the console. npm's debug log
+        # records every level regardless, so pull the answer out of there.
+        if: failure() && steps.publish.conclusion == 'failure'
+        run: |
+          grep -h " oidc " "$HOME"/.npm/_logs/*-debug-0.log \
+            || echo "npm logged nothing about OIDC: it never attempted the exchange."
 
       - name: Confirm provenance attached
         # A publish that succeeds without provenance is the failure mode this
