@@ -90,9 +90,10 @@ jobs:
 
       - name: Setup pnpm
         # Must run before setup-node, which hashes the pnpm store for its
-        # cache and cannot find pnpm otherwise. This version also has to be
-        # new enough to speak OIDC — 10.12.1 predates npm's trusted
-        # publishing entirely.
+        # cache and cannot find pnpm otherwise. pnpm 10 does not talk to the
+        # registry itself when publishing: it packs the tarball and shells out
+        # to the `npm` that sits next to `node`. The OIDC exchange is npm's
+        # job, which is why the npm version is what gets checked below.
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 10.34.5
@@ -106,6 +107,55 @@ jobs:
           # `_authToken=${NODE_AUTH_TOKEN}`, and that unresolved placeholder
           # gets sent as a bearer token, which the registry rejects as a
           # misleading E404 instead of falling through to OIDC.
+
+      - name: npm can speak OIDC
+        # Trusted publishing landed in npm 11.5.1. An older npm does not fail
+        # on the missing feature — it publishes unauthenticated and the
+        # registry answers E404, which reads like a missing package.
+        run: |
+          set -euo pipefail
+          have="$(npm --version)"
+          if [ "$(printf '%s\n' 11.5.1 "$have" | sort -V | head -n1)" != "11.5.1" ]; then
+            echo "::error::npm $have cannot do trusted publishing; 11.5.1 or newer is required."
+            exit 1
+          fi
+          echo "npm $have"
+
+      - name: Release coordinates are consistent
+        # Everything that can be known to be wrong before anything is built.
+        # A dispatch at a tag whose package.json files were never bumped
+        # publishes nothing, and a prerelease sent to `latest` is handed to
+        # every plain `npm install`.
+        env:
+          REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || needs.release-please.outputs.tag }}
+          DIST_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.dist_tag || 'latest' }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./packages/core/package.json').version")"
+          for pkg in astro cli starlight; do
+            other="$(node -p "require('./packages/$pkg/package.json').version")"
+            if [ "$other" != "$version" ]; then
+              echo "::error::@grove-dev/$pkg is at $other but @grove-dev/core is at $version. The four packages release in lockstep."
+              exit 1
+            fi
+          done
+          case "$REF" in
+            v[0-9]*)
+              if [ "$REF" != "v$version" ]; then
+                echo "::error::Ref $REF does not match the package version $version. Bump the four package.json files in the tagged commit."
+                exit 1
+              fi
+              ;;
+          esac
+          case "$version" in
+            *-*)
+              if [ "$DIST_TAG" = "latest" ]; then
+                echo "::error::$version is a prerelease and must not be published under the 'latest' dist-tag."
+                exit 1
+              fi
+              ;;
+          esac
+          echo "Publishing $version from $REF under '$DIST_TAG'"
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -126,23 +176,38 @@ jobs:
         # and skips versions already on the registry, which makes a re-run
         # after a partial failure safe. `--no-git-checks` because this is a
         # detached checkout of the tag.
+        #
+        # Provenance is requested through the environment, not `--provenance`.
+        # Under `-r`, pnpm rebuilds the argument list for each package and
+        # forwards only --tag, --registry, --access, --dry-run, --force and
+        # --otp; a `--provenance` flag is accepted and then dropped. The
+        # environment is inherited by the `npm publish` pnpm spawns, so this
+        # is the form that actually arrives.
+        env:
+          NPM_CONFIG_PROVENANCE: 'true'
         run: >-
           pnpm -r publish
           --access public
-          --provenance
           --no-git-checks
           --tag ${{ github.event_name == 'workflow_dispatch' && inputs.dist_tag || 'latest' }}
 
       - name: Confirm provenance attached
         # A publish that succeeds without provenance is the failure mode this
         # whole pipeline exists to prevent, and npm reports it as success.
-        # Fail loudly here instead of finding out from a user.
+        # Fail loudly here instead of finding out from a user. The registry
+        # can lag a fresh publish by a few seconds, so ask more than once
+        # before calling it missing.
         run: |
           set -euo pipefail
           for pkg in core astro cli starlight; do
             name="@grove-dev/$pkg"
             version="$(node -p "require('./packages/$pkg/package.json').version")"
-            attestations="$(npm view "$name@$version" dist.attestations --json 2>/dev/null || echo null)"
+            attestations=null
+            for _ in 1 2 3 4 5 6; do
+              attestations="$(npm view "$name@$version" dist.attestations --json 2>/dev/null || echo null)"
+              if [ "$attestations" != "null" ] && [ -n "$attestations" ]; then break; fi
+              sleep 10
+            done
             if [ "$attestations" = "null" ] || [ -z "$attestations" ]; then
               echo "::error::$name@$version published without provenance attestations."
               exit 1

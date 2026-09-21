@@ -137,17 +137,28 @@ So the rule is: **bump `version`, leave `workspace:*` alone, let publish do the 
 `workflow_dispatch` on the Release workflow runs the publish job on its own, against a ref you name:
 
 ```bash
+# The tagged commit has to carry the version. A tag on a commit whose
+# package.json files still say 0.10.0 publishes nothing: that version is
+# already on the registry and `pnpm -r publish` skips it.
+git switch -c rc/0.11.0-rc.1
+for p in core astro cli starlight; do (cd packages/$p && npm pkg set version=0.11.0-rc.1); done
+git commit -am "chore: 0.11.0-rc.1"
+
 git tag -a v0.11.0-rc.1 -m "v0.11.0-rc.1" && git push origin v0.11.0-rc.1
 gh workflow run release.yml -f ref=v0.11.0-rc.1 -f dist_tag=next
 ```
 
-`dist_tag` defaults to `next`. Never dispatch a prerelease with `latest` — npm would hand every `npm install @grove-dev/core` a release candidate.
+The branch never merges; the tag is what the job checks out. `dist_tag` defaults to `next`. Never dispatch a prerelease with `latest` — npm would hand every `npm install @grove-dev/core` a release candidate.
+
+The job refuses the obvious mistakes before it builds anything: four package versions that disagree, a `v…` ref that does not match the package version, and a prerelease version headed for `latest`.
 
 ## When publishing fails
 
 `pnpm -r publish` skips versions already on the registry, so **re-running the job is safe** and is the first thing to try. A partial publish leaves the remaining packages to a re-run rather than to manual intervention.
 
 If it fails at the auth step with a `404`, the OIDC claim did not match. In order of likelihood: the workflow filename on npmjs.com no longer matches this file, `id-token: write` is missing from the publish job, or an environment name was configured on npmjs.com that this workflow does not set.
+
+Provenance is requested with `NPM_CONFIG_PROVENANCE=true` on the publish step, not with a `--provenance` flag. pnpm 10 publishes by packing the tarball and spawning `npm publish`, and under `-r` it rebuilds the argument list per package — `--tag`, `--registry`, `--access`, `--dry-run`, `--force`, `--otp` and nothing else. A `--provenance` flag is accepted and silently dropped; the environment variable is inherited by the spawned npm and arrives. The same detail is why the job checks the **npm** version (≥ 11.5.1) rather than pnpm's: the OIDC exchange is npm's.
 
 If `pnpm publish` itself turns out to be the problem, the escape hatch is to take pnpm out of the auth path entirely — `pnpm pack` already produces a publishable tarball with `workspace:*` resolved, so `npm publish <tarball> --provenance` (npm ≥ 11.5.1) does the same job.
 

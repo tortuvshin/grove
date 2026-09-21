@@ -40,8 +40,11 @@ Release.
 
 **`publish`** runs in the same workflow run, gated on
 `release_created == 'true'`. It checks out the tag, builds, runs both
-pre-flight checks, publishes with `pnpm -r publish --provenance`, and then
-asserts that provenance actually attached.
+pre-flight checks, publishes with `pnpm -r publish`, and then asserts that
+provenance actually attached. Provenance is requested through
+`NPM_CONFIG_PROVENANCE=true` rather than a `--provenance` flag: under `-r`,
+pnpm 10 rebuilds the arguments it hands to `npm publish` for each package
+and drops that flag, while the environment is inherited intact.
 
 ## The version-bump model
 
@@ -206,9 +209,20 @@ tarballs around for inspection.
 against a ref you name:
 
 ```bash
+# The tagged commit has to carry the version: a tag on a commit whose
+# package.json files still hold a released version publishes nothing.
+git switch -c rc/0.11.0-rc.1
+for p in core astro cli starlight; do (cd packages/$p && npm pkg set version=0.11.0-rc.1); done
+git commit -am "chore: 0.11.0-rc.1"
+
 git tag -a v0.11.0-rc.1 -m "v0.11.0-rc.1" && git push origin v0.11.0-rc.1
 gh workflow run release.yml -f ref=v0.11.0-rc.1 -f dist_tag=next
 ```
+
+The branch never merges; the tag is what the job checks out. Before it
+builds anything, the job rejects package versions that disagree, a `v…` ref
+that does not match the package version, and a prerelease headed for
+`latest`.
 
 `dist_tag` defaults to `next`. npm publishes to `latest` unless told
 otherwise, including for prerelease versions — dispatching a release
