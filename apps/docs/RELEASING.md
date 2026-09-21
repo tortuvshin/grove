@@ -52,6 +52,15 @@ All four fields are case-sensitive exact matches. Two consequences worth interna
 
 Because the packages already exist on npm, the "trusted publishing cannot create a package's first version" limitation does not apply here. It would apply to a brand-new fifth package — publish its `0.0.1` manually once, then configure the trusted publisher.
 
+Configuring (or checking) a trusted publisher from the command line needs **npm 12 or newer**. The registry requires every configuration to name what it may do, and npm 11's `npm trust` does not send that field — it fails with a bare `400 Bad Request`.
+
+```bash
+npx npm@latest trust list @grove-dev/core
+npx npm@latest trust github @grove-dev/core --file release.yml --repo tortuvshin/grove --allow-publish
+```
+
+Both open a browser window for two-factor authentication. That step is the point: it is the one place a human approves who may publish.
+
 ## Provenance
 
 Every version from **0.10.0 onward** carries a signed provenance attestation linking the tarball to the commit and workflow run that produced it. Check any published version:
@@ -156,7 +165,7 @@ The job refuses the obvious mistakes before it builds anything: four package ver
 
 `pnpm -r publish` skips versions already on the registry, so **re-running the job is safe** and is the first thing to try. A partial publish leaves the remaining packages to a re-run rather than to manual intervention.
 
-If it fails at the auth step with a `404`, the OIDC claim did not match. In order of likelihood: the workflow filename on npmjs.com no longer matches this file, `id-token: write` is missing from the publish job, or an environment name was configured on npmjs.com that this workflow does not set.
+If it fails at the auth step with `ENEEDAUTH` or a `404`, the OIDC exchange was refused. The `Why the publish failed` step prints the registry's own answer, which npm otherwise keeps below console level. `OIDC token exchange error - package not found` means no trusted publisher on that package matches this repository and workflow — which is how 0.10.0's first attempt failed: the four configurations described above had been documented but never created. Otherwise the claim did not match. In order of likelihood: the workflow filename on npmjs.com no longer matches this file, `id-token: write` is missing from the publish job, or an environment name was configured on npmjs.com that this workflow does not set.
 
 Provenance is requested with `NPM_CONFIG_PROVENANCE=true` on the publish step, not with a `--provenance` flag. pnpm 10 publishes by packing the tarball and spawning `npm publish`, and under `-r` it rebuilds the argument list per package — `--tag`, `--registry`, `--access`, `--dry-run`, `--force`, `--otp` and nothing else. A `--provenance` flag is accepted and silently dropped; the environment variable is inherited by the spawned npm and arrives. The same detail is why the job checks the **npm** version (≥ 11.5.1) rather than pnpm's: the OIDC exchange is npm's.
 
