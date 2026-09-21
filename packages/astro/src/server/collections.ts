@@ -1,5 +1,5 @@
-import type { Collection, CollectionEntry } from '@grove-dev/core';
-import { collectionSchema, findRelated, runCollection } from '@grove-dev/core';
+import type { Collection, CollectionEntry, CollectionSourceRecord } from '@grove-dev/core';
+import { collectionSchema, findRelated, runCollection, toCollectionEntries } from '@grove-dev/core';
 import { absoluteUrl, ogPath, type PageSeo, seoDescription, seoTitle } from './seo.js';
 
 // Collection YAML loading lives in @grove-dev/core (it also feeds the
@@ -11,94 +11,21 @@ interface RouteHint {
   blueprintConfig?: { routeSlug?: string };
 }
 
-interface RawRecord {
-  slug?: string;
-  name?: string;
-  title?: string;
-  description?: string;
-  stack?: string;
-  stacks?: string[];
-  platforms?: string[];
-  license?: string;
-  licenses?: string[];
-  visibility?: string;
-  /** GitHub stargazers count. Stored on `github.repository.stargazers_count`
-   *  in the full payload; read explicitly because the index payload
-   *  does not flatten it. */
-  stars?: number;
-  /** GitHub fork count. Stored on `github.repository.forks_count`. */
-  forks?: number;
-  pushedAt?: string;
-  lastCommitAt?: string;
-  category?: string;
-  tags?: string[];
-  scores?: { curation?: number; activity?: number };
-  repoUrl?: string;
-  links?: { github?: string; website?: string };
-  /** GitHub metadata block on the full record. The star / fork counts
-   *  are read from `github.repository.stargazers_count` /
-   *  `github.repository.forks_count` here. */
-  github?: {
-    repository?: {
-      stargazers_count?: number;
-      forks_count?: number;
-    };
-  };
-}
-
 /**
  * Map a list of full records (shape produced by `records.json`) to
  * the lightweight `CollectionEntry` shape consumed by `runCollection`.
  *
- * - Skips records with `visibility === "hide"` — they should never
- *   appear in any collection.
- * - Combines `category` and `tags` into a `categories` array (deduplicated).
- * - Falls back to `stacks[0]` when `stack` is missing.
- * - Prefers `pushedAt`; falls back to `lastCommitAt`.
- * - Constructs `url` as `${routeSlug}/${slug}/` so the value points
- *   back to the consumer's detail page.
- * - Populates `repoHref` (from `repoUrl` or `links.github`) and
- *   `homepageHref` (from `links.website`) so the row component
- *   can render "View repo" / "Visit site" footer links.
+ * The projection itself is `toCollectionEntries` in `@grove-dev/core` —
+ * shared with the OG-image pipeline so both count a collection the same
+ * way. This wrapper only resolves the directory route slug from the
+ * site payload, so an entry's `url` points at the consumer's detail page.
  */
 export function recordsToCollectionEntries(
-  records: RawRecord[],
+  records: CollectionSourceRecord[],
   site: RouteHint,
 ): CollectionEntry[] {
   const routeSlug = site.routeSlug ?? site.blueprintConfig?.routeSlug ?? 'projects';
-  const out: CollectionEntry[] = [];
-  for (const r of records) {
-    if (r.visibility === 'hide') continue;
-    if (!r.slug) continue;
-    const categories = [...(r.category ? [r.category] : []), ...(r.tags ?? [])].filter(
-      (value, index, self) => self.indexOf(value) === index,
-    );
-    out.push({
-      slug: r.slug,
-      title: r.name ?? r.title ?? r.slug,
-      description: r.description ?? '',
-      url: `/${routeSlug}/${r.slug}/`,
-      repoHref: r.repoUrl ?? r.links?.github,
-      homepageHref: r.links?.website,
-      stack: r.stack ?? r.stacks?.[0],
-      platform: r.platforms,
-      license: r.license,
-      // Pass through the curated `licenses` array so the collection
-      // engine can match both curated SPDX ids and the GitHub fallback.
-      // If only `license` (singular, GitHub-synced) is present, mirror
-      // it into the array so the filter still matches it.
-      licenses:
-        r.licenses && r.licenses.length > 0 ? r.licenses : r.license ? [r.license] : undefined,
-      status: r.visibility,
-      stars: r.stars ?? r.github?.repository?.stargazers_count,
-      forks: r.forks ?? r.github?.repository?.forks_count,
-      pushedAt: r.pushedAt ?? r.lastCommitAt,
-      curationScore: r.scores?.curation,
-      activityScore: r.scores?.activity,
-      categories: categories.length > 0 ? categories : undefined,
-    });
-  }
-  return out;
+  return toCollectionEntries(records, { routeSlug });
 }
 
 // ── Collection view-models ──────────────────────────────────────

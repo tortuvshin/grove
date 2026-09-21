@@ -18,51 +18,72 @@
  * state and never mutate their input.
  */
 
-export type CollectionKind = 'curated' | 'generated';
+import { z } from 'zod';
 
-export type RankingPreset = 'quality' | 'active' | 'curated' | 'recency' | 'stars';
+const rankingPresetSchema = z.enum(['quality', 'active', 'curated', 'recency', 'stars']);
 
-export interface CollectionQuery {
-  stacks?: string[];
-  platforms?: string[];
-  categories?: string[];
-  licenses?: string[];
-  kinds?: string[];
-  excludeStatuses?: string[];
+const collectionQuerySchema = z.object({
+  stacks: z.array(z.string()).optional(),
+  platforms: z.array(z.string()).optional(),
+  categories: z.array(z.string()).optional(),
+  licenses: z.array(z.string()).optional(),
+  kinds: z.array(z.string()).optional(),
+  excludeStatuses: z.array(z.string()).optional(),
   /** Minimum GitHub star count. Entries below this are excluded. */
-  minStars?: number;
+  minStars: z.number().nonnegative().optional(),
   /** Minimum GitHub fork count. Entries below this are excluded. */
-  minForks?: number;
-  q?: string;
-}
+  minForks: z.number().nonnegative().optional(),
+  q: z.string().optional(),
+});
 
-export interface CollectionRanking {
-  preset: RankingPreset;
-  signals?: string[];
-}
+/**
+ * The shape of one `data/collections/<slug>.yml` file. Named
+ * `collectionDefinitionSchema` because `collectionSchema` is already the
+ * JSON-LD builder in `page-document.ts`.
+ *
+ * Top-level keys are loose so a consumer can carry its own fields next
+ * to Grove's; the blocks Grove reads are strict enough that a typo in
+ * `ranking.preset` or a string `minStars` fails `grove check` instead of
+ * silently producing an unfiltered, unranked page.
+ */
+export const collectionDefinitionSchema = z.looseObject({
+  slug: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'slug must be lowercase kebab-case'),
+  kind: z.enum(['curated', 'generated']).default('curated'),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  query: collectionQuerySchema.prefault({}),
+  ranking: z
+    .object({
+      preset: rankingPresetSchema,
+      signals: z.array(z.string()).optional(),
+    })
+    .prefault({ preset: 'curated' }),
+  editorial: z
+    .object({
+      introduction: z.string().optional(),
+      selectionNote: z.string().optional(),
+      lastReviewedAt: z.string().optional(),
+    })
+    .optional(),
+  seo: z
+    .object({
+      index: z.boolean().default(true),
+      title: z.string().optional(),
+      description: z.string().optional(),
+    })
+    .prefault({}),
+});
 
-export interface CollectionEditorial {
-  introduction?: string;
-  selectionNote?: string;
-  lastReviewedAt?: string;
-}
-
-export interface CollectionSeo {
-  index: boolean;
-  title?: string;
-  description?: string;
-}
-
-export interface Collection {
-  slug: string;
-  kind: CollectionKind;
-  title: string;
-  description: string;
-  query: CollectionQuery;
-  ranking: CollectionRanking;
-  editorial?: CollectionEditorial;
-  seo: CollectionSeo;
-}
+export type Collection = z.infer<typeof collectionDefinitionSchema>;
+export type CollectionKind = Collection['kind'];
+export type RankingPreset = z.infer<typeof rankingPresetSchema>;
+export type CollectionQuery = Collection['query'];
+export type CollectionRanking = Collection['ranking'];
+export type CollectionEditorial = NonNullable<Collection['editorial']>;
+export type CollectionSeo = Collection['seo'];
 
 export interface CollectionEntry {
   slug: string;

@@ -16,7 +16,7 @@ A collection is different from a lens in two ways:
 
 ## Two kinds
 
-`CollectionKind` is `"curated" | "generated"` (`packages/core/src/collections.ts:21`). Both kinds have the exact same shape — a `query` and a `ranking` — and are resolved the same way at build time: `runCollection` filters the record set with `query` and orders the result with `ranking` (`packages/core/src/collector.ts:12-17`). There is no field for hand-listing record ids; `kind` only changes the eyebrow label the collection page renders (`packages/astro/src/pages/collections/[slug].astro:52`: `"Curated collection"` vs `"Generated collection"`).
+`CollectionKind` is `"curated" | "generated"` (`packages/core/src/collections.ts`). Both kinds have the exact same shape — a `query` and a `ranking` — and are resolved the same way at build time: `runCollection` filters the record set with `query` and orders the result with `ranking` (`packages/core/src/collector.ts:12-17`). There is no field for hand-listing record ids; `kind` only changes the eyebrow label the collection page renders (`packages/astro/src/pages/collections/[slug].astro:52`: `"Curated collection"` vs `"Generated collection"`).
 
 <Tabs syncKey="kind">
   <TabItem label="curated" icon="seti:notebook">
@@ -71,23 +71,23 @@ editorial:
     <Badge text="curated" variant="default" />
     <Badge text="generated" variant="default" />
 
-    `curated` or `generated` (`packages/core/src/collections.ts:21`). Both run through the same `query`/`ranking` pipeline; `kind` only changes the eyebrow label the collection page renders.
+    `curated` or `generated` (`packages/core/src/collections.ts`). Both run through the same `query`/`ranking` pipeline; `kind` only changes the eyebrow label the collection page renders.
   </Card>
 
   <Card title="title">
-    Required display title (`packages/core/src/collections.ts:59`). `grove collection promote` defaults it to a humanized slug when `--title` isn't passed (`packages/cli/src/collection-cli.ts:25`); the YAML loader itself applies no default.
+    Required display title (`packages/core/src/collections.ts`). `grove collection promote` defaults it to a humanized slug when `--title` isn't passed (`packages/cli/src/collection-cli.ts:25`); the YAML loader itself applies no default.
   </Card>
 
   <Card title="description">
-    Required long description for the collection page (`packages/core/src/collections.ts:60`).
+    Required long description for the collection page (`packages/core/src/collections.ts`).
   </Card>
 
   <Card title="query">
-    Facet filters: `stacks`, `platforms`, `categories`, `licenses`, `kinds`, `excludeStatuses`, `minStars`, `minForks`, `q` (`packages/core/src/collections.ts:25-37`).
+    Facet filters: `stacks`, `platforms`, `categories`, `licenses`, `kinds`, `excludeStatuses`, `minStars`, `minForks`, `q` (`packages/core/src/collections.ts`).
   </Card>
 
   <Card title="ranking.preset">
-    One of `quality`, `active`, `curated`, `recency`, or `stars` (`packages/core/src/collections.ts:23`).
+    One of `quality`, `active`, `curated`, `recency`, or `stars` (`packages/core/src/collections.ts`).
   </Card>
 
   <Card title="seo.title / seo.description / seo.index">
@@ -95,7 +95,7 @@ editorial:
   </Card>
 
   <Card title="editorial.introduction / editorial.selectionNote / editorial.lastReviewedAt">
-    Optional editorial intro, selection note, and last-reviewed date (`packages/core/src/collections.ts:44-48`).
+    Optional editorial intro, selection note, and last-reviewed date (`packages/core/src/collections.ts`).
   </Card>
 </CardGrid>
 
@@ -143,6 +143,16 @@ The fastest way to create a collection is to land on a browse URL — `/browse?s
 
 The page template is in `@grove-dev/astro`'s `CollectionPage` component. Consumers customize via their own `src/pages/collections/*` if they need a different layout.
 
+## Validation and ranking inputs
+
+`grove check` parses every collection file with the same schema the build uses. A typo that used to produce a silently unfiltered page — `ranking: { preset: popularity }`, `minStars: "500"` — is a `collection_invalid` error; a slug shared by two files is `duplicate_collection_slug`; a query that matches nothing is a `collection_empty` warning. See [`grove check`](/automation/check/).
+
+`excludeStatuses` matches a record's **`health.status`** (`active`, `mature`, `stale`, `inactive`, `archived`, …), the lifecycle value `grove sync github` writes — not the curation `visibility`, which is `keep` for almost every record. The `quality` and `active` presets rank on a curated `scores` block when you wrote one and otherwise on the synced GitHub data: recent releases, pushes and commits for activity, stars on a log scale for adoption. A directory that has run `grove sync github` gets meaningful ordering with no hand-scored records.
+
+<Aside type="caution" title="Upgrading from 0.10">
+  Before this change `excludeStatuses` compared against `visibility`, so `excludeStatuses: [archived]` excluded nothing, and records without a `scores` block all ranked 0 and rendered in file order. After upgrading, a collection can get shorter (archived or stale records now leave) and its order will change. If you wrote a local adapter to back-fill `status`, `pushedAt` or scores before calling `runCollection`, delete it.
+</Aside>
+
 ## When to use a collection vs a content page
 
 A content page is for prose. A collection is for "I want a page that lists and sorts records for me." If your collection page is mostly prose with one or two record mentions, write a content page. If it lists twenty records, that's a collection.
@@ -155,7 +165,7 @@ A content page is for prose. A collection is for "I want a page that lists and s
 ## How matching works
 
 <Aside type="note" title="Match semantics">
-  `filterEntries` ANDs every query field you set: a record must satisfy `stacks`, `platforms`, `categories`, `licenses`, `kinds`, `excludeStatuses`, `minStars`, `minForks`, and `q` all at once. Within a single array field (`platforms`, `categories`, `licenses`) a record matches if it has *any* of the listed values (`packages/core/src/collections.ts:95-142`).
+  `filterEntries` ANDs every query field you set: a record must satisfy `stacks`, `platforms`, `categories`, `licenses`, `kinds`, `excludeStatuses`, `minStars`, `minForks`, and `q` all at once. Within a single array field (`platforms`, `categories`, `licenses`) a record matches if it has *any* of the listed values (`packages/core/src/collections.ts`).
 </Aside>
 
 If a record was added after the collection was created and now matches the query, it appears automatically at the next build — no re-authoring needed.

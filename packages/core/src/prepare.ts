@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 import { type GenerateResult, generate } from './build-data.js';
-import type { CollectionEntry } from './collections.js';
+import { toCollectionEntries } from './collection-entries.js';
 import { loadCollections } from './collections-io.js';
 import { runCollection } from './collector.js';
 import { loadConfig } from './config.js';
@@ -131,7 +131,7 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
     await readFile(join(root, config.paths.generatedDir, 'site-config.json'), 'utf8'),
   ) as {
     stats?: { totalRecords?: number; repositoryStars?: number };
-    blueprintConfig?: { labelPlural?: string };
+    blueprintConfig?: { labelPlural?: string; routeSlug?: string };
     taxonomy?: {
       categories?: Array<{ id: string; name?: string; count?: number }>;
       stacks?: Array<{ id: string; name?: string; count?: number }>;
@@ -195,25 +195,10 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
   const categoryCounts = countBy((r) => r.category);
   const stackCounts = countBy((r) => r.stack);
   const licenseCounts = countBy(licenseOf);
-  // Lightweight CollectionEntry mapping — enough for the collection
-  // engine's query filter, so the OG caption's count matches the page.
-  const collectionEntries: CollectionEntry[] = visible.map((r) => {
-    const status = r.health?.visibility ?? r.visibility;
-    const stars = r.github?.stars ?? r.github?.repository?.stargazers_count;
-    const pushedAt = r.lastCommitAt ?? r.github?.pushedAt ?? r.github?.repository?.pushed_at;
-    const license = licenseOf(r);
-    return {
-      slug: r.slug,
-      title: r.name ?? r.title ?? r.slug,
-      description: r.description ?? '',
-      url: `/${r.slug}/`,
-      ...(r.stack !== undefined ? { stack: r.stack } : {}),
-      ...(license !== undefined ? { license } : {}),
-      ...(status !== undefined ? { status } : {}),
-      ...(stars !== undefined ? { stars } : {}),
-      ...(pushedAt != null ? { pushedAt } : {}),
-      ...(r.category ? { categories: [r.category] } : {}),
-    };
+  // The same projection the collection page uses, so the OG caption's
+  // count matches what the page renders.
+  const collectionEntries = toCollectionEntries(visible, {
+    routeSlug: sitePayload.blueprintConfig?.routeSlug ?? 'projects',
   });
   const taxonomyJobs = [
     ...(sitePayload.taxonomy?.categories ?? []).map((t) => ({
