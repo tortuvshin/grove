@@ -32,7 +32,7 @@
     "check": "node ../../scripts/check-registry.mjs"
   },
   "devDependencies": {
-    "@types/node": "^25.9.2",
+    "@types/node": "^26.4.1",
     "shadcn": "4.19.0"
   }
 }
