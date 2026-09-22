@@ -284,3 +284,169 @@ export function findCollectionsFor(
   }
   return result;
 }
+
+// ── Record context: relations, related records, membership ──────
+
+const RELATION_LABELS: Record<string, string> = {
+  'alternative-to': 'Alternative to',
+};
+
+export interface RecordContextSubject {
+  id: string;
+  name: string;
+  /** The subject's own page (e.g. the vendor's), when the vocabulary has one. */
+  url?: string;
+}
+
+export interface RecordContextModel {
+  /** The record's relations, resolved against the subject vocabulary. */
+  relations: Array<{
+    type: string;
+    /** Human label for the relation type, e.g. "Alternative to". */
+    label: string;
+    subject: RecordContextSubject;
+    note?: string;
+    evidence?: { type: string; url?: string; quote?: string; checkedAt?: string };
+    /** The collection that declares `subject: <id>`, if there is one. */
+    hub?: { title: string; url: string };
+  }>;
+  /** Other visible records that share one of the record's subjects. */
+  relatedRecords: Array<{
+    subject: RecordContextSubject;
+    label: string;
+    hub?: { title: string; url: string };
+    records: Array<{ slug: string; title: string; url: string; description: string }>;
+  }>;
+  /** Collections whose resolved entries include the record. */
+  collectionMembership: Array<{ slug: string; title: string; url: string }>;
+}
+
+interface RecordContextInput {
+  collections: Collection[];
+  entries: CollectionEntry[];
+  /** `site-config.json` → `taxonomy.subjects`. */
+  subjects?: Array<{ id: string; name: string; url?: unknown }>;
+  /** Cap on related records listed per subject (default 6). */
+  relatedLimit?: number;
+}
+
+/**
+ * A detail page is rendered once per record, and each render needs every
+ * collection resolved. Cache the resolved slug sets per entry stream so a
+ * 100-record, 20-collection site runs 20 collections, not 2,000.
+ */
+const membershipCache = new WeakMap<CollectionEntry[], Map<string, Set<string>>>();
+
+function membersOf(collection: Collection, entries: CollectionEntry[]): Set<string> {
+  let bySlug = membershipCache.get(entries);
+  if (!bySlug) {
+    bySlug = new Map();
+    membershipCache.set(entries, bySlug);
+  }
+  let members = bySlug.get(collection.slug);
+  if (!members) {
+    members = new Set(runCollection(collection, entries).entries.map((entry) => entry.slug));
+    bySlug.set(collection.slug, members);
+  }
+  return members;
+}
+
+/**
+ * Everything a record page links *out* to: the subjects it relates to
+ * (and the hub collection for each), sibling records that share a
+ * subject, and the collections it appears in. Pure — the caller passes
+ * the collections, the entry stream and the subject vocabulary.
+ */
+export function getRecordContextModel(
+  record: {
+    slug: string;
+    relations?: Array<{
+      type: string;
+      to: string;
+      note?: string | undefined;
+      evidence?:
+        | {
+            type: string;
+            url?: string | undefined;
+            quote?: string | undefined;
+            checkedAt?: string | undefined;
+          }
+        | undefined;
+    }>;
+  },
+  input: RecordContextInput,
+): RecordContextModel {
+  const { collections, entries } = input;
+  const limit = input.relatedLimit ?? 6;
+  const subjects = new Map(
+    (input.subjects ?? []).map((subject) => [
+      subject.id,
+      {
+        id: subject.id,
+        name: subject.name,
+        ...(typeof subject.url === 'string' ? { url: subject.url } : {}),
+      } satisfies RecordContextSubject,
+    ]),
+  );
+  const hubFor = (subjectId: string) => {
+    const hub = collections.find((collection) => collection.subject === subjectId);
+    return hub ? { title: hub.title, url: `/collections/${hub.slug}/` } : undefined;
+  };
+
+  const relations: RecordContextModel['relations'] = [];
+  const relatedRecords: RecordContextModel['relatedRecords'] = [];
+  const seenSubjects = new Set<string>();
+  for (const relation of record.relations ?? []) {
+    const subject = subjects.get(relation.to);
+    if (!subject) continue;
+    const label = RELATION_LABELS[relation.type] ?? relation.type;
+    const hub = hubFor(subject.id);
+    const evidence = relation.evidence
+      ? {
+          type: relation.evidence.type,
+          ...(relation.evidence.url ? { url: relation.evidence.url } : {}),
+          ...(relation.evidence.quote ? { quote: relation.evidence.quote } : {}),
+          ...(relation.evidence.checkedAt ? { checkedAt: relation.evidence.checkedAt } : {}),
+        }
+      : undefined;
+    relations.push({
+      type: relation.type,
+      label,
+      subject,
+      ...(relation.note ? { note: relation.note } : {}),
+      ...(evidence ? { evidence } : {}),
+      ...(hub ? { hub } : {}),
+    });
+
+    const key = `${relation.type}:${subject.id}`;
+    if (seenSubjects.has(key)) continue;
+    seenSubjects.add(key);
+    const siblings = entries
+      .filter(
+        (entry) =>
+          entry.slug !== record.slug &&
+          (entry.relations ?? []).some((r) => r.to === subject.id && r.type === relation.type),
+      )
+      .sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0))
+      .slice(0, limit)
+      .map((entry) => ({
+        slug: entry.slug,
+        title: entry.title,
+        url: entry.url,
+        description: entry.description,
+      }));
+    if (siblings.length > 0) {
+      relatedRecords.push({ subject, label, ...(hub ? { hub } : {}), records: siblings });
+    }
+  }
+
+  const collectionMembership = collections
+    .filter((collection) => membersOf(collection, entries).has(record.slug))
+    .map((collection) => ({
+      slug: collection.slug,
+      title: collection.title,
+      url: `/collections/${collection.slug}/`,
+    }));
+
+  return { relations, relatedRecords, collectionMembership };
+}

@@ -56,3 +56,23 @@ describe('findRelated', () => {
     expect(out[0].slug).toBe('active-flutter');
   });
 });
+
+describe('findRelated — subjects', () => {
+  const make = (slug: string, extra: Partial<Collection>): Collection => ({
+    slug,
+    kind: 'curated',
+    title: slug,
+    description: 'x',
+    query: {},
+    ranking: { preset: 'curated' },
+    seo: { index: true },
+    ...extra,
+  });
+
+  it('relates a hub to a collection that queries the same subject', () => {
+    const hub = make('notion-alternatives', { subject: 'notion' });
+    const notes = make('note-apps', { query: { relatedTo: { subjects: ['notion', 'evernote'] } } });
+    const other = make('chat-apps', { subject: 'slack' });
+    expect(findRelated(hub, [hub, notes, other], 4).map((c) => c.slug)).toEqual(['note-apps']);
+  });
+});

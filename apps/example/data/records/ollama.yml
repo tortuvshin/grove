@@ -28,3 +28,9 @@ curation:
   lenses: [production-like, good-to-learn]
 content: ./content/records/ollama.md
 visibility: keep
+relations:
+  - type: alternative-to
+    to: chatgpt
+    evidence:
+      type: editorial
+      checkedAt: "2026-09-01"

@@ -4,6 +4,7 @@ import {
   getCollectionIndexModel,
   getCollectionPageModel,
   getCollectionTeaserModel,
+  getRecordContextModel,
   recordsToCollectionEntries,
 } from './collections.js';
 
@@ -248,5 +249,123 @@ describe('getCollectionTeaserModel', () => {
   it("uses the project's route slug for entry URLs", () => {
     const model = getCollectionTeaserModel([collection], entries, 5);
     expect(model.collections[0].count).toBe(2);
+  });
+});
+
+describe('getRecordContextModel', () => {
+  const stream: CollectionEntry[] = [
+    {
+      slug: 'appflowy',
+      title: 'AppFlowy',
+      description: 'Docs and wikis.',
+      url: '/apps/appflowy/',
+      stars: 60000,
+      relations: [{ type: 'alternative-to', to: 'notion' }],
+    },
+    {
+      slug: 'affine',
+      title: 'AFFiNE',
+      description: 'Docs and whiteboards.',
+      url: '/apps/affine/',
+      stars: 40000,
+      relations: [{ type: 'alternative-to', to: 'notion' }],
+    },
+    {
+      slug: 'anytype',
+      title: 'Anytype',
+      description: 'Local-first notes.',
+      url: '/apps/anytype/',
+      stars: 5000,
+      relations: [{ type: 'alternative-to', to: 'notion' }],
+    },
+    {
+      slug: 'mattermost',
+      title: 'Mattermost',
+      description: 'Team chat.',
+      url: '/apps/mattermost/',
+      relations: [{ type: 'alternative-to', to: 'slack' }],
+    },
+  ];
+  const base = {
+    kind: 'curated' as const,
+    description: 'd',
+    ranking: { preset: 'curated' as const },
+    seo: { index: true },
+  };
+  const hub: Collection = {
+    ...base,
+    slug: 'open-source-notion-alternatives',
+    title: 'Open Source Notion Alternatives',
+    subject: 'notion',
+    query: { relatedTo: { type: 'alternative-to', subjects: ['notion'] } },
+  };
+  const chat: Collection = {
+    ...base,
+    slug: 'team-chat',
+    title: 'Team chat',
+    query: {},
+    entries: [{ slug: 'mattermost' }],
+  };
+  const subjects = [
+    { id: 'notion', name: 'Notion', url: 'https://www.notion.com' },
+    { id: 'slack', name: 'Slack' },
+  ];
+  const input = { collections: [hub, chat], entries: stream, subjects };
+
+  it('resolves relations against the vocabulary and links the hub', () => {
+    const model = getRecordContextModel(
+      {
+        slug: 'appflowy',
+        relations: [
+          {
+            type: 'alternative-to',
+            to: 'notion',
+            evidence: { type: 'self-described', quote: 'The open source Notion alternative' },
+          },
+          { type: 'alternative-to', to: 'not-in-vocabulary' },
+        ],
+      },
+      input,
+    );
+    expect(model.relations).toEqual([
+      {
+        type: 'alternative-to',
+        label: 'Alternative to',
+        subject: { id: 'notion', name: 'Notion', url: 'https://www.notion.com' },
+        evidence: { type: 'self-described', quote: 'The open source Notion alternative' },
+        hub: {
+          title: 'Open Source Notion Alternatives',
+          url: '/collections/open-source-notion-alternatives/',
+        },
+      },
+    ]);
+  });
+
+  it('lists sibling records by stars, without the record itself', () => {
+    const model = getRecordContextModel(
+      { slug: 'anytype', relations: [{ type: 'alternative-to', to: 'notion' }] },
+      { ...input, relatedLimit: 1 },
+    );
+    expect(model.relatedRecords).toHaveLength(1);
+    expect(model.relatedRecords[0]?.records.map((r) => r.slug)).toEqual(['appflowy']);
+    expect(model.relatedRecords[0]?.hub?.url).toBe('/collections/open-source-notion-alternatives/');
+  });
+
+  it('omits the hub when no collection declares the subject, and sibling groups with nobody in them', () => {
+    const model = getRecordContextModel(
+      { slug: 'mattermost', relations: [{ type: 'alternative-to', to: 'slack' }] },
+      input,
+    );
+    expect(model.relations[0]?.hub).toBeUndefined();
+    expect(model.relatedRecords).toEqual([]);
+  });
+
+  it('reports the collections the record appears in, by query or by pick', () => {
+    expect(
+      getRecordContextModel({ slug: 'affine' }, input).collectionMembership.map((c) => c.slug),
+    ).toEqual(['open-source-notion-alternatives']);
+    expect(
+      getRecordContextModel({ slug: 'mattermost' }, input).collectionMembership.map((c) => c.slug),
+    ).toEqual(['team-chat']);
   });
 });

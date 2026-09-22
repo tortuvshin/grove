@@ -282,11 +282,14 @@ export type {
   ProjectRecord,
   ProjectType,
   ReadmeConfig,
+  Relation,
+  RelationType,
   Resource,
   ResourceKind,
   ResourceRecord,
   ResourceType,
   Score,
+  Subject,
 } from './schema.js';
 // ── Record YAML helpers (used by `grove import` and the generator) ──
 export {
@@ -314,12 +317,16 @@ export {
   projectTypeSchema,
   readmeConfigSchema,
   recordsFileSchema,
+  relationEvidenceSchema,
+  relationSchema,
+  relationTypeSchema,
   resourceKindSchema,
   resourceRecordSchema,
   resourceSchema,
   resourceTypeSchema,
   scoreSchema,
   stringifyRecordYaml,
+  subjectSchema,
 } from './schema.js';
 export type {
   SiteArtifactStats,

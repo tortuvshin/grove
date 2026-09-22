@@ -101,6 +101,20 @@ Only these six filenames are read. Files with other names in `data/taxonomy/` ar
   </TabItem>
 </Tabs>
 
+## The optional seventh file: `subjects.yml`
+
+`data/taxonomy/subjects.yml` lists the things records relate to that are not records themselves — usually a product a record is an alternative to:
+
+```yaml title="data/taxonomy/subjects.yml"
+- id: notion
+  name: Notion
+  kind: product          # product | company | standard | other
+  url: https://www.notion.com
+  aliases: [Notion.so]
+```
+
+A site without the file simply has no subjects. Unlike the other vocabularies it is validated strictly — an invalid or duplicated subject, or a record relation to an unknown one, is a `grove check` error. See [Subjects and relations](/concepts/relations/).
+
 ## Authoring conventions
 
 <CardGrid stagger>

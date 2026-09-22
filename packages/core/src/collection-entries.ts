@@ -37,6 +37,7 @@ export interface CollectionSourceRecord {
   pushedAt?: string | null;
   lastCommitAt?: string | null;
   scores?: { curation?: number; activity?: number };
+  relations?: Array<{ type: string; to: string }>;
   health?: { status?: string; visibility?: string };
   github?: {
     stars?: number;
@@ -138,6 +139,9 @@ export function toCollectionEntries(
       ...(curationScore !== undefined ? { curationScore } : {}),
       ...(activityScore !== undefined ? { activityScore } : {}),
       ...(categories.length ? { categories } : {}),
+      ...(r.relations?.length
+        ? { relations: r.relations.map(({ type, to }) => ({ type, to })) }
+        : {}),
     });
   }
   return out;

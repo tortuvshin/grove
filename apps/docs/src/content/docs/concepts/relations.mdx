@@ -1,0 +1,90 @@
+---
+title: Subjects and relations
+description: Relate records to things that are not records — "an open-source alternative to X" — and gather them on a hub collection.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Records often matter because of something that is *not* in the directory. An open-source CRM is "an alternative to Salesforce"; nobody maintains a Salesforce record. A **subject** is that outside thing, a **relation** is the record's link to it, and a collection that declares the subject is the **hub** that gathers every related record on one page.
+
+## Subjects
+
+Subjects are a vocabulary file, like categories:
+
+```yaml
+# data/taxonomy/subjects.yml
+- id: notion
+  name: Notion
+  kind: product            # product | company | standard | other  (default: product)
+  url: https://www.notion.com
+  description: A hosted docs and wiki workspace.
+  aliases: [Notion.so]
+```
+
+A subject gets no page, sitemap entry or browse card of its own. Extra keys are kept, so a site can carry its own fields. Every subject is published in `site-config.json` under `taxonomy.subjects`, with a `count` of the visible records related to it.
+
+## Relations
+
+```yaml
+# data/records/appflowy.yml
+relations:
+  - type: alternative-to     # the only type today
+    to: notion               # a subject id
+    note: Closest to Notion's block editor and databases.
+    evidence:
+      type: self-described   # self-described | repo-topic | editorial
+      url: https://github.com/AppFlowy-IO/AppFlowy
+      quote: The open source Notion alternative
+      checkedAt: "2026-09-01"
+```
+
+`relations` defaults to `[]` on every record. `evidence` records where the claim comes from: the project's own words (`self-described` — quote them), a repository topic such as `notion-alternative` (`repo-topic`), or the curator's judgement (`editorial`). The record page marks an `editorial` relation as "editor's match" and leaves the project's own claims alone.
+
+<Aside type="note" title="Why only one relation type">
+  `alternative-to` is the relation directories are asked for. The type is an enum so it can widen later without breaking a file that validates today.
+</Aside>
+
+## The hub collection
+
+A hub is an ordinary [collection](/concepts/collections/) that names its subject and takes its members from the relations:
+
+```yaml
+# data/collections/open-source-notion-alternatives.yml
+slug: open-source-notion-alternatives
+title: Open Source Notion Alternatives
+description: Self-hosted and local-first workspaces you can use instead of Notion.
+subject: notion
+query:
+  relatedTo:
+    type: alternative-to
+    subjects: [notion]
+ranking:
+  preset: stars
+```
+
+Because membership is `query.relatedTo`, the hub cannot drift from the records: add a relation to a record and it joins the page. Everything else a collection can do applies — hand-picked `entries` with verdict notes, a Markdown `content` body, `faq`. There is one hub per subject, and it lives at the collection's normal URL, `/collections/<slug>/`; there is no separate route to keep canonical.
+
+A subject with no hub simply has no page. Nothing is generated from relations alone, so a directory never publishes a thin "alternatives to X" page it did not write.
+
+## What the record page gains
+
+`getRecordContextModel(record, { collections, entries, subjects })` from `@grove-dev/astro/server` returns:
+
+- `relations` — each resolved to its subject, with the hub's title and URL when one exists;
+- `relatedRecords` — other visible records sharing a subject, by stars, capped at six per subject;
+- `collectionMembership` — every collection the record appears in, by query or by pick.
+
+The scaffolded detail page renders them with `record-relations.astro` (a row of "Alternative to X" links under the header) and `related-records.astro` ("Other alternatives to X", "Featured in"). `editorial-summary.astro` also renders the record's `whyListed`.
+
+## Validation
+
+`grove check` reports:
+
+| Code | Severity | When |
+|---|---|---|
+| `subject_invalid` | error | `subjects.yml` is not a list, or an item fails the schema |
+| `duplicate_subject` | error | Two subjects share an id |
+| `unknown_subject` | error | A record relation points at an id that is not in `subjects.yml` |
+| `collection_unknown_subject` | error | A collection's `subject` or `query.relatedTo.subjects` names an unknown id |
+| `duplicate_subject_hub` | error | Two collections declare the same `subject` |
+| `subject_without_collection` | warning | Three or more records relate to a subject and no collection is its hub |

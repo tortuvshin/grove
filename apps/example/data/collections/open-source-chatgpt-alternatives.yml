@@ -1,0 +1,18 @@
+slug: open-source-chatgpt-alternatives
+kind: curated
+title: Open Source ChatGPT Alternatives
+description: Self-hosted chat interfaces and local model runners you can use instead of a hosted assistant.
+# The hub for the `chatgpt` subject. Membership comes from the relations
+# on the records, so adding a relation to a record adds it here.
+subject: chatgpt
+query:
+  relatedTo:
+    type: alternative-to
+    subjects: [chatgpt]
+ranking:
+  preset: stars
+editorial:
+  introduction: Open WebUI gives you the chat window; Ollama runs the models behind it. Most self-hosted setups use both.
+  lastReviewedAt: "2026-09-01"
+seo:
+  index: true

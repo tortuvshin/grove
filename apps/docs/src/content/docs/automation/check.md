@@ -45,6 +45,12 @@ grove check --strict   # also fail when there are warnings
 | `collection_unknown_entry` | error | A collection's `entries` lists a slug that is not a record. |
 | `collection_body_missing` | error | A collection's `content` path does not exist. |
 | `collection_hidden_entry` | warning | A collection's `entries` lists a record that is hidden or removed, so it will not render. |
+| `subject_invalid` | error | `data/taxonomy/subjects.yml` is not a YAML list, or an item fails the subject schema. |
+| `duplicate_subject` | error | Two subjects share an `id`. |
+| `unknown_subject` | error | A record's `relations[].to` is not a subject id. |
+| `collection_unknown_subject` | error | A collection's `subject` or `query.relatedTo.subjects` names an unknown subject. |
+| `duplicate_subject_hub` | error | Two collections declare the same `subject`. |
+| `subject_without_collection` | warning | Three or more records relate to a subject and no collection declares it. |
 | `collection_empty` | warning | No record matches the collection's query, so the page would render an empty list. |
 
 Source: `packages/core/src/validate.ts:70-284`.

@@ -510,3 +510,105 @@ describe('validateProject — collections', () => {
     });
   });
 });
+
+describe('validateProject — subjects and relations', () => {
+  const record = (slug: string, relationTo?: string) =>
+    [
+      'kind: project',
+      `slug: ${slug}`,
+      `name: ${slug}`,
+      'description: a record',
+      'addedAt: 2026-01-01',
+      'category: tools',
+      'links: {}',
+      'curation: { reviewed: false, labels: [], lenses: [] }',
+      'scores: {}',
+      ...(relationTo ? ['relations:', '  - type: alternative-to', `    to: ${relationTo}`] : []),
+    ].join('\n');
+
+  async function scaffold(
+    cwd: string,
+    files: {
+      subjects?: string;
+      records: Record<string, string>;
+      collections?: Record<string, string>;
+    },
+  ) {
+    await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+    await mkdir(join(cwd, 'data', 'collections'), { recursive: true });
+    await mkdir(join(cwd, 'data', 'taxonomy'), { recursive: true });
+    await writeFile(
+      join(cwd, 'data', 'taxonomy', 'categories.yml'),
+      '- id: tools\n  name: Tools\n',
+    );
+    if (files.subjects !== undefined) {
+      await writeFile(join(cwd, 'data', 'taxonomy', 'subjects.yml'), files.subjects);
+    }
+    for (const [slug, text] of Object.entries(files.records)) {
+      await writeFile(join(cwd, 'data', 'records', `${slug}.yml`), text);
+    }
+    for (const [file, text] of Object.entries(files.collections ?? {})) {
+      await writeFile(join(cwd, 'data', 'collections', file), text);
+    }
+  }
+
+  it('errors when a relation points at a subject that is not defined', async () => {
+    await withTmpCwd('grove-validate-unknown-subject-', async (cwd) => {
+      await scaffold(cwd, { records: { alpha: record('alpha', 'notion') } });
+      const result = await validateProject(makeConfig());
+      expect(result.errors.map((e) => e.code)).toEqual(['unknown_subject']);
+    });
+  });
+
+  it('reports an invalid and a duplicated subject', async () => {
+    await withTmpCwd('grove-validate-bad-subjects-', async (cwd) => {
+      await scaffold(cwd, {
+        subjects:
+          '- id: notion\n  name: Notion\n- id: notion\n  name: Notion again\n- id: Bad_Id\n  name: Bad\n',
+        records: { alpha: record('alpha') },
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors.map((e) => e.code).sort()).toEqual([
+        'duplicate_subject',
+        'subject_invalid',
+      ]);
+    });
+  });
+
+  it('errors on an unknown collection subject and on two hubs for one subject', async () => {
+    await withTmpCwd('grove-validate-hubs-', async (cwd) => {
+      const hub = (slug: string, subject: string) =>
+        `slug: ${slug}\ntitle: ${slug}\ndescription: d\nsubject: ${subject}\nquery: { relatedTo: { subjects: [${subject}] } }\n`;
+      await scaffold(cwd, {
+        subjects: '- id: notion\n  name: Notion\n',
+        records: { alpha: record('alpha', 'notion') },
+        collections: {
+          'a.yml': hub('a', 'notion'),
+          'b.yml': hub('b', 'notion'),
+          'c.yml': hub('c', 'slack'),
+        },
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors.map((e) => e.code).sort()).toEqual([
+        'collection_unknown_subject',
+        'duplicate_subject_hub',
+      ]);
+    });
+  });
+
+  it('warns when three records share a subject and no collection is its hub', async () => {
+    await withTmpCwd('grove-validate-hubless-', async (cwd) => {
+      await scaffold(cwd, {
+        subjects: '- id: notion\n  name: Notion\n',
+        records: {
+          alpha: record('alpha', 'notion'),
+          beta: record('beta', 'notion'),
+          gamma: record('gamma', 'notion'),
+        },
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors).toEqual([]);
+      expect(result.warnings.map((w) => w.code)).toEqual(['subject_without_collection']);
+    });
+  });
+});

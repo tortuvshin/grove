@@ -290,6 +290,7 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
   const categoryCounts = new Map<string, number>();
   const stackCounts = new Map<string, number>();
   const licenseCounts = new Map<string, number>();
+  const subjectCounts = new Map<string, number>();
   const bump = (counts: Map<string, number>, id: string) => {
     const key = id.toLowerCase();
     counts.set(key, (counts.get(key) ?? 0) + 1);
@@ -300,6 +301,10 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
       categories.add(cat);
       bump(categoryCounts, cat);
     }
+    const related = new Set(
+      ((r as { relations?: Array<{ to: string }> }).relations ?? []).map((rel) => rel.to),
+    );
+    for (const subject of related) bump(subjectCounts, subject);
     const s1 = (r as { stack?: string }).stack;
     if (s1) {
       stacks.add(s1);
@@ -424,6 +429,13 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
     licenses: withCounts(
       await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'licenses.yml'),
       licenseCounts,
+    ),
+    // Subjects records relate to (data/taxonomy/subjects.yml). `count`
+    // is how many visible records have a relation to each one. Optional
+    // — a site without the file gets an empty list.
+    subjects: withCounts(
+      await loadTaxonomyFile(cwd, cfg.paths.taxonomyDir, 'subjects.yml'),
+      subjectCounts,
     ),
   };
 

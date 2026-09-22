@@ -94,13 +94,14 @@ repositories to aggregate.
   "contributors": { /* … */ },
   "taxonomy": {
     "categories": [], "stacks": [], "platforms": [],
-    "topics": [], "distributionChannels": [], "licenses": []
+    "topics": [], "distributionChannels": [], "licenses": [],
+    "subjects": []
   },
   "stats": { "totalRecords": 6, "totalCategories": 5, /* … */ }
 }
 ```
 
-`taxonomy` is the resolved contents of `data/taxonomy/`, and `stats` is a flat
+`taxonomy` is the resolved contents of `data/taxonomy/` — `subjects` carries each subject with a `count` of the visible records related to it — and `stats` is a flat
 block of counts (`totalRecords`, `totalApps`, `totalCategories`,
 `totalStacks`, `totalPlatforms`, `totalStars`, and the repository totals).
 There is no `audit` key here.

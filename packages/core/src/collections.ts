@@ -36,6 +36,17 @@ const collectionQuerySchema = z.object({
   /** Minimum GitHub fork count. Entries below this are excluded. */
   minForks: z.number().nonnegative().optional(),
   q: z.string().optional(),
+  /**
+   * Records related to any of these subjects (ids from
+   * `data/taxonomy/subjects.yml`). `type` narrows to one relation type;
+   * omitted, any relation to the subject matches.
+   */
+  relatedTo: z
+    .object({
+      type: z.string().optional(),
+      subjects: z.array(z.string().min(1)).min(1),
+    })
+    .optional(),
 });
 
 /**
@@ -56,6 +67,14 @@ export const collectionDefinitionSchema = z.looseObject({
   kind: z.enum(['curated', 'generated']).default('curated'),
   title: z.string().min(1),
   description: z.string().min(1),
+  /**
+   * The subject this collection is the hub for — "alternatives to X" is
+   * a collection with `subject: x`. One hub per subject; records related
+   * to the subject link to it. Membership still comes from `entries` and
+   * `query` (usually `query.relatedTo`), so the hub cannot drift from
+   * the relations on the records.
+   */
+  subject: z.string().min(1).optional(),
   /**
    * Path to the collection's long-form Markdown body, relative to the
    * project root (convention: `./content/collections/<slug>.md`).
@@ -140,6 +159,8 @@ export interface CollectionEntry {
   curationScore?: number;
   activityScore?: number;
   categories?: string[];
+  /** Relation targets from the record, matched by `query.relatedTo`. */
+  relations?: Array<{ type: string; to: string }>;
   /** The curator's note for this record in the collection being run. */
   note?: string;
   /** True when the collection pins this record above the ranking. */
@@ -184,6 +205,13 @@ export function filterEntries(
     }
     if (query.minForks != null && (entry.forks ?? 0) < query.minForks) {
       return false;
+    }
+    if (query.relatedTo) {
+      const { type, subjects } = query.relatedTo;
+      const related = (entry.relations ?? []).some(
+        (relation) => subjects.includes(relation.to) && (!type || relation.type === type),
+      );
+      if (!related) return false;
     }
     if (query.q) {
       const hay = `${entry.title} ${entry.description}`.toLowerCase();

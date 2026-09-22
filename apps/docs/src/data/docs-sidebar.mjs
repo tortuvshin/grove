@@ -42,6 +42,7 @@ export const SIDEBAR = [
         items: [
           { label: 'Curate with decisions', slug: 'concepts/decisions' },
           { label: 'Build collections', slug: 'concepts/collections' },
+          { label: 'Relate records to subjects', slug: 'concepts/relations' },
           {
             label: 'Walkthrough: curate a collection',
             slug: 'guides/walkthrough-curate-collection',

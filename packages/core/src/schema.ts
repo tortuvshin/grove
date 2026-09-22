@@ -353,7 +353,67 @@ const resourceBaseSchema = z.object({
       description: z.string().optional(),
     })
     .optional(),
+  /**
+   * How this record relates to a *subject* — a thing people search for
+   * that is not itself a record (see `subjectSchema`). Defaults to `[]`
+   * so every record, old or new, carries the field.
+   */
+  relations: z.array(z.lazy(() => relationSchema)).default([]),
 });
+
+// ──────────────────────────────────────────────────────────────────────
+// Subjects and relations
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * A subject is something a record can be *about* without being a record:
+ * a proprietary product, a company, a standard. Subjects live in
+ * `data/taxonomy/subjects.yml` — a vocabulary file, like categories —
+ * so they get no detail page, sitemap entry or browse card of their own.
+ * Extra keys are kept for the consumer's own use.
+ */
+export const subjectSchema = z.looseObject({
+  id: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'subject id must be lowercase kebab-case'),
+  name: z.string().min(1),
+  kind: z.enum(['product', 'company', 'standard', 'other']).default('product'),
+  /** The subject's own canonical page, e.g. the vendor's product page. */
+  url: z.string().url().optional(),
+  description: z.string().optional(),
+  /** Other names people use for it. */
+  aliases: z.array(z.string()).default([]),
+});
+export type Subject = z.infer<typeof subjectSchema>;
+
+/**
+ * Only `alternative-to` ships today. The enum can widen later without
+ * breaking a file that already validates.
+ */
+export const relationTypeSchema = z.enum(['alternative-to']);
+export type RelationType = z.infer<typeof relationTypeSchema>;
+
+/**
+ * Where a relation claim comes from. `self-described` is the project's
+ * own words (quote them); `repo-topic` is a repository topic such as
+ * `notion-alternative`; `editorial` is the curator's judgement.
+ */
+export const relationEvidenceSchema = z.object({
+  type: z.enum(['self-described', 'repo-topic', 'editorial']),
+  url: z.string().url().optional(),
+  quote: z.string().optional(),
+  checkedAt: z.string().optional(),
+});
+
+export const relationSchema = z.object({
+  type: relationTypeSchema,
+  /** Subject id from `data/taxonomy/subjects.yml`. */
+  to: z.string().min(1),
+  note: z.string().optional(),
+  evidence: relationEvidenceSchema.optional(),
+});
+export type Relation = z.infer<typeof relationSchema>;
 
 // ──────────────────────────────────────────────────────────────────────
 // Blueprint: project-directory — kind: project
@@ -927,6 +987,8 @@ export interface IndexBase {
   content?: string | undefined;
   curation: ProjectRecord['curation'];
   licenses: string[];
+  /** Relation targets only — note and evidence stay on the full record. */
+  relations: Array<{ type: RelationType; to: string }>;
 }
 
 export interface IndexGithubSummary {
@@ -1029,6 +1091,10 @@ export function toIndexRecord(record: Resource): IndexRecord {
     licenses: record.kind === 'project' ? (record.licenses ?? []) : [],
     summary: record.summary,
     sourceDescription: record.sourceDescription,
+    relations: (record.relations ?? []).map((relation) => ({
+      type: relation.type,
+      to: relation.to,
+    })),
   };
 
   if (record.kind === 'project') {
