@@ -22,6 +22,32 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.11.0](https://github.com/tortuvshin/grove/compare/v0.10.0...v0.11.0) (2026-09-22)
+
+
+### Features
+
+* **core:** hand-picked collection entries, editorial body and FAQ ([27e101d](https://github.com/tortuvshin/grove/commit/27e101dca04d67ea53e9742ff7a9a2e72b177054))
+* **core:** hand-picked collection entries, editorial body and FAQ ([554e7ed](https://github.com/tortuvshin/grove/commit/554e7ed4e822dbf714b4dfac5010a8950bc5c35c))
+* **core:** subjects vocabulary and record relations ([58f5e96](https://github.com/tortuvshin/grove/commit/58f5e9666c42307407d03f84767ecdf3d976f634))
+* **core:** subjects vocabulary and record relations ([0d3eaf2](https://github.com/tortuvshin/grove/commit/0d3eaf200e99f8ddc9da56da05377d1a90afac6e))
+* **core:** validate collections and rank from synced health and GitHub data ([5cbd162](https://github.com/tortuvshin/grove/commit/5cbd162add9dac095c04e84e1c372cc231a36e2c))
+* **core:** validate collections and rank from synced health and GitHub data ([02dcadd](https://github.com/tortuvshin/grove/commit/02dcaddb992795644aded5ac9f07becc66897517))
+* **registry:** collection page renders introduction, verdict list, body and FAQ ([554e7ed](https://github.com/tortuvshin/grove/commit/554e7ed4e822dbf714b4dfac5010a8950bc5c35c))
+* **registry:** record page links to subject hubs, sibling records and collections ([0d3eaf2](https://github.com/tortuvshin/grove/commit/0d3eaf200e99f8ddc9da56da05377d1a90afac6e))
+
+
+### Bug Fixes
+
+* **astro:** single h1, same-tab internal links, slashed links, honest ItemList count ([fc7a7c3](https://github.com/tortuvshin/grove/commit/fc7a7c3210860b768cf55d86c146ee92ebf93156))
+* **astro:** single h1, same-tab internal links, slashed links, honest ItemList count ([4e77868](https://github.com/tortuvshin/grove/commit/4e77868215594f2c87c4ab5f331fdb3ea46e468e))
+
+
+### Documentation
+
+* how to create a trusted publisher, and what a refused exchange looks like ([e2ed5a8](https://github.com/tortuvshin/grove/commit/e2ed5a801028b49219a898ce3ce9e79e297a8f3d))
+* how to create a trusted publisher, and what a refused exchange looks like ([72148fa](https://github.com/tortuvshin/grove/commit/72148fafd43b304417c2ac0230a215f9fbd8c10b))
+
 ## [0.10.0](https://github.com/tortuvshin/grove/compare/v0.9.0...v0.10.0) (2026-09-21)
 
 
