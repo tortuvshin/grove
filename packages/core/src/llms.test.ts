@@ -39,7 +39,7 @@ describe('LLM outputs', () => {
 
     expect(text).toContain('> Source: https://openappscout.com/apps');
     expect(text).toContain('## Apps');
-    expect(text).toContain('- url: https://openappscout.com/apps/immich');
+    expect(text).toContain('- url: https://openappscout.com/apps/immich/\n');
     expect(text).not.toContain('/projects');
   });
 });

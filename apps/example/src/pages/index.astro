@@ -74,7 +74,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
       { label: "How this site works", href: "#pipeline" },
     ]}
     ctas={[
-      { label: `Browse ${itemPlural}`, href: `/${slug}`, variant: "primary" },
+      { label: `Browse ${itemPlural}`, href: `/${slug}/`, variant: "primary" },
     ]}
   />
 
@@ -88,7 +88,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} gaining stars, activity, or attention recently.`}
     eyebrow="Hot"
     items={hotList}
-    hrefFor={(r) => `/${slug}/${r.slug}`}
+    hrefFor={(r) => `/${slug}/${r.slug}/`}
     viewAllHref={`/${slug}?label=hot`}
     viewAllLabel={`View all trending ${itemPlural}`}
   />
@@ -99,7 +99,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     description={`${itemPlural.charAt(0).toUpperCase() + itemPlural.slice(1)} added to the directory in the last few weeks.`}
     eyebrow="New"
     items={newList}
-    hrefFor={(r) => `/${slug}/${r.slug}`}
+    hrefFor={(r) => `/${slug}/${r.slug}/`}
     viewAllHref={`/${slug}?sort=recently-added`}
     viewAllLabel={`View all recently added`}
   />
@@ -110,7 +110,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     description={`Long-running curated ${itemPlural} with strong history, active maintainers, and real-world usage.`}
     eyebrow="Mature"
     items={matureList}
-    hrefFor={(r) => `/${slug}/${r.slug}`}
+    hrefFor={(r) => `/${slug}/${r.slug}/`}
     viewAllHref={`/${slug}?label=mature`}
     viewAllLabel={`View all established`}
   />
@@ -120,7 +120,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     pathPrefix={`/${slug}`}
     itemLabelPlural={itemPlural}
     itemNoun={{ singular: itemSingular, plural: itemPlural }}
-    hrefFor={(stackSlug: string) => `/stacks/${stackSlug}`}
+    hrefFor={(stackSlug: string) => `/stacks/${stackSlug}/`}
   />
   <CollectionTeaser
     model={collectionTeaser}
@@ -131,7 +131,7 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     pathPrefix={`/${slug}`}
     itemLabelPlural={itemPlural}
     itemNoun={{ singular: itemSingular, plural: itemPlural }}
-    hrefFor={(categorySlug: string) => `/categories/${categorySlug}`}
+    hrefFor={(categorySlug: string) => `/categories/${categorySlug}/`}
   />
 
   <ContributorsGrid

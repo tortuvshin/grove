@@ -12,7 +12,7 @@ import type { ProjectCardModel } from '@grove-dev/astro/server';
  *  - `entry` — the collection entry (slug, title, description, …)
  *  - `href` — full detail URL; wins over `routeSlug`
  *  - `routeSlug` — blueprint slug (e.g. "projects"); details derived
- *    as `/${routeSlug}/${slug}` when `href` is not provided
+ *    as `/${routeSlug}/${slug}/` when `href` is not provided
  *  - `showChips`, `showLabel` — deprecated no-ops. The card renders
  *    one fixed layout everywhere, so a record cannot look like a
  *    different record depending on the page it appears on.
@@ -49,7 +49,7 @@ interface Props {
   entry: CollectionEntry;
   /** Full detail-page URL. Wins over `routeSlug`. */
   href?: string;
-  /** Blueprint route slug; detail URL = `/${routeSlug}/${slug}`. */
+  /** Blueprint route slug; detail URL = `/${routeSlug}/${slug}/`. */
   routeSlug?: string;
   /** @deprecated Ignored — the card renders one fixed layout. */
   showChips?: boolean;
@@ -75,7 +75,7 @@ const base = (routeSlug ?? '').replace(/^\/+|\/+$/g, '');
 const detailHref =
   typeof hrefProp === 'string' && hrefProp.length > 0
     ? hrefProp
-    : entry.url || (base ? `/${base}/${slug}` : `/${slug}`);
+    : entry.url || (base ? `/${base}/${slug}/` : `/${slug}/`);
 
 const repoHref = entry.repoHref;
 const stars = showMeta ? entry.stars : undefined;

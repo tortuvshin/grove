@@ -48,9 +48,23 @@ describe('renderMarkdownToSafeHtml', () => {
     expect(html).toContain('href="https://example.com"');
   });
 
-  it('forces noopener noreferrer on links', () => {
+  it('forces noopener noreferrer on external links', () => {
     const html = renderMarkdownToSafeHtml('[link](https://example.com)');
     expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain('target="_blank"');
+  });
+
+  it('keeps links that stay on the site in the same tab', () => {
+    for (const href of ['/apps/immich/', '#setup', '../stacks/flutter/']) {
+      const html = renderMarkdownToSafeHtml(`[link](${href})`);
+      expect(html).toContain(`href="${href}"`);
+      expect(html).not.toContain('target=');
+      expect(html).not.toContain('rel=');
+    }
+  });
+
+  it('treats protocol-relative links as external', () => {
+    const html = renderMarkdownToSafeHtml('[link](//example.com/x)');
     expect(html).toContain('target="_blank"');
   });
 

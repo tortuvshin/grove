@@ -6,7 +6,7 @@ import type { CollectionEntry } from './collections.js';
 import { loadCollections } from './collections-io.js';
 import { runCollection } from './collector.js';
 import { loadConfig } from './config.js';
-import { readContentFile } from './content-body.js';
+import { readContentFile, shiftHeadings, stripLeadingH1 } from './content-body.js';
 import { buildLlmsFiles, type LlmsRecordInput, type LlmsResult } from './llms.js';
 import { buildOgImages, type OgBuildResult } from './og-image.js';
 import { buildSiteArtifacts, type SiteArtifactsResult } from './site-artifacts.js';
@@ -73,7 +73,10 @@ function readDetailBody(root: string, record: GeneratedRecord): string | undefin
     resolve(root, record.content),
     join(root, record.content.replace(/^\.\//, '')),
   ]);
-  const body = found?.body.trim();
+  if (!found) return undefined;
+  // The body lands under `### <name>` → `#### Detail`, so its own title
+  // is redundant and its `##` sections must sit below level 4.
+  const body = shiftHeadings(stripLeadingH1(found.body), 3).trim();
   return body ? body : undefined;
 }
 

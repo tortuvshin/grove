@@ -57,7 +57,7 @@ const {
   lede,
   itemNoun = { singular: itemLabel(), plural: itemLabelPlural() },
   records,
-  backHref = `/${indexSlug()}`,
+  backHref = `/${indexSlug()}/`,
   backLabel = `← Back to all ${itemLabelPlural()}`,
 } = Astro.props;
 
@@ -85,7 +85,7 @@ const hrefPrefix = backHref.replace(/\/$/, '');
           <li class="m-0 p-0">
             <ProjectCard
               model={buildProjectCardModel(record)}
-              href={`${hrefPrefix}/${record.slug}`}
+              href={`${hrefPrefix}/${record.slug}/`}
               eager={i < 3}
             />
           </li>

@@ -92,7 +92,9 @@ export {
   readContentFile,
   readingMetrics,
   resolveContentPath,
+  shiftHeadings,
   stripFrontmatter,
+  stripLeadingH1,
 } from './content-body.js';
 export type {
   Contributor,

@@ -214,7 +214,7 @@ const description = seo.description;
             <li class="m-0 p-0" data-record-slug={item.slug}>
               <IndexRow
                 record={item as Parameters<typeof IndexRow>[0]["record"]}
-                detailHref={`/${slug}/${item.slug}`}
+                detailHref={`/${slug}/${item.slug}/`}
                 eager={i < 3}
               />
             </li>

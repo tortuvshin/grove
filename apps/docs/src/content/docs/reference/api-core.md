@@ -266,14 +266,18 @@ import {
 ```ts
 import {
   extractToc, headingSlug, readContentFile,
-  readingMetrics, resolveContentPath, stripFrontmatter,
+  readingMetrics, resolveContentPath, shiftHeadings,
+  stripFrontmatter, stripLeadingH1,
 } from "@grove-dev/core";
 
 const toc = extractToc(markdownBody);
 const content = readContentFile(contentPath, candidatePaths);
+const embedded = shiftHeadings(stripLeadingH1(content.body), 3);
 ```
 
 These read and shape the `content/records/<slug>.md` body that accompanies a record. Pure helpers; safe to import from server-only contexts.
+
+`stripLeadingH1` drops a body's opening `# Title` line — the detail page already renders the record name as its `<h1>`, so a second one never reaches the page. `shiftHeadings` pushes every heading deeper (capped at `######`); `llms-full.txt` uses both so a record's body sits below its `### <name>` section instead of outranking it. Headings inside fenced code blocks are left alone.
 
 ## Importer helpers
 
