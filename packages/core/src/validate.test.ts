@@ -398,3 +398,88 @@ describe('validateProject — decision / health cross-references', () => {
     });
   });
 });
+
+describe('validateProject — collections', () => {
+  const record = (slug: string, extra: string[] = []) =>
+    [
+      'kind: project',
+      `slug: ${slug}`,
+      `name: ${slug}`,
+      'description: a record',
+      'addedAt: 2026-01-01',
+      'category: tools',
+      'links: {}',
+      'curation: { reviewed: false, labels: [], lenses: [] }',
+      'scores: {}',
+      ...extra,
+    ].join('\n');
+
+  async function scaffold(cwd: string, collections: Record<string, string>) {
+    await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+    await mkdir(join(cwd, 'data', 'collections'), { recursive: true });
+    await mkdir(join(cwd, 'data', 'taxonomy'), { recursive: true });
+    await writeFile(
+      join(cwd, 'data', 'taxonomy', 'categories.yml'),
+      '- id: tools\n  name: Tools\n',
+    );
+    await writeFile(join(cwd, 'data', 'records', 'alpha.yml'), record('alpha'));
+    for (const [file, text] of Object.entries(collections)) {
+      await writeFile(join(cwd, 'data', 'collections', file), text);
+    }
+  }
+
+  it('accepts a valid collection that matches records', async () => {
+    await withTmpCwd('grove-validate-collection-ok-', async (cwd) => {
+      await scaffold(cwd, {
+        'tools.yml':
+          'slug: tools\ntitle: Tools\ndescription: All tools.\nquery: { categories: [tools] }\n',
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors).toEqual([]);
+      expect(result.warnings).toEqual([]);
+    });
+  });
+
+  it('reports every schema problem in a collection file as an error', async () => {
+    await withTmpCwd('grove-validate-collection-bad-', async (cwd) => {
+      await scaffold(cwd, {
+        'bad.yml':
+          'slug: bad\ntitle: Bad\ndescription: x\nranking: { preset: popularity }\nquery: { minStars: "5" }\n',
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      const messages = result.errors
+        .filter((e) => e.code === 'collection_invalid')
+        .map((e) => e.message);
+      expect(messages).toHaveLength(2);
+      expect(messages.every((m) => m.startsWith('collections/bad.yml: '))).toBe(true);
+    });
+  });
+
+  it('errors on a slug used by two files and warns when slug and file name differ', async () => {
+    await withTmpCwd('grove-validate-collection-slugs-', async (cwd) => {
+      const body = 'title: T\ndescription: d\n';
+      await scaffold(cwd, {
+        'a.yml': `slug: shared\n${body}`,
+        'b.yml': `slug: shared\n${body}`,
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors.map((e) => e.code)).toEqual(['duplicate_collection_slug']);
+      expect(result.warnings.map((w) => w.code)).toContain('collection_slug_mismatch');
+    });
+  });
+
+  it('warns about unknown taxonomy values and an empty result', async () => {
+    await withTmpCwd('grove-validate-collection-empty-', async (cwd) => {
+      await scaffold(cwd, {
+        'games.yml': 'slug: games\ntitle: Games\ndescription: d\nquery: { categories: [games] }\n',
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors).toEqual([]);
+      expect(result.warnings.map((w) => w.code).sort()).toEqual([
+        'collection_empty',
+        'unknown_taxonomy_value',
+      ]);
+    });
+  });
+});

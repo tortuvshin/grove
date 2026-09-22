@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { collectionDefinitionSchema } from '@grove-dev/core';
 import { Command } from 'commander';
 import { stringify as yamlStringify } from 'yaml';
 
@@ -33,6 +34,16 @@ export function buildCollectionCommand(): Command {
         ranking: { preset: 'quality' },
         seo: { index: true },
       };
+      // Refuse to write a file `grove check` would reject (a slug with
+      // capitals or underscores is the usual cause).
+      const valid = collectionDefinitionSchema.safeParse(collection);
+      if (!valid.success) {
+        for (const issue of valid.error.issues) {
+          process.stderr.write(`${issue.path.join('.') || '(root)'}: ${issue.message}\n`);
+        }
+        process.exitCode = 1;
+        return;
+      }
       const out = resolve(process.cwd(), 'data/collections', `${opts.slug}.yml`);
       await mkdir(resolve(process.cwd(), 'data/collections'), { recursive: true });
       await writeFile(out, yamlStringify(collection), 'utf8');

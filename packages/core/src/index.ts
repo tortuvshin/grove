@@ -54,6 +54,12 @@ export type {
 // ── Candidate extraction (AST-based, source-preserving) ──────────────
 export { extractCandidates } from './candidate.js';
 export type {
+  CollectionSourceRecord,
+  ToCollectionEntriesOptions,
+} from './collection-entries.js';
+// ── Record → CollectionEntry projection ──────────────────────────────
+export { toCollectionEntries } from './collection-entries.js';
+export type {
   Collection,
   CollectionEditorial,
   CollectionEntry,
@@ -65,11 +71,12 @@ export type {
 } from './collections.js';
 // ── Collection engine (query, ranking, editorial) ────────────────────
 export {
+  collectionDefinitionSchema,
   filterEntries,
   rankEntries,
 } from './collections.js';
 // ── Collection IO (YAML loading from data/collections) ───────────────
-export { loadCollections } from './collections-io.js';
+export { CollectionFileError, loadCollections, parseCollectionFile } from './collections-io.js';
 export type { CollectionResult } from './collector.js';
 // ── Collection runner + related resolver ─────────────────────────────
 export { runCollection } from './collector.js';

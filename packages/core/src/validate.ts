@@ -2,6 +2,9 @@ import { access, readdir, readFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { ZodError } from 'zod';
+import { type CollectionSourceRecord, toCollectionEntries } from './collection-entries.js';
+import { CollectionFileError, parseCollectionFile } from './collections-io.js';
+import { runCollection } from './collector.js';
 import { readYamlFile } from './io.js';
 import {
   blueprintKind,
@@ -94,6 +97,8 @@ export async function validateProject(
     stacks: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'stacks.yml')),
     platforms: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'platforms.yml')),
   };
+  /** Every record that parsed — the stream collections are checked against. */
+  const parsedRecords: Resource[] = [];
 
   const warnUnknownTaxonomy = (
     fileSlug: string,
@@ -168,6 +173,7 @@ export async function validateProject(
       }
       continue;
     }
+    parsedRecords.push({ ...parsed, slug: fileSlug });
     // Override the filename-derived slug with the record's own slug
     // before downstream checks (links/health) consume it. Filename
     // and record.slug must agree; mismatch is itself a warning.
@@ -270,6 +276,69 @@ export async function validateProject(
           severity: 'error',
         });
       }
+    }
+  }
+
+  // ── Collections ────────────────────────────────────────────────────
+  // Parsed with the same function the build uses, so a file that would
+  // throw during `astro build` fails here first, with every problem
+  // listed instead of only the first.
+  const collectionsDir = resolve(process.cwd(), 'data/collections');
+  const collectionFiles = (await readdir(collectionsDir).catch(() => [] as string[]))
+    .filter((f) => f.endsWith('.yml'))
+    .sort();
+  const collectionSlugs = new Map<string, string>();
+  const collectionEntries = toCollectionEntries(parsedRecords as CollectionSourceRecord[], {
+    routeSlug: config.routes?.directory ?? 'projects',
+  });
+  for (const file of collectionFiles) {
+    const where = `collections/${file}`;
+    let collection: ReturnType<typeof parseCollectionFile>;
+    try {
+      collection = parseCollectionFile(file, await readFile(join(collectionsDir, file), 'utf8'));
+    } catch (err) {
+      const problems = err instanceof CollectionFileError ? err.problems : [(err as Error).message];
+      for (const problem of problems) {
+        errors.push({
+          code: 'collection_invalid',
+          message: `${where}: ${problem}`,
+          severity: 'error',
+        });
+      }
+      continue;
+    }
+    const firstFile = collectionSlugs.get(collection.slug);
+    if (firstFile) {
+      errors.push({
+        code: 'duplicate_collection_slug',
+        message: `${where}: slug "${collection.slug}" is already used by collections/${firstFile}`,
+        severity: 'error',
+      });
+      continue;
+    }
+    collectionSlugs.set(collection.slug, file);
+    if (collection.slug !== basename(file, '.yml')) {
+      warnings.push({
+        code: 'collection_slug_mismatch',
+        message: `${where}: slug "${collection.slug}" does not match the file name`,
+        severity: 'warning',
+      });
+    }
+    for (const id of collection.query.categories ?? []) {
+      warnUnknownTaxonomy(where, 'query.categories', id, taxonomy.categories, 'categories.yml');
+    }
+    for (const id of collection.query.stacks ?? []) {
+      warnUnknownTaxonomy(where, 'query.stacks', id, taxonomy.stacks, 'stacks.yml');
+    }
+    for (const id of collection.query.platforms ?? []) {
+      warnUnknownTaxonomy(where, 'query.platforms', id, taxonomy.platforms, 'platforms.yml');
+    }
+    if (runCollection(collection, collectionEntries).isEmpty) {
+      warnings.push({
+        code: 'collection_empty',
+        message: `${where}: no record matches this collection's query`,
+        severity: 'warning',
+      });
     }
   }
 
