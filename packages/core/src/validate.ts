@@ -291,6 +291,7 @@ export async function validateProject(
   const collectionEntries = toCollectionEntries(parsedRecords as CollectionSourceRecord[], {
     routeSlug: config.routes?.directory ?? 'projects',
   });
+  const inStream = new Set(collectionEntries.map((entry) => entry.slug));
   for (const file of collectionFiles) {
     const where = `collections/${file}`;
     let collection: ReturnType<typeof parseCollectionFile>;
@@ -332,6 +333,28 @@ export async function validateProject(
     }
     for (const id of collection.query.platforms ?? []) {
       warnUnknownTaxonomy(where, 'query.platforms', id, taxonomy.platforms, 'platforms.yml');
+    }
+    for (const pick of collection.entries ?? []) {
+      if (!slugs.has(pick.slug)) {
+        errors.push({
+          code: 'collection_unknown_entry',
+          message: `${where}: entries lists "${pick.slug}", which is not a record`,
+          severity: 'error',
+        });
+      } else if (!inStream.has(pick.slug)) {
+        warnings.push({
+          code: 'collection_hidden_entry',
+          message: `${where}: entries lists "${pick.slug}", which is hidden or removed and will not render`,
+          severity: 'warning',
+        });
+      }
+    }
+    if (collection.content && !(await exists(resolve(process.cwd(), collection.content)))) {
+      errors.push({
+        code: 'collection_body_missing',
+        message: `${where}: content "${collection.content}" does not exist`,
+        severity: 'error',
+      });
     }
     if (runCollection(collection, collectionEntries).isEmpty) {
       warnings.push({

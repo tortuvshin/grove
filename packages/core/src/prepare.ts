@@ -140,6 +140,15 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
   };
 
   const collections = await loadCollections(root);
+  // Resolved once: the sitemap needs to know which collections are
+  // empty, the OG captions how many entries each one has. It is the
+  // same projection the collection page uses, so all three agree.
+  const collectionEntries = toCollectionEntries(records, {
+    routeSlug: sitePayload.blueprintConfig?.routeSlug ?? 'projects',
+  });
+  const collectionCounts = new Map(
+    collections.map((c) => [c.slug, runCollection(c, collectionEntries).entries.length] as const),
+  );
   // A taxonomy id with no matching record gets no detail page at all
   // (see `[name].astro`'s `getStaticPaths`) — keep it out of the
   // sitemap too, instead of advertising a URL that 404s.
@@ -151,7 +160,9 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
       items: records.map(toSitemapItem),
       collections: collections.map((c) => ({
         slug: c.slug,
-        index: c.seo?.index !== false,
+        // An empty collection renders noindex (there is nothing to
+        // rank for), so it stays out of the sitemap as well.
+        index: c.seo?.index !== false && (collectionCounts.get(c.slug) ?? 0) > 0,
         ...(c.editorial?.lastReviewedAt ? { lastReviewedAt: c.editorial.lastReviewedAt } : {}),
       })),
       taxonomies: {
@@ -195,11 +206,6 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
   const categoryCounts = countBy((r) => r.category);
   const stackCounts = countBy((r) => r.stack);
   const licenseCounts = countBy(licenseOf);
-  // The same projection the collection page uses, so the OG caption's
-  // count matches what the page renders.
-  const collectionEntries = toCollectionEntries(visible, {
-    routeSlug: sitePayload.blueprintConfig?.routeSlug ?? 'projects',
-  });
   const taxonomyJobs = [
     ...(sitePayload.taxonomy?.categories ?? []).map((t) => ({
       facet: 'category' as const,
@@ -241,7 +247,7 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
     collections: collections.map((c) => ({
       slug: c.slug,
       title: c.seo?.title ?? c.title,
-      count: runCollection(c, collectionEntries).entries.length,
+      count: collectionCounts.get(c.slug) ?? 0,
     })),
     taxonomies: taxonomyJobs,
     ...(sitePayload.stats ? { stats: sitePayload.stats } : {}),

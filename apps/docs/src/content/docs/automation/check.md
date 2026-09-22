@@ -42,6 +42,9 @@ grove check --strict   # also fail when there are warnings
 | `collection_invalid` | error | A `data/collections/*.yml` file is not a YAML mapping or fails the collection schema — a missing `title`, an unknown `ranking.preset`, a string `minStars`. One issue per failing field. |
 | `duplicate_collection_slug` | error | Two collection files declare the same `slug`. |
 | `collection_slug_mismatch` | warning | A collection's `slug` differs from its file name. |
+| `collection_unknown_entry` | error | A collection's `entries` lists a slug that is not a record. |
+| `collection_body_missing` | error | A collection's `content` path does not exist. |
+| `collection_hidden_entry` | warning | A collection's `entries` lists a record that is hidden or removed, so it will not render. |
 | `collection_empty` | warning | No record matches the collection's query, so the page would render an empty list. |
 
 Source: `packages/core/src/validate.ts:70-284`.

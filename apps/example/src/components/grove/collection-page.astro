@@ -8,13 +8,20 @@ import type { CollectionPageModel } from '@grove-dev/astro/server';
  * the matched entries via `CollectionRow`, and a related-collections
  * section.
  *
+ * Editorial layers, each rendered only when the collection has it:
+ * `editorial.introduction` (lead paragraph), the selection criteria,
+ * the Markdown body (`bodyHtml`, from `getCollectionBodyHtml`), and the
+ * `faq`. When the curator wrote per-entry notes the entries render as a
+ * numbered verdict list — a card clamps its description to two lines,
+ * which is no place for a 40-word verdict — and otherwise as the card
+ * grid.
+ *
  * Generic: no blueprint-specific copy. Consumers can override
- * `eyebrow`, `title`, `description`; the `<slot name="intro">` is
- * the natural place for editorial intros (markdown rendered with
- * the consumer's content pipeline). `emptyLabel` matches
- * `RecordSection`'s API for empty-state copy.
+ * `eyebrow`, `title`, `description`; `<slot name="intro">` takes any
+ * extra markup. `emptyLabel` matches `RecordSection`'s API for
+ * empty-state copy.
  */
-import { formatCount } from '@grove-dev/core';
+import { formatCount, formatStars } from '@grove-dev/core';
 import Container from '../../layouts/container.astro';
 import SectionHeader from '../../layouts/section-header.astro';
 import EmptyState from '../ui/empty-state.astro';
@@ -23,6 +30,8 @@ import CollectionRow from './collection-row.astro';
 
 interface Props {
   model: CollectionPageModel;
+  /** Sanitized HTML of the collection's Markdown body, if it has one. */
+  bodyHtml?: string | null;
   /** Override the eyebrow text (default: derived from collection kind). */
   eyebrow?: string;
   /** Override the title (default: collection.title). */
@@ -45,6 +54,7 @@ interface Props {
 
 const {
   model,
+  bodyHtml = null,
   eyebrow,
   title,
   description,
@@ -57,6 +67,15 @@ const {
 
 const finalTitle = title ?? model.collection.title;
 const finalDescription = description ?? model.collection.description;
+const hasNotes = model.entries.some((entry) => entry.note);
+const reviewedLabel = model.collection.lastReviewedAt
+  ? new Date(model.collection.lastReviewedAt).toLocaleDateString('en', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
+  : null;
 const finalEyebrow =
   eyebrow ?? (model.collection.kind === 'curated' ? 'Curated collection' : 'Generated collection');
 ---
@@ -64,6 +83,12 @@ const finalEyebrow =
 <section id={id} class={`py-12 sm:py-16 ${className}`}>
   <Container>
     <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} level={level} />
+
+    {model.collection.introduction && (
+      <p class="m-0 mb-6 max-w-[68ch] text-[1.0625rem] leading-relaxed text-foreground">
+        {model.collection.introduction}
+      </p>
+    )}
 
     {/* Editorial context reads as a quiet callout, not metadata
         shouting in uppercase. */}
@@ -93,6 +118,32 @@ const finalEyebrow =
         title={emptyLabel}
         description="No records currently match this collection's query. The collection fills automatically as matching records are added."
       />
+    ) : hasNotes ? (
+      <ol class="m-0 flex list-none flex-col gap-3 p-0">
+        {model.entries.map((entry, i) => (
+          <li class="m-0 rounded-[var(--radius-lg)] border border-border bg-card p-4 sm:p-5">
+            <h3 class="m-0 text-[1.0625rem] font-semibold leading-snug text-foreground">
+              <span class="mr-2 tabular-nums text-muted-foreground">{i + 1}.</span>
+              <a href={entry.url} class="text-foreground no-underline hover:underline">{entry.title}</a>
+            </h3>
+            <p class="m-0 mt-2 max-w-[72ch] text-[0.9375rem] leading-relaxed text-foreground">
+              {entry.note ?? entry.description}
+            </p>
+            <p class="m-0 mt-3 flex flex-wrap gap-x-4 gap-y-1 text-2xs text-muted-foreground">
+              {typeof entry.stars === 'number' && entry.stars > 0 && (
+                <span>{formatStars(entry.stars)} stars</span>
+              )}
+              {(entry.licenses?.[0] ?? entry.license) && <span>{entry.licenses?.[0] ?? entry.license}</span>}
+              {entry.stack && <span>{entry.stack}</span>}
+              {entry.repoHref && (
+                <a href={entry.repoHref} rel="noopener noreferrer" target="_blank" class="text-muted-foreground underline">
+                  Source
+                </a>
+              )}
+            </p>
+          </li>
+        ))}
+      </ol>
     ) : (
       <CardGrid>
         {model.entries.map((entry, i) => (
@@ -101,6 +152,30 @@ const finalEyebrow =
           </li>
         ))}
       </CardGrid>
+    )}
+
+    {bodyHtml && <div class="grove-prose mt-12 max-w-[72ch]" set:html={bodyHtml} />}
+
+    {model.faq.length > 0 && (
+      <section class="mt-12 max-w-[72ch]">
+        <h2 class="m-0 mb-4 text-[1.375rem] font-semibold tracking-tight text-foreground">
+          Frequently asked questions
+        </h2>
+        <dl class="m-0 flex flex-col gap-5">
+          {model.faq.map((item) => (
+            <div>
+              <dt class="m-0 text-[1rem] font-semibold text-foreground">{item.q}</dt>
+              <dd class="m-0 mt-1 text-[0.9375rem] leading-relaxed text-foreground">{item.a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
+
+    {reviewedLabel && (
+      <p class="m-0 mt-8 text-2xs text-muted-foreground">
+        Last reviewed <time datetime={model.collection.lastReviewedAt}>{reviewedLabel}</time>
+      </p>
     )}
 
     {model.related.length > 0 && (

@@ -39,6 +39,8 @@ const pageContentHtml = getPageContentHtml("about");
 
 `getPageContentHtml(name)` (exported from `@grove-dev/astro/server`) looks for `content/pages/<name>.md`, strips any leading frontmatter block, renders the remaining Markdown, and sanitizes it. It returns the HTML string, or `null` if the file doesn't exist — which is why `about.astro` falls back to hard-coded copy when no `content/pages/about.md` is present. `grove init` doesn't scaffold that file; adding one is opt-in.
 
+A collection's long-form body works the same way: `getCollectionBodyHtml(collection.content)` renders the Markdown file a collection's `content` field points at (record-body allowlist, so tables work) and returns `null` when there is none. The scaffolded `collections/[slug].astro` already calls it — see [Collections](/concepts/collections/#hand-picked-entries).
+
 <Aside type="caution" title="Frontmatter isn't read automatically">
   You can put a `---` frontmatter block at the top of the Markdown file for your own reference, but `getPageContentHtml` strips it and never parses it. Nothing derives the page's `<title>`, meta description, or OG image from it — the wrapping `.astro` page supplies those explicitly, the same as any other Astro page. Any `title:`/`description:` you write in the frontmatter is just a note to yourself.
 </Aside>

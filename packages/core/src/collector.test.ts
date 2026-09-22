@@ -70,3 +70,81 @@ describe('runCollection', () => {
     expect(r.isStale).toBe(true);
   });
 });
+
+describe('runCollection — hand-picked entries', () => {
+  const stream: CollectionEntry[] = [
+    { slug: 'a', title: 'A', description: 'about a', url: '/x/a/', stack: 'rust', stars: 10 },
+    { slug: 'b', title: 'B', description: 'about b', url: '/x/b/', stack: 'rust', stars: 300 },
+    { slug: 'c', title: 'C', description: 'about c', url: '/x/c/', stack: 'go', stars: 200 },
+    {
+      slug: 'd',
+      title: 'D',
+      description: 'about d',
+      url: '/x/d/',
+      stack: 'go',
+      status: 'archived',
+    },
+  ];
+  const base: Collection = {
+    slug: 'picks',
+    kind: 'curated',
+    title: 'Picks',
+    description: 'picks',
+    query: {},
+    ranking: { preset: 'curated' },
+    seo: { index: true },
+  };
+
+  it('uses only the picks when the query states no criterion', () => {
+    const result = runCollection({ ...base, entries: [{ slug: 'c' }, { slug: 'a' }] }, stream);
+    expect(result.entries.map((e) => e.slug)).toEqual(['c', 'a']);
+  });
+
+  it('still means "everything" for a query-less collection with no picks', () => {
+    expect(runCollection(base, stream).entries).toHaveLength(4);
+  });
+
+  it('adds query matches after the picks, without duplicates', () => {
+    const result = runCollection(
+      { ...base, entries: [{ slug: 'c' }, { slug: 'a' }], query: { stacks: ['rust'] } },
+      stream,
+    );
+    expect(result.entries.map((e) => e.slug)).toEqual(['c', 'a', 'b']);
+  });
+
+  it('keeps pinned picks on top, in file order, above the ranking', () => {
+    const result = runCollection(
+      {
+        ...base,
+        ranking: { preset: 'stars' },
+        entries: [{ slug: 'a', pinned: true }, { slug: 'c' }],
+        query: { stacks: ['rust'] },
+      },
+      stream,
+    );
+    expect(result.entries.map((e) => e.slug)).toEqual(['a', 'b', 'c']);
+    expect(result.entries[0]?.pinned).toBe(true);
+  });
+
+  it('attaches the note to the picked entry only', () => {
+    const result = runCollection(
+      { ...base, entries: [{ slug: 'a', note: 'Best for small teams.' }, { slug: 'b' }] },
+      stream,
+    );
+    expect(result.entries[0]?.note).toBe('Best for small teams.');
+    expect(result.entries[1]?.note).toBeUndefined();
+    expect(stream[0]?.note).toBeUndefined();
+  });
+
+  it('lets a pick through excludeStatuses but skips a slug missing from the stream', () => {
+    const result = runCollection(
+      {
+        ...base,
+        entries: [{ slug: 'd' }, { slug: 'ghost' }, { slug: 'd' }],
+        query: { stacks: ['go'], excludeStatuses: ['archived'] },
+      },
+      stream,
+    );
+    expect(result.entries.map((e) => e.slug)).toEqual(['d', 'c']);
+  });
+});

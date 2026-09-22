@@ -5,6 +5,7 @@ import {
   collectionSchema,
   contentSchema,
   definePageDocument,
+  faqSchema,
   recordSchema,
   siteSchema,
   validateJsonLd,
@@ -216,6 +217,33 @@ describe('JSON-LD schemas', () => {
       ],
     });
     expect(nodes.map((n) => n['@type'])).toEqual([['Article', 'WebPage'], 'BreadcrumbList']);
+  });
+});
+
+describe('faqSchema', () => {
+  it('builds a FAQPage with one Question per item', () => {
+    const node = faqSchema({
+      url: 'https://example.com/c/',
+      items: [
+        { question: 'Is it free?', answer: 'Yes.' },
+        { question: 'Can I self-host it?', answer: 'Yes, with Docker.' },
+      ],
+    });
+    expect(node['@type']).toBe('FAQPage');
+    expect(node['@id']).toBe('https://example.com/c/#faq');
+    expect(node.mainEntity).toEqual([
+      {
+        '@type': 'Question',
+        name: 'Is it free?',
+        acceptedAnswer: { '@type': 'Answer', text: 'Yes.' },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I self-host it?',
+        acceptedAnswer: { '@type': 'Answer', text: 'Yes, with Docker.' },
+      },
+    ]);
+    expect(validateJsonLd([node])).toEqual([]);
   });
 });
 

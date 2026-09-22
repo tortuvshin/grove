@@ -482,4 +482,31 @@ describe('validateProject — collections', () => {
       ]);
     });
   });
+
+  it('errors on an unknown pick and a missing body, warns on a hidden pick', async () => {
+    await withTmpCwd('grove-validate-collection-picks-', async (cwd) => {
+      await scaffold(cwd, {
+        'picks.yml': [
+          'slug: picks',
+          'title: Picks',
+          'description: d',
+          'content: ./content/collections/picks.md',
+          'entries:',
+          '  - slug: alpha',
+          '  - slug: ghost',
+          '  - slug: hidden-one',
+        ].join('\n'),
+      });
+      await writeFile(
+        join(cwd, 'data', 'records', 'hidden-one.yml'),
+        record('hidden-one', ['visibility: hide']),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.errors.map((e) => e.code).sort()).toEqual([
+        'collection_body_missing',
+        'collection_unknown_entry',
+      ]);
+      expect(result.warnings.map((w) => w.code)).toEqual(['collection_hidden_entry']);
+    });
+  });
 });
