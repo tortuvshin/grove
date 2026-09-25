@@ -612,3 +612,91 @@ describe('validateProject — subjects and relations', () => {
     });
   });
 });
+
+describe('validateProject — record content pointers', () => {
+  /** Write one record, optionally with a `content` pointer and its body. */
+  async function scaffoldRecord(cwd: string, content?: string, body?: string) {
+    await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+    await writeFile(
+      join(cwd, 'data', 'records', 'demo.yml'),
+      [
+        'kind: project',
+        'slug: demo',
+        'addedAt: 2026-01-01',
+        'name: Demo',
+        'description: a demo',
+        'category: tools',
+        'links: {}',
+        ...(content ? [`content: ${content}`] : []),
+      ].join('\n'),
+    );
+    if (body !== undefined) {
+      await mkdir(join(cwd, 'content', 'records'), { recursive: true });
+      await writeFile(join(cwd, 'content', 'records', 'demo.md'), body);
+    }
+  }
+
+  it('accepts a pointer to a body with real prose', async () => {
+    await withTmpCwd('grove-validate-content-ok-', async (cwd) => {
+      await scaffoldRecord(
+        cwd,
+        './content/records/demo.md',
+        ['---', 'title: Demo', '---', '# Demo', '', 'Demo keeps notes in plain files.'].join('\n'),
+      );
+      const result = await validateProject(makeConfig(), { strict: true });
+      expect(result.ok).toBe(true);
+      expect(result.issues).toEqual([]);
+    });
+  });
+
+  it('does not check a record without a content pointer', async () => {
+    await withTmpCwd('grove-validate-content-none-', async (cwd) => {
+      await scaffoldRecord(cwd);
+      const result = await validateProject(makeConfig(), { strict: true });
+      expect(result.issues).toEqual([]);
+    });
+  });
+
+  it('errors when the pointer does not resolve to a file', async () => {
+    await withTmpCwd('grove-validate-content-missing-', async (cwd) => {
+      await scaffoldRecord(cwd, './content/records/demo.md');
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      expect(result.errors.map((e) => e.code)).toEqual(['content_pointer_missing']);
+    });
+  });
+
+  it('warns on a body with only headings, and fails it under --strict', async () => {
+    await withTmpCwd('grove-validate-content-headings-', async (cwd) => {
+      await scaffoldRecord(
+        cwd,
+        './content/records/demo.md',
+        ['---', 'title: Demo', '---', '# Demo', '', '## Overview', '', '## Setup', ''].join('\n'),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(true);
+      expect(result.warnings.map((w) => w.code)).toEqual(['content_body_skeleton']);
+      expect((await validateProject(makeConfig(), { strict: true })).ok).toBe(false);
+    });
+  });
+
+  it('warns on a body of headings, comments and TODO placeholders', async () => {
+    await withTmpCwd('grove-validate-content-todo-', async (cwd) => {
+      await scaffoldRecord(
+        cwd,
+        './content/records/demo.md',
+        [
+          '## Overview',
+          '',
+          'TODO: write the overview',
+          '<!-- describe the setup',
+          'in a few sentences -->',
+          '## Setup',
+          '- TBD',
+        ].join('\n'),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.warnings.map((w) => w.code)).toEqual(['content_body_skeleton']);
+    });
+  });
+});
