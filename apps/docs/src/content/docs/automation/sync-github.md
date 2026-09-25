@@ -36,25 +36,61 @@ For each `.yml` file in `config.paths.recordsDir` (default `data/records`, sorte
 1. Parses the file and reads `repoUrl`, falling back to `links.github` if `repoUrl` is unset.
 2. If neither is set, logs `[sync github] <file>: no repository, skipped` and moves on.
 3. Parses the URL with `parseGithubRepoUrl`. If it doesn't match `https?://github.com/<owner>/<repo>`, logs `[sync github] <file>: invalid GitHub URL, skipped`.
-4. Tries `fetchGithubMetadata(ref)` — a `GET /repos/<owner>/<repo>` call, followed by `GET /repos/<owner>/<repo>/releases/latest` for the latest release date. Any thrown error (rate limit, network failure, non-2xx status) is caught silently and falls through to step 5.
+4. Tries `fetchGithubMetadata(ref)` — a `GET /repos/<owner>/<repo>` call, followed by `GET /repos/<owner>/<repo>/releases/latest` for the latest release date. Any thrown error (rate limit, network failure, non-2xx status) is caught, its message is kept as the record's reason, and the run falls through to step 5.
 5. If the API call didn't produce metadata, tries `enrichFromGithubHtml(repoUrl)` — an unauthenticated fetch of the public `https://github.com/<owner>/<repo>` HTML page.
-6. If both sources failed, logs `[sync github] <file>: unavailable` and counts it as failed.
+6. If both sources failed, logs `[sync github] <file>: unavailable` and counts it as failed. The record file is not rewritten, so it keeps whatever `github` block it had from its last successful sync.
 7. On success from either source, merges the result into the record's `github` block and rewrites the file with `stringifyRecordYaml`, logging `[sync github] <file>: api` or `[sync github] <file>: html`.
-8. After all files, prints one summary line: `[sync github] <updated> updated (<htmlOnly> HTML fallback), <failed> failed`.
+8. After all files, prints the [end-of-run summary](#end-of-run-summary): a totals line, then one row per record that fell back to HTML or failed.
 
-There is no separate command for "which records were skipped" beyond what's printed to stdout during the run — nothing is written to disk for skips.
+Skipped records (no repository, invalid URL) are only reported by their per-file log line — they are not counted as failures and don't appear in the summary. Nothing is written to disk for skips.
+
+## End-of-run summary
+
+A clean run ends with one line:
+
+```text
+[sync github] 42 updated (0 HTML fallback), 0 failed
+```
+
+When any record fell back to HTML or failed, a table follows with the record slug, the outcome, and a short reason — the API error (HTTP status or network message) and, for failures, why the HTML fallback didn't work either. Rows are sorted by slug so the output is the same from run to run:
+
+```text
+[sync github] 41 updated (1 HTML fallback), 1 failed
+  slug       outcome        reason
+  dead-repo  failed         API: repository not found; HTML: not found
+  ollama     html fallback  API: GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze.
+```
+
+Records synced through the API with no problem are left out of the table. Reasons are single-line and truncated to 160 characters; they come from HTTP status lines and `fetch` errors, never from request headers, so the token doesn't leak into logs.
+
+### GitHub Actions job summary
+
+When `GITHUB_STEP_SUMMARY` is set — GitHub Actions sets it for every step — the same summary is **appended** to that file as Markdown, so it shows on the workflow run's summary page:
+
+```md
+### grove sync github
+
+**41 updated (1 HTML fallback), 1 failed**
+
+| Record | Outcome | Reason |
+| --- | --- | --- |
+| `dead-repo` | failed | API: repository not found; HTML: not found |
+| `ollama` | html fallback | API: GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze. |
+```
+
+The file is only ever appended to, never truncated, so summaries from earlier steps in the same job survive. Outside Actions (the variable is unset) nothing is written.
 
 ## Run it
 
 ```bash
 grove sync github                # sync every record in data/records/
 grove sync github --limit 10     # only the first 10 records, sorted by filename
-grove sync github --strict       # process.exitCode = 1 if any record ended up "unavailable"
+grove sync github --strict       # exit code 1 if any record ended up "unavailable"
 ```
 
 `--limit` always takes the **first N files alphabetically** (`files.slice(0, options.limit)`). There is no `--offset` flag and no stored progress between runs — running `--limit 10` twice in a row syncs the same 10 files both times. If you need to bound API usage per run on a large directory, `--limit` caps the ceiling; it does not let you page through the rest of the records on a later run.
 
-`--strict` doesn't stop the loop early — every selected file is still processed. It only flips the process exit code to `1` at the end if `failed > 0`, which is what makes it useful as a CI gate.
+`--strict` doesn't stop the loop early — every selected file is still processed and the summary is still printed (and appended to the job summary). It only flips the process exit code to `1` at the end if at least one record failed, which is what makes it useful as a CI gate. An HTML fallback counts as a successful refresh, not a failure. Without `--strict` the command exits `0` even when records failed — read the summary to see which ones.
 
 ## Authentication
 
@@ -167,7 +203,7 @@ The sync command does not look at `visibility`, `health.visibility`, or any cura
 
 ## Handling a failed run
 
-`grove sync github` doesn't throw or stop early on a per-record failure — both the API call and the HTML fallback are wrapped in their own `try/catch`, so a bad record just falls through to "unavailable" and the loop continues to the next file. The whole command only exits non-zero if `--strict` is set and at least one record ended up unavailable; records that did sync successfully are written regardless.
+`grove sync github` doesn't throw or stop early on a per-record failure — both the API call and the HTML fallback are wrapped in their own `try/catch`, so a bad record just falls through to "unavailable" and the loop continues to the next file. A failed record keeps its previous `github` block, which is why the [end-of-run summary](#end-of-run-summary) names every failed record and its reason. The whole command only exits non-zero if `--strict` is set and at least one record ended up unavailable; records that did sync successfully are written regardless.
 
 If the API returns `403` with an `x-ratelimit-remaining: 0` header, `github.ts` throws `GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze.` — that error is caught by the CLI and treated the same as any other API failure (falls through to the HTML fallback).
 
@@ -176,7 +212,7 @@ If the API returns `403` with an `x-ratelimit-remaining: 0` header, `github.ts` 
 The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on a weekly cron (`0 3 * * 0`, Sunday 03:00 UTC) plus `workflow_dispatch` for manual runs:
 
 1. `pnpm install --frozen-lockfile`
-2. `pnpm exec grove sync github`, with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in the environment
+2. `pnpm exec grove sync github`, with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in the environment — the fallback/failure table lands on the run's summary page via `GITHUB_STEP_SUMMARY`
 3. `peter-evans/create-pull-request@v6` opens a PR (branch `chore/sync-github`) if the run changed any files
 
 `fetchGithubMetadata` resolves its token from `GH_TOKEN` first and `GITHUB_TOKEN` second, so either name works — including a personal access token you set yourself for higher rate limits.
