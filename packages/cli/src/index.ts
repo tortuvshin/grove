@@ -35,6 +35,13 @@ import {
 } from './package-manager.js';
 import { buildReadmeCommand } from './readme-cli.js';
 import { run } from './run.js';
+import {
+  appendSyncStepSummary,
+  formatSyncSummaryText,
+  type SyncOutcome,
+  shortReason,
+  syncExitCode,
+} from './sync-summary.js';
 import { formatPlan, runUpdate } from './update.js';
 
 const program = new Command();
@@ -107,7 +114,10 @@ program
   .argument('<target>', 'github | contributors')
   .description('Refresh GitHub metadata owned by Grove.')
   .option('--limit <count>', 'limit records to sync', Number)
-  .option('--strict', 'fail if any GitHub record cannot be refreshed')
+  .option(
+    '--strict',
+    'exit non-zero if any record could not be refreshed from either the API or the HTML fallback',
+  )
   .action(async (target: string, options: { limit?: number; strict?: boolean }) => {
     const config = await loadConfig();
     const githubFlags = normalizeGithubIntegration(config.integrations?.github);
@@ -138,9 +148,7 @@ program
     const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
     const files = (await readdir(recordsDir)).filter((file) => file.endsWith('.yml')).sort();
     const selected = options.limit === undefined ? files : files.slice(0, options.limit);
-    let updated = 0;
-    let htmlOnly = 0;
-    let failed = 0;
+    const outcomes: SyncOutcome[] = [];
 
     for (const file of selected) {
       const filePath = join(recordsDir, file);
@@ -157,6 +165,7 @@ program
         continue;
       }
 
+      const slug = basename(file, '.yml');
       const github = (raw.github as Record<string, unknown> | undefined) ?? {};
       const patch: Record<string, unknown> = {};
       // Health is written inline onto the record (not to a shared
@@ -164,11 +173,14 @@ program
       // the same file.
       let health: HealthEntry['health'] | undefined;
       let source: 'api' | 'html' | undefined;
+      // Why the API path didn't deliver, then why the fallback didn't —
+      // reported per record at the end instead of swallowed.
+      const reasons: string[] = [];
       try {
         const metadata = await fetchGithubMetadata(ref);
         if (metadata) {
           if (githubFlags.health) {
-            health = classifyHealth(basename(file, '.yml'), metadata).health;
+            health = classifyHealth(slug, metadata).health;
           }
           // Merge into the existing repository block rather than
           // replacing it wholesale. Sync only owns the fields it
@@ -177,9 +189,12 @@ program
           // survive a re-run.
           Object.assign(patch, buildGithubSyncPatch(metadata, github));
           source = 'api';
+        } else {
+          reasons.push('API: repository not found');
         }
-      } catch {
+      } catch (error) {
         // The token-free HTML fallback below keeps scheduled syncs useful.
+        reasons.push(`API: ${shortReason(error)}`);
       }
       if (!source) {
         try {
@@ -197,14 +212,19 @@ program
               topics: enriched.fields.topics,
             };
             source = 'html';
-            htmlOnly += 1;
+          } else {
+            reasons.push(
+              `HTML: ${enriched.notFound ? 'not found' : enriched.rateLimited ? 'rate limited' : shortReason(enriched.error)}`,
+            );
           }
-        } catch {
+        } catch (error) {
           // Report the record once both metadata sources have failed.
+          reasons.push(`HTML: ${shortReason(error)}`);
         }
       }
+      const reason = reasons.length > 0 ? reasons.join('; ') : undefined;
       if (!source) {
-        failed += 1;
+        outcomes.push({ slug, outcome: 'failed', ...(reason ? { reason } : {}) });
         console.log(`[sync github] ${file}: unavailable`);
         continue;
       }
@@ -218,11 +238,12 @@ program
         }),
         'utf8',
       );
-      updated += 1;
+      outcomes.push({ slug, outcome: source, ...(reason ? { reason } : {}) });
       console.log(`[sync github] ${file}: ${source}`);
     }
-    console.log(`[sync github] ${updated} updated (${htmlOnly} HTML fallback), ${failed} failed`);
-    if (options.strict && failed > 0) process.exitCode = 1;
+    console.log(formatSyncSummaryText(outcomes));
+    await appendSyncStepSummary(outcomes);
+    if (syncExitCode(outcomes, options.strict ?? false) !== 0) process.exitCode = 1;
   });
 
 program

@@ -399,6 +399,134 @@ describe('validateProject — decision / health cross-references', () => {
   });
 });
 
+describe('validateProject — inline health vs health.yml parity', () => {
+  const PARITY_CODES = [
+    'health_source_mismatch',
+    'health_source_missing_entry',
+    'health_file_orphan_entry',
+  ];
+
+  async function writeInlineRecord(cwd: string, slug: string, status = 'active') {
+    await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+    await writeFile(
+      join(cwd, 'data', 'records', `${slug}.yml`),
+      [
+        'kind: project',
+        `slug: ${slug}`,
+        `name: ${slug}`,
+        'description: record with inline health',
+        "addedAt: '2026-01-01'",
+        'category: tools',
+        "links: { github: 'https://github.com/owner/repo' }",
+        'curation: { reviewed: false, labels: [], lenses: [] }',
+        'scores: {}',
+        "github: { repository: { pushed_at: '2026-08-01T00:00:00Z' } }",
+        `health: { status: ${status}, tier: listed, visibility: keep }`,
+      ].join('\n'),
+    );
+  }
+
+  async function writeHealthFile(
+    cwd: string,
+    entries: { id: string; status: string; pushedAt?: string }[],
+  ) {
+    await writeFile(
+      join(cwd, 'data', 'health.yml'),
+      [
+        'health:',
+        ...entries.flatMap((entry) => [
+          `  - id: ${entry.id}`,
+          `    github: { pushedAt: '${entry.pushedAt ?? '2026-08-01T00:00:00Z'}' }`,
+          `    health: { status: ${entry.status}, tier: listed, visibility: keep }`,
+        ]),
+      ].join('\n'),
+    );
+  }
+
+  const parityWarnings = (warnings: { code: string }[]) =>
+    warnings.filter((warn) => PARITY_CODES.includes(warn.code));
+
+  it('stays quiet when inline health matches the health.yml entry', async () => {
+    await withTmpCwd('grove-validate-parity-match-', async (cwd) => {
+      await writeInlineRecord(cwd, 'same');
+      await writeHealthFile(cwd, [{ id: 'same', status: 'active' }]);
+
+      const result = await validateProject(makeConfig());
+      expect(parityWarnings(result.warnings)).toEqual([]);
+    });
+  });
+
+  it('emits health_source_mismatch naming the record and the differing fields', async () => {
+    await withTmpCwd('grove-validate-parity-mismatch-', async (cwd) => {
+      await writeInlineRecord(cwd, 'drifted', 'active');
+      await writeHealthFile(cwd, [{ id: 'drifted', status: 'stale' }]);
+
+      const result = await validateProject(makeConfig());
+      const mismatches = result.warnings.filter((w) => w.code === 'health_source_mismatch');
+      expect(mismatches).toHaveLength(1);
+      expect(mismatches[0]?.message).toContain('drifted');
+      expect(mismatches[0]?.message).toContain('status active (inline) vs stale (file)');
+      expect(mismatches[0]?.message).not.toContain('tier');
+      expect(mismatches[0]?.message).not.toContain('lastCommitAt');
+    });
+  });
+
+  it('emits health_source_missing_entry when an inline-health record is absent from health.yml', async () => {
+    await withTmpCwd('grove-validate-parity-missing-', async (cwd) => {
+      await writeInlineRecord(cwd, 'listed');
+      await writeInlineRecord(cwd, 'unlisted');
+      await writeHealthFile(cwd, [{ id: 'listed', status: 'active' }]);
+
+      const result = await validateProject(makeConfig());
+      const missing = parityWarnings(result.warnings);
+      expect(missing.map((w) => w.code)).toEqual(['health_source_missing_entry']);
+      expect(missing[0]?.message).toContain('unlisted');
+    });
+  });
+
+  it('compares lastCommitAt against the health.yml entry pushedAt', async () => {
+    await withTmpCwd('grove-validate-parity-commit-', async (cwd) => {
+      await writeInlineRecord(cwd, 'old-file');
+      await writeHealthFile(cwd, [
+        { id: 'old-file', status: 'active', pushedAt: '2025-01-01T00:00:00Z' },
+      ]);
+
+      const result = await validateProject(makeConfig());
+      const mismatch = result.warnings.find((w) => w.code === 'health_source_mismatch');
+      expect(mismatch?.message).toContain('lastCommitAt 2026-08-01T00:00:00Z (inline)');
+      expect(mismatch?.message).not.toContain('status');
+    });
+  });
+
+  it('emits health_file_orphan_entry for a health.yml id with no record', async () => {
+    await withTmpCwd('grove-validate-parity-orphan-', async (cwd) => {
+      await writeInlineRecord(cwd, 'real');
+      await writeHealthFile(cwd, [
+        { id: 'real', status: 'active' },
+        { id: 'ghost', status: 'active' },
+      ]);
+
+      const result = await validateProject(makeConfig());
+      const orphans = parityWarnings(result.warnings);
+      expect(orphans.map((w) => w.code)).toEqual(['health_file_orphan_entry']);
+      expect(orphans[0]?.message).toContain('ghost');
+      // The orphan is the only warning, so it alone is what --strict fails on.
+      expect(result.warnings).toHaveLength(1);
+      expect(result.ok).toBe(true);
+      expect((await validateProject(makeConfig(), { strict: true })).ok).toBe(false);
+    });
+  });
+
+  it('adds no parity warnings when health.yml does not exist', async () => {
+    await withTmpCwd('grove-validate-parity-nofile-', async (cwd) => {
+      await writeInlineRecord(cwd, 'solo');
+
+      const result = await validateProject(makeConfig());
+      expect(parityWarnings(result.warnings)).toEqual([]);
+    });
+  });
+});
+
 describe('validateProject — collections', () => {
   const record = (slug: string, extra: string[] = []) =>
     [
@@ -609,6 +737,94 @@ describe('validateProject — subjects and relations', () => {
       const result = await validateProject(makeConfig());
       expect(result.errors).toEqual([]);
       expect(result.warnings.map((w) => w.code)).toEqual(['subject_without_collection']);
+    });
+  });
+});
+
+describe('validateProject — record content pointers', () => {
+  /** Write one record, optionally with a `content` pointer and its body. */
+  async function scaffoldRecord(cwd: string, content?: string, body?: string) {
+    await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+    await writeFile(
+      join(cwd, 'data', 'records', 'demo.yml'),
+      [
+        'kind: project',
+        'slug: demo',
+        'addedAt: 2026-01-01',
+        'name: Demo',
+        'description: a demo',
+        'category: tools',
+        'links: {}',
+        ...(content ? [`content: ${content}`] : []),
+      ].join('\n'),
+    );
+    if (body !== undefined) {
+      await mkdir(join(cwd, 'content', 'records'), { recursive: true });
+      await writeFile(join(cwd, 'content', 'records', 'demo.md'), body);
+    }
+  }
+
+  it('accepts a pointer to a body with real prose', async () => {
+    await withTmpCwd('grove-validate-content-ok-', async (cwd) => {
+      await scaffoldRecord(
+        cwd,
+        './content/records/demo.md',
+        ['---', 'title: Demo', '---', '# Demo', '', 'Demo keeps notes in plain files.'].join('\n'),
+      );
+      const result = await validateProject(makeConfig(), { strict: true });
+      expect(result.ok).toBe(true);
+      expect(result.issues).toEqual([]);
+    });
+  });
+
+  it('does not check a record without a content pointer', async () => {
+    await withTmpCwd('grove-validate-content-none-', async (cwd) => {
+      await scaffoldRecord(cwd);
+      const result = await validateProject(makeConfig(), { strict: true });
+      expect(result.issues).toEqual([]);
+    });
+  });
+
+  it('errors when the pointer does not resolve to a file', async () => {
+    await withTmpCwd('grove-validate-content-missing-', async (cwd) => {
+      await scaffoldRecord(cwd, './content/records/demo.md');
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(false);
+      expect(result.errors.map((e) => e.code)).toEqual(['content_pointer_missing']);
+    });
+  });
+
+  it('warns on a body with only headings, and fails it under --strict', async () => {
+    await withTmpCwd('grove-validate-content-headings-', async (cwd) => {
+      await scaffoldRecord(
+        cwd,
+        './content/records/demo.md',
+        ['---', 'title: Demo', '---', '# Demo', '', '## Overview', '', '## Setup', ''].join('\n'),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.ok).toBe(true);
+      expect(result.warnings.map((w) => w.code)).toEqual(['content_body_skeleton']);
+      expect((await validateProject(makeConfig(), { strict: true })).ok).toBe(false);
+    });
+  });
+
+  it('warns on a body of headings, comments and TODO placeholders', async () => {
+    await withTmpCwd('grove-validate-content-todo-', async (cwd) => {
+      await scaffoldRecord(
+        cwd,
+        './content/records/demo.md',
+        [
+          '## Overview',
+          '',
+          'TODO: write the overview',
+          '<!-- describe the setup',
+          'in a few sentences -->',
+          '## Setup',
+          '- TBD',
+        ].join('\n'),
+      );
+      const result = await validateProject(makeConfig());
+      expect(result.warnings.map((w) => w.code)).toEqual(['content_body_skeleton']);
     });
   });
 });

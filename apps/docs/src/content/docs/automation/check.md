@@ -34,9 +34,14 @@ grove check --strict   # also fail when there are warnings
 | `zod_error` | error | One line per failed Zod check against `recordsFileSchema` — missing required field, wrong type, invalid enum value, and so on. If a record has no `kind`, it's defaulted to `project` before the Zod parse runs. |
 | `slug_mismatch` | warning | The record's own `slug` field doesn't match its filename. |
 | `unknown_taxonomy_value` | warning | The record's `category`, `stack`, or (for `platforms[]`) a `platform` value isn't defined in `data/taxonomy/{categories,stacks,platforms}.yml`. Also raised for a collection's `query.categories`, `query.stacks` and `query.platforms`. Only checked when the matching taxonomy file has entries. |
+| `content_pointer_missing` | error | The record's `content` path does not resolve to a file, so its detail page would render without a body. Resolved the same way the build resolves it. |
+| `content_body_skeleton` | warning | The record's `content` file has no prose after its frontmatter — only headings, blank lines, HTML comments and lines starting with `TODO` or `TBD`. |
 | `missing_health` | error | The record has a `repoUrl` or `links.github` but `data/health.yml` has no entry for its slug. |
 | `missing_health_file` | warning | `data/health.yml` doesn't exist, but at least one record links to GitHub and would need an entry. |
 | `health_file_invalid` | error | `data/health.yml` exists but fails to parse against its schema. |
+| `health_source_mismatch` | warning | A record carries inline `health` and also has a `data/health.yml` entry, and the two disagree on `status`, `tier`, `visibility` or `lastCommitAt` (the file side is the entry's `github.pushedAt`). The build uses the inline block, so the file entry is stale. |
+| `health_source_missing_entry` | warning | `data/health.yml` exists, but a record with inline `health` has no entry in it. |
+| `health_file_orphan_entry` | warning | A `data/health.yml` entry's `id` matches no record. |
 | `decisions_file_invalid` | error | `data/decisions.yml` exists but fails to parse against its schema. |
 | `unknown_decision_record` | error | An entry in `data/decisions.yml` references a slug that has no matching record. |
 | `collection_invalid` | error | A `data/collections/*.yml` file is not a YAML mapping or fails the collection schema — a missing `title`, an unknown `ranking.preset`, a string `minStars`. One issue per failing field. |
@@ -57,7 +62,7 @@ Source: `packages/core/src/validate.ts:70-284`.
 
 A **YAML syntax error** (bad indentation, an unterminated string, and so on) is not one of these codes — `validateProject` calls the YAML parser without a `try`/`catch` around it, so a syntax error throws straight out of the function. It crashes the `check` command with the raw parser error message instead of a structured `[error] ...` line, and still exits `1`.
 
-Two checks that a previous draft of this page claimed do not exist in the source: there is no check that `related[]` or `parent` slug references resolve to real records, no validation of `data/overrides.yml`, no check of `content:` body paths, and no taxonomy check for `license`. None of those fields or files are touched anywhere in `validate.ts`.
+Two checks that a previous draft of this page claimed do not exist in the source: there is no check that `related[]` or `parent` slug references resolve to real records, no validation of `data/overrides.yml`, and no taxonomy check for `license`. None of those fields or files are touched anywhere in `validate.ts`.
 
 ## Severity and exit codes
 

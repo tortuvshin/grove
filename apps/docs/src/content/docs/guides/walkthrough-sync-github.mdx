@@ -92,7 +92,7 @@ import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, 
    Everything above lands under `github.`. It never touches `curation` or any prose you wrote — the patch is merged into the existing `github` block, so fields outside the sync surface survive a re-run. `health` is separate: it's only written when `integrations.github.health` is enabled (off by default), and lands as a top-level `health:` block on the record, not under `github.`.
 
    <Aside type="note" title="What you should see">
-     One line per record: `[sync github] <file>: api`, or `html` when the fallback handled it, or `no repository, skipped` / `invalid GitHub URL, skipped` / `unavailable`. The run ends with a count of updated, HTML-fallback, and failed records.
+     One line per record: `[sync github] <file>: api`, or `html` when the fallback handled it, or `no repository, skipped` / `invalid GitHub URL, skipped` / `unavailable`. The run ends with a count of updated, HTML-fallback, and failed records, followed by a table naming each record that fell back to HTML or failed, with the reason. In GitHub Actions the same table is appended to the job summary.
    </Aside>
 
    Two flags are worth knowing: `--limit <count>` processes only the first N record files (useful for a dry run), and `--strict` sets a non-zero exit code when any record failed.
