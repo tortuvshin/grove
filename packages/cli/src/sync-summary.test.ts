@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   appendSyncStepSummary,
   formatSyncSummaryMarkdown,
@@ -97,8 +97,16 @@ describe('sync github summary', () => {
   });
 
   it('skips the step summary when the variable is unset', async () => {
-    expect(await appendSyncStepSummary(mixed, undefined)).toBe(false);
-    expect(await appendSyncStepSummary(mixed, '')).toBe(false);
+    // An explicit `undefined` falls back to process.env, which GitHub
+    // Actions always sets; clear it so the test neither fails in CI nor
+    // appends to the real job summary.
+    vi.stubEnv('GITHUB_STEP_SUMMARY', '');
+    try {
+      expect(await appendSyncStepSummary(mixed, undefined)).toBe(false);
+      expect(await appendSyncStepSummary(mixed, '')).toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('exits non-zero under --strict only when a record failed', () => {
