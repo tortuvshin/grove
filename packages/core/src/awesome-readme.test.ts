@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assertReadmeLinkConfig,
   buildAwesomeReadme,
   injectAwesomeReadmeBlock,
   parseAwesomeReadmeSections,
+  recordDetailUrl,
 } from './awesome-readme.js';
 
 const baseInput = {
@@ -322,6 +324,133 @@ describe('buildAwesomeReadme — readme config', () => {
     expect(md).toContain('https://awesome.re/badge.svg');
     expect(md).toContain('## Contents');
     expect(md).toContain('Browse the full directory');
+  });
+});
+
+describe('buildAwesomeReadme — entryLinkTarget', () => {
+  const detailInput = {
+    ...baseInput,
+    directoryRoute: 'apps',
+    readme: { entryLinkTarget: 'detail' as const },
+  };
+
+  it('defaults to homepage links (unchanged behaviour)', () => {
+    const md = buildAwesomeReadme(baseInput);
+    expect(md).toContain('- [CrewAI](https://crewai.com) - Python framework');
+    expect(md).toContain('- [Open WebUI](https://github.com/open-webui/open-webui) - ');
+    expect(md).not.toContain('[Source]');
+  });
+
+  it('homepage mode is identical to the default', () => {
+    const md = buildAwesomeReadme({ ...baseInput, readme: { entryLinkTarget: 'homepage' } });
+    expect(md).toBe(buildAwesomeReadme(baseInput));
+  });
+
+  it('repository mode prefers the repository and falls back to the homepage', () => {
+    const md = buildAwesomeReadme({
+      ...baseInput,
+      records: [
+        ...baseInput.records,
+        {
+          slug: 'site-only',
+          name: 'Site Only',
+          description: 'No repository',
+          category: 'agents',
+          homepageUrl: 'https://site-only.example',
+          visibility: 'keep',
+        },
+      ],
+      readme: { entryLinkTarget: 'repository' },
+    });
+    expect(md).toContain('- [CrewAI](https://github.com/crewAIInc/crewAI) - ');
+    expect(md).toContain('- [Site Only](https://site-only.example) - No repository.');
+  });
+
+  it('detail mode links to the record page with the repository as Source', () => {
+    const md = buildAwesomeReadme(detailInput);
+    expect(md).toContain(
+      '- [CrewAI](https://openappscout.com/apps/crewai/) - Python framework for coordinating role-based autonomous agents. ([Source](https://github.com/crewAIInc/crewAI))',
+    );
+  });
+
+  it('detail mode omits Source when a record has no repository', () => {
+    const md = buildAwesomeReadme({
+      ...detailInput,
+      records: [
+        {
+          slug: 'no-repo',
+          name: 'No Repo',
+          description: 'x',
+          category: 'agents',
+          visibility: 'keep',
+        },
+      ],
+    });
+    expect(md).toContain('- [No Repo](https://openappscout.com/apps/no-repo/) - x.');
+    expect(md).not.toContain('[Source]');
+  });
+
+  it('detail mode still skips hidden and removed records', () => {
+    const md = buildAwesomeReadme({
+      ...detailInput,
+      records: baseInput.records
+        .filter((r) => r.slug !== 'ollama')
+        .map((r) => ({ ...r, visibility: r.slug === 'crewai' ? 'hide' : 'remove' })),
+    });
+    expect(md).not.toContain('crewai');
+    expect(md).not.toContain('open-webui');
+  });
+
+  it('detail mode throws instead of falling back when site.url is missing', () => {
+    expect(() => buildAwesomeReadme({ ...detailInput, site: { name: 'Open Apps' } })).toThrow(
+      /site\.url/,
+    );
+  });
+
+  it('detail mode throws when the directory route is missing', () => {
+    expect(() => buildAwesomeReadme({ ...detailInput, directoryRoute: undefined })).toThrow(
+      /routes\.directory/,
+    );
+  });
+
+  it('assertReadmeLinkConfig ignores non-detail modes', () => {
+    expect(() =>
+      assertReadmeLinkConfig({ site: {}, readme: { entryLinkTarget: 'homepage' } }),
+    ).not.toThrow();
+    expect(() => assertReadmeLinkConfig({ site: {} })).not.toThrow();
+  });
+
+  it('detail output is stable across regenerations inside the sentinels', () => {
+    const block = buildAwesomeReadme(detailInput);
+    const once = injectAwesomeReadmeBlock('# Intro\n', block);
+    const twice = injectAwesomeReadmeBlock(once, buildAwesomeReadme(detailInput));
+    expect(twice).toBe(once);
+  });
+});
+
+describe('recordDetailUrl', () => {
+  it('joins site URL, route and slug with one trailing slash', () => {
+    expect(recordDetailUrl('https://openappscout.com', 'apps', 'immich')).toBe(
+      'https://openappscout.com/apps/immich/',
+    );
+  });
+
+  it('tolerates a trailing slash on the site URL and slashes around the route', () => {
+    expect(recordDetailUrl('https://openappscout.com/', '/apps/', 'immich')).toBe(
+      'https://openappscout.com/apps/immich/',
+    );
+  });
+
+  it('keeps a site URL path prefix', () => {
+    expect(recordDetailUrl('https://example.org/directory', 'apps', 'x')).toBe(
+      'https://example.org/directory/apps/x/',
+    );
+  });
+
+  it('URI-encodes the slug', () => {
+    expect(recordDetailUrl('https://example.org', 'apps', 'a b/ü')).toBe(
+      'https://example.org/apps/a%20b%2F%C3%BC/',
+    );
   });
 });
 

@@ -111,6 +111,7 @@ readme: {
   showBadge: true,
   showToc: true,
   showBrowseLink: true,
+  entryLinkTarget: "homepage",
 }
 ```
 
@@ -122,6 +123,10 @@ Every field is optional. Fallback behavior:
 - `browseLabel` has no `site.*` fallback — it defaults to the literal string `"Browse the full directory →"`.
 - `intro` has no fallback; when unset, no intro section is rendered.
 - `showBadge`, `showToc`, and `showBrowseLink` each default to `true`.
+- `entryLinkTarget` decides where each entry's main link points:
+  - `homepage` (default): the homepage, falling back to the repository.
+  - `repository`: the repository, falling back to the homepage.
+  - `detail`: the record's page on your site, built from `site.url`, the directory route (`routes.directory`, or the blueprint default) and the URI-encoded slug, with a trailing slash. The repository becomes a secondary link: `- [Name](https://example.org/apps/name/) - Description. ([Source](https://github.com/owner/name))`. `detail` requires `site.url`: `grove check` reports `readme_detail_link_requires_site_url` and `grove readme generate` exits 1 rather than falling back to repository links.
 
 ## What survives a re-run
 

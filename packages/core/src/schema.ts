@@ -696,6 +696,13 @@ export const readmeConfigSchema = z.object({
   showBadge: z.boolean().default(true),
   showToc: z.boolean().default(true),
   showBrowseLink: z.boolean().default(true),
+  /**
+   * Where each README entry links: `homepage` (default; falls back to
+   * the repository), `repository` (falls back to the homepage), or
+   * `detail` — the record's page on this site, with the repository as
+   * a secondary "Source" link. `detail` requires `site.url`.
+   */
+  entryLinkTarget: z.enum(['detail', 'homepage', 'repository']).default('homepage'),
 });
 
 export const groveConfigSchema = z.object({

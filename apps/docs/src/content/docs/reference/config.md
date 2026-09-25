@@ -144,6 +144,7 @@ export default defineConfig({
     showBadge: true,
     showToc: true,
     showBrowseLink: true,
+    entryLinkTarget: "homepage",
   },
 
   paths: {
@@ -370,6 +371,7 @@ Every field is optional; an unset field falls back to the matching
 | `showBadge` | `boolean` | `true` | Show the sindresorhus-style "awesome" badge. |
 | `showToc` | `boolean` | `true` | Show the `## Contents` section. |
 | `showBrowseLink` | `boolean` | `true` | Show the "browse the catalog" link. |
+| `entryLinkTarget` | `"homepage" \| "repository" \| "detail"` | `"homepage"` | Where each entry links. `detail` links to the record's page on the site (requires `site.url`) and adds a `([Source](…))` link to the repository. |
 
 ```ts
 readme: {

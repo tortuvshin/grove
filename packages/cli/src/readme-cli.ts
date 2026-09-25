@@ -5,6 +5,7 @@ import {
   type AwesomeReadmeRecord,
   buildAwesomeReadme,
   decisionsFileSchema,
+  directoryRoute,
   type GroveConfig,
   healthFileSchema,
   injectAwesomeReadmeBlock,
@@ -31,19 +32,27 @@ export function buildReadmeCommand(): Command {
       const records = await loadRecords(cwd, config);
       const categories = await loadCategories(cwd, config.paths.taxonomyDir);
 
-      const markdown = buildAwesomeReadme({
-        site: {
-          name: config.site.name,
-          ...(config.site.tagline ? { tagline: config.site.tagline } : {}),
-          ...(config.site.description ? { description: config.site.description } : {}),
-          ...(config.site.url ? { url: config.site.url } : {}),
-          ...(config.site.repoUrl ? { repoUrl: config.site.repoUrl } : {}),
-        },
-        categories,
-        records,
-        generatedAt: new Date().toISOString(),
-        readme: config.readme,
-      });
+      let markdown: string;
+      try {
+        markdown = buildAwesomeReadme({
+          site: {
+            name: config.site.name,
+            ...(config.site.tagline ? { tagline: config.site.tagline } : {}),
+            ...(config.site.description ? { description: config.site.description } : {}),
+            ...(config.site.url ? { url: config.site.url } : {}),
+            ...(config.site.repoUrl ? { repoUrl: config.site.repoUrl } : {}),
+          },
+          directoryRoute: directoryRoute(config),
+          categories,
+          records,
+          generatedAt: new Date().toISOString(),
+          readme: config.readme,
+        });
+      } catch (error) {
+        console.error(`[grove readme] ${(error as Error).message}`);
+        process.exitCode = 1;
+        return;
+      }
 
       if (opts.stdout) {
         process.stdout.write(markdown);
@@ -155,8 +164,9 @@ async function loadRecords(cwd: string, config: GroveConfig): Promise<AwesomeRea
           ? (repoMeta.stargazers_count as number)
           : undefined;
     const license = typeof github.license === 'string' ? (github.license as string) : undefined;
+    const slug = typeof raw.slug === 'string' ? (raw.slug as string) : file.replace(/\.ya?ml$/, '');
     out.push({
-      slug: typeof raw.slug === 'string' ? (raw.slug as string) : '',
+      slug,
       name: typeof raw.name === 'string' ? (raw.name as string) : undefined,
       description: typeof raw.description === 'string' ? (raw.description as string) : undefined,
       category: typeof raw.category === 'string' ? (raw.category as string) : undefined,
@@ -166,10 +176,7 @@ async function loadRecords(cwd: string, config: GroveConfig): Promise<AwesomeRea
         typeof raw.homepageUrl === 'string'
           ? (raw.homepageUrl as string)
           : (links.website ?? undefined),
-      visibility: resolveVisibility(
-        typeof raw.slug === 'string' ? (raw.slug as string) : file.replace(/\.ya?ml$/, ''),
-        raw,
-      ),
+      visibility: resolveVisibility(slug, raw),
       ...(stars !== undefined ? { stars } : {}),
       ...(license !== undefined ? { license } : {}),
     });

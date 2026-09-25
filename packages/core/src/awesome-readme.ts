@@ -6,6 +6,12 @@
  * TOC, H2 category sections, and `- [Name](URL) - Description.` entries
  * sorted alphabetically within each section.
  *
+ * Entries link to the project's homepage (falling back to its
+ * repository) by default. `readme.entryLinkTarget: 'detail'` links
+ * each entry to its page on the directory site instead and keeps the
+ * repository as a secondary `([Source](…))` link, so the README sends
+ * readers to the reviewed page rather than past it.
+ *
  * The output is wrapped between `<!-- grove-readme:start -->` /
  * `<!-- grove-readme:end -->` sentinels so a project's hand-written
  * intro, contributing notes, and license section are preserved across
@@ -29,6 +35,15 @@ export interface AwesomeReadmeCategory {
   name: string;
 }
 
+/**
+ * Where each entry's main link points.
+ * - `homepage` (default): homepage, falling back to the repository.
+ * - `repository`: repository, falling back to the homepage.
+ * - `detail`: the record's page on the site (`site.url` + directory
+ *   route + slug + `/`), with the repository as a secondary link.
+ */
+export type ReadmeEntryLinkTarget = 'detail' | 'homepage' | 'repository';
+
 export interface AwesomeReadmeOptions {
   title?: string | undefined;
   tagline?: string | undefined;
@@ -39,6 +54,7 @@ export interface AwesomeReadmeOptions {
   showBadge?: boolean | undefined;
   showToc?: boolean | undefined;
   showBrowseLink?: boolean | undefined;
+  entryLinkTarget?: ReadmeEntryLinkTarget | undefined;
 }
 
 export interface AwesomeReadmeInput {
@@ -49,6 +65,12 @@ export interface AwesomeReadmeInput {
     url?: string | undefined;
     repoUrl?: string | undefined;
   };
+  /**
+   * Directory route segment for record pages (e.g. `apps` for
+   * `/apps/<slug>/`). Required when `readme.entryLinkTarget` is
+   * `detail`.
+   */
+  directoryRoute?: string | undefined;
   records: AwesomeReadmeRecord[];
   categories: AwesomeReadmeCategory[];
   generatedAt: string;
@@ -67,8 +89,53 @@ function normalizeDescription(value: string | undefined): string {
   return stripped;
 }
 
-function entryUrl(record: AwesomeReadmeRecord): string {
-  return record.homepageUrl ?? record.repoUrl ?? '';
+/**
+ * Canonical URL of a record's detail page: `site.url` without a
+ * trailing slash, the directory route, the URI-encoded slug, and a
+ * trailing slash to match the canonical URLs pages emit (see
+ * `buildSitemap`).
+ */
+export function recordDetailUrl(siteUrl: string, directoryRoute: string, slug: string): string {
+  const base = siteUrl.replace(/\/+$/, '');
+  const route = directoryRoute.replace(/^\/+|\/+$/g, '');
+  return `${base}/${route}/${encodeURIComponent(slug)}/`;
+}
+
+/**
+ * Throws when `detail` links cannot be built. A README that silently
+ * fell back to repository links would hide the misconfiguration.
+ */
+export function assertReadmeLinkConfig(input: {
+  readme?: AwesomeReadmeOptions | undefined;
+  site: { url?: string | undefined };
+  directoryRoute?: string | undefined;
+}): void {
+  if (input.readme?.entryLinkTarget !== 'detail') return;
+  const missing: string[] = [];
+  if (!input.site.url) missing.push('site.url');
+  if (!input.directoryRoute) missing.push('the directory route (routes.directory)');
+  if (missing.length > 0) {
+    throw new Error(
+      `readme.entryLinkTarget is 'detail' but ${missing.join(' and ')} ${missing.length > 1 ? 'are' : 'is'} not set.`,
+    );
+  }
+}
+
+interface EntryLinks {
+  main: string;
+  source?: string | undefined;
+}
+
+function entryLinks(record: AwesomeReadmeRecord, input: AwesomeReadmeInput): EntryLinks {
+  const target = input.readme?.entryLinkTarget ?? 'homepage';
+  const { directoryRoute } = input;
+  const siteUrl = input.site.url;
+  // assertReadmeLinkConfig in buildAwesomeReadme guarantees both are set.
+  if (target === 'detail' && siteUrl && directoryRoute) {
+    return { main: recordDetailUrl(siteUrl, directoryRoute, record.slug), source: record.repoUrl };
+  }
+  if (target === 'repository') return { main: record.repoUrl ?? record.homepageUrl ?? '' };
+  return { main: record.homepageUrl ?? record.repoUrl ?? '' };
 }
 
 function entryLabel(record: AwesomeReadmeRecord): string {
@@ -98,12 +165,13 @@ function categoryAnchor(name: string): string {
     .replace(/\s+/g, '-');
 }
 
-function buildEntryLine(record: AwesomeReadmeRecord): string {
+function buildEntryLine(record: AwesomeReadmeRecord, input: AwesomeReadmeInput): string {
   const label = entryLabel(record);
-  const url = entryUrl(record);
+  const { main, source } = entryLinks(record, input);
   const desc = normalizeDescription(record.description);
-  const link = url ? `[${label}](${url})` : label;
-  return desc ? `- ${link} - ${desc}.` : `- ${link}`;
+  const link = main ? `[${label}](${main})` : label;
+  const sourceLink = source ? ` ([Source](${source}))` : '';
+  return desc ? `- ${link} - ${desc}.${sourceLink}` : `- ${link}${sourceLink}`;
 }
 
 function isVisible(record: AwesomeReadmeRecord): boolean {
@@ -115,6 +183,7 @@ function hasLabel(record: AwesomeReadmeRecord): boolean {
 }
 
 export function buildAwesomeReadme(input: AwesomeReadmeInput): string {
+  assertReadmeLinkConfig(input);
   const visible = input.records.filter((r) => isVisible(r) && hasLabel(r));
   const opts = input.readme ?? {};
   const showBadge = opts.showBadge !== false;
@@ -187,7 +256,7 @@ export function buildAwesomeReadme(input: AwesomeReadmeInput): string {
     if (records.length === 0) continue;
     lines.push(`## ${name}`);
     lines.push('');
-    for (const record of records) lines.push(buildEntryLine(record));
+    for (const record of records) lines.push(buildEntryLine(record, input));
     lines.push('');
   }
 

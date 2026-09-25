@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { type GroveConfig, loadConfig } from './config.js';
 import { totalPages } from './directory-search.js';
+import { directoryRoute } from './routes.js';
 
 export interface SitemapEntry {
   loc: string;
@@ -75,16 +76,6 @@ ${body}
 `;
 }
 
-const BLUEPRINT_INDEX: Record<string, string> = {
-  'project-directory': 'projects',
-  'resource-hub': 'resources',
-  'ecosystem-map': 'entities',
-};
-
-function directorySlug(config: GroveConfig): string {
-  return config.routes.directory ?? BLUEPRINT_INDEX[config.blueprint] ?? 'items';
-}
-
 /**
  * Build a sitemap from generated records data + Grove config.
  * Writes to public/sitemap.xml.
@@ -100,7 +91,7 @@ export async function buildSitemap(
 ): Promise<SitemapResult> {
   const cfg = config ?? (await loadConfig(cwd));
   const siteUrl = (input.siteUrl ?? cfg.site.url ?? 'https://example.com').replace(/\/$/, '');
-  const indexSlug = input.indexSlug ?? directorySlug(cfg);
+  const indexSlug = input.indexSlug ?? directoryRoute(cfg);
   const entries: SitemapEntry[] = [];
 
   entries.push({
