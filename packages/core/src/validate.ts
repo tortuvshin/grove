@@ -182,6 +182,15 @@ export async function validateProject(
   const warnings: ValidationIssue[] = [];
   const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
 
+  if (config.readme?.entryLinkTarget === 'detail' && !config.site.url) {
+    errors.push({
+      code: 'readme_detail_link_requires_site_url',
+      message:
+        "readme.entryLinkTarget is 'detail' but site.url is not set, so README entries cannot link to record pages",
+      severity: 'error',
+    });
+  }
+
   if (!(await exists(recordsDir))) {
     errors.push({
       code: 'missing_records_dir',

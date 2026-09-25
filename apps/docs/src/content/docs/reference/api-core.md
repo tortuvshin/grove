@@ -150,6 +150,22 @@ const { start, end } = parseAwesomeReadmeSections(existingReadme);
 
 The command `grove readme generate` is `buildAwesomeReadme` + `injectAwesomeReadmeBlock`. `parseAwesomeReadmeSections` is exported for tools that want to inspect or validate the sentinel block without rendering.
 
+With `readme.entryLinkTarget: 'detail'`, also pass `directoryRoute` so entries can link to record pages:
+
+```ts
+import { assertReadmeLinkConfig, directoryRoute, recordDetailUrl } from "@grove-dev/core";
+
+// Route segment of record pages: routes.directory, or the blueprint default.
+const route = directoryRoute(config); // "apps"
+
+// Throws when 'detail' links cannot be built (no site.url or route).
+assertReadmeLinkConfig({ readme: config.readme, site: config.site, directoryRoute: route });
+
+recordDetailUrl("https://example.org", route, "immich"); // "https://example.org/apps/immich/"
+```
+
+`buildAwesomeReadme` calls `assertReadmeLinkConfig` itself; call it directly to fail early in your own tooling.
+
 ## JSON-LD
 
 ```ts

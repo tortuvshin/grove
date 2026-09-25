@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { type GroveConfig, loadConfig } from './config.js';
+import { directoryRoute } from './routes.js';
 import { slugify } from './slug.js';
 
 export interface LlmsRecordInput {
@@ -31,21 +32,11 @@ export interface LlmsResult {
   indexed: number;
 }
 
-const BLUEPRINT_INDEX: Record<string, string> = {
-  'project-directory': 'projects',
-  'resource-hub': 'resources',
-  'ecosystem-map': 'entities',
-};
-
 const BLUEPRINT_PLURAL: Record<string, string> = {
   'project-directory': 'Projects',
   'resource-hub': 'Resources',
   'ecosystem-map': 'Entities',
 };
-
-function directorySlug(config: GroveConfig): string {
-  return config.routes.directory ?? BLUEPRINT_INDEX[config.blueprint] ?? 'items';
-}
 
 function pluralLabel(config: GroveConfig): string {
   const label = config.labels.plural ?? BLUEPRINT_PLURAL[config.blueprint] ?? 'Items';
@@ -97,7 +88,7 @@ function buildDetailSection(record: LlmsRecordInput, siteUrl: string, indexSlug:
 
 export function buildLlmsTxt(input: LlmsInput, config: GroveConfig): string {
   const siteUrl = (input.siteUrl ?? config.site.url ?? '').replace(/\/$/, '');
-  const indexSlug = directorySlug(config);
+  const indexSlug = directoryRoute(config);
   const visible = input.records.filter((r) => r.visibility !== 'hide' && r.visibility !== 'remove');
   return `# ${config.site.name}
 
@@ -146,7 +137,7 @@ export function buildLlmsFullTxt(
   if ('generatedAt' in input) {
     const legacyInput = input as LlmsInput;
     const siteUrl = (legacyInput.siteUrl ?? config?.site.url ?? '').replace(/\/$/, '');
-    const indexSlug = config ? directorySlug(config) : 'items';
+    const indexSlug = config ? directoryRoute(config) : 'items';
     const visible = legacyInput.records.filter(
       (r) => r.visibility !== 'hide' && r.visibility !== 'remove',
     );

@@ -828,3 +828,32 @@ describe('validateProject — record content pointers', () => {
     });
   });
 });
+
+describe('validateProject — readme.entryLinkTarget', () => {
+  it("errors when entryLinkTarget is 'detail' and site.url is missing", async () => {
+    await withTmpCwd('grove-validate-readme-detail-', async (cwd) => {
+      await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+      const config = makeConfig({
+        readme: { entryLinkTarget: 'detail' },
+      } as Partial<GroveConfig>);
+      const result = await validateProject(config);
+      expect(result.errors.some((e) => e.code === 'readme_detail_link_requires_site_url')).toBe(
+        true,
+      );
+    });
+  });
+
+  it("accepts 'detail' when site.url is set", async () => {
+    await withTmpCwd('grove-validate-readme-detail-ok-', async (cwd) => {
+      await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+      const config = makeConfig({
+        site: { name: 'test', tagline: 'test', url: 'https://example.org' },
+        readme: { entryLinkTarget: 'detail' },
+      } as Partial<GroveConfig>);
+      const result = await validateProject(config);
+      expect(result.errors.some((e) => e.code === 'readme_detail_link_requires_site_url')).toBe(
+        false,
+      );
+    });
+  });
+});

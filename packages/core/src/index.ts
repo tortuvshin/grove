@@ -29,6 +29,7 @@ export type {
   AwesomeReadmeOptions,
   AwesomeReadmeRecord,
   AwesomeReadmeSections,
+  ReadmeEntryLinkTarget,
 } from './awesome-readme.js';
 // ── Awesome-list README ──────────────────────────────────────────────
 // Generates a canonical sindresorhus/awesome-format README from the
@@ -38,9 +39,11 @@ export type {
 export {
   AWESOME_README_END,
   AWESOME_README_START,
+  assertReadmeLinkConfig,
   buildAwesomeReadme,
   injectAwesomeReadmeBlock,
   parseAwesomeReadmeSections,
+  recordDetailUrl,
 } from './awesome-readme.js';
 export type { GenerateResult, RecordsFullPayload, RecordsIndexPayload } from './build-data.js';
 // ── Build pipeline ───────────────────────────────────────────────────
@@ -254,6 +257,7 @@ export type {
 export { classifyRepositoryHealth } from './repository-health.js';
 // ── Robots + filter URL policy ───────────────────────────────────────
 export { buildRobotsTxt, isIndexableFilterPath } from './robots.js';
+export { directoryRoute } from './routes.js';
 // ── Schema-derived types ─────────────────────────────────────────────
 export type {
   AppLabel,
