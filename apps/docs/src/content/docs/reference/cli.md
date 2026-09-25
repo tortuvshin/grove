@@ -266,7 +266,7 @@ commit, license, language, topics).
 | Option | Description |
 |---|---|
 | `--limit <n>` | Sync only the first `n` records (alphabetical by filename). Useful as a rate-limit guard. |
-| `--strict` | Fail the run (exit 1) if any record could not be synced (API + HTML fallback both failed) |
+| `--strict` | Fail the run (exit 1) if any record could not be synced (API + HTML fallback both failed). An HTML fallback is not a failure. |
 
 **Reads:**
 
@@ -284,11 +284,19 @@ commit, license, language, topics).
 **Output:**
 
 ```
-[sync github] owner/repo ... updated
-[sync github] owner/repo ... html-fallback
-[sync github] owner/repo ... skipped (api+html error)
-[sync github] 35 updated (5 html-only), 2 failed
+[sync github] astro.yml: api
+[sync github] ollama.yml: html
+[sync github] dead-repo.yml: unavailable
+[sync github] 2 updated (1 HTML fallback), 1 failed
+  slug       outcome        reason
+  dead-repo  failed         API: repository not found; HTML: not found
+  ollama     html fallback  API: GitHub API 502 Bad Gateway for /repos/ollama/ollama
 ```
+
+The table after the totals line lists only HTML-fallback and failed
+records, sorted by slug; a clean run prints just the totals line.
+When `GITHUB_STEP_SUMMARY` is set, the same summary is appended to it
+as a Markdown table.
 
 **Behavior:**
 
