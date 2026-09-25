@@ -10,6 +10,7 @@ import {
   blueprintKind,
   decisionsFileSchema,
   type GroveConfig,
+  type HealthEntry,
   healthFileSchema,
   type Resource,
   recordsFileSchema,
@@ -44,6 +45,78 @@ async function exists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+interface HealthParityValues {
+  status: string;
+  tier: string;
+  visibility: string;
+  lastCommitAt: string | null;
+}
+
+const HEALTH_PARITY_FIELDS = ['status', 'tier', 'visibility', 'lastCommitAt'] as const;
+
+function sameInstant(a: string | null, b: string | null): boolean {
+  // Only compare when both sides know a date — a missing one is not drift.
+  if (a === null || b === null) return true;
+  const ta = Date.parse(a);
+  const tb = Date.parse(b);
+  return Number.isNaN(ta) || Number.isNaN(tb) ? a === b : ta === tb;
+}
+
+/**
+ * Compare inline record health against `paths.health` entries:
+ * differing values, inline records the file lacks, and file entries
+ * with no record at all.
+ */
+function healthParityIssues(
+  healthPath: string,
+  entries: HealthEntry[],
+  inline: Map<string, HealthParityValues>,
+  recordSlugs: Set<string>,
+): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const byId = new Map(entries.map((entry) => [entry.id, entry]));
+  for (const [slug, values] of inline) {
+    const entry = byId.get(slug);
+    if (!entry) {
+      issues.push({
+        code: 'health_source_missing_entry',
+        message: `${slug}: has inline health but no entry in ${healthPath}`,
+        severity: 'warning',
+      });
+      continue;
+    }
+    const fileValues: HealthParityValues = {
+      status: entry.health.status,
+      tier: entry.health.tier,
+      visibility: entry.health.visibility,
+      lastCommitAt: entry.github?.pushedAt ?? null,
+    };
+    const differing = HEALTH_PARITY_FIELDS.filter((field) =>
+      field === 'lastCommitAt'
+        ? !sameInstant(values.lastCommitAt, fileValues.lastCommitAt)
+        : values[field] !== fileValues[field],
+    );
+    if (differing.length === 0) continue;
+    const detail = differing
+      .map((field) => `${field} ${values[field]} (inline) vs ${fileValues[field]} (file)`)
+      .join(', ');
+    issues.push({
+      code: 'health_source_mismatch',
+      message: `${slug}: inline health disagrees with ${healthPath} — ${detail}`,
+      severity: 'warning',
+    });
+  }
+  for (const entry of entries) {
+    if (recordSlugs.has(entry.id)) continue;
+    issues.push({
+      code: 'health_file_orphan_entry',
+      message: `${healthPath}: entry "${entry.id}" has no matching record`,
+      severity: 'warning',
+    });
+  }
+  return issues;
 }
 
 async function taxonomyIds(path: string): Promise<Set<string>> {
@@ -95,6 +168,8 @@ export async function validateProject(
   const slugs = new Set<string>();
   /** Slugs that have a github link and therefore need a health entry. */
   const slugsNeedingHealth = new Set<string>();
+  /** Inline health per slug, compared against health.yml once it is read. */
+  const inlineHealth = new Map<string, HealthParityValues>();
   const taxonomyDir = config.paths.taxonomyDir ?? 'data/taxonomy';
   const taxonomy = {
     categories: await taxonomyIds(resolve(process.cwd(), taxonomyDir, 'categories.yml')),
@@ -290,12 +365,30 @@ export async function validateProject(
     if ((repoUrl || linksGithub) && !hasInlineHealth) {
       slugsNeedingHealth.add(fileSlug);
     }
+    if (parsed.kind === 'project' && parsed.health) {
+      const github = parsed.github as
+        | { pushedAt?: string | null; repository?: { pushed_at?: string | null } }
+        | undefined;
+      inlineHealth.set(fileSlug, {
+        status: parsed.health.status,
+        tier: parsed.health.tier,
+        visibility: parsed.health.visibility,
+        // Same fallback chain the sitemap/index use for lastCommitAt.
+        lastCommitAt:
+          (parsed as { lastCommitAt?: string | null }).lastCommitAt ??
+          github?.pushedAt ??
+          github?.repository?.pushed_at ??
+          null,
+      });
+    }
   }
 
   if (await exists(resolve(process.cwd(), config.paths.health))) {
     let health: ReturnType<typeof unwrapHealth> = [];
+    let healthParsed = false;
     try {
       health = unwrapHealth(healthFileSchema.parse(await readYamlFile(config.paths.health)));
+      healthParsed = true;
     } catch (err) {
       errors.push({
         code: 'health_file_invalid',
@@ -303,6 +396,11 @@ export async function validateProject(
         severity: 'error',
       });
     }
+    // The build prefers inline health and only falls back to health.yml,
+    // so a file that drifts from the records is a second source of truth
+    // nobody reads. Flag the drift; skip it when the file didn't parse.
+    if (healthParsed)
+      warnings.push(...healthParityIssues(config.paths.health, health, inlineHealth, slugs));
     const healthIds = new Set(health.map((entry) => entry.id));
     for (const slug of slugsNeedingHealth) {
       if (healthIds.has(slug)) continue;
