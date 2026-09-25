@@ -5,6 +5,7 @@ import { ZodError } from 'zod';
 import { type CollectionSourceRecord, toCollectionEntries } from './collection-entries.js';
 import { CollectionFileError, parseCollectionFile } from './collections-io.js';
 import { runCollection } from './collector.js';
+import { readContentFile } from './content-body.js';
 import { readYamlFile } from './io.js';
 import {
   blueprintKind,
@@ -37,6 +38,34 @@ export interface ValidationResult {
 
 /** Related records a subject needs before a missing hub is worth a warning. */
 const SUBJECT_HUB_MIN_RECORDS = 3;
+
+/**
+ * True when a Markdown body (frontmatter already stripped) has at
+ * least one line of prose. Deliberately narrow — only these count as
+ * "not prose":
+ *
+ *   - blank lines
+ *   - ATX headings (`#` through `######` followed by a space)
+ *   - HTML comments, including ones spanning several lines
+ *   - placeholder lines that start with an upper-case `TODO` or `TBD`,
+ *     optionally behind a list marker, `>` or emphasis (`- TODO: …`,
+ *     `**TBD**`)
+ *
+ * Anything else — a sentence, a list item, a code fence, a table row —
+ * is prose, so a real body is never flagged as a skeleton.
+ */
+function hasProse(body: string): boolean {
+  return body
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, '')
+    .split(/\r?\n/)
+    .some((line) => {
+      const trimmed = line.trim();
+      if (trimmed === '') return false;
+      if (/^#{1,6}(?:\s|$)/.test(trimmed)) return false;
+      if (/^(?:[-*+]\s+|>\s*)?[*_]*(?:TODO|TBD)\b/.test(trimmed)) return false;
+      return true;
+    });
+}
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -337,6 +366,27 @@ export async function validateProject(
         message: `${fileSlug}: no addedAt — the recently-added sort will fall back to the review or repo date`,
         severity: 'warning',
       });
+    }
+    // A `content` pointer the build can't resolve is dropped from the
+    // detail page without a word, so resolve it here with the same
+    // helper the build uses. A body that resolves but holds only
+    // headings and TODOs renders as an empty-looking page — a warning,
+    // which `--strict` turns into a failure.
+    if (parsed.content) {
+      const body = readContentFile(parsed.content);
+      if (!body) {
+        errors.push({
+          code: 'content_pointer_missing',
+          message: `${fileSlug}: content "${parsed.content}" does not resolve to a file`,
+          severity: 'error',
+        });
+      } else if (!hasProse(body.body)) {
+        warnings.push({
+          code: 'content_body_skeleton',
+          message: `${fileSlug}: content "${parsed.content}" has only headings, comments or TODO placeholders`,
+          severity: 'warning',
+        });
+      }
     }
     warnUnknownTaxonomy(
       fileSlug,
