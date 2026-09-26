@@ -22,6 +22,14 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.19.0](https://github.com/tortuvshin/grove/compare/v0.18.0...v0.19.0) (2026-09-26)
+
+
+### Features
+
+* **core:** outbound attribution, submittedBy, press and nav menus ([e0c95a8](https://github.com/tortuvshin/grove/commit/e0c95a8df905bb249f0615a56d4702be8e89196c))
+* **registry:** header menus, hero proof, collection cards, credited submissions ([3ac132e](https://github.com/tortuvshin/grove/commit/3ac132e3c0f61ef7b2b44720538cfb29ef3a3c45))
+
 ## [0.18.0](https://github.com/tortuvshin/grove/compare/v0.17.0...v0.18.0) (2026-09-26)
 
 
