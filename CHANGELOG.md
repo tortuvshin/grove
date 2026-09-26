@@ -22,6 +22,16 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.18.0](https://github.com/tortuvshin/grove/compare/v0.17.0...v0.18.0) (2026-09-26)
+
+
+### Features
+
+* **core:** index policy for record, collection and taxonomy pages ([3e6cb57](https://github.com/tortuvshin/grove/commit/3e6cb5713417263ad729f83086e2d59c67ac9145))
+* **core:** SoftwareApplication JSON-LD with verified fields only ([26e2a1e](https://github.com/tortuvshin/grove/commit/26e2a1eedf11896c3f5820d11672e80f0b7ca0c9))
+* **sync:** collect channel and media candidates; add grove candidates ([4b18a21](https://github.com/tortuvshin/grove/commit/4b18a2138a0226844b92cff77faa712978b18fe0))
+* **sync:** collect channel and media candidates; add grove candidates ([90745b7](https://github.com/tortuvshin/grove/commit/90745b7f07ff4b72100ad3155ac3c51cdff2e788)), closes [#113](https://github.com/tortuvshin/grove/issues/113)
+
 ## [0.17.0](https://github.com/tortuvshin/grove/compare/v0.16.0...v0.17.0) (2026-09-26)
 
 
