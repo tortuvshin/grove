@@ -91,7 +91,7 @@ from `@grove-dev/core`:
 
 - **JSON-LD** — `buildJsonLd` is overloaded by input shape and emits
   `WebSite` for the site, `CollectionPage` for collections,
-  `SoftwareSourceCode` for project records, and an article-style node for
+  `SoftwareApplication` + `SoftwareSourceCode` for project records, and an article-style node for
   content pages. `validateJsonLd` reports structural issues.
 - **Open Graph** — `og:title`, `og:url`, `og:description`, `og:image`, and
   the image's `width` / `height` / `alt`.

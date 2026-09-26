@@ -241,18 +241,138 @@ export interface RecordInput {
 }
 
 export function recordSchema(input: RecordInput): JsonLdNode[] {
-  const isApp = input.kind === 'application';
-  const main: JsonLdNode = {
+  const main: JsonLdNode =
+    input.kind === 'application'
+      ? softwareApplicationSchema({
+          url: input.url,
+          name: input.name,
+          description: input.description,
+          ...(input.repoUrl ? { repoUrl: input.repoUrl } : {}),
+          ...(input.license ? { license: input.license } : {}),
+        })
+      : {
+          '@context': 'https://schema.org',
+          '@type': ['CreativeWork', 'WebPage'],
+          '@id': `${input.url}#record`,
+          url: input.url,
+          name: input.name,
+          description: input.description,
+          ...(input.license ? { license: input.license } : {}),
+        };
+  return [main, breadcrumbSchema(input.crumbs)];
+}
+
+/**
+ * Every property `softwareApplicationSchema` can emit. Each one comes
+ * from the record, the page, or the GitHub API — nothing is inferred.
+ * `offers`, `aggregateRating`, `review` and `isAccessibleForFree` are
+ * deliberately absent: a directory has no verified price or rating, and
+ * open source is not the same as free in a store. Exported so a site's
+ * SEO gate can hold its pages to the same list.
+ */
+export const SOFTWARE_APPLICATION_FIELDS = [
+  '@context',
+  '@type',
+  '@id',
+  'name',
+  'description',
+  'url',
+  'codeRepository',
+  'sameAs',
+  'license',
+  'operatingSystem',
+  'applicationCategory',
+  'downloadUrl',
+  'programmingLanguage',
+  'dateCreated',
+  'dateModified',
+  'author',
+  'keywords',
+] as const;
+
+/** SPDX ids GitHub reports when it cannot identify a license. */
+const UNKNOWN_LICENSES = new Set(['NOASSERTION', 'OTHER']);
+
+export interface SoftwareApplicationInput {
+  /** Canonical page URL; the node's `@id` is `<url>#record`. */
+  url: string;
+  name: string;
+  description: string;
+  /** Source repository — `codeRepository`, and first in `sameAs`. */
+  repoUrl?: string;
+  /** The project's own website — added to `sameAs`. */
+  homepageUrl?: string;
+  /** SPDX id as detected by GitHub. `NOASSERTION` / `OTHER` are dropped;
+   *  an SPDX id becomes its spdx.org URL. */
+  license?: string | null;
+  /** Platform labels (e.g. "Android", "iOS") — `operatingSystem`. */
+  platforms?: string[];
+  /** Category label — `applicationCategory`. */
+  category?: string;
+  /** URLs of distribution channels a curator marked `verified: true`.
+   *  Unverified channels must not be passed. */
+  downloadUrls?: string[];
+  /** Primary language as reported by GitHub. */
+  programmingLanguage?: string | null;
+  /** Repository creation / last push, from GitHub. */
+  dateCreated?: string | null;
+  dateModified?: string | null;
+  /** Repository owner. Emitted only with a type GitHub reported
+   *  (`User` → Person, `Organization` → Organization). */
+  owner?: { login: string; type?: string | null; url?: string };
+  keywords?: string[];
+}
+
+function licenseUrl(spdx: string | null | undefined): string | undefined {
+  if (!spdx || UNKNOWN_LICENSES.has(spdx.toUpperCase())) return undefined;
+  return `https://spdx.org/licenses/${spdx}.html`;
+}
+
+/**
+ * `["SoftwareApplication", "SoftwareSourceCode"]` node for an app
+ * record, limited to `SOFTWARE_APPLICATION_FIELDS`. Missing inputs are
+ * left out rather than filled with a default.
+ */
+export function softwareApplicationSchema(input: SoftwareApplicationInput): JsonLdNode {
+  const sameAs = [input.repoUrl, input.homepageUrl].filter((url): url is string => Boolean(url));
+  const downloadUrls = [...new Set(input.downloadUrls ?? [])];
+  const license = licenseUrl(input.license);
+  const authorType =
+    input.owner?.type === 'User'
+      ? 'Person'
+      : input.owner?.type === 'Organization'
+        ? 'Organization'
+        : undefined;
+  const node: JsonLdNode = {
     '@context': 'https://schema.org',
-    '@type': isApp ? ['SoftwareApplication', 'SoftwareSourceCode'] : ['CreativeWork', 'WebPage'],
+    '@type': ['SoftwareApplication', 'SoftwareSourceCode'],
     '@id': `${input.url}#record`,
-    url: input.url,
     name: input.name,
     description: input.description,
-    ...(isApp && input.repoUrl ? { codeRepository: input.repoUrl } : {}),
-    ...(input.license ? { license: input.license } : {}),
+    url: input.url,
+    ...(input.repoUrl ? { codeRepository: input.repoUrl } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
+    ...(license ? { license } : {}),
+    ...(input.platforms?.length ? { operatingSystem: input.platforms.join(', ') } : {}),
+    ...(input.category ? { applicationCategory: input.category } : {}),
+    ...(downloadUrls.length
+      ? { downloadUrl: downloadUrls.length === 1 ? downloadUrls[0] : downloadUrls }
+      : {}),
+    ...(input.programmingLanguage ? { programmingLanguage: input.programmingLanguage } : {}),
+    ...(input.dateCreated ? { dateCreated: input.dateCreated } : {}),
+    ...(input.dateModified ? { dateModified: input.dateModified } : {}),
+    ...(input.owner && authorType
+      ? {
+          author: {
+            '@type': authorType,
+            name: input.owner.login,
+            url: input.owner.url ?? `https://github.com/${input.owner.login}`,
+          },
+        }
+      : {}),
+    ...(input.keywords?.length ? { keywords: input.keywords.join(', ') } : {}),
   };
-  return [main, breadcrumbSchema(input.crumbs)];
+  return node;
 }
 
 export interface ContentInput {
@@ -300,7 +420,7 @@ export interface JsonLdValidationIssue {
   message: string;
 }
 
-const URL_FIELDS = new Set(['url', 'codeRepository', 'logo', 'image', 'sameAs']);
+const URL_FIELDS = new Set(['url', 'codeRepository', 'logo', 'image', 'sameAs', 'downloadUrl']);
 
 export function validateJsonLd(nodes: JsonLdNode[]): JsonLdValidationIssue[] {
   const issues: JsonLdValidationIssue[] = [];

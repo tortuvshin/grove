@@ -148,7 +148,7 @@ describe('SEO + page-structure parity', () => {
         /<meta\s+property="og:type"\s+content="article"/,
         /<link\s+rel="canonical"\s+href="https:\/\/example\.com\/projects\/crewai\/"/,
         /<meta\s+property="og:image"\s+content="https:\/\/example\.com\/og\/records\/crewai\.png"/,
-        /"@type":"SoftwareSourceCode"/,
+        /"@type":\["SoftwareApplication","SoftwareSourceCode"\]/,
         /"@type":"BreadcrumbList"/,
       ],
     },

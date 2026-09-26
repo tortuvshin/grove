@@ -43,6 +43,7 @@ import {
   readContentFile,
   readingMetrics,
   recordIndexable,
+  softwareApplicationSchema,
   statusDisplay,
   taxonomyTermIndexable,
   totalPages,
@@ -699,46 +700,39 @@ export function getRecordDetailModel(
 
   let recordLd: Record<string, unknown>;
   if (isProject && proj) {
-    const sameAs = [repoUrl, homepageUrl].filter(Boolean);
-    // schema.org `dateCreated` is when the *work* was created, so the
-    // repository's own creation date is the honest answer. This used to
-    // read `curation.reviewedAt` and published the review date as the
-    // project's birthday — off by years on most records.
+    // Only verified fields (`SOFTWARE_APPLICATION_FIELDS`): nothing here
+    // is inferred. `dateCreated` is the repository's creation date — the
+    // work's own birthday, not the review date. Download links come only
+    // from channels a curator marked `verified: true`.
+    const owner = (github as { owner?: { login?: string; type?: string; html_url?: string } })
+      ?.owner;
     const dateCreated = github?.created_at ? String(github.created_at) : undefined;
-    recordLd = {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareSourceCode',
-      '@id': `${pageUrl}#record`,
-      name,
-      headline: name,
-      description,
+    recordLd = softwareApplicationSchema({
       url: pageUrl,
-      codeRepository: repoUrl || undefined,
-      sameAs: sameAs.length ? sameAs : undefined,
-      programmingLanguage: language ?? undefined,
-      license: licenseSpdx ?? undefined,
-      applicationCategory: record.category || undefined,
-      operatingSystem: platforms.length ? platforms.join(', ') : undefined,
-      keywords: record.tags?.length ? record.tags.join(', ') : undefined,
-      dateCreated: dateCreated ?? undefined,
-      dateModified: pushedAt ?? dateCreated ?? undefined,
-      interactionStatistic:
-        stars > 0
-          ? {
-              '@type': 'InteractionCounter',
-              interactionType: { '@type': 'LikeAction' },
-              userInteractionCount: stars,
-            }
-          : undefined,
-      author: ownerRepo
+      name,
+      description,
+      ...(repoUrl ? { repoUrl } : {}),
+      ...(homepageUrl ? { homepageUrl } : {}),
+      license: licenseSpdx,
+      platforms: platforms.map((id) => taxonomyLabel('platforms', id)),
+      ...(categoryLabel ? { category: categoryLabel } : {}),
+      downloadUrls: (proj.distribution?.channels ?? [])
+        .filter((channel) => channel.verified === true)
+        .map((channel) => channel.url),
+      programmingLanguage: language,
+      dateCreated,
+      dateModified: pushedAt ?? dateCreated,
+      ...(owner?.login && ownerRepo?.owner === owner.login
         ? {
-            '@type': 'Organization',
-            name: ownerRepo.owner,
-            url: `https://github.com/${ownerRepo.owner}`,
+            owner: {
+              login: owner.login,
+              type: owner.type ?? null,
+              ...(owner.html_url ? { url: owner.html_url } : {}),
+            },
           }
-        : undefined,
-      isAccessibleForFree: true,
-    };
+        : {}),
+      keywords: record.tags ?? [],
+    });
   } else if (record.kind === 'resource') {
     const schemaTypes: Record<string, string> = {
       article: 'Article',
@@ -759,7 +753,6 @@ export function getRecordDetailModel(
       author: record.author ? { '@type': 'Person', name: record.author } : undefined,
       datePublished: record.publishedAt || undefined,
       keywords: record.tags?.length ? record.tags.join(', ') : undefined,
-      isAccessibleForFree: true,
     };
   } else {
     recordLd = {

@@ -51,7 +51,7 @@ depends on what that page is.
 
 | Builder | Emits |
 |---|---|
-| `recordSchema` | `["SoftwareApplication", "SoftwareSourceCode"]` for `kind: "application"`, `["CreativeWork", "WebPage"]` for `kind: "article"` — plus `codeRepository` and `license` when present |
+| `recordSchema` | `["SoftwareApplication", "SoftwareSourceCode"]` for `kind: "application"` (via `softwareApplicationSchema`), `["CreativeWork", "WebPage"]` for `kind: "article"` — plus `codeRepository` and `license` when present |
 | `collectionSchema` | `["CollectionPage", "WebPage"]`, an `ItemList` of the members, and breadcrumbs |
 | `contentSchema` | `["Article", "WebPage"]` with `author` and optional `datePublished`, plus breadcrumbs |
 | `faqSchema` | A single `FAQPage` node with one `Question` / `acceptedAnswer` per item. Not part of the `buildJsonLd` overload — call it directly. A collection with a `faq` block gets it automatically. |
@@ -61,6 +61,31 @@ breadcrumb structured data is emitted by default, not opt-in. `faqSchema` is the
 exception: it returns only the `FAQPage` node, to append to a page's existing graph.
 `breadcrumbSchema` is also exported on its own for pages that need nothing
 else.
+
+### Record detail pages
+
+A project record's page emits one `["SoftwareApplication", "SoftwareSourceCode"]`
+node built by `softwareApplicationSchema`. It carries only fields with a
+verified source, listed in `SOFTWARE_APPLICATION_FIELDS`:
+
+| Field | Source |
+|---|---|
+| `name`, `description`, `url`, `@id` | the record and its canonical URL |
+| `codeRepository`, `sameAs` | `repoUrl`; `links.website` is added to `sameAs` |
+| `license` | the SPDX id GitHub detected, as its spdx.org URL; left out for `NOASSERTION` / `OTHER` |
+| `operatingSystem` | the record's `platforms`, as taxonomy labels |
+| `applicationCategory` | the category label |
+| `downloadUrl` | distribution channels marked `verified: true` — never unverified ones |
+| `programmingLanguage`, `dateCreated`, `dateModified` | the GitHub repository |
+| `author` | the repository owner, typed `Person` or `Organization` from what GitHub reports; left out when the type is unknown |
+| `keywords` | the record's tags |
+
+Never emitted: `offers`, `aggregateRating`, `review`,
+`isAccessibleForFree`. A directory has no verified price or rating, and
+an open-source app can still be paid in a store. Google's software
+rich result asks for `offers` plus a rating, so these pages do not get
+one — and Search Console may list them as missing those fields. That is
+the intended trade: no invented data.
 
 :::note[`validateJsonLd` is a dev-time warning, not a gate]
 The layout runs `validateJsonLd` only under `import.meta.env.DEV` and prints

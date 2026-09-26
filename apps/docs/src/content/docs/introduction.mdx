@@ -26,7 +26,7 @@ without you writing any of it a second time:
 | A detail page | `/projects/my-project/` | People browsing the site |
 | A row in the browse index | `/projects/` | People filtering and searching |
 | A sitemap entry | `public/sitemap.xml` | Search engines |
-| A `SoftwareSourceCode` block | inline JSON-LD on the page | Google rich results |
+| A `SoftwareApplication` block | inline JSON-LD on the page | Search engines and structured-data consumers |
 | An index line and a detail section | `public/llms-full.txt` | AI assistants and crawlers |
 | A social card | `public/og/records/my-project.png` | Slack, LinkedIn, Discord |
 | A row in the dataset | `data/generated/records.json` | Anything consuming your data |
@@ -40,7 +40,7 @@ content pages.
 <Aside type="note" title="What lands where">
   `llms.txt` is the small file — site name, tagline, and counts. The per-record index
   lines and detail sections go in `llms-full.txt`. JSON-LD type varies by record kind:
-  `SoftwareSourceCode` for projects, and `Article`/`Book`/`Course`/`Person`/
+  `SoftwareApplication` + `SoftwareSourceCode` for projects, and `Article`/`Book`/`Course`/`Person`/
   `Organization` and friends for the other kinds.
 </Aside>
 
