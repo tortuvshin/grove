@@ -271,8 +271,8 @@
     {
       "target": "src/layouts/base-layout.astro",
       "source": "default/layouts/base-layout.astro",
-      "hash": "sha256-8319330df1aed53058fa6412363b545b96f5f49f6901a38b6d6dd45c8c44d948",
-      "bytes": 13892
+      "hash": "sha256-77f05661fc2646ad874535e8332c611f7c07404c5dc1b7775ff407e8df97d042",
+      "bytes": 14139
     },
     {
       "target": "src/layouts/container.astro",
