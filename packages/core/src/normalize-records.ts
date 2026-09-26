@@ -133,15 +133,16 @@ export interface NormalizedRecord {
   /**
    * The review body: a Markdown record's own body, or the file a YAML
    * record's `content:` points at, frontmatter stripped. Absent for a
-   * data-only record or a pointer that does not resolve.
+   * data-only record, a Markdown record whose body is blank, or a
+   * pointer that does not resolve.
    */
   body?: string;
   /**
    * The record after every layer: source, GitHub cache (or legacy
    * inline copy), overrides, `paths.health` and decisions. This is
    * what the build serializes and every output renders. For a Markdown
-   * record, `content` points at the record's own file, so every
-   * renderer that reads `content` finds the body unchanged.
+   * record with a body, `content` points at the record's own file, so
+   * every renderer that reads `content` finds the body unchanged.
    */
   record: Resource;
   /**
@@ -196,6 +197,11 @@ export interface NormalizedRecords {
 
 function isMapping(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** True when a Markdown record's body holds anything but whitespace. */
+function hasBody(body: string | undefined): body is string {
+  return body !== undefined && /\S/.test(body);
 }
 
 /** `./`-prefixed, `/`-separated path relative to `cwd`: the form `content:` pointers use. */
@@ -476,8 +482,10 @@ export async function loadNormalizedRecords(
         continue;
       }
       // `content` points at the record's own file, so every renderer that
-      // reads a body through `content` works unchanged.
-      raw.content = contentPointerFor(cwd, source.path);
+      // reads a body through `content` works unchanged. A blank body is
+      // no body: the record then reads exactly like a YAML record with
+      // no pointer (no "no notes yet" fallback, no skeleton warning).
+      if (hasBody(source.body)) raw.content = contentPointerFor(cwd, source.path);
       if (raw.slug === undefined) raw.slug = slug;
     } else if (format === 'yaml+content' && warnPointer) {
       push(
@@ -539,7 +547,7 @@ export async function loadNormalizedRecords(
     record = applyDecisionVisibility(record, decision);
 
     let body: string | undefined;
-    if (format === 'markdown') body = source.body;
+    if (format === 'markdown') body = hasBody(source.body) ? source.body : undefined;
     else if (base.content) {
       body = readContentFile(base.content, pointerCandidates(cwd, base.content))?.body;
     }

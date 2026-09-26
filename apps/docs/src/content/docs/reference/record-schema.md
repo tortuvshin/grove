@@ -63,14 +63,16 @@ Rules:
 - **Body**: everything after the frontmatter. The normalized record's
   `content` points at the file itself, so the detail page and
   `llms-full.txt` render it exactly as they render a pointed-at body. A
-  Markdown record must not set `content:` itself (`markdown_content_pointer`
-  error).
+  blank body (nothing but whitespace) is no body: `content` stays unset,
+  exactly as for a YAML record with no pointer. A Markdown record must not
+  set `content:` itself (`markdown_content_pointer` error).
 - **One slug, one format**: the same slug as both `<slug>.yml` and
   `<slug>.md` is a `duplicate_slug_format` error on both files. Neither
   wins.
-- **Converting** a YAML + pointer record: move its YAML (minus `content:`)
-  into the body file's frontmatter and delete the `.yml`. The normalized
-  record is identical. Set
+- **Converting**: [`grove migrate markdown-records`](/reference/cli/#grove-migrate-markdown-records)
+  turns every YAML record, with or without a pointer, into one Markdown
+  record whose normalized form is identical. By hand: move the YAML (minus
+  `content:`) into the body file's frontmatter and delete the `.yml`. Set
   [`records.deprecateContentPointer`](/reference/config/#records) to have
   `grove check` list the YAML + pointer records still to convert.
 

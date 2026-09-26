@@ -306,6 +306,14 @@ export type {
 } from './readme-health.js';
 // ── README health: batch orchestration (candidates → evidence → health) ──
 export { runReadmeHealthCheck } from './readme-health.js';
+export type {
+  YamlRecordToMarkdownOptions,
+  YamlRecordToMarkdownResult,
+} from './record-markdown.js';
+// ── Record codemod: YAML → Markdown ──────────────────────────────────
+// One YAML record (plus its body) as one Markdown record, as
+// `grove migrate markdown-records` writes it.
+export { MARKDOWN_RECORD_FIELD_ORDER, yamlRecordToMarkdown } from './record-markdown.js';
 export { findRelated } from './related.js';
 export type {
   RepositoryHealthConfidence,
