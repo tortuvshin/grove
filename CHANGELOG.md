@@ -22,6 +22,14 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.14.0](https://github.com/tortuvshin/grove/compare/v0.13.0...v0.14.0) (2026-09-26)
+
+
+### Features
+
+* **core:** one push-age table, reasons per band, stale sync as unknown ([e4ff68e](https://github.com/tortuvshin/grove/commit/e4ff68ead8431b87bd729a7f9ac9e59125c5ecbc))
+* **core:** one push-age table, reasons per band, stale sync as unknown ([8dac244](https://github.com/tortuvshin/grove/commit/8dac244b480d757cd98243e64ad56d7803515ec7)), closes [#100](https://github.com/tortuvshin/grove/issues/100)
+
 ## [0.13.0](https://github.com/tortuvshin/grove/compare/v0.12.0...v0.13.0) (2026-09-26)
 
 
