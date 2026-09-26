@@ -74,13 +74,27 @@ for (const { slug, record, visibility, provenance } of records) {
 5. the `paths.health` entry, for a project record nothing above gave a health block;
 6. the `paths.decisions` visibility (`applyDecisionVisibility`: a project with no health block gets a fabricated `unknown` one to carry it).
 
-Each `NormalizedRecord` carries `format` (`RecordFormat`: `yaml`, `yaml+content` or `markdown`), `body` (a Markdown record's body, or the file a pointer resolves to, frontmatter stripped), `record` (every layer applied; a Markdown record's `content` points at its own file), `base` (before `paths.health` and decisions), `visibility` (`recordVisibility(record)`: decision, then `health.visibility`, then the record's own `visibility`), `declaredSlug` (the `slug` written in the file) and `provenance`. `RecordHealthSource` is `cache | inline | override | file | decision | none`.
+Each `NormalizedRecord` carries `format` (`RecordFormat`: `yaml`, `yaml+content` or `markdown`), `body` (a Markdown record's body, or the file a pointer resolves to, frontmatter stripped; absent when a Markdown record's body is blank), `record` (every layer applied; a Markdown record with a body has `content` pointing at its own file), `base` (before `paths.health` and decisions), `visibility` (`recordVisibility(record)`: decision, then `health.visibility`, then the record's own `visibility`), `declaredSlug` (the `slug` written in the file) and `provenance`. `RecordHealthSource` is `cache | inline | override | file | decision | none`.
 
 The loader never throws for a bad record. A file that fails to parse or fails the schema is reported in `issues` (`schema_error`, or one `zod_error` per Zod issue). So are a slug that exists in both formats (`duplicate_slug_format`, on both files) and a Markdown record with its own `content:` (`markdown_content_pointer`). A disagreeing inline copy is a `github_cache_mismatch` warning, and with `records.deprecateContentPointer` every YAML + pointer record gets a `record_format_deprecated` warning. `entries` lists every file in discovery order with its own issues and `syncStale` (its cached health came from a stale sync), and `record` is set only when the file normalized. Missing or invalid side files count as empty; `grove check` reports them.
 
 `readRecordSources(config, cwd?)` is the discovery step on its own. It returns `{ sources }`: every record file in both formats, sorted by file name, with its parsed YAML or frontmatter (`data`), a Markdown record's `body`, and read issues, and no layer merged. `grove sync github` iterates over it.
 
 Types: `NormalizedRecord`, `NormalizedRecords`, `RecordEntry`, `RecordIssue`, `RecordHealthSource`, `RecordFormat`, `RecordSource`, `RecordSources`.
+
+### YAML to Markdown codemod
+
+```ts
+import { yamlRecordToMarkdown, MARKDOWN_RECORD_FIELD_ORDER } from "@grove-dev/core";
+
+const result = yamlRecordToMarkdown("immich", yamlText, { kind: "project", labelKey: "name", body });
+if (result.ok) await writeFile("content/records/immich.md", result.text);
+else console.warn(result.reason);
+```
+
+`yamlRecordToMarkdown(slug, yamlText, options?)` is the pure step behind [`grove migrate markdown-records`](/reference/cli/#grove-migrate-markdown-records). It returns `{ ok: true, text, dropped }`: `---`, the frontmatter, `---`, then `options.body` byte-for-byte. `dropped` lists the fields left out because the normalizer derives them: `content`, `slug` when it equals `slug`, and `kind` when it equals `options.kind`. Top-level fields are sorted by `MARKDOWN_RECORD_FIELD_ORDER` (`contributor` fields, then fields it does not list in their original order, then `reviewer` fields). Each field keeps its own text and the comment lines directly above it. It returns `{ ok: false, reason }`, rather than a file, for a record that is not a mapping, still has inline `github`/`health`, has no `options.labelKey` (default `name`), or would not read back through `splitFrontmatter` as the same fields and body.
+
+Types: `YamlRecordToMarkdownOptions`, `YamlRecordToMarkdownResult`.
 
 ## Pipeline
 

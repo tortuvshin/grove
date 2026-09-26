@@ -22,6 +22,19 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.17.0](https://github.com/tortuvshin/grove/compare/v0.16.0...v0.17.0) (2026-09-26)
+
+
+### Features
+
+* **cli:** add grove migrate markdown-records ([f352cca](https://github.com/tortuvshin/grove/commit/f352ccadb31c3aab06afa6baa78bca6945a144b1))
+* **cli:** add grove migrate markdown-records ([1a381fb](https://github.com/tortuvshin/grove/commit/1a381fb1f6a6dc5630a937d583788ac34e081583)), closes [#112](https://github.com/tortuvshin/grove/issues/112)
+
+
+### Bug Fixes
+
+* **core:** read a Markdown record with a blank body as bodiless ([e10f927](https://github.com/tortuvshin/grove/commit/e10f927c0d0ec59948f90ee1e53c2ade0275c38a)), closes [#112](https://github.com/tortuvshin/grove/issues/112)
+
 ## [0.16.0](https://github.com/tortuvshin/grove/compare/v0.15.0...v0.16.0) (2026-09-26)
 
 

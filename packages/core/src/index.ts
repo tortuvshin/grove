@@ -374,6 +374,14 @@ export {
   normalizeCandidateUrl,
   sortRecordCandidates,
 } from './record-candidates.js';
+export type {
+  YamlRecordToMarkdownOptions,
+  YamlRecordToMarkdownResult,
+} from './record-markdown.js';
+// ── Record codemod: YAML → Markdown ──────────────────────────────────
+// One YAML record (plus its body) as one Markdown record, as
+// `grove migrate markdown-records` writes it.
+export { MARKDOWN_RECORD_FIELD_ORDER, yamlRecordToMarkdown } from './record-markdown.js';
 export { findRelated } from './related.js';
 export type {
   RepositoryHealthConfidence,

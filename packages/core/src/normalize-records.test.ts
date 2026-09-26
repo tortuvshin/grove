@@ -487,6 +487,20 @@ describe('record formats: YAML and Markdown', () => {
     expect(after?.declaredSlug).toBe(before?.declaredSlug);
   });
 
+  it('reads a Markdown record with a blank body like a YAML record with no pointer', async () => {
+    await writeFile(join(records(), 'data-only.yml'), YAML_ONLY);
+    const before = (await loadNormalizedRecords(config, cwd)).records[0];
+    await writeFile(join(bodies(), 'data-only.md'), `---\n${YAML_ONLY}---\n\n  \n`);
+    await rm(join(records(), 'data-only.yml'));
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(issues).toEqual([]);
+    expect(out[0]?.format).toBe('markdown');
+    // No `content`, so no "no notes yet" fallback and no skeleton warning.
+    expect(out[0]?.record.content).toBeUndefined();
+    expect(out[0]?.body).toBeUndefined();
+    expect(out[0]?.record).toEqual(before?.record);
+  });
+
   it('grove check accepts a Markdown-only site', async () => {
     await rm(records(), { recursive: true });
     await writeFile(join(bodies(), 'written.md'), MARKDOWN);
