@@ -266,7 +266,7 @@ Every named schema is exported. The complete list:
 | `resourceSchema`, `recordsFileSchema` | `packages/core/src/schema.ts` |
 | `auditSchema`, `readmeConfigSchema` | `packages/core/src/schema.ts` |
 | `normalizeGithubIntegration` | `packages/core/src/schema.ts` |
-| `siteSchema`, `collectionSchema`, `recordSchema`, `contentSchema` | `packages/core/src/page-document.ts` |
+| `siteSchema`, `collectionSchema`, `recordSchema`, `contentSchema`, `softwareApplicationSchema`, `SOFTWARE_APPLICATION_FIELDS` | `packages/core/src/page-document.ts` |
 
 `defineConfig`, `loadConfig`, and validation helpers (`validateProject`, `loadRecords`, `loadRecordsOrThrow`) are in `packages/core/src/{config,validate}.ts`.
 

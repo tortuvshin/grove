@@ -7,7 +7,9 @@ import {
   definePageDocument,
   faqSchema,
   recordSchema,
+  SOFTWARE_APPLICATION_FIELDS,
   siteSchema,
+  softwareApplicationSchema,
   validateJsonLd,
 } from './page-document.js';
 
@@ -203,6 +205,81 @@ describe('JSON-LD schemas', () => {
       ],
     });
     expect(art[0]?.['@type']).toEqual(['CreativeWork', 'WebPage']);
+  });
+
+  it('softwareApplicationSchema emits only allowlisted, verified fields', () => {
+    const node = softwareApplicationSchema({
+      url: 'https://example.com/apps/a/',
+      name: 'A',
+      description: 'An app.',
+      repoUrl: 'https://github.com/a/b',
+      homepageUrl: 'https://a.example',
+      license: 'AGPL-3.0',
+      platforms: ['Android', 'iOS'],
+      category: 'Tools',
+      downloadUrls: ['https://f-droid.org/packages/a/', 'https://f-droid.org/packages/a/'],
+      programmingLanguage: 'Dart',
+      dateCreated: '2020-01-01T00:00:00Z',
+      dateModified: '2026-01-01T00:00:00Z',
+      owner: { login: 'a', type: 'User' },
+      keywords: ['photos', 'backup'],
+    });
+    expect(node['@type']).toEqual(['SoftwareApplication', 'SoftwareSourceCode']);
+    expect(node['@id']).toBe('https://example.com/apps/a/#record');
+    expect(node.codeRepository).toBe('https://github.com/a/b');
+    expect(node.sameAs).toEqual(['https://github.com/a/b', 'https://a.example']);
+    expect(node.license).toBe('https://spdx.org/licenses/AGPL-3.0.html');
+    expect(node.operatingSystem).toBe('Android, iOS');
+    expect(node.applicationCategory).toBe('Tools');
+    expect(node.downloadUrl).toBe('https://f-droid.org/packages/a/');
+    expect(node.author).toEqual({
+      '@type': 'Person',
+      name: 'a',
+      url: 'https://github.com/a',
+    });
+    expect(node.keywords).toBe('photos, backup');
+    for (const key of Object.keys(node)) {
+      expect(SOFTWARE_APPLICATION_FIELDS).toContain(key);
+    }
+    for (const invented of ['offers', 'aggregateRating', 'review', 'isAccessibleForFree']) {
+      expect(SOFTWARE_APPLICATION_FIELDS).not.toContain(invented);
+    }
+    expect(validateJsonLd([node])).toEqual([]);
+  });
+
+  it('softwareApplicationSchema leaves out what it cannot verify', () => {
+    const node = softwareApplicationSchema({
+      url: 'https://example.com/apps/a/',
+      name: 'A',
+      description: 'An app.',
+      license: 'NOASSERTION',
+      owner: { login: 'a' },
+      downloadUrls: [],
+      platforms: [],
+    });
+    expect(Object.keys(node).sort()).toEqual(
+      ['@context', '@id', '@type', 'description', 'name', 'url'].sort(),
+    );
+    expect(
+      softwareApplicationSchema({
+        url: 'https://e.x/',
+        name: 'A',
+        description: 'x',
+        license: 'other',
+      }).license,
+    ).toBeUndefined();
+    expect(
+      softwareApplicationSchema({
+        url: 'https://e.x/',
+        name: 'A',
+        description: 'x',
+        owner: { login: 'org', type: 'Organization' },
+        downloadUrls: ['https://a.example/1', 'https://a.example/2'],
+      }),
+    ).toMatchObject({
+      author: { '@type': 'Organization', name: 'org' },
+      downloadUrl: ['https://a.example/1', 'https://a.example/2'],
+    });
   });
 
   it('contentSchema produces Article + BreadcrumbList', () => {

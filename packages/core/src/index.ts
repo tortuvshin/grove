@@ -276,6 +276,7 @@ export type {
   PageMetadata,
   RecordInput,
   SiteInput,
+  SoftwareApplicationInput,
   TwitterMetadata,
 } from './page-document.js';
 // ── PageDocument: unified page-level contract + JSON-LD registry ────
@@ -291,7 +292,9 @@ export {
   definePageDocument,
   faqSchema,
   recordSchema,
+  SOFTWARE_APPLICATION_FIELDS,
   siteSchema,
+  softwareApplicationSchema,
   validateJsonLd,
 } from './page-document.js';
 export type { ParsedEntry, ParsedSection } from './parseReadme.js';

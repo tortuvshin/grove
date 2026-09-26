@@ -307,8 +307,8 @@
     {
       "target": "src/layouts/seo.astro",
       "source": "default/layouts/seo.astro",
-      "hash": "sha256-925f6ae89cdcc96c6ddf693262ed3e1a2a287bd52d41e4b23326dd689925f40a",
-      "bytes": 6804
+      "hash": "sha256-1f0734be5b44338a6bfb84429a13f4e6fae7a05b0c13d3d9b7dd8574345b6727",
+      "bytes": 6807
     },
     {
       "target": "src/lib/classnames.ts",

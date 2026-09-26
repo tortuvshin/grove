@@ -67,7 +67,38 @@ function projectRecordWithSeoOverride() {
   };
 }
 
-const records = [projectRecord(), projectRecordWithoutDates(), projectRecordWithSeoOverride()];
+function projectRecordWithChannels() {
+  const record = projectRecord();
+  return {
+    ...record,
+    slug: 'with-channels',
+    repoUrl: 'https://github.com/demo-user/with-channels',
+    links: { website: 'https://with-channels.example' },
+    tags: ['backup'],
+    distribution: {
+      channels: [
+        { type: 'fdroid', url: 'https://f-droid.org/packages/demo/', verified: true },
+        { type: 'play-store', url: 'https://play.google.com/store/apps/details?id=demo' },
+      ],
+    },
+    github: {
+      repository: {
+        ...record.github.repository,
+        full_name: 'demo-user/with-channels',
+        language: 'Dart',
+        license: { spdx_id: 'MIT' },
+        owner: { login: 'demo-user', type: 'User', html_url: 'https://github.com/demo-user' },
+      },
+    },
+  };
+}
+
+const records = [
+  projectRecord(),
+  projectRecordWithoutDates(),
+  projectRecordWithSeoOverride(),
+  projectRecordWithChannels(),
+];
 
 vi.mock('@grove/generated/records.full.json', () => ({ default: { records } }));
 vi.mock('@grove/generated/records.index.json', () => ({ default: { records: [] } }));
@@ -132,5 +163,41 @@ describe('getRecordDetailModel seo override', () => {
     expect(detail).not.toBeNull();
     expect(detail!.seo.title).not.toBe('A hand-written title');
     expect(detail!.seo.title).toContain('demo');
+  });
+});
+
+describe('getRecordDetailModel JSON-LD', () => {
+  it('emits a SoftwareApplication node with verified fields only', async () => {
+    const { SOFTWARE_APPLICATION_FIELDS } = await import('@grove-dev/core');
+    const detail = getRecordDetailModel(
+      'with-channels',
+      site as Parameters<typeof getRecordDetailModel>[1],
+    );
+    const node = detail!.seo.jsonLd![0] as Record<string, unknown>;
+    expect(node['@type']).toEqual(['SoftwareApplication', 'SoftwareSourceCode']);
+    expect(node.codeRepository).toBe('https://github.com/demo-user/with-channels');
+    expect(node.sameAs).toEqual([
+      'https://github.com/demo-user/with-channels',
+      'https://with-channels.example',
+    ]);
+    expect(node.license).toBe('https://spdx.org/licenses/MIT.html');
+    // Only the channel a curator marked verified.
+    expect(node.downloadUrl).toBe('https://f-droid.org/packages/demo/');
+    expect(node.author).toEqual({
+      '@type': 'Person',
+      name: 'demo-user',
+      url: 'https://github.com/demo-user',
+    });
+    for (const key of Object.keys(node)) expect(SOFTWARE_APPLICATION_FIELDS).toContain(key);
+  });
+
+  it('leaves out author and license when GitHub did not report them', () => {
+    const detail = getRecordDetailModel('demo', site as Parameters<typeof getRecordDetailModel>[1]);
+    const node = detail!.seo.jsonLd![0] as Record<string, unknown>;
+    expect(node.author).toBeUndefined();
+    expect(node.license).toBeUndefined();
+    expect(node.downloadUrl).toBeUndefined();
+    expect(node).not.toHaveProperty('isAccessibleForFree');
+    expect(node).not.toHaveProperty('interactionStatistic');
   });
 });

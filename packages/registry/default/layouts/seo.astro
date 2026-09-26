@@ -14,7 +14,7 @@
  *   - JSON-LD WebSite+Organization identity graph on every page
  *     (built by @grove-dev/core's `siteSchema`, with a SearchAction
  *     pointing at the directory's browse page)
- *   - Per-page JSON-LD nodes when `jsonLd` is provided (SoftwareSourceCode
+ *   - Per-page JSON-LD nodes when `jsonLd` is provided (SoftwareApplication
  *     on record pages, CollectionPage/ItemList/BreadcrumbList on
  *     collection and taxonomy pages, ...)
  *
@@ -46,7 +46,7 @@ interface Props {
   type?: 'website' | 'article' | 'profile';
   /** Set true to add noindex,nofollow. */
   noindex?: boolean;
-  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on item pages. */
+  /** Extra JSON-LD payload (object) — typically SoftwareApplication on item pages. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -161,7 +161,7 @@ const perPageLdJson = perPageNodes ? JSON.stringify(perPageNodes) : null;
 <!-- JSON-LD: site-wide identity graph -->
 <script is:inline type="application/ld+json" set:html={siteLdJson} />
 
-<!-- JSON-LD: per-page (SoftwareSourceCode, CollectionPage, BreadcrumbList, ...) -->
+<!-- JSON-LD: per-page (SoftwareApplication, CollectionPage, BreadcrumbList, ...) -->
 {perPageLdJson && (
   <script
     is:inline
