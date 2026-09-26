@@ -1,11 +1,12 @@
 import { access, readdir, readFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, join, relative, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { ZodError } from 'zod';
 import { type CollectionSourceRecord, toCollectionEntries } from './collection-entries.js';
 import { CollectionFileError, parseCollectionFile } from './collections-io.js';
 import { runCollection } from './collector.js';
 import { readContentFile } from './content-body.js';
+import { loadGithubCache, resolveRecordGithub } from './github-cache.js';
 import { readYamlFile } from './io.js';
 import {
   blueprintKind,
@@ -77,6 +78,8 @@ async function exists(path: string): Promise<boolean> {
 }
 
 interface HealthParityValues {
+  /** Where the record's effective health came from. */
+  source: 'inline' | 'cache';
   status: string;
   tier: string;
   visibility: string;
@@ -94,9 +97,9 @@ function sameInstant(a: string | null, b: string | null): boolean {
 }
 
 /**
- * Compare inline record health against `paths.health` entries:
- * differing values, inline records the file lacks, and file entries
- * with no record at all.
+ * Compare each record's effective health (cache or inline) against
+ * `paths.health` entries: differing values, records the file lacks,
+ * and file entries with no record at all.
  */
 function healthParityIssues(
   healthPath: string,
@@ -111,12 +114,12 @@ function healthParityIssues(
     if (!entry) {
       issues.push({
         code: 'health_source_missing_entry',
-        message: `${slug}: has inline health but no entry in ${healthPath}`,
+        message: `${slug}: has ${values.source} health but no entry in ${healthPath}`,
         severity: 'warning',
       });
       continue;
     }
-    const fileValues: HealthParityValues = {
+    const fileValues: Omit<HealthParityValues, 'source'> = {
       status: entry.health.status,
       tier: entry.health.tier,
       visibility: entry.health.visibility,
@@ -129,11 +132,11 @@ function healthParityIssues(
     );
     if (differing.length === 0) continue;
     const detail = differing
-      .map((field) => `${field} ${values[field]} (inline) vs ${fileValues[field]} (file)`)
+      .map((field) => `${field} ${values[field]} (${values.source}) vs ${fileValues[field]} (file)`)
       .join(', ');
     issues.push({
       code: 'health_source_mismatch',
-      message: `${slug}: inline health disagrees with ${healthPath} — ${detail}`,
+      message: `${slug}: ${values.source} health disagrees with ${healthPath} — ${detail}`,
       severity: 'warning',
     });
   }
@@ -203,10 +206,21 @@ export async function validateProject(
   const expectedKind = blueprintKind[config.blueprint];
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith('.yml')).sort();
+  // The sync bot's layer. Records resolve `github` / `health` through
+  // it exactly as the build does (cache > inline > health.yml).
+  const githubCache = await loadGithubCache(config);
+  const cachePath = relative(process.cwd(), githubCache.dir) || '.';
+  for (const { file, message } of githubCache.errors) {
+    errors.push({
+      code: 'github_cache_invalid',
+      message: `${cachePath}/${file}: ${message}`,
+      severity: 'error',
+    });
+  }
   const slugs = new Set<string>();
   /** Slugs that have a github link and therefore need a health entry. */
   const slugsNeedingHealth = new Set<string>();
-  /** Inline health per slug, compared against health.yml once it is read. */
+  /** Effective (cache or inline) health per slug, compared against health.yml once it is read. */
   const inlineHealth = new Map<string, HealthParityValues>();
   const taxonomyDir = config.paths.taxonomyDir ?? 'data/taxonomy';
   const taxonomy = {
@@ -300,7 +314,17 @@ export async function validateProject(
       slugs.add(fileSlug);
       continue;
     }
-    const obj = raw as Record<string, unknown>;
+    // Cache wins over a legacy inline copy — but a disagreement between
+    // the two is a second source of truth, so say which fields differ.
+    const resolved = resolveRecordGithub(raw, githubCache.entries.get(fileSlug));
+    if (resolved.conflicts.length > 0) {
+      warnings.push({
+        code: 'github_cache_mismatch',
+        message: `${fileSlug}: inline github/health disagrees with ${cachePath}/${fileSlug}.json — ${resolved.conflicts.join(', ')}. The cache wins; run \`grove migrate github-cache\` to drop the inline copy.`,
+        severity: 'warning',
+      });
+    }
+    const obj = resolved.record;
 
     // Slug uniqueness — even if a record later fails Zod parse, we
     // still need to flag a duplicate filename as an error.
@@ -414,14 +438,14 @@ export async function validateProject(
         warnUnknownTaxonomy(fileSlug, 'platform', platform, taxonomy.platforms, 'platforms.yml');
       }
     }
-    // Records that link to a GitHub repo need a health entry — either
-    // inline on the record itself (what `sync github` now writes) or,
-    // for records synced before that change, in health.yml — so
-    // list/detail UIs can render staleness signals.
+    // Records that link to a GitHub repo need a health entry — in the
+    // sync cache (what `sync github` writes), inline on the record
+    // (older syncs) or in health.yml — so list/detail UIs can render
+    // staleness signals.
     const repoUrl = (parsed as { repoUrl?: string }).repoUrl;
     const linksGithub = (parsed.links as { github?: string } | undefined)?.github;
-    const hasInlineHealth = parsed.kind === 'project' && Boolean(parsed.health);
-    if ((repoUrl || linksGithub) && !hasInlineHealth) {
+    const hasRecordHealth = parsed.kind === 'project' && Boolean(parsed.health);
+    if ((repoUrl || linksGithub) && !hasRecordHealth) {
       slugsNeedingHealth.add(fileSlug);
     }
     if (parsed.kind === 'project' && parsed.health) {
@@ -429,6 +453,7 @@ export async function validateProject(
         | { pushedAt?: string | null; repository?: { pushed_at?: string | null } }
         | undefined;
       inlineHealth.set(fileSlug, {
+        source: resolved.health === 'cache' ? 'cache' : 'inline',
         status: parsed.health.status,
         tier: parsed.health.tier,
         visibility: parsed.health.visibility,
@@ -440,6 +465,15 @@ export async function validateProject(
           null,
       });
     }
+  }
+
+  for (const slug of githubCache.entries.keys()) {
+    if (slugs.has(slug)) continue;
+    warnings.push({
+      code: 'github_cache_orphan',
+      message: `${cachePath}/${slug}.json has no matching record`,
+      severity: 'warning',
+    });
   }
 
   if (await exists(resolve(process.cwd(), config.paths.health))) {
@@ -455,7 +489,7 @@ export async function validateProject(
         severity: 'error',
       });
     }
-    // The build prefers inline health and only falls back to health.yml,
+    // The build prefers cache/inline health and only falls back to health.yml,
     // so a file that drifts from the records is a second source of truth
     // nobody reads. Flag the drift; skip it when the file didn't parse.
     if (healthParsed)
@@ -672,6 +706,7 @@ export async function loadRecords(
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith('.yml')).sort();
   const expectedKind = blueprintKind[config.blueprint];
+  const githubCache = await loadGithubCache(config, cwd);
   const out: Resource[] = [];
   for (const file of files) {
     const fileSlug = basename(file, '.yml');
@@ -685,9 +720,10 @@ export async function loadRecords(
       }
       continue;
     }
-    if (!raw.kind) raw.kind = expectedKind;
+    const record = resolveRecordGithub(raw, githubCache.entries.get(fileSlug)).record;
+    if (!record.kind) record.kind = expectedKind;
     try {
-      const parsed = recordsFileSchema.parse(raw);
+      const parsed = recordsFileSchema.parse(record);
       parsed.slug = fileSlug;
       out.push(parsed);
     } catch (err) {

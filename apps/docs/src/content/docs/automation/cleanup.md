@@ -3,15 +3,15 @@ title: Cleanup report
 description: Surface records whose embedded health signals need human review, without deleting anything.
 ---
 
-`grove cleanup` reads every record's own `health:` block, filters for the ones that need a human look, and writes `data/generated/cleanup-report.json`. **The command never deletes or edits a record.** It surfaces a triage list; a curator acts on it via the record's YAML or `data/decisions.yml`.
+`grove cleanup` reads every record's `health` block (from the GitHub sync cache, else inline), filters for the ones that need a human look, and writes `data/generated/cleanup-report.json`. **The command never deletes or edits a record.** It surfaces a triage list; a curator acts on it via the record's YAML or `data/decisions.yml`.
 
 Source: `pickCleanupCandidates()` and `cleanupStale()` in `packages/core/src/decisions.ts`.
 
 ## Where the health data comes from — and where it doesn't
 
-`cleanupStale()` reads each record file directly (`recordsFileSchema.parse(...)` per `data/records/*.yml`) and looks at the `health:` field embedded on that record. It does **not** read `data/health.yml`, and it does **not** apply `data/decisions.yml` overrides — that merge only happens in the separate `generate()` build step (`packages/core/src/build-data.ts`), which the cleanup report doesn't go through. So a record with a `keep` decision in `data/decisions.yml` can still show up in the cleanup report if its own `health.cleanupCandidate` is `true`.
+`cleanupStale()` reads each record file directly (`recordsFileSchema.parse(...)` per `data/records/*.yml`), takes `github` and `health` from the record's GitHub sync cache entry when there is one (else the block inline on the record), and looks at that `health`. It does **not** read `data/health.yml`, and it does **not** apply `data/decisions.yml` overrides — that merge only happens in the separate `generate()` build step (`packages/core/src/build-data.ts`), which the cleanup report doesn't go through. So a record with a `keep` decision in `data/decisions.yml` can still show up in the cleanup report if its own `health.cleanupCandidate` is `true`.
 
-`classifyHealth()` (`packages/core/src/health.ts`) is what derives that block from GitHub metadata. `grove sync github` runs it and writes `data/health.yml` when `integrations.github.health` is enabled; otherwise the file is hand-authored. The build merges those entries onto records that carry no inline `health:` block of their own, so both routes end up in the same place. See [Maintain health signals](/content/health-classification/).
+`classifyHealth()` (`packages/core/src/health.ts`) is what derives that block from GitHub metadata. `grove sync github` runs it and writes the result into each record's GitHub sync cache entry (`data/cache/github/<slug>.json`) when `integrations.github.health` is enabled; otherwise health is hand-authored inline or in `data/health.yml`. The build and `grove cleanup` share the cache-then-inline lookup (`resolveRecordGithub`); only the build adds the `data/health.yml` fallback. See [Maintain health signals](/content/health-classification/).
 
 ## Usage
 

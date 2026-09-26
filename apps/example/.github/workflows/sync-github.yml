@@ -29,3 +29,5 @@ jobs:
           title: "Sync GitHub metadata"
           branch: chore/sync-github
           delete-branch: true
+          # Sync only writes the cache; records stay curator-owned.
+          add-paths: data/cache/github/**

@@ -36,12 +36,15 @@ grove check --strict   # also fail when there are warnings
 | `unknown_taxonomy_value` | warning | The record's `category`, `stack`, or (for `platforms[]`) a `platform` value isn't defined in `data/taxonomy/{categories,stacks,platforms}.yml`. Also raised for a collection's `query.categories`, `query.stacks` and `query.platforms`. Only checked when the matching taxonomy file has entries. |
 | `content_pointer_missing` | error | The record's `content` path does not resolve to a file, so its detail page would render without a body. Resolved the same way the build resolves it. |
 | `content_body_skeleton` | warning | The record's `content` file has no prose after its frontmatter — only headings, blank lines, HTML comments and lines starting with `TODO` or `TBD`. |
-| `missing_health` | error | The record has a `repoUrl` or `links.github` but `data/health.yml` has no entry for its slug. |
+| `missing_health` | error | The record has a `repoUrl` or `links.github`, no health in the GitHub sync cache or inline, and `data/health.yml` has no entry for its slug. |
 | `missing_health_file` | warning | `data/health.yml` doesn't exist, but at least one record links to GitHub and would need an entry. |
 | `health_file_invalid` | error | `data/health.yml` exists but fails to parse against its schema. |
-| `health_source_mismatch` | warning | A record carries inline `health` and also has a `data/health.yml` entry, and the two disagree on `status`, `tier`, `visibility` or `lastCommitAt` (the file side is the entry's `github.pushedAt`). The build uses the inline block, so the file entry is stale. |
-| `health_source_missing_entry` | warning | `data/health.yml` exists, but a record with inline `health` has no entry in it. |
+| `health_source_mismatch` | warning | A record's health (from the GitHub sync cache, else inline) and its `data/health.yml` entry disagree on `status`, `tier`, `visibility` or `lastCommitAt` (the file side is the entry's `github.pushedAt`). The message says `(cache)` or `(inline)`. The build uses the cache/inline block, so the file entry is stale. |
+| `health_source_missing_entry` | warning | `data/health.yml` exists, but a record with cache or inline `health` has no entry in it. |
 | `health_file_orphan_entry` | warning | A `data/health.yml` entry's `id` matches no record. |
+| `github_cache_invalid` | error | A file in `paths.githubCache` is not valid JSON, fails the cache-entry schema, or its `slug` differs from its file name. The build skips it and falls back to the record's inline blocks. |
+| `github_cache_mismatch` | warning | A record still carries inline `github`/`health` and its cache entry disagrees on stars, forks, `pushed_at`, `archived`, license, or health `status`/`tier`/`visibility`. The cache wins; `grove migrate github-cache` removes the inline copy. |
+| `github_cache_orphan` | warning | A cache file in `paths.githubCache` matches no record (for example, the record was deleted). |
 | `decisions_file_invalid` | error | `data/decisions.yml` exists but fails to parse against its schema. |
 | `unknown_decision_record` | error | An entry in `data/decisions.yml` references a slug that has no matching record. |
 | `collection_invalid` | error | A `data/collections/*.yml` file is not a YAML mapping or fails the collection schema — a missing `title`, an unknown `ranking.preset`, a string `minStars`. One issue per failing field. |

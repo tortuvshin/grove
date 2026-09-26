@@ -265,6 +265,33 @@ The token-free HTML fallback (`enrichFromGithubHtml`) fetches the public GitHub 
 
 `rateLimitWaitMs` and `sleep` are exported for backoff scheduling in long-running sync loops.
 
+### GitHub sync cache
+
+`grove sync github` writes one JSON entry per record to `paths.githubCache`; every reader resolves a record's `github` and `health` through the same helper (cache > inline > `paths.health`).
+
+```ts
+import {
+  loadGithubCache,          // (config, cwd?) → { dir, entries: Map<slug, entry>, errors }
+  resolveRecordGithub,      // (rawRecord, entry?) → { record, github, health, conflicts }
+  githubCacheConflicts,     // (rawRecord, entry?) → string[] of inline-vs-cache field differences
+  githubCacheDir,           // (config, cwd?) → absolute cache directory
+  nextGithubCacheEntry,     // (previous, attempt) → next entry (lastSuccessAt / partialFailures rules)
+  seedGithubCacheEntry,     // (slug, rawRecord) → entry built from legacy inline blocks
+  serializeGithubCacheEntry,// (entry) → deterministic JSON text with trailing newline
+  writeGithubCacheEntry,    // (dir, entry) → false when the file already held these bytes
+  migrateRecordGithub,      // (slug, yamlText, existing?) → { text, entry, moved, conflicts }
+  removeTopLevelYamlKeys,   // (yamlText, keys) → text with only those top-level blocks removed
+  githubCacheEntrySchema,   // Zod schema for one cache file
+  GITHUB_CACHE_SCHEMA_VERSION,
+  GITHUB_CACHE_MAX_FAILURES,
+} from "@grove-dev/core";
+
+const cache = await loadGithubCache(config);
+const { record, conflicts } = resolveRecordGithub(raw, cache.entries.get(slug));
+```
+
+Types: `GithubCache`, `GithubCacheEntry`, `GithubCacheFailure`, `GithubCacheSource`, `GithubCacheMigration`, `GithubFieldSource`, `GithubSyncAttempt`, `ResolvedRecordGithub`.
+
 ## Helpers and IO
 
 A small set of pure utilities round out the surface.
