@@ -22,6 +22,19 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.16.0](https://github.com/tortuvshin/grove/compare/v0.15.0...v0.16.0) (2026-09-26)
+
+
+### Features
+
+* **core:** read records from Markdown frontmatter alongside YAML ([5b52d9a](https://github.com/tortuvshin/grove/commit/5b52d9a89fcbbd7e66c4a4f1d5de2f3cc9e8274f))
+* **registry:** scoped browse for taxonomy pages ([44d18e4](https://github.com/tortuvshin/grove/commit/44d18e4b24ea166916a5c3c49e7fd8ac5bca1ab7))
+
+
+### Bug Fixes
+
+* **registry:** keep gtag on window so Back/Forward page views work ([18b6397](https://github.com/tortuvshin/grove/commit/18b63979b03cf99ea46cb0dea2f087f1fddba9e5))
+
 ## [0.15.0](https://github.com/tortuvshin/grove/compare/v0.14.0...v0.15.0) (2026-09-26)
 
 
