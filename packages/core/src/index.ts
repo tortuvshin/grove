@@ -57,6 +57,57 @@ export type {
 } from './candidate.js';
 // ── Candidate extraction (AST-based, source-preserving) ──────────────
 export { extractCandidates } from './candidate.js';
+// ── Channel and media candidates (integrations.github.candidates) ───
+export type {
+  CandidateCollectInput,
+  CandidateCollection,
+  CandidateCollector,
+  CandidateCollectorOptions,
+} from './candidate-collector.js';
+export {
+  CANDIDATE_REQUESTS_PER_RECORD,
+  createCandidateCollector,
+  REPOLOGY_MIN_INTERVAL_MS,
+} from './candidate-collector.js';
+export type {
+  AppstreamFacts,
+  FastlaneFiles,
+  RepologyChannel,
+  RepologyPackage,
+  TreeFile,
+} from './candidate-discovery.js';
+export {
+  findAssetLogos,
+  findFastlane,
+  findGradleAppFiles,
+  findMetainfoFiles,
+  findWebManifests,
+  installableAssets,
+  isExcludedPath,
+  parseAppstream,
+  parseGradleApplicationIds,
+  pickManifestIcon,
+  repologyChannels,
+  sameVersion,
+} from './candidate-discovery.js';
+export type {
+  CandidateKind,
+  CandidateOrigin,
+  CandidateProvenance,
+  CandidateReview,
+  ChannelCandidate,
+  MediaCandidate,
+  RecordCandidates,
+} from './candidate-schema.js';
+export {
+  candidateKindSchema,
+  candidateOriginSchema,
+  candidateProvenanceSchema,
+  candidateReviewSchema,
+  channelCandidateSchema,
+  mediaCandidateSchema,
+  recordCandidatesSchema,
+} from './candidate-schema.js';
 export type {
   CollectionSourceRecord,
   ToCollectionEntriesOptions,
@@ -180,6 +231,7 @@ export type {
   GithubCache,
   GithubCacheEntry,
   GithubCacheFailure,
+  GithubCacheFailureSource,
   GithubCacheMigration,
   GithubCacheSource,
   GithubFieldSource,
@@ -224,6 +276,8 @@ export { PUSH_AGE_BANDS, pushAgeBand } from './health-thresholds.js';
 // (per-page PNG cards). One implementation so the two social-card
 // surfaces never print different hosts for the same config.
 export { hostOf } from './host.js';
+export type { ImageFacts, ImageFormat } from './image-probe.js';
+export { IMAGE_PROBE_BYTES, imageFormatFromPath, probeImageBytes } from './image-probe.js';
 export { importAwesomeList, writeImportedRecords } from './importer.js';
 // ── IO helpers ────────────────────────────────────────────────────────
 export { readYamlFile, writeTextFile, writeYamlFile } from './io.js';
@@ -306,6 +360,20 @@ export type {
 } from './readme-health.js';
 // ── README health: batch orchestration (candidates → evidence → health) ──
 export { runReadmeHealthCheck } from './readme-health.js';
+export type {
+  CandidateListing,
+  CandidateRow,
+  CandidateStatus,
+  ListCandidatesOptions,
+} from './record-candidates.js';
+export {
+  candidateRows,
+  listRecordCandidates,
+  loadCandidateReviews,
+  mergeRecordCandidates,
+  normalizeCandidateUrl,
+  sortRecordCandidates,
+} from './record-candidates.js';
 export { findRelated } from './related.js';
 export type {
   RepositoryHealthConfidence,

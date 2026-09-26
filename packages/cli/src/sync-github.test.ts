@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { defineConfig, type GithubMetadata, type GroveConfig } from '@grove-dev/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { migrateGithubCache } from './migrate-cli.js';
 import { runGithubSync } from './sync-github.js';
 
@@ -173,6 +173,68 @@ describe('runGithubSync', () => {
     await sync();
     expect(await readFile(join(cwd, 'data', 'cache', 'github', 'demo.json'), 'utf8')).toBe(first);
     expect(first.endsWith('\n')).toBe(true);
+  });
+  it('collects candidates only when integrations.github.candidates is on, and never fails the record for them', async () => {
+    const collect = vi.fn(async () => ({
+      candidates: {
+        channels: [
+          {
+            type: 'fdroid',
+            platform: 'android',
+            label: 'F-Droid',
+            url: 'https://f-droid.org/packages/org.demo/',
+            facts: { appId: 'org.demo' },
+            provenance: {
+              source: 'fdroid' as const,
+              url: 'https://f-droid.org/api/v1/packages/org.demo',
+              fetchedAt: at.toISOString(),
+            },
+          },
+        ],
+        logos: [],
+        screenshots: [],
+      },
+      failures: ['repology: fetch failed (ECONNREFUSED)'],
+      requests: 5,
+    }));
+    const off = await runGithubSync({
+      cwd,
+      config,
+      fetchMetadata: async () => metadata,
+      candidateCollector: { collect },
+      now: () => at,
+      log: () => {},
+    });
+    expect(collect).not.toHaveBeenCalled();
+    expect(off.candidates).toBeUndefined();
+    expect((await cached()).candidates).toBeUndefined();
+
+    const on = await runGithubSync({
+      cwd,
+      config: defineConfig({
+        site: { name: 'test', tagline: 'test' },
+        blueprint: 'project-directory',
+        integrations: { github: { metadata: true, health: true, candidates: true } },
+      }),
+      fetchMetadata: async () => metadata,
+      candidateCollector: { collect },
+      now: () => at,
+      log: () => {},
+    });
+    expect(collect).toHaveBeenCalledTimes(1);
+    expect(on.outcomes).toEqual([{ slug: 'demo', outcome: 'api' }]);
+    expect(on.candidates).toMatchObject({ records: 1, withChannels: 1, requests: 5 });
+    const entry = await cached();
+    expect(entry.candidates.channels[0].url).toBe('https://f-droid.org/packages/org.demo/');
+    expect(entry.partialFailures).toEqual([
+      {
+        at: at.toISOString(),
+        source: 'candidates',
+        reason: 'repology: fetch failed (ECONNREFUSED)',
+      },
+    ]);
+    expect(entry.lastSuccessAt).toBe(at.toISOString());
+    expect(await readFile(recordPath, 'utf8')).toBe(RECORD);
   });
 });
 

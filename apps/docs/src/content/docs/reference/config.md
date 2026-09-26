@@ -280,7 +280,7 @@ any component.
 
 ### `integrations.github`
 
-**Type:** `boolean | { metadata?: boolean; contributors?: boolean; health?: boolean }`
+**Type:** `boolean | { metadata?: boolean; contributors?: boolean; health?: boolean; candidates?: boolean }`
 **Default:** `false`
 
 Enables the GitHub integration. Three modes:
@@ -288,8 +288,13 @@ Enables the GitHub integration. Three modes:
 - `false` — disabled. No GitHub API calls.
 - `true` — enable all sub-features (equivalent to
   `{ metadata: true, contributors: true, health: true }`).
-- `{ metadata, contributors, health }` — pick which sub-features
-  to enable.
+- `{ metadata, contributors, health, candidates }` — pick which
+  sub-features to enable.
+
+`candidates` is opt-in only: a blanket `true` leaves it off. When set,
+`grove sync github` also collects channel and media candidates into the
+cache. Nothing is rendered or written into records. See
+[Channel and media candidates](/automation/sync-github/#channel-and-media-candidates).
 
 `metadata` and `contributors` are real gates: with either set to `false`,
 the matching `grove sync` target prints `disabled by

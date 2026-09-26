@@ -315,6 +315,28 @@ as a Markdown table.
 - Records with `repoUrl` pointing at a non-GitHub host are
   unparseable and skipped.
 
+## `grove candidates`
+
+List the channel and media candidates in the GitHub sync cache that no
+reviewer has approved or rejected yet (`integrations.github.candidates`).
+Read-only: approving stays a human edit to `paths.decisions` or the
+record.
+
+```bash
+grove candidates                 # pending candidates, grouped by record
+grove candidates --slug immich   # one record
+grove candidates --markdown      # tables + decision entries for a review issue
+grove candidates --json          # machine-readable
+grove candidates --all           # include approved, rejected and in-record ones
+```
+
+A candidate is **approved** or **rejected** when `paths.decisions` has a
+`candidates:` entry with the same record `id`, `kind` and `url`. It is
+**in-record** when the record already carries that URL
+(`distribution.channels[].url`, `logoUrl`, `screenshots[].src` or
+`screenshots[].source`). Everything else is **pending**. An unreadable
+decisions file is reported, and the command exits 1.
+
 ## `grove migrate github-cache`
 
 Move the `github` and `health` blocks that Grove 0.12 and earlier
