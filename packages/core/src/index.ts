@@ -44,6 +44,7 @@ export {
   injectAwesomeReadmeBlock,
   parseAwesomeReadmeSections,
   recordDetailUrl,
+  toAwesomeReadmeRecord,
 } from './awesome-readme.js';
 export type { GenerateResult, RecordsFullPayload, RecordsIndexPayload } from './build-data.js';
 // ── Build pipeline ───────────────────────────────────────────────────
@@ -181,6 +182,8 @@ export type {
   GithubCacheSource,
   GithubFieldSource,
   GithubSyncAttempt,
+  GithubSyncFreshness,
+  GithubSyncFreshnessOptions,
   ResolvedRecordGithub,
 } from './github-cache.js';
 // ── GitHub sync cache (paths.githubCache) ────────────────────────────
@@ -189,14 +192,18 @@ export type {
 export {
   GITHUB_CACHE_MAX_FAILURES,
   GITHUB_CACHE_SCHEMA_VERSION,
+  GITHUB_SYNC_MAX_AGE_DAYS,
   githubCacheConflicts,
   githubCacheDir,
   githubCacheEntrySchema,
+  githubSyncFreshness,
+  githubSyncFreshnessOptions,
   loadGithubCache,
   migrateRecordGithub,
   nextGithubCacheEntry,
   removeTopLevelYamlKeys,
   resolveRecordGithub,
+  SYNC_STALE_REASON,
   seedGithubCacheEntry,
   serializeGithubCacheEntry,
   writeGithubCacheEntry,
@@ -206,6 +213,10 @@ export type { GhFetchOptions } from './github-client.js';
 export { rateLimitWaitMs, sleep } from './github-client.js';
 // ── Health: classification ────────────────────────────────────────────
 export { classifyHealth } from './health.js';
+export type { PushAgeBand, PushAgeBandId } from './health-thresholds.js';
+// One push-age table for every classifier: ≤ 6 months active, 6–18
+// stale, 18–24 needs_review, > 24 inactive.
+export { PUSH_AGE_BANDS, pushAgeBand } from './health-thresholds.js';
 // ── Host helper ──────────────────────────────────────────────────────
 // Shared by `site-artifacts.ts` (static OG SVG) and `og-image.ts`
 // (per-page PNG cards). One implementation so the two social-card
@@ -227,6 +238,17 @@ export {
   detectGithubRepo,
   parseAwesomeMarkdown,
 } from './markdown.js';
+export type {
+  NormalizedRecord,
+  NormalizedRecords,
+  RecordEntry,
+  RecordHealthSource,
+  RecordIssue,
+} from './normalize-records.js';
+// ── Record normalizer ────────────────────────────────────────────────
+// The one reader of the record layers (source, GitHub cache, overrides,
+// health.yml, decisions). Build, check, cleanup and README all use it.
+export { applyDecisionVisibility, loadNormalizedRecords } from './normalize-records.js';
 export type { OgBuildInput, OgBuildResult, OgTemplate } from './og-image.js';
 export { buildOgImages, renderOgPng } from './og-image.js';
 export type {
@@ -349,6 +371,7 @@ export {
   projectTypeSchema,
   readmeConfigSchema,
   recordsFileSchema,
+  recordVisibility,
   relationEvidenceSchema,
   relationSchema,
   relationTypeSchema,

@@ -822,6 +822,24 @@ export const groveConfigSchema = z.object({
     })
     .default({ github: false }),
 
+  /**
+   * How readers treat the GitHub sync cache. A cache entry whose newest
+   * `partialFailures[].at` is later than `lastSuccessAt`, or whose
+   * `lastSuccessAt` is missing or older than `github.maxAgeDays`, is
+   * stale: build, check, cleanup and README resolve its health as
+   * `status: unknown` with `staleReason: sync_stale` instead of
+   * presenting the old status as current.
+   */
+  sync: z
+    .object({
+      github: z
+        .object({
+          maxAgeDays: z.number().int().positive().default(14),
+        })
+        .prefault({}),
+    })
+    .prefault({}),
+
   // `.prefault({})` runs `{}` through themeSchema's own per-field
   // defaults, so the default values live in exactly one place.
   theme: themeSchema.prefault({}),
@@ -1092,6 +1110,19 @@ export function isIndexEntity(r: IndexRecord): r is IndexEntityRecord {
  * runtime check alone. The casts are safe because each branch
  * is gated on the literal string compare.
  */
+/**
+ * A record's effective visibility. Project records carry it in
+ * `health.visibility` (where a `paths.decisions` entry has already been
+ * folded in) and fall back to their own `visibility` field; resource-hub
+ * and ecosystem-map records have no health block and use the field.
+ * Every output (index, README, sitemap, llms) reads visibility through
+ * this rule.
+ */
+export function recordVisibility(record: Resource): DecisionVisibility {
+  if (record.kind === 'project') return record.health?.visibility ?? record.visibility;
+  return record.visibility;
+}
+
 export function toIndexRecord(record: Resource): IndexRecord {
   const base = {
     slug: record.slug,
@@ -1133,11 +1164,10 @@ export function toIndexRecord(record: Resource): IndexRecord {
       // Health surfaced alongside the record so list/detail UIs can
       // show staleness/curation tier without a second lookup.
       health: r.health,
-      // Visibility comes from either the health block (auto-derived
-      // from signals) or the curation override (`decisions.yml`).
-      // The generate step folds the latter in before serialising,
-      // so this is a best-effort projection of the current state.
-      visibility: r.health?.visibility ?? 'keep',
+      // Visibility comes from the health block (auto-derived from
+      // signals, with any `decisions.yml` override folded in by the
+      // normalizer), then the record's own field.
+      visibility: recordVisibility(r),
       github: r.github?.repository
         ? {
             fullName: r.github.repository.full_name,

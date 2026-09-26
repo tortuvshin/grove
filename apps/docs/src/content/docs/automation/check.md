@@ -8,7 +8,7 @@ description: Validate records, regenerate every derived artifact, and run astro 
 ## What it does, in order
 
 1. Loads `grove.config.ts` (`loadConfig()`). If the config file itself fails to parse against the Zod schema, the command exits before any records are read.
-2. Runs `validateProject()` (`packages/core/src/validate.ts`) against every file in `paths.recordsDir` (default `data/records`) and prints one line per issue.
+2. Runs `validateProject()` (`packages/core/src/validate.ts`) against every file in `paths.recordsDir` (default `data/records`) and prints one line per issue. Records come from the same normalizer the build uses (`loadNormalizedRecords`), so a record is checked with its GitHub sync cache, `data/overrides.yml` patch and `data/decisions.yml` visibility applied, exactly as the site renders it.
 3. If validation failed — or `--strict` was passed and any warnings were reported — the command stops here with exit code `1`. Nothing is regenerated.
 4. Otherwise it calls `prepareDirectory()` (`packages/core/src/prepare.ts`), which regenerates every derived artifact, and prints a one-line summary.
 5. Finally it runs `pnpm exec astro check` as a child process.
@@ -29,9 +29,9 @@ grove check --strict   # also fail when there are warnings
 | Code | Severity | What it means |
 |---|---|---|
 | `missing_records_dir` | error | `paths.recordsDir` doesn't exist. |
-| `schema_error` | error | The record's YAML parsed to something that isn't a mapping (empty file, a list, etc.), or a non-Zod exception was thrown while parsing it. |
+| `schema_error` | error | The record's YAML has a syntax error, parsed to something that isn't a mapping (empty file, a list, etc.), or a non-Zod exception was thrown while parsing it. |
 | `duplicate_slug` | error | Two record files resolve to the same slug. |
-| `zod_error` | error | One line per failed Zod check against `recordsFileSchema` — missing required field, wrong type, invalid enum value, and so on. If a record has no `kind`, it's defaulted to `project` before the Zod parse runs. |
+| `zod_error` | error | One line per failed Zod check against `recordsFileSchema` — missing required field, wrong type, invalid enum value, and so on. If a record has no `kind`, it's defaulted to the blueprint's kind before the Zod parse runs. The record is checked with its `data/overrides.yml` patch applied, so a patch that breaks the schema fails here. |
 | `slug_mismatch` | warning | The record's own `slug` field doesn't match its filename. |
 | `unknown_taxonomy_value` | warning | The record's `category`, `stack`, or (for `platforms[]`) a `platform` value isn't defined in `data/taxonomy/{categories,stacks,platforms}.yml`. Also raised for a collection's `query.categories`, `query.stacks` and `query.platforms`. Only checked when the matching taxonomy file has entries. |
 | `content_pointer_missing` | error | The record's `content` path does not resolve to a file, so its detail page would render without a body. Resolved the same way the build resolves it. |
@@ -45,6 +45,7 @@ grove check --strict   # also fail when there are warnings
 | `github_cache_invalid` | error | A file in `paths.githubCache` is not valid JSON, fails the cache-entry schema, or its `slug` differs from its file name. The build skips it and falls back to the record's inline blocks. |
 | `github_cache_mismatch` | warning | A record still carries inline `github`/`health` and its cache entry disagrees on stars, forks, `pushed_at`, `archived`, license, or health `status`/`tier`/`visibility`. The cache wins; `grove migrate github-cache` removes the inline copy. |
 | `github_cache_orphan` | warning | A cache file in `paths.githubCache` matches no record (for example, the record was deleted). |
+| `github_sync_stale` | warning | One warning for all records whose cache entry is stale: the newest `partialFailures[].at` is later than `lastSuccessAt`, or `lastSuccessAt` is missing or older than `sync.github.maxAgeDays`. Their health resolves as `status: unknown` (`staleReason: sync_stale`). Run `grove sync github`. |
 | `decisions_file_invalid` | error | `data/decisions.yml` exists but fails to parse against its schema. |
 | `unknown_decision_record` | error | An entry in `data/decisions.yml` references a slug that has no matching record. |
 | `collection_invalid` | error | A `data/collections/*.yml` file is not a YAML mapping or fails the collection schema — a missing `title`, an unknown `ranking.preset`, a string `minStars`. One issue per failing field. |
@@ -61,11 +62,11 @@ grove check --strict   # also fail when there are warnings
 | `subject_without_collection` | warning | Three or more records relate to a subject and no collection declares it. |
 | `collection_empty` | warning | No record matches the collection's query, so the page would render an empty list. |
 
-Source: `packages/core/src/validate.ts:70-284`.
+Source: `packages/core/src/validate.ts`; `schema_error`, `zod_error` and `github_cache_mismatch` come from the record normalizer in `packages/core/src/normalize-records.ts`.
 
-A **YAML syntax error** (bad indentation, an unterminated string, and so on) is not one of these codes — `validateProject` calls the YAML parser without a `try`/`catch` around it, so a syntax error throws straight out of the function. It crashes the `check` command with the raw parser error message instead of a structured `[error] ...` line, and still exits `1`.
+A **YAML syntax error** (bad indentation, an unterminated string, and so on) in a record is reported as a `schema_error` with the parser's message; the other records are still checked.
 
-Two checks that a previous draft of this page claimed do not exist in the source: there is no check that `related[]` or `parent` slug references resolve to real records, no validation of `data/overrides.yml`, and no taxonomy check for `license`. None of those fields or files are touched anywhere in `validate.ts`.
+Two checks that a previous draft of this page claimed do not exist in the source: there is no check that `related[]` or `parent` slug references resolve to real records, no check that a `data/overrides.yml` id matches a record, and no taxonomy check for `license`. None of those fields or files are touched anywhere in `validate.ts`.
 
 ## Severity and exit codes
 

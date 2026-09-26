@@ -1,4 +1,10 @@
 import type { RepositoryEvidence } from './evidence.js';
+import {
+  daysSince,
+  POPULAR_STARS,
+  PUSH_AGE_MAX_DAYS,
+  RECENT_RELEASE_WITHIN_DAYS,
+} from './health-thresholds.js';
 
 export type RepositoryHealthStatus =
   | 'active'
@@ -18,27 +24,18 @@ export interface RepositoryHealthResult {
   counterEvidence: string[];
 }
 
-function daysSince(value: string | null | undefined): number {
-  if (!value) return Infinity;
-  const date = new Date(value);
-  if (Number.isNaN(date.valueOf())) return Infinity;
-  return (Date.now() - date.valueOf()) / 86_400_000;
-}
-
 function unknown(reason: string): RepositoryHealthResult {
   return { status: 'unknown', confidence: 'low', evidence: [reason], counterEvidence: [] };
 }
 
-// Thresholds intentionally match `classifyHealth` (health.ts) so "stale" means
-// the same thing everywhere in Grove. Not imported — health.test.ts documents
-// that these cutoffs are deliberately burned into the function that uses them
-// rather than shared, so a future change forces a visible diff at the call
-// site instead of drifting silently through a shared constant.
-const ACTIVE_WITHIN_DAYS = 183;
-const STABLE_WITHIN_DAYS = 548;
-const CONFIDENT_STALE_WITHIN_DAYS = 730;
-const RECENT_RELEASE_WITHIN_DAYS = 365;
-const POPULAR_STARS = 500;
+// The push-age bands come from the shared table in health-thresholds.ts,
+// so a README link and a directory record read the same cutoffs. This
+// classifier keeps its own vocabulary: the `stale` band (6–18 months)
+// reads as `stable` here, and both later bands as `likely-stale` — with
+// medium confidence up to 24 months and low confidence beyond.
+const ACTIVE_WITHIN_DAYS = PUSH_AGE_MAX_DAYS.active;
+const STABLE_WITHIN_DAYS = PUSH_AGE_MAX_DAYS.stale;
+const CONFIDENT_STALE_WITHIN_DAYS = PUSH_AGE_MAX_DAYS.needs_review;
 
 export function classifyRepositoryHealth(evidence: RepositoryEvidence): RepositoryHealthResult {
   if (evidence.status === 'not-found') {
