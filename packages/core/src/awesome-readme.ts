@@ -18,6 +18,8 @@
  * regenerations. When the sentinels are absent, a new block is appended.
  */
 
+import { type Resource, recordVisibility } from './schema.js';
+
 export interface AwesomeReadmeRecord {
   slug: string;
   name?: string | undefined;
@@ -28,6 +30,37 @@ export interface AwesomeReadmeRecord {
   stars?: number | undefined;
   license?: string | undefined;
   visibility?: string | undefined;
+}
+
+/**
+ * Project a normalized record (see `loadNormalizedRecords`) onto the
+ * README entry shape. Visibility is the record's effective visibility
+ * (`recordVisibility`: decision, then health, then the record field),
+ * so the README lists exactly the records the site shows.
+ */
+export function toAwesomeReadmeRecord(record: Resource): AwesomeReadmeRecord {
+  const github = (record.kind === 'project' ? record.github : undefined) as
+    | { stars?: unknown; license?: unknown; repository?: { stargazers_count?: unknown } }
+    | undefined;
+  const stars =
+    typeof github?.stars === 'number'
+      ? github.stars
+      : typeof github?.repository?.stargazers_count === 'number'
+        ? github.repository.stargazers_count
+        : undefined;
+  const license = typeof github?.license === 'string' ? github.license : undefined;
+  const repoUrl = (record.kind === 'project' ? record.repoUrl : undefined) ?? record.links.github;
+  return {
+    slug: record.slug,
+    name: record.kind === 'resource' ? record.title : record.name,
+    ...(record.description ? { description: record.description } : {}),
+    category: record.category,
+    ...(repoUrl !== undefined ? { repoUrl } : {}),
+    ...(record.links.website !== undefined ? { homepageUrl: record.links.website } : {}),
+    visibility: recordVisibility(record),
+    ...(stars !== undefined ? { stars } : {}),
+    ...(license !== undefined ? { license } : {}),
+  };
 }
 
 export interface AwesomeReadmeCategory {

@@ -1,25 +1,19 @@
 import { access, readdir, readFile } from 'node:fs/promises';
 import { basename, join, relative, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
-import { ZodError } from 'zod';
 import { type CollectionSourceRecord, toCollectionEntries } from './collection-entries.js';
 import { CollectionFileError, parseCollectionFile } from './collections-io.js';
 import { runCollection } from './collector.js';
 import { readContentFile } from './content-body.js';
-import {
-  githubSyncFreshnessOptions,
-  loadGithubCache,
-  resolveRecordGithub,
-} from './github-cache.js';
+import { githubSyncFreshnessOptions } from './github-cache.js';
 import { readYamlFile } from './io.js';
+import { loadNormalizedRecords } from './normalize-records.js';
 import {
-  blueprintKind,
   decisionsFileSchema,
   type GroveConfig,
   type HealthEntry,
   healthFileSchema,
   type Resource,
-  recordsFileSchema,
   subjectSchema,
   unwrapDecisions,
   unwrapHealth,
@@ -172,12 +166,13 @@ async function taxonomyIds(path: string): Promise<Set<string>> {
 }
 
 /**
- * Validate a Grove project: read every record YAML under
- * `config.paths.recordsDir`, run full Zod parsing, and surface any
- * schema, slug, link, health, or decision reference issues.
+ * Validate a Grove project: read every record through the shared
+ * normalizer (`loadNormalizedRecords`) and surface any schema, slug,
+ * link, health, or decision reference issues.
  *
- * Each record is run through the same Zod schema the build pipeline
- * uses (see `recordsFileSchema`). Validation catches both schema
+ * Records are the exact ones the build publishes, so a record that
+ * passes here renders the same way on the site, in the README and in
+ * `grove cleanup`. Validation catches both schema
  * problems (missing fields, wrong types) and reference problems
  * (duplicate slugs, missing health entries, dangling decision ids).
  */
@@ -207,12 +202,11 @@ export async function validateProject(
     return finalize(errors, warnings);
   }
 
-  const expectedKind = blueprintKind[config.blueprint];
-  const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith('.yml')).sort();
-  // The sync bot's layer. Records resolve `github` / `health` through
-  // it exactly as the build does (cache > inline > health.yml).
-  const githubCache = await loadGithubCache(config);
+  // Records come from the shared normalizer: the same records, with the
+  // same cache / overrides / health.yml / decisions merge, that the
+  // build publishes. The checks below only add reporting on top.
+  const normalized = await loadNormalizedRecords(config, process.cwd());
+  const githubCache = normalized.githubCache;
   const cachePath = relative(process.cwd(), githubCache.dir) || '.';
   for (const { file, message } of githubCache.errors) {
     errors.push({
@@ -304,38 +298,11 @@ export async function validateProject(
     });
   };
 
-  for (const file of files) {
-    const fileSlug = basename(file, '.yml');
-    const text = await readFile(join(recordsDir, file), 'utf8');
-    // `schema: 'core'` disables custom-tag interpretation; a malicious
-    // record with `!!binary` / `!!js/function` would otherwise be parsed
-    // into a host object by the YAML package's default schema.
-    // Implementation-checklist.md #27.
-    const raw = parseYaml(text, { schema: 'core' }) as Record<string, unknown> | null;
-    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
-      errors.push({
-        code: 'schema_error',
-        message: `${fileSlug}: record file is empty or not a YAML mapping`,
-        severity: 'error',
-      });
-      slugs.add(fileSlug);
-      continue;
-    }
-    // Cache wins over a legacy inline copy — but a disagreement between
-    // the two is a second source of truth, so say which fields differ.
-    const resolved = resolveRecordGithub(raw, githubCache.entries.get(fileSlug), freshness);
-    if (resolved.syncStale) syncStale.push(fileSlug);
-    if (resolved.conflicts.length > 0) {
-      warnings.push({
-        code: 'github_cache_mismatch',
-        message: `${fileSlug}: inline github/health disagrees with ${cachePath}/${fileSlug}.json — ${resolved.conflicts.join(', ')}. The cache wins; run \`grove migrate github-cache\` to drop the inline copy.`,
-        severity: 'warning',
-      });
-    }
-    const obj = resolved.record;
-
-    // Slug uniqueness — even if a record later fails Zod parse, we
-    // still need to flag a duplicate filename as an error.
+  for (const entry of normalized.entries) {
+    const fileSlug = entry.slug;
+    if (entry.syncStale) syncStale.push(fileSlug);
+    // Slug uniqueness — even if a record fails to parse, a duplicate
+    // slug is still an error.
     if (slugs.has(fileSlug)) {
       errors.push({
         code: 'duplicate_slug',
@@ -344,36 +311,21 @@ export async function validateProject(
       });
     }
     slugs.add(fileSlug);
-
-    // Full Zod parse — this is the source of truth for "is this a
-    // valid record". Each issue becomes a `zod_error` validation
-    // issue with the issue path baked into the message. If the
-    // parse throws something that isn't a ZodError (e.g. file
-    // doesn't exist anymore), surface it as a generic schema error.
-    if (!obj.kind) obj.kind = expectedKind;
-    let parsed: Resource;
-    try {
-      parsed = recordsFileSchema.parse(obj);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        for (const issue of err.issues) {
-          const where = issue.path.length > 0 ? issue.path.join('.') : '(root)';
-          errors.push({
-            code: 'zod_error',
-            message: `${fileSlug}: ${where} ${issue.message}`,
-            severity: 'error',
-          });
-        }
-      } else {
-        errors.push({
-          code: 'schema_error',
-          message: `${fileSlug}: ${(err as Error).message}`,
-          severity: 'error',
-        });
-      }
-      continue;
+    // Parse and schema failures (`schema_error`, `zod_error`, one per
+    // Zod issue) and cache disagreements (`github_cache_mismatch`).
+    for (const issue of entry.issues) {
+      (issue.severity === 'error' ? errors : warnings).push({
+        code: issue.code,
+        message: issue.message,
+        severity: issue.severity,
+      });
     }
-    parsedRecords.push({ ...parsed, slug: fileSlug });
+    if (!entry.record) continue;
+    // `base` is the record before health.yml and decisions: the health
+    // checks below compare exactly that against health.yml. Collections
+    // see the fully merged record, as the build renders it.
+    const parsed = entry.record.base;
+    parsedRecords.push(entry.record.record);
     for (const relation of parsed.relations) {
       if (!subjectIds.has(relation.to)) {
         errors.push({
@@ -387,13 +339,12 @@ export async function validateProject(
       related.add(fileSlug);
       relatedRecords.set(relation.to, related);
     }
-    // Override the filename-derived slug with the record's own slug
-    // before downstream checks (links/health) consume it. Filename
-    // and record.slug must agree; mismatch is itself a warning.
-    if (parsed.slug !== fileSlug) {
+    // The file name is the slug; a different `slug` in the file is
+    // ignored, and worth a warning.
+    if (entry.record.declaredSlug !== fileSlug) {
       warnings.push({
         code: 'slug_mismatch',
-        message: `${fileSlug}: record slug "${parsed.slug}" does not match filename`,
+        message: `${fileSlug}: record slug "${String(entry.record.declaredSlug)}" does not match filename`,
         severity: 'warning',
       });
     }
@@ -461,7 +412,7 @@ export async function validateProject(
         | { pushedAt?: string | null; repository?: { pushed_at?: string | null } }
         | undefined;
       inlineHealth.set(fileSlug, {
-        source: resolved.health === 'cache' ? 'cache' : 'inline',
+        source: entry.record.provenance.health === 'cache' ? 'cache' : 'inline',
         status: parsed.health.status,
         tier: parsed.health.tier,
         visibility: parsed.health.visibility,
@@ -703,59 +654,31 @@ function finalize(
 }
 
 /**
- * Load and normalize every record YAML under `config.paths.recordsDir`.
+ * Load every record through the shared normalizer and return the fully
+ * merged records (GitHub cache, overrides, health.yml and decisions
+ * applied) — the same records `generate()` publishes.
  *
- * @param config Grove config (provides `paths.recordsDir` and `blueprint`)
- * @param opts.onError 'skip' (default) silently drops schema failures;
- *   'throw' raises on the first failure with the file slug and the
- *   Zod issue path in the error message.
- * @param opts.cwd Working directory to resolve `paths.recordsDir`
- *   against. Defaults to `process.cwd()`.
+ * @param config Grove config (provides `paths` and `blueprint`)
+ * @param opts.onError 'skip' (default) drops records that fail the
+ *   schema; 'throw' raises on the first failure with the file slug and
+ *   the Zod issue path in the error message.
+ * @param opts.cwd Working directory to resolve `paths` against.
+ *   Defaults to `process.cwd()`.
  *
- * For callers that want the strict-by-default behaviour, see
- * `loadRecordsOrThrow`. `validateProject` is the recommended
- * surface for surfacing failures with full error reporting.
+ * `validateProject` is the recommended surface for reporting failures;
+ * `loadNormalizedRecords` returns the records with their provenance.
  */
 export async function loadRecords(
   config: GroveConfig,
   opts: { onError?: 'skip' | 'throw'; cwd?: string } = {},
 ): Promise<Resource[]> {
   const onError = opts.onError ?? 'skip';
-  const cwd = opts.cwd ?? process.cwd();
-  const recordsDir = resolve(cwd, config.paths.recordsDir);
-  const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith('.yml')).sort();
-  const expectedKind = blueprintKind[config.blueprint];
-  const githubCache = await loadGithubCache(config, cwd);
-  const out: Resource[] = [];
-  for (const file of files) {
-    const fileSlug = basename(file, '.yml');
-    const text = await readFile(join(recordsDir, file), 'utf8');
-    // `schema: 'core'` disables custom-tag interpretation. Same
-    // rationale as the `readRecords` block above.
-    const raw = parseYaml(text, { schema: 'core' }) as Record<string, unknown> | null;
-    if (!raw || typeof raw !== 'object') {
-      if (onError === 'throw') {
-        throw new Error(`${fileSlug}: record file is empty or not a YAML mapping`);
-      }
-      continue;
-    }
-    const record = resolveRecordGithub(
-      raw,
-      githubCache.entries.get(fileSlug),
-      githubSyncFreshnessOptions(config),
-    ).record;
-    if (!record.kind) record.kind = expectedKind;
-    try {
-      const parsed = recordsFileSchema.parse(record);
-      parsed.slug = fileSlug;
-      out.push(parsed);
-    } catch (err) {
-      if (onError === 'throw') throw err;
-      // skip — validation should have caught this
-    }
+  const normalized = await loadNormalizedRecords(config, opts.cwd ?? process.cwd());
+  if (onError === 'throw') {
+    const first = normalized.issues.find((issue) => issue.severity === 'error');
+    if (first) throw new Error(first.message);
   }
-  return out;
+  return normalized.records.map((entry) => entry.record);
 }
 
 /**

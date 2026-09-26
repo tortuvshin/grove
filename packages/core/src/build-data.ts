@@ -1,131 +1,9 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
-import {
-  githubSyncFreshnessOptions,
-  loadGithubCache,
-  resolveRecordGithub,
-} from './github-cache.js';
-import { classifyHealth } from './health.js';
-import {
-  blueprintKind,
-  decisionsFileSchema,
-  type GroveConfig,
-  type HealthEntry,
-  healthFileSchema,
-  overridesFileSchema,
-  type Resource,
-  recordsFileSchema,
-  toIndexRecord,
-  unwrapDecisions,
-  unwrapHealth,
-  unwrapOverrides,
-} from './schema.js';
-
-/**
- * Apply a minimal decisions.yml override to a normalized record. The
- * human curation layer is the single source of truth for visibility:
- *   - For project records: decision.visibility (when present) wins
- *     over record.health.visibility. The health block's other fields
- *     (status, tier, etc.) are untouched.
- *   - For resource-hub and ecosystem-map records: decision.visibility
- *     is written to the record's top-level `visibility` field (these
- *     blueprints have no `health` block).
- *
- * The full override pipeline (with reasons surfaced in the index
- * payload) is a V2 feature; V1 keeps the merge intentional and small.
- *
- * When a project record has no existing health block but a decisions
- * override exists, we call `classifyHealth` (the V1 single source of
- * truth) with no GitHub metadata to fabricate an "unknown" health
- * block whose `visibility` we then overwrite with the decision. This
- * fabrication is required by the index payload: `toIndexRecord` reads
- * `record.health?.visibility` to populate the index, so the override
- * cannot flow through without a health block. Without the fabrication
- * the override would silently disappear from the rendered index.
- */
-function applyDecision(record: Resource, visibilityById: Map<string, string>): Resource {
-  const override = visibilityById.get(record.slug);
-  if (!override) return record;
-  if (record.kind === 'project') {
-    const existing = record.health;
-    // Fabricate a default "no signals" health block via the canonical
-    // classifier. Keeps the threshold/format in lockstep with the rest
-    // of the package — if `classifyHealth` ever changes its unknown
-    // shape, this fabrication updates automatically.
-    const fabricated = classifyHealth(record.slug).health;
-    const merged = {
-      ...(existing ?? fabricated),
-      visibility: override as typeof fabricated.visibility,
-    };
-    return { ...record, health: merged };
-  }
-  // Resource-hub / ecosystem-map: no `health` block; the top-level
-  // `visibility` field on the base schema is the source of truth.
-  return { ...record, visibility: override as typeof record.visibility };
-}
-
-/**
- * Load `data/health.yml` into a slug -> health-block map.
- *
- * `grove check` has always validated this file — a record with a
- * GitHub link and no entry here is a `missing_health` error — but
- * nothing ever read it back into the build, so the health signals it
- * carries never reached a rendered page. This is that missing read.
- * Missing or invalid file → empty map, same as decisions.
- */
-async function loadHealthEntries(
-  healthPath: string,
-  cwd: string,
-): Promise<Map<string, HealthEntry['health']>> {
-  try {
-    const raw = await readFile(resolve(cwd, healthPath), 'utf8');
-    const parsed = healthFileSchema.parse(parseYaml(raw, { schema: 'core' }) ?? {});
-    const out = new Map<string, HealthEntry['health']>();
-    for (const entry of unwrapHealth(parsed)) out.set(entry.id, entry.health);
-    return out;
-  } catch {
-    return new Map();
-  }
-}
-
-/**
- * Load `data/overrides.yml` into a slug -> patch map. Each patch is a
- * shallow set of top-level fields applied over the parsed record, for
- * correcting imported records without editing generated YAML by hand.
- */
-async function loadOverridePatches(
-  overridesPath: string,
-  cwd: string,
-): Promise<Map<string, Record<string, unknown>>> {
-  try {
-    const raw = await readFile(resolve(cwd, overridesPath), 'utf8');
-    const parsed = overridesFileSchema.parse(parseYaml(raw, { schema: 'core' }) ?? {});
-    const out = new Map<string, Record<string, unknown>>();
-    for (const entry of unwrapOverrides(parsed)) out.set(entry.id, entry.patch);
-    return out;
-  } catch {
-    return new Map();
-  }
-}
-
-async function loadDecisionVisibility(
-  decisionsPath: string,
-  cwd: string,
-): Promise<Map<string, string>> {
-  try {
-    const raw = await readFile(resolve(cwd, decisionsPath), 'utf8');
-    const parsed = decisionsFileSchema.parse(parseYaml(raw, { schema: 'core' }) ?? {});
-    const decisions = unwrapDecisions(parsed);
-    const out = new Map<string, string>();
-    for (const d of decisions) out.set(d.id, d.decision.visibility);
-    return out;
-  } catch {
-    // missing or invalid decisions.yml → no overrides
-    return new Map();
-  }
-}
+import { loadNormalizedRecords } from './normalize-records.js';
+import { blueprintKind, type GroveConfig, type Resource, toIndexRecord } from './schema.js';
 
 /**
  * The full payload written to data/generated/records.full.json.
@@ -219,58 +97,24 @@ export interface GenerateResult {
 
 export async function generate(cwd = process.cwd(), config?: GroveConfig): Promise<GenerateResult> {
   const cfg = config ?? (await loadConfig(cwd));
-  const recordsDir = resolve(cwd, cfg.paths.recordsDir);
   const outDir = resolve(cwd, cfg.paths.generatedDir);
   await mkdir(outDir, { recursive: true });
 
   const expectedKind = blueprintKind[cfg.blueprint];
-  const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith('.yml')).sort();
 
-  // Load the side files once; a missing file is an empty map.
-  // Precedence, lowest to highest: the GitHub sync cache supplies
-  // `github` / `health` over any legacy inline copy, overrides patch
-  // the parsed record, health.yml supplies a health block nothing else
-  // did, and decisions.yml has the final say on visibility. An
-  // unreadable cache file is skipped here; `grove check` reports it.
-  const visibilityById = await loadDecisionVisibility(cfg.paths.decisions, cwd);
-  const healthBySlug = await loadHealthEntries(cfg.paths.health, cwd);
-  const patchBySlug = await loadOverridePatches(cfg.paths.overrides, cwd);
-  const githubCache = await loadGithubCache(cfg, cwd);
-  // A stale sync resolves as `status: unknown` rather than old values.
-  const freshness = githubSyncFreshnessOptions(cfg);
-
-  const out: Resource[] = [];
-  const errors: string[] = [];
-  for (const file of files) {
-    const fileSlug = basename(file, '.yml');
-    try {
-      const text = await readFile(join(recordsDir, file), 'utf8');
-      const parsed = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
-      const raw = resolveRecordGithub(parsed, githubCache.entries.get(fileSlug), freshness).record;
-      if (!raw.kind) raw.kind = expectedKind;
-      const patch = patchBySlug.get(fileSlug);
-      const normalized = recordsFileSchema.parse(patch ? { ...raw, ...patch } : raw);
-      normalized.slug = fileSlug;
-      // A health block from the cache (or inline on the record) wins;
-      // otherwise take the one keyed by this slug in health.yml.
-      if (normalized.kind === 'project' && !normalized.health) {
-        const health = healthBySlug.get(fileSlug);
-        if (health) normalized.health = health;
-      }
-      // Apply decisions.yml visibility override on top of the record.
-      // The index payload then derives visibility from record.health,
-      // which is now the merged result.
-      out.push(applyDecision(normalized, visibilityById));
-    } catch (err) {
-      errors.push(`${file}: ${(err as Error).message}`);
-    }
-  }
+  // Every layer (record, GitHub cache, overrides, health.yml,
+  // decisions) is merged by the shared normalizer, so the README,
+  // `grove check` and `grove cleanup` see exactly these records.
+  const normalized = await loadNormalizedRecords(cfg, cwd);
+  const errors = normalized.issues
+    .filter((issue) => issue.severity === 'error')
+    .map((issue) => issue.message);
   if (errors.length > 0) {
     const e = new Error(`generate failed: ${errors.length} schema error(s)`);
     (e as Error & { details?: string[] }).details = errors;
     throw e;
   }
+  const out: Resource[] = normalized.records.map((entry) => entry.record);
 
   out.sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
 

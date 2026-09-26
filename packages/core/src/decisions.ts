@@ -1,13 +1,8 @@
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
-import { parse as parseYaml } from 'yaml';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import { loadConfig } from './config.js';
-import {
-  githubSyncFreshnessOptions,
-  loadGithubCache,
-  resolveRecordGithub,
-} from './github-cache.js';
-import { blueprintKind, type GroveConfig, type Resource, recordsFileSchema } from './schema.js';
+import { loadNormalizedRecords } from './normalize-records.js';
+import type { GroveConfig, Resource } from './schema.js';
 
 export interface CleanupCandidate {
   slug: string;
@@ -59,9 +54,9 @@ export function pickCleanupCandidates(records: Resource[]): Resource[] {
 }
 
 /**
- * Read every record YAML under `config.paths.recordsDir`, normalize,
- * then write `data/generated/cleanup-report.json` with the list of
- * records that need human attention (stale / unknown / cleanup).
+ * Read every record through the shared normalizer, then write
+ * `data/generated/cleanup-report.json` with the list of records that
+ * need human attention (stale / unknown / cleanup).
  *
  * V1 name for what was previously `review`.
  */
@@ -70,33 +65,18 @@ export async function cleanupStale(
   config?: GroveConfig,
 ): Promise<{ report: CleanupReport; path: string }> {
   const cfg = config ?? (await loadConfig(cwd));
-  const recordsDir = resolve(cwd, cfg.paths.recordsDir);
   const outDir = resolve(cwd, cfg.paths.generatedDir);
   await mkdir(outDir, { recursive: true });
 
-  const expectedKind = blueprintKind[cfg.blueprint];
-  const entries = await readdir(recordsDir).catch(() => [] as string[]);
-  const files = entries.filter((f) => f.endsWith('.yml')).sort();
-
-  // Health and stars come from the GitHub sync cache when it has them.
-  // A stale sync resolves as `status: unknown`, which makes it a candidate.
-  const githubCache = await loadGithubCache(cfg, cwd);
-  const freshness = githubSyncFreshnessOptions(cfg);
-  const records: Resource[] = [];
-  for (const file of files) {
-    const fileSlug = basename(file, '.yml');
-    const text = await readFile(join(recordsDir, file), 'utf8');
-    const parsed = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
-    const raw = resolveRecordGithub(parsed, githubCache.entries.get(fileSlug), freshness).record;
-    if (!raw.kind) raw.kind = expectedKind;
-    try {
-      const normalized = recordsFileSchema.parse(raw);
-      normalized.slug = fileSlug;
-      records.push(normalized);
-    } catch {
-      // skip — validation surfaces the error
-    }
-  }
+  // The same normalized records the build publishes: health from the
+  // sync cache (or inline, or health.yml), overrides and decisions
+  // applied. Records that fail the schema are left out; `grove check`
+  // reports them. A health block the normalizer fabricated only to
+  // carry a decision's visibility is not a health signal: such a record
+  // has no observed health, so it is not a candidate.
+  const records = (await loadNormalizedRecords(cfg, cwd)).records
+    .filter((entry) => entry.provenance.health !== 'decision')
+    .map((entry) => entry.record);
 
   const candidates = pickCleanupCandidates(records).map(toCandidate);
   const report: CleanupReport = {

@@ -53,6 +53,33 @@ const result = await generate("/path/to/space");
 
 `generate(cwd = process.cwd(), config?)` writes `records.full.json`, `records.index.json`, `records.json`, and `site-config.json` under `data/generated/` (`packages/core/src/build-data.ts:166`). The `result` object is the `GenerateResult` type with `totalRecords`, `byKind`, `byStack`, and the resolved payloads.
 
+## Records
+
+```ts
+import { loadNormalizedRecords, recordVisibility, applyDecisionVisibility } from "@grove-dev/core";
+
+const { records, entries, issues, githubCache } = await loadNormalizedRecords(config, "/path/to/space");
+for (const { slug, record, visibility, provenance } of records) {
+  // record: the fully merged Resource; visibility: effective visibility
+  // provenance: { github, health, decision, override } — where each layer came from
+}
+```
+
+`loadNormalizedRecords(config, cwd = process.cwd())` is the one reader of the record layers. `generate()`, `grove check`, `grove cleanup` and `grove readme generate` all take their records from it, so the site, the README and the checks cannot disagree about a record. Per record, lowest to highest precedence:
+
+1. the record file, `paths.recordsDir/<slug>.yml`;
+2. the GitHub sync cache for `github` / `health`, over a legacy inline copy (`resolveRecordGithub` with `githubSyncFreshnessOptions(config)`, so health from a stale sync resolves as `status: unknown`);
+3. the `paths.overrides` patch (shallow, top-level fields);
+4. schema parse with `recordsFileSchema`; the slug is always the file name;
+5. the `paths.health` entry, for a project record nothing above gave a health block;
+6. the `paths.decisions` visibility (`applyDecisionVisibility`: a project with no health block gets a fabricated `unknown` one to carry it).
+
+Each `NormalizedRecord` carries `record` (every layer applied), `base` (before `paths.health` and decisions), `visibility` (`recordVisibility(record)`: decision, then `health.visibility`, then the record's own `visibility`), `declaredSlug` (the `slug` written in the file) and `provenance`. `RecordHealthSource` is `cache | inline | override | file | decision | none`.
+
+The loader never throws for a bad record. A file that fails to parse or fails the schema is reported in `issues` (`schema_error`, or one `zod_error` per Zod issue), and a disagreeing inline copy as a `github_cache_mismatch` warning. `entries` lists every file in discovery order with its own issues and `syncStale` (its cached health came from a stale sync), and `record` is set only when the file normalized. Missing or invalid side files count as empty; `grove check` reports them.
+
+Types: `NormalizedRecord`, `NormalizedRecords`, `RecordEntry`, `RecordIssue`, `RecordHealthSource`.
+
 ## Pipeline
 
 ```ts
@@ -148,7 +175,7 @@ const readmeWithBlock = injectAwesomeReadmeBlock(existingReadme, markdown);
 const { start, end } = parseAwesomeReadmeSections(existingReadme);
 ```
 
-The command `grove readme generate` is `buildAwesomeReadme` + `injectAwesomeReadmeBlock`. `parseAwesomeReadmeSections` is exported for tools that want to inspect or validate the sentinel block without rendering.
+The command `grove readme generate` is `loadNormalizedRecords` + `toAwesomeReadmeRecord` + `buildAwesomeReadme` + `injectAwesomeReadmeBlock`. `toAwesomeReadmeRecord(record)` projects a normalized record onto the README entry shape, including its effective visibility. `parseAwesomeReadmeSections` is exported for tools that want to inspect or validate the sentinel block without rendering.
 
 With `readme.entryLinkTarget: 'detail'`, also pass `directoryRoute` so entries can link to record pages:
 
@@ -267,7 +294,7 @@ The token-free HTML fallback (`enrichFromGithubHtml`) fetches the public GitHub 
 
 ### GitHub sync cache
 
-`grove sync github` writes one JSON entry per record to `paths.githubCache`; every reader resolves a record's `github` and `health` through the same helper (cache > inline > `paths.health`).
+`grove sync github` writes one JSON entry per record to `paths.githubCache`; the record normalizer (`loadNormalizedRecords`, see [Records](#records)) resolves a record's `github` and `health` through this helper (cache > inline > `paths.health`).
 
 ```ts
 import {
