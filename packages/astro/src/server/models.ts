@@ -10,8 +10,10 @@ import type {
   IndexFilters,
   IndexProjectRecord,
   IndexRecord,
+  ListingIndexPolicy,
   ProjectRecord,
   ReadingMetrics,
+  RecordIndexPolicy,
   Resource,
   TocEntry,
 } from '@grove-dev/core';
@@ -33,14 +35,17 @@ import {
   hasAnyFilter,
   hrefForClearedFilters,
   hrefForFilters,
+  NOINDEX_FOLLOW,
   nameInitials,
   pagePathHref,
   paginate,
   projectStackIds,
   readContentFile,
   readingMetrics,
+  recordIndexable,
   softwareApplicationSchema,
   statusDisplay,
+  taxonomyTermIndexable,
   totalPages,
   truncateWords,
 } from '@grove-dev/core';
@@ -67,6 +72,12 @@ import {
   titleCaseFirst,
 } from './seo.js';
 
+export interface SiteIndexPolicy {
+  recordIndexPolicy?: string;
+  collectionIndexPolicy?: string;
+  taxonomyIndexPolicy?: string;
+}
+
 export interface DirectorySiteConfig {
   name: string;
   tagline?: string;
@@ -84,6 +95,10 @@ export interface DirectorySiteConfig {
   analytics?: {
     googleAnalyticsId?: string;
   };
+  /** Index policy from `grove.config.ts` (`seo.*IndexPolicy`). Plain
+   *  strings: `site-config.json` is a JSON import, and the values were
+   *  already validated by the config schema. */
+  seo?: SiteIndexPolicy;
   footer?: {
     columns?: Array<{
       heading: string;
@@ -105,8 +120,8 @@ export interface DirectorySiteConfig {
     labelPlural?: string;
   };
   taxonomy?: {
-    categories?: Array<{ id: string; name: string }>;
-    stacks?: Array<{ id: string; name: string }>;
+    categories?: Array<{ id: string; name: string; description?: string }>;
+    stacks?: Array<{ id: string; name: string; description?: string }>;
     platforms?: Array<{ id: string; name: string }>;
     topics?: Array<{ id: string; name: string }>;
     licenses?: Array<{ id: string; name: string }>;
@@ -774,12 +789,21 @@ export function getRecordDetailModel(
       { path: `${routeSlug}/${recordSlug}/`, name },
     ]),
   ];
+  // `seo.recordIndexPolicy`: a record without the editorial work the
+  // policy asks for still renders, but as `noindex,follow` — the same
+  // rule keeps it out of the sitemap (`prepareDirectory`).
+  const contentHtml = isProject ? getContentHtml(recordSlug) : null;
+  const indexable = recordIndexable(
+    { hasBody: Boolean(contentHtml), reviewed: record.curation?.reviewed === true },
+    site.seo?.recordIndexPolicy as RecordIndexPolicy | undefined,
+  );
   const seo: PageSeo = {
     title,
     description,
     image: ogPath('record', recordSlug),
     imageAlt: `${name} — ${site.name}`,
     jsonLd,
+    ...(indexable ? {} : { noindex: true, robots: NOINDEX_FOLLOW }),
   };
 
   return {
@@ -827,7 +851,7 @@ export function getRecordDetailModel(
     // components can render the category pill without each consumer
     // having to destructure `record.category` themselves.
     category: record.category,
-    contentHtml: isProject ? getContentHtml(recordSlug) : null,
+    contentHtml,
     // Curated summary (Open Apps-written) takes priority over the
     // raw `description` (typically copied from GitHub). Fall back to
     // `description` when the curator has not written a summary yet.
@@ -1095,7 +1119,20 @@ export function getTaxonomyPageModel(
       ...(r.description ? { description: r.description } : {}),
     };
   });
+  // `seo.taxonomyIndexPolicy` covers categories and stacks — the pages
+  // a term's intro copy (`description` in data/taxonomy) is written for.
+  // Licenses have no editorial copy and are not covered. An empty term
+  // is left to the page, as before.
+  const term = kind === 'licenses' ? undefined : site.taxonomy?.[kind]?.find((t) => t.id === id);
+  const excludedByPolicy =
+    kind !== 'licenses' &&
+    count > 0 &&
+    !taxonomyTermIndexable(
+      { count, description: term?.description },
+      site.seo?.taxonomyIndexPolicy as ListingIndexPolicy | undefined,
+    );
   const seo: PageSeo = {
+    ...(excludedByPolicy ? { noindex: true, robots: NOINDEX_FOLLOW } : {}),
     // `main` already names the site, so seoTitle appends nothing —
     // it still runs for the length/whitespace normalization.
     title: seoTitle(main, site.name),

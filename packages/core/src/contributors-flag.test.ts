@@ -37,15 +37,28 @@ describe('contributors showContributionCount default', () => {
 describe('normalizeGithubIntegration', () => {
   it('expands a blanket boolean into per-feature flags', async () => {
     const { normalizeGithubIntegration } = await import('./schema.js');
+    // `candidates` is opt-in only: a blanket `true` leaves it off.
     expect(normalizeGithubIntegration(true)).toEqual({
       metadata: true,
       contributors: true,
       health: true,
+      candidates: false,
     });
     expect(normalizeGithubIntegration(false)).toEqual({
       metadata: false,
       contributors: false,
       health: false,
+      candidates: false,
+    });
+  });
+
+  it('turns candidates on only when asked for by name', async () => {
+    const { normalizeGithubIntegration } = await import('./schema.js');
+    expect(normalizeGithubIntegration({ metadata: true, candidates: true })).toEqual({
+      metadata: true,
+      contributors: false,
+      health: false,
+      candidates: true,
     });
   });
 
@@ -53,11 +66,12 @@ describe('normalizeGithubIntegration', () => {
     const { normalizeGithubIntegration } = await import('./schema.js');
     expect(
       normalizeGithubIntegration({ metadata: true, contributors: false, health: false }),
-    ).toEqual({ metadata: true, contributors: false, health: false });
+    ).toEqual({ metadata: true, contributors: false, health: false, candidates: false });
     expect(normalizeGithubIntegration(undefined)).toEqual({
       metadata: false,
       contributors: false,
       health: false,
+      candidates: false,
     });
   });
 });

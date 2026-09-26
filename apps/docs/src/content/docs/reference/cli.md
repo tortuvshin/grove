@@ -315,6 +315,28 @@ as a Markdown table.
 - Records with `repoUrl` pointing at a non-GitHub host are
   unparseable and skipped.
 
+## `grove candidates`
+
+List the channel and media candidates in the GitHub sync cache that no
+reviewer has approved or rejected yet (`integrations.github.candidates`).
+Read-only: approving stays a human edit to `paths.decisions` or the
+record.
+
+```bash
+grove candidates                 # pending candidates, grouped by record
+grove candidates --slug immich   # one record
+grove candidates --markdown      # tables + decision entries for a review issue
+grove candidates --json          # machine-readable
+grove candidates --all           # include approved, rejected and in-record ones
+```
+
+A candidate is **approved** or **rejected** when `paths.decisions` has a
+`candidates:` entry with the same record `id`, `kind` and `url`. It is
+**in-record** when the record already carries that URL
+(`distribution.channels[].url`, `logoUrl`, `screenshots[].src` or
+`screenshots[].source`). Everything else is **pending**. An unreadable
+decisions file is reported, and the command exits 1.
+
 ## `grove migrate github-cache`
 
 Move the `github` and `health` blocks that Grove 0.12 and earlier
@@ -335,6 +357,53 @@ Re-running is a no-op.
 
 ```
 [migrate github-cache] moved 102 record(s) into data/cache/github/ (0 kept an existing cache entry)
+```
+
+## `grove migrate markdown-records`
+
+Turn each YAML record into one [Markdown record](/reference/record-schema/#record-formats):
+`paths.bodiesDir/<slug>.md` with the record's fields as YAML frontmatter
+and its review body underneath.
+
+**Syntax:** `grove migrate markdown-records [--check]`
+
+| Option | Description |
+|---|---|
+| `--check` | Write nothing; list what would change and exit 1 while YAML records remain. |
+
+For each `paths.recordsDir/<slug>.yml`:
+
+- **Body**: the file its `content:` points at, byte-for-byte after the
+  frontmatter. A record with no pointer gets frontmatter and an empty body.
+- **Frontmatter**: every field, in a fixed order (what the record is, then
+  links, distribution, tags and review fields, then `source`, `curation`,
+  `scores` and `visibility`). Each field keeps its own text, including
+  comments directly above it. Three fields are dropped because the
+  normalizer derives them identically: `content`, `slug` (when it equals
+  the file name) and `kind` (when it equals the blueprint's kind).
+  Everything else stays, including `links.github` and `visibility`, which
+  nothing derives.
+- **Files**: the `.md` is written, then the `.yml` is deleted.
+  `paths.decisions`, `paths.overrides` and the GitHub cache are not
+  touched.
+
+A record is left as YAML, with the reason printed, when:
+
+- its target `.md` exists but is not its own body (a notes file no record
+  points at stays untouched, and the loader keeps ignoring it);
+- its body lives under another name, or has frontmatter of its own;
+- it still carries inline `github` / `health` (run `grove migrate github-cache`
+  first);
+- the Markdown file would not read back as the same fields and body (for
+  example frontmatter over 198 lines).
+
+The command exits 1 when any record is left as YAML. Re-running converts
+nothing new.
+
+```
+[migrate markdown-records] data/records/immich.yml → content/records/immich.md (dropped content, slug, kind)
+[migrate markdown-records] kept data/records/utm.yml: content/records/utm.md already exists and is not this record's body
+[migrate markdown-records] moved 98 record(s) to Markdown; 4 left as YAML.
 ```
 
 ## `grove sync contributors`

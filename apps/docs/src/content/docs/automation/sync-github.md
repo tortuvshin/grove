@@ -281,6 +281,61 @@ The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on 
 
 `fetchGithubMetadata` resolves its token from `GH_TOKEN` first and `GITHUB_TOKEN` second, so either name works — including a personal access token you set yourself for higher rate limits.
 
+## Channel and media candidates
+
+With `integrations.github: { metadata: true, candidates: true }`,
+`grove sync github` also looks for review material for each record it
+refreshed. The results go into the record's cache entry under
+`candidates`:
+
+- **Channels** — each channel is shaped like a `distribution.channels[]` entry, with `facts` and `provenance` added:
+  - F-Droid, when an Android app module's Gradle `applicationId` is in F-Droid's package API.
+  - Flathub, when an AppStream metainfo file in the repository names an app id that Flathub has. Without metainfo, a Flathub search result counts only when its AppStream URLs point back at the repository.
+  - Repology packages: Homebrew, AUR, Arch, Nixpkgs, Scoop, winget, Chocolatey, Snapcraft, Flathub and F-Droid. Repology projects are matched by name only, so `facts.versionMatchesRelease` says whether a package version equals the latest release tag.
+  - GitHub Releases whose latest release ships installable assets, one entry per platform.
+- **Logos:**
+  - fastlane `images/icon.png`
+  - AppStream `<icon type="remote">`
+  - the best icon of a web app manifest
+  - `logo*` / `icon*` files in asset directories
+- **Screenshots** — fastlane `phoneScreenshots/`, in one locale with en-US first, and AppStream `<screenshots>`.
+
+The following are never picked:
+
+- README images
+- anything under `node_modules`, `vendor`, `Pods`, `docs`, `.github`, tests or examples
+- banners, social cards, splash screens and previews
+- a file name repeated across three or more packages (plugin icons)
+- raster files under 128 px
+
+Every candidate carries `provenance: { source, url, fetchedAt }`. Files in the repository are pinned to a commit permalink and carry their `blobSha`, byte size and, from a 16 KB range request, their format and pixel size. Git LFS pointers are followed to `media.githubusercontent.com`. Nothing is downloaded in full, and nothing is hotlinked: a reviewer copies an approved file into the site.
+
+**Bounded and never fatal:**
+
+- Each record may make at most `CANDIDATE_REQUESTS_PER_RECORD` (24) requests.
+- A host that answers 429, or fails twice in a row, is skipped for the rest of the run.
+- Repology is asked at most once per second, with a `grove/<version>` User-Agent.
+- A failed lookup is written to `partialFailures` with `source: candidates`. It never makes the entry stale and never fails the record.
+- The candidates a failed source found last time are kept.
+- An unchanged candidate keeps its previous `fetchedAt`, and a repository file keeps its permalink while its blob is unchanged, so a re-run does not rewrite the cache.
+
+**Review.** Run [`grove candidates`](/reference/cli/#grove-candidates) to list pending candidates. Approve or reject one in `paths.decisions`:
+
+```yaml
+candidates:
+  - id: immich            # record slug
+    kind: logo            # channel | logo | screenshot
+    url: https://github.com/immich-app/immich/blob/<commit>/mobile/android/fastlane/metadata/android/en-US/images/icon.png
+    verdict: approved     # approved | rejected
+    reason: The app's own launcher icon, as shipped to F-Droid.
+    reviewedBy: maintainer
+    reviewedAt: 2026-09-26
+    provenance: { source: fastlane, url: <as listed>, fetchedAt: <as listed> }
+```
+
+`grove check` reports a verdict whose `id` matches no record
+(`unknown_candidate_review_record`). Approval never edits the record; copying the channel or file into it stays a curator's change.
+
 ## What is NOT synced
 
 - **Releases** — only `latestReleaseAt` (the single latest release's `published_at`) is written; no release list or notes.

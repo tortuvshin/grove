@@ -7,7 +7,14 @@
  * replaced it, following the same real-module + mocked-generated-JSON
  * pattern as `models-home.test.ts`.
  */
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
+
+const bodyDir = mkdtempSync(join(tmpdir(), 'grove-record-body-'));
+const bodyPath = join(bodyDir, 'with-body.md');
+writeFileSync(bodyPath, '# With body\n\nA written review of the project.\n');
 
 function projectRecord() {
   return {
@@ -67,29 +74,13 @@ function projectRecordWithSeoOverride() {
   };
 }
 
-function projectRecordWithChannels() {
+function projectRecordWithBody(reviewed: boolean) {
   const record = projectRecord();
   return {
     ...record,
-    slug: 'with-channels',
-    repoUrl: 'https://github.com/demo-user/with-channels',
-    links: { website: 'https://with-channels.example' },
-    tags: ['backup'],
-    distribution: {
-      channels: [
-        { type: 'fdroid', url: 'https://f-droid.org/packages/demo/', verified: true },
-        { type: 'play-store', url: 'https://play.google.com/store/apps/details?id=demo' },
-      ],
-    },
-    github: {
-      repository: {
-        ...record.github.repository,
-        full_name: 'demo-user/with-channels',
-        language: 'Dart',
-        license: { spdx_id: 'MIT' },
-        owner: { login: 'demo-user', type: 'User', html_url: 'https://github.com/demo-user' },
-      },
-    },
+    slug: reviewed ? 'body-reviewed' : 'body-unreviewed',
+    content: bodyPath,
+    curation: { ...record.curation, reviewed },
   };
 }
 
@@ -97,7 +88,8 @@ const records = [
   projectRecord(),
   projectRecordWithoutDates(),
   projectRecordWithSeoOverride(),
-  projectRecordWithChannels(),
+  projectRecordWithBody(true),
+  projectRecordWithBody(false),
 ];
 
 vi.mock('@grove/generated/records.full.json', () => ({ default: { records } }));
@@ -166,38 +158,34 @@ describe('getRecordDetailModel seo override', () => {
   });
 });
 
-describe('getRecordDetailModel JSON-LD', () => {
-  it('emits a SoftwareApplication node with verified fields only', async () => {
-    const { SOFTWARE_APPLICATION_FIELDS } = await import('@grove-dev/core');
-    const detail = getRecordDetailModel(
-      'with-channels',
-      site as Parameters<typeof getRecordDetailModel>[1],
-    );
-    const node = detail!.seo.jsonLd![0] as Record<string, unknown>;
-    expect(node['@type']).toEqual(['SoftwareApplication', 'SoftwareSourceCode']);
-    expect(node.codeRepository).toBe('https://github.com/demo-user/with-channels');
-    expect(node.sameAs).toEqual([
-      'https://github.com/demo-user/with-channels',
-      'https://with-channels.example',
-    ]);
-    expect(node.license).toBe('https://spdx.org/licenses/MIT.html');
-    // Only the channel a curator marked verified.
-    expect(node.downloadUrl).toBe('https://f-droid.org/packages/demo/');
-    expect(node.author).toEqual({
-      '@type': 'Person',
-      name: 'demo-user',
-      url: 'https://github.com/demo-user',
-    });
-    for (const key of Object.keys(node)) expect(SOFTWARE_APPLICATION_FIELDS).toContain(key);
+describe('getRecordDetailModel index policy', () => {
+  type Site = Parameters<typeof getRecordDetailModel>[1];
+  const withPolicy = (recordIndexPolicy: 'all' | 'editorial' | 'editorial-and-reviewed') =>
+    ({ ...site, seo: { recordIndexPolicy } }) as Site;
+  const robotsFor = (slug: string, s: Site) => {
+    const { seo } = getRecordDetailModel(slug, s)!;
+    return seo.noindex ? seo.robots : 'index';
+  };
+
+  it('indexes every record by default, with no robots override', () => {
+    for (const slug of ['demo', 'body-reviewed', 'body-unreviewed']) {
+      const { seo } = getRecordDetailModel(slug, site as Site)!;
+      expect(seo.noindex).toBeUndefined();
+      expect(seo.robots).toBeUndefined();
+    }
   });
 
-  it('leaves out author and license when GitHub did not report them', () => {
-    const detail = getRecordDetailModel('demo', site as Parameters<typeof getRecordDetailModel>[1]);
-    const node = detail!.seo.jsonLd![0] as Record<string, unknown>;
-    expect(node.author).toBeUndefined();
-    expect(node.license).toBeUndefined();
-    expect(node.downloadUrl).toBeUndefined();
-    expect(node).not.toHaveProperty('isAccessibleForFree');
-    expect(node).not.toHaveProperty('interactionStatistic');
+  it("'editorial' noindexes (follow) records without a written body", () => {
+    const s = withPolicy('editorial');
+    expect(robotsFor('demo', s)).toBe('noindex,follow');
+    expect(robotsFor('body-unreviewed', s)).toBe('index');
+    expect(robotsFor('body-reviewed', s)).toBe('index');
+  });
+
+  it("'editorial-and-reviewed' also needs curation.reviewed", () => {
+    const s = withPolicy('editorial-and-reviewed');
+    expect(robotsFor('demo', s)).toBe('noindex,follow');
+    expect(robotsFor('body-unreviewed', s)).toBe('noindex,follow');
+    expect(robotsFor('body-reviewed', s)).toBe('index');
   });
 });

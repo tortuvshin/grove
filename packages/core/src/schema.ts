@@ -1,5 +1,6 @@
 import { parse, stringify } from 'yaml';
 import { z } from 'zod';
+import { type CandidateReview, candidateReviewSchema } from './candidate-schema.js';
 import { DEFAULT_FACETS, FACET_IDS } from './directory-facets.js';
 
 // ──────────────────────────────────────────────────────────────────────
@@ -246,9 +247,17 @@ export const decisionSchema = z.object({
   }),
 });
 
+/**
+ * `paths.decisions`: a list of decisions, or an object with
+ * `decisions:` and, since candidates exist, `candidates:` — the
+ * reviewer's verdicts on channel and media candidates.
+ */
 export const decisionsFileSchema = z.union([
   z.array(decisionSchema),
-  z.object({ decisions: z.array(decisionSchema) }),
+  z.object({
+    decisions: z.array(decisionSchema).default([]),
+    candidates: z.array(candidateReviewSchema).default([]),
+  }),
 ]);
 
 // ──────────────────────────────────────────────────────────────────────
@@ -604,6 +613,12 @@ export const githubIntegrationSchema = z.union([
     metadata: z.boolean().default(false),
     contributors: z.boolean().default(false),
     health: z.boolean().default(false),
+    /**
+     * Collect channel and media candidates (F-Droid, Flathub,
+     * Repology, GitHub Releases; logos and screenshots) into the sync
+     * cache. Opt-in only: the blanket `github: true` leaves it off.
+     */
+    candidates: z.boolean().default(false),
   }),
 ]);
 
@@ -612,6 +627,7 @@ export interface GithubIntegrationFlags {
   metadata: boolean;
   contributors: boolean;
   health: boolean;
+  candidates: boolean;
 }
 
 /**
@@ -623,12 +639,15 @@ export function normalizeGithubIntegration(
   value: z.infer<typeof githubIntegrationSchema> | undefined,
 ): GithubIntegrationFlags {
   if (typeof value === 'boolean') {
-    return { metadata: value, contributors: value, health: value };
+    // Candidates make extra requests to third-party indexes, so a
+    // blanket `true` written before they existed does not turn them on.
+    return { metadata: value, contributors: value, health: value, candidates: false };
   }
   return {
     metadata: value?.metadata ?? false,
     contributors: value?.contributors ?? false,
     health: value?.health ?? false,
+    candidates: value?.candidates ?? false,
   };
 }
 
@@ -705,6 +724,37 @@ export const readmeConfigSchema = z.object({
   entryLinkTarget: z.enum(['detail', 'homepage', 'repository']).default('homepage'),
 });
 
+/** Values of `seo.recordIndexPolicy` — see `index-policy.ts`. */
+export const RECORD_INDEX_POLICIES = ['all', 'editorial', 'editorial-and-reviewed'] as const;
+/** Values of `seo.collectionIndexPolicy` / `seo.taxonomyIndexPolicy`. */
+export const LISTING_INDEX_POLICIES = ['all', 'editorial'] as const;
+
+/**
+ * Which generated pages are offered to search engines. Every policy
+ * defaults to `all` (today's behaviour). A page a policy excludes
+ * still renders, with `noindex,follow`, and is left out of the sitemap.
+ */
+const seoConfigSchema = z
+  .object({
+    /**
+     * Record detail pages. `editorial`: only records with a written
+     * Markdown body. `editorial-and-reviewed`: a body and
+     * `curation.reviewed: true`.
+     */
+    recordIndexPolicy: z.enum(RECORD_INDEX_POLICIES).default('all'),
+    /**
+     * Collection pages. `editorial`: only collections with an
+     * `editorial.introduction` (or a Markdown `content` body).
+     */
+    collectionIndexPolicy: z.enum(LISTING_INDEX_POLICIES).default('all'),
+    /**
+     * Category and stack pages. `editorial`: only terms with a
+     * `description` in `data/taxonomy/*.yml`.
+     */
+    taxonomyIndexPolicy: z.enum(LISTING_INDEX_POLICIES).default('all'),
+  })
+  .prefault({});
+
 export const groveConfigSchema = z.object({
   blueprint: blueprintSchema.default('project-directory'),
 
@@ -737,6 +787,9 @@ export const groveConfigSchema = z.object({
      */
     twitter: z.string().optional(),
   }),
+
+  /** Search-engine index policy — see `seoConfigSchema`. */
+  seo: seoConfigSchema,
 
   analytics: z
     .object({
@@ -966,6 +1019,11 @@ export function unwrapHealth(value: HealthFile): HealthEntry[] {
 
 export function unwrapDecisions(value: DecisionsFile): Decision[] {
   return Array.isArray(value) ? value : value.decisions;
+}
+
+/** Candidate verdicts from a decisions file; the list form has none. */
+export function unwrapCandidateReviews(value: DecisionsFile): CandidateReview[] {
+  return Array.isArray(value) ? [] : value.candidates;
 }
 
 export function unwrapOverrides(value: OverridesFile): Override[] {

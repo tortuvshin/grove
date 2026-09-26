@@ -229,6 +229,39 @@ describe('getCollectionPageModel', () => {
   });
 });
 
+describe('getCollectionPageModel index policy', () => {
+  const editorialSite = { seo: { collectionIndexPolicy: 'editorial' as const } };
+
+  it("indexes a non-empty collection by default and under 'all'", () => {
+    for (const site of [undefined, { seo: { collectionIndexPolicy: 'all' as const } }]) {
+      const model = getCollectionPageModel(collection, entries, [collection], site);
+      expect(model.seo.noindex).toBe(false);
+      expect(model.seo.robots).toBeUndefined();
+    }
+  });
+
+  it("'editorial' noindexes (follow) a collection without an introduction", () => {
+    const model = getCollectionPageModel(collection, entries, [collection], editorialSite);
+    expect(model.seo.noindex).toBe(true);
+    expect(model.seo.robots).toBe('noindex,follow');
+  });
+
+  it("'editorial' keeps a collection with an introduction indexable", () => {
+    const introduced: Collection = {
+      ...collection,
+      editorial: { ...collection.editorial, introduction: 'Why these four, and for whom.' },
+    };
+    const model = getCollectionPageModel(introduced, entries, [introduced], editorialSite);
+    expect(model.seo.noindex).toBe(false);
+  });
+
+  it('leaves an empty collection on its own noindex rule', () => {
+    const model = getCollectionPageModel(emptyCollection, entries, [collection], editorialSite);
+    expect(model.seo.noindex).toBe(true);
+    expect(model.seo.robots).toBeUndefined();
+  });
+});
+
 describe('getCollectionIndexModel', () => {
   it('counts entries per collection', () => {
     const model = getCollectionIndexModel([collection, otherCollection], entries);

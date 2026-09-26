@@ -50,6 +50,7 @@ grove check --strict   # also fail when there are warnings
 | `github_sync_stale` | warning | One warning for all records whose cache entry is stale: the newest `partialFailures[].at` is later than `lastSuccessAt`, or `lastSuccessAt` is missing or older than `sync.github.maxAgeDays`. Their health resolves as `status: unknown` (`staleReason: sync_stale`). Run `grove sync github`. |
 | `decisions_file_invalid` | error | `data/decisions.yml` exists but fails to parse against its schema. |
 | `unknown_decision_record` | error | An entry in `data/decisions.yml` references a slug that has no matching record. |
+| `unknown_candidate_review_record` | error | A `candidates:` verdict in `data/decisions.yml` references a slug that has no matching record. |
 | `collection_invalid` | error | A `data/collections/*.yml` file is not a YAML mapping or fails the collection schema — a missing `title`, an unknown `ranking.preset`, a string `minStars`. One issue per failing field. |
 | `duplicate_collection_slug` | error | Two collection files declare the same `slug`. |
 | `collection_slug_mismatch` | warning | A collection's `slug` differs from its file name. |

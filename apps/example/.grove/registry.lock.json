@@ -277,8 +277,8 @@
     {
       "target": "src/layouts/base-layout.astro",
       "source": "default/layouts/base-layout.astro",
-      "hash": "sha256-77f05661fc2646ad874535e8332c611f7c07404c5dc1b7775ff407e8df97d042",
-      "bytes": 14139
+      "hash": "sha256-491b61c94635e74e2828894f43f00be7d19cf445ed87c694fc2f827913ba0cac",
+      "bytes": 14280
     },
     {
       "target": "src/layouts/container.astro",
@@ -307,8 +307,8 @@
     {
       "target": "src/layouts/seo.astro",
       "source": "default/layouts/seo.astro",
-      "hash": "sha256-1f0734be5b44338a6bfb84429a13f4e6fae7a05b0c13d3d9b7dd8574345b6727",
-      "bytes": 6807
+      "hash": "sha256-d714d9244ebd58bc84c6ee7bb8bfd434dc6addf5d97229238fdc3b669e2b87fd",
+      "bytes": 7826
     },
     {
       "target": "src/lib/classnames.ts",
@@ -337,8 +337,8 @@
     {
       "target": "src/pages/[slug]/[recordSlug].astro",
       "source": "default/pages/[slug]/[recordSlug].astro",
-      "hash": "sha256-66a399b4dd8a3b68a138853b90c2b62dbd52c67ac6eb8e42cf3a6aa6031e2f4d",
-      "bytes": 3502
+      "hash": "sha256-58602dae0f42593f9c31a80aa5f85b68d3d0103921f018a9a3c8308711ee5a04",
+      "bytes": 3548
     },
     {
       "target": "src/pages/[slug]/index.astro",
@@ -379,8 +379,8 @@
     {
       "target": "src/pages/categories/[name].astro",
       "source": "default/pages/categories/[name].astro",
-      "hash": "sha256-0c178aee34f823e41ee03a94fc11ff9c81ce6705285eabe14bc98ad2ec159104",
-      "bytes": 1336
+      "hash": "sha256-7504ab4af67f2374eade085a863f212fc49d4ab78130a518988f935a186c3fad",
+      "bytes": 1394
     },
     {
       "target": "src/pages/categories/index.astro",
@@ -391,8 +391,8 @@
     {
       "target": "src/pages/collections/[slug].astro",
       "source": "default/pages/collections/[slug].astro",
-      "hash": "sha256-3c1a3c551cff7df784bc4f462463f9c0d0e02be1939fb994023fa011e5556889",
-      "bytes": 1577
+      "hash": "sha256-a7d2cfda527dc53c0bd9d9dc7605c6d214be6345da3efdf74b77ad08fe0d6202",
+      "bytes": 1605
     },
     {
       "target": "src/pages/collections/index.astro",
@@ -427,8 +427,8 @@
     {
       "target": "src/pages/stacks/[name].astro",
       "source": "default/pages/stacks/[name].astro",
-      "hash": "sha256-b6da615d1a723b485db0c43e6f910de43b3cbe2d845f9aab382f634846aa3a04",
-      "bytes": 1301
+      "hash": "sha256-4f7f1bb5c080354561f895fecbcf945df06826583e55c44272d39186dbf39e1b",
+      "bytes": 1359
     },
     {
       "target": "src/pages/stacks/index.astro",

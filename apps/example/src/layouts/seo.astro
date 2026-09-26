@@ -20,6 +20,17 @@
  *
  * Noindex is opt-in via the `noindex` prop. By default everything is
  * indexable; noindex targets today are /submit, /404, and /empty.
+ * `robots` sets the exact value instead — page models pass
+ * `noindex,follow` for pages the index policy (`seo.*IndexPolicy`)
+ * excludes, so their links are still followed.
+ *
+ * Any URL with a query string (`?q=`, `?sort=`, facet filters) is a
+ * filtered view of a static page: the server sends the base page's
+ * HTML, canonical included. A small inline script switches the robots
+ * meta to `noindex,follow` on those URLs so the variant itself is not
+ * indexed; Google renders JavaScript and honours a robots meta the page
+ * sets at runtime. A server-side `X-Robots-Tag` is stronger where the
+ * host allows it (see the SEO docs).
  */
 import { type JsonLdNode, siteSchema, validateJsonLd } from '@grove-dev/core';
 
@@ -46,7 +57,9 @@ interface Props {
   type?: 'website' | 'article' | 'profile';
   /** Set true to add noindex,nofollow. */
   noindex?: boolean;
-  /** Extra JSON-LD payload (object) — typically SoftwareApplication on item pages. */
+  /** Exact robots meta value (e.g. "noindex,follow"); wins over `noindex`. */
+  robots?: string;
+  /** Extra JSON-LD payload (object) — typically SoftwareSourceCode on item pages. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -59,8 +72,11 @@ const {
   imageAlt,
   type = 'website',
   noindex = false,
+  robots,
   jsonLd,
 } = Astro.props;
+const robotsContent =
+  robots ?? (noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large');
 
 // `Astro.site` is required for canonical / OG / Twitter / JSON-LD URLs to
 // resolve to the consumer's domain. Failing the build (rather than silently
@@ -132,11 +148,13 @@ const perPageLdJson = perPageNodes ? JSON.stringify(perPageNodes) : null;
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
-{noindex ? (
-  <meta name="robots" content="noindex,nofollow" />
-) : (
-  <meta name="robots" content="index,follow,max-image-preview:large" />
-)}
+<meta name="robots" content={robotsContent} />
+<!-- Filtered / parameter URLs: noindex the variant, canonical stays the base page. -->
+<script is:inline data-grove-param-robots>
+  if (location.search) {
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', 'noindex,follow');
+  }
+</script>
 
 <!-- Open Graph -->
 <meta property="og:type" content={type} />

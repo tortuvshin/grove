@@ -62,6 +62,13 @@ export default defineConfig({
     googleAnalyticsId: "G-XXXXXXXXXX",
   },
 
+  // Index only pages someone wrote or reviewed (default: "all").
+  seo: {
+    recordIndexPolicy: "editorial-and-reviewed",
+    collectionIndexPolicy: "editorial",
+    taxonomyIndexPolicy: "editorial",
+  },
+
   nav: [
     { label: "Home", href: "/" },
     { label: "Browse", href: "/projects" },
@@ -205,6 +212,21 @@ is supported today. Determines the record kind (`project` /
 |---|---|---|---|
 | `googleAnalyticsId` | `string`, must match `/^G-[A-Z0-9]+$/` | `undefined` | GA4 measurement ID (e.g. `G-XXXXXX`). Wired into `BaseLayout` as `site.analytics.googleAnalyticsId`; a per-page `gaId` prop can override it. Omit both to ship without Google Analytics. |
 
+### `seo`
+
+**Type:** `object` (optional)
+**Default:** every policy `"all"`
+
+Which generated pages are offered to search engines. A page a policy
+excludes still renders, with `noindex,follow`, and is left out of the
+sitemap. See [SEO & social → Index policy](/outputs/seo/#index-policy).
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `recordIndexPolicy` | `"all" \| "editorial" \| "editorial-and-reviewed"` | `"all"` | Record detail pages. `editorial`: a non-empty Markdown body. `editorial-and-reviewed`: a body and `curation.reviewed: true`. |
+| `collectionIndexPolicy` | `"all" \| "editorial"` | `"all"` | Collection pages. `editorial`: an `editorial.introduction` or a Markdown `content` body. |
+| `taxonomyIndexPolicy` | `"all" \| "editorial"` | `"all"` | Category and stack pages. `editorial`: the term has a `description` in `data/taxonomy/*.yml`. |
+
 ### `nav`
 
 **Type:** `Array<{ label: string; href: string }>`
@@ -280,7 +302,7 @@ any component.
 
 ### `integrations.github`
 
-**Type:** `boolean | { metadata?: boolean; contributors?: boolean; health?: boolean }`
+**Type:** `boolean | { metadata?: boolean; contributors?: boolean; health?: boolean; candidates?: boolean }`
 **Default:** `false`
 
 Enables the GitHub integration. Three modes:
@@ -288,8 +310,13 @@ Enables the GitHub integration. Three modes:
 - `false` — disabled. No GitHub API calls.
 - `true` — enable all sub-features (equivalent to
   `{ metadata: true, contributors: true, health: true }`).
-- `{ metadata, contributors, health }` — pick which sub-features
-  to enable.
+- `{ metadata, contributors, health, candidates }` — pick which
+  sub-features to enable.
+
+`candidates` is opt-in only: a blanket `true` leaves it off. When set,
+`grove sync github` also collects channel and media candidates into the
+cache. Nothing is rendered or written into records. See
+[Channel and media candidates](/automation/sync-github/#channel-and-media-candidates).
 
 `metadata` and `contributors` are real gates: with either set to `false`,
 the matching `grove sync` target prints `disabled by
