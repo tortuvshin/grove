@@ -7,7 +7,10 @@ import {
   focusIndexAfterRender,
   hrefForGroupSelection,
   resultsAnnouncement,
+  scopedGroups,
+  searchWithoutScope,
   showResultsLabel,
+  withoutScope,
 } from './live-filters.ts';
 
 describe('hrefForGroupSelection', () => {
@@ -226,5 +229,50 @@ describe('focusIndexAfterRender', () => {
 
   it('clamps a negative index to the first item', () => {
     expect(focusIndexAfterRender(-1, 2)).toBe(0);
+  });
+});
+
+describe('scope', () => {
+  // Same table as core's DIRECTORY_FILTER_KEYS.
+  const keys = {
+    stacks: 'stack',
+    platforms: 'platform',
+    categories: 'category',
+    tags: 'tag',
+    licenses: 'license',
+  };
+
+  it('lists only the groups that carry values', () => {
+    expect(scopedGroups({ stacks: ['flutter'], categories: [] })).toEqual(['stacks']);
+    expect(scopedGroups(undefined)).toEqual([]);
+    expect(scopedGroups(null)).toEqual([]);
+  });
+
+  it('removes the scoped group from URL filters and keeps the rest', () => {
+    const filters = { q: 'notes', stacks: ['react'], platforms: ['android'] };
+    expect(withoutScope(filters, { stacks: ['flutter'] })).toEqual({
+      q: 'notes',
+      platforms: ['android'],
+    });
+    // The input is not mutated.
+    expect(filters.stacks).toEqual(['react']);
+  });
+
+  it('returns the same filters when there is no scope', () => {
+    const filters = { stacks: ['go'] };
+    expect(withoutScope(filters, undefined)).toBe(filters);
+    expect(withoutScope(filters, {})).toBe(filters);
+  });
+
+  it('strips scoped parameters from a query string', () => {
+    expect(
+      searchWithoutScope('?stack=react&platform=android&stack=go', { stacks: ['flutter'] }, keys),
+    ).toBe('?platform=android');
+    expect(searchWithoutScope('?category=games', { categories: ['games'] }, keys)).toBe('');
+  });
+
+  it('reports no change when the query has no scoped parameter', () => {
+    expect(searchWithoutScope('?platform=android', { stacks: ['flutter'] }, keys)).toBeNull();
+    expect(searchWithoutScope('?stack=go', undefined, keys)).toBeNull();
   });
 });

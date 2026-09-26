@@ -148,8 +148,8 @@
       "name": "taxonomy",
       "type": "registry:block",
       "title": "Taxonomy pages",
-      "description": "Browse-by-category, -stack, and -license: the three index/detail route pairs, the shared list body, and the stack/category grids the home page also renders.",
-      "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui"],
+      "description": "Browse-by-category, -stack, and -license: the three index/detail route pairs, the shared list body (the browse engine with a fixed scope, so each term page has search, facets and sort), and the stack/category grids the home page also renders.",
+      "registryDependencies": ["@grove/shell", "@grove/project-card", "@grove/ui", "@grove/browse"],
       "files": [
         {
           "path": "default/pages/categories/index.astro",
@@ -323,6 +323,11 @@
           "path": "default/components/grove/directory-browse.astro",
           "type": "registry:component",
           "target": "~/src/components/grove/directory-browse.astro"
+        },
+        {
+          "path": "default/components/grove/directory-browse-view.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/directory-browse-view.astro"
         },
         {
           "path": "default/components/grove/directory-index-client.astro",

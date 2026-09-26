@@ -46,10 +46,10 @@ The registry groups its files into 12 feature-level items plus `default`, which 
 | `@grove/ui` | UI primitives — `button`, `badge`, `empty-state`, `filter-drawer`, `page-header`, `search-field` — plus `lib/classnames.ts`, the class builders that keep server-rendered and client-rebuilt controls byte-identical. |
 | `@grove/shell` | The document shell every page renders inside: `base-layout`, `header`, `footer`, `container`, `section-header`, `seo`, `theme-toggle`, `powered-by`, and `styles/system.css` (design tokens, light/dark theme, Tailwind theme). |
 | `@grove/project-card` | The canonical record card every listing surface renders through — `project-card`, `card-grid`, `card-icon`, the brand-mark `icon` component, and `lib/icon-kinds.ts` + `lib/icon-registry.ts`. |
-| `@grove/taxonomy` | Browse-by-category, -stack, and -license: `categories/`, `stacks/`, and `licenses/[name]` routes, the shared `taxonomy-list` body, and the `stack-grid` / `category-grid` the home page also renders. |
+| `@grove/taxonomy` | Browse-by-category, -stack, and -license: `categories/`, `stacks/`, and `licenses/[name]` routes, the shared `taxonomy-list` body (the browse engine scoped to the term, so it depends on `@grove/browse`), and the `stack-grid` / `category-grid` the home page also renders. |
 | `@grove/collections` | Curated and generated collections: `collections/` index and detail routes, `collection-index`, `collection-page`, `collection-card`, `collection-row`, and `collection-teaser`. |
 | `@grove/home` | The landing route (`pages/index.astro`) with `hero`, `why-this-exists`, `pipeline-strip`, `record-section` (trending / new / established), `contributors-grid`, `original-collection`, and `final-cta`. |
-| `@grove/browse` | The list/discovery page and its paginated routes (`[slug]/index`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json.ts`) with `directory-browse`, `directory-index-client`, `refine-panel`, `filter-group-menu`, `filter-options`, `smart-lens-tabs`, `index-row`, and `pagination`, plus `lib/live-filters.ts` (the tested URL, history-session, and label logic behind live filtering). |
+| `@grove/browse` | The list/discovery page and its paginated routes (`[slug]/index`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json.ts`) with `directory-browse`, `directory-browse-view`, `directory-index-client`, `refine-panel`, `filter-group-menu`, `filter-options`, `smart-lens-tabs`, `index-row`, and `pagination`, plus `lib/live-filters.ts` (the tested URL, history-session, and label logic behind live filtering). |
 | `@grove/record` | The per-record route (`[slug]/[recordSlug]`) with `record-header`, `record-sidebar`, `editorial-summary`, `table-of-contents`, `markdown-body`, and `language-breakdown`. |
 | `@grove/submit` | `pages/submit.astro` and `submission-client` — fetch a repository, validate against the taxonomy, draft a record YAML for a pull request. |
 | `@grove/about` | `pages/about.astro` — the narrative about route, overridable from `content/pages/about.md`. |
@@ -83,7 +83,7 @@ Domain UI components rendered by Grove's pages. Each accepts a view-model-shaped
 | `language-breakdown.astro` | Code-composition bar + legend for the record detail sidebar. |
 | `editorial-summary.astro` | "Best for" + "Consider before using" cards on the record detail page. |
 | `table-of-contents.astro` | Collapsible TOC with scroll-spy and smooth scroll. |
-| `directory-index-client.astro` | Client controller for the browse page (filter, sort, paginate, chips). Filters apply live. Changes made while a popover or the drawer is open share one history entry, and the result count is announced through a debounced polite live region. |
+| `directory-index-client.astro` | Client controller for the browse page (filter, sort, paginate, chips). Filters apply live. With a `scope`, the record index is narrowed to it before anything else, and the scope never becomes a chip, a facet, or a URL parameter. Changes made while a popover or the drawer is open share one history entry, and the result count is announced through a debounced polite live region. |
 | `submission-client.astro` | Submit-form client (GitHub fetch + YAML preview). |
 | `refine-panel.astro` | Facet dropdowns used by the browse page. Every change applies at once and the popover stays open. There is no Apply button. |
 | `filter-group-menu.astro` / `filter-options.astro` | Single facet dropdown + checkbox list. |
@@ -91,8 +91,9 @@ Domain UI components rendered by Grove's pages. Each accepts a view-model-shaped
 | `powered-by.astro` | "Powered by Grove" inline SVG attribution. |
 | `smart-lens-tabs.astro` | Horizontal curated lens tabs (server-rendered). |
 | `why-this-exists.astro` | Three-point "why" section with icons. |
-| `directory-browse.astro` | Browse-page body shared by the unfiltered and paginated routes — search/sort, facets, active-filter chips, results grid, pagination. |
-| `taxonomy-list.astro` | Shared body for the three taxonomy pages (`stacks/[name]`, `categories/[name]`, `licenses/[name]`) — heading, count, card grid, empty state. |
+| `directory-browse.astro` | Browse page shared by the unfiltered and paginated routes: the page header, lens tabs and submit call to action around `directory-browse-view`. |
+| `directory-browse-view.astro` | The browse engine's body — search/sort, facets, active-filter chips, results grid, pagination, and the client controller. Takes an optional immutable `scope` (e.g. `{ stacks: ['flutter'] }`) and the `pathPrefix` its URLs live on, which is how taxonomy pages get filters in their own query string. A scoped list is one page long. |
+| `taxonomy-list.astro` | Shared body for the three taxonomy pages (`stacks/[name]`, `categories/[name]`, `licenses/[name]`) — heading, the scoped `directory-browse-view` (or an empty state for a term with no records), and the back link. |
 | `pipeline-strip.astro` | Optional "how this site works" home-page section — source file → build → published outputs. Sample record is illustrative, not live data. |
 
 ## Primitives (`packages/registry/default/components/ui/`)

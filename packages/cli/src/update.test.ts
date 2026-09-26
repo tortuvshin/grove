@@ -32,7 +32,7 @@ describe('grove update', () => {
     const cwd = await scaffold();
     const summary = await runUpdate({ cwd, from: resolveBundledItemPath(), check: true });
     expect(summary.exitCode).toBe(0);
-    expect(summary.plan.unchanged).toHaveLength(73);
+    expect(summary.plan.unchanged).toHaveLength(74);
     expect(summary.plan.upstream_changed).toEqual([]);
     expect(summary.plan.new).toEqual([]);
     expect(summary.plan.locally_modified).toEqual([]);
@@ -72,7 +72,7 @@ describe('grove update', () => {
     expect(summary.applied).toEqual([UNTOUCHED]);
     // The lockfile now exists and omits nothing the project has.
     const lock = JSON.parse(await readFile(join(cwd, '.grove/registry.lock.json'), 'utf8'));
-    expect(lock.files.length).toBe(73);
+    expect(lock.files.length).toBe(74);
   });
 
   it('adoption is idempotent — the second run reports no adoption and no work', async () => {
@@ -82,7 +82,7 @@ describe('grove update', () => {
 
     const second = await runUpdate({ cwd, from: resolveBundledItemPath(), adopt: true });
     expect(second.adopted).toBeUndefined();
-    expect(second.plan.unchanged).toHaveLength(73);
+    expect(second.plan.unchanged).toHaveLength(74);
     expect(second.applied).toEqual([]);
   });
 
@@ -145,7 +145,7 @@ describe('grove update', () => {
     expect(summary.source).toBe(from);
     expect(summary.plan.upstream_changed).toEqual([UNTOUCHED]);
     expect(summary.plan.conflict).toEqual([EDITED]);
-    expect(summary.plan.unchanged).toHaveLength(71);
+    expect(summary.plan.unchanged).toHaveLength(72);
     expect(summary.applied).toEqual([UNTOUCHED]);
     expect(summary.preserved).toEqual([EDITED]);
 
@@ -157,7 +157,7 @@ describe('grove update', () => {
     // we preserved. Recording the upstream hash for a file that was never
     // written would make the lock claim content that is not on disk.
     const lock = JSON.parse(await readFile(join(cwd, '.grove/registry.lock.json'), 'utf8'));
-    expect(lock.fileCount).toBe(73);
+    expect(lock.fileCount).toBe(74);
     expect(lock.files.find((f: { target: string }) => f.target === UNTOUCHED).hash).toBe(
       sha256(newButton),
     );
@@ -174,7 +174,7 @@ describe('grove update', () => {
     expect(again.exitCode).toBe(2);
     expect(again.plan.conflict).toEqual([EDITED]);
     expect(again.plan.locally_modified).toEqual([]);
-    expect(again.plan.unchanged).toHaveLength(72);
+    expect(again.plan.unchanged).toHaveLength(73);
   });
 
   it('--force takes the upstream side of a conflict and then settles', async () => {
@@ -198,7 +198,7 @@ describe('grove update', () => {
     const lock = JSON.parse(await readFile(join(cwd, '.grove/registry.lock.json'), 'utf8'));
     expect(lock.scaffoldVersion).toBe('2.0.0');
     const again = await runUpdate({ cwd, from, check: true });
-    expect(again.plan.unchanged).toHaveLength(73);
+    expect(again.plan.unchanged).toHaveLength(74);
   });
 
   it('a local edit upstream never touched is preserved, not overwritten, even with --force', async () => {

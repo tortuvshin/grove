@@ -34,6 +34,8 @@ const model = getTaxonomyPageModel('stacks', name, displayName, siteConfig);
     eyebrow="Stack"
     displayName={displayName}
     lede={`Browse ${itemLabelPlural()} in this directory built with ${displayName}.`}
-    records={model.records}
+    scope={{ stacks: [name] }}
+    count={model.records.length}
+    pathPrefix={`/stacks/${name}`}
   />
 </BaseLayout>
