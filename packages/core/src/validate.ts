@@ -6,7 +6,11 @@ import { type CollectionSourceRecord, toCollectionEntries } from './collection-e
 import { CollectionFileError, parseCollectionFile } from './collections-io.js';
 import { runCollection } from './collector.js';
 import { readContentFile } from './content-body.js';
-import { loadGithubCache, resolveRecordGithub } from './github-cache.js';
+import {
+  githubSyncFreshnessOptions,
+  loadGithubCache,
+  resolveRecordGithub,
+} from './github-cache.js';
 import { readYamlFile } from './io.js';
 import {
   blueprintKind,
@@ -217,6 +221,9 @@ export async function validateProject(
       severity: 'error',
     });
   }
+  const freshness = githubSyncFreshnessOptions(config);
+  /** Slugs whose cached health resolves as `unknown` because the sync is stale. */
+  const syncStale: string[] = [];
   const slugs = new Set<string>();
   /** Slugs that have a github link and therefore need a health entry. */
   const slugsNeedingHealth = new Set<string>();
@@ -316,7 +323,8 @@ export async function validateProject(
     }
     // Cache wins over a legacy inline copy — but a disagreement between
     // the two is a second source of truth, so say which fields differ.
-    const resolved = resolveRecordGithub(raw, githubCache.entries.get(fileSlug));
+    const resolved = resolveRecordGithub(raw, githubCache.entries.get(fileSlug), freshness);
+    if (resolved.syncStale) syncStale.push(fileSlug);
     if (resolved.conflicts.length > 0) {
       warnings.push({
         code: 'github_cache_mismatch',
@@ -465,6 +473,18 @@ export async function validateProject(
           null,
       });
     }
+  }
+
+  // One warning for the whole run: a broken sync goes stale for every
+  // record at once, and per-record lines would bury everything else.
+  if (syncStale.length > 0) {
+    const shown = syncStale.slice(0, 5).join(', ');
+    const more = syncStale.length > 5 ? ` and ${syncStale.length - 5} more` : '';
+    warnings.push({
+      code: 'github_sync_stale',
+      message: `${syncStale.length} record(s) have a stale GitHub sync (a failure newer than lastSuccessAt, or no success within ${freshness.maxAgeDays} days); their health resolves as status "unknown": ${shown}${more}. Run \`grove sync github\`.`,
+      severity: 'warning',
+    });
   }
 
   for (const slug of githubCache.entries.keys()) {
@@ -720,7 +740,11 @@ export async function loadRecords(
       }
       continue;
     }
-    const record = resolveRecordGithub(raw, githubCache.entries.get(fileSlug)).record;
+    const record = resolveRecordGithub(
+      raw,
+      githubCache.entries.get(fileSlug),
+      githubSyncFreshnessOptions(config),
+    ).record;
     if (!record.kind) record.kind = expectedKind;
     try {
       const parsed = recordsFileSchema.parse(record);

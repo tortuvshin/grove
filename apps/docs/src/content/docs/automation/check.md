@@ -45,6 +45,7 @@ grove check --strict   # also fail when there are warnings
 | `github_cache_invalid` | error | A file in `paths.githubCache` is not valid JSON, fails the cache-entry schema, or its `slug` differs from its file name. The build skips it and falls back to the record's inline blocks. |
 | `github_cache_mismatch` | warning | A record still carries inline `github`/`health` and its cache entry disagrees on stars, forks, `pushed_at`, `archived`, license, or health `status`/`tier`/`visibility`. The cache wins; `grove migrate github-cache` removes the inline copy. |
 | `github_cache_orphan` | warning | A cache file in `paths.githubCache` matches no record (for example, the record was deleted). |
+| `github_sync_stale` | warning | One warning for all records whose cache entry is stale: the newest `partialFailures[].at` is later than `lastSuccessAt`, or `lastSuccessAt` is missing or older than `sync.github.maxAgeDays`. Their health resolves as `status: unknown` (`staleReason: sync_stale`). Run `grove sync github`. |
 | `decisions_file_invalid` | error | `data/decisions.yml` exists but fails to parse against its schema. |
 | `unknown_decision_record` | error | An entry in `data/decisions.yml` references a slug that has no matching record. |
 | `collection_invalid` | error | A `data/collections/*.yml` file is not a YAML mapping or fails the collection schema — a missing `title`, an unknown `ranking.preset`, a string `minStars`. One issue per failing field. |

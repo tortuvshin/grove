@@ -49,7 +49,7 @@ export function pickCleanupCandidates(records: Resource[]): Resource[] {
 
 A record with no `health:` block at all is not a candidate — `health?.cleanupCandidate` and `health?.status` are both `undefined`, and neither condition matches.
 
-When the block *was* produced by `classifyHealth()`, `cleanupCandidate` is `true` for `status: stale`, `status: archived`, or `status: inactive` (`packages/core/src/health.ts:88`); `unknown` and `needs_review` are caught by the second condition directly. The exact GitHub-activity thresholds behind those statuses are documented on [Maintain health signals](/content/health-classification/) — this page only documents what `grove cleanup` itself does with the block once it exists.
+When the block *was* produced by `classifyHealth()`, `cleanupCandidate` is `true` for `status: stale`, `status: needs_review`, `status: archived`, or `status: inactive` (`packages/core/src/health.ts`); `unknown` — including a record whose GitHub sync is stale (`staleReason: sync_stale`) — is caught by the second condition directly. The exact GitHub-activity thresholds behind those statuses are documented on [Maintain health signals](/content/health-classification/) — this page only documents what `grove cleanup` itself does with the block once it exists.
 
 ## The cleanup-report.json shape
 

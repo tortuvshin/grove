@@ -25,7 +25,21 @@ Either way `grove check` holds you to it: a GitHub-linked record needs a health 
 
 To change a record's effective visibility, write a [decision](/concepts/decisions/) in `data/decisions.yml` rather than editing `health.visibility` by hand — the decision is folded in at build time and leaves the rest of the block alone.
 
-`reasons` is a plain-language array explaining the classification — e.g. `"Recent repository activity"`, `"No recent commits in the last 6 months"`, `"Strong adoption with maintenance signals"`, `"Clear license found"`, `"License is missing or unclear"`. It's for humans reading the raw record, not rendered to visitors.
+`reasons` is a plain-language array explaining the classification — e.g. `"Pushed to within the last 6 months"`, `"No push in the last 6 months"`, `"Strong adoption with maintenance signals"`, `"Clear license found"`, `"License is missing or unclear"`. It's for humans reading the raw record, not rendered to visitors. The first reason always names the same band as `staleReason`.
+
+## The push-age bands
+
+Every status below except `archived` and `unknown` comes from one table, `PUSH_AGE_BANDS` in `packages/core/src/health-thresholds.ts`, which `classifyHealth` and the README link classifier both read. The signal is GitHub's `pushed_at` — the last push to any branch. That is push activity, not commit activity, and an old push does not make a project dead: every band past `active` means "a person should look", not a verdict. Archived is different — it is a fact GitHub reports.
+
+| Days since last push | Status | `staleReason` | First reason |
+| --- | --- | --- | --- |
+| 0 – 183 (up to 6 months) | `active` | `null` | Pushed to within the last 6 months |
+| 184 – 548 (6–18 months) | `stale` | `no_push_6_months` | No push in the last 6 months |
+| 549 – 730 (18–24 months) | `needs_review` | `no_push_18_months` | No push in the last 18 months |
+| over 730 (24+ months), or no push date | `inactive` | `no_push_24_months` | No push in the last 24 months |
+| — (GitHub reports it archived) | `archived` | `github_archived` | Repository is archived on GitHub |
+
+Each upper bound is inclusive: a repo last pushed exactly 183 days ago is still `active`. Grove 0.13 and earlier wrote `no_commits_365_days` for `stale`, nothing for `needs_review`, and `no_commits_24_months` for `inactive`; a cache entry keeps the old value until its next successful sync.
 
 ## The status enum
 
@@ -35,7 +49,7 @@ Ten enum values. Seven come out of `classifyHealth`'s branching logic on GitHub 
   <Card title="active">
     <Badge text="derived" variant="success" size="small" />
 
-    **When:** Repo pushed within the last 183 days.
+    **When:** Repo pushed within the last 183 days (6 months, inclusive).
 
     **Action:** Leave alone.
   </Card>
@@ -49,21 +63,21 @@ Ten enum values. Seven come out of `classifyHealth`'s branching logic on GitHub 
   <Card title="stale">
     <Badge text="derived" variant="success" size="small" />
 
-    **When:** Last push more than 183 days ago, up to 548 days (roughly 6–18 months).
+    **When:** Last push more than 183 days ago, up to 548 days (roughly 6–18 months). `staleReason: no_push_6_months`.
 
-    **Action:** Decide: still relevant?
+    **Action:** Decide: still relevant? Stale means "needs a look", not "dead".
   </Card>
   <Card title="needs_review">
     <Badge text="derived" variant="success" size="small" />
 
-    **When:** Last push more than 548 days ago, up to 730 days (roughly 18–24 months) — the gap between `stale` and `inactive`.
+    **When:** Last push more than 548 days ago, up to 730 days (roughly 18–24 months) — the gap between `stale` and `inactive`. `staleReason: no_push_18_months`.
 
     **Action:** Read the repo; decide `keep`, `hide`, or `historical`.
   </Card>
   <Card title="inactive">
     <Badge text="derived" variant="success" size="small" />
 
-    **When:** Last push more than 730 days ago (24+ months).
+    **When:** Last push more than 730 days ago (24+ months), or no push date at all. `staleReason: no_push_24_months`.
 
     **Action:** Add a `historical` or `remove` decision.
   </Card>
@@ -77,9 +91,9 @@ Ten enum values. Seven come out of `classifyHealth`'s branching logic on GitHub 
   <Card title="unknown">
     <Badge text="derived" variant="success" size="small" />
 
-    **When:** No GitHub metadata at all (e.g., the project isn't on GitHub).
+    **When:** No GitHub metadata at all (e.g., the project isn't on GitHub) — or the GitHub sync for this record is stale (`staleReason: sync_stale`, see below).
 
-    **Action:** Add a `repoUrl`, or write a decision explaining why it's listed anyway.
+    **Action:** Add a `repoUrl`, or write a decision explaining why it's listed anyway. For `sync_stale`, fix and re-run `grove sync github`.
   </Card>
   <Card title="historical">
     <Badge text="editor-only" variant="caution" size="small" />
@@ -99,6 +113,16 @@ Ten enum values. Seven come out of `classifyHealth`'s branching logic on GitHub 
     **Action:** Treat like `archived` for visibility.
   </Card>
 </CardGrid>
+
+### Stale sync reads as `unknown`
+
+A failed sync keeps the previous values in the cache entry rather than blanking them, so an old `status` could otherwise be shown as if it were current. Every reader — the build, `grove check`, `grove cleanup` and `grove readme` — therefore checks the entry's freshness first. When the newest `partialFailures[].at` is later than `lastSuccessAt`, or `lastSuccessAt` is missing, or it is older than `sync.github.maxAgeDays` (default 14 days, see [config](/reference/config/#sync)), the resolved health reads:
+
+- `status: unknown`, `staleReason: sync_stale`, `confidence: low`, `cleanupCandidate: false`;
+- `reasons`: why the sync is stale (e.g. `GitHub sync failed on 2026-09-20 (HTTP 502); last success 2026-09-01`) and `Last synced status: <old status>`;
+- `tier` and `visibility` unchanged, so a sync outage neither hides nor promotes records.
+
+The cache file itself is not rewritten; it keeps the last observed values as evidence. `grove check` reports all such records in one `github_sync_stale` warning, and `grove cleanup` lists them as `unknown` candidates.
 
 `needs_review` is a real output of `classifyHealth`, not an editor-only value — it's what a repo classifies as when its last push falls between the `stale` and `inactive` windows. Only `historical`, `quiet`, and `unavailable` are hand-authored; `data/decisions.yml` has no field for `status`, so these three can only be set by editing the record's `health.status` directly.
 
@@ -135,7 +159,7 @@ Four values, derived from stars and `status`.
 ## The cleanupCandidate flag
 
 <Aside type="note" title="When cleanupCandidate is true">
-`health.cleanupCandidate` is `true` only when `status` is `stale`, `archived`, or `inactive`. It's explicitly `false` when there's no GitHub data at all (`status: unknown`) — the flag itself doesn't cover that case.
+`health.cleanupCandidate` is `true` only when `status` is `stale`, `needs_review`, `archived`, or `inactive`. It's explicitly `false` when there's no GitHub data at all or the sync is stale (`status: unknown`) — the flag itself doesn't cover that case.
 
 `grove cleanup` casts a wider net than the flag: it writes `data/generated/cleanup-report.json` with every record where `health.cleanupCandidate` is `true`, **or** `health.status` is `unknown`, **or** `health.status` is `needs_review`. Run `grove cleanup` (locally or in CI) to regenerate the report — nothing regenerates it automatically on a schedule.
 </Aside>
@@ -146,13 +170,13 @@ When the cleanup report lands, work through it in this order. Don't try to handl
 
 <Steps>
 
-1. **Open `data/generated/cleanup-report.json`.** Sort by `staleReason` (`no_commits_365_days`, `no_commits_24_months`, or `github_archived`). Records sharing a `staleReason` are usually batchable with the same decision and justification.
+1. **Open `data/generated/cleanup-report.json`.** Sort by `staleReason` (`no_push_6_months`, `no_push_18_months`, `no_push_24_months`, `github_archived`, or `sync_stale`). Records sharing a `staleReason` are usually batchable with the same decision and justification.
 
 2. **For each `archived` candidate**: visit the live repo to confirm the archive notice is there. If the project is *also* superseded by something in your directory, add a `historical` decision and note the replacement in `reason`. If it's just dead, add `remove`.
 
-3. **For each `stale` or `needs_review` candidate**: read the last commit. If the project is feature-complete (a library that hit 1.0 and stopped), add a `keep` decision. If it was abandoned without being archived, this is a judgment call — `hide` is the safe default; `remove` if the GitHub repo is also gone.
+3. **For each `stale` or `needs_review` candidate**: look at the last push and the commits behind it. If the project is feature-complete (a library that hit 1.0 and stopped), add a `keep` decision. If it was abandoned without being archived, this is a judgment call — `hide` is the safe default; `remove` if the GitHub repo is also gone.
 
-4. **For each `unknown` candidate**: usually means the project isn't on GitHub. Either add the correct `repoUrl` so a future sync can classify it, or write a decision noting where it actually lives.
+4. **For each `unknown` candidate**: with `staleReason: sync_stale`, the data is out of date — fix the sync (its `reasons` say what failed) rather than deciding anything about the project. Otherwise it usually means the project isn't on GitHub. Either add the correct `repoUrl` so a future sync can classify it, or write a decision noting where it actually lives.
 
 5. **Run `grove check` after each batch** to make sure `data/decisions.yml` parses and the generated index still validates.
 
@@ -162,7 +186,7 @@ When the cleanup report lands, work through it in this order. Don't try to handl
 
 The signals are heuristics. Three common cases where they get it wrong:
 
-<Aside type="caution" title="No commits in 18 months but the project is feature-complete">
+<Aside type="caution" title="No push in 18 months but the project is feature-complete">
 A library at 1.0 with a stable API has every right to be quiet. Don't auto-`hide` these — write a `keep` decision instead.
 </Aside>
 

@@ -822,6 +822,24 @@ export const groveConfigSchema = z.object({
     })
     .default({ github: false }),
 
+  /**
+   * How readers treat the GitHub sync cache. A cache entry whose newest
+   * `partialFailures[].at` is later than `lastSuccessAt`, or whose
+   * `lastSuccessAt` is missing or older than `github.maxAgeDays`, is
+   * stale: build, check, cleanup and README resolve its health as
+   * `status: unknown` with `staleReason: sync_stale` instead of
+   * presenting the old status as current.
+   */
+  sync: z
+    .object({
+      github: z
+        .object({
+          maxAgeDays: z.number().int().positive().default(14),
+        })
+        .prefault({}),
+    })
+    .prefault({}),
+
   // `.prefault({})` runs `{}` through themeSchema's own per-field
   // defaults, so the default values live in exactly one place.
   theme: themeSchema.prefault({}),

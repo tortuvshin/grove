@@ -6,7 +6,7 @@
  * spirit as health.test.ts: a threshold change should force a
  * visible test-name update, not drift silently.
  */
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RepositoryEvidence } from './evidence.js';
 import { classifyRepositoryHealth } from './repository-health.js';
 import type { GithubMetadata } from './schema.js';
@@ -202,5 +202,32 @@ describe('classifyRepositoryHealth — counterEvidence', () => {
     );
     expect(result.status).toBe('likely-stale');
     expect(result.counterEvidence).toContain('A release was published within the last year');
+  });
+});
+
+describe('classifyRepositoryHealth — exact band edges (shared table)', () => {
+  // Frozen clock so each edge is tested exactly and one millisecond past it.
+  const FROZEN = Date.parse('2026-09-26T12:00:00.000Z');
+  const ago = (days: number, extraMs = 0) =>
+    new Date(FROZEN - days * 86_400_000 - extraMs).toISOString();
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(FROZEN);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it.each([
+    ['exactly 183 days', ago(183), 'active', 'high'],
+    ['183 days + 1 ms', ago(183, 1), 'stable', 'high'],
+    ['exactly 548 days', ago(548), 'stable', 'high'],
+    ['548 days + 1 ms', ago(548, 1), 'likely-stale', 'medium'],
+    ['exactly 730 days', ago(730), 'likely-stale', 'medium'],
+    ['730 days + 1 ms', ago(730, 1), 'likely-stale', 'low'],
+  ])('%s → %s (%s confidence)', (_label, pushedAt, status, confidence) => {
+    const result = classifyRepositoryHealth(makeEvidence({ github: makeGithub({ pushedAt }) }));
+    expect(result.status).toBe(status);
+    expect(result.confidence).toBe(confidence);
   });
 });
