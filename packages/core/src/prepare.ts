@@ -5,8 +5,14 @@ import { type GenerateResult, generate } from './build-data.js';
 import { toCollectionEntries } from './collection-entries.js';
 import { loadCollections } from './collections-io.js';
 import { runCollection } from './collector.js';
-import { loadConfig } from './config.js';
+import { type GroveConfig, loadConfig } from './config.js';
 import { readContentFile, shiftHeadings, stripLeadingH1 } from './content-body.js';
+import {
+  collectionIndexable,
+  hasEditorialBody,
+  recordIndexable,
+  taxonomyTermIndexable,
+} from './index-policy.js';
 import { buildLlmsFiles, type LlmsRecordInput, type LlmsResult } from './llms.js';
 import { buildOgImages, type OgBuildResult } from './og-image.js';
 import { buildSiteArtifacts, type SiteArtifactsResult } from './site-artifacts.js';
@@ -47,14 +53,36 @@ type GeneratedRecord = {
     };
   };
   health?: { visibility?: string };
+  curation?: { reviewed?: boolean };
 };
 
-function toSitemapItem(record: GeneratedRecord): SitemapInput['items'][number] {
+function contentCandidates(root: string, content: string): string[] {
+  return [resolve(root, content), join(root, content.replace(/^\.\//, ''))];
+}
+
+function toSitemapItem(
+  root: string,
+  record: GeneratedRecord,
+  policy: GroveConfig['seo']['recordIndexPolicy'],
+): SitemapInput['items'][number] {
   const visibility = record.health?.visibility ?? record.visibility;
   const lastCommitAt =
     record.lastCommitAt ?? record.github?.pushedAt ?? record.github?.repository?.pushed_at;
+  // Same rule the detail page model applies (`getRecordDetailModel`).
+  const index =
+    policy === 'all' ||
+    recordIndexable(
+      {
+        hasBody: record.content
+          ? hasEditorialBody(record.content, contentCandidates(root, record.content))
+          : false,
+        reviewed: record.curation?.reviewed === true,
+      },
+      policy,
+    );
   return {
     slug: record.slug,
+    ...(index ? {} : { index: false }),
     ...(visibility !== undefined ? { visibility } : {}),
     ...(lastCommitAt !== undefined ? { lastCommitAt } : {}),
     ...(record.addedAt !== undefined ? { addedAt: record.addedAt } : {}),
@@ -69,10 +97,7 @@ function toSitemapItem(record: GeneratedRecord): SitemapInput['items'][number] {
  */
 function readDetailBody(root: string, record: GeneratedRecord): string | undefined {
   if (!record.content) return undefined;
-  const found = readContentFile(record.content, [
-    resolve(root, record.content),
-    join(root, record.content.replace(/^\.\//, '')),
-  ]);
+  const found = readContentFile(record.content, contentCandidates(root, record.content));
   if (!found) return undefined;
   // The body lands under `### <name>` → `#### Detail`, so its own title
   // is redundant and its `##` sections must sit below level 4.
@@ -133,8 +158,8 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
     stats?: { totalRecords?: number; repositoryStars?: number };
     blueprintConfig?: { labelPlural?: string; routeSlug?: string };
     taxonomy?: {
-      categories?: Array<{ id: string; name?: string; count?: number }>;
-      stacks?: Array<{ id: string; name?: string; count?: number }>;
+      categories?: Array<{ id: string; name?: string; count?: number; description?: string }>;
+      stacks?: Array<{ id: string; name?: string; count?: number; description?: string }>;
       licenses?: Array<{ id: string; name?: string; count?: number }>;
     };
   };
@@ -153,21 +178,39 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
   // (see `[name].astro`'s `getStaticPaths`) — keep it out of the
   // sitemap too, instead of advertising a URL that 404s.
   const hasRecords = (t: { count?: number }) => (t.count ?? 0) > 0;
+  // Categories and stacks also follow `seo.taxonomyIndexPolicy`, the
+  // rule `getTaxonomyPageModel` applies to the page itself.
+  const termIndexable = (t: { count?: number; description?: string }) =>
+    taxonomyTermIndexable(
+      { count: t.count ?? 0, description: t.description },
+      config.seo.taxonomyIndexPolicy,
+    );
 
   const sitemap = await buildSitemap(
     {
       generatedAt,
-      items: records.map(toSitemapItem),
+      items: records.map((r) => toSitemapItem(root, r, config.seo.recordIndexPolicy)),
       collections: collections.map((c) => ({
         slug: c.slug,
         // An empty collection renders noindex (there is nothing to
-        // rank for), so it stays out of the sitemap as well.
-        index: c.seo?.index !== false && (collectionCounts.get(c.slug) ?? 0) > 0,
+        // rank for), so it stays out of the sitemap as well; so does one
+        // `seo.collectionIndexPolicy` excludes.
+        index: collectionIndexable(
+          {
+            introduction: c.editorial?.introduction,
+            hasBody: c.content
+              ? hasEditorialBody(c.content, contentCandidates(root, c.content))
+              : false,
+            seoIndex: c.seo?.index,
+            entryCount: collectionCounts.get(c.slug) ?? 0,
+          },
+          config.seo.collectionIndexPolicy,
+        ),
         ...(c.editorial?.lastReviewedAt ? { lastReviewedAt: c.editorial.lastReviewedAt } : {}),
       })),
       taxonomies: {
-        categories: (sitePayload.taxonomy?.categories ?? []).filter(hasRecords).map((t) => t.id),
-        stacks: (sitePayload.taxonomy?.stacks ?? []).filter(hasRecords).map((t) => t.id),
+        categories: (sitePayload.taxonomy?.categories ?? []).filter(termIndexable).map((t) => t.id),
+        stacks: (sitePayload.taxonomy?.stacks ?? []).filter(termIndexable).map((t) => t.id),
         licenses: (sitePayload.taxonomy?.licenses ?? []).filter(hasRecords).map((t) => t.id),
       },
     },

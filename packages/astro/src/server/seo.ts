@@ -21,6 +21,10 @@ export interface PageSeo {
   imageAlt?: string;
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
+  /** Exact robots meta value, when it differs from the layout's
+   *  `noindex` default — `noindex,follow` for a page the index policy
+   *  excludes (see `seo.*IndexPolicy`). Pass to BaseLayout's `robots`. */
+  robots?: string;
 }
 
 /** Google truncates titles around 60 chars; suffixing past ~65 only

@@ -7,7 +7,14 @@
  * replaced it, following the same real-module + mocked-generated-JSON
  * pattern as `models-home.test.ts`.
  */
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
+
+const bodyDir = mkdtempSync(join(tmpdir(), 'grove-record-body-'));
+const bodyPath = join(bodyDir, 'with-body.md');
+writeFileSync(bodyPath, '# With body\n\nA written review of the project.\n');
 
 function projectRecord() {
   return {
@@ -67,7 +74,23 @@ function projectRecordWithSeoOverride() {
   };
 }
 
-const records = [projectRecord(), projectRecordWithoutDates(), projectRecordWithSeoOverride()];
+function projectRecordWithBody(reviewed: boolean) {
+  const record = projectRecord();
+  return {
+    ...record,
+    slug: reviewed ? 'body-reviewed' : 'body-unreviewed',
+    content: bodyPath,
+    curation: { ...record.curation, reviewed },
+  };
+}
+
+const records = [
+  projectRecord(),
+  projectRecordWithoutDates(),
+  projectRecordWithSeoOverride(),
+  projectRecordWithBody(true),
+  projectRecordWithBody(false),
+];
 
 vi.mock('@grove/generated/records.full.json', () => ({ default: { records } }));
 vi.mock('@grove/generated/records.index.json', () => ({ default: { records: [] } }));
@@ -132,5 +155,37 @@ describe('getRecordDetailModel seo override', () => {
     expect(detail).not.toBeNull();
     expect(detail!.seo.title).not.toBe('A hand-written title');
     expect(detail!.seo.title).toContain('demo');
+  });
+});
+
+describe('getRecordDetailModel index policy', () => {
+  type Site = Parameters<typeof getRecordDetailModel>[1];
+  const withPolicy = (recordIndexPolicy: 'all' | 'editorial' | 'editorial-and-reviewed') =>
+    ({ ...site, seo: { recordIndexPolicy } }) as Site;
+  const robotsFor = (slug: string, s: Site) => {
+    const { seo } = getRecordDetailModel(slug, s)!;
+    return seo.noindex ? seo.robots : 'index';
+  };
+
+  it('indexes every record by default, with no robots override', () => {
+    for (const slug of ['demo', 'body-reviewed', 'body-unreviewed']) {
+      const { seo } = getRecordDetailModel(slug, site as Site)!;
+      expect(seo.noindex).toBeUndefined();
+      expect(seo.robots).toBeUndefined();
+    }
+  });
+
+  it("'editorial' noindexes (follow) records without a written body", () => {
+    const s = withPolicy('editorial');
+    expect(robotsFor('demo', s)).toBe('noindex,follow');
+    expect(robotsFor('body-unreviewed', s)).toBe('index');
+    expect(robotsFor('body-reviewed', s)).toBe('index');
+  });
+
+  it("'editorial-and-reviewed' also needs curation.reviewed", () => {
+    const s = withPolicy('editorial-and-reviewed');
+    expect(robotsFor('demo', s)).toBe('noindex,follow');
+    expect(robotsFor('body-unreviewed', s)).toBe('noindex,follow');
+    expect(robotsFor('body-reviewed', s)).toBe('index');
   });
 });

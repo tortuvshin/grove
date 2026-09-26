@@ -279,6 +279,22 @@ export { hostOf } from './host.js';
 export type { ImageFacts, ImageFormat } from './image-probe.js';
 export { IMAGE_PROBE_BYTES, imageFormatFromPath, probeImageBytes } from './image-probe.js';
 export { importAwesomeList, writeImportedRecords } from './importer.js';
+// ── Index policy (which generated pages are offered to search engines) ──
+export type {
+  CollectionIndexInput,
+  IndexPolicyConfig,
+  ListingIndexPolicy,
+  RecordIndexInput,
+  RecordIndexPolicy,
+  TaxonomyTermIndexInput,
+} from './index-policy.js';
+export {
+  collectionIndexable,
+  hasEditorialBody,
+  NOINDEX_FOLLOW,
+  recordIndexable,
+  taxonomyTermIndexable,
+} from './index-policy.js';
 // ── IO helpers ────────────────────────────────────────────────────────
 export { readYamlFile, writeTextFile, writeYamlFile } from './io.js';
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from './llms.js';
@@ -448,12 +464,14 @@ export {
   healthFileSchema,
   healthStatusSchema,
   healthTierSchema,
+  LISTING_INDEX_POLICIES,
   linksSchema,
   normalizeGithubIntegration,
   overrideSchema,
   overridesFileSchema,
   projectRecordSchema,
   projectTypeSchema,
+  RECORD_INDEX_POLICIES,
   readmeConfigSchema,
   recordsFileSchema,
   recordVisibility,

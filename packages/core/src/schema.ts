@@ -724,6 +724,37 @@ export const readmeConfigSchema = z.object({
   entryLinkTarget: z.enum(['detail', 'homepage', 'repository']).default('homepage'),
 });
 
+/** Values of `seo.recordIndexPolicy` — see `index-policy.ts`. */
+export const RECORD_INDEX_POLICIES = ['all', 'editorial', 'editorial-and-reviewed'] as const;
+/** Values of `seo.collectionIndexPolicy` / `seo.taxonomyIndexPolicy`. */
+export const LISTING_INDEX_POLICIES = ['all', 'editorial'] as const;
+
+/**
+ * Which generated pages are offered to search engines. Every policy
+ * defaults to `all` (today's behaviour). A page a policy excludes
+ * still renders, with `noindex,follow`, and is left out of the sitemap.
+ */
+const seoConfigSchema = z
+  .object({
+    /**
+     * Record detail pages. `editorial`: only records with a written
+     * Markdown body. `editorial-and-reviewed`: a body and
+     * `curation.reviewed: true`.
+     */
+    recordIndexPolicy: z.enum(RECORD_INDEX_POLICIES).default('all'),
+    /**
+     * Collection pages. `editorial`: only collections with an
+     * `editorial.introduction` (or a Markdown `content` body).
+     */
+    collectionIndexPolicy: z.enum(LISTING_INDEX_POLICIES).default('all'),
+    /**
+     * Category and stack pages. `editorial`: only terms with a
+     * `description` in `data/taxonomy/*.yml`.
+     */
+    taxonomyIndexPolicy: z.enum(LISTING_INDEX_POLICIES).default('all'),
+  })
+  .prefault({});
+
 export const groveConfigSchema = z.object({
   blueprint: blueprintSchema.default('project-directory'),
 
@@ -756,6 +787,9 @@ export const groveConfigSchema = z.object({
      */
     twitter: z.string().optional(),
   }),
+
+  /** Search-engine index policy — see `seoConfigSchema`. */
+  seo: seoConfigSchema,
 
   analytics: z
     .object({

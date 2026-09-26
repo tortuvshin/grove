@@ -19,6 +19,9 @@ export interface SitemapInput {
     visibility?: string;
     lastCommitAt?: string | null;
     addedAt?: string | null;
+    /** `false` for a record page the index policy renders noindex —
+     *  it is still counted for browse pagination but not listed. */
+    index?: boolean;
   }>;
   indexSlug?: string;
   /** Collections to list under /collections/. Entries with `index: false`
@@ -125,6 +128,7 @@ export async function buildSitemap(
   }
 
   for (const item of listed) {
+    if (item.index === false) continue;
     const lastmod = item.lastCommitAt ?? item.addedAt ?? input.generatedAt;
     entries.push({
       loc: `${siteUrl}/${indexSlug}/${item.slug}/`,

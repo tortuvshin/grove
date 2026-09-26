@@ -1,8 +1,16 @@
-import type { Collection, CollectionEntry, CollectionSourceRecord } from '@grove-dev/core';
+import type {
+  Collection,
+  CollectionEntry,
+  CollectionSourceRecord,
+  ListingIndexPolicy,
+} from '@grove-dev/core';
 import {
+  collectionIndexable,
   collectionSchema,
   faqSchema,
   findRelated,
+  hasEditorialBody,
+  NOINDEX_FOLLOW,
   runCollection,
   toCollectionEntries,
 } from '@grove-dev/core';
@@ -96,6 +104,8 @@ export function getCollectionPageModel(
     url?: string;
     siteUrl?: string;
     blueprintConfig?: { labelPlural?: string };
+    /** `seo.collectionIndexPolicy` is read from here. */
+    seo?: { collectionIndexPolicy?: string };
   },
 ): CollectionPageModel {
   const result = runCollection(collection, entries);
@@ -141,6 +151,20 @@ export function getCollectionPageModel(
   // The curator's `seo.title` / `seo.description` overrides win
   // verbatim; the fallback pattern advertises the list size. A
   // collection marked `seo.index: false` renders with noindex.
+  // `seo.collectionIndexPolicy: 'editorial'` also noindexes (with
+  // `follow`) a non-empty collection that has no intro or body.
+  const excludedByPolicy =
+    collection.seo?.index !== false &&
+    !result.isEmpty &&
+    !collectionIndexable(
+      {
+        introduction: collection.editorial?.introduction,
+        hasBody: hasEditorialBody(collection.content),
+        seoIndex: collection.seo?.index,
+        entryCount: result.entries.length,
+      },
+      site?.seo?.collectionIndexPolicy as ListingIndexPolicy | undefined,
+    );
   const seo: PageSeo = {
     title:
       collection.seo?.title ??
@@ -151,7 +175,8 @@ export function getCollectionPageModel(
     jsonLd: jsonLd as unknown as Record<string, unknown>[],
     // An empty collection has nothing to rank for; it also stays out of
     // the sitemap (see `prepareDirectory`).
-    noindex: collection.seo?.index === false || result.isEmpty,
+    noindex: collection.seo?.index === false || result.isEmpty || excludedByPolicy,
+    ...(excludedByPolicy ? { robots: NOINDEX_FOLLOW } : {}),
   };
   return {
     collection: {
