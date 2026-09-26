@@ -117,7 +117,11 @@ describe('default Astro route configuration', () => {
       'utf8',
     );
 
-    expect(listClient).toContain('if (!isListUrl || !url.search) return;');
+    // The rule lives in `canAdoptInPlace` (lib/live-filters.ts, unit
+    // tested): a bare list URL is adopted only from page 1 of that list.
+    expect(listClient).toContain(
+      'if (!isListUrl || !canAdoptInPlace(url, location.pathname, routePage || 1)) return;',
+    );
     // The skip link lives on this same path; a hash is never ours.
     expect(listClient).toContain('if (url.hash) return;');
     // Sort is a client view too: every `/page/N/` document is built
@@ -194,8 +198,40 @@ describe('default Astro route configuration', () => {
       resolve(import.meta.dirname, '../../registry/default/components/grove/refine-panel.astro'),
       'utf8',
     );
-    expect(panel).toContain('aria-expanded="true"');
-    expect(panel).toContain('.focus()');
+    expect(panel).toContain('getAttribute("aria-expanded") === "true"');
+    expect(panel).toContain('parts(openGroup).trigger?.focus()');
+  });
+
+  it('applies facet changes live, with no Apply step', async () => {
+    const read = (path: string) =>
+      readFile(resolve(import.meta.dirname, '../../registry/default/components', path), 'utf8');
+    const [menu, panel, drawer, browse, listClient] = await Promise.all([
+      read('grove/filter-group-menu.astro'),
+      read('grove/refine-panel.astro'),
+      read('ui/filter-drawer.astro'),
+      read('grove/directory-browse.astro'),
+      read('grove/directory-index-client.astro'),
+    ]);
+
+    // Every input navigates on change; there is no Apply button.
+    expect(menu).not.toContain('grove-filter-apply');
+    expect(panel).not.toContain('grove-filter-apply');
+    expect(panel).toContain(
+      'input.addEventListener("change", () => navigate(group, checkedValues(group)))',
+    );
+    // Popovers and the drawer report open/close so one filter session
+    // becomes one history entry.
+    expect(panel).toContain('"grove:filter-surface"');
+    expect(drawer).toContain('"grove:filter-surface"');
+    expect(listClient).toContain('new FilterHistorySession()');
+    expect(listClient).toContain('adopt(url, session.modeForChange())');
+    // The drawer's footer shows results; it does not apply them.
+    expect(drawer).toContain('data-drawer-results');
+    expect(browse).toContain('resultsTarget="#results-heading"');
+    // The count is announced politely, and chips render in the panel too.
+    expect(browse).toContain('aria-live="polite"');
+    expect(browse.match(/data-active-filters/g)?.length).toBe(2);
+    expect(listClient).toContain('querySelectorAll<HTMLElement>("[data-active-filters]")');
   });
 
   it('uses generated taxonomy names as display labels', async () => {
