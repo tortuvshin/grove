@@ -117,7 +117,7 @@ export default defineConfig({
     github: {
       metadata: true,    // gates `grove sync github`
       contributors: false, // gates `grove sync contributors`
-      health: true,      // derive data/health.yml during `sync github`
+      health: true,      // derive health into the sync cache during `sync github`
     },
   },
 
@@ -157,6 +157,7 @@ export default defineConfig({
     taxonomyDir: "data/taxonomy",
     generatedDir: "data/generated",
     health: "data/health.yml",
+    githubCache: "data/cache/github",
     decisions: "data/decisions.yml",
     overrides: "data/overrides.yml",
   },
@@ -288,9 +289,10 @@ Enables the GitHub integration. Three modes:
 the matching `grove sync` target prints `disabled by
 integrations.github.<flag> — skipping` and exits without making a request.
 
-`health` gates whether `grove sync github` also derives a health entry per
-record — via `classifyHealth` — and writes them all to `data/health.yml` at
-the end of the run. Leave it off and that file stays yours to author. See
+`health` gates whether `grove sync github` also derives a health block per
+record — via `classifyHealth` — and writes it into that record's entry in
+the GitHub sync cache (`paths.githubCache`). Leave it off and health stays
+yours to author. See
 [Maintain health signals](/content/health-classification/).
 
 ### `theme`
@@ -405,14 +407,25 @@ you need.
 | `taxonomyDir` | `"data/taxonomy"` | Controlled category, stack, platform, and distribution-channel values |
 | `generatedDir` | `"data/generated"` | Auto-generated JSON; gitignored |
 | `health` | `"data/health.yml"` | Legacy health file (gitignored by default) |
+| `githubCache` | `"data/cache/github"` | GitHub sync cache: one `<slug>.json` per record, written only by `grove sync github`. **Commit it** — see below |
 | `decisions` | `"data/decisions.yml"` | Human curation decisions |
 | `overrides` | `"data/overrides.yml"` | Manual patches for imported records |
 
-The `health` path is legacy; in V1 the canonical health signal
-lives on each record (the `health:` block) and is derived from
-`grove sync github` + `data/decisions.yml`. The `health.yml` file
-is still read for backward compatibility but is not written by
-any V1 command.
+The `githubCache` directory is the sync bot's layer: GitHub metadata,
+the derived health block, `lastSuccessAt` and `partialFailures` for each
+record (format in [Sync GitHub metadata](/automation/sync-github/#the-cache-file)).
+Records and `decisions.yml` stay human-owned; sync never writes to them.
+Unlike `generatedDir`, the cache is committed — it records what GitHub
+said at sync time, which a build cannot recreate offline. The default
+path sits outside `data/generated/`, so the usual `data/generated/*`
+ignore rule does not catch it; if you move it inside an ignored
+directory, add a negation (for example `!data/generated/github/`).
+
+Readers resolve a record's `github` and `health` with precedence
+cache > inline block on the record (Grove 0.12 and earlier) > the
+`health` file. The `health.yml` file is still read for backward
+compatibility but is not written by any V1 command. Move legacy
+inline blocks with `grove migrate github-cache`.
 
 ## Type-safe config
 

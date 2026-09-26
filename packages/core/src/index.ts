@@ -173,6 +173,34 @@ export {
   parseGithubRepoUrl,
   pruneLegacyGithubFields,
 } from './github.js';
+export type {
+  GithubCache,
+  GithubCacheEntry,
+  GithubCacheFailure,
+  GithubCacheMigration,
+  GithubCacheSource,
+  GithubFieldSource,
+  GithubSyncAttempt,
+  ResolvedRecordGithub,
+} from './github-cache.js';
+// ── GitHub sync cache (paths.githubCache) ────────────────────────────
+// The sync bot's layer: one JSON per record. Every reader resolves a
+// record's github/health through `resolveRecordGithub`.
+export {
+  GITHUB_CACHE_MAX_FAILURES,
+  GITHUB_CACHE_SCHEMA_VERSION,
+  githubCacheConflicts,
+  githubCacheDir,
+  githubCacheEntrySchema,
+  loadGithubCache,
+  migrateRecordGithub,
+  nextGithubCacheEntry,
+  removeTopLevelYamlKeys,
+  resolveRecordGithub,
+  seedGithubCacheEntry,
+  serializeGithubCacheEntry,
+  writeGithubCacheEntry,
+} from './github-cache.js';
 export type { GhFetchOptions } from './github-client.js';
 // ── GitHub: client helpers (V1 public subset) ────────────────────────
 export { rateLimitWaitMs, sleep } from './github-client.js';

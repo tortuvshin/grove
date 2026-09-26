@@ -1,9 +1,9 @@
 ---
 title: Sync GitHub metadata
-description: Keep stars, forks, license, language, and topics fresh by refreshing each record's github block from the GitHub API.
+description: Keep stars, forks, license, language, and topics fresh by refreshing each record's GitHub data into the sync cache.
 ---
 
-`grove sync github` refreshes the `github` block on every `data/records/*.yml` file with live data from the GitHub REST API, writing the result back to the same YAML files so the diff is reviewable in a pull request.
+`grove sync github` fetches every record's repository from the GitHub REST API and writes the result to the **GitHub sync cache** — one JSON file per record under `paths.githubCache` (default `data/cache/github/<slug>.json`). Record YAML is read, never written: curators own `data/records/`, the sync bot owns the cache, and reviewers own `data/decisions.yml`. A sync pull request only ever touches the cache directory, so its diff is star counts and timestamps, not your curated records.
 
 This guide is for site maintainers who run (or schedule) the sync. If you're a contributor adding a single record, you don't need to read this — the scaffolded workflow runs it on a schedule, not on your PR.
 
@@ -23,8 +23,8 @@ integrations: {
 
 `integrations.github` can also be a single boolean (`github: true`), which expands to all three sub-flags via `normalizeGithubIntegration`.
 
-:::note[`health: true` writes `health:` inline on each record]
-When `integrations.github.health` is enabled, every record synced via the API path gets a `health:` block written directly onto it (derived by `classifyHealth` in `packages/core/src/health.ts`) — one write per record, alongside the `github` patch, so two records syncing at once never contend for the same file. `data/health.yml` is only read as a fallback for records that don't carry an inline block.
+:::note[`health: true` writes `health` into the cache entry]
+When `integrations.github.health` is enabled, every record synced via the API path gets a `health` block in its cache entry (derived by `classifyHealth` in `packages/core/src/health.ts`) — one file per record, so two records syncing at once never contend for the same file. `data/health.yml` is only read as a fallback for records with no health in the cache or inline.
 :::
 
 If `integrations.github.metadata` is `false`, running `grove sync github` prints `[sync github] disabled by integrations.github.metadata — skipping` and exits without reading any files.
@@ -38,11 +38,73 @@ For each `.yml` file in `config.paths.recordsDir` (default `data/records`, sorte
 3. Parses the URL with `parseGithubRepoUrl`. If it doesn't match `https?://github.com/<owner>/<repo>`, logs `[sync github] <file>: invalid GitHub URL, skipped`.
 4. Tries `fetchGithubMetadata(ref)` — a `GET /repos/<owner>/<repo>` call, followed by `GET /repos/<owner>/<repo>/releases/latest` for the latest release date. Any thrown error (rate limit, network failure, non-2xx status) is caught, its message is kept as the record's reason, and the run falls through to step 5.
 5. If the API call didn't produce metadata, tries `enrichFromGithubHtml(repoUrl)` — an unauthenticated fetch of the public `https://github.com/<owner>/<repo>` HTML page.
-6. If both sources failed, logs `[sync github] <file>: unavailable` and counts it as failed. The record file is not rewritten, so it keeps whatever `github` block it had from its last successful sync.
-7. On success from either source, merges the result into the record's `github` block and rewrites the file with `stringifyRecordYaml`, logging `[sync github] <file>: api` or `[sync github] <file>: html`.
-8. After all files, prints the [end-of-run summary](#end-of-run-summary): a totals line, then one row per record that fell back to HTML or failed.
+6. If both sources failed, logs `[sync github] <file>: unavailable` and counts it as failed. The cache entry keeps its previous `github` and `health` and gains a `partialFailures` entry for each failed source; `lastSuccessAt` does not move.
+7. On success from either source, merges the result into the previous `github` block (from the cache entry, or — before [migration](#migrating-from-inline-blocks) — from the record's inline block) and writes `data/cache/github/<slug>.json`, logging `[sync github] <file>: api` or `[sync github] <file>: html`.
+8. After all files, prints the [end-of-run summary](#end-of-run-summary): a totals line, then one row per record that fell back to HTML or failed. If any record still carries an inline `github`/`health` block, it also prints how many and points at `grove migrate github-cache`.
 
 Skipped records (no repository, invalid URL) are only reported by their per-file log line — they are not counted as failures and don't appear in the summary. Nothing is written to disk for skips.
+
+## The cache file
+
+One file per record, `<paths.githubCache>/<slug>.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "slug": "ollama",
+  "repoUrl": "https://github.com/ollama/ollama",
+  "source": "api",
+  "lastSuccessAt": "2026-08-14T03:11:42.000Z",
+  "partialFailures": [
+    { "at": "2026-08-07T03:10:58.000Z", "source": "api", "reason": "GitHub API 502 Bad Gateway" }
+  ],
+  "sourceDescription": "Get up and running with large language models.",
+  "github": { "repository": { "stargazers_count": 92000 }, "sync": { "syncedAt": "2026-08-14T03:11:42.000Z", "source": "api" } },
+  "health": { "status": "active", "tier": "curated", "visibility": "keep" }
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `source` | Which fetch path delivered the data now in `github`: `api` or `html`. |
+| `lastSuccessAt` | When the GitHub API last delivered a full refresh. An HTML fallback or a failure never moves it. `null` when the API has never succeeded for this record. |
+| `partialFailures` | The last 5 failed fetches, oldest first: `{ at, source, reason }`. Kept after a later success, so the history stays visible. |
+| `sourceDescription` | The repository description GitHub reports. Stored for curators and tools; the build does not merge it into the record. |
+| `github` | The block the build uses as the record's `github` — same shape as [before](#what-gets-written-back). |
+| `health` | The block the build uses as the record's `health`, when `integrations.github.health` is on. |
+
+The writer is deterministic: fixed top-level key order, nested blocks in the order sync builds them, two-space indent and a trailing newline. A file whose bytes would not change is not rewritten, and a re-run on unchanged upstream data only changes the timestamps.
+
+### Staleness
+
+A failed or partial sync keeps the previous data rather than blanking it — but it does not pretend the data is fresh. When the newest `partialFailures[].at` is later than `lastSuccessAt`, the entry is stale: the values are from `lastSuccessAt`, and the failure says why nothing newer arrived.
+
+### Precedence and conflicts
+
+Every reader — the build (`generate`), `grove check`, `grove cleanup` and `grove readme generate` — resolves a record's `github` and `health` through the same helper, `resolveRecordGithub`:
+
+1. the cache entry, for each block it carries;
+2. the record's own inline block (written by Grove 0.12 and earlier);
+3. for `health` only, the record's entry in `paths.health` (`data/health.yml`).
+
+When a record carries an inline block **and** the cache has one that disagrees (stars, forks, `pushed_at`, `archived`, license; or health `status`, `tier`, `visibility`), `grove check` emits a `github_cache_mismatch` warning naming the fields. The cache still wins. Other cache checks: `github_cache_invalid` (error — a file that is not valid JSON or not a cache entry; the build skips it and falls back to inline) and `github_cache_orphan` (warning — a cache file with no matching record, e.g. after a record was deleted).
+
+### Committing the cache
+
+The cache is committed, not gitignored: it is observed network state that a build cannot recreate offline, which is why it lives under `data/cache/` and not in `paths.generatedDir` (which consumers gitignore and may delete as a build artefact). No `.gitignore` change is needed with the default path. If you point `paths.githubCache` inside an ignored directory, add a negation such as `!data/generated/github/`.
+
+## Migrating from inline blocks
+
+Records synced by Grove 0.12 or earlier carry `github:` and `health:` inline. Move them into the cache once:
+
+```bash
+grove migrate github-cache --check   # exit 1 if any record still carries an inline block; writes nothing
+grove migrate github-cache           # move them
+```
+
+For each record with an inline block, the migration writes the cache entry first and then strips the two top-level keys from the YAML. Every other line of the record — comments, quoting, key order — is left byte-for-byte as it was. `lastSuccessAt` is seeded from the inline `github.sync.syncedAt` when that sync came from the API. If a cache entry already exists (a sync ran before the migration), the cache entry is kept and the inline copy only fills blocks it lacks; any disagreement is printed. Running it again is a no-op.
+
+Until you migrate, nothing breaks: the build reads inline blocks as a fallback, and the first sync seeds its merge from them.
 
 ## End-of-run summary
 
@@ -119,7 +181,7 @@ When the HTML fallback succeeds, the CLI writes the four scraped fields into a *
 
 ## What gets written back
 
-For a successful API sync, `buildGithubSyncPatch` (`packages/core/src/github.ts`) writes these fields into `github.repository`, spread on top of whatever was already there so unrelated custom keys survive:
+For a successful API sync, `buildGithubSyncPatch` (`packages/core/src/github.ts`) writes these fields into the cache entry's `github.repository`, spread on top of whatever was already there so unrelated custom keys survive. Shown here as YAML for readability; the cache stores the same structure as JSON:
 
 ```yaml
 github:
@@ -143,7 +205,7 @@ github:
   sync:
     syncedAt: "2026-08-14T03:11:42.000Z"
     source: api
-health:                                      # written alongside github, when enabled
+health:                                      # the entry's health block, when enabled
   status: active
   maturity: mature
   tier: curated
@@ -158,7 +220,7 @@ Notes on this shape:
 - `license.spdx_id` and `license.name` are both set to the **same** string (whichever GitHub returned — SPDX id preferred, falling back to the license's display name). The API's own `license.name` (which can differ from the SPDX id) is not fetched into a separate field.
 - `latestReleaseAt` and `homepage` live at the top level of `github`, not nested inside `repository` — that's deliberate (see the comment on `buildGithubSyncPatch`).
 - Fields `fetchGithubMetadata` fetches from the API but that `buildGithubSyncPatch` never writes back: `watchers_count`, `created_at`, `description`, `html_url`, `size`, `visibility`, `fork`, `private`. If you need one of those, it isn't part of the sync's write surface today.
-- A sync also drops `github.latestRelease`, `github.files`, and `github.labels` from the record if they're present — leftover full-blob fields an older sync version wrote that nothing reads today. `github.languages` and `github.activity` are kept; they're read by the record page.
+- A sync also drops `github.latestRelease`, `github.files`, and `github.labels` if they're present — leftover full-blob fields an older sync version wrote that nothing reads today. `github.languages` and `github.activity` are kept; they're read by the record page.
 
 For an HTML-fallback sync:
 
@@ -176,7 +238,7 @@ github:
 
 ## Field precedence
 
-Within `github.repository`, sync always overwrites the specific fields listed above on every successful API run — there is no per-field opt-out. Anything else already present on the record (other keys under `github`, or the record's other top-level fields) is left untouched by the merge.
+Within `github.repository`, sync always overwrites the specific fields listed above on every successful API run — there is no per-field opt-out. Anything else already present in the previous `github` block is carried forward by the merge, and the record file itself is never touched.
 
 `data/overrides.yml` is applied by the **build**, not by the sync. Each entry is `{ id, patch }`, and the patch's top-level keys are merged over the parsed record before validation:
 
@@ -188,7 +250,7 @@ overrides:
       category: developer-tools
 ```
 
-Because it runs at build time, an override survives every `grove sync github` run — the sync rewrites `data/records/<slug>.yml`, the override re-applies on top. That makes it the right place to correct an imported record you do not want to hand-edit. It does **not** stop the sync from rewriting the underlying YAML.
+Because it runs at build time, an override survives every `grove sync github` run — the sync rewrites the cache entry, the override re-applies on top. That makes it the right place to correct an imported record you do not want to hand-edit, including a `github` or `health` value the cache would otherwise supply.
 
 For `repoUrl` resolution: `record.repoUrl` is read first, falling back to `record.links.github` if unset. The sync command does not compare the two or warn when they disagree — it just uses whichever one resolves.
 
@@ -203,7 +265,7 @@ The sync command does not look at `visibility`, `health.visibility`, or any cura
 
 ## Handling a failed run
 
-`grove sync github` doesn't throw or stop early on a per-record failure — both the API call and the HTML fallback are wrapped in their own `try/catch`, so a bad record just falls through to "unavailable" and the loop continues to the next file. A failed record keeps its previous `github` block, which is why the [end-of-run summary](#end-of-run-summary) names every failed record and its reason. The whole command only exits non-zero if `--strict` is set and at least one record ended up unavailable; records that did sync successfully are written regardless.
+`grove sync github` doesn't throw or stop early on a per-record failure — both the API call and the HTML fallback are wrapped in their own `try/catch`, so a bad record just falls through to "unavailable" and the loop continues to the next file. A failed record keeps its previous `github` block in the cache, with the failure appended to `partialFailures`, which is why the [end-of-run summary](#end-of-run-summary) names every failed record and its reason. The whole command only exits non-zero if `--strict` is set and at least one record ended up unavailable; records that did sync successfully are written regardless.
 
 If the API returns `403` with an `x-ratelimit-remaining: 0` header, `github.ts` throws `GitHub API rate limit reached. Set GITHUB_TOKEN and rerun analyze.` — that error is caught by the CLI and treated the same as any other API failure (falls through to the HTML fallback).
 
@@ -213,7 +275,7 @@ The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on 
 
 1. `pnpm install --frozen-lockfile`
 2. `pnpm exec grove sync github`, with `GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` in the environment — the fallback/failure table lands on the run's summary page via `GITHUB_STEP_SUMMARY`
-3. `peter-evans/create-pull-request@v6` opens a PR (branch `chore/sync-github`) if the run changed any files
+3. `peter-evans/create-pull-request@v6` opens a PR (branch `chore/sync-github`) if the run changed any files, with `add-paths: data/cache/github/**` so the PR can only ever contain cache files
 
 `fetchGithubMetadata` resolves its token from `GH_TOKEN` first and `GITHUB_TOKEN` second, so either name works — including a personal access token you set yourself for higher rate limits.
 
@@ -223,7 +285,7 @@ The example scaffold (`apps/example/.github/workflows/sync-github.yml`) runs on 
 - **Issues / PRs** — `open_issues_count` is written, but no per-issue or per-PR data.
 - **Private repositories** — the HTML fallback scrapes a public page, so it won't work on a private repo; the API path needs a token with access.
 - **Non-GitHub hosts** — GitLab, Codeberg, Bitbucket, etc. don't match `parseGithubRepoUrl` and are skipped.
-- **Health when the flag is off** — with `integrations.github.health` disabled (or unset), `grove sync github` never calls `classifyHealth`. Whatever `health` a record carries has to come from somewhere else.
+- **Health when the flag is off** — with `integrations.github.health` disabled (or unset), `grove sync github` never calls `classifyHealth`. The cache entry keeps whatever `health` it already had; otherwise it has to come from somewhere else.
 - **Contributors** — a separate command, [`grove sync contributors`](/automation/sync-contributors/), handles that.
 
 ## Programmatic API
@@ -240,8 +302,9 @@ const ref = parseGithubRepoUrl("https://github.com/ollama/ollama");
 if (ref) {
   const metadata = await fetchGithubMetadata(ref); // reads process.env.GITHUB_TOKEN by default
   if (metadata) {
-    const patch = buildGithubSyncPatch(metadata, existingRecord.github);
-    // ...merge `patch` into the record and write it back yourself
+    const patch = buildGithubSyncPatch(metadata, previousEntry.github);
+    // ...fold it into a cache entry with nextGithubCacheEntry and
+    // write it with writeGithubCacheEntry
   } else {
     const enriched = await enrichFromGithubHtml("https://github.com/ollama/ollama");
     // enriched.fields.{license, language, topics, homepage}
@@ -253,7 +316,7 @@ The full programmatic surface is in [Programmatic API](/reference/api-core/).
 
 ## Related
 
-- [Record schema](/reference/record-schema/) — every field a record file may carry, including `github.*`
+- [Record schema](/reference/record-schema/) — every field a record file may carry, including the legacy inline `github.*`
 - [Maintain health signals](/content/health-classification/) — how `health.*` is derived and where it lands when the `health` flag is on or off
 - [Decisions](/concepts/decisions/) — the curator layer that overrides visibility
 - [Cleanup report](/automation/cleanup/) — the command that flags stale/archived records for review

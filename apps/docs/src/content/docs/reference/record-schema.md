@@ -275,14 +275,15 @@ its shape is:
 | `confidence` | `low` \| `medium` \| `high` | `"medium"` |
 | `reasons` | `string[]` | `[]` |
 
-:::note[Health is written inline on the record]
-`grove sync github` writes `health:` directly onto each record it syncs
-when `integrations.github.health` is enabled — one file write per
-record, so two records syncing at once never touch the same file. An
-inline `health:` block always wins over `data/health.yml`, which is
-kept only as a fallback for records synced before this change (or
-hand-authored). When a record has no inline block, the build looks up
-its slug there instead.
+:::note[Sync writes `github` and `health` to the cache, not the record]
+`grove sync github` writes `github` and (when
+`integrations.github.health` is enabled) `health` into the record's
+GitHub sync cache entry, `data/cache/github/<slug>.json` — never into
+the record file. Readers take each block from the cache first, then
+from an inline block on the record (what Grove 0.12 and earlier
+wrote; move them with `grove migrate github-cache`), then — for
+health — from `data/health.yml`. See
+[Sync GitHub metadata](/automation/sync-github/#precedence-and-conflicts).
 
 `classifyHealth` in `packages/core/src/health.ts` is the derivation, and
 it is exported from `@grove-dev/core` if you would rather drive it from

@@ -270,14 +270,21 @@ commit, license, language, topics).
 
 **Reads:**
 
-- `data/records/*.yml` (one at a time)
+- `data/records/*.yml` (one at a time; never written)
+- `data/cache/github/*.json` (`paths.githubCache`) — the previous
+  entry each merge starts from; a record's inline `github`/`health`
+  seeds it when there is no entry yet
 
 **Writes:**
 
-- Each successfully synced record is rewritten with a
-  `github.repository` block (API success) or a partial
-  `github.html` block (HTML fallback), plus a `github.sync` block
-  with `syncedAt` and `source: "api" | "html"`.
+- `data/cache/github/<slug>.json` for every record with a GitHub
+  repository: a `github.repository` block (API success) or a partial
+  `github.html` block (HTML fallback), a `github.sync` block with
+  `syncedAt` and `source: "api" | "html"`, the derived `health` block
+  (with `integrations.github.health`), `lastSuccessAt`, and the last
+  five `partialFailures`. A failed record keeps its previous data;
+  only `partialFailures` grows. See
+  [the cache file](/automation/sync-github/#the-cache-file).
 - Records with no `repoUrl` or unparseable URLs are skipped
   (printed to stdout).
 
@@ -307,6 +314,28 @@ as a Markdown table.
   HTML for license, language, topics, and homepage.
 - Records with `repoUrl` pointing at a non-GitHub host are
   unparseable and skipped.
+
+## `grove migrate github-cache`
+
+Move the `github` and `health` blocks that Grove 0.12 and earlier
+wrote inline on each record into the GitHub sync cache, and strip
+them from the record.
+
+**Syntax:** `grove migrate github-cache [--check]`
+
+| Option | Description |
+|---|---|
+| `--check` | Write nothing; exit 1 when any record still carries an inline block. |
+
+The cache entry is written before the record, and only the two
+top-level keys are removed from each YAML file — comments, quoting
+and key order of everything else stay byte-for-byte. An existing
+cache entry wins over the inline copy (disagreements are printed).
+Re-running is a no-op.
+
+```
+[migrate github-cache] moved 102 record(s) into data/cache/github/ (0 kept an existing cache entry)
+```
 
 ## `grove sync contributors`
 

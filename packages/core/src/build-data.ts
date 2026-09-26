@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
+import { loadGithubCache, resolveRecordGithub } from './github-cache.js';
 import { classifyHealth } from './health.js';
 import {
   blueprintKind,
@@ -222,13 +223,16 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith('.yml')).sort();
 
-  // Load the three side files once; a missing file is an empty map.
-  // Precedence, lowest to highest: overrides patch the parsed record,
-  // health.yml supplies a health block the record does not carry, and
-  // decisions.yml has the final say on visibility.
+  // Load the side files once; a missing file is an empty map.
+  // Precedence, lowest to highest: the GitHub sync cache supplies
+  // `github` / `health` over any legacy inline copy, overrides patch
+  // the parsed record, health.yml supplies a health block nothing else
+  // did, and decisions.yml has the final say on visibility. An
+  // unreadable cache file is skipped here; `grove check` reports it.
   const visibilityById = await loadDecisionVisibility(cfg.paths.decisions, cwd);
   const healthBySlug = await loadHealthEntries(cfg.paths.health, cwd);
   const patchBySlug = await loadOverridePatches(cfg.paths.overrides, cwd);
+  const githubCache = await loadGithubCache(cfg, cwd);
 
   const out: Resource[] = [];
   const errors: string[] = [];
@@ -236,13 +240,14 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
     const fileSlug = basename(file, '.yml');
     try {
       const text = await readFile(join(recordsDir, file), 'utf8');
-      const raw = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
+      const parsed = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
+      const raw = resolveRecordGithub(parsed, githubCache.entries.get(fileSlug)).record;
       if (!raw.kind) raw.kind = expectedKind;
       const patch = patchBySlug.get(fileSlug);
       const normalized = recordsFileSchema.parse(patch ? { ...raw, ...patch } : raw);
       normalized.slug = fileSlug;
-      // A health block written inline on the record wins; otherwise
-      // take the one keyed by this slug in health.yml, if there is one.
+      // A health block from the cache (or inline on the record) wins;
+      // otherwise take the one keyed by this slug in health.yml.
       if (normalized.kind === 'project' && !normalized.health) {
         const health = healthBySlug.get(fileSlug);
         if (health) normalized.health = health;

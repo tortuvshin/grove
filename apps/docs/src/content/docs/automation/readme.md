@@ -86,7 +86,7 @@ Stars, license, and other GitHub metadata are not rendered on the entry line —
 A record is skipped entirely (not printed anywhere) when its `visibility` field is `"hide"` or `"remove"`, or when it has neither a `name` nor a `slug` to label it with.
 
 :::caution[decisions.yml is not consulted]
-The site build applies `data/decisions.yml` overrides and, for `project` records, derives effective visibility from `health.visibility` — that's the pipeline behind the live site and `llms.txt`. `grove readme generate` does none of that: it reads only the record file's own top-level `visibility` field directly. A project hidden site-wide through `data/decisions.yml` can still show up in the README unless that record's YAML also sets `visibility: hide` (or `remove`) itself.
+`grove readme generate` resolves effective visibility the same way the site build does: a `data/decisions.yml` entry wins, then the record's `health.visibility` (from the GitHub sync cache, else the block inline on the record), then `data/health.yml`, then the record's own top-level `visibility`. Star counts come from the cache the same way. A project hidden site-wide is therefore hidden in the README too.
 :::
 
 ## Categories

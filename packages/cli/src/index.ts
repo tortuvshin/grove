@@ -1,32 +1,23 @@
 #!/usr/bin/env node
 
 import { existsSync } from 'node:fs';
-import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, relative, resolve } from 'node:path';
 import {
-  buildGithubSyncPatch,
-  classifyHealth,
   cleanupStale,
-  enrichFromGithubHtml,
-  fetchGithubMetadata,
-  type HealthEntry,
   loadConfig,
   normalizeGithubIntegration,
-  parseGithubRepoUrl,
   prepareDirectory,
-  pruneLegacyGithubFields,
-  stringifyRecordYaml,
   syncContributors,
   validateProject,
 } from '@grove-dev/core';
 import { Command } from 'commander';
-import { parse as parseYaml } from 'yaml';
 import { buildAuditCommand } from './audit-cli.js';
 import { buildCollectionCommand } from './collection-cli.js';
 import { buildHealthCommand } from './health-cli.js';
 import { buildIconsCommand } from './icons-cli.js';
 import { buildImportCommand } from './import-cli.js';
 import { initDirectory, readCliVersion } from './init.js';
+import { buildMigrateCommand } from './migrate-cli.js';
 import {
   detectPackageManager,
   installCommand,
@@ -35,13 +26,8 @@ import {
 } from './package-manager.js';
 import { buildReadmeCommand } from './readme-cli.js';
 import { run } from './run.js';
-import {
-  appendSyncStepSummary,
-  formatSyncSummaryText,
-  type SyncOutcome,
-  shortReason,
-  syncExitCode,
-} from './sync-summary.js';
+import { runGithubSync } from './sync-github.js';
+import { appendSyncStepSummary, formatSyncSummaryText, syncExitCode } from './sync-summary.js';
 import { formatPlan, runUpdate } from './update.js';
 
 const program = new Command();
@@ -112,7 +98,7 @@ program
 program
   .command('sync')
   .argument('<target>', 'github | contributors')
-  .description('Refresh GitHub metadata owned by Grove.')
+  .description('Refresh GitHub metadata owned by Grove into the sync cache (paths.githubCache).')
   .option('--limit <count>', 'limit records to sync', Number)
   .option(
     '--strict',
@@ -145,101 +131,18 @@ program
       return;
     }
 
-    const recordsDir = resolve(process.cwd(), config.paths.recordsDir);
-    const files = (await readdir(recordsDir)).filter((file) => file.endsWith('.yml')).sort();
-    const selected = options.limit === undefined ? files : files.slice(0, options.limit);
-    const outcomes: SyncOutcome[] = [];
-
-    for (const file of selected) {
-      const filePath = join(recordsDir, file);
-      const raw = (parseYaml(await readFile(filePath, 'utf8')) ?? {}) as Record<string, unknown>;
-      const links = (raw.links as Record<string, string> | undefined) ?? {};
-      const repoUrl = (raw.repoUrl as string | undefined) ?? links.github;
-      if (!repoUrl) {
-        console.log(`[sync github] ${file}: no repository, skipped`);
-        continue;
-      }
-      const ref = parseGithubRepoUrl(repoUrl);
-      if (!ref) {
-        console.log(`[sync github] ${file}: invalid GitHub URL, skipped`);
-        continue;
-      }
-
-      const slug = basename(file, '.yml');
-      const github = (raw.github as Record<string, unknown> | undefined) ?? {};
-      const patch: Record<string, unknown> = {};
-      // Health is written inline onto the record (not to a shared
-      // data/health.yml) so two records syncing at once never touch
-      // the same file.
-      let health: HealthEntry['health'] | undefined;
-      let source: 'api' | 'html' | undefined;
-      // Why the API path didn't deliver, then why the fallback didn't —
-      // reported per record at the end instead of swallowed.
-      const reasons: string[] = [];
-      try {
-        const metadata = await fetchGithubMetadata(ref);
-        if (metadata) {
-          if (githubFlags.health) {
-            health = classifyHealth(slug, metadata).health;
-          }
-          // Merge into the existing repository block rather than
-          // replacing it wholesale. Sync only owns the fields it
-          // explicitly writes; curator-curated fields and anything
-          // outside the sync surface (manually-added metadata, etc.)
-          // survive a re-run.
-          Object.assign(patch, buildGithubSyncPatch(metadata, github));
-          source = 'api';
-        } else {
-          reasons.push('API: repository not found');
-        }
-      } catch (error) {
-        // The token-free HTML fallback below keeps scheduled syncs useful.
-        reasons.push(`API: ${shortReason(error)}`);
-      }
-      if (!source) {
-        try {
-          const enriched = await enrichFromGithubHtml(repoUrl);
-          if (!enriched.notFound && !enriched.rateLimited && !enriched.error) {
-            // HTML fallback only fills fields the API didn't reach.
-            // `homepage` is the only field unique to the HTML path;
-            // it lives at `github.homepage` (flat, matches schema).
-            if (enriched.fields.homepage) {
-              patch.homepage = enriched.fields.homepage;
-            }
-            patch.html = {
-              license: enriched.fields.license,
-              language: enriched.fields.language,
-              topics: enriched.fields.topics,
-            };
-            source = 'html';
-          } else {
-            reasons.push(
-              `HTML: ${enriched.notFound ? 'not found' : enriched.rateLimited ? 'rate limited' : shortReason(enriched.error)}`,
-            );
-          }
-        } catch (error) {
-          // Report the record once both metadata sources have failed.
-          reasons.push(`HTML: ${shortReason(error)}`);
-        }
-      }
-      const reason = reasons.length > 0 ? reasons.join('; ') : undefined;
-      if (!source) {
-        outcomes.push({ slug, outcome: 'failed', ...(reason ? { reason } : {}) });
-        console.log(`[sync github] ${file}: unavailable`);
-        continue;
-      }
-      patch.sync = { syncedAt: new Date().toISOString(), source };
-      await writeFile(
-        filePath,
-        stringifyRecordYaml({
-          ...raw,
-          ...(health ? { health } : {}),
-          github: { ...pruneLegacyGithubFields(github), ...patch },
-        }),
-        'utf8',
+    const { outcomes, inlineRecords, cacheDir } = await runGithubSync({
+      cwd: process.cwd(),
+      config,
+      ...(options.limit === undefined ? {} : { limit: options.limit }),
+    });
+    console.log(`[sync github] cache → ${relative(process.cwd(), cacheDir) || '.'}`);
+    if (inlineRecords.length > 0) {
+      // The cache wins over these, and `grove check` warns where they
+      // disagree; migrating removes the second copy for good.
+      console.log(
+        `[sync github] ${inlineRecords.length} record(s) still carry inline github/health — run \`grove migrate github-cache\` to move them into the cache.`,
       );
-      outcomes.push({ slug, outcome: source, ...(reason ? { reason } : {}) });
-      console.log(`[sync github] ${file}: ${source}`);
     }
     console.log(formatSyncSummaryText(outcomes));
     await appendSyncStepSummary(outcomes);
@@ -334,6 +237,7 @@ program.addCommand(buildCollectionCommand());
 program.addCommand(buildHealthCommand());
 program.addCommand(buildIconsCommand());
 program.addCommand(buildImportCommand());
+program.addCommand(buildMigrateCommand());
 program.addCommand(buildReadmeCommand());
 
 program.parseAsync().catch((error: unknown) => {
