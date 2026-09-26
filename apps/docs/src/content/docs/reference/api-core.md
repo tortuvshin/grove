@@ -555,6 +555,32 @@ A small set of pure-data constants that the browse-page controller, refine panel
 - `FACET_DIMENSION_FOR_KEY` — reverse map (URL param key → facet group key).
 - `isDirectoryFilterGroupKey(value)` — type guard.
 
+## Channel and media candidates
+
+Used by `grove sync github` with `integrations.github.candidates` and by `grove candidates`.
+
+- `createCandidateCollector(options)` — returns `{ collect({ owner, repo, previous }) }`. It collects channel, logo and screenshot candidates for one repository within `CANDIDATE_REQUESTS_PER_RECORD`, spacing Repology requests by `REPOLOGY_MIN_INTERVAL_MS`. It never throws: failures come back as strings.
+- Discovery helpers (pure):
+  - `findFastlane`, `findGradleAppFiles`, `parseGradleApplicationIds`
+  - `findMetainfoFiles`, `parseAppstream`
+  - `findWebManifests`, `pickManifestIcon`
+  - `findAssetLogos`, `isExcludedPath`
+  - `installableAssets`, `repologyChannels`, `sameVersion`
+- `probeImageBytes(bytes)`, `imageFormatFromPath(path)`, `IMAGE_PROBE_BYTES` — read the format and pixel size from the leading bytes of an image.
+- `mergeRecordCandidates(previous, next, failedSources)`, `sortRecordCandidates` — deterministic order, `fetchedAt` carry-over, and candidates kept from a failed source.
+- `candidateRows(slug, candidates, reviews, record)`, `listRecordCandidates(config, cwd, { slug, all })`, `loadCandidateReviews`, `normalizeCandidateUrl` — review status: `pending`, `approved`, `rejected` or `in-record`.
+- Schemas:
+  - `candidateOriginSchema`, `candidateKindSchema`, `candidateProvenanceSchema`
+  - `channelCandidateSchema`, `mediaCandidateSchema`, `recordCandidatesSchema`
+  - `candidateReviewSchema` (the `candidates:` list in `decisionsFileSchema`)
+- Types:
+  - `CandidateCollector`, `CandidateCollectorOptions`, `CandidateCollectInput`, `CandidateCollection`
+  - `TreeFile`, `FastlaneFiles`, `AppstreamFacts`, `RepologyPackage`, `RepologyChannel`
+  - `CandidateOrigin`, `CandidateKind`, `CandidateProvenance`, `CandidateReview`
+  - `ChannelCandidate`, `MediaCandidate`, `RecordCandidates`
+  - `CandidateRow`, `CandidateStatus`, `CandidateListing`, `ListCandidatesOptions`
+  - `ImageFacts`, `ImageFormat`, `GithubCacheFailureSource`
+
 ## YAML string helpers (submit form, future CLI emit)
 
 Pure, dependency-free helpers for the submit form's YAML preview. Used by `SubmissionClient.astro` (now in the registry scaffold at `components/grove/submission-client.astro`).

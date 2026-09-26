@@ -12,6 +12,7 @@ import {
 } from '@grove-dev/core';
 import { Command } from 'commander';
 import { buildAuditCommand } from './audit-cli.js';
+import { buildCandidatesCommand } from './candidates-cli.js';
 import { buildCollectionCommand } from './collection-cli.js';
 import { buildHealthCommand } from './health-cli.js';
 import { buildIconsCommand } from './icons-cli.js';
@@ -26,7 +27,7 @@ import {
 } from './package-manager.js';
 import { buildReadmeCommand } from './readme-cli.js';
 import { run } from './run.js';
-import { runGithubSync } from './sync-github.js';
+import { formatCandidateRunSummary, runGithubSync } from './sync-github.js';
 import { appendSyncStepSummary, formatSyncSummaryText, syncExitCode } from './sync-summary.js';
 import { formatPlan, runUpdate } from './update.js';
 
@@ -131,11 +132,13 @@ program
       return;
     }
 
-    const { outcomes, inlineRecords, cacheDir } = await runGithubSync({
+    const run = await runGithubSync({
       cwd: process.cwd(),
       config,
       ...(options.limit === undefined ? {} : { limit: options.limit }),
+      userAgent: `grove/${readCliVersion()} (+https://github.com/tortuvshin/grove)`,
     });
+    const { outcomes, inlineRecords, cacheDir } = run;
     console.log(`[sync github] cache → ${relative(process.cwd(), cacheDir) || '.'}`);
     if (inlineRecords.length > 0) {
       // The cache wins over these, and `grove check` warns where they
@@ -145,6 +148,7 @@ program
       );
     }
     console.log(formatSyncSummaryText(outcomes));
+    if (run.candidates) console.log(formatCandidateRunSummary(run.candidates));
     await appendSyncStepSummary(outcomes);
     if (syncExitCode(outcomes, options.strict ?? false) !== 0) process.exitCode = 1;
   });
@@ -233,6 +237,7 @@ program
   );
 
 program.addCommand(buildAuditCommand());
+program.addCommand(buildCandidatesCommand());
 program.addCommand(buildCollectionCommand());
 program.addCommand(buildHealthCommand());
 program.addCommand(buildIconsCommand());

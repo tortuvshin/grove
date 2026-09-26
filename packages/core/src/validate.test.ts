@@ -351,6 +351,44 @@ describe('validateProject — decision / health cross-references', () => {
     });
   });
 
+  it('emits unknown_candidate_review_record when a candidate verdict names a non-existent slug', async () => {
+    await withTmpCwd('grove-validate-xref-candidate-', async (cwd) => {
+      await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+      await writeFile(
+        join(cwd, 'data', 'records', 'real.yml'),
+        [
+          'kind: project',
+          'slug: real',
+          'name: Real',
+          'description: real record',
+          'category: tools',
+          'links: {}',
+          'curation: { reviewed: false, labels: [], lenses: [] }',
+          'scores: {}',
+        ].join('\n'),
+      );
+      await writeFile(
+        join(cwd, 'data', 'decisions.yml'),
+        [
+          'candidates:',
+          '  - id: ghost',
+          '    kind: logo',
+          '    url: https://github.com/o/r/blob/abc/icon.png',
+          '    verdict: approved',
+          '    provenance:',
+          '      source: fastlane',
+          '      url: https://github.com/o/r/blob/abc/icon.png',
+          "      fetchedAt: '2026-09-26T00:00:00.000Z'",
+        ].join('\n'),
+      );
+
+      const result = await validateProject(makeConfig());
+      expect(result.errors.some((e) => e.code === 'decisions_file_invalid')).toBe(false);
+      const e = result.errors.find((err) => err.code === 'unknown_candidate_review_record');
+      expect(e?.message).toContain('ghost');
+    });
+  });
+
   it('emits missing_health when a record points at GitHub but no health.yml exists', async () => {
     await withTmpCwd('grove-validate-xref-health-', async (cwd) => {
       await mkdir(join(cwd, 'data', 'records'), { recursive: true });

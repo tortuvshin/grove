@@ -8,6 +8,7 @@ import {
   GITHUB_CACHE_MAX_FAILURES,
   GITHUB_SYNC_MAX_AGE_DAYS,
   type GithubCacheEntry,
+  githubCacheEntrySchema,
   githubSyncFreshness,
   githubSyncFreshnessOptions,
   loadGithubCache,
@@ -604,5 +605,21 @@ describe('readers resolve github/health through the cache', () => {
     expect(cache.errors).toEqual([
       { file: 'a.json', message: 'slug "b" does not match the file name' },
     ]);
+  });
+});
+
+describe('githubSyncFreshness and candidate failures', () => {
+  it('ignores a candidates failure newer than the last success', () => {
+    const entry = githubCacheEntrySchema.parse({
+      schemaVersion: 1,
+      slug: 'demo',
+      lastSuccessAt: '2026-09-20T00:00:00.000Z',
+      partialFailures: [
+        { at: '2026-09-25T00:00:00.000Z', source: 'candidates', reason: 'repology: down' },
+      ],
+    });
+    expect(githubSyncFreshness(entry, { now: Date.parse('2026-09-26T00:00:00.000Z') })).toEqual({
+      stale: false,
+    });
   });
 });

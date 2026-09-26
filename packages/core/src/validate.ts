@@ -15,6 +15,7 @@ import {
   healthFileSchema,
   type Resource,
   subjectSchema,
+  unwrapCandidateReviews,
   unwrapDecisions,
   unwrapHealth,
 } from './schema.js';
@@ -483,10 +484,11 @@ export async function validateProject(
 
   if (await exists(resolve(process.cwd(), config.paths.decisions))) {
     let decisions: ReturnType<typeof unwrapDecisions> = [];
+    let candidateReviews: ReturnType<typeof unwrapCandidateReviews> = [];
     try {
-      decisions = unwrapDecisions(
-        decisionsFileSchema.parse(await readYamlFile(config.paths.decisions)),
-      );
+      const file = decisionsFileSchema.parse(await readYamlFile(config.paths.decisions));
+      decisions = unwrapDecisions(file);
+      candidateReviews = unwrapCandidateReviews(file);
     } catch (err) {
       errors.push({
         code: 'decisions_file_invalid',
@@ -499,6 +501,15 @@ export async function validateProject(
         errors.push({
           code: 'unknown_decision_record',
           message: `Decision references unknown record: ${decision.id}`,
+          severity: 'error',
+        });
+      }
+    }
+    for (const review of candidateReviews) {
+      if (!slugs.has(review.id)) {
+        errors.push({
+          code: 'unknown_candidate_review_record',
+          message: `Candidate review references unknown record: ${review.id}`,
           severity: 'error',
         });
       }

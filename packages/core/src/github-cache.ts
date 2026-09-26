@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { parseDocument, parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import { recordCandidatesSchema } from './candidate-schema.js';
 import { DAY_MS } from './health-thresholds.js';
 import type { GroveConfig } from './schema.js';
 
@@ -34,9 +35,16 @@ export const SYNC_STALE_REASON = 'sync_stale';
 
 const cacheSourceSchema = z.enum(['api', 'html']);
 
+/**
+ * What failed: the API or HTML fetch, or — with
+ * `integrations.github.candidates` — candidate collection. Candidate
+ * failures are recorded but never make the entry stale.
+ */
+const cacheFailureSourceSchema = z.enum(['api', 'html', 'candidates']);
+
 const githubCacheFailureSchema = z.object({
   at: z.string(),
-  source: cacheSourceSchema,
+  source: cacheFailureSourceSchema,
   reason: z.string(),
 });
 
@@ -54,9 +62,15 @@ export const githubCacheEntrySchema = z.object({
   sourceDescription: z.string().optional(),
   github: z.record(z.string(), z.unknown()).optional(),
   health: z.record(z.string(), z.unknown()).optional(),
+  /**
+   * Channel and media candidates (`integrations.github.candidates`).
+   * Review material only: never merged into the record or rendered.
+   */
+  candidates: recordCandidatesSchema.optional(),
 });
 
 export type GithubCacheSource = z.infer<typeof cacheSourceSchema>;
+export type GithubCacheFailureSource = z.infer<typeof cacheFailureSourceSchema>;
 export type GithubCacheFailure = z.infer<typeof githubCacheFailureSchema>;
 export type GithubCacheEntry = z.infer<typeof githubCacheEntrySchema>;
 
@@ -168,6 +182,8 @@ export function githubSyncFreshness(
   const success = entry.lastSuccessAt ? Date.parse(entry.lastSuccessAt) : Number.NaN;
   const newestFailure = entry.partialFailures.reduce<{ at: number; reason: string } | undefined>(
     (newest, failure) => {
+      // A candidate lookup failing says nothing about the metadata.
+      if (failure.source === 'candidates') return newest;
       const at = Date.parse(failure.at);
       if (Number.isNaN(at) || (newest && newest.at >= at)) return newest;
       return { at, reason: failure.reason };
@@ -360,6 +376,7 @@ const ENTRY_KEY_ORDER = [
   'sourceDescription',
   'github',
   'health',
+  'candidates',
 ] as const satisfies ReadonlyArray<keyof GithubCacheEntry>;
 
 /**
@@ -405,8 +422,10 @@ export interface GithubSyncAttempt {
   /** A freshly derived health block; the previous one is kept when absent. */
   health?: Record<string, unknown>;
   sourceDescription?: string;
+  /** Freshly collected candidates; the previous ones are kept when absent. */
+  candidates?: GithubCacheEntry['candidates'];
   /** What failed on the way, in order. */
-  failures: Array<{ source: GithubCacheSource; reason: string }>;
+  failures: Array<{ source: GithubCacheFailureSource; reason: string }>;
 }
 
 /**
@@ -441,6 +460,7 @@ export function nextGithubCacheEntry(
     ...(attempt.repoUrl ? { repoUrl: attempt.repoUrl } : {}),
     partialFailures,
   };
+  if (attempt.candidates) next.candidates = attempt.candidates;
   if (!attempt.source) return next;
   next.source = attempt.source;
   if (attempt.github) next.github = attempt.github;
