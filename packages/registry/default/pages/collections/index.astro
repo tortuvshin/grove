@@ -3,10 +3,12 @@ import records from '@grove/generated/records.json';
 import siteConfig from '@grove/generated/site-config.json';
 import {
   getCollectionIndexModel,
+  getCollectionTiles,
   loadCollections,
   recordsToCollectionEntries,
 } from '@grove-dev/astro/server';
-import CollectionIndex from '../../components/grove/collection-index.astro';
+import { runCollection } from '@grove-dev/core';
+import CollectionDirectory from '../../components/grove/collection-directory.astro';
 import BaseLayout from '../../layouts/base-layout.astro';
 
 const collections = await loadCollections(process.cwd());
@@ -15,10 +17,10 @@ const entries = recordsToCollectionEntries(
   siteConfig,
 );
 const model = getCollectionIndexModel(collections, entries, siteConfig);
-const countNoun = {
-  singular: siteConfig.blueprintConfig?.labelSingular ?? 'item',
-  plural: siteConfig.blueprintConfig?.labelPlural ?? 'items',
-};
+const tiles = getCollectionTiles(collections, entries, siteConfig);
+const covered = new Set(
+  collections.flatMap((c) => runCollection(c, entries).entries.map((e) => e.slug)),
+).size;
 const seo = model.seo;
 ---
 <BaseLayout
@@ -28,5 +30,9 @@ const seo = model.seo;
   jsonLd={seo?.jsonLd}
   site={siteConfig}
 >
-  <CollectionIndex model={model} level={1} countNoun={countNoun} />
+  <CollectionDirectory
+    tiles={tiles}
+    covered={covered}
+    itemsLabel={siteConfig.blueprintConfig?.labelPlural ?? "items"}
+  />
 </BaseLayout>

@@ -11,15 +11,26 @@
  *
  * Optional `repoUrl` adds a "View source" GitHub button. Set
  * `repoLabel` to change the visible text.
+ *
+ * A nav item with `children` opens a menu panel; `menu: "collections"`
+ * fills the panel from the collection files. The item whose `href` (or
+ * a child's) prefixes the current path is marked `aria-current`.
  */
 
+import { loadCollections } from '@grove-dev/astro/server';
 import { compact } from '@grove-dev/core';
 import ThemeToggle from '../components/site/theme-toggle.astro';
 import { buttonClass } from '../lib/classnames.ts';
 
-interface NavItem {
+interface NavLink {
   label: string;
   href: string;
+  description?: string;
+}
+
+interface NavItem extends NavLink {
+  children?: NavLink[];
+  menu?: 'collections';
 }
 
 interface Site {
@@ -63,7 +74,28 @@ const defaultNavItems = site.blueprintConfig
       { label: 'About', href: '/about' },
     ]
   : [];
-const navItems = site.nav?.length ? site.nav : defaultNavItems;
+const navItems: NavItem[] = site.nav?.length ? site.nav : defaultNavItems;
+
+// Resolve menus: explicit children, or the collection files for
+// `menu: "collections"` (loaded only when a nav item asks for them).
+const collections = navItems.some((item) => item.menu === 'collections')
+  ? await loadCollections(process.cwd())
+  : [];
+const menus = navItems.map((item) => {
+  const children: NavLink[] =
+    item.menu === 'collections'
+      ? collections
+          .map((c) => ({ label: c.title, href: `/collections/${c.slug}/`, description: c.description }))
+          .sort((a, b) => a.label.localeCompare(b.label))
+      : (item.children ?? []);
+  return { ...item, children, footer: item.menu === 'collections' ? { label: 'All collections', href: item.href } : undefined };
+});
+const withSlash = (path: string) => (path.endsWith('/') ? path : `${path}/`);
+const pathname = withSlash(Astro.url.pathname);
+const isCurrent = (item: (typeof menus)[number]) =>
+  [item.href, ...item.children.map((c) => c.href)]
+    .map((href) => withSlash(href.split('?')[0] ?? ''))
+    .some((href) => href !== '/' && pathname.startsWith(href));
 const stars = site.stats?.repositoryStars;
 const starsLabel = typeof stars === 'number' ? compact(stars) : null;
 ---
@@ -102,32 +134,75 @@ const starsLabel = typeof stars === 'number' ? compact(stars) : null;
     </a>
 
     <nav class="hidden flex-1 md:block" aria-label="Primary">
-      <ul class="m-0 flex list-none gap-5 p-0">
-        {navItems.map((item) => (
-          <li>
-            <a
-              href={item.href}
-              class="text-[0.875rem] font-medium text-ink-500 transition-colors hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
-            >
-              {item.label}
-            </a>
-          </li>
-        ))}
+      <ul class="m-0 flex list-none items-center gap-1 p-0">
+        {menus.map((menu) => {
+          const current = isCurrent(menu);
+          const itemClass = [
+            "relative inline-flex h-8 cursor-pointer list-none items-center gap-1 rounded-[var(--radius)] px-2.5 text-[0.875rem] font-medium no-underline outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/35 [&::-webkit-details-marker]:hidden",
+            current ? "text-foreground after:absolute after:inset-x-2.5 after:-bottom-[0.8125rem] after:h-0.5 after:rounded-full after:bg-foreground after:content-['']" : "text-muted-foreground",
+          ].join(" ");
+          return (
+            <li class="relative">
+              {menu.children.length > 0 ? (
+                <details class="group" data-nav-menu>
+                  <summary class={itemClass} aria-current={current ? "page" : undefined}>
+                    {menu.label}
+                    <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="opacity-60 transition-transform group-open:rotate-180"><path d="m4 6 4 4 4-4"></path></svg>
+                  </summary>
+                  <div class:list={[
+                    "absolute left-0 top-[calc(100%+0.625rem)] z-50 rounded-[var(--radius-lg)] border border-border bg-popover p-2 shadow-lg",
+                    menu.children.length > 5 ? "w-[34rem]" : "w-80",
+                  ]}>
+                    <ul class:list={["m-0 grid list-none gap-0.5 p-0", menu.children.length > 5 && "grid-cols-2"]}>
+                      {menu.children.map((item) => (
+                        <li>
+                          <a href={item.href} class="block rounded-[var(--radius)] px-3 py-2 no-underline outline-none hover:bg-accent focus-visible:bg-accent">
+                            <span class="block text-sm font-medium text-foreground">{item.label}</span>
+                            {item.description && <span class="mt-0.5 line-clamp-2 block text-2xs leading-snug text-muted-foreground">{item.description}</span>}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                    {menu.footer && (
+                      <a href={menu.footer.href} class="mt-1 flex items-center justify-between rounded-[var(--radius)] border-t border-border px-3 pb-1 pt-2.5 text-sm font-medium text-foreground no-underline hover:underline">
+                        {menu.footer.label}<span aria-hidden="true">→</span>
+                      </a>
+                    )}
+                  </div>
+                </details>
+              ) : (
+                <a href={menu.href} class={itemClass} aria-current={current ? "page" : undefined}>{menu.label}</a>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </nav>
 
     <div class="ml-auto flex items-center gap-2">
-      <details class="group relative md:hidden">
-        <summary class="inline-flex h-9 cursor-pointer list-none items-center justify-center rounded-[var(--radius)] border border-border bg-secondary px-2.5 text-sm font-medium text-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35">
+      <details class="group relative md:hidden" data-nav-menu>
+        <summary class="inline-flex h-9 cursor-pointer list-none items-center justify-center gap-1.5 rounded-[var(--radius)] border border-border bg-secondary px-2.5 text-sm font-medium text-foreground hover:bg-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/35 [&::-webkit-details-marker]:hidden">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"></path></svg>
           Menu
         </summary>
-        <nav aria-label="Mobile primary" class="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-56 rounded-[var(--radius)] border border-border bg-background p-2 shadow-lg">
-          <ul class="m-0 flex list-none flex-col gap-1 p-0">
-            {navItems.map((item) => (
-              <li><a href={item.href} class="block rounded-md px-3 py-2 text-sm font-medium text-foreground no-underline hover:bg-accent">{item.label}</a></li>
+        <nav aria-label="Mobile primary" class="fixed inset-x-3 top-[3.75rem] z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-[var(--radius-lg)] border border-border bg-popover p-3 shadow-lg">
+          <ul class="m-0 flex list-none flex-col gap-3 p-0">
+            {menus.map((menu) => (
+              <li>
+                <a href={menu.href} aria-current={isCurrent(menu) ? "page" : undefined} class="block rounded-md px-2 py-1.5 text-sm font-semibold text-foreground no-underline hover:bg-accent aria-[current=page]:bg-accent">{menu.label}</a>
+                {menu.children.length > 0 && (
+                  <ul class="m-0 mt-1 grid list-none grid-cols-2 gap-0.5 p-0">
+                    {menu.children.map((item) => (
+                      <li><a href={item.href} class="block truncate rounded-md px-2 py-1.5 text-sm text-muted-foreground no-underline hover:bg-accent hover:text-foreground">{item.label}</a></li>
+                    ))}
+                  </ul>
+                )}
+              </li>
             ))}
             {submitHref && (
-              <li class="border-t border-border pt-1"><a href={submitHref} class="block rounded-md px-3 py-2 text-sm font-medium text-foreground no-underline hover:bg-accent">{submitLabel ?? "Submit"}</a></li>
+              <li class="border-t border-border pt-3">
+                <a href={submitHref} class={buttonClass("primary", "md", "w-full justify-center")}>{submitLabel ?? "Submit"}</a>
+              </li>
             )}
           </ul>
         </nav>
@@ -136,7 +211,7 @@ const starsLabel = typeof stars === 'number' ? compact(stars) : null;
       {submitHref && (
         <a
           href={submitHref}
-          class={buttonClass("secondary", "sm", "max-sm:!hidden")}
+          class={buttonClass("primary", "sm", "max-sm:!hidden")}
         >
           <svg
             viewBox="0 0 16 16"
@@ -155,7 +230,7 @@ const starsLabel = typeof stars === 'number' ? compact(stars) : null;
         <a
           href={site.repoUrl}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
           aria-label={`${repoLabel} on GitHub${starsLabel ? ` — ${starsLabel} stars` : ""}`}
           title={`${repoLabel} on GitHub`}
           class={buttonClass("secondary", "bare", "h-8 overflow-hidden p-0 text-sm")}
@@ -181,6 +256,28 @@ const starsLabel = typeof stars === 'number' ? compact(stars) : null;
 </header>
 
 <script>
+  // Nav menus are <details>: one open at a time, closed by Escape,
+  // an outside click, or following a link inside the panel.
+  const menus = [...document.querySelectorAll<HTMLDetailsElement>("[data-nav-menu]")];
+  const closeAll = (except?: HTMLDetailsElement) =>
+    menus.forEach((menu) => { if (menu !== except) menu.open = false; });
+  menus.forEach((menu) => {
+    menu.addEventListener("toggle", () => { if (menu.open) closeAll(menu); });
+    menu.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) menu.open = false;
+    });
+  });
+  document.addEventListener("click", (e) => {
+    if (!(e.target as HTMLElement).closest("[data-nav-menu]")) closeAll();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const open = menus.find((menu) => menu.open);
+    if (!open) return;
+    open.open = false;
+    open.querySelector("summary")?.focus();
+  });
+
   // Smooth-scroll for in-page anchor links (Header nav + Hero CTA).
   // Works on any <a href="#…"> that points to an existing element on
   // the current page. External links (e.g. /about, /projects?…) are

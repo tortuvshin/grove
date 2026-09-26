@@ -159,6 +159,11 @@ export interface CollectionEntry {
   curationScore?: number;
   activityScore?: number;
   categories?: string[];
+  /** Free-form tags from the record (without its category). */
+  tags?: string[];
+  /** Square image for the entry: the record's `logoUrl`, else the
+   *  GitHub owner's avatar. Absent when neither is known. */
+  avatarUrl?: string;
   /** Relation targets from the record, matched by `query.relatedTo`. */
   relations?: Array<{ type: string; to: string }>;
   /** The curator's note for this record in the collection being run. */

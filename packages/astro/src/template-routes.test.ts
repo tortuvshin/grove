@@ -296,8 +296,9 @@ describe('default Astro route configuration', () => {
     expect(models).toMatch(/taxonomyLabel\(['"]categories['"]/);
     expect(models).toContain('site.taxonomy?.stacks?.length');
     expect(models).not.toMatch(/return ['"]typescript['"]/);
-    expect(submitPage).toContain('md:grid-cols-[minmax(0,1fr)_minmax(300px,0.72fr)]');
-    expect(submitPage).toContain('md:sticky md:top-24');
+    // Form and preview side by side on wide screens, the preview sticky.
+    expect(submitPage).toContain('lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]');
+    expect(submitPage).toContain('lg:sticky lg:top-20');
   });
 
   it('keeps routes consumer-owned and package logic composable', async () => {

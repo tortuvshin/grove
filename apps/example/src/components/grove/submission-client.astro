@@ -1,11 +1,9 @@
 ---
-import {
-  inferStackFromTopics,
-  parseGithubRepo,
-  recordSlugify,
-  yamlLines,
-  yamlQuote,
-} from '@grove-dev/core';
+// The helpers below mirror `recordSlugify`, `parseGithubRepo`,
+// `yamlQuote`, `yamlLines` and `inferStackFromTopics` in @grove-dev/core.
+// They are written out inside the script because `define:vars` only
+// carries JSON: a function passed through it arrives as `undefined`,
+// which left "Fetch details" doing nothing. core's tests pin the rules.
 
 interface Props {
   existingSlugs: string[];
@@ -34,6 +32,9 @@ interface Props {
    * unauthenticated limit (60 requests/hour).
    */
   githubProxyPath?: string;
+  /** id → label, for the live preview card. */
+  categoryLabels?: Record<string, string>;
+  stackLabels?: Record<string, string>;
 }
 const {
   existingSlugs,
@@ -42,10 +43,12 @@ const {
   fields,
   taxonomy,
   githubProxyPath = '',
+  categoryLabels = {},
+  stackLabels = {},
 } = Astro.props;
 ---
 
-<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields, taxonomy, githubProxyPath, recordSlugify, parseGithubRepo, yamlQuote, yamlLines, inferStackFromTopics }}>
+<script is:inline define:vars={{ existingSlugs, existingFullNames, repoUrl, fields, taxonomy, githubProxyPath, categoryLabels, stackLabels }}>
     /** @typedef {{ name: string; description: string | null; html_url: string; homepage: string | null; language: string | null; private: boolean; topics: string[] }} GitHubRepo */
     /** @type {GitHubRepo | null} */
     let repository = null;
@@ -63,7 +66,12 @@ const {
       license: /** @type {HTMLSelectElement | null} */ ($("#item-license")),
       website: /** @type {HTMLInputElement | null} */ ($("#item-website")),
       bestFor: /** @type {HTMLTextAreaElement | null} */ ($("#best-for")),
+      submittedBy: /** @type {HTMLInputElement | null} */ ($("#submitted-by")),
     };
+    /** Facts for the repository card; not written to the record. */
+    let repoFacts = null;
+    const GITHUB_LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+    const submitter = () => String(inputs.submittedBy?.value ?? "").trim().replace(/^@/, "");
     const fetchButton = /** @type {HTMLButtonElement | null} */ ($("#fetch-repo"));
     const preview = /** @type {HTMLElement | null} */ ($("#yaml-preview"));
     const status = /** @type {HTMLElement | null} */ ($("#submit-status"));
@@ -75,12 +83,23 @@ const {
     const stackIds = new Set(taxonomy?.stackIds ?? []);
     const platformIds = new Set(taxonomy?.platformIds ?? []);
 
-    const slugify = recordSlugify;
-    const parseRepo = parseGithubRepo;
-    const quote = yamlQuote;
-    const lines = yamlLines;
-    const inferStack = /** @param {GitHubRepo} repo */ (repo) =>
-      inferStackFromTopics({ language: repo.language, topics: repo.topics });
+    const slugify = (value) =>
+      String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const parseRepo = (value) => {
+      const match = String(value ?? "").match(/github\.com\/([^/]+)\/([^/?#]+)/);
+      return match ? { owner: match[1] ?? "", repo: (match[2] ?? "").replace(/\.git$/, "") } : null;
+    };
+    const quote = (value) => `"${String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    const lines = (values, indent = 2) => values.map((value) => `${" ".repeat(indent)}- ${value}`).join("\n");
+    const inferStack = /** @param {GitHubRepo} repo */ (repo) => {
+      const language = String(repo.language || "").toLowerCase();
+      const topics = (repo.topics || []).map((topic) => String(topic).toLowerCase());
+      if (topics.includes("flutter") || language === "dart") return "flutter";
+      if (topics.includes("react-native")) return "react-native";
+      if (language === "swift" || language === "objective-c") return "ios";
+      if (language === "kotlin" || language === "java") return "android";
+      return language;
+    };
     const selectedPlatforms = () =>
       /** @type {string[]} */ ([...document.querySelectorAll("input[name=platform]:checked")].map((input) => /** @type {HTMLInputElement} */ (input).value));
     const setStatus = (text, tone = "muted") => {
@@ -88,7 +107,7 @@ const {
       status.textContent = text;
       // Status tokens (danger/warning/success) so the submit states use
       // the same semantic roles as the rest of the system.
-      status.className = `mt-3 min-h-5 text-2xs ${tone === "error" ? "text-danger" : tone === "warn" ? "text-warning" : tone === "success" ? "text-success" : "text-muted-foreground"}`;
+      status.className = `mt-3 min-h-5 whitespace-pre-line text-2xs ${tone === "error" ? "text-danger" : tone === "warn" ? "text-warning" : tone === "success" ? "text-success" : "text-muted-foreground"}`;
     };
     const generateYaml = () => {
       if (!repository) return "";
@@ -104,6 +123,8 @@ const {
         // `recently-added` sort has nothing to sort a new record on and
         // drops it to the bottom of the list built to show it off.
         `addedAt: ${new Date().toISOString().slice(0, 10)}`,
+        // Credits the contributor on the record page and /contributors/.
+        ...(GITHUB_LOGIN.test(submitter()) ? [`submittedBy: ${submitter()}`] : []),
         `name: ${quote(inputs.name?.value ?? "")}`,
         `description: ${quote(inputs.description?.value ?? "")}`,
         ...(fields.category ? [`category: ${inputs.category?.value || "uncategorized"}`] : []),
@@ -164,6 +185,9 @@ const {
           issues.push("Choose a primary stack from the taxonomy.");
         }
       }
+      if (submitter() && !GITHUB_LOGIN.test(submitter())) {
+        issues.push("That GitHub username doesn't look right — letters, digits and dashes only.");
+      }
       if (fields.platforms && selectedPlatforms().length === 0) {
         issues.push("Select at least one platform.");
       } else if (fields.platforms && platformIds.size > 0) {
@@ -172,13 +196,87 @@ const {
       }
       return issues;
     };
+    // ── Live preview, checklist and step states ──────────────────
+    const setText = (selector, text) => {
+      const el = $(selector);
+      if (el) el.textContent = text;
+    };
+    const updateGuide = (valid) => {
+      const state = {
+        repo: Boolean(repository),
+        description: String(inputs.description?.value ?? "").trim().length >= 40,
+        category: Boolean(inputs.category?.value),
+        stack: Boolean(inputs.stack?.value),
+        platforms: selectedPlatforms().length > 0,
+        credit: GITHUB_LOGIN.test(submitter()),
+      };
+      document.querySelectorAll("[data-check]").forEach((li) => {
+        li.setAttribute("data-ok", String(Boolean(state[li.getAttribute("data-check") ?? ""])));
+      });
+      const steps = {
+        repo: state.repo ? "done" : "current",
+        details: !state.repo ? "todo" : valid ? "done" : "current",
+        review: state.repo && valid ? "current" : "todo",
+      };
+      document.querySelectorAll("[data-step]").forEach((li) => {
+        li.setAttribute("data-state", steps[li.getAttribute("data-step") ?? ""] ?? "todo");
+      });
+      const name = String(inputs.name?.value ?? "").trim();
+      if (name) setText("#preview-name", name);
+      setText("#preview-initials", name ? name.slice(0, 2).toUpperCase() : "?");
+      const meta = [categoryLabels[inputs.category?.value ?? ""], stackLabels[inputs.stack?.value ?? ""]].filter(Boolean);
+      setText("#preview-meta", meta.length ? meta.join(" · ") : "Category · Stack");
+      const description = String(inputs.description?.value ?? "").trim();
+      setText("#preview-description", description || "The description appears here.");
+      const avatar = /** @type {HTMLImageElement | null} */ ($("#preview-avatar"));
+      const initials = $("#preview-initials");
+      if (avatar && initials) {
+        avatar.hidden = !repoFacts?.avatar;
+        initials.hidden = Boolean(repoFacts?.avatar);
+        if (repoFacts?.avatar) avatar.src = repoFacts.avatar;
+      }
+      const credit = $("#preview-credit");
+      if (credit) {
+        credit.hidden = !state.credit;
+        credit.textContent = state.credit ? `Submitted by @${submitter()}` : "";
+      }
+    };
+    const showRepoCard = () => {
+      const card = $("#repo-card");
+      if (!card) return;
+      card.hidden = !repoFacts;
+      if (!repoFacts) return;
+      const avatar = /** @type {HTMLImageElement | null} */ ($("#repo-avatar"));
+      if (avatar) avatar.src = repoFacts.avatar;
+      setText("#repo-name", repoFacts.fullName);
+      setText("#repo-description", repoFacts.description || "No description on GitHub.");
+      const facts = $("#repo-facts");
+      if (facts) {
+        facts.replaceChildren(
+          ...[
+            `★ ${repoFacts.stars.toLocaleString("en")} stars`,
+            repoFacts.license ? `Licence: ${repoFacts.license}` : "No licence detected",
+            repoFacts.pushedAt ? `Last push ${new Date(repoFacts.pushedAt).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" })}` : "",
+            repoFacts.archived ? "Archived" : "",
+          ].filter(Boolean).map((text) => {
+            const span = document.createElement("span");
+            span.textContent = text;
+            return span;
+          }),
+        );
+      }
+    };
+
     const refresh = () => {
+      updateGuide(Boolean(generateYaml()) && validationIssues().length === 0);
       const yaml = generateYaml();
+      const path = `data/records/${slugify(inputs.slug?.value ?? "")}.yml`;
+      setText("#record-path", yaml ? path : "");
       if (preview) preview.textContent = yaml || "Paste a GitHub URL to generate a draft.";
       if (!yaml || !openPrLink || !copyButton) return;
       const issues = validationIssues();
       if (issues.length > 0) {
-        setStatus(issues[0], "error");
+        setStatus(issues.map((issue) => `• ${issue}`).join("\n"), "error");
         openPrLink.classList.add("pointer-events-none", "opacity-50");
         copyButton.disabled = true;
         copyButton.classList.add("pointer-events-none", "opacity-50");
@@ -189,6 +287,7 @@ const {
       openPrLink.classList.remove("pointer-events-none", "opacity-50");
       copyButton.disabled = false;
       copyButton.classList.remove("pointer-events-none", "opacity-50");
+      setStatus(`Draft is valid. "Open pull request" creates ${path} in one step.`, "success");
     };
 
     fetchButton?.addEventListener("click", async () => {
@@ -230,7 +329,16 @@ const {
           if (!response.ok) {
             throw new Error(`GitHub returned ${response.status}.`);
           }
-          const data = /** @type {GitHubRepo & { topics?: string[] }} */ (await response.json());
+          const data = /** @type {any} */ (await response.json());
+          repoFacts = {
+            fullName: data.full_name ?? `${parsed.owner}/${parsed.repo}`,
+            description: data.description ?? "",
+            avatar: data.owner?.avatar_url ? `${data.owner.avatar_url}&s=80` : `https://github.com/${parsed.owner}.png?size=80`,
+            stars: Number(data.stargazers_count ?? 0),
+            license: data.license?.spdx_id && data.license.spdx_id !== "NOASSERTION" ? data.license.spdx_id : "",
+            pushedAt: data.pushed_at ?? "",
+            archived: Boolean(data.archived),
+          };
           repository = {
             name: data.name,
             description: data.description ?? null,
@@ -242,10 +350,15 @@ const {
           };
         }
         if (repository.private) throw new Error("Private repositories cannot be submitted.");
+        showRepoCard();
         if (inputs.name) inputs.name.value = repository.name || parsed.repo;
         if (inputs.slug) inputs.slug.value = slugify(repository.name || parsed.repo);
         if (inputs.description) inputs.description.value = repository.description || "";
-        if (inputs.stack) inputs.stack.value = inferStack(repository);
+        if (inputs.stack) {
+          // Only a real taxonomy id; an unknown value would blank the select.
+          const inferred = inferStack(repository);
+          inputs.stack.value = stackIds.size === 0 || stackIds.has(inferred) ? inferred : "";
+        }
         if (inputs.tags) inputs.tags.value = (repository.topics || []).slice(0, 8).join(", ");
         if (inputs.website) inputs.website.value = repository.homepage || "";
         const duplicate = inputs.slug ? slugSet.has(inputs.slug.value) : false;
@@ -256,11 +369,21 @@ const {
         refresh();
       } catch (error) {
         repository = null;
+        repoFacts = null;
+        showRepoCard();
+        refresh();
         setStatus(error instanceof Error ? error.message : "Unable to fetch repository metadata.", "error");
       } finally {
         if (fetchButton) fetchButton.disabled = false;
       }
     });
+    inputs.repo?.addEventListener("keydown", (event) => {
+      if (/** @type {KeyboardEvent} */ (event).key === "Enter") {
+        event.preventDefault();
+        fetchButton?.click();
+      }
+    });
+    $("#submit-form")?.addEventListener("submit", (event) => event.preventDefault());
     $("#submit-form")?.addEventListener("input", refresh);
     $("#submit-form")?.addEventListener("change", refresh);
     copyButton?.addEventListener("click", async () => {

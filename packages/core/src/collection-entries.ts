@@ -16,6 +16,7 @@
  * scores 0 and a "ranked" collection renders in file order.
  */
 import type { CollectionEntry } from './collections.js';
+import { getOwnerAndRepoFromRepoUrl, getOwnerAvatarUrl } from './directory-repo.js';
 
 export interface CollectionSourceRecord {
   slug?: string;
@@ -31,6 +32,7 @@ export interface CollectionSourceRecord {
   licenses?: string[];
   visibility?: string;
   repoUrl?: string;
+  logoUrl?: string;
   links?: { github?: string; website?: string };
   stars?: number;
   forks?: number;
@@ -121,6 +123,11 @@ export function toCollectionEntries(
     const curationScore =
       r.scores?.curation ?? (stars !== undefined ? adoptionFromStars(stars) : undefined);
 
+    const avatarUrl =
+      r.logoUrl ??
+      getOwnerAvatarUrl(getOwnerAndRepoFromRepoUrl(repoHref ?? '').owner, 80) ??
+      undefined;
+
     out.push({
       slug: r.slug,
       title: r.name ?? r.title ?? r.slug,
@@ -139,6 +146,8 @@ export function toCollectionEntries(
       ...(curationScore !== undefined ? { curationScore } : {}),
       ...(activityScore !== undefined ? { activityScore } : {}),
       ...(categories.length ? { categories } : {}),
+      ...(r.tags?.length ? { tags: r.tags } : {}),
+      ...(avatarUrl ? { avatarUrl } : {}),
       ...(r.relations?.length
         ? { relations: r.relations.map(({ type, to }) => ({ type, to })) }
         : {}),

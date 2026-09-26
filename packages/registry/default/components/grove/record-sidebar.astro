@@ -1,4 +1,7 @@
 ---
+import siteConfig from '@grove/generated/site-config.json';
+import { withRef } from '@grove-dev/core';
+import FeaturedBadge from '../site/featured-badge.astro';
 import type { RecordDetailModel } from '@grove-dev/astro/server';
 import { taxonomyLabel } from '@grove-dev/astro/server';
 /**
@@ -94,6 +97,8 @@ function row(label: string, value: unknown) {
   if (value === null || value === undefined || value === '') return null;
   return { label, value };
 }
+const outbound = (siteConfig as { outbound?: { ref?: string | false; skipHosts?: string[] } }).outbound ?? {};
+const siteOrigin = new URL((siteConfig as { siteUrl?: string }).siteUrl ?? 'https://example.com').origin;
 ---
 
 <aside
@@ -184,7 +189,7 @@ function row(label: string, value: unknown) {
               <a
                 href={recentReleases[0].html_url ?? repoUrl}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener"
                 class="no-underline hover:underline"
               >
                 {recentReleases[0].tag_name ?? recentReleases[0].name ?? "—"}
@@ -251,7 +256,7 @@ function row(label: string, value: unknown) {
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">Docs</dt>
             <dd class="truncate text-ink-900 dark:text-ink-100">
-              <a href={String(repo.homepage)} target="_blank" rel="noopener noreferrer" class="no-underline hover:underline">
+              <a href={withRef(String(repo.homepage), outbound)} target="_blank" rel="noopener" class="no-underline hover:underline">
                 {new URL(String(repo.homepage)).hostname}
               </a>
             </dd>
@@ -261,7 +266,7 @@ function row(label: string, value: unknown) {
           <div class="flex items-baseline justify-between gap-3">
             <dt class="text-ink-500 dark:text-ink-400">Source</dt>
             <dd class="text-ink-900 dark:text-ink-100">
-              <a href={repoUrl} target="_blank" rel="noopener noreferrer" class="no-underline hover:underline">
+              <a href={repoUrl} target="_blank" rel="noopener" class="no-underline hover:underline">
                 {ownerRepo ? `${ownerRepo.owner}/${ownerRepo.repo}` : repoUrl}
               </a>
             </dd>
@@ -361,6 +366,14 @@ function row(label: string, value: unknown) {
       )}
     </section>
   )}
+
+  <FeaturedBadge
+    pageUrl={`${siteOrigin}/${detail.slug}/${record.slug}/`}
+    origin={siteOrigin}
+    siteName={String((siteConfig as { name?: string }).name ?? '')}
+    name={String((record as { name?: string }).name ?? record.slug)}
+    outboundRef={outbound.ref}
+  />
 
   {/* ── Source card (small) ────────────────────────────────── */}
   {sidebar.showSource && (

@@ -20,7 +20,9 @@
  * dynamic strings, so the package ships the rules statically and
  * the badge's `data-activity-tone` attribute picks one at runtime.
  */
+import siteConfig from '@grove/generated/site-config.json';
 import type { RecordDetailModel } from '@grove-dev/astro/server';
+import { withRef } from '@grove-dev/core';
 import { buttonClass } from '../../lib/classnames.ts';
 
 interface Props {
@@ -43,6 +45,11 @@ const {
   category,
   name,
 } = detail;
+// Links to the record's own site carry `ref=<site host>`; see `outbound`
+// in grove.config.ts.
+const outbound = (siteConfig as { outbound?: { ref?: string | false; skipHosts?: string[] } }).outbound ?? {};
+const homepageHref = withRef(homepageUrl, outbound);
+const submittedBy = (record as { submittedBy?: string }).submittedBy;
 ---
 
 <header class="mb-8">
@@ -84,7 +91,7 @@ const {
           <a
             href={`https://github.com/${ownerRepo.owner}`}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
           >
             @{ownerRepo.owner}
@@ -93,7 +100,7 @@ const {
           <a
             href={repoUrl}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             class="text-inherit no-underline hover:text-ink-900 dark:hover:text-ink-100"
           >
             {ownerRepo.repo}
@@ -114,6 +121,17 @@ const {
           {l}
         </span>
       ))}
+      {submittedBy && (
+        <a
+          href={`/contributors/#${submittedBy.toLowerCase()}`}
+          class="inline-flex items-center gap-1.5 rounded-full border border-border py-0.5 pl-0.5 pr-2 text-2xs font-medium text-ink-700 no-underline hover:border-ink-400 dark:text-ink-300"
+          title={`Submitted by @${submittedBy}`}
+          data-submitted-by={submittedBy}
+        >
+          <img src={`https://github.com/${submittedBy}.png?size=32`} alt="" width="16" height="16" loading="lazy" decoding="async" class="h-4 w-4 rounded-full" />
+          Submitted by @{submittedBy}
+        </a>
+      )}
       {/* Curated = reviewed provenance, not a success status. */}
       {record.curation?.reviewed && (
         <span class="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground">
@@ -150,6 +168,17 @@ const {
         {l}
       </span>
     ))}
+    {submittedBy && (
+      <a
+        href={`/contributors/#${submittedBy.toLowerCase()}`}
+        class="inline-flex items-center gap-1.5 rounded-full border border-border py-0.5 pl-0.5 pr-2 text-2xs font-medium text-ink-700 no-underline hover:border-ink-400 dark:text-ink-300"
+        title={`Submitted by @${submittedBy}`}
+        data-submitted-by={submittedBy}
+      >
+        <img src={`https://github.com/${submittedBy}.png?size=32`} alt="" width="16" height="16" loading="lazy" decoding="async" class="h-4 w-4 rounded-full" />
+        Submitted by @{submittedBy}
+      </a>
+    )}
     {record.curation?.reviewed && (
       <span class="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-0.5 text-2xs font-medium text-secondary-foreground">
         <svg viewBox="0 0 16 16" width="10" height="10" aria-hidden="true" fill="currentColor">
@@ -179,18 +208,24 @@ const {
       <a
         href={repoUrl}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="noopener"
         class={buttonClass("primary", "sm")}
+        data-event="external_repo_click"
+        data-event-source="record_header"
+        data-event-item={record.slug}
       >
         View on GitHub →
       </a>
     )}
     {homepageUrl && (
       <a
-        href={homepageUrl}
+        href={homepageHref}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="noopener"
         class={buttonClass("secondary", "sm")}
+        data-event="homepage_click"
+        data-event-source="record_header"
+        data-event-item={record.slug}
       >
         Homepage
       </a>
@@ -211,7 +246,7 @@ const {
           />
           {shot.source && (
             <figcaption class="px-3 py-1.5 text-2xs text-ink-500 dark:text-ink-400">
-              Source: <a href={shot.source} target="_blank" rel="noopener noreferrer" class="text-inherit no-underline hover:underline">{shot.source.replace(/^https?:\/\//, "")}</a>
+              Source: <a href={shot.source} target="_blank" rel="noopener" class="text-inherit no-underline hover:underline">{shot.source.replace(/^https?:\/\//, "")}</a>
             </figcaption>
           )}
         </figure>

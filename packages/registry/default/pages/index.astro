@@ -12,6 +12,7 @@ import CollectionTeaser from '../components/grove/collection-teaser.astro';
 import ContributorsGrid from '../components/grove/contributors-grid.astro';
 import FinalCta from '../components/grove/final-cta.astro';
 import Hero from '../components/grove/hero.astro';
+import HeroProof from '../components/grove/hero-proof.astro';
 import OriginalCollection from '../components/grove/original-collection.astro';
 import PipelineStrip from '../components/grove/pipeline-strip.astro';
 import RecordSection from '../components/grove/record-section.astro';
@@ -76,7 +77,12 @@ const collectionTeaser = getCollectionTeaserModel(allCollections, teaserEntries,
     ctas={[
       { label: `Browse ${itemPlural}`, href: `/${slug}/`, variant: "primary" },
     ]}
-  />
+  >
+    {((siteConfig as { press?: unknown[] }).press?.length ?? 0) > 0 && (
+      <HeroProof slot="eyebrow" variant="pill" />
+    )}
+    <HeroProof slot="proof" variant="row" contributors={contributors} />
+  </Hero>
 
   <WhyThisExists />
 

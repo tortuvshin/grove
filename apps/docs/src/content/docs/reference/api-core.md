@@ -173,6 +173,24 @@ const { robotsPath, ogImagePath, robotsWritten, ogImageWritten } = await buildSi
 
 `buildSiteArtifacts(cwd, config, stats?)` writes `robots.txt` and `og-image.svg` under `config.paths.publicDir` (`packages/core/src/site-artifacts.ts:91-113`). Both are sentinel-owned: the first emission prepends a `# grove-generated: edit this file to take ownership` marker to `robots.txt` and a `<!-- grove-generated: edit this file to take ownership -->` marker to `og-image.svg`; subsequent runs honor user edits.
 
+`buildSiteArtifacts` also writes `public/badges/featured.svg` and `featured-dark.svg` — the "Featured on <site>" README badge record pages offer to maintainers — from `buildFeaturedBadgeSvg(siteName, variant)`, with the same ownership marker.
+
+## Outbound attribution
+
+```ts
+import { withRef, resolveOutboundRef, DEFAULT_REF_SKIP_HOSTS } from "@grove-dev/core";
+
+const ref = resolveOutboundRef(config.outbound.ref, config.site.url); // "example.dev" | false
+withRef("https://anarlog.so/download", { ref }); // → "https://anarlog.so/download?ref=example.dev"
+withRef("https://github.com/o/r", { ref });       // unchanged: forge
+```
+
+`withRef(url, { ref, skipHosts })` (options type `OutboundOptions`) adds `ref` unless attribution is off, the host (or a parent domain) is in `DEFAULT_REF_SKIP_HOSTS` or `skipHosts`, or the URL already has `ref` / `utm_source`. `site-config.json` carries the resolved `outbound` block for components.
+
+## Licence placeholders
+
+`isDetectedLicense(spdxId)` is `false` for GitHub's placeholders (`NOASSERTION`, `OTHER`, `NONE`, `UNLICENSED`) and empty ids — use it before showing a licence as a fact. `licenseDisplay` turns the same placeholders into "License not detected".
+
 ## OG cards (PNG)
 
 ```ts

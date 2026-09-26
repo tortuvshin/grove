@@ -475,3 +475,83 @@ export function getRecordContextModel(
 
   return { relations, relatedRecords, collectionMembership };
 }
+
+// ── Collection tiles ────────────────────────────────────────────
+
+/** One collection as a card: what the index and "related" rows render. */
+export interface CollectionTile {
+  slug: string;
+  url: string;
+  title: string;
+  /** First sentence of the editorial introduction, else the description. */
+  takeaway: string;
+  /** True when a curator wrote a note for at least one entry. */
+  editorial: boolean;
+  kind: 'curated' | 'generated';
+  count: number;
+  countLabel: string;
+  /** Up to eight entries with an image, in collection order. */
+  faces: Array<{ title: string; avatarUrl?: string }>;
+  /** First entries, for "Includes …" lines and quick picks. */
+  examples: Array<{
+    slug: string;
+    title: string;
+    url: string;
+    note?: string;
+    avatarUrl?: string;
+    stars?: number;
+  }>;
+  /** ISO date of the last editorial review, when the collection has one. */
+  reviewedAt?: string;
+  isEmpty: boolean;
+}
+
+function firstSentence(text: string | undefined): string | undefined {
+  const clean = text?.trim().replace(/\s+/g, ' ');
+  if (!clean) return undefined;
+  const match = clean.match(/^.+?[.!?](?=\s|$)/);
+  return match ? match[0] : clean;
+}
+
+/**
+ * Cards for `collections`, in the order given. `countNoun` defaults to
+ * the site's blueprint labels.
+ */
+export function getCollectionTiles(
+  collections: Collection[],
+  entries: CollectionEntry[],
+  site?: { blueprintConfig?: { labelSingular?: string; labelPlural?: string } },
+): CollectionTile[] {
+  const singular = site?.blueprintConfig?.labelSingular ?? 'item';
+  const plural = site?.blueprintConfig?.labelPlural ?? 'items';
+  return collections.map((collection) => {
+    const result = runCollection(collection, entries);
+    const count = result.entries.length;
+    return {
+      slug: collection.slug,
+      url: `/collections/${collection.slug}/`,
+      title: collection.title,
+      takeaway: firstSentence(collection.editorial?.introduction) ?? collection.description,
+      editorial: result.entries.some((entry) => Boolean(entry.note)),
+      kind: collection.kind,
+      count,
+      countLabel: `${count} ${count === 1 ? singular : plural}`,
+      faces: result.entries
+        .filter((entry) => entry.avatarUrl)
+        .slice(0, 8)
+        .map((entry) => ({ title: entry.title, avatarUrl: entry.avatarUrl })),
+      examples: result.entries.slice(0, 4).map((entry) => ({
+        slug: entry.slug,
+        title: entry.title,
+        url: entry.url,
+        ...(entry.note ? { note: entry.note } : {}),
+        ...(entry.avatarUrl ? { avatarUrl: entry.avatarUrl } : {}),
+        ...(entry.stars !== undefined ? { stars: entry.stars } : {}),
+      })),
+      ...(collection.editorial?.lastReviewedAt
+        ? { reviewedAt: collection.editorial.lastReviewedAt }
+        : {}),
+      isEmpty: result.isEmpty,
+    };
+  });
+}

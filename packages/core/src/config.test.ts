@@ -122,7 +122,9 @@ describe('press, outbound and nav menus', () => {
     const config = defineConfig({
       site: {
         name: 'Directory',
-        press: [{ outlet: 'Astro', title: 'Roundup', url: 'https://astro.build/x/', date: '2026-08' }],
+        press: [
+          { outlet: 'Astro', title: 'Roundup', url: 'https://astro.build/x/', date: '2026-08' },
+        ],
       },
       outbound: { ref: 'directory.dev' },
       nav: [

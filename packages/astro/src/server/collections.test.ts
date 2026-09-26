@@ -4,6 +4,7 @@ import {
   getCollectionIndexModel,
   getCollectionPageModel,
   getCollectionTeaserModel,
+  getCollectionTiles,
   getRecordContextModel,
   recordsToCollectionEntries,
 } from './collections.js';
@@ -400,5 +401,34 @@ describe('getRecordContextModel', () => {
     expect(
       getRecordContextModel({ slug: 'mattermost' }, input).collectionMembership.map((c) => c.slug),
     ).toEqual(['team-chat']);
+  });
+});
+
+describe('getCollectionTiles', () => {
+  const entries: CollectionEntry[] = [
+    { slug: 'a', title: 'A', description: '', url: '/apps/a/', avatarUrl: 'https://img/a', stars: 10 },
+    { slug: 'b', title: 'B', description: '', url: '/apps/b/' },
+  ];
+  const curated = {
+    slug: 'picks',
+    kind: 'curated',
+    title: 'Picks',
+    description: 'Fallback.',
+    query: {},
+    ranking: { preset: 'curated' },
+    entries: [{ slug: 'a', note: 'Best for X.' }, { slug: 'b' }],
+    editorial: { introduction: 'First sentence. Second one.', lastReviewedAt: '2026-09-01' },
+  } as unknown as Collection;
+
+  it('builds a card with takeaway, faces, examples and review date', () => {
+    const [tile] = getCollectionTiles([curated], entries, {
+      blueprintConfig: { labelSingular: 'app', labelPlural: 'apps' },
+    });
+    expect(tile?.takeaway).toBe('First sentence.');
+    expect(tile?.editorial).toBe(true);
+    expect(tile?.countLabel).toBe('2 apps');
+    expect(tile?.faces).toEqual([{ title: 'A', avatarUrl: 'https://img/a' }]);
+    expect(tile?.examples[0]).toMatchObject({ slug: 'a', note: 'Best for X.', stars: 10 });
+    expect(tile?.reviewedAt).toBe('2026-09-01');
   });
 });

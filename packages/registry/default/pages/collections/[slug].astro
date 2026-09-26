@@ -4,6 +4,7 @@ import siteConfig from '@grove/generated/site-config.json';
 import {
   getCollectionBodyHtml,
   getCollectionPageModel,
+  getCollectionTiles,
   loadCollections,
   recordsToCollectionEntries,
 } from '@grove-dev/astro/server';
@@ -26,6 +27,11 @@ const entries = recordsToCollectionEntries(
 );
 const model = getCollectionPageModel(collection, entries, collections, siteConfig);
 const bodyHtml = getCollectionBodyHtml(collection.content);
+const relatedTiles = getCollectionTiles(
+  model.related.flatMap((r) => collections.filter((c) => c.slug === r.slug)),
+  entries,
+  siteConfig,
+);
 ---
 <BaseLayout
   title={model.seo.title}
@@ -40,7 +46,7 @@ const bodyHtml = getCollectionBodyHtml(collection.content);
   <CollectionPage
     model={model}
     bodyHtml={bodyHtml}
-    eyebrow={model.collection.kind === "curated" ? "Curated collection" : "Generated collection"}
+    relatedTiles={relatedTiles}
     countNoun={{
       singular: siteConfig.blueprintConfig?.labelSingular ?? "item",
       plural: siteConfig.blueprintConfig?.labelPlural ?? "items",

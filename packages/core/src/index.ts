@@ -330,12 +330,8 @@ export {
 } from './normalize-records.js';
 export type { OgBuildInput, OgBuildResult, OgTemplate } from './og-image.js';
 export { buildOgImages, renderOgPng } from './og-image.js';
-export {
-  DEFAULT_REF_SKIP_HOSTS,
-  type OutboundOptions,
-  resolveOutboundRef,
-  withRef,
-} from './outbound.js';
+export type { OutboundOptions } from './outbound.js';
+export { DEFAULT_REF_SKIP_HOSTS, resolveOutboundRef, withRef } from './outbound.js';
 export type {
   CollectionInput,
   ContentInput,

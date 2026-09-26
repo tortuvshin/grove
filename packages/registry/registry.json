@@ -234,6 +234,31 @@
           "path": "default/components/grove/collection-teaser.astro",
           "type": "registry:component",
           "target": "~/src/components/grove/collection-teaser.astro"
+        },
+        {
+          "path": "default/components/grove/collection-directory.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-directory.astro"
+        },
+        {
+          "path": "default/components/grove/collection-tile.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/collection-tile.astro"
+        },
+        {
+          "path": "default/components/grove/entry-avatar.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/entry-avatar.astro"
+        },
+        {
+          "path": "default/components/grove/entry-chips.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/entry-chips.astro"
+        },
+        {
+          "path": "default/components/grove/entry-metrics.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/entry-metrics.astro"
         }
       ]
     },
@@ -289,6 +314,11 @@
           "path": "default/components/grove/final-cta.astro",
           "type": "registry:component",
           "target": "~/src/components/grove/final-cta.astro"
+        },
+        {
+          "path": "default/components/grove/hero-proof.astro",
+          "type": "registry:component",
+          "target": "~/src/components/grove/hero-proof.astro"
         }
       ]
     },
@@ -422,6 +452,11 @@
           "path": "default/components/grove/language-breakdown.astro",
           "type": "registry:component",
           "target": "~/src/components/grove/language-breakdown.astro"
+        },
+        {
+          "path": "default/components/site/featured-badge.astro",
+          "type": "registry:component",
+          "target": "~/src/components/site/featured-badge.astro"
         }
       ]
     },

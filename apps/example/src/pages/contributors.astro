@@ -12,7 +12,7 @@
  * repository. Project owners in the directory are a separate metric.
  */
 import siteConfig from '@grove/generated/site-config.json';
-import { getContributorsPageModel } from '@grove-dev/astro/server';
+import { getContributorsPageModel, getSubmissionsBySubmitter } from '@grove-dev/astro/server';
 import EmptyState from '../components/ui/empty-state.astro';
 import BaseLayout from '../layouts/base-layout.astro';
 
@@ -23,6 +23,10 @@ const {
   contributorsGraphHref,
   showContributionCount,
 } = getContributorsPageModel(siteConfig);
+// Records per `submittedBy`; the ids are what a record page's
+// "Submitted by @login" links to.
+const submitters = getSubmissionsBySubmitter(siteConfig);
+const submittedTotal = submitters.reduce((n, p) => n + p.items.length, 0);
 ---
 
 <BaseLayout title={seo.title} description={seo.description} image={seo.image} jsonLd={seo.jsonLd} site={siteConfig}>
@@ -45,7 +49,7 @@ const {
           <a
             href={contributorsGraphHref}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             class="font-medium underline decoration-ink-300 underline-offset-2 hover:decoration-ink-500 dark:decoration-ink-700 dark:hover:decoration-ink-400"
           >
             GitHub contributors graph →
@@ -54,6 +58,36 @@ const {
       )}
     </div>
   </section>
+
+  {submitters.length > 0 && (
+    <section aria-labelledby="submitted-heading" class="pb-4">
+      <div class="mx-auto w-full max-w-container px-5 sm:px-7">
+        <h2 id="submitted-heading" class="m-0 text-[1.25rem] font-semibold tracking-tight text-foreground">
+          Added by the community
+        </h2>
+        <p class="m-0 mt-1 text-sm text-muted-foreground">
+          {submittedTotal} {submittedTotal === 1 ? "entry" : "entries"} came in from {submitters.length} {submitters.length === 1 ? "person" : "people"}. Each page credits who submitted it.
+        </p>
+        <ul class="m-0 mt-4 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-3">
+          {submitters.map((person) => (
+            <li id={person.id} class="m-0 flex scroll-mt-24 items-start gap-3 rounded-[var(--radius-lg)] border border-border bg-card p-3 target:border-ring target:ring-3 target:ring-ring/35">
+              <img src={`https://github.com/${person.login}.png?size=64`} alt="" width="32" height="32" loading="lazy" decoding="async" class="h-8 w-8 shrink-0 rounded-full border border-border" />
+              <div class="min-w-0">
+                <a href={`https://github.com/${person.login}`} target="_blank" rel="noopener" class="text-sm font-semibold text-foreground no-underline hover:underline" data-event="contributor_click" data-event-source="submitted_by">
+                  @{person.login}
+                </a>
+                <p class="m-0 mt-0.5 text-sm leading-snug text-muted-foreground">
+                  {person.items.map((item, i) => (
+                    <>{i > 0 && ", "}<a href={item.url} class="text-muted-foreground underline decoration-border underline-offset-2 hover:text-foreground">{item.name}</a></>
+                  ))}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 
   {sorted.length === 0 ? (
     <section class="pb-12 sm:pb-16">
@@ -84,7 +118,7 @@ const {
                 <a
                   href={href}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener"
                   class="group rounded-[calc(var(--radius)+0.25rem)] border border-border bg-card shadow-none transition-colors flex flex-col items-center gap-2 p-3 text-center no-underline  hover:border-ink-300 dark:hover:border-ink-700"
                   data-event="contributor_click"
                   data-event-source="contributors_page"

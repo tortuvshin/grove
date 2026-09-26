@@ -140,3 +140,20 @@ describe('toCollectionEntries', () => {
     });
   });
 });
+
+describe('toCollectionEntries — avatar and tags', () => {
+  it('uses logoUrl first, then the GitHub owner avatar, and keeps tags', () => {
+    const [withLogo, withOwner, bare] = toCollectionEntries(
+      [
+        { slug: 'a', logoUrl: 'https://cdn.example/a.png', repoUrl: 'https://github.com/o/a' },
+        { slug: 'b', repoUrl: 'https://github.com/owner/b', tags: ['x', 'y'] },
+        { slug: 'c' },
+      ],
+      { routeSlug: 'apps' },
+    );
+    expect(withLogo?.avatarUrl).toBe('https://cdn.example/a.png');
+    expect(withOwner?.avatarUrl).toBe('https://avatars.githubusercontent.com/owner?v=4&s=80');
+    expect(withOwner?.tags).toEqual(['x', 'y']);
+    expect(bare?.avatarUrl).toBeUndefined();
+  });
+});

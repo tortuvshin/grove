@@ -202,6 +202,7 @@ is supported today. Determines the record kind (`project` /
 | `repoUrl` | `string` (URL) | `undefined` | The space's GitHub repo URL. Used in the "view source" link and PR templates. |
 | `locale` | `string` (BCP-47) | `"en"` | Site language. Drives `<html lang>`, `og:locale`, and JSON-LD `inLanguage`. |
 | `twitter` | `string` | `undefined` | Twitter/X handle (e.g. `@myproject`). Emitted as `twitter:site` on every page. |
+| `press` | `Array<{ outlet, title, url, date, label?, logo? }>` | `[]` | Places that featured the site, newest first. `date` is `YYYY-MM`; `logo` is a path under `public/`. The home hero links the first one (and shows it in the proof row under the call to action); `/about` lists them all. Only list a mention you can link to. |
 
 ### `analytics`
 
@@ -229,12 +230,45 @@ sitemap. See [SEO & social → Index policy](/outputs/seo/#index-policy).
 
 ### `nav`
 
-**Type:** `Array<{ label: string; href: string }>`
+**Type:** `Array<{ label: string; href: string; description?: string; children?: NavLink[]; menu?: "collections" }>`
 **Default:** `[]`
 
 Top-navigation items, in order. Each item has a `label` (visible
 text) and an `href` (link target; can be a relative path or a full
-URL).
+URL). An item with `children` opens a menu panel in the header;
+`menu: "collections"` fills the panel from `data/collections/` so a new
+collection appears without a config change. `description` is the line
+under a menu link. The item whose `href` (or a child's) prefixes the
+current path is marked `aria-current="page"`.
+
+```ts
+nav: [
+  { label: "Browse", href: "/apps/", children: [
+    { label: "Categories", href: "/categories/", description: "By what the app does" },
+    { label: "Stacks", href: "/stacks/" },
+  ] },
+  { label: "Collections", href: "/collections/", menu: "collections" },
+  { label: "About", href: "/about/" },
+],
+```
+
+### `outbound`
+
+**Type:** `object` (optional)
+**Default:** `{ skipHosts: [] }` — `ref` resolves to the host of `site.url`
+
+Attribution on links that leave the site. Links from a record page to
+the record's own site (homepage, collection "Website" buttons) carry
+`ref=<value>`, so its maintainers see this directory in Plausible, GA,
+Umami and the like. Forges, app stores and package registries are never
+tagged (see `DEFAULT_REF_SKIP_HOSTS`), and an existing `ref` or
+`utm_source` is kept. Every outbound link uses `rel="noopener"` — not
+`noreferrer` — so GitHub's Traffic → Referring sites lists the site too.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `ref` | `string \| false` | host of `site.url` | The `ref` value. `false` turns tagging off. |
+| `skipHosts` | `string[]` | `[]` | Extra hosts (and their subdomains) to leave untouched. |
 
 ### `browse.facets`
 

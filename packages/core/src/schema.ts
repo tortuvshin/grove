@@ -829,6 +829,8 @@ export const groveConfigSchema = z.object({
           date: z.string().regex(/^\d{4}-\d{2}$/, 'Expected YYYY-MM'),
           /** Short hero label, e.g. "Featured in Astro's August 2026 roundup". */
           label: z.string().optional(),
+          /** Outlet mark under `public/` (e.g. `/icons/brands/astro.svg`), shown on a light chip. */
+          logo: z.string().optional(),
         }),
       )
       .default([]),

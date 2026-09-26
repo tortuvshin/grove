@@ -88,6 +88,17 @@ The unique identifier. It is the URL segment for the detail page, the key
 used by `data/decisions.yml` and `data/overrides.yml`, and the id carried
 into every generated output. Must equal the filename.
 
+### `submittedBy`
+
+The GitHub login of the person who submitted the record (a leading `@`
+is stripped). The record page shows "Submitted by @login" and the
+contributors page groups records by it (`getSubmissionsBySubmitter`).
+The submit form writes it when the contributor fills in their username.
+
+```yaml
+submittedBy: octocat
+```
+
 ### `addedAt`
 
 **Type:** `string` (ISO date or date-time) · **Optional**

@@ -1,0 +1,141 @@
+---
+/**
+ * CollectionDirectory — the /collections/ page.
+ *
+ * A short header with the two kinds of collection as a legend, one
+ * featured editor's-picks collection with its first picks, then every
+ * other collection as a card. Tiles come from `getCollectionTiles`.
+ * The featured slot goes to the most recently reviewed non-empty
+ * collection with curator notes; with none, every tile is in the grid.
+ */
+import type { CollectionTile as Tile } from '@grove-dev/astro/server';
+import { formatStars } from '@grove-dev/core';
+import Container from '../../layouts/container.astro';
+import { buttonClass } from '../../lib/classnames.ts';
+import EmptyState from '../ui/empty-state.astro';
+import CollectionTile from './collection-tile.astro';
+
+interface Props {
+  tiles: Tile[];
+  /** Distinct entries across all collections, for the header line. */
+  covered?: number;
+  itemsLabel?: string;
+  title?: string;
+  description?: string;
+}
+
+const {
+  tiles,
+  covered,
+  itemsLabel = 'items',
+  title = 'Collections',
+  description = 'Shortlists for a question you already have, and live views that re-rank as the directory changes.',
+} = Astro.props;
+
+const featured = tiles
+  .filter((t) => t.editorial && !t.isEmpty && t.reviewedAt)
+  .sort((a, b) => Date.parse(b.reviewedAt ?? '') - Date.parse(a.reviewedAt ?? ''))[0];
+const rest = tiles.filter((t) => t !== featured);
+const reviewedText = (date?: string) =>
+  date
+    ? new Date(date).toLocaleDateString('en', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })
+    : undefined;
+---
+
+<section class="border-b border-border pb-10 pt-12 sm:pb-12 sm:pt-16">
+  <Container>
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-[60ch]">
+        <p class="m-0 text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+          {tiles.length} collections{typeof covered === 'number' && covered > 0 ? ` · ${covered} ${itemsLabel} covered` : ''}
+        </p>
+        <h1 class="m-0 mt-2 text-[2rem] font-semibold leading-tight tracking-tight text-foreground sm:text-[2.625rem]">{title}</h1>
+        <p class="m-0 mt-3 text-[1.0625rem] leading-relaxed text-muted-foreground">{description}</p>
+      </div>
+      <dl class="m-0 grid gap-2 text-sm sm:grid-cols-2 lg:w-[30rem]">
+        <div class="rounded-[var(--radius-lg)] border border-border bg-card p-3">
+          <dt class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs font-semibold text-emerald-700 dark:text-emerald-300">Editor's picks</dt>
+          <dd class="m-0 mt-2 text-2xs leading-relaxed text-muted-foreground">A person chose each entry and wrote down why. Dated reviews.</dd>
+        </div>
+        <div class="rounded-[var(--radius-lg)] border border-border bg-card p-3">
+          <dt class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2 py-0.5 text-2xs font-semibold text-secondary-foreground">
+            <span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>Live view
+          </dt>
+          <dd class="m-0 mt-2 text-2xs leading-relaxed text-muted-foreground">Fixed rules over the directory, re-ranked on every sync.</dd>
+        </div>
+      </dl>
+    </div>
+  </Container>
+</section>
+
+{tiles.length === 0 && (
+  <section class="py-12">
+    <Container>
+      <EmptyState title="No collections yet" description="Add a YAML file to data/collections/ and it appears here." />
+    </Container>
+  </section>
+)}
+
+{featured && (
+  <section aria-labelledby="featured-heading" class="pt-10 sm:pt-12">
+    <Container>
+      <article class="grid overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card lg:grid-cols-2">
+        <div class="flex min-w-0 flex-col p-6 sm:p-8">
+          <p class="m-0 flex items-center gap-2 text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+            <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 font-semibold normal-case tracking-normal text-emerald-700 dark:text-emerald-300">Featured</span>
+            Editor's picks
+          </p>
+          <h2 id="featured-heading" class="m-0 mt-4 text-[1.625rem] font-semibold leading-tight tracking-tight text-foreground sm:text-[2rem]">
+            <a href={featured.url} class="text-foreground no-underline hover:underline">{featured.title}</a>
+          </h2>
+          {featured.takeaway && <p class="m-0 mt-4 max-w-[58ch] text-[0.9375rem] leading-relaxed text-foreground">{featured.takeaway}</p>}
+          <div class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 pt-6">
+            <a href={featured.url} class={buttonClass('primary', 'md')} data-event="collection_card_click" data-event-source="collection_featured" data-event-item={featured.slug}>See the picks →</a>
+            <span class="text-2xs text-muted-foreground">
+              {featured.countLabel}
+              {reviewedText(featured.reviewedAt) && <> · Reviewed <time datetime={featured.reviewedAt}>{reviewedText(featured.reviewedAt)}</time></>}
+            </span>
+          </div>
+        </div>
+        {featured.examples.length > 0 && (
+          <div class="min-w-0 border-t border-border bg-surface-sunken p-4 sm:p-6 lg:border-l lg:border-t-0">
+            <h3 class="m-0 px-2 text-2xs font-medium uppercase tracking-wider text-muted-foreground">Quick picks</h3>
+            <ol class="m-0 mt-2 flex list-none flex-col p-0">
+              {featured.examples.map((ex, i) => (
+                <li class="m-0">
+                  <a href={`${featured.url}#pick-${ex.slug}`} class="group flex items-start gap-3 rounded-[var(--radius)] px-2 py-2.5 no-underline hover:bg-accent">
+                    {ex.avatarUrl ? (
+                      <img src={ex.avatarUrl} alt="" width="36" height="36" loading="lazy" decoding="async" class="h-9 w-9 shrink-0 rounded-lg border border-border bg-background object-cover" />
+                    ) : (
+                      <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-xs font-semibold text-muted-foreground">{i + 1}</span>
+                    )}
+                    <span class="min-w-0 flex-1">
+                      <span class="flex items-baseline justify-between gap-3">
+                        <span class="text-[0.9375rem] font-semibold text-foreground group-hover:underline">{ex.title}</span>
+                        {typeof ex.stars === 'number' && ex.stars > 0 && <span class="shrink-0 text-2xs tabular-nums text-muted-foreground">★ {formatStars(ex.stars)}</span>}
+                      </span>
+                      {ex.note && <span class="mt-0.5 line-clamp-2 block text-sm leading-snug text-muted-foreground">{ex.note}</span>}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </article>
+    </Container>
+  </section>
+)}
+
+{rest.length > 0 && (
+  <section aria-labelledby="all-collections" class="pb-16 pt-12">
+    <Container>
+      <h2 id="all-collections" class="m-0 mb-4 text-[1.25rem] font-semibold tracking-tight text-foreground">
+        {featured ? 'More collections' : 'All collections'}
+      </h2>
+      <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+        {rest.map((tile) => <li class="m-0 p-0"><CollectionTile tile={tile} /></li>)}
+      </ul>
+    </Container>
+  </section>
+)}

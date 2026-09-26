@@ -25,6 +25,9 @@ import BaseLayout from '../layouts/base-layout.astro';
 import Container from '../layouts/container.astro';
 import { buttonClass } from '../lib/classnames.ts';
 
+type Press = { outlet: string; title: string; url: string; date: string; logo?: string };
+const press = ((siteConfig as { press?: Press[] }).press ?? []);
+
 const githubUrl = siteConfig.repoUrl;
 const seo = getAboutPageSeo(siteConfig);
 const slug = indexSlug();
@@ -121,7 +124,7 @@ const pageContentHtml = getPageContentHtml('about');
           <a
             href={githubUrl}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             class={buttonClass("secondary", "sm")}
           >
             View on GitHub
@@ -130,6 +133,26 @@ const pageContentHtml = getPageContentHtml('about');
         <a href="/submit" class={buttonClass("ghost", "sm")}>Submit a {item} →</a>
       </section>
       </>
+      )}
+      {press.length > 0 && (
+        <section class="mt-12 border-t border-border pt-8" aria-labelledby="press-heading">
+          <h2 id="press-heading" class="m-0 text-[1.25rem] font-semibold tracking-tight text-foreground">Featured in</h2>
+          <ul class="m-0 mt-4 flex list-none flex-col gap-2 p-0">
+            {press.map((item) => (
+              <li class="m-0">
+                <a href={item.url} target="_blank" rel="noopener" class="flex items-center gap-3 rounded-[var(--radius-lg)] border border-border bg-card p-3 no-underline hover:border-ink-400 dark:hover:border-ink-600">
+                  {item.logo && (
+                    <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white p-1.5"><img src={item.logo} alt="" width="20" height="20" class="h-5 w-5" /></span>
+                  )}
+                  <span class="min-w-0">
+                    <span class="block text-sm font-semibold text-foreground">{item.title}</span>
+                    <span class="block text-2xs text-muted-foreground">{item.outlet} · {new Date(`${item.date}-01T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </article>
   </Container>

@@ -1,54 +1,60 @@
 ---
-import type { CollectionPageModel } from '@grove-dev/astro/server';
+import siteConfig from '@grove/generated/site-config.json';
+import type { CollectionPageModel, CollectionTile as Tile } from '@grove-dev/astro/server';
 /**
  * CollectionPage — renders a single curated/generated collection.
  *
  * Consumes a `CollectionPageModel` produced by `getCollectionPageModel`.
- * Renders the header via `SectionHeader` (framework consistency),
- * the matched entries via `CollectionRow`, and a related-collections
- * section.
  *
- * Editorial layers, each rendered only when the collection has it:
- * `editorial.introduction` (lead paragraph), the selection criteria,
- * the Markdown body (`bodyHtml`, from `getCollectionBodyHtml`), and the
- * `faq`. When the curator wrote per-entry notes the entries render as a
- * numbered verdict list — a card clamps its description to two lines,
- * which is no place for a 40-word verdict — and otherwise as the card
- * grid.
+ * First screen: a header band with the kind (editor's picks when the
+ * curator wrote per-entry notes, otherwise a live view), the title, the
+ * verdict (`editorial.introduction`, falling back to the description),
+ * faces of the entries, the count and the review date.
+ *
+ * Entries: editor's picks render as numbered cards with the note, tags,
+ * stars / last push / licence and Website (with `ref`) and Source
+ * links; live views render as a two-column grid of ranked cards. A
+ * sticky rail on wide screens holds the page outline and a submit
+ * prompt. Below: the Markdown body (`bodyHtml`), "How we picked"
+ * (`selectionNote`), the FAQ and related collections — as cards when
+ * `relatedTiles` is passed.
  *
  * Generic: no blueprint-specific copy. Consumers can override
  * `eyebrow`, `title`, `description`; `<slot name="intro">` takes any
- * extra markup. `emptyLabel` matches `RecordSection`'s API for
- * empty-state copy.
+ * extra markup.
  */
-import { formatCount, formatStars } from '@grove-dev/core';
+import { formatCount, withRef } from '@grove-dev/core';
 import Container from '../../layouts/container.astro';
 import SectionHeader from '../../layouts/section-header.astro';
+import { buttonClass } from '../../lib/classnames.ts';
 import EmptyState from '../ui/empty-state.astro';
-import CardGrid from './card-grid.astro';
-import CollectionRow from './collection-row.astro';
+import CollectionTile from './collection-tile.astro';
+import Avatar from './entry-avatar.astro';
+import Chips from './entry-chips.astro';
+import Metrics from './entry-metrics.astro';
 
 interface Props {
   model: CollectionPageModel;
   /** Sanitized HTML of the collection's Markdown body, if it has one. */
   bodyHtml?: string | null;
-  /** Override the eyebrow text (default: derived from collection kind). */
+  /** Override the eyebrow text (default: "Editor's picks" / "Live view"). */
   eyebrow?: string;
   /** Override the title (default: collection.title). */
   title?: string;
-  /** Override the description (default: collection.description). */
+  /** Override the lead (default: introduction, else description). */
   description?: string;
   /** Default copy when the collection has no matching entries. */
   emptyLabel?: string;
   /** Section id (deep link + stable key). */
   id?: string;
-  /**
-   * Heading level for the collection title. This component IS the
-   * page on collection detail routes, so it defaults to 1.
-   */
+  /** Heading level for the collection title (the page's h1 by default). */
   level?: 1 | 2;
   /** Noun pair for the entry count (blueprint labels). */
   countNoun?: { singular: string; plural: string };
+  /** Cards for related collections (`getCollectionTiles`); plain links otherwise. */
+  relatedTiles?: Tile[];
+  /** Where the rail's "Know one that fits?" prompt points. Empty hides it. */
+  submitHref?: string;
   class?: string;
 }
 
@@ -62,142 +68,216 @@ const {
   id,
   level = 1,
   countNoun = { singular: 'item', plural: 'items' },
+  relatedTiles = [],
+  submitHref = '/submit/',
   class: className = '',
 } = Astro.props;
 
+const Heading = `h${level}` as 'h1' | 'h2';
+const editorial = model.entries.some((entry) => entry.note);
 const finalTitle = title ?? model.collection.title;
-const finalDescription = description ?? model.collection.description;
-const hasNotes = model.entries.some((entry) => entry.note);
-const reviewedLabel = model.collection.lastReviewedAt
+const verdict = description ?? model.collection.introduction ?? model.collection.description;
+const finalEyebrow = eyebrow ?? (editorial ? "Editor's picks" : 'Live view');
+const countText = formatCount(model.total, countNoun);
+const reviewedText = model.collection.lastReviewedAt
   ? new Date(model.collection.lastReviewedAt).toLocaleDateString('en', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
       timeZone: 'UTC',
     })
   : null;
-const finalEyebrow =
-  eyebrow ?? (model.collection.kind === 'curated' ? 'Curated collection' : 'Generated collection');
+const outbound = (siteConfig as { outbound?: { ref?: string | false; skipHosts?: string[] } }).outbound ?? {};
+const faces = model.entries.filter((e) => e.avatarUrl).slice(0, 6);
+const jumpLinks = [
+  model.isEmpty ? null : { href: '#entries', label: editorial ? `The ${countText}` : `All ${countText}` },
+  model.collection.selectionNote ? { href: '#how-we-picked', label: 'How we picked' } : null,
+  model.faq.length > 0 ? { href: '#faq', label: 'Questions' } : null,
+  model.related.length > 0 ? { href: '#related', label: 'Related collections' } : null,
+].filter((link): link is { href: string; label: string } => link !== null);
 ---
 
-<section id={id} class={`py-12 sm:py-16 ${className}`}>
+<section id={id} class={className}>
+  <div class="border-b border-border bg-surface-sunken/60">
+    <Container>
+      <header class="max-w-[76ch] py-10 sm:py-14">
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-2xs text-muted-foreground">
+          <a href="/collections/" class="text-muted-foreground no-underline hover:text-foreground hover:underline">Collections</a>
+          <span aria-hidden="true">/</span>
+          {editorial ? (
+            <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 font-semibold text-emerald-700 dark:text-emerald-300">{finalEyebrow}</span>
+          ) : (
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2 py-0.5 font-semibold text-secondary-foreground"><span class="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>{finalEyebrow}</span>
+          )}
+        </nav>
+        <Heading class="m-0 mt-4 text-[2rem] font-semibold leading-[1.1] tracking-tight text-foreground sm:text-[2.625rem]">{finalTitle}</Heading>
+        {verdict && <p class="m-0 mt-4 text-[1.0625rem] leading-relaxed text-foreground sm:text-[1.125rem]">{verdict}</p>}
+        <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+          {faces.length > 0 && (
+            <span class="flex -space-x-2" aria-hidden="true">
+              {faces.map((e) => (
+                <img src={e.avatarUrl} alt="" width="28" height="28" decoding="async" class="h-7 w-7 rounded-full border-2 border-background bg-secondary object-cover" />
+              ))}
+            </span>
+          )}
+          <span class="font-medium text-foreground">{countText}</span>
+          {reviewedText && <span>Reviewed <time datetime={model.collection.lastReviewedAt}>{reviewedText}</time></span>}
+        </div>
+      </header>
+    </Container>
+  </div>
+
   <Container>
-    <SectionHeader eyebrow={finalEyebrow} title={finalTitle} description={finalDescription} level={level} />
+    <div class="grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+      <div class="min-w-0">
+        {jumpLinks.length > 1 && (
+          <nav aria-label="On this page" class="mb-8 lg:hidden">
+            <ul class="m-0 flex list-none flex-wrap gap-2 p-0">
+              {jumpLinks.map((link) => (
+                <li class="m-0"><a href={link.href} class={buttonClass('outline', 'sm')}>{link.label}</a></li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
-    {model.collection.introduction && (
-      <p class="m-0 mb-6 max-w-[68ch] text-[1.0625rem] leading-relaxed text-foreground">
-        {model.collection.introduction}
-      </p>
-    )}
+        <slot name="intro" />
 
-    {/* Editorial context reads as a quiet callout, not metadata
-        shouting in uppercase. */}
-    {model.collection.selectionNote && (
-      <aside class="mb-6 max-w-[64ch] rounded-[var(--radius-lg)] border-l-2 border-border bg-surface-sunken px-4 py-3">
-        <p class="m-0 text-2xs font-medium uppercase tracking-wider text-muted-foreground">
-          Selection criteria
-        </p>
-        <p class="m-0 mt-1 text-[0.875rem] leading-relaxed text-foreground">
-          {model.collection.selectionNote}
-        </p>
-      </aside>
-    )}
+        <section id="entries" aria-labelledby="entries-heading" class="scroll-mt-20">
+          <h2 id="entries-heading" class="m-0 mb-4 text-[1.375rem] font-semibold tracking-tight text-foreground">
+            {editorial ? `The ${countText}` : `All ${countText}, ranked`}
+          </h2>
 
-    <slot name="intro" />
+          {model.isEmpty ? (
+            <EmptyState
+              title={emptyLabel}
+              description="No records currently match this collection's query. The collection fills automatically as matching records are added."
+            />
+          ) : editorial ? (
+            <ol class="m-0 flex list-none flex-col gap-4 p-0">
+              {model.entries.map((entry, i) => {
+                const website = withRef(entry.homepageHref, outbound);
+                return (
+                  <li id={`pick-${entry.slug}`} class="m-0 scroll-mt-20 rounded-[var(--radius-lg)] border border-border bg-card p-5 sm:p-6">
+                    <div class="flex items-start gap-4">
+                      <Avatar src={entry.avatarUrl} title={entry.title} size="lg" />
+                      <div class="min-w-0 flex-1">
+                        <h3 class="m-0 flex flex-wrap items-baseline gap-x-2 text-[1.1875rem] font-semibold leading-snug text-foreground">
+                          <span class="tabular-nums text-muted-foreground">{i + 1}.</span>
+                          <a href={entry.url} class="text-foreground no-underline hover:underline">{entry.title}</a>
+                        </h3>
+                        <Metrics stars={entry.stars} pushedAt={entry.pushedAt} license={entry.licenses?.[0] ?? entry.license} />
+                      </div>
+                    </div>
+                    <p class="m-0 mt-4 max-w-[72ch] text-[0.9375rem] leading-relaxed text-foreground">{entry.note ?? entry.description}</p>
+                    <Chips items={(entry.tags ?? []).slice(0, 4)} />
+                    <div class="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+                      {website && (
+                        <a href={website} rel="noopener" target="_blank" class={buttonClass('secondary', 'sm')} data-event="homepage_click" data-event-source="collection_pick" data-event-item={entry.slug}>
+                          Website<span class="sr-only"> of {entry.title}</span>
+                        </a>
+                      )}
+                      {entry.repoHref && (
+                        <a href={entry.repoHref} rel="noopener" target="_blank" class={buttonClass('ghost', 'sm')} data-event="external_repo_click" data-event-source="collection_pick" data-event-item={entry.slug}>
+                          Source<span class="sr-only"> code of {entry.title}</span>
+                        </a>
+                      )}
+                      <a href={entry.url} class="ml-auto text-sm font-medium text-muted-foreground no-underline hover:text-foreground hover:underline">Full page →</a>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <ol class="m-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2">
+              {model.entries.map((entry, i) => (
+                <li id={`pick-${entry.slug}`} class="group relative m-0 flex scroll-mt-20 flex-col rounded-[var(--radius-lg)] border border-border bg-card p-4 transition-[border-color,box-shadow] focus-within:border-ring hover:border-ink-300 hover:shadow-md dark:hover:border-ink-700">
+                  <div class="flex items-start gap-3">
+                    <Avatar src={entry.avatarUrl} title={entry.title} />
+                    <div class="min-w-0 flex-1">
+                      <h3 class="m-0 text-[1rem] font-semibold leading-snug text-foreground">
+                        <a href={entry.url} class="text-foreground no-underline outline-none after:absolute after:inset-0 after:content-[''] group-hover:underline">{entry.title}</a>
+                      </h3>
+                      {entry.stack && <p class="m-0 mt-0.5 text-2xs text-muted-foreground">{entry.stack}</p>}
+                    </div>
+                    <span class="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-2xs font-semibold tabular-nums text-secondary-foreground" aria-label={`Rank ${i + 1}`}>#{i + 1}</span>
+                  </div>
+                  <p class="m-0 mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{entry.description}</p>
+                  <Chips items={(entry.tags ?? []).slice(0, 3)} />
+                  <div class="mt-auto pt-3">
+                    <Metrics stars={entry.stars} pushedAt={entry.pushedAt} license={entry.licenses?.[0] ?? entry.license} bordered />
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
 
-    {/* Bridges the heading outline: the page title is an h1 and the
-        entry cards render h3 titles — without this h2 Lighthouse
-        flags a heading-order skip. */}
-    <h2 class="sr-only">Entries</h2>
-    <p class="m-0 mb-4 text-2xs font-medium uppercase tracking-wider text-ink-500 dark:text-ink-400">
-      {formatCount(model.total, countNoun)}
-    </p>
+        {bodyHtml && <div class="grove-prose mt-12 max-w-[76ch]" set:html={bodyHtml} />}
 
-    {model.isEmpty ? (
-      <EmptyState
-        title={emptyLabel}
-        description="No records currently match this collection's query. The collection fills automatically as matching records are added."
-      />
-    ) : hasNotes ? (
-      <ol class="m-0 flex list-none flex-col gap-3 p-0">
-        {model.entries.map((entry, i) => (
-          <li class="m-0 rounded-[var(--radius-lg)] border border-border bg-card p-4 sm:p-5">
-            <h3 class="m-0 text-[1.0625rem] font-semibold leading-snug text-foreground">
-              <span class="mr-2 tabular-nums text-muted-foreground">{i + 1}.</span>
-              <a href={entry.url} class="text-foreground no-underline hover:underline">{entry.title}</a>
-            </h3>
-            <p class="m-0 mt-2 max-w-[72ch] text-[0.9375rem] leading-relaxed text-foreground">
-              {entry.note ?? entry.description}
+        {model.collection.selectionNote && (
+          <details id="how-we-picked" class="group mt-12 max-w-[76ch] scroll-mt-20 rounded-[var(--radius-lg)] border border-border bg-surface-sunken">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-[var(--radius-lg)] px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/35 [&::-webkit-details-marker]:hidden">
+              <h2 class="m-0 text-[1rem] font-semibold text-foreground">How we picked</h2>
+              <span aria-hidden="true" class="text-muted-foreground transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <p class="m-0 px-4 pb-4 text-[0.9375rem] leading-relaxed text-foreground">
+              {model.collection.selectionNote.trim().replace(/\s*\n\s*/g, ' ')}
             </p>
-            <p class="m-0 mt-3 flex flex-wrap gap-x-4 gap-y-1 text-2xs text-muted-foreground">
-              {typeof entry.stars === 'number' && entry.stars > 0 && (
-                <span>{formatStars(entry.stars)} stars</span>
-              )}
-              {(entry.licenses?.[0] ?? entry.license) && <span>{entry.licenses?.[0] ?? entry.license}</span>}
-              {entry.stack && <span>{entry.stack}</span>}
-              {entry.repoHref && (
-                <a href={entry.repoHref} rel="noopener noreferrer" target="_blank" class="text-muted-foreground underline">
-                  Source
-                </a>
-              )}
-            </p>
-          </li>
-        ))}
-      </ol>
-    ) : (
-      <CardGrid>
-        {model.entries.map((entry, i) => (
-          <li class="m-0 p-0">
-            <CollectionRow entry={entry} eager={i < 3} />
-          </li>
-        ))}
-      </CardGrid>
-    )}
+          </details>
+        )}
 
-    {bodyHtml && <div class="grove-prose mt-12 max-w-[72ch]" set:html={bodyHtml} />}
+        {model.faq.length > 0 && (
+          <section id="faq" class="mt-12 max-w-[76ch] scroll-mt-20">
+            <h2 class="m-0 mb-4 text-[1.375rem] font-semibold tracking-tight text-foreground">Frequently asked questions</h2>
+            <dl class="m-0 flex flex-col gap-5">
+              {model.faq.map((item) => (
+                <div>
+                  <dt class="m-0 text-[1rem] font-semibold text-foreground">{item.q}</dt>
+                  <dd class="m-0 mt-1 text-[0.9375rem] leading-relaxed text-foreground">{item.a}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+      </div>
 
-    {model.faq.length > 0 && (
-      <section class="mt-12 max-w-[72ch]">
-        <h2 class="m-0 mb-4 text-[1.375rem] font-semibold tracking-tight text-foreground">
-          Frequently asked questions
-        </h2>
-        <dl class="m-0 flex flex-col gap-5">
-          {model.faq.map((item) => (
-            <div>
-              <dt class="m-0 text-[1rem] font-semibold text-foreground">{item.q}</dt>
-              <dd class="m-0 mt-1 text-[0.9375rem] leading-relaxed text-foreground">{item.a}</dd>
+      <aside class="hidden lg:block" data-pagefind-ignore>
+        <div class="sticky top-20 flex flex-col gap-4">
+          {jumpLinks.length > 1 && (
+            <nav aria-label="On this page" class="rounded-[var(--radius-lg)] border border-border bg-card p-3">
+              <p class="m-0 px-2 text-2xs font-medium uppercase tracking-wider text-muted-foreground">On this page</p>
+              <ul class="m-0 mt-2 flex list-none flex-col p-0">
+                {jumpLinks.map((link) => (
+                  <li class="m-0"><a href={link.href} class="block rounded-[var(--radius)] px-2 py-1.5 text-sm text-foreground no-underline hover:bg-accent">{link.label}</a></li>
+                ))}
+              </ul>
+            </nav>
+          )}
+          {submitHref && (
+            <div class="rounded-[var(--radius-lg)] border border-dashed border-border p-4">
+              <p class="m-0 text-sm font-semibold text-foreground">Know one that fits?</p>
+              <p class="m-0 mt-1 text-2xs leading-relaxed text-muted-foreground">Submit it with one pull request. The page credits you.</p>
+              <a href={submitHref} class={buttonClass('secondary', 'sm', 'mt-3 w-full justify-center')}>Submit {countNoun.singular === 'item' ? 'an entry' : `a ${countNoun.singular}`}</a>
             </div>
-          ))}
-        </dl>
-      </section>
-    )}
-
-    {reviewedLabel && (
-      <p class="m-0 mt-8 text-2xs text-muted-foreground">
-        Last reviewed <time datetime={model.collection.lastReviewedAt}>{reviewedLabel}</time>
-      </p>
-    )}
+          )}
+        </div>
+      </aside>
+    </div>
 
     {model.related.length > 0 && (
-      <section class="mt-12 border-t border-ink-200 pt-8 dark:border-ink-800">
-        <SectionHeader
-          eyebrow="Related"
-          title="Related collections"
-          description="Other curated groupings of related items."
-          level={2}
-        />
-        <ul class="m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-4">
-          {model.related.map((r) => (
-            <li class="m-0 p-0">
-              <a
-                href={r.url}
-                class="group flex h-full flex-col gap-1 rounded-md border border-ink-200 bg-white px-3 py-2.5 no-underline transition-colors hover:border-ink-400 dark:border-ink-800 dark:bg-ink-950 dark:hover:border-ink-600"
-              >
-                <span class="text-sm font-medium text-ink-900 group-hover:underline dark:text-ink-100">{r.title}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
+      <section id="related" data-pagefind-ignore class="scroll-mt-20 border-t border-border pb-16 pt-10">
+        <SectionHeader eyebrow="Related" title="Related collections" level={2} />
+        {relatedTiles.length > 0 ? (
+          <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedTiles.map((tile) => <li class="m-0 p-0"><CollectionTile tile={tile} eventSource="collection_related" /></li>)}
+          </ul>
+        ) : (
+          <ul class="m-0 grid list-none grid-cols-1 gap-2 p-0 sm:grid-cols-2 lg:grid-cols-4">
+            {model.related.map((r) => (
+              <li class="m-0 p-0"><a href={r.url} class="flex h-full rounded-md border border-border bg-card px-3 py-2.5 text-sm font-medium text-foreground no-underline hover:underline">{r.title}</a></li>
+            ))}
+          </ul>
+        )}
       </section>
     )}
   </Container>
