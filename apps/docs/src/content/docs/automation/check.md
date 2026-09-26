@@ -24,13 +24,15 @@ grove check --strict   # also fail when there are warnings
 
 ## What gets validated
 
-`validateProject()` reads every `*.yml` file in `paths.recordsDir`, parses it, and accumulates issues across **all** files before returning — it does not stop at the first failure. Each issue carries a `code` and a `severity` of `error` or `warning`:
+`validateProject()` reads every record, whether a `*.yml` file in `paths.recordsDir` or a Markdown record in `paths.bodiesDir` (see [Record formats](/reference/record-schema/#record-formats)), parses it, and accumulates issues across **all** files before returning — it does not stop at the first failure. Each issue carries a `code` and a `severity` of `error` or `warning`:
 
 | Code | Severity | What it means |
 |---|---|---|
-| `missing_records_dir` | error | `paths.recordsDir` doesn't exist. |
+| `missing_records_dir` | error | `paths.recordsDir` doesn't exist and there are no Markdown records under `paths.bodiesDir` either. |
 | `schema_error` | error | The record's YAML has a syntax error, parsed to something that isn't a mapping (empty file, a list, etc.), or a non-Zod exception was thrown while parsing it. |
-| `duplicate_slug` | error | Two record files resolve to the same slug. |
+| `duplicate_slug_format` | error | One slug exists both as `paths.recordsDir/<slug>.yml` and as a Markdown record `paths.bodiesDir/<slug>.md`. Reported on both files; neither is built. |
+| `markdown_content_pointer` | error | A Markdown record sets `content:` in its frontmatter. The file is its own body; remove the key. |
+| `record_format_deprecated` | warning | Only with `records.deprecateContentPointer: true`: a YAML record points at its body with `content:`. The message names the Markdown file to move it to. |
 | `zod_error` | error | One line per failed Zod check against `recordsFileSchema` — missing required field, wrong type, invalid enum value, and so on. If a record has no `kind`, it's defaulted to the blueprint's kind before the Zod parse runs. The record is checked with its `data/overrides.yml` patch applied, so a patch that breaks the schema fails here. |
 | `slug_mismatch` | warning | The record's own `slug` field doesn't match its filename. |
 | `unknown_taxonomy_value` | warning | The record's `category`, `stack`, or (for `platforms[]`) a `platform` value isn't defined in `data/taxonomy/{categories,stacks,platforms}.yml`. Also raised for a collection's `query.categories`, `query.stacks` and `query.platforms`. Only checked when the matching taxonomy file has entries. |
@@ -62,7 +64,7 @@ grove check --strict   # also fail when there are warnings
 | `subject_without_collection` | warning | Three or more records relate to a subject and no collection declares it. |
 | `collection_empty` | warning | No record matches the collection's query, so the page would render an empty list. |
 
-Source: `packages/core/src/validate.ts`; `schema_error`, `zod_error` and `github_cache_mismatch` come from the record normalizer in `packages/core/src/normalize-records.ts`.
+Source: `packages/core/src/validate.ts`; `schema_error`, `zod_error`, `duplicate_slug_format`, `markdown_content_pointer`, `record_format_deprecated` and `github_cache_mismatch` come from the record normalizer in `packages/core/src/normalize-records.ts`.
 
 A **YAML syntax error** (bad indentation, an unterminated string, and so on) in a record is reported as a `schema_error` with the parser's message; the other records are still checked.
 
@@ -107,7 +109,7 @@ Source: `packages/cli/src/index.ts:72-83`.
 A blocked run looks like this, and stops — nothing after it runs, and there is no summary line:
 
 ```
-[error] duplicate_slug: Duplicate record slug: old
+[error] duplicate_slug_format: old: record is defined twice (data/records/old.yml and content/records/old.md); keep one format and delete the other
 [error] zod_error: cool-tool: projectType Invalid enum value
 ```
 
@@ -115,7 +117,7 @@ A blocked run looks like this, and stops — nothing after it runs, and there is
 
 Once validation passes, step 4 above regenerates every derived artifact by calling the functions in `packages/core/src/prepare.ts`:
 
-- **`generate()`** (`packages/core/src/build-data.ts`) reads every `data/records/*.yml` and `data/decisions.yml`, and writes `data/generated/records.full.json`, `data/generated/records.index.json`, `data/generated/records.json` (an alias of the full file), and `data/generated/site-config.json`.
+- **`generate()`** (`packages/core/src/build-data.ts`) reads every record (YAML and Markdown) through the record normalizer, with the GitHub sync cache, `data/overrides.yml`, `data/health.yml` and `data/decisions.yml` merged, and writes `data/generated/records.full.json`, `data/generated/records.index.json`, `data/generated/records.json` (an alias of the full file), and `data/generated/site-config.json`.
 - **`buildSitemap()`** writes `public/sitemap.xml` from the generated records and `data/collections/*.yml`.
 - **`buildLlmsFiles()`** writes `public/llms.txt` and `public/llms-full.txt`.
 - **`buildSiteArtifacts()`** writes `public/robots.txt` and a default `public/og-image.svg` — but only while those files still contain a `grove-generated` marker comment. Editing either file by hand removes the marker, and `check` stops touching it.

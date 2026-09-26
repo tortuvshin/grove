@@ -1,5 +1,4 @@
-import { readdir, readFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename } from 'node:path';
 import {
   buildGithubSyncPatch,
   classifyHealth,
@@ -12,10 +11,10 @@ import {
   normalizeGithubIntegration,
   parseGithubRepoUrl,
   pruneLegacyGithubFields,
+  readRecordSources,
   seedGithubCacheEntry,
   writeGithubCacheEntry,
 } from '@grove-dev/core';
-import { parse as parseYaml } from 'yaml';
 import { type SyncOutcome, shortReason } from './sync-summary.js';
 
 export interface GithubSyncOptions {
@@ -39,7 +38,7 @@ export interface GithubSyncRun {
 /**
  * `grove sync github`: fetch each record's repository and write the
  * result to the GitHub sync cache (`paths.githubCache`), one JSON file
- * per record. Record YAML is read, never written.
+ * per record. Record files (YAML or Markdown) are read, never written.
  *
  * The previous cache entry — or, before `grove migrate github-cache`
  * has run, the record's inline blocks — seeds the merge, so fields sync
@@ -54,17 +53,19 @@ export async function runGithubSync(options: GithubSyncOptions): Promise<GithubS
   const log = options.log ?? console.log;
   const githubFlags = normalizeGithubIntegration(config.integrations?.github);
 
-  const recordsDir = resolve(cwd, config.paths.recordsDir);
-  const files = (await readdir(recordsDir)).filter((file) => file.endsWith('.yml')).sort();
-  const selected = options.limit === undefined ? files : files.slice(0, options.limit);
+  // Both record formats: YAML under `paths.recordsDir` and Markdown
+  // records under `paths.bodiesDir`, discovered exactly as the build
+  // discovers them.
+  const { sources } = await readRecordSources(config, cwd);
+  const selected = options.limit === undefined ? sources : sources.slice(0, options.limit);
   const cache = await loadGithubCache(config, cwd);
   const outcomes: SyncOutcome[] = [];
   const inlineRecords: string[] = [];
 
-  for (const file of selected) {
-    const slug = basename(file, '.yml');
-    const raw = (parseYaml(await readFile(join(recordsDir, file), 'utf8'), { schema: 'core' }) ??
-      {}) as Record<string, unknown>;
+  for (const record of selected) {
+    const { slug } = record;
+    const file = basename(record.path);
+    const raw = record.data ?? {};
     if (raw.github !== undefined || raw.health !== undefined) inlineRecords.push(slug);
     const links = (raw.links as Record<string, string> | undefined) ?? {};
     const repoUrl = (raw.repoUrl as string | undefined) ?? links.github;

@@ -263,7 +263,7 @@ A file is skipped (not counted as failed) when:
 - It has neither `repoUrl` nor `links.github` set.
 - The value present doesn't match `parseGithubRepoUrl`'s pattern (`https?://github.com/<owner>/<repo>`) — this covers non-GitHub hosts like GitLab or Codeberg, and malformed URLs.
 
-The sync command does not look at `visibility`, `health.visibility`, or any curation field before deciding whether to process a record — every `.yml` file in the records directory is read regardless of its visibility.
+The sync command does not look at `visibility`, `health.visibility`, or any curation field before deciding whether to process a record. Every record is read regardless of its visibility: each `.yml` file in `paths.recordsDir` and each Markdown record in `paths.bodiesDir`, discovered by the same `readRecordSources` the build uses. Record files of either format are never written.
 
 ## Handling a failed run
 

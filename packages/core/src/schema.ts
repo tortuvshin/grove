@@ -874,6 +874,26 @@ export const groveConfigSchema = z.object({
    */
   readme: readmeConfigSchema.optional(),
 
+  /**
+   * Record source formats. Records are read from two places, both
+   * supported permanently:
+   *   - `paths.recordsDir/<slug>.yml` — YAML only, or YAML with a
+   *     `content:` pointer to a Markdown body;
+   *   - `paths.bodiesDir/<slug>.md` — one Markdown file per record,
+   *     YAML frontmatter plus the review body.
+   */
+  records: z
+    .object({
+      /**
+       * Warn (`record_format_deprecated`) for every YAML record that
+       * points at its body with `content:`, to drive a move to one
+       * Markdown file per record. Off by default so an existing site's
+       * `grove check` does not start warning once per record.
+       */
+      deprecateContentPointer: z.boolean().default(false),
+    })
+    .default({ deprecateContentPointer: false }),
+
   paths: z
     .object({
       dataDir: z.string().default('data'),

@@ -125,6 +125,40 @@ describe('runGithubSync', () => {
     expect(await readFile(recordPath, 'utf8')).toBe(RECORD);
   });
 
+  it('syncs Markdown records too, without touching the file', async () => {
+    const markdown = [
+      '---',
+      'name: Notes',
+      'repoUrl: https://github.com/owner/notes',
+      '---',
+      '',
+      'The review body.',
+      '',
+    ].join('\n');
+    await mkdir(join(cwd, 'content', 'records'), { recursive: true });
+    const notesPath = join(cwd, 'content', 'records', 'notes.md');
+    await writeFile(notesPath, markdown);
+    const seen: string[] = [];
+    const run = await runGithubSync({
+      cwd,
+      config,
+      fetchMetadata: async (ref) => {
+        seen.push(`${ref.owner}/${ref.repo}`);
+        return metadata;
+      },
+      now: () => at,
+      log: () => {},
+    });
+    expect(seen).toEqual(['owner/demo', 'owner/notes']);
+    expect(run.outcomes.map((o) => o.slug)).toEqual(['demo', 'notes']);
+    expect(await readFile(notesPath, 'utf8')).toBe(markdown);
+    const entry = JSON.parse(
+      await readFile(join(cwd, 'data', 'cache', 'github', 'notes.json'), 'utf8'),
+    );
+    expect(entry.slug).toBe('notes');
+    expect(entry.github.repository).toMatchObject({ stargazers_count: 50 });
+  });
+
   it('rewrites a byte-identical cache file for identical input', async () => {
     const sync = () =>
       runGithubSync({

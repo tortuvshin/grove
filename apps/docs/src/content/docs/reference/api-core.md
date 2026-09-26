@@ -65,20 +65,22 @@ for (const { slug, record, visibility, provenance } of records) {
 }
 ```
 
-`loadNormalizedRecords(config, cwd = process.cwd())` is the one reader of the record layers. `generate()`, `grove check`, `grove cleanup` and `grove readme generate` all take their records from it, so the site, the README and the checks cannot disagree about a record. Per record, lowest to highest precedence:
+`loadNormalizedRecords(config, cwd = process.cwd())` is the one reader of the record layers, in both [record formats](/reference/record-schema/#record-formats) (YAML under `paths.recordsDir`, optionally with a `content:` pointer, and Markdown with frontmatter under `paths.bodiesDir`). `generate()`, `grove check`, `grove cleanup` and `grove readme generate` all take their records from it, so the site, the README and the checks cannot disagree about a record. Per record, lowest to highest precedence:
 
-1. the record file, `paths.recordsDir/<slug>.yml`;
+1. the record file: `paths.recordsDir/<slug>.yml`, or a Markdown record's frontmatter;
 2. the GitHub sync cache for `github` / `health`, over a legacy inline copy (`resolveRecordGithub` with `githubSyncFreshnessOptions(config)`, so health from a stale sync resolves as `status: unknown`);
 3. the `paths.overrides` patch (shallow, top-level fields);
 4. schema parse with `recordsFileSchema`; the slug is always the file name;
 5. the `paths.health` entry, for a project record nothing above gave a health block;
 6. the `paths.decisions` visibility (`applyDecisionVisibility`: a project with no health block gets a fabricated `unknown` one to carry it).
 
-Each `NormalizedRecord` carries `record` (every layer applied), `base` (before `paths.health` and decisions), `visibility` (`recordVisibility(record)`: decision, then `health.visibility`, then the record's own `visibility`), `declaredSlug` (the `slug` written in the file) and `provenance`. `RecordHealthSource` is `cache | inline | override | file | decision | none`.
+Each `NormalizedRecord` carries `format` (`RecordFormat`: `yaml`, `yaml+content` or `markdown`), `body` (a Markdown record's body, or the file a pointer resolves to, frontmatter stripped), `record` (every layer applied; a Markdown record's `content` points at its own file), `base` (before `paths.health` and decisions), `visibility` (`recordVisibility(record)`: decision, then `health.visibility`, then the record's own `visibility`), `declaredSlug` (the `slug` written in the file) and `provenance`. `RecordHealthSource` is `cache | inline | override | file | decision | none`.
 
-The loader never throws for a bad record. A file that fails to parse or fails the schema is reported in `issues` (`schema_error`, or one `zod_error` per Zod issue), and a disagreeing inline copy as a `github_cache_mismatch` warning. `entries` lists every file in discovery order with its own issues and `syncStale` (its cached health came from a stale sync), and `record` is set only when the file normalized. Missing or invalid side files count as empty; `grove check` reports them.
+The loader never throws for a bad record. A file that fails to parse or fails the schema is reported in `issues` (`schema_error`, or one `zod_error` per Zod issue). So are a slug that exists in both formats (`duplicate_slug_format`, on both files) and a Markdown record with its own `content:` (`markdown_content_pointer`). A disagreeing inline copy is a `github_cache_mismatch` warning, and with `records.deprecateContentPointer` every YAML + pointer record gets a `record_format_deprecated` warning. `entries` lists every file in discovery order with its own issues and `syncStale` (its cached health came from a stale sync), and `record` is set only when the file normalized. Missing or invalid side files count as empty; `grove check` reports them.
 
-Types: `NormalizedRecord`, `NormalizedRecords`, `RecordEntry`, `RecordIssue`, `RecordHealthSource`.
+`readRecordSources(config, cwd?)` is the discovery step on its own. It returns `{ sources }`: every record file in both formats, sorted by file name, with its parsed YAML or frontmatter (`data`), a Markdown record's `body`, and read issues, and no layer merged. `grove sync github` iterates over it.
+
+Types: `NormalizedRecord`, `NormalizedRecords`, `RecordEntry`, `RecordIssue`, `RecordHealthSource`, `RecordFormat`, `RecordSource`, `RecordSources`.
 
 ## Pipeline
 
@@ -351,7 +353,7 @@ import {
 import {
   extractToc, headingSlug, readContentFile,
   readingMetrics, resolveContentPath, shiftHeadings,
-  stripFrontmatter, stripLeadingH1,
+  splitFrontmatter, stripFrontmatter, stripLeadingH1,
 } from "@grove-dev/core";
 
 const toc = extractToc(markdownBody);
@@ -360,6 +362,8 @@ const embedded = shiftHeadings(stripLeadingH1(content.body), 3);
 ```
 
 These read and shape the `content/records/<slug>.md` body that accompanies a record. Pure helpers; safe to import from server-only contexts.
+
+`splitFrontmatter(text)` returns `{ frontmatter, body, hasFrontmatter }`. It is the one frontmatter rule: `readContentFile` uses it for bodies and the record normalizer uses it for Markdown records. The closing `---` is only looked for in the first 200 lines, so a horizontal rule further down is never mistaken for it.
 
 `stripLeadingH1` drops a body's opening `# Title` line — the detail page already renders the record name as its `<h1>`, so a second one never reaches the page. `shiftHeadings` pushes every heading deeper (capped at `######`); `llms-full.txt` uses both so a record's body sits below its `### <name>` section instead of outranking it. Headings inside fenced code blocks are left alone.
 

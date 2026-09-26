@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildAwesomeReadme, toAwesomeReadmeRecord } from './awesome-readme.js';
 import { generate } from './build-data.js';
 import { cleanupStale } from './decisions.js';
-import { loadNormalizedRecords } from './normalize-records.js';
+import { loadNormalizedRecords, readRecordSources } from './normalize-records.js';
 import { type GroveConfig, groveConfigSchema } from './schema.js';
 import { validateProject } from './validate.js';
 
@@ -298,6 +298,226 @@ describe('loadNormalizedRecords', () => {
       expect(report.candidates[0]?.stars).toBe(7);
     } finally {
       process.chdir(previous);
+    }
+  });
+});
+
+describe('record formats: YAML and Markdown', () => {
+  let cwd: string;
+  const records = () => join(cwd, 'data', 'records');
+  const bodies = () => join(cwd, 'content', 'records');
+
+  const YAML_ONLY = 'slug: data-only\nname: Data Only\ncategory: tools\n';
+  const YAML_POINTER = [
+    'slug: pointed',
+    'name: Pointed',
+    'description: Body lives in a sidecar',
+    'category: tools',
+    'content: ./content/records/pointed.md',
+    '',
+  ].join('\n');
+  const POINTED_BODY = '# Pointed\n\nThe sidecar body.\n';
+  const MARKDOWN = [
+    '---',
+    'name: Written',
+    'description: One file, frontmatter plus body',
+    'category: tools',
+    '---',
+    '',
+    '## Review',
+    '',
+    'The body of a Markdown record.',
+    '',
+  ].join('\n');
+
+  beforeEach(async () => {
+    vi.stubEnv('GITHUB_TOKEN', '');
+    vi.stubEnv('GITHUB_ACTIONS', '');
+    cwd = await mkdtemp(join(tmpdir(), 'grove-formats-'));
+    await mkdir(records(), { recursive: true });
+    await mkdir(bodies(), { recursive: true });
+  });
+
+  afterEach(async () => {
+    vi.unstubAllEnvs();
+    await rm(cwd, { recursive: true, force: true });
+  });
+
+  it('reads a YAML-only record with no body', async () => {
+    await writeFile(join(records(), 'data-only.yml'), YAML_ONLY);
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(issues).toEqual([]);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ slug: 'data-only', format: 'yaml' });
+    expect(out[0]?.body).toBeUndefined();
+    expect(out[0]?.record.content).toBeUndefined();
+  });
+
+  it('reads a YAML record with a content pointer, and its body', async () => {
+    await writeFile(join(records(), 'pointed.yml'), YAML_POINTER);
+    await writeFile(join(bodies(), 'pointed.md'), POINTED_BODY);
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    // The pointed-at file is a body, not a second record, and the
+    // pointer format does not warn unless the site opts in.
+    expect(issues).toEqual([]);
+    expect(out.map((r) => [r.slug, r.format])).toEqual([['pointed', 'yaml+content']]);
+    expect(out[0]?.record.content).toBe('./content/records/pointed.md');
+    expect(out[0]?.body).toBe(POINTED_BODY);
+  });
+
+  it('warns about content pointers only when records.deprecateContentPointer is set', async () => {
+    await writeFile(join(records(), 'pointed.yml'), YAML_POINTER);
+    await writeFile(join(bodies(), 'pointed.md'), POINTED_BODY);
+    const strict = groveConfigSchema.parse({
+      ...config,
+      records: { deprecateContentPointer: true },
+    });
+    const { records: out, issues } = await loadNormalizedRecords(strict, cwd);
+    expect(out).toHaveLength(1);
+    expect(issues).toEqual([
+      expect.objectContaining({
+        code: 'record_format_deprecated',
+        severity: 'warning',
+        slug: 'pointed',
+      }),
+    ]);
+    expect(issues[0]?.message).toContain('content/records/pointed.md');
+  });
+
+  it('reads a Markdown record: slug from the file name, body from the file', async () => {
+    await writeFile(join(bodies(), 'written.md'), MARKDOWN);
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(issues).toEqual([]);
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({
+      slug: 'written',
+      format: 'markdown',
+      file: join('content', 'records', 'written.md'),
+      declaredSlug: undefined,
+      record: {
+        kind: 'project',
+        slug: 'written',
+        name: 'Written',
+        description: 'One file, frontmatter plus body',
+        // Renderers read the body through `content`, as for a pointer.
+        content: './content/records/written.md',
+      },
+    });
+    expect(out[0]?.body).toBe('\n## Review\n\nThe body of a Markdown record.\n');
+  });
+
+  it('validates frontmatter with the same schema as YAML', async () => {
+    await writeFile(
+      join(bodies(), 'bad.md'),
+      '---\nname: Bad\ncategory: tools\nstacks: not-a-list\n---\nBody\n',
+    );
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(out).toEqual([]);
+    expect(issues.map((i) => [i.code, i.message])).toEqual([
+      ['zod_error', 'bad: stacks Invalid input: expected array, received string'],
+    ]);
+  });
+
+  it('reads both formats side by side and ignores Markdown that is not a record', async () => {
+    await writeFile(join(records(), 'data-only.yml'), YAML_ONLY);
+    await writeFile(join(records(), 'pointed.yml'), YAML_POINTER);
+    await writeFile(join(bodies(), 'pointed.md'), POINTED_BODY);
+    await writeFile(join(bodies(), 'written.md'), MARKDOWN);
+    // A body nothing points at, and frontmatter with no `name`.
+    await writeFile(join(bodies(), 'orphan.md'), 'Just prose.\n');
+    await writeFile(join(bodies(), 'notes.md'), '---\ntitle: Notes\n---\nNot a record.\n');
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(issues).toEqual([]);
+    expect(out.map((r) => [r.slug, r.format])).toEqual([
+      ['data-only', 'yaml'],
+      ['pointed', 'yaml+content'],
+      ['written', 'markdown'],
+    ]);
+  });
+
+  it('rejects one slug in both formats instead of picking one', async () => {
+    await writeFile(join(records(), 'written.yml'), 'slug: written\nname: YAML copy\n');
+    await writeFile(join(bodies(), 'written.md'), MARKDOWN);
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(out).toEqual([]);
+    expect(issues.map((i) => [i.code, i.file])).toEqual([
+      ['duplicate_slug_format', join('content', 'records', 'written.md')],
+      ['duplicate_slug_format', join('data', 'records', 'written.yml')],
+    ]);
+    expect(issues[0]?.message).toBe(
+      `written: record is defined twice (${join('data', 'records', 'written.yml')} and ${join('content', 'records', 'written.md')}); keep one format and delete the other`,
+    );
+    await expect(generate(cwd, config)).rejects.toThrow('generate failed');
+  });
+
+  it('keeps the file name as the slug when frontmatter declares another', async () => {
+    await writeFile(join(bodies(), 'written.md'), MARKDOWN.replace('---\n', '---\nslug: other\n'));
+    const { records: out } = await loadNormalizedRecords(config, cwd);
+    expect(out[0]?.slug).toBe('written');
+    expect(out[0]?.record.slug).toBe('written');
+    expect(out[0]?.declaredSlug).toBe('other');
+  });
+
+  it('rejects a Markdown record that also points at a body', async () => {
+    await writeFile(
+      join(bodies(), 'written.md'),
+      MARKDOWN.replace('---\n', '---\ncontent: ./elsewhere.md\n'),
+    );
+    const { records: out, issues } = await loadNormalizedRecords(config, cwd);
+    expect(out).toEqual([]);
+    expect(issues.map((i) => i.code)).toEqual(['markdown_content_pointer']);
+  });
+
+  it('normalizes a YAML + pointer record and its Markdown conversion identically', async () => {
+    await writeFile(join(records(), 'pointed.yml'), YAML_POINTER);
+    await writeFile(join(bodies(), 'pointed.md'), POINTED_BODY);
+    const before = (await loadNormalizedRecords(config, cwd)).records[0];
+
+    // Convert by hand: frontmatter = the YAML minus its pointer.
+    const frontmatter = YAML_POINTER.replace('content: ./content/records/pointed.md\n', '');
+    await writeFile(join(bodies(), 'pointed.md'), `---\n${frontmatter}---\n${POINTED_BODY}`);
+    await rm(join(records(), 'pointed.yml'));
+    const after = (await loadNormalizedRecords(config, cwd)).records[0];
+
+    expect(after?.format).toBe('markdown');
+    expect(after?.record).toEqual(before?.record);
+    expect(after?.base).toEqual(before?.base);
+    expect(after?.body).toBe(before?.body);
+    expect(after?.visibility).toBe(before?.visibility);
+    expect(after?.declaredSlug).toBe(before?.declaredSlug);
+  });
+
+  it('grove check accepts a Markdown-only site', async () => {
+    await rm(records(), { recursive: true });
+    await writeFile(join(bodies(), 'written.md'), MARKDOWN);
+    const previous = process.cwd();
+    process.chdir(cwd);
+    try {
+      const result = await validateProject(config);
+      expect(result.errors).toEqual([]);
+      // The body resolves through `content`, like a pointer would.
+      expect(result.warnings.map((w) => w.code)).toEqual(['missing_added_at']);
+    } finally {
+      process.chdir(previous);
+    }
+  });
+});
+
+describe('readRecordSources', () => {
+  it('returns raw data for both formats without merging any layer', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'grove-sources-'));
+    try {
+      await mkdir(join(cwd, 'data', 'records'), { recursive: true });
+      await mkdir(join(cwd, 'content', 'records'), { recursive: true });
+      await writeFile(join(cwd, 'data', 'records', 'a.yml'), 'name: A\n');
+      await writeFile(join(cwd, 'content', 'records', 'b.md'), '---\nname: B\n---\nBody\n');
+      const { sources } = await readRecordSources(config, cwd);
+      expect(sources.map((s) => [s.slug, s.format, s.data, s.body])).toEqual([
+        ['a', 'yaml', { name: 'A' }, undefined],
+        ['b', 'markdown', { name: 'B' }, 'Body\n'],
+      ]);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
     }
   });
 });

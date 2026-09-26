@@ -254,7 +254,7 @@ health:                                    # auto-derived by classifyHealth()
 ### What you'll do day-to-day
 
 - **Add a record** — create `data/records/<slug>.yml` with at least `name`; `slug` must be present in the file too, though the filename always wins, and `kind` is filled in for you.
-- **Add a Markdown body** — create `content/records/<slug>.md` and set `content:` to its relative path.
+- **Add a Markdown body** — create `content/records/<slug>.md` and set `content:` to its relative path, or write the whole record as that one Markdown file, with the fields in its frontmatter (see [Record formats](/reference/record-schema/#record-formats)).
 - **Tag and categorize** — set `category`, `tags`, `stacks`, `platforms`, `licenses` from the matching `data/taxonomy/*.yml`.
 - **Curate** — set `curation.{reviewed,reviewedBy,labels,lenses}`, `scores.*`, or `visibility`.
 - **Add screenshots** — list `screenshots: [{ src, alt, source?, width?, height? }]`.
