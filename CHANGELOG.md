@@ -22,6 +22,13 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.15.0](https://github.com/tortuvshin/grove/compare/v0.14.0...v0.15.0) (2026-09-26)
+
+
+### Features
+
+* **core:** one record normalizer for build, check, cleanup and README ([34b6325](https://github.com/tortuvshin/grove/commit/34b632523c6c2d914740ae015115e02241df9ad9))
+
 ## [0.14.0](https://github.com/tortuvshin/grove/compare/v0.13.0...v0.14.0) (2026-09-26)
 
 
