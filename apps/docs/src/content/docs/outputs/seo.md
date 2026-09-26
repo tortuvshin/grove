@@ -21,7 +21,7 @@ silently ignored by every social platform. Set
 | `<title>` | the page title you pass |
 | `<meta name="description">` | the page description you pass |
 | `<link rel="canonical">` | `Astro.site` + the current pathname |
-| `<meta name="robots">` | `index,follow,max-image-preview:large`, or `noindex,nofollow` when the page opts out |
+| `<meta name="robots">` | `index,follow,max-image-preview:large`; `noindex,nofollow` when the page opts out; `noindex,follow` when the [index policy](#index-policy) excludes it or the URL has a query string |
 | `og:type` | `website` by default; pass `article` for post-like pages |
 | `og:url` | the canonical URL |
 | `og:title`, `og:description` | title, and description truncated to 200 characters |
@@ -86,6 +86,54 @@ Filter URLs are excluded. `isIndexableFilterPath` in
 `packages/core/src/robots.ts` returns `false` for anything matching
 `/browse?`, `/search?`, or `/apps?` — those are query-string views of
 content that is already indexed at its own URL.
+
+## Index policy
+
+Every generated page is indexable by default. A directory built from
+imported metadata can publish hundreds of pages that are template text
+over synced data, so `seo` in `grove.config.ts` can restrict indexing
+to pages a person wrote or reviewed:
+
+```ts
+seo: {
+  recordIndexPolicy: "editorial-and-reviewed", // "all" | "editorial" | "editorial-and-reviewed"
+  collectionIndexPolicy: "editorial",          // "all" | "editorial"
+  taxonomyIndexPolicy: "editorial",            // "all" | "editorial"
+},
+```
+
+| Page | `editorial` means | Also |
+|---|---|---|
+| Record detail | a non-empty Markdown body (`content:` or `content/records/<slug>.md`) | `editorial-and-reviewed` also needs `curation.reviewed: true` |
+| Collection | `editorial.introduction`, or a Markdown `content` body | `seo.index: false` and empty collections stay noindex either way |
+| Category, stack | the term's `description` in `data/taxonomy/*.yml` | licenses are not covered |
+
+A page the policy excludes still renders and still links onwards: the
+page model returns `seo.noindex: true` and `seo.robots: "noindex,follow"`,
+and the registry pages pass both to `BaseLayout`. The sitemap applies the
+same functions (`recordIndexable`, `collectionIndexable`,
+`taxonomyTermIndexable` from `@grove-dev/core`), so the page and the
+sitemap cannot disagree.
+
+### Parameter URLs
+
+Filtered and sorted views (`/apps/?q=…`, `?sort=`, facet parameters)
+are the static base page served with a query string: the server HTML,
+canonical included, is the base page's. The `Seo` layout adds a small
+inline script that switches the robots meta to `noindex,follow` when
+`location.search` is non-empty. The canonical keeps pointing at the
+base path.
+
+Google renders JavaScript and honours a robots meta the page changes at
+runtime — adding `noindex` that way works; the reverse (removing a
+server-sent `noindex`) does not, because Google stops at a server
+`noindex` without rendering. Crawlers that do not render JavaScript see
+only the canonical. Where the host can set headers per request, an
+`X-Robots-Tag: noindex, follow` response header on requests that carry a
+query string is the stronger, static equivalent — on Cloudflare a
+Response Header Transform Rule matching `http.request.uri.query ne ""`
+does it without a Worker. Do not add `Disallow: /*?` to `robots.txt`
+instead: a crawler that may not fetch the URL never sees its `noindex`.
 
 ## `robots.txt`
 

@@ -62,6 +62,13 @@ export default defineConfig({
     googleAnalyticsId: "G-XXXXXXXXXX",
   },
 
+  // Index only pages someone wrote or reviewed (default: "all").
+  seo: {
+    recordIndexPolicy: "editorial-and-reviewed",
+    collectionIndexPolicy: "editorial",
+    taxonomyIndexPolicy: "editorial",
+  },
+
   nav: [
     { label: "Home", href: "/" },
     { label: "Browse", href: "/projects" },
@@ -204,6 +211,21 @@ is supported today. Determines the record kind (`project` /
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `googleAnalyticsId` | `string`, must match `/^G-[A-Z0-9]+$/` | `undefined` | GA4 measurement ID (e.g. `G-XXXXXX`). Wired into `BaseLayout` as `site.analytics.googleAnalyticsId`; a per-page `gaId` prop can override it. Omit both to ship without Google Analytics. |
+
+### `seo`
+
+**Type:** `object` (optional)
+**Default:** every policy `"all"`
+
+Which generated pages are offered to search engines. A page a policy
+excludes still renders, with `noindex,follow`, and is left out of the
+sitemap. See [SEO & social → Index policy](/outputs/seo/#index-policy).
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `recordIndexPolicy` | `"all" \| "editorial" \| "editorial-and-reviewed"` | `"all"` | Record detail pages. `editorial`: a non-empty Markdown body. `editorial-and-reviewed`: a body and `curation.reviewed: true`. |
+| `collectionIndexPolicy` | `"all" \| "editorial"` | `"all"` | Collection pages. `editorial`: an `editorial.introduction` or a Markdown `content` body. |
+| `taxonomyIndexPolicy` | `"all" \| "editorial"` | `"all"` | Category and stack pages. `editorial`: the term has a `description` in `data/taxonomy/*.yml`. |
 
 ### `nav`
 

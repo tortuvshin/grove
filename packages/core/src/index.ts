@@ -225,6 +225,22 @@ export { PUSH_AGE_BANDS, pushAgeBand } from './health-thresholds.js';
 // surfaces never print different hosts for the same config.
 export { hostOf } from './host.js';
 export { importAwesomeList, writeImportedRecords } from './importer.js';
+// ── Index policy (which generated pages are offered to search engines) ──
+export type {
+  CollectionIndexInput,
+  IndexPolicyConfig,
+  ListingIndexPolicy,
+  RecordIndexInput,
+  RecordIndexPolicy,
+  TaxonomyTermIndexInput,
+} from './index-policy.js';
+export {
+  collectionIndexable,
+  hasEditorialBody,
+  NOINDEX_FOLLOW,
+  recordIndexable,
+  taxonomyTermIndexable,
+} from './index-policy.js';
 // ── IO helpers ────────────────────────────────────────────────────────
 export { readYamlFile, writeTextFile, writeYamlFile } from './io.js';
 export type { LlmsInput, LlmsRecordInput, LlmsResult } from './llms.js';
@@ -372,12 +388,14 @@ export {
   healthFileSchema,
   healthStatusSchema,
   healthTierSchema,
+  LISTING_INDEX_POLICIES,
   linksSchema,
   normalizeGithubIntegration,
   overrideSchema,
   overridesFileSchema,
   projectRecordSchema,
   projectTypeSchema,
+  RECORD_INDEX_POLICIES,
   readmeConfigSchema,
   recordsFileSchema,
   recordVisibility,

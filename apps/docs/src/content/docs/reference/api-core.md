@@ -111,6 +111,27 @@ const xml = buildSitemapXml(entries);
 
 `buildSitemap(input: SitemapInput, cwd?, config?)` (`packages/core/src/sitemap.ts:96`) is async and writes the file; `buildSitemapXml(entries: SitemapEntry[])` (`packages/core/src/sitemap.ts:69`) is synchronous and does not write anything. A single `sitemap.xml` is emitted. There is no separate sitemap index.
 
+## Index policy
+
+```ts
+import {
+  recordIndexable,
+  collectionIndexable,
+  taxonomyTermIndexable,
+  hasEditorialBody,
+  NOINDEX_FOLLOW,
+  RECORD_INDEX_POLICIES,
+  LISTING_INDEX_POLICIES,
+} from "@grove-dev/core";
+
+recordIndexable({ hasBody, reviewed, visibility }, config.seo.recordIndexPolicy);
+collectionIndexable({ introduction, hasBody, seoIndex, entryCount }, config.seo.collectionIndexPolicy);
+taxonomyTermIndexable({ description, count }, config.seo.taxonomyIndexPolicy);
+hasEditorialBody(record.content); // non-empty Markdown body besides an opening `# Title`
+```
+
+The rules behind `seo.*IndexPolicy` (`packages/core/src/index-policy.ts`), shared by the page models and the sitemap. Types: `RecordIndexPolicy`, `ListingIndexPolicy`, `IndexPolicyConfig`, `RecordIndexInput`, `CollectionIndexInput`, `TaxonomyTermIndexInput`. `NOINDEX_FOLLOW` is the robots value an excluded page carries. See [SEO & social → Index policy](/outputs/seo/#index-policy).
+
 ## llms.txt
 
 ```ts

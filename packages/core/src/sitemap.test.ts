@@ -114,6 +114,30 @@ describe('buildSitemap', () => {
     expect(xml).not.toContain('ghost');
     expect(xml).not.toContain('/submit');
   });
+
+  it('leaves out a record page the index policy renders noindex', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'grove-sitemap-'));
+    roots.push(cwd);
+    const config = {
+      blueprint: 'project-directory',
+      site: { name: 'Open Apps', url: 'https://openappscout.com' },
+      routes: {},
+      labels: { singular: 'app', plural: 'apps' },
+      paths: { publicDir: 'public' },
+    } as GroveConfig;
+
+    const result = await buildSitemap(
+      {
+        generatedAt: '2026-06-24T00:00:00.000Z',
+        items: [{ slug: 'reviewed' }, { slug: 'imported', index: false }],
+      },
+      cwd,
+      config,
+    );
+    const xml = await readFile(result.path, 'utf8');
+    expect(xml).toContain('/projects/reviewed/');
+    expect(xml).not.toContain('imported');
+  });
 });
 
 describe('buildSitemapIndex', () => {

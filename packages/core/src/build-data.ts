@@ -310,6 +310,8 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
     footer: cfg.footer,
     submission: cfg.submission,
     analytics: cfg.analytics,
+    // Index policy — page models read it from here (see index-policy.ts).
+    seo: cfg.seo,
     browse: cfg.browse,
     theme: cfg.theme,
     integrations: cfg.integrations,
