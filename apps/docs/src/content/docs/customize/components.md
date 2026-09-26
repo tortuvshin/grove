@@ -21,7 +21,7 @@ src/
 │   └── site/       # site chrome — theme-toggle
 ├── layouts/        # base-layout, header, footer, container, seo, section-header
 ├── pages/          # home, browse, record detail, taxonomy, collections, submit, about, contributors, 404 — same update rules as everything else here
-├── lib/            # UI-local helpers (classnames, icon-kinds, icon-registry)
+├── lib/            # UI-local helpers (classnames, icon-kinds, icon-registry, live-filters)
 └── styles/         # system.css
 ```
 
@@ -49,7 +49,7 @@ The registry groups its files into 12 feature-level items plus `default`, which 
 | `@grove/taxonomy` | Browse-by-category, -stack, and -license: `categories/`, `stacks/`, and `licenses/[name]` routes, the shared `taxonomy-list` body, and the `stack-grid` / `category-grid` the home page also renders. |
 | `@grove/collections` | Curated and generated collections: `collections/` index and detail routes, `collection-index`, `collection-page`, `collection-card`, `collection-row`, and `collection-teaser`. |
 | `@grove/home` | The landing route (`pages/index.astro`) with `hero`, `why-this-exists`, `pipeline-strip`, `record-section` (trending / new / established), `contributors-grid`, `original-collection`, and `final-cta`. |
-| `@grove/browse` | The list/discovery page and its paginated routes (`[slug]/index`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json.ts`) with `directory-browse`, `directory-index-client`, `refine-panel`, `filter-group-menu`, `filter-options`, `smart-lens-tabs`, `index-row`, and `pagination`. |
+| `@grove/browse` | The list/discovery page and its paginated routes (`[slug]/index`, `[slug]/page/[page]`, `[slug]/page/cards`, `[slug]/page/records.json.ts`) with `directory-browse`, `directory-index-client`, `refine-panel`, `filter-group-menu`, `filter-options`, `smart-lens-tabs`, `index-row`, and `pagination`, plus `lib/live-filters.ts` (the tested URL, history-session, and label logic behind live filtering). |
 | `@grove/record` | The per-record route (`[slug]/[recordSlug]`) with `record-header`, `record-sidebar`, `editorial-summary`, `table-of-contents`, `markdown-body`, and `language-breakdown`. |
 | `@grove/submit` | `pages/submit.astro` and `submission-client` — fetch a repository, validate against the taxonomy, draft a record YAML for a pull request. |
 | `@grove/about` | `pages/about.astro` — the narrative about route, overridable from `content/pages/about.md`. |
@@ -83,9 +83,9 @@ Domain UI components rendered by Grove's pages. Each accepts a view-model-shaped
 | `language-breakdown.astro` | Code-composition bar + legend for the record detail sidebar. |
 | `editorial-summary.astro` | "Best for" + "Consider before using" cards on the record detail page. |
 | `table-of-contents.astro` | Collapsible TOC with scroll-spy and smooth scroll. |
-| `directory-index-client.astro` | Client controller for the browse page (filter, sort, paginate, chips). |
+| `directory-index-client.astro` | Client controller for the browse page (filter, sort, paginate, chips). Filters apply live. Changes made while a popover or the drawer is open share one history entry, and the result count is announced through a debounced polite live region. |
 | `submission-client.astro` | Submit-form client (GitHub fetch + YAML preview). |
-| `refine-panel.astro` | Multi-select facet dropdowns used by the browse page. |
+| `refine-panel.astro` | Facet dropdowns used by the browse page. Every change applies at once and the popover stays open. There is no Apply button. |
 | `filter-group-menu.astro` / `filter-options.astro` | Single facet dropdown + checkbox list. |
 | `pagination.astro` | Previous/Next + windowed page list. |
 | `powered-by.astro` | "Powered by Grove" inline SVG attribution. |
@@ -104,7 +104,7 @@ Stateless, presentation-only primitives. Use them in any consumer page or in you
 | `badge.astro` | Span-based status pill with six semantic variants. |
 | `button.astro` | `<a>` or `<button>` with class via `buttonClass()`. |
 | `empty-state.astro` | "Nothing here" block with optional recovery link. |
-| `filter-drawer.astro` | Mobile filter surface built on `<dialog>`. |
+| `filter-drawer.astro` | Mobile filter surface built on `<dialog>`, with a sticky "Show N results" button that closes the sheet and moves focus to the results. |
 | `page-header.astro` | Eyebrow + h1/h2 + description block. |
 | `search-field.astro` | Search input with magnifier icon, clear button, `/` shortcut. |
 

@@ -358,6 +358,11 @@
           "path": "default/components/grove/index-row.astro",
           "type": "registry:component",
           "target": "~/src/components/grove/index-row.astro"
+        },
+        {
+          "path": "default/lib/live-filters.ts",
+          "type": "registry:file",
+          "target": "~/src/lib/live-filters.ts"
         }
       ]
     },
