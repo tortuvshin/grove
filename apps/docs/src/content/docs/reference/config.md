@@ -411,6 +411,25 @@ readme: {
 See [README generation](/automation/readme/) for the full rendered
 output and the sentinel-block mechanics.
 
+### `records`
+
+**Type:** `object` · **Default:** `{ deprecateContentPointer: false }`
+
+Record source formats. Grove reads YAML records from `paths.recordsDir`
+(optionally with a `content:` pointer to a Markdown body) and Markdown
+records with frontmatter from `paths.bodiesDir`. All of them are supported
+permanently; see [Record formats](/reference/record-schema/#record-formats).
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `deprecateContentPointer` | `boolean` | `false` | When `true`, `grove check` warns (`record_format_deprecated`) for every YAML record with a `content:` pointer, naming the Markdown file to move it to. Off by default so an existing site's CI does not start warning once per record; turn it on while migrating, and `--strict` makes it a gate. |
+
+```ts
+records: {
+  deprecateContentPointer: true,
+},
+```
+
 ### `paths`
 
 **Type:** `object`
@@ -424,7 +443,7 @@ you need.
 | `contentDir` | `"content"` | Root for Markdown content |
 | `recordsDir` | `"data/records"` | Where record YAML files live |
 | `pagesDir` | `"content/pages"` | The scaffold ships `about.astro`, `contributors.astro`, `submit.astro`, and `404.astro` as Astro components under `src/pages/`. The `content/pages/` directory is reserved for consumer-authored Markdown content pages. |
-| `bodiesDir` | `"content/records"` | Optional Markdown body per record (referenced by `content:`) |
+| `bodiesDir` | `"content/records"` | Markdown records (`<slug>.md`, frontmatter plus body), and bodies that YAML records point at with `content:` |
 | `publicDir` | `"public"` | Static assets served as-is |
 | `taxonomyDir` | `"data/taxonomy"` | Controlled category, stack, platform, and distribution-channel values |
 | `generatedDir` | `"data/generated"` | Auto-generated JSON; gitignored |

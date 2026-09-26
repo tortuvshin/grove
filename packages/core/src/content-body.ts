@@ -194,17 +194,37 @@ export function readContentFile(
   } catch {
     return null;
   }
-  const lines = raw.split(/\r?\n/);
-  let frontmatter = '';
-  let body = raw;
+  return { ...splitFrontmatter(raw), path: found };
+}
+
+export interface SplitFrontmatterResult {
+  /** Markdown body with frontmatter stripped. */
+  body: string;
+  /** Raw YAML text between the frontmatter fences (no fences, no trim). */
+  frontmatter: string;
+  /** True when the text opens with a closed `---` fence pair. */
+  hasFrontmatter: boolean;
+}
+
+/**
+ * Split Markdown text into its leading YAML frontmatter and body — the
+ * rule `readContentFile` and Markdown records share. The closing fence
+ * is searched for in the first 200 lines only, so a `---` horizontal
+ * rule further down is never mistaken for it.
+ */
+export function splitFrontmatter(text: string): SplitFrontmatterResult {
+  const lines = text.split(/\r?\n/);
   if (lines[0]?.trim() === '---') {
     const close = lines.slice(1, 200).findIndex((l) => l.trim() === '---');
     if (close >= 0) {
-      frontmatter = lines.slice(1, close + 1).join('\n');
-      body = lines.slice(close + 2).join('\n');
+      return {
+        frontmatter: lines.slice(1, close + 1).join('\n'),
+        body: lines.slice(close + 2).join('\n'),
+        hasFrontmatter: true,
+      };
     }
   }
-  return { body, frontmatter, path: found };
+  return { body: text, frontmatter: '', hasFrontmatter: false };
 }
 
 // ── Heading slug (GitHub-flavoured, ASCII-only) ──────────────────────

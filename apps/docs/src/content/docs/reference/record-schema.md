@@ -3,9 +3,11 @@ title: Record schema
 description: Every field a record file may carry, its type, its default, and which ones a human writes versus which ones a command fills in.
 ---
 
-A record is one YAML file under `data/records/`. `grove check` parses it with
-the Zod schema in `packages/core/src/schema.ts` and rejects the build if it
-does not validate.
+A record is one file: a YAML file under `data/records/`, or a Markdown file
+with YAML frontmatter under `content/records/` (see
+[Record formats](#record-formats)). `grove check` parses it with the Zod
+schema in `packages/core/src/schema.ts` and rejects the build if it does not
+validate. Both formats go through the same schema.
 
 The schema is a discriminated union on `kind` with three members —
 `project`, `resource`, and `entity`. **Only `kind: project` is usable
@@ -19,6 +21,58 @@ record's `slug:` field disagrees with its filename, `grove check` reports
 `record slug "…" does not match filename` as a **warning** — the build
 continues and the filename wins, because the loader overwrites `slug` with the
 filename. Run `grove check --strict` if you want that to fail.
+
+## Record formats
+
+Grove reads three layouts, all permanently supported and mixable within one
+site. The record normalizer (`loadNormalizedRecords`) discovers them, and
+every output (site, README, `grove check`, `grove cleanup`, `grove sync github`)
+reads them the same way.
+
+| Format | Files | Use it for |
+|---|---|---|
+| YAML only | `paths.recordsDir/<slug>.yml` | Data-only records with no review body. |
+| YAML + pointer | `paths.recordsDir/<slug>.yml` with `content: ./content/records/<slug>.md` | Existing sites. The body file has no frontmatter. |
+| Markdown | `paths.bodiesDir/<slug>.md`: frontmatter plus body | One file per record: fields in the frontmatter, the review underneath. |
+
+A Markdown record looks like this:
+
+```markdown
+---
+name: Immich
+description: Self-hosted photo and video backup.
+category: media
+repoUrl: https://github.com/immich-app/immich
+addedAt: 2026-08-11
+---
+
+## Why it's listed
+
+The review body, rendered on the detail page.
+```
+
+Rules:
+
+- **Slug**: the file name without `.md`. `slug:` in the frontmatter is
+  optional; if it is set and differs, `grove check` warns (`slug_mismatch`)
+  and the file name wins.
+- **What counts as a record**: a `.md` file in `paths.bodiesDir` whose
+  frontmatter has `name` (`title` on a resource hub). A file that a YAML
+  record's `content:` points at is that record's body, never a record. A
+  file with no frontmatter is ignored.
+- **Body**: everything after the frontmatter. The normalized record's
+  `content` points at the file itself, so the detail page and
+  `llms-full.txt` render it exactly as they render a pointed-at body. A
+  Markdown record must not set `content:` itself (`markdown_content_pointer`
+  error).
+- **One slug, one format**: the same slug as both `<slug>.yml` and
+  `<slug>.md` is a `duplicate_slug_format` error on both files. Neither
+  wins.
+- **Converting** a YAML + pointer record: move its YAML (minus `content:`)
+  into the body file's frontmatter and delete the `.yml`. The normalized
+  record is identical. Set
+  [`records.deprecateContentPointer`](/reference/config/#records) to have
+  `grove check` list the YAML + pointer records still to convert.
 
 ## Shared base fields
 
@@ -110,9 +164,11 @@ including the extra ones. A non-URL value fails validation.
 
 **Type:** `string` · **Optional**
 
-Path to a Markdown body for this record, relative to `paths.bodiesDir`
-(default `content/records`). The detail page renders the body beneath the
-record header.
+Path to a Markdown body for this YAML record, relative to the project root
+(conventionally `./content/records/<slug>.md`, under `paths.bodiesDir`). The
+detail page renders the body beneath the record header. Leave it out of a
+Markdown record: the file is the body, and the normalizer sets `content` to
+the file's own path.
 
 ### `source`
 

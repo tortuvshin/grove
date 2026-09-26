@@ -92,6 +92,7 @@ export type {
   ReadContentFileResult,
   ReadingMetrics,
   ReadingMetricsOptions,
+  SplitFrontmatterResult,
   TocEntry,
 } from './content-body.js';
 // ── Content body ───────────────────────────────────────────────────
@@ -106,6 +107,7 @@ export {
   readingMetrics,
   resolveContentPath,
   shiftHeadings,
+  splitFrontmatter,
   stripFrontmatter,
   stripLeadingH1,
 } from './content-body.js';
@@ -242,13 +244,20 @@ export type {
   NormalizedRecord,
   NormalizedRecords,
   RecordEntry,
+  RecordFormat,
   RecordHealthSource,
   RecordIssue,
+  RecordSource,
+  RecordSources,
 } from './normalize-records.js';
 // ── Record normalizer ────────────────────────────────────────────────
 // The one reader of the record layers (source, GitHub cache, overrides,
 // health.yml, decisions). Build, check, cleanup and README all use it.
-export { applyDecisionVisibility, loadNormalizedRecords } from './normalize-records.js';
+export {
+  applyDecisionVisibility,
+  loadNormalizedRecords,
+  readRecordSources,
+} from './normalize-records.js';
 export type { OgBuildInput, OgBuildResult, OgTemplate } from './og-image.js';
 export { buildOgImages, renderOgPng } from './og-image.js';
 export type {

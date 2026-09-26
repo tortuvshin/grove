@@ -193,7 +193,14 @@ export async function validateProject(
     });
   }
 
-  if (!(await exists(recordsDir))) {
+  // Records come from the shared normalizer: the same records, with the
+  // same cache / overrides / health.yml / decisions merge, that the
+  // build publishes. The checks below only add reporting on top.
+  const normalized = await loadNormalizedRecords(config, process.cwd());
+
+  // A site may keep every record as Markdown under `paths.bodiesDir`,
+  // so only a site with no records anywhere is missing its records dir.
+  if (!(await exists(recordsDir)) && normalized.entries.length === 0) {
     errors.push({
       code: 'missing_records_dir',
       message: `${config.paths.recordsDir} does not exist`,
@@ -201,11 +208,6 @@ export async function validateProject(
     });
     return finalize(errors, warnings);
   }
-
-  // Records come from the shared normalizer: the same records, with the
-  // same cache / overrides / health.yml / decisions merge, that the
-  // build publishes. The checks below only add reporting on top.
-  const normalized = await loadNormalizedRecords(config, process.cwd());
   const githubCache = normalized.githubCache;
   const cachePath = relative(process.cwd(), githubCache.dir) || '.';
   for (const { file, message } of githubCache.errors) {
@@ -301,18 +303,12 @@ export async function validateProject(
   for (const entry of normalized.entries) {
     const fileSlug = entry.slug;
     if (entry.syncStale) syncStale.push(fileSlug);
-    // Slug uniqueness — even if a record fails to parse, a duplicate
-    // slug is still an error.
-    if (slugs.has(fileSlug)) {
-      errors.push({
-        code: 'duplicate_slug',
-        message: `Duplicate record slug: ${fileSlug}`,
-        severity: 'error',
-      });
-    }
     slugs.add(fileSlug);
-    // Parse and schema failures (`schema_error`, `zod_error`, one per
-    // Zod issue) and cache disagreements (`github_cache_mismatch`).
+    // From the normalizer: parse and schema failures (`schema_error`,
+    // `zod_error`, one per Zod issue), a slug defined in both formats
+    // (`duplicate_slug_format`), a Markdown record with a `content:`
+    // pointer, the opt-in `record_format_deprecated` warning, and cache
+    // disagreements (`github_cache_mismatch`).
     for (const issue of entry.issues) {
       (issue.severity === 'error' ? errors : warnings).push({
         code: issue.code,
@@ -341,7 +337,7 @@ export async function validateProject(
     }
     // The file name is the slug; a different `slug` in the file is
     // ignored, and worth a warning.
-    if (entry.record.declaredSlug !== fileSlug) {
+    if (entry.record.declaredSlug !== undefined && entry.record.declaredSlug !== fileSlug) {
       warnings.push({
         code: 'slug_mismatch',
         message: `${fileSlug}: record slug "${String(entry.record.declaredSlug)}" does not match filename`,

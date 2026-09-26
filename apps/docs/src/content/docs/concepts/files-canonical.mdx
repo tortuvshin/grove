@@ -62,8 +62,8 @@ file is in tells you whether you may edit it.
   <Card title="Author-owned" icon="pencil">
     Files a human edits by hand, in an editor, in a pull request:
 
-    - **Records** — `data/records/<slug>.yml`. One typed entity per file.
-    - **Markdown bodies** — `content/records/<slug>.md`. Optional long-form content.
+    - **Records** — `data/records/<slug>.yml`, or `content/records/<slug>.md` with the fields in YAML frontmatter and the review below. One typed entity per file ([formats](/reference/record-schema/#record-formats)).
+    - **Markdown bodies** — `content/records/<slug>.md` without frontmatter, pointed at by a YAML record's `content:`. Optional long-form content.
     - **Taxonomy** — `data/taxonomy/*.yml`. Six controlled vocabularies.
     - **Decisions** — `data/decisions.yml`. Curator overrides for visibility and sort priority.
     - **Collections** — `data/collections/<slug>.yml`. Curated or ranked groupings.
