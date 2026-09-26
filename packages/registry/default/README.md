@@ -44,7 +44,7 @@ This is a deliberate difference from a typical shadcn registry, which groups sou
 
 A file's registry type follows from what the shadcn CLI does with it. `.astro` files are never transformed, so they carry semantic types (`registry:page`, `registry:component`, `registry:ui`). `.ts` and `.css` files must be `registry:file` — the CLI runs other types through ts-morph transformers that strip comments and reformat, and `grove update` hashes installed files, so they have to land byte-identical.
 
-Two composition components — `components/grove/directory-browse.astro` and `components/grove/taxonomy-list.astro` — hold markup shared by more than one page (the browse page and its pagination route; the three taxonomy list pages) and aren't meant to be imported anywhere else. `components/grove/pipeline-strip.astro` is optional editorial content for the home page; its sample record is illustrative markup, not live data (pass `samplePath` once you have a real record to link to).
+Three composition components — `components/grove/directory-browse.astro`, `components/grove/directory-browse-view.astro` and `components/grove/taxonomy-list.astro` — hold markup shared by more than one page (the browse page and its pagination route; the browse engine both of those and the taxonomy pages render, scoped on the taxonomy pages; the three taxonomy list pages) and aren't meant to be imported anywhere else. `components/grove/pipeline-strip.astro` is optional editorial content for the home page; its sample record is illustrative markup, not live data (pass `samplePath` once you have a real record to link to).
 
 ## Build and check
 

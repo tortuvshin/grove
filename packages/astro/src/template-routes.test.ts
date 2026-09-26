@@ -209,7 +209,7 @@ describe('default Astro route configuration', () => {
       read('grove/filter-group-menu.astro'),
       read('grove/refine-panel.astro'),
       read('ui/filter-drawer.astro'),
-      read('grove/directory-browse.astro'),
+      read('grove/directory-browse-view.astro'),
       read('grove/directory-index-client.astro'),
     ]);
 
@@ -232,6 +232,40 @@ describe('default Astro route configuration', () => {
     expect(browse).toContain('aria-live="polite"');
     expect(browse.match(/data-active-filters/g)?.length).toBe(2);
     expect(listClient).toContain('querySelectorAll<HTMLElement>("[data-active-filters]")');
+  });
+
+  it('browses taxonomy pages with the same engine, scoped to the term', async () => {
+    const read = (path: string) =>
+      readFile(resolve(import.meta.dirname, '../../registry/default', path), 'utf8');
+    const [browse, view, taxonomyList, listClient, stacks, categories, licenses] =
+      await Promise.all([
+        read('components/grove/directory-browse.astro'),
+        read('components/grove/directory-browse-view.astro'),
+        read('components/grove/taxonomy-list.astro'),
+        read('components/grove/directory-index-client.astro'),
+        read('pages/stacks/[name].astro'),
+        read('pages/categories/[name].astro'),
+        read('pages/licenses/[name].astro'),
+      ]);
+
+    // The directory renders the view without a scope.
+    expect(browse).toContain('<DirectoryBrowseView routePage={routePage}>');
+    // Taxonomy pages render it scoped, on their own path.
+    expect(taxonomyList).toContain('<DirectoryBrowseView scope={scope} pathPrefix={pathPrefix} />');
+    expect(stacks).toContain('scope={{ stacks: [name] }}');
+    expect(stacks).toContain('pathPrefix={`/stacks/');
+    expect(categories).toContain('scope={{ categories: [name] }}');
+    expect(licenses).toContain('scope={{ licenses: [name] }}');
+    // The scoped group is neither a facet nor a chip on the page.
+    expect(view).toContain('!fixed.includes(group.filterKey');
+    expect(view).toContain('const chips = scoped ? [] : model.chips;');
+    // The client narrows the index to the scope once, strips the scope
+    // from the URL's filters, and keeps reading data from the directory.
+    expect(listClient).toContain(
+      'items = scope ? filterRecords(all, scope as IndexFilters) : all;',
+    );
+    expect(listClient).toContain('withoutScope(filtersFromSearchParams(source), scope)');
+    expect(listClient).toContain('const dataPrefix = `/');
   });
 
   it('uses generated taxonomy names as display labels', async () => {

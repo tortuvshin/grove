@@ -2,7 +2,7 @@
   "scaffold": "@grove/default",
   "scaffoldVersion": "1.3.0",
   "installedAt": "2026-09-26",
-  "fileCount": 73,
+  "fileCount": 74,
   "files": [
     {
       "target": "src/components/grove/card-grid.astro",
@@ -59,16 +59,22 @@
       "bytes": 4392
     },
     {
+      "target": "src/components/grove/directory-browse-view.astro",
+      "source": "default/components/grove/directory-browse-view.astro",
+      "hash": "sha256-6d957c814358c6ddda7bd043891983f3d6c6fa291fb1b7540b4bf70e80511fd5",
+      "bytes": 11138
+    },
+    {
       "target": "src/components/grove/directory-browse.astro",
       "source": "default/components/grove/directory-browse.astro",
-      "hash": "sha256-aa88910e186c0eac1469f2277117578562490fe7b85bd4e8df9124adbdfbe531",
-      "bytes": 11715
+      "hash": "sha256-247d7063a893d11efc9c30ed0696ba9ede38017f9e8b8cb74f19ed806ce4bd17",
+      "bytes": 4148
     },
     {
       "target": "src/components/grove/directory-index-client.astro",
       "source": "default/components/grove/directory-index-client.astro",
-      "hash": "sha256-c0df96f989fc50f7a7fc11f9f1ffd6b966923884a6d7dca1eee20c3a2c94b88c",
-      "bytes": 30002
+      "hash": "sha256-c66d73484767b3699f7038b930ab3b916ba42396993328f6405003e3bfc82f95",
+      "bytes": 32287
     },
     {
       "target": "src/components/grove/editorial-summary.astro",
@@ -217,8 +223,8 @@
     {
       "target": "src/components/grove/taxonomy-list.astro",
       "source": "default/components/grove/taxonomy-list.astro",
-      "hash": "sha256-0b426582419e997393fa83ea3c09386c8e1ca816a826ab1bfc448d587b41057f",
-      "bytes": 3352
+      "hash": "sha256-dab309b2db913726f69e20533381e60f5374758e4fd80d6f3f7421ba131de977",
+      "bytes": 3719
     },
     {
       "target": "src/components/grove/why-this-exists.astro",
@@ -325,8 +331,8 @@
     {
       "target": "src/lib/live-filters.ts",
       "source": "default/lib/live-filters.ts",
-      "hash": "sha256-455d0563953563a51e85e9135ac352f55038e94ef45b745395b009a96da528ca",
-      "bytes": 7077
+      "hash": "sha256-42d2454540179e763396c9c0badfcc2cce736fb6bdabb8760141eba3191cb543",
+      "bytes": 9485
     },
     {
       "target": "src/pages/[slug]/[recordSlug].astro",
@@ -373,8 +379,8 @@
     {
       "target": "src/pages/categories/[name].astro",
       "source": "default/pages/categories/[name].astro",
-      "hash": "sha256-10019038511eff644ad9bfd7625330cc9a888da3a3d50f2a4bfbd974c10b7faf",
-      "bytes": 1257
+      "hash": "sha256-0c178aee34f823e41ee03a94fc11ff9c81ce6705285eabe14bc98ad2ec159104",
+      "bytes": 1336
     },
     {
       "target": "src/pages/categories/index.astro",
@@ -415,14 +421,14 @@
     {
       "target": "src/pages/licenses/[name].astro",
       "source": "default/pages/licenses/[name].astro",
-      "hash": "sha256-e70188355af3aa54118e475b3247e4cc5eab7f3f932a5135fd505e28164f3a76",
-      "bytes": 1246
+      "hash": "sha256-fb754ce69ad274b4e8e5863e2a1302681de4b75277f2503f93c8508ab5edf42c",
+      "bytes": 1321
     },
     {
       "target": "src/pages/stacks/[name].astro",
       "source": "default/pages/stacks/[name].astro",
-      "hash": "sha256-00d05c7c4dfa5c800a76ef667d176317877eefaf594f8fc5a3227a9c5d714d06",
-      "bytes": 1230
+      "hash": "sha256-b6da615d1a723b485db0c43e6f910de43b3cbe2d845f9aab382f634846aa3a04",
+      "bytes": 1301
     },
     {
       "target": "src/pages/stacks/index.astro",
