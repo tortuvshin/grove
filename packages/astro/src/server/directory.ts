@@ -274,7 +274,8 @@ export const fullProjects: ProjectRecord[] = fullRecords.filter(
 //      matches the elements the `grove-prose` CSS actually
 //      styles (h1-h4, p, ul/ol/li, pre/code, blockquote, a).
 //      Links are restricted to safe schemes and external links
-//      are hardened to `rel="noopener noreferrer" target="_blank"`.
+//      open in a new tab with `rel="noopener"` — the referrer is kept so
+//      the linked project sees the directory in its analytics.
 //      javascript: / data: URIs are blocked; event handlers,
 //      iframes, and scripts are stripped.
 //
@@ -462,7 +463,7 @@ const ANCHOR_TRANSFORM = (tagName: string, attribs: Record<string, string>) => {
   const external = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(href);
   return {
     tagName,
-    attribs: external ? { ...attribs, rel: 'noopener noreferrer', target: '_blank' } : attribs,
+    attribs: external ? { ...attribs, rel: 'noopener', target: '_blank' } : attribs,
   };
 };
 

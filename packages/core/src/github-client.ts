@@ -52,7 +52,7 @@ export async function ghFetch(path: string, options: GhFetchOptions = {}): Promi
     } catch (err) {
       lastErr = err as Error;
       if (i < attempts - 1) {
-        await sleep(500 * Math.pow(2, i));
+        await sleep(500 * 2 ** i);
         continue;
       }
       throw err;
@@ -70,7 +70,7 @@ export async function ghFetch(path: string, options: GhFetchOptions = {}): Promi
     }
     if (res.status >= 500 && i < attempts - 1) {
       lastErr = new Error(`GitHub ${res.status} ${res.statusText} for ${path}`);
-      await sleep(500 * Math.pow(2, i));
+      await sleep(500 * 2 ** i);
       continue;
     }
     return res;

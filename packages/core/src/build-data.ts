@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
 import { loadNormalizedRecords } from './normalize-records.js';
+import { resolveOutboundRef } from './outbound.js';
 import { blueprintKind, type GroveConfig, type Resource, toIndexRecord } from './schema.js';
 
 /**
@@ -306,7 +307,13 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
     favicon: cfg.site.favicon,
     locale: cfg.site.locale,
     twitter: cfg.site.twitter,
+    press: cfg.site.press,
     nav: cfg.nav,
+    // `ref` resolved: the configured value, else the host of site.url.
+    outbound: {
+      ref: resolveOutboundRef(cfg.outbound.ref, cfg.site.url),
+      skipHosts: cfg.outbound.skipHosts,
+    },
     footer: cfg.footer,
     submission: cfg.submission,
     analytics: cfg.analytics,

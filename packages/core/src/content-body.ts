@@ -308,7 +308,7 @@ export function extractToc(body: string, options: ExtractTocOptions = {}): TocEn
     if (!m || !m[1] || !m[2]) continue;
     const depth = m[1].length as 2 | 3 | 4 | 5 | 6;
     if (depth > maxDepth) continue;
-    const text = m[2].replace(/[`*_~\[\]()]/g, '').trim();
+    const text = m[2].replace(/[`*_~[\]()]/g, '').trim();
     if (!text) continue;
     const id = uniqueSlug(headingSlug(text) || 'section', seen);
     out.push({ text, id, depth });

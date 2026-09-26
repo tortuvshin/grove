@@ -48,9 +48,10 @@ describe('renderMarkdownToSafeHtml', () => {
     expect(html).toContain('href="https://example.com"');
   });
 
-  it('forces noopener noreferrer on external links', () => {
+  it('opens external links with noopener and keeps the referrer', () => {
     const html = renderMarkdownToSafeHtml('[link](https://example.com)');
-    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).toContain('rel="noopener"');
+    expect(html).not.toContain('noreferrer');
     expect(html).toContain('target="_blank"');
   });
 

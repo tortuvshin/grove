@@ -7,6 +7,7 @@ import type { GroveConfig } from './schema.js';
 
 const ROBOTS_MARKER = '# grove-generated: edit this file to take ownership';
 const OG_MARKER = '<!-- grove-generated: edit this file to take ownership -->';
+const BADGE_MARKER = OG_MARKER;
 
 export interface SiteArtifactStats {
   totalRecords?: number;
@@ -18,6 +19,8 @@ export interface SiteArtifactsResult {
   ogImagePath: string;
   robotsWritten: boolean;
   ogImageWritten: boolean;
+  /** `public/badges/featured.svg` and `featured-dark.svg`. */
+  badgePaths: string[];
 }
 
 function xml(value: string): string {
@@ -76,6 +79,49 @@ export function buildOgImageSvg(config: GroveConfig, stats: SiteArtifactStats = 
 `;
 }
 
+/**
+ * "Featured on <site>" README badge, 40px tall. Record pages offer it
+ * to maintainers with Markdown and HTML snippets; the width follows the
+ * site name so long names do not clip.
+ */
+export function buildFeaturedBadgeSvg(
+  siteName: string,
+  variant: 'light' | 'dark' = 'light',
+): string {
+  const name = xml(siteName);
+  // ~8.4px per character at 14px semibold, plus the mark and padding.
+  const width = Math.max(150, Math.round(42 + siteName.length * 8.4 + 14));
+  const c =
+    variant === 'dark'
+      ? {
+          bg: '#18181b',
+          border: '#3f3f46',
+          mark: '#fafafa',
+          tick: '#18181b',
+          eyebrow: '#a1a1aa',
+          text: '#fafafa',
+        }
+      : {
+          bg: '#ffffff',
+          border: '#d4d4d8',
+          mark: '#18181b',
+          tick: '#fafafa',
+          eyebrow: '#71717a',
+          text: '#18181b',
+        };
+  const font = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+  return `${BADGE_MARKER}
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="40" viewBox="0 0 ${width} 40" role="img" aria-label="Featured on ${name}">
+  <title>Featured on ${name}</title>
+  <rect x="0.5" y="0.5" width="${width - 1}" height="39" rx="8" fill="${c.bg}" stroke="${c.border}"/>
+  <rect x="12" y="10" width="20" height="20" rx="4" fill="${c.mark}"/>
+  <path d="M17.5 20.5l2.5 2.5 5-6" fill="none" stroke="${c.tick}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="42" y="17" font-family="${font}" font-size="9" font-weight="500" fill="${c.eyebrow}" letter-spacing=".6">FEATURED ON</text>
+  <text x="42" y="31" font-family="${font}" font-size="14" font-weight="600" fill="${c.text}">${name}</text>
+</svg>
+`;
+}
+
 async function writeOwnedArtifact(path: string, marker: string, content: string): Promise<boolean> {
   try {
     const current = await readFile(path, 'utf8');
@@ -111,5 +157,18 @@ export async function buildSiteArtifacts(
     OG_MARKER,
     buildOgImageSvg(config, stats),
   );
-  return { robotsPath, ogImagePath, robotsWritten, ogImageWritten };
+  const badgeLight = join(publicDir, 'badges', 'featured.svg');
+  const badgeDark = join(publicDir, 'badges', 'featured-dark.svg');
+  const badgePaths = [badgeLight, badgeDark];
+  await writeOwnedArtifact(
+    badgeLight,
+    BADGE_MARKER,
+    buildFeaturedBadgeSvg(config.site.name, 'light'),
+  );
+  await writeOwnedArtifact(
+    badgeDark,
+    BADGE_MARKER,
+    buildFeaturedBadgeSvg(config.site.name, 'dark'),
+  );
+  return { robotsPath, ogImagePath, robotsWritten, ogImageWritten, badgePaths };
 }

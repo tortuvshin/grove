@@ -62,7 +62,7 @@ describe('PoweredBy', () => {
 
   it('links out to the Grove site safely', () => {
     expect(poweredBySource).toMatch(/href = ['"]https:\/\/withgrove\.dev['"]/);
-    expect(poweredBySource).toContain('rel="noopener noreferrer"');
+    expect(poweredBySource).toContain('rel="noopener"');
   });
 
   it('is rendered by the footer behind the poweredBy flag', () => {

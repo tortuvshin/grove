@@ -278,6 +278,9 @@ export const overridesFileSchema = z.union([
 // Curation: shared block
 // ──────────────────────────────────────────────────────────────────────
 
+/** A GitHub login: letters, digits and single dashes, up to 39 characters. */
+export const GITHUB_LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+
 const curationBlockSchema = z
   .object({
     reviewed: z.boolean().default(false),
@@ -306,6 +309,16 @@ const resourceBaseSchema = z.object({
    * validate — `recordAddedAt` falls back for them.
    */
   addedAt: z.string().optional(),
+  /**
+   * GitHub login of the person who submitted the record. Record pages
+   * show "Submitted by @login" and the contributors page lists what
+   * each person added. A leading `@` is accepted and stripped.
+   */
+  submittedBy: z
+    .string()
+    .transform((value) => value.trim().replace(/^@/, ''))
+    .pipe(z.string().regex(GITHUB_LOGIN, 'Expected a GitHub login such as octocat'))
+    .optional(),
   description: z.string().default(''),
   /**
    * Open Apps-written summary, surfaced as the lead paragraph on the
@@ -569,12 +582,25 @@ export type RecordsFile = z.infer<typeof recordsFileSchema>;
 // Grove config
 // ──────────────────────────────────────────────────────────────────────
 
-export const navItemSchema = z.object({
+const navLinkSchema = z.object({
   label: z.string().min(1),
   href: z.string().min(1),
+  /** One line under the label inside a header menu. */
+  description: z.string().optional(),
 });
 
-export const footerNavItemSchema = navItemSchema.extend({
+/**
+ * A header nav item. With `children` it opens a menu; `menu:
+ * "collections"` fills the menu from the collection files instead, so
+ * a new collection appears without editing the config. `href` stays the
+ * section's own page (the menu's footer link and the mobile heading).
+ */
+export const navItemSchema = navLinkSchema.extend({
+  children: z.array(navLinkSchema).optional(),
+  menu: z.enum(['collections']).optional(),
+});
+
+export const footerNavItemSchema = navLinkSchema.extend({
   external: z.boolean().optional(),
 });
 
@@ -786,6 +812,26 @@ export const groveConfigSchema = z.object({
      * `twitter:site` on every page when set.
      */
     twitter: z.string().optional(),
+    /**
+     * Places that featured the site, newest first. The home hero links
+     * the first one; the about page lists them all. Only list a mention
+     * you can link to.
+     */
+    press: z
+      .array(
+        z.object({
+          /** Publication, e.g. "Astro". */
+          outlet: z.string().min(1),
+          /** Title of the post or issue. */
+          title: z.string().min(1),
+          url: z.string().url(),
+          /** Month of publication, `YYYY-MM`. */
+          date: z.string().regex(/^\d{4}-\d{2}$/, 'Expected YYYY-MM'),
+          /** Short hero label, e.g. "Featured in Astro's August 2026 roundup". */
+          label: z.string().optional(),
+        }),
+      )
+      .default([]),
   }),
 
   /** Search-engine index policy — see `seoConfigSchema`. */
@@ -801,6 +847,22 @@ export const groveConfigSchema = z.object({
     .default({}),
 
   nav: z.array(navItemSchema).default([]),
+
+  /**
+   * Links to a record's own site (homepage, download page, web app)
+   * carry `ref=<value>` so its maintainers see this site in their
+   * analytics. Defaults to the host of `site.url`; `false` turns it off.
+   * Forges, app stores and package registries are never tagged — see
+   * `withRef` — and outbound links keep the referrer (`rel="noopener"`),
+   * which is what GitHub's traffic page reads.
+   */
+  outbound: z
+    .object({
+      ref: z.union([z.string().min(1), z.literal(false)]).optional(),
+      /** Extra hosts to leave untouched, on top of the built-in list. */
+      skipHosts: z.array(z.string()).default([]),
+    })
+    .prefault({}),
 
   footer: footerSchema,
 

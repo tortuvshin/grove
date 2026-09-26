@@ -200,6 +200,11 @@ export const LICENSE_OTHER = 'Other';
  * short, neutral phrase; known SPDX ids pass through untouched so
  * downstream consumers can still match on them.
  */
+/** False for GitHub's placeholders (NOASSERTION, OTHER, NONE, …) and empty ids. */
+export function isDetectedLicense(spdxId: string | null | undefined): boolean {
+  return Boolean(spdxId) && !LICENSE_PLACEHOLDER_IDS.has(String(spdxId).toUpperCase());
+}
+
 export function licenseDisplay(spdxId: string | null | undefined): string {
   if (!spdxId) return LICENSE_NOT_DETECTED;
   if (LICENSE_PLACEHOLDER_IDS.has(spdxId.toUpperCase())) {

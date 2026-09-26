@@ -116,3 +116,40 @@ describe('theme.primaryColor validation', () => {
     ).toThrow(/hex color/);
   });
 });
+
+describe('press, outbound and nav menus', () => {
+  it('accepts press mentions, outbound settings and nav menus', () => {
+    const config = defineConfig({
+      site: {
+        name: 'Directory',
+        press: [{ outlet: 'Astro', title: 'Roundup', url: 'https://astro.build/x/', date: '2026-08' }],
+      },
+      outbound: { ref: 'directory.dev' },
+      nav: [
+        { label: 'Browse', href: '/apps/', children: [{ label: 'Stacks', href: '/stacks/' }] },
+        { label: 'Collections', href: '/collections/', menu: 'collections' },
+      ],
+    });
+    expect(config.site.press[0]?.outlet).toBe('Astro');
+    expect(config.outbound.ref).toBe('directory.dev');
+    expect(config.nav[0]?.children?.[0]?.href).toBe('/stacks/');
+  });
+
+  it('defaults press to empty and outbound to the site host', () => {
+    const config = defineConfig({ site: { name: 'Directory' } });
+    expect(config.site.press).toEqual([]);
+    expect(config.outbound.ref).toBeUndefined();
+    expect(config.outbound.skipHosts).toEqual([]);
+  });
+
+  it('rejects a press date that is not YYYY-MM', () => {
+    expect(() =>
+      defineConfig({
+        site: {
+          name: 'Directory',
+          press: [{ outlet: 'A', title: 'B', url: 'https://a.dev/', date: 'August' }],
+        },
+      }),
+    ).toThrow(/YYYY-MM/);
+  });
+});

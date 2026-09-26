@@ -452,6 +452,36 @@ export function getDirectoryIndexModel(
   };
 }
 
+/**
+ * Records grouped by `submittedBy`, most submissions first. Only visible
+ * records count. Each person's `id` is their lowercased login — the
+ * anchor a record page's "Submitted by @login" links to.
+ */
+export function getSubmissionsBySubmitter(
+  site: DirectorySiteConfig,
+): Array<{ id: string; login: string; items: Array<{ slug: string; name: string; url: string }> }> {
+  const routeSlug = site.blueprintConfig?.routeSlug ?? 'projects';
+  const byLogin = new Map<
+    string,
+    { id: string; login: string; items: Array<{ slug: string; name: string; url: string }> }
+  >();
+  for (const record of fullItems) {
+    const login = (record as { submittedBy?: string }).submittedBy;
+    if (!login) continue;
+    const id = login.toLowerCase();
+    const entry = byLogin.get(id) ?? { id, login, items: [] };
+    entry.items.push({
+      slug: record.slug,
+      name: 'name' in record && record.name ? String(record.name) : record.slug,
+      url: `/${routeSlug}/${record.slug}/`,
+    });
+    byLogin.set(id, entry);
+  }
+  return [...byLogin.values()].sort(
+    (a, b) => b.items.length - a.items.length || a.login.localeCompare(b.login),
+  );
+}
+
 export function getContributorsPageModel(site: DirectorySiteConfig) {
   const contributors = loadDirectoryContributors();
   // Render-time guard: even if a stale `data/generated/contributors.json`
