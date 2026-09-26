@@ -443,9 +443,11 @@ path sits outside `data/generated/`, so the usual `data/generated/*`
 ignore rule does not catch it; if you move it inside an ignored
 directory, add a negation (for example `!data/generated/github/`).
 
-Readers resolve a record's `github` and `health` with precedence
-cache > inline block on the record (Grove 0.12 and earlier) > the
-`health` file. The `health.yml` file is still read for backward
+Every reader (build, `grove check`, `grove cleanup`, `grove readme
+generate`) goes through the record normalizer, which resolves a record's
+`github` and `health` with precedence cache > inline block on the record
+(Grove 0.12 and earlier) > the `health` file, then applies `overrides`
+and `decisions`. The `health.yml` file is still read for backward
 compatibility but is not written by any V1 command. Move legacy
 inline blocks with `grove migrate github-cache`.
 

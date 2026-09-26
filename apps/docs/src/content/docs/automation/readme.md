@@ -78,15 +78,17 @@ Each visible record becomes one line:
 ```
 
 - **Label** is the record's `name` field, falling back to its `slug` if `name` is unset.
-- **url** is `homepageUrl` if the record has one, otherwise `repoUrl`. If neither is set, the entry renders as plain text with no link.
+- **url** is the record's `links.website` if it has one, otherwise `repoUrl` (or `links.github`). If neither is set, the entry renders as plain text with no link.
 - **Description** is the record's `description`, whitespace-collapsed, with any trailing punctuation stripped and a single period appended. If there's no description, the entry is just `- [Label](url)` with no trailing dash.
 
-Stars, license, and other GitHub metadata are not rendered on the entry line — the generator only reads `slug`, `name`, `description`, `category`, `repoUrl`/`links.github`, `homepageUrl`/`links.website`, and `visibility` from each record file.
+Stars, license, and other GitHub metadata are not rendered on the entry line — the generator only reads `slug`, `name`, `description`, `category`, `repoUrl`/`links.github`, `links.website`, and effective visibility from each record.
 
-A record is skipped entirely (not printed anywhere) when its `visibility` field is `"hide"` or `"remove"`, or when it has neither a `name` nor a `slug` to label it with.
+Records come from the same normalizer the site build uses (`loadNormalizedRecords`): GitHub sync cache, `data/overrides.yml`, `data/health.yml` and `data/decisions.yml` are merged exactly as they are for the site, and the slug is the file name. A record that fails the schema is left out, and the command prints `[grove readme] skipped N record(s) that fail the schema (…)` to stderr; `grove check` names the problem.
 
-:::caution[decisions.yml is not consulted]
-`grove readme generate` resolves effective visibility the same way the site build does: a `data/decisions.yml` entry wins, then the record's `health.visibility` (from the GitHub sync cache, else the block inline on the record), then `data/health.yml`, then the record's own top-level `visibility`. Star counts come from the cache the same way. A project hidden site-wide is therefore hidden in the README too.
+A record is skipped entirely (not printed anywhere) when its effective visibility is `"hide"` or `"remove"`.
+
+:::note[Same visibility as the site]
+Effective visibility is resolved once, for every output: a `data/decisions.yml` entry wins, then the record's `health.visibility` (from the GitHub sync cache, else the block inline on the record, else `data/health.yml`), then the record's own top-level `visibility`. A project hidden site-wide is therefore hidden in the README too.
 :::
 
 ## Categories

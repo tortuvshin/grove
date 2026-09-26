@@ -83,7 +83,7 @@ Readers act on it: `resolveRecordGithub` (with the options from `githubSyncFresh
 
 ### Precedence and conflicts
 
-Every reader — the build (`generate`), `grove check`, `grove cleanup` and `grove readme generate` — resolves a record's `github` and `health` through the same helper, `resolveRecordGithub`:
+Every reader — the build (`generate`), `grove check`, `grove cleanup` and `grove readme generate` — takes its records from the same normalizer (`loadNormalizedRecords`), which resolves a record's `github` and `health` through `resolveRecordGithub`:
 
 1. the cache entry, for each block it carries;
 2. the record's own inline block (written by Grove 0.12 and earlier);
@@ -242,7 +242,7 @@ github:
 
 Within `github.repository`, sync always overwrites the specific fields listed above on every successful API run — there is no per-field opt-out. Anything else already present in the previous `github` block is carried forward by the merge, and the record file itself is never touched.
 
-`data/overrides.yml` is applied by the **build**, not by the sync. Each entry is `{ id, patch }`, and the patch's top-level keys are merged over the parsed record before validation:
+`data/overrides.yml` is applied by the record normalizer, not by the sync, so the build, `grove check`, `grove cleanup` and `grove readme generate` all see the patched record. Each entry is `{ id, patch }`, and the patch's top-level keys are merged over the record (after the cache) before schema validation:
 
 ```yaml
 overrides:
