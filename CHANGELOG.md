@@ -22,6 +22,16 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.13.0](https://github.com/tortuvshin/grove/compare/v0.12.0...v0.13.0) (2026-09-26)
+
+
+### Features
+
+* **core:** move GitHub sync output into a committed per-record cache ([18850ee](https://github.com/tortuvshin/grove/commit/18850ee455d78a3ba9c3ec74f056291aae6eb5ab))
+* **core:** move GitHub sync output into a committed per-record cache ([5b79752](https://github.com/tortuvshin/grove/commit/5b797523fe4ac914c86c121ce580c56fc006ce87)), closes [#94](https://github.com/tortuvshin/grove/issues/94)
+* **registry:** apply browse filters live, without an Apply button ([a371cff](https://github.com/tortuvshin/grove/commit/a371cffbd9ee69df75659fc760ab68db31c4b8c1))
+* **registry:** apply browse filters live, without an Apply button ([89095ed](https://github.com/tortuvshin/grove/commit/89095ede86829ee3ae1b3b670f6f1bcdc0bc9d45)), closes [#95](https://github.com/tortuvshin/grove/issues/95)
+
 ## [0.12.0](https://github.com/tortuvshin/grove/compare/v0.11.0...v0.12.0) (2026-09-25)
 
 
