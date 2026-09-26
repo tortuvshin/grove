@@ -22,6 +22,25 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [0.12.0](https://github.com/tortuvshin/grove/compare/v0.11.0...v0.12.0) (2026-09-25)
+
+
+### Features
+
+* **cli:** report per-record sync github failures in an end-of-run summary ([4525ccf](https://github.com/tortuvshin/grove/commit/4525ccf32369cd5f95c45211e4579814a44c661c))
+* **cli:** report per-record sync github failures in an end-of-run summary ([e8795cd](https://github.com/tortuvshin/grove/commit/e8795cd00c83df551e9b08ffa84fe502ca25033f)), closes [#84](https://github.com/tortuvshin/grove/issues/84)
+* **core:** readme.entryLinkTarget to link README entries to record pages ([19b2c53](https://github.com/tortuvshin/grove/commit/19b2c536438276a05adcfdba71c44a9c7306845e))
+* **core:** readme.entryLinkTarget to link README entries to record pages ([b534cf8](https://github.com/tortuvshin/grove/commit/b534cf80f7207ba9880e4b76084dee9e1b81647f)), closes [#85](https://github.com/tortuvshin/grove/issues/85)
+* **core:** validate record content pointers in grove check ([ffab4db](https://github.com/tortuvshin/grove/commit/ffab4dbec91f07f866c0719a4507d6bbb6353fda))
+* **core:** validate record content pointers in grove check ([08bb531](https://github.com/tortuvshin/grove/commit/08bb5317f35629f429edf626c4b1fde9a977c31a)), closes [#86](https://github.com/tortuvshin/grove/issues/86)
+* **core:** warn when inline health and health.yml disagree ([8cba90f](https://github.com/tortuvshin/grove/commit/8cba90f93e5715fcfd4aceaced461cad0533eaf5))
+* **core:** warn when inline health and health.yml disagree ([6a72b16](https://github.com/tortuvshin/grove/commit/6a72b1600923cfb1cf8aaeee830e18e40db5be98)), closes [#83](https://github.com/tortuvshin/grove/issues/83)
+
+
+### Documentation
+
+* **core:** document directoryRoute, recordDetailUrl and assertReadmeLinkConfig ([d3c1f6d](https://github.com/tortuvshin/grove/commit/d3c1f6d5b6dbb5a402dfb6fd0fcf5635fc08eb64)), closes [#85](https://github.com/tortuvshin/grove/issues/85)
+
 ## [0.11.0](https://github.com/tortuvshin/grove/compare/v0.10.0...v0.11.0) (2026-09-22)
 
 
