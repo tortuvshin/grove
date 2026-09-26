@@ -867,6 +867,13 @@ export const groveConfigSchema = z.object({
       taxonomyDir: z.string().default('data/taxonomy'),
       generatedDir: z.string().default('data/generated'),
       health: z.string().default('data/health.yml'),
+      /**
+       * Directory `grove sync github` writes one `<slug>.json` per
+       * record to (GitHub metadata, health, `lastSuccessAt`,
+       * `partialFailures`). Committed, unlike `generatedDir`: it is
+       * observed network state, not something a build can recreate.
+       */
+      githubCache: z.string().default('data/cache/github'),
       decisions: z.string().default('data/decisions.yml'),
       overrides: z.string().default('data/overrides.yml'),
     })
@@ -880,6 +887,7 @@ export const groveConfigSchema = z.object({
       taxonomyDir: 'data/taxonomy',
       generatedDir: 'data/generated',
       health: 'data/health.yml',
+      githubCache: 'data/cache/github',
       decisions: 'data/decisions.yml',
       overrides: 'data/overrides.yml',
     }),

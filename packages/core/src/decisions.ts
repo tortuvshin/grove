@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
+import { loadGithubCache, resolveRecordGithub } from './github-cache.js';
 import { blueprintKind, type GroveConfig, type Resource, recordsFileSchema } from './schema.js';
 
 export interface CleanupCandidate {
@@ -73,11 +74,14 @@ export async function cleanupStale(
   const entries = await readdir(recordsDir).catch(() => [] as string[]);
   const files = entries.filter((f) => f.endsWith('.yml')).sort();
 
+  // Health and stars come from the GitHub sync cache when it has them.
+  const githubCache = await loadGithubCache(cfg, cwd);
   const records: Resource[] = [];
   for (const file of files) {
     const fileSlug = basename(file, '.yml');
     const text = await readFile(join(recordsDir, file), 'utf8');
-    const raw = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
+    const parsed = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
+    const raw = resolveRecordGithub(parsed, githubCache.entries.get(fileSlug)).record;
     if (!raw.kind) raw.kind = expectedKind;
     try {
       const normalized = recordsFileSchema.parse(raw);
