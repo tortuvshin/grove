@@ -12,7 +12,7 @@ For per-version detail, read
 at the repo root.
 
 <!-- x-release-please-start-version -->
-## Shipped — `0.17.0`
+## Shipped — `0.18.0`
 <!-- x-release-please-end -->
 
 Four packages, released in lockstep at the same version.
