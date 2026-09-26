@@ -76,8 +76,8 @@ describe('grove init (registry scaffold)', () => {
     // Lockfile records the install-time hashes with project-relative targets.
     const lockfile = JSON.parse(await readFile(join(target, '.grove/registry.lock.json'), 'utf8'));
     expect(lockfile.scaffold).toBe('@grove/default');
-    expect(lockfile.fileCount).toBe(74);
-    expect(lockfile.files).toHaveLength(74);
+    expect(lockfile.fileCount).toBe(81);
+    expect(lockfile.files).toHaveLength(81);
     for (const file of lockfile.files) {
       expect(file.target.startsWith('src/'), file.target).toBe(true);
       expect(file.hash.startsWith('sha256-'), file.target).toBe(true);
@@ -92,7 +92,7 @@ describe('grove init (registry scaffold)', () => {
 
     // Return value surfaces what was installed.
     expect(result.installedScaffold.name).toBe('default');
-    expect(result.installedScaffold.files).toHaveLength(74);
+    expect(result.installedScaffold.files).toHaveLength(81);
   });
 
   it('installs the bundled item itself when shadcn fails', async () => {
@@ -106,7 +106,7 @@ describe('grove init (registry scaffold)', () => {
     });
 
     // Every scaffold file still lands…
-    expect(result.installedScaffold.files).toHaveLength(74);
+    expect(result.installedScaffold.files).toHaveLength(81);
     for (const file of ['src/pages/index.astro', 'src/styles/system.css']) {
       expect(existsSync(join(target, file)), file).toBe(true);
     }
@@ -123,7 +123,7 @@ describe('grove init (registry scaffold)', () => {
 
     // The lockfile is written on this path too, so `grove update` works.
     const lockfile = JSON.parse(await readFile(join(target, '.grove/registry.lock.json'), 'utf8'));
-    expect(lockfile.fileCount).toBe(74);
+    expect(lockfile.fileCount).toBe(81);
   });
 
   it('rolls back a failed init so the retry is just `grove init`', async () => {
@@ -148,7 +148,7 @@ describe('grove init (registry scaffold)', () => {
       installScaffold,
       packageManager: pnpm,
     });
-    expect(result.installedScaffold.files).toHaveLength(74);
+    expect(result.installedScaffold.files).toHaveLength(81);
     expect(existsSync(join(target, 'src/pages/index.astro'))).toBe(true);
   });
 
@@ -168,7 +168,7 @@ describe('grove init (registry scaffold)', () => {
     expect(existsSync(join(target, 'pnpm-workspace.yaml'))).toBe(false);
     // Everything else is identical — the scaffold itself is not
     // package-manager-specific.
-    expect(result.installedScaffold.files).toHaveLength(74);
+    expect(result.installedScaffold.files).toHaveLength(81);
     expect(existsSync(join(target, 'src/pages/index.astro'))).toBe(true);
     expect(result.packageManager.name).toBe('bun');
   });

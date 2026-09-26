@@ -78,7 +78,7 @@ describe('grove init integration', () => {
 
     const lock = JSON.parse(await readFile(join(target, '.grove/registry.lock.json'), 'utf8'));
     expect(lock.scaffold).toBe('@grove/default');
-    expect(lock.fileCount).toBe(74);
+    expect(lock.fileCount).toBe(81);
 
     expect(existsSync(join(target, 'data/generated/records.json'))).toBe(false);
     expect(existsSync(join(target, 'data/records/.gitkeep'))).toBe(true);

@@ -25,7 +25,7 @@ describe('registry item access', () => {
   it("loads the built item with every file's content inlined", async () => {
     const item = await loadItem(resolveBundledItemPath());
     expect(item.name).toBe('default');
-    expect(item.files).toHaveLength(74);
+    expect(item.files).toHaveLength(81);
     for (const file of item.files) {
       expect(typeof file.content).toBe('string');
       expect(file.target.startsWith('~/src/'), file.path).toBe(true);
@@ -49,7 +49,7 @@ describe('registry item access', () => {
     const lock = buildLockfile(item);
     expect(lock.scaffold).toBe(SCAFFOLD_ID);
     expect(lock.scaffoldVersion).toBe(item.meta?.version);
-    expect(lock.fileCount).toBe(74);
+    expect(lock.fileCount).toBe(81);
     expect(lock.installedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
