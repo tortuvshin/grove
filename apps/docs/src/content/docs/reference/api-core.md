@@ -272,7 +272,9 @@ The token-free HTML fallback (`enrichFromGithubHtml`) fetches the public GitHub 
 ```ts
 import {
   loadGithubCache,          // (config, cwd?) → { dir, entries: Map<slug, entry>, errors }
-  resolveRecordGithub,      // (rawRecord, entry?) → { record, github, health, conflicts }
+  resolveRecordGithub,      // (rawRecord, entry?, freshness?) → { record, github, health, conflicts, syncStale? }
+  githubSyncFreshness,      // (entry, { maxAgeDays?, now? }?) → { stale: false } | { stale: true, cause, detail }
+  githubSyncFreshnessOptions, // (config) → { maxAgeDays } from sync.github.maxAgeDays
   githubCacheConflicts,     // (rawRecord, entry?) → string[] of inline-vs-cache field differences
   githubCacheDir,           // (config, cwd?) → absolute cache directory
   nextGithubCacheEntry,     // (previous, attempt) → next entry (lastSuccessAt / partialFailures rules)
@@ -284,13 +286,21 @@ import {
   githubCacheEntrySchema,   // Zod schema for one cache file
   GITHUB_CACHE_SCHEMA_VERSION,
   GITHUB_CACHE_MAX_FAILURES,
+  GITHUB_SYNC_MAX_AGE_DAYS, // 14, the default for sync.github.maxAgeDays
+  SYNC_STALE_REASON,        // "sync_stale"
 } from "@grove-dev/core";
 
 const cache = await loadGithubCache(config);
-const { record, conflicts } = resolveRecordGithub(raw, cache.entries.get(slug));
+const { record, conflicts, syncStale } = resolveRecordGithub(
+  raw,
+  cache.entries.get(slug),
+  githubSyncFreshnessOptions(config),
+);
 ```
 
-Types: `GithubCache`, `GithubCacheEntry`, `GithubCacheFailure`, `GithubCacheSource`, `GithubCacheMigration`, `GithubFieldSource`, `GithubSyncAttempt`, `ResolvedRecordGithub`.
+Pass the freshness options, as every Grove reader does: a stale entry's health then resolves as `status: unknown` with `staleReason: sync_stale`, and `syncStale` says why. Without them the cached block is returned as-is.
+
+Types: `GithubCache`, `GithubCacheEntry`, `GithubCacheFailure`, `GithubCacheSource`, `GithubCacheMigration`, `GithubFieldSource`, `GithubSyncAttempt`, `GithubSyncFreshness`, `GithubSyncFreshnessOptions`, `ResolvedRecordGithub`.
 
 ## Helpers and IO
 
@@ -364,6 +374,14 @@ const entry = classifyHealth(record.slug, githubSignal); // { id, health }
 
 `classifyHealth` is the function `grove sync github` runs per record. Exposed for custom importer flows that need to compute the `health` block without doing a full sync.
 
+```ts
+import { PUSH_AGE_BANDS, pushAgeBand } from "@grove-dev/core";
+
+pushAgeBand(400); // { id: "stale", maxDays: 548, staleReason: "no_push_6_months", reason: "No push in the last 6 months" }
+```
+
+`PUSH_AGE_BANDS` is the one push-age table behind `classifyHealth` and `classifyRepositoryHealth`: ≤ 183 days `active`, ≤ 548 `stale`, ≤ 730 `needs_review`, beyond that `inactive`. Types: `PushAgeBand`, `PushAgeBandId`.
+
 ## README health check
 
 ```ts
@@ -399,7 +417,7 @@ const verdict = classifyRepositoryHealth(evidence); // { status, confidence, evi
 - `extractCandidates(markdown, options?)` turns every list item into a `CandidateEntry`. Unlike `parseAwesomeMarkdown` it drops nothing: an item with no link still becomes a candidate, with a low confidence and a warning.
 - `inspectRepository(url, options?)` fetches the evidence for one GitHub repository — API first, HTML as a fallback when the API is unavailable (flagged `partial-evidence-html-fallback`). `inspectRepositories(urls, { concurrency, cache })` does the same for a batch, fetching each repository once however many times it is linked.
 - `createMemoryCache()` is the default in-process `RepositoryEvidenceCache`; pass your own `{ get, set }` to persist evidence between runs. `canonicalRepoKey(owner, repo)` is the lowercase `owner/repo` key the cache and duplicate detection share.
-- `classifyRepositoryHealth(evidence)` returns an explainable verdict — `active`, `maintained`, `stable`, `likely-stale`, `archived`, `broken`, or `unknown` — with a confidence and the evidence for and against it. Its cutoffs match `classifyHealth`, so "stale" means the same thing in a README check and in a synced record.
+- `classifyRepositoryHealth(evidence)` returns an explainable verdict — `active`, `maintained`, `stable`, `likely-stale`, `archived`, `broken`, or `unknown` — with a confidence and the evidence for and against it. It reads the same `PUSH_AGE_BANDS` table as `classifyHealth`, so the cutoffs are identical in a README check and in a synced record.
 
 ## Collections
 

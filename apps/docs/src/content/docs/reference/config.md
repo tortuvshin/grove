@@ -121,6 +121,12 @@ export default defineConfig({
     },
   },
 
+  sync: {
+    // A cache entry with no successful API sync in this many days (or a
+    // failure newer than its last success) resolves as status "unknown".
+    github: { maxAgeDays: 14 },
+  },
+
   theme: {
     radius: "soft",          // "none" | "soft" | "round"
     density: "comfortable",  // "compact" | "comfortable" | "spacious"
@@ -294,6 +300,22 @@ record — via `classifyHealth` — and writes it into that record's entry in
 the GitHub sync cache (`paths.githubCache`). Leave it off and health stays
 yours to author. See
 [Maintain health signals](/content/health-classification/).
+
+### `sync`
+
+**Type:** `{ github?: { maxAgeDays?: number } }`
+**Default:** `{ github: { maxAgeDays: 14 } }`
+
+How readers treat the GitHub sync cache. A cache entry is stale when its
+newest `partialFailures[].at` is later than `lastSuccessAt`, or when
+`lastSuccessAt` is missing or more than `sync.github.maxAgeDays` days old
+(a positive integer). The build, `grove check`, `grove cleanup` and
+`grove readme` then resolve that record's health as `status: unknown`
+with `staleReason: sync_stale` rather than presenting the old status as
+current; `tier` and `visibility` are kept. Set it above your sync
+schedule plus the time a sync PR usually waits for review — the default
+suits a weekly sync. See
+[Maintain health signals](/content/health-classification/#stale-sync-reads-as-unknown).
 
 ### `theme`
 

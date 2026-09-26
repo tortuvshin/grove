@@ -1,14 +1,11 @@
 /**
  * @grove-dev/core — health classification unit tests.
  *
- * Pins the boundary cases around the threshold ladder in
- * `classifyHealth`. The thresholds are not a parameter — they're
- * burned into the function — so the only thing these tests can do
- * is pin them. A future PR that bumps any threshold will need to
- * update at least one test name, which is exactly the intent:
- * "the day someone raises the inactive cutoff from 730 to 800 days,
- * the build breaks at the test name so a deliberate decision is
- * made."
+ * Pins every edge of the push-age bands `classifyHealth` reads from
+ * the shared table in `health-thresholds.ts`. The cutoffs are spelled
+ * out as literals here on purpose: the day someone raises the inactive
+ * cutoff from 730 to 800 days, these tests break and a deliberate
+ * decision is made.
  *
  * The function also has a "fabricate" path — calling it with no
  * `github` arg returns the canonical unknown health block. This
@@ -16,8 +13,9 @@
  * `build-data.ts` reuses for its no-health-block merge, so pinning
  * it here means downstream code can't drift.
  */
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { classifyHealth } from './health.js';
+import { DAY_MS, PUSH_AGE_BANDS, pushAgeBand } from './health-thresholds.js';
 import type { GithubMetadata } from './schema.js';
 
 function makeGithub(overrides: Partial<GithubMetadata> = {}): GithubMetadata {
@@ -71,50 +69,81 @@ describe('classifyHealth — fabrication path (no GitHub metadata)', () => {
   });
 });
 
-describe('classifyHealth — status thresholds (pushedAt)', () => {
-  const NOW = Date.now();
-  const daysAgo = (n: number) => new Date(NOW - n * 86_400_000).toISOString();
-
-  it('active: pushed within 6 months (≤ 183 days)', () => {
-    const result = classifyHealth('a', makeGithub({ pushedAt: daysAgo(0) }));
-    expect(result.health.status).toBe('active');
+describe('classifyHealth — push-age bands (pushedAt)', () => {
+  // Frozen clock: each edge is tested exactly, and one millisecond past it.
+  const NOW = Date.parse('2026-09-26T12:00:00.000Z');
+  const ago = (days: number, extraMs = 0) => new Date(NOW - days * DAY_MS - extraMs).toISOString();
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it('active boundary: 180 days is well inside the active window', () => {
-    // Pin the boundary just below 183 so the test is stable across
-    // floating-point rounding of `Date.now() - N*86_400_000`. The
-    // exact-183-day edge case is `183.0000000347` days, which the
-    // `<= 183` check rejects — testing 180 instead makes the
-    // intent (active window is ~6 months) obvious without
-    // coupling to the float math.
-    const result = classifyHealth('a', makeGithub({ pushedAt: daysAgo(180) }));
-    expect(result.health.status).toBe('active');
+  const ACTIVE = 'Pushed to within the last 6 months';
+  const SIX = 'No push in the last 6 months';
+  const EIGHTEEN = 'No push in the last 18 months';
+  const TWENTY_FOUR = 'No push in the last 24 months';
+  const cases: Array<[string, string | null, string, string | null, string]> = [
+    ['pushed today', ago(0), 'active', null, ACTIVE],
+    ['exactly 183 days (6 months, inclusive)', ago(183), 'active', null, ACTIVE],
+    ['183 days + 1 ms', ago(183, 1), 'stale', 'no_push_6_months', SIX],
+    ['exactly 548 days (18 months, inclusive)', ago(548), 'stale', 'no_push_6_months', SIX],
+    ['548 days + 1 ms', ago(548, 1), 'needs_review', 'no_push_18_months', EIGHTEEN],
+    [
+      'exactly 730 days (24 months, inclusive)',
+      ago(730),
+      'needs_review',
+      'no_push_18_months',
+      EIGHTEEN,
+    ],
+    ['730 days + 1 ms', ago(730, 1), 'inactive', 'no_push_24_months', TWENTY_FOUR],
+    ['no pushedAt at all', null, 'inactive', 'no_push_24_months', TWENTY_FOUR],
+  ];
+
+  it.each(cases)('%s → %s', (_label, pushedAt, status, staleReason, reason) => {
+    const { health } = classifyHealth('a', makeGithub({ pushedAt }));
+    expect(health.status).toBe(status);
+    expect(health.staleReason).toBe(staleReason);
+    expect(health.reasons[0]).toBe(reason);
   });
 
-  it('stale boundary: 184 days is the first day a record becomes stale', () => {
-    // 184 days is the first value that reliably falls on the
-    // "stale" side of the 183-day cutoff. The 183-day mark itself
-    // is load-bearing in production (a record turns 6 months old
-    // on this exact day) but is sensitive to ms rounding — pin
-    // 184 here so a future threshold bump is visible immediately
-    // and the test does not flake.
-    const result = classifyHealth('a', makeGithub({ pushedAt: daysAgo(184) }));
-    expect(result.health.status).toBe('stale');
+  it('reads the same cutoffs as the shared table', () => {
+    expect(PUSH_AGE_BANDS.map((band) => [band.id, band.maxDays, band.staleReason])).toEqual([
+      ['active', 183, null],
+      ['stale', 548, 'no_push_6_months'],
+      ['needs_review', 730, 'no_push_18_months'],
+      ['inactive', Number.POSITIVE_INFINITY, 'no_push_24_months'],
+    ]);
   });
 
-  it('stale: pushed between 184 and 548 days (6-18 months)', () => {
-    const result = classifyHealth('a', makeGithub({ pushedAt: daysAgo(400) }));
-    expect(result.health.status).toBe('stale');
+  it('never calls push activity "commits"', () => {
+    for (const days of [0, 200, 600, 800]) {
+      const { health } = classifyHealth('a', makeGithub({ pushedAt: ago(days) }));
+      expect(health.reasons.join(' ')).not.toMatch(/commit/i);
+      expect(health.staleReason ?? '').not.toMatch(/commit/);
+    }
   });
 
-  it('needs_review: pushed between 548 and 730 days (18-24 months)', () => {
-    const result = classifyHealth('a', makeGithub({ pushedAt: daysAgo(600) }));
-    expect(result.health.status).toBe('needs_review');
+  it('every band past active is a cleanup candidate; active is not', () => {
+    const at = (days: number) =>
+      classifyHealth('a', makeGithub({ pushedAt: ago(days) })).health.cleanupCandidate;
+    expect(at(10)).toBe(false);
+    expect([at(200), at(600), at(800)]).toEqual([true, true, true]);
   });
 
-  it('inactive: pushed > 730 days (2+ years)', () => {
-    const result = classifyHealth('a', makeGithub({ pushedAt: daysAgo(800) }));
-    expect(result.health.status).toBe('inactive');
+  it('archived is a fact that wins over any push age', () => {
+    const { health } = classifyHealth('a', makeGithub({ archived: true, pushedAt: ago(1) }));
+    expect(health.status).toBe('archived');
+    expect(health.staleReason).toBe('github_archived');
+  });
+});
+
+describe('pushAgeBand', () => {
+  it('maps a missing date (Infinity) and NaN to inactive', () => {
+    expect(pushAgeBand(Number.POSITIVE_INFINITY).id).toBe('inactive');
+    expect(pushAgeBand(Number.NaN).id).toBe('inactive');
   });
 });
 

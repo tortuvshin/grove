@@ -293,15 +293,17 @@ your own script.
 ### How `classifyHealth` derives each field
 
 With no GitHub metadata at all it returns `status: unknown`,
-`tier: experimental`, `confidence: low`. Otherwise, from `pushedAt`:
+`tier: experimental`, `confidence: low`. Otherwise, from `pushedAt` —
+push activity, not commit activity — through the shared `PUSH_AGE_BANDS`
+table (upper bounds inclusive):
 
-| Days since last push | `status` |
-|---|---|
-| repo is archived on GitHub | `archived` |
-| ≤ 183 | `active` |
-| 184 – 548 | `stale` |
-| 549 – 730 | `needs_review` |
-| > 730 | `inactive` |
+| Days since last push | `status` | `staleReason` |
+|---|---|---|
+| repo is archived on GitHub | `archived` | `github_archived` |
+| ≤ 183 (6 months) | `active` | `null` |
+| 184 – 548 (6–18 months) | `stale` | `no_push_6_months` |
+| 549 – 730 (18–24 months) | `needs_review` | `no_push_18_months` |
+| > 730 (24+ months), or no push date | `inactive` | `no_push_24_months` |
 
 Then, with `popular` meaning ≥ 500 stars and `maintainedSignals` meaning
 pushed within 183 days **and** (a release within 365 days **or** a license
@@ -315,9 +317,15 @@ that is not `NOASSERTION`):
 - `tier` is `hidden` when archived or inactive, else `curated` at ≥ 500
   stars, `listed` at ≥ 50, `experimental` below that.
 - `visibility` is `hide` when `tier` is `hidden`, otherwise `keep`.
-- `cleanupCandidate` is `true` for `stale`, `archived`, and `inactive`.
-- `staleReason` is `no_commits_365_days` (stale), `no_commits_24_months`
-  (inactive), `github_archived` (archived), or `null`.
+- `cleanupCandidate` is `true` for `stale`, `needs_review`, `archived`,
+  and `inactive`.
+- `staleReason` is the band's reason from the table above, and the first
+  entry of `reasons` says the same thing in words (`No push in the last
+  6 months`, …). Grove 0.13 and earlier wrote `no_commits_365_days` and
+  `no_commits_24_months`.
+- A cached block whose sync is stale resolves as `status: unknown` with
+  `staleReason: sync_stale` when read — see
+  [Maintain health signals](/content/health-classification/#stale-sync-reads-as-unknown).
 - `confidence` is `high` when `github.fullName` is present, `medium` when
   it is not, and `low` only in the no-metadata case above.
 

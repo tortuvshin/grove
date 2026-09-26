@@ -77,7 +77,9 @@ The writer is deterministic: fixed top-level key order, nested blocks in the ord
 
 ### Staleness
 
-A failed or partial sync keeps the previous data rather than blanking it — but it does not pretend the data is fresh. When the newest `partialFailures[].at` is later than `lastSuccessAt`, the entry is stale: the values are from `lastSuccessAt`, and the failure says why nothing newer arrived.
+A failed or partial sync keeps the previous data rather than blanking it — but it does not pretend the data is fresh. When the newest `partialFailures[].at` is later than `lastSuccessAt`, the entry is stale: the values are from `lastSuccessAt`, and the failure says why nothing newer arrived. An entry is also stale when `lastSuccessAt` is missing or older than `sync.github.maxAgeDays` (default 14 days) — a sync that stopped running fails no fetch, but its data still ages.
+
+Readers act on it: `resolveRecordGithub` (with the options from `githubSyncFreshnessOptions(config)`) resolves a stale entry's health as `status: unknown` with `staleReason: sync_stale`, keeping `tier` and `visibility`. `grove check` reports every such record in a single `github_sync_stale` warning. The file on disk is untouched — `githubSyncFreshness(entry)` tells you why it is stale.
 
 ### Precedence and conflicts
 

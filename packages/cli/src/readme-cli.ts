@@ -7,6 +7,7 @@ import {
   decisionsFileSchema,
   directoryRoute,
   type GroveConfig,
+  githubSyncFreshnessOptions,
   healthFileSchema,
   injectAwesomeReadmeBlock,
   loadConfig,
@@ -159,6 +160,7 @@ async function loadRecords(cwd: string, config: GroveConfig): Promise<AwesomeRea
     const raw = resolveRecordGithub(
       (parseYaml(await readFile(join(dir, file), 'utf8')) ?? {}) as Record<string, unknown>,
       githubCache.entries.get(fileSlug),
+      githubSyncFreshnessOptions(config),
     ).record;
     const github = (raw.github as Record<string, unknown> | undefined) ?? {};
     const repoMeta = (github.repository as Record<string, unknown> | undefined) ?? {};

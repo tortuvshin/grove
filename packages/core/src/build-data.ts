@@ -2,7 +2,11 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
-import { loadGithubCache, resolveRecordGithub } from './github-cache.js';
+import {
+  githubSyncFreshnessOptions,
+  loadGithubCache,
+  resolveRecordGithub,
+} from './github-cache.js';
 import { classifyHealth } from './health.js';
 import {
   blueprintKind,
@@ -233,6 +237,8 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
   const healthBySlug = await loadHealthEntries(cfg.paths.health, cwd);
   const patchBySlug = await loadOverridePatches(cfg.paths.overrides, cwd);
   const githubCache = await loadGithubCache(cfg, cwd);
+  // A stale sync resolves as `status: unknown` rather than old values.
+  const freshness = githubSyncFreshnessOptions(cfg);
 
   const out: Resource[] = [];
   const errors: string[] = [];
@@ -241,7 +247,7 @@ export async function generate(cwd = process.cwd(), config?: GroveConfig): Promi
     try {
       const text = await readFile(join(recordsDir, file), 'utf8');
       const parsed = (parseYaml(text, { schema: 'core' }) ?? {}) as Record<string, unknown>;
-      const raw = resolveRecordGithub(parsed, githubCache.entries.get(fileSlug)).record;
+      const raw = resolveRecordGithub(parsed, githubCache.entries.get(fileSlug), freshness).record;
       if (!raw.kind) raw.kind = expectedKind;
       const patch = patchBySlug.get(fileSlug);
       const normalized = recordsFileSchema.parse(patch ? { ...raw, ...patch } : raw);

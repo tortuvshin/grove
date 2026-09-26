@@ -41,7 +41,7 @@ describe('pickCleanupCandidates — pure predicate', () => {
         tier: 'listed',
         visibility: 'keep',
         cleanupCandidate: true,
-        staleReason: 'no_commits_365_days',
+        staleReason: 'no_push_6_months',
         confidence: 'high',
         reasons: [],
       },

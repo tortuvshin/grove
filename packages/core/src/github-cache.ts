@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { parseDocument, parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import { DAY_MS } from './health-thresholds.js';
 import type { GroveConfig } from './schema.js';
 
 /**
@@ -24,6 +25,12 @@ export const GITHUB_CACHE_SCHEMA_VERSION = 1;
 
 /** How many failed or partial fetches a cache entry remembers. */
 export const GITHUB_CACHE_MAX_FAILURES = 5;
+
+/** Default for `sync.github.maxAgeDays`: older successful syncs are stale. */
+export const GITHUB_SYNC_MAX_AGE_DAYS = 14;
+
+/** `staleReason` of a health block resolved from a stale cache entry. */
+export const SYNC_STALE_REASON = 'sync_stale';
 
 const cacheSourceSchema = z.enum(['api', 'html']);
 
@@ -115,6 +122,104 @@ export async function loadGithubCache(
 
 export type GithubFieldSource = 'cache' | 'inline' | 'none';
 
+// ── Freshness ──────────────────────────────────────────────────────
+
+export interface GithubSyncFreshnessOptions {
+  /** Longest a successful API sync stays fresh. Default {@link GITHUB_SYNC_MAX_AGE_DAYS}. */
+  maxAgeDays?: number;
+  /** Reference time in ms. Default `Date.now()`. */
+  now?: number;
+}
+
+export type GithubSyncFreshness =
+  | { stale: false }
+  | {
+      stale: true;
+      /** Why: the newest failure postdates the last success, or the last success is missing or too old. */
+      cause: 'failed_since_success' | 'never_succeeded' | 'too_old';
+      /** One human-readable line, e.g. for `reasons[]` and `grove check`. */
+      detail: string;
+    };
+
+/** Freshness options from a project config, for {@link resolveRecordGithub}. */
+export function githubSyncFreshnessOptions(config: GroveConfig): GithubSyncFreshnessOptions {
+  return { maxAgeDays: config.sync?.github?.maxAgeDays ?? GITHUB_SYNC_MAX_AGE_DAYS };
+}
+
+function day(iso: string): string {
+  return iso.slice(0, 10);
+}
+
+/**
+ * Whether a cache entry's data can still be presented as current.
+ *
+ * A failed or partial sync keeps the previous values rather than
+ * blanking them, so the entry alone does not say whether they are
+ * fresh. It is stale when the newest `partialFailures[].at` is later
+ * than `lastSuccessAt`, when there is no `lastSuccessAt`, or when
+ * `lastSuccessAt` is older than `maxAgeDays`.
+ */
+export function githubSyncFreshness(
+  entry: GithubCacheEntry,
+  options: GithubSyncFreshnessOptions = {},
+): GithubSyncFreshness {
+  const now = options.now ?? Date.now();
+  const maxAgeDays = options.maxAgeDays ?? GITHUB_SYNC_MAX_AGE_DAYS;
+  const success = entry.lastSuccessAt ? Date.parse(entry.lastSuccessAt) : Number.NaN;
+  const newestFailure = entry.partialFailures.reduce<{ at: number; reason: string } | undefined>(
+    (newest, failure) => {
+      const at = Date.parse(failure.at);
+      if (Number.isNaN(at) || (newest && newest.at >= at)) return newest;
+      return { at, reason: failure.reason };
+    },
+    undefined,
+  );
+  if (newestFailure && (Number.isNaN(success) || newestFailure.at > success)) {
+    const since = Number.isNaN(success)
+      ? 'no successful sync on record'
+      : `last success ${day(entry.lastSuccessAt as string)}`;
+    return {
+      stale: true,
+      cause: 'failed_since_success',
+      detail: `GitHub sync failed on ${day(new Date(newestFailure.at).toISOString())} (${newestFailure.reason}); ${since}`,
+    };
+  }
+  if (Number.isNaN(success)) {
+    return {
+      stale: true,
+      cause: 'never_succeeded',
+      detail: 'GitHub sync has never completed a full API refresh for this record',
+    };
+  }
+  const ageDays = (now - success) / DAY_MS;
+  if (ageDays > maxAgeDays) {
+    return {
+      stale: true,
+      cause: 'too_old',
+      detail: `GitHub sync last succeeded ${Math.floor(ageDays)} days ago (${day(entry.lastSuccessAt as string)}), older than ${maxAgeDays} days`,
+    };
+  }
+  return { stale: false };
+}
+
+/**
+ * The health block to present for a stale cache entry: `status:
+ * unknown`, `staleReason: sync_stale`, low confidence, with the stale
+ * detail and the last synced status in `reasons`. Visibility and tier
+ * are kept — a sync outage must not hide or promote records.
+ */
+function staleSyncHealth(health: Record<string, unknown>, detail: string): Record<string, unknown> {
+  const previous = typeof health.status === 'string' ? health.status : 'unknown';
+  return {
+    ...health,
+    status: 'unknown',
+    staleReason: SYNC_STALE_REASON,
+    confidence: 'low',
+    cleanupCandidate: false,
+    reasons: [detail, `Last synced status: ${previous}`],
+  };
+}
+
 export interface ResolvedRecordGithub {
   /** Shallow copy of the record with `github` / `health` taken from the cache when it has them. */
   record: Record<string, unknown>;
@@ -126,6 +231,11 @@ export interface ResolvedRecordGithub {
    * `grove check` can say so instead of picking silently.
    */
   conflicts: string[];
+  /**
+   * Set when freshness options were passed and the cache entry is
+   * stale; the resolved `health` then reads `status: unknown`.
+   */
+  syncStale?: Extract<GithubSyncFreshness, { stale: true }>;
 }
 
 function asObject(value: unknown): Record<string, unknown> | undefined {
@@ -201,14 +311,21 @@ export function githubCacheConflicts(
  * Resolve a raw record's `github` and `health` blocks: the cache entry
  * wins for each block it carries, the record's own inline block is the
  * legacy fallback. The input is not mutated.
+ *
+ * With `freshness`, a cached health block from a stale entry (see
+ * {@link githubSyncFreshness}) resolves as `status: unknown` with
+ * `staleReason: sync_stale`; the cache file itself keeps the old
+ * values as evidence. Every Grove reader passes it.
  */
 export function resolveRecordGithub(
   record: Record<string, unknown>,
   entry: GithubCacheEntry | undefined,
+  freshness?: GithubSyncFreshnessOptions,
 ): ResolvedRecordGithub {
   const out = { ...record };
   let github: GithubFieldSource = record.github === undefined ? 'none' : 'inline';
   let health: GithubFieldSource = record.health === undefined ? 'none' : 'inline';
+  let syncStale: ResolvedRecordGithub['syncStale'];
   if (entry?.github) {
     out.github = entry.github;
     github = 'cache';
@@ -216,8 +333,19 @@ export function resolveRecordGithub(
   if (entry?.health) {
     out.health = entry.health;
     health = 'cache';
+    const fresh = freshness ? githubSyncFreshness(entry, freshness) : undefined;
+    if (fresh?.stale) {
+      syncStale = fresh;
+      out.health = staleSyncHealth(entry.health, fresh.detail);
+    }
   }
-  return { record: out, github, health, conflicts: githubCacheConflicts(record, entry) };
+  return {
+    record: out,
+    github,
+    health,
+    conflicts: githubCacheConflicts(record, entry),
+    ...(syncStale ? { syncStale } : {}),
+  };
 }
 
 // ── Writing ────────────────────────────────────────────────────────

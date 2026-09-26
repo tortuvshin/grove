@@ -1,21 +1,26 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { generate } from './build-data.js';
 import { cleanupStale } from './decisions.js';
 import {
   GITHUB_CACHE_MAX_FAILURES,
+  GITHUB_SYNC_MAX_AGE_DAYS,
   type GithubCacheEntry,
+  githubSyncFreshness,
+  githubSyncFreshnessOptions,
   loadGithubCache,
   migrateRecordGithub,
   nextGithubCacheEntry,
   removeTopLevelYamlKeys,
   resolveRecordGithub,
+  SYNC_STALE_REASON,
   seedGithubCacheEntry,
   serializeGithubCacheEntry,
   writeGithubCacheEntry,
 } from './github-cache.js';
+import { DAY_MS } from './health-thresholds.js';
 import { type GroveConfig, groveConfigSchema } from './schema.js';
 import { loadRecords, validateProject } from './validate.js';
 
@@ -23,6 +28,11 @@ const config: GroveConfig = groveConfigSchema.parse({
   site: { name: 'test', tagline: 'test' },
   blueprint: 'project-directory',
 });
+
+/** A cache entry field set for a sync that just succeeded. */
+function synced(): Pick<GithubCacheEntry, 'lastSuccessAt'> {
+  return { lastSuccessAt: new Date().toISOString() };
+}
 
 function entry(overrides: Partial<GithubCacheEntry> = {}): GithubCacheEntry {
   return {
@@ -221,6 +231,128 @@ describe('resolveRecordGithub', () => {
   });
 });
 
+describe('githubSyncFreshness', () => {
+  const NOW = Date.parse('2026-09-26T00:00:00.000Z');
+  const ago = (days: number, extraMs = 0) => new Date(NOW - days * DAY_MS - extraMs).toISOString();
+  const failure = (at: string) => ({ at, source: 'api' as const, reason: 'HTTP 502' });
+
+  it('is fresh up to and including maxAgeDays after the last success', () => {
+    expect(githubSyncFreshness(entry({ lastSuccessAt: ago(0) }), { now: NOW })).toEqual({
+      stale: false,
+    });
+    expect(
+      githubSyncFreshness(entry({ lastSuccessAt: ago(GITHUB_SYNC_MAX_AGE_DAYS) }), { now: NOW })
+        .stale,
+    ).toBe(false);
+  });
+
+  it('is stale one millisecond past maxAgeDays', () => {
+    const result = githubSyncFreshness(entry({ lastSuccessAt: ago(GITHUB_SYNC_MAX_AGE_DAYS, 1) }), {
+      now: NOW,
+    });
+    expect(result).toMatchObject({ stale: true, cause: 'too_old' });
+  });
+
+  it('honours a configured maxAgeDays', () => {
+    const e = entry({ lastSuccessAt: ago(20) });
+    expect(githubSyncFreshness(e, { now: NOW }).stale).toBe(true);
+    expect(githubSyncFreshness(e, { now: NOW, maxAgeDays: 30 }).stale).toBe(false);
+    expect(
+      githubSyncFreshnessOptions(
+        groveConfigSchema.parse({ ...config, sync: { github: { maxAgeDays: 30 } } }),
+      ),
+    ).toEqual({ maxAgeDays: 30 });
+    expect(githubSyncFreshnessOptions(config)).toEqual({ maxAgeDays: 14 });
+  });
+
+  it('is stale when the newest failure is later than lastSuccessAt, however recent', () => {
+    const result = githubSyncFreshness(
+      entry({ lastSuccessAt: ago(2), partialFailures: [failure(ago(1))] }),
+      { now: NOW },
+    );
+    expect(result).toMatchObject({ stale: true, cause: 'failed_since_success' });
+    if (result.stale) expect(result.detail).toContain('HTTP 502');
+  });
+
+  it('a failure older than the last success does not make it stale', () => {
+    const result = githubSyncFreshness(
+      entry({ lastSuccessAt: ago(1), partialFailures: [failure(ago(2))] }),
+      { now: NOW },
+    );
+    expect(result.stale).toBe(false);
+  });
+
+  it('compares against the newest failure, not the last in the list', () => {
+    const result = githubSyncFreshness(
+      entry({ lastSuccessAt: ago(2), partialFailures: [failure(ago(1)), failure(ago(3))] }),
+      { now: NOW },
+    );
+    expect(result).toMatchObject({ stale: true, cause: 'failed_since_success' });
+  });
+
+  it('is stale when the API never succeeded', () => {
+    expect(githubSyncFreshness(entry(), { now: NOW })).toMatchObject({
+      stale: true,
+      cause: 'never_succeeded',
+    });
+    expect(
+      githubSyncFreshness(entry({ partialFailures: [failure(ago(1))] }), { now: NOW }),
+    ).toMatchObject({ stale: true, cause: 'failed_since_success' });
+  });
+});
+
+describe('resolveRecordGithub — sync freshness', () => {
+  const NOW = Date.parse('2026-09-26T00:00:00.000Z');
+  const health = {
+    status: 'mature',
+    tier: 'curated',
+    visibility: 'keep',
+    staleReason: null,
+    reasons: ['Strong adoption'],
+  };
+  const staleEntry = entry({
+    lastSuccessAt: '2026-08-01T00:00:00.000Z',
+    health,
+    github: { repository: {} },
+  });
+
+  it('resolves a stale entry as unknown / sync_stale, keeping tier and visibility', () => {
+    const resolved = resolveRecordGithub({}, staleEntry, { now: NOW });
+    expect(resolved.syncStale).toMatchObject({ stale: true, cause: 'too_old' });
+    expect(resolved.record.health).toMatchObject({
+      status: 'unknown',
+      staleReason: SYNC_STALE_REASON,
+      confidence: 'low',
+      tier: 'curated',
+      visibility: 'keep',
+      reasons: [expect.stringContaining('older than 14 days'), 'Last synced status: mature'],
+    });
+    // The github block is still the cached one; only health changes.
+    expect(resolved.record.github).toBe(staleEntry.github);
+    // The cache entry is not mutated.
+    expect(staleEntry.health?.status).toBe('mature');
+  });
+
+  it('leaves a fresh entry untouched', () => {
+    const fresh = entry({ lastSuccessAt: '2026-09-20T00:00:00.000Z', health });
+    const resolved = resolveRecordGithub({}, fresh, { now: NOW });
+    expect(resolved.syncStale).toBeUndefined();
+    expect(resolved.record.health).toBe(health);
+  });
+
+  it('without freshness options, keeps the old behaviour', () => {
+    const resolved = resolveRecordGithub({}, staleEntry);
+    expect(resolved.syncStale).toBeUndefined();
+    expect(resolved.record.health).toBe(health);
+  });
+
+  it('does not touch inline (legacy) health', () => {
+    const resolved = resolveRecordGithub({ health }, entry({ github: {} }), { now: NOW });
+    expect(resolved.syncStale).toBeUndefined();
+    expect(resolved.record.health).toBe(health);
+  });
+});
+
 describe('migration codemod', () => {
   it('seeds lastSuccessAt only from an inline API sync', () => {
     expect(
@@ -324,7 +456,9 @@ describe('readers resolve github/health through the cache', () => {
     expect(demo?.health?.status).toBe('active');
 
     // A cache entry wins over the inline block.
-    await writeCache(entry({ health: { status: 'stale' }, github: { repository: {} } }));
+    await writeCache(
+      entry({ ...synced(), health: { status: 'stale' }, github: { repository: {} } }),
+    );
     const all = await records();
     demo = all.find((r) => r.slug === 'demo');
     expect(demo?.health?.status).toBe('stale');
@@ -334,6 +468,13 @@ describe('readers resolve github/health through the cache', () => {
   });
 
   it('migration round-trip leaves the generated records identical', async () => {
+    // The fixture's API sync (2026-09-01) must still be fresh once it
+    // moves to the cache, or the cache copy would resolve as sync_stale.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(Date.parse('2026-09-02T00:00:00.000Z'));
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
     const recordPath = join(cwd, 'data', 'records', 'demo.yml');
     await writeFile(recordPath, RECORD_WITH_INLINE);
     await generate(cwd, config);
@@ -354,6 +495,7 @@ describe('readers resolve github/health through the cache', () => {
     await writeFile(join(cwd, 'data', 'records', 'demo.yml'), RECORD_WITH_INLINE);
     await writeCache(
       entry({
+        ...synced(),
         health: { status: 'needs_review' },
         github: { repository: { stargazers_count: 42 } },
       }),
@@ -368,6 +510,7 @@ describe('readers resolve github/health through the cache', () => {
     await writeFile(join(cwd, 'data', 'records', 'demo.yml'), RECORD_WITH_INLINE);
     await writeCache(
       entry({
+        ...synced(),
         github: { repository: { stargazers_count: 11 } },
         health: { status: 'active', tier: 'listed', visibility: 'keep' },
       }),
@@ -398,12 +541,54 @@ describe('readers resolve github/health through the cache', () => {
       join(cwd, 'data', 'records', 'demo.yml'),
       "kind: project\nslug: demo\nname: Demo\ncategory: tools\naddedAt: '2026-01-01'\nrepoUrl: https://github.com/owner/demo\n",
     );
-    await writeCache(entry({ health: { status: 'active' } }));
+    await writeCache(entry({ ...synced(), health: { status: 'active' } }));
     const original = process.cwd();
     process.chdir(cwd);
     try {
       const result = await validateProject(config);
       expect(result.issues).toEqual([]);
+    } finally {
+      process.chdir(original);
+    }
+  });
+
+  it('a stale sync surfaces as unknown in generate, cleanup and check', async () => {
+    await writeFile(join(cwd, 'data', 'records', 'demo.yml'), RECORD_WITH_INLINE);
+    await writeCache(
+      entry({
+        lastSuccessAt: '2026-01-01T00:00:00.000Z',
+        partialFailures: [{ at: '2026-02-01T00:00:00.000Z', source: 'api', reason: 'HTTP 502' }],
+        health: { status: 'mature', tier: 'curated', visibility: 'keep', reasons: ['old'] },
+        github: { repository: {} },
+      }),
+    );
+    const demo = (await records()).find((r) => r.slug === 'demo') as
+      | { health?: Record<string, unknown> }
+      | undefined;
+    expect(demo?.health).toMatchObject({
+      status: 'unknown',
+      staleReason: 'sync_stale',
+      tier: 'curated',
+      visibility: 'keep',
+    });
+    const { report } = await cleanupStale(cwd, config);
+    expect(report.candidates).toMatchObject([
+      { slug: 'demo', status: 'unknown', staleReason: 'sync_stale' },
+    ]);
+    // The cache file keeps the last observed values as evidence.
+    const cached = JSON.parse(
+      await readFile(join(cwd, 'data', 'cache', 'github', 'demo.json'), 'utf8'),
+    );
+    expect(cached.health.status).toBe('mature');
+
+    const original = process.cwd();
+    process.chdir(cwd);
+    try {
+      const result = await validateProject(config);
+      const stale = result.warnings.filter((w) => w.code === 'github_sync_stale');
+      expect(stale).toHaveLength(1);
+      expect(stale[0]?.message).toContain('1 record(s)');
+      expect(stale[0]?.message).toContain('demo');
     } finally {
       process.chdir(original);
     }
