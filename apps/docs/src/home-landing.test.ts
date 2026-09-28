@@ -222,16 +222,18 @@ describe('docs homepage (standalone Astro route)', () => {
       'Search and saved views',
       'Curated collections',
       'Rich detail pages',
-      'Self-updating facts',
-      'Nothing rots quietly',
+      'Facts that stay fresh',
+      'Credit that travels',
       'One source, many outputs',
-      'Yours to own',
+      'Yours to own, stable to build on',
     ]) {
       expect(features, title).toContain(title);
     }
 
     // User-language claims that map to real mechanisms.
-    expect(features).toContain('review queue');
+    expect(features).toContain('stale entries surface in a queue');
+    expect(features).toContain('README badge');
+    expect(features).toContain('semver API since 1.0');
     expect(features).toContain('llms.txt');
     expect(features).toContain('No database, no CMS');
 
@@ -402,11 +404,11 @@ describe('docs homepage (standalone Astro route)', () => {
 
     // A real screenshot (astro:assets) replaced the hand-built mock. The
     // note under the lede used to be a caveat about a pending migration;
-    // the migration is done, so it now says the space runs on the
-    // published packages and takes UI changes through `grove update`.
+    // the migration is done, so it now says the space runs on Grove 1.0
+    // from npm and takes UI changes through `grove update`.
     expect(openApps).toContain('astro:assets');
     expect(openApps).toContain('open-apps-home.png');
-    expect(openApps).toMatch(/published (Grove )?packages/);
+    expect(openApps).toContain('Grove 1.0 from npm');
     expect(openApps).toContain('grove update');
   });
 
@@ -620,10 +622,11 @@ describe('docs homepage (standalone Astro route)', () => {
     expect(faq).toMatch(/faqs\.map/);
 
     const faqData = await readFile(resolve(docsRoot, 'src/data/faq.ts'), 'utf8');
-    // Seven Q&A pairs in the shared module, opening with "What is Grove?".
+    // Eight Q&A pairs in the shared module, opening with "What is Grove?".
     expect(faqData).toContain("q: 'What is Grove?'");
+    expect(faqData).toContain("q: 'Is Grove stable?'");
     const itemCount = (faqData.match(/\bq:\s*['"]/g) ?? []).length;
-    expect(itemCount).toBe(7);
+    expect(itemCount).toBe(8);
 
     const homeLayout = await readFile(resolve(docsRoot, 'src/layouts/HomeLayout.astro'), 'utf8');
     // FAQPage schema.org block is emitted, sourced from the same module.
