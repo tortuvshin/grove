@@ -788,6 +788,12 @@ const seoConfigSchema = z
      * routes such as `submit/` or `404`.
      */
     staticPaths: z.array(z.string().min(1)).default(['about/', 'contributors/']),
+    /**
+     * Former names of the site. `grove seo` fails when one still appears
+     * in a title, `og:site_name` or page text — the leftovers a rename
+     * tends to miss in record data and generated copy.
+     */
+    retiredBrands: z.array(z.string().min(1)).default([]),
   })
   .prefault({});
 

@@ -491,6 +491,12 @@ export {
   stringifyRecordYaml,
   subjectSchema,
 } from './schema.js';
+// ── Built-site SEO check ─────────────────────────────────────────────
+export {
+  type BuiltSiteCheckOptions,
+  type BuiltSiteCheckResult,
+  checkBuiltSite,
+} from './seo-check.js';
 export type {
   SiteArtifactStats,
   SiteArtifactsResult,

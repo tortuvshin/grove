@@ -125,6 +125,20 @@ const xml = buildSitemapXml(entries);
 
 `buildSitemap(input: SitemapInput, cwd?, config?)` (`packages/core/src/sitemap.ts:96`) is async and writes the file; `buildSitemapXml(entries: SitemapEntry[])` (`packages/core/src/sitemap.ts:69`) is synchronous and does not write anything. A single `sitemap.xml` is emitted. There is no separate sitemap index.
 
+## Built-site SEO check
+
+```ts
+import { checkBuiltSite, type BuiltSiteCheckOptions, type BuiltSiteCheckResult } from "@grove-dev/core";
+
+const result: BuiltSiteCheckResult = await checkBuiltSite({
+  distDir: "dist",
+  retiredBrands: ["Old Name"],
+} satisfies BuiltSiteCheckOptions);
+if (result.errors.length) process.exitCode = 1;
+```
+
+`checkBuiltSite(options?)` (`packages/core/src/seo-check.ts`) reads the built HTML, `data/generated/site-config.json`, `records.full.json` and the collection files, and returns `{ errors, warnings, indexable, noindex, policyNoindex, checked }`. It is what [`grove seo`](/reference/cli/#grove-seo) runs; see there for the list of checks.
+
 ## Index policy
 
 ```ts

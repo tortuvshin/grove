@@ -101,6 +101,7 @@ describe('seo config', () => {
       collectionIndexPolicy: 'all',
       taxonomyIndexPolicy: 'all',
       staticPaths: ['about/', 'contributors/'],
+      retiredBrands: [],
     });
   });
 

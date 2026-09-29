@@ -27,6 +27,7 @@ import {
 } from './package-manager.js';
 import { buildReadmeCommand } from './readme-cli.js';
 import { run } from './run.js';
+import { buildSeoCommand } from './seo-cli.js';
 import { formatCandidateRunSummary, runGithubSync } from './sync-github.js';
 import { appendSyncStepSummary, formatSyncSummaryText, syncExitCode } from './sync-summary.js';
 import { formatPlan, runUpdate } from './update.js';
@@ -244,6 +245,7 @@ program.addCommand(buildIconsCommand());
 program.addCommand(buildImportCommand());
 program.addCommand(buildMigrateCommand());
 program.addCommand(buildReadmeCommand());
+program.addCommand(buildSeoCommand());
 
 program.parseAsync().catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : String(error));

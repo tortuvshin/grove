@@ -585,6 +585,42 @@ grove audit --page /projects/     # one specific page
 grove audit --json out.json --junit out.xml
 ```
 
+## `grove seo`
+
+Crawl the built site for SEO mistakes that only show up across pages.
+Run it after the build — `pnpm build && grove seo` — locally or in CI.
+Implementation in `packages/cli/src/seo-cli.ts`; the checks in
+`packages/core/src/seo-check.ts` (`checkBuiltSite`).
+
+**Syntax:** `grove seo [options]`
+
+**Options:**
+
+| Option | Description | Default |
+|---|---|---|
+| `--dist <dir>` | Built site directory | `dist` |
+| `--quiet` | Print errors only | off |
+
+**Errors** (exit code 1):
+
+- a missing `<title>` or meta description on an indexable page;
+- two indexable pages with the same `<title>` or description;
+- a canonical that is missing, duplicated, or not the page's own URL;
+- a `noindex` page listed in the sitemap, or an indexable page missing
+  from it;
+- a record, collection, category, stack or licence page whose robots meta
+  disagrees with `seo.*IndexPolicy` (policy-excluded pages must say
+  `noindex,follow`);
+- a page without the parameter-URL robots script;
+- record JSON-LD outside the SoftwareApplication allowlist, or a
+  `downloadUrl` that is not a verified channel;
+- a name from `seo.retiredBrands` in a title, `og:site_name` or page text.
+
+**Warnings:** titles over 65 characters and descriptions over 160.
+
+**Reads:** `dist/`, `data/generated/site-config.json`,
+`data/generated/records.full.json`, `data/collections/`.
+
 ## `grove collection promote`
 
 Promote a filter URL into a curated `data/collections/<slug>.yml`
