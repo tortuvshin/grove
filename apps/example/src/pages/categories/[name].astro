@@ -35,7 +35,8 @@ const model = getTaxonomyPageModel('categories', name, displayName, siteConfig);
   <TaxonomyList
     eyebrow="Category"
     displayName={displayName}
-    lede={`Browse ${itemLabelPlural()} in this directory in the ${displayName} category.`}
+    heading={model.heading}
+    lede={model.lede ?? `Browse ${itemLabelPlural()} in this directory in the ${displayName} category.`}
     scope={{ categories: [name] }}
     count={model.records.length}
     pathPrefix={`/categories/${name}`}

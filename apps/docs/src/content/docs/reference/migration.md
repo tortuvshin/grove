@@ -14,6 +14,27 @@ what's new in each release. The roadmap is at [Project > Roadmap](/project/roadm
 
 ## Breaking changes
 
+### 1.1.0 — licence pages follow the taxonomy index policy
+
+Nothing is removed. Two behaviours change, and registry 1.6.0 carries the
+matching pages:
+
+- **Licence pages** now follow `seo.taxonomyIndexPolicy`, like category
+  and stack pages. Under `"editorial"`, a licence term without a
+  `description` in `data/taxonomy/licenses.yml` renders `noindex,follow`
+  and leaves the sitemap. Add a `description` (and optionally `heading`,
+  `seoTitle`) to the licences you want indexed; a guide under the list
+  can live in `content/pages/licenses/<id>.md`.
+- **The collections menu** (`menu: "collections"`) shows the slugs in
+  `featured`, or the first ten collections, titles only, with an
+  "All N collections" footer — no longer every collection with its
+  description.
+
+New, not breaking: `seo.staticPaths` (static pages in the sitemap),
+`seo.retiredBrands` and the `grove seo` command. The registry `Seo`
+layout no longer emits a `SearchAction` (Google retired the sitelinks
+search box in November 2024).
+
 ### 1.0.0 — legacy fields removed
 
 1.0 removes the compatibility shims that 0.x carried. Every change is a

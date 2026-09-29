@@ -105,7 +105,10 @@ const siteOrigin = new URL((siteConfig as { siteUrl?: string }).siteUrl ?? 'http
 <aside
   class:list={[
     layout === "grid"
-      ? "grove-sidebar grid grid-cols-1 items-start gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      ? // Full width under the article: a flat band of columns, not a wall of
+        // boxes of uneven height. Cards lose their frame here; the badge and
+        // source notes sit on their own row below.
+        "grove-sidebar grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-2 xl:grid-cols-4 [&>.grove-card]:rounded-none [&>.grove-card]:border-0 [&>.grove-card]:bg-transparent [&>.grove-card]:p-0"
       : "grove-sidebar flex flex-col gap-4",
     layout === "column" &&
       sticky &&
@@ -223,9 +226,19 @@ const siteOrigin = new URL((siteConfig as { siteUrl?: string }).siteUrl ?? 'http
             <dd class="text-ink-900 dark:text-ink-100">{pushedLabel}</dd>
           </div>
         )}
+        {/* Two clocks, named apart: when a person last reviewed the page,
+            and when the repository numbers were last synced. */}
+        {reviewedAtLabel && (
+          <div class="flex items-baseline justify-between gap-3">
+            <dt class="text-ink-500 dark:text-ink-400">Editorial review</dt>
+            <dd class="text-ink-900 dark:text-ink-100">
+              <time datetime={String(record.curation?.reviewedAt)}>{reviewedAtLabel}</time>
+            </dd>
+          </div>
+        )}
         {repo?.updated_at && lastFetchedLabel && (
           <div class="flex items-baseline justify-between gap-3">
-            <dt class="text-ink-500 dark:text-ink-400">Last fetched</dt>
+            <dt class="text-ink-500 dark:text-ink-400">Repository data</dt>
             <dd class="text-ink-900 dark:text-ink-100">
               <time datetime={String(repo.updated_at)}>{lastFetchedLabel}</time>
             </dd>
@@ -368,18 +381,20 @@ const siteOrigin = new URL((siteConfig as { siteUrl?: string }).siteUrl ?? 'http
     </section>
   )}
 
-  <FeaturedBadge
-    pageUrl={`${siteOrigin}/${detail.slug}/${record.slug}/`}
-    origin={siteOrigin}
-    siteName={String((siteConfig as { name?: string }).name ?? '')}
-    name={String((record as { name?: string }).name ?? record.slug)}
-    outboundRef={outbound.ref}
-  />
+  <div class:list={[layout === "grid" && "border-t border-border pt-6 sm:col-start-1 xl:col-span-2 [&>.grove-card]:rounded-none [&>.grove-card]:border-0 [&>.grove-card]:bg-transparent [&>.grove-card]:p-0"]}>
+    <FeaturedBadge
+      pageUrl={`${siteOrigin}/${detail.slug}/${record.slug}/`}
+      origin={siteOrigin}
+      siteName={String((siteConfig as { name?: string }).name ?? '')}
+      name={String((record as { name?: string }).name ?? record.slug)}
+      outboundRef={outbound.ref}
+    />
+  </div>
 
   {/* ── Source card (small) ────────────────────────────────── */}
   {sidebar.showSource && (
     <section
-      class="grove-card grove-card--muted rounded-[var(--radius-lg)] border border-dashed border-ink-200 bg-card/50 p-4 text-2xs text-ink-500 dark:border-ink-800 dark:text-ink-400"
+      class:list={[layout === "grid" && "!border-t !border-solid !border-border !pt-6 xl:col-span-2", "grove-card grove-card--muted rounded-[var(--radius-lg)] border border-dashed border-ink-200 bg-card/50 p-4 text-2xs text-ink-500 dark:border-ink-800 dark:text-ink-400"]}
       aria-labelledby="sidebar-source-title"
     >
       <h2
@@ -398,7 +413,7 @@ const siteOrigin = new URL((siteConfig as { siteUrl?: string }).siteUrl ?? 'http
           belongs, and gated the whole card besides. */}
       {reviewedAtLabel && (
         <p class:list={["m-0 leading-relaxed", addedAtLabel && "mt-1.5"]}>
-          Reviewed by {record.curation?.reviewedBy ?? "grove"}
+          Reviewed by {record.curation?.reviewedBy ?? "grove"}{" "}
           on <time datetime={String(record.curation?.reviewedAt)}>
             {reviewedAtLabel}
           </time>.
