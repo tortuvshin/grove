@@ -177,8 +177,7 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
   // A taxonomy id with no matching record gets no detail page at all
   // (see `[name].astro`'s `getStaticPaths`) — keep it out of the
   // sitemap too, instead of advertising a URL that 404s.
-  const hasRecords = (t: { count?: number }) => (t.count ?? 0) > 0;
-  // Categories and stacks also follow `seo.taxonomyIndexPolicy`, the
+  // Categories, stacks and licences also follow `seo.taxonomyIndexPolicy`, the
   // rule `getTaxonomyPageModel` applies to the page itself.
   const termIndexable = (t: { count?: number; description?: string }) =>
     taxonomyTermIndexable(
@@ -211,7 +210,7 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
       taxonomies: {
         categories: (sitePayload.taxonomy?.categories ?? []).filter(termIndexable).map((t) => t.id),
         stacks: (sitePayload.taxonomy?.stacks ?? []).filter(termIndexable).map((t) => t.id),
-        licenses: (sitePayload.taxonomy?.licenses ?? []).filter(hasRecords).map((t) => t.id),
+        licenses: (sitePayload.taxonomy?.licenses ?? []).filter(termIndexable).map((t) => t.id),
       },
       staticPaths: config.seo.staticPaths,
     },

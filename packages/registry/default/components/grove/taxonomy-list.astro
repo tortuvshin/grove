@@ -92,6 +92,9 @@ const {
   <DirectoryBrowseView scope={scope} pathPrefix={pathPrefix} />
 )}
 
+{/* Optional editorial guide for the term (e.g. licence pages). */}
+<slot />
+
 <section class="mx-auto w-full max-w-container px-5 pb-12 sm:px-7 sm:pb-16">
   <p class="m-0 text-2xs text-ink-500 dark:text-ink-400">
     <a href={backHref} class="text-inherit no-underline hover:underline">

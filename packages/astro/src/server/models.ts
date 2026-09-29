@@ -78,6 +78,19 @@ export interface SiteIndexPolicy {
   taxonomyIndexPolicy?: string;
 }
 
+/**
+ * A category, stack or licence term with its optional editorial copy
+ * from `data/taxonomy/*.yml`: `description` is the page lede and meta
+ * description, `heading` the H1, `seoTitle` the `<title>`.
+ */
+export interface TaxonomyTermCopy {
+  id: string;
+  name: string;
+  description?: string;
+  heading?: string;
+  seoTitle?: string;
+}
+
 export interface DirectorySiteConfig {
   name: string;
   tagline?: string;
@@ -120,11 +133,11 @@ export interface DirectorySiteConfig {
     labelPlural?: string;
   };
   taxonomy?: {
-    categories?: Array<{ id: string; name: string; description?: string }>;
-    stacks?: Array<{ id: string; name: string; description?: string }>;
+    categories?: Array<TaxonomyTermCopy>;
+    stacks?: Array<TaxonomyTermCopy>;
     platforms?: Array<{ id: string; name: string }>;
     topics?: Array<{ id: string; name: string }>;
-    licenses?: Array<{ id: string; name: string }>;
+    licenses?: Array<TaxonomyTermCopy>;
     distributionChannels?: Array<{ id: string; name: string }>;
   };
   contributors?: {
@@ -1126,7 +1139,7 @@ export function getTaxonomyPageModel(
         ? `${titleCaseFirst(plural)} built with ${displayName} on ${site.name}`
         : `${licenseLabel}-licensed ${plural} on ${site.name}`;
   const description = seoDescription(
-    undefined,
+    site.taxonomy?.[kind]?.find((t) => t.id === id)?.description,
     kind === 'categories'
       ? `${count} curated open-source ${plural} in the ${displayName} category on ${site.name}. Compare stars, activity, and licenses.`
       : kind === 'stacks'
@@ -1149,13 +1162,11 @@ export function getTaxonomyPageModel(
       ...(r.description ? { description: r.description } : {}),
     };
   });
-  // `seo.taxonomyIndexPolicy` covers categories and stacks — the pages
-  // a term's intro copy (`description` in data/taxonomy) is written for.
-  // Licenses have no editorial copy and are not covered. An empty term
-  // is left to the page, as before.
-  const term = kind === 'licenses' ? undefined : site.taxonomy?.[kind]?.find((t) => t.id === id);
+  // `seo.taxonomyIndexPolicy` covers categories, stacks and licences:
+  // under `editorial` a term needs intro copy (`description` in
+  // data/taxonomy). An empty term is left to the page, as before.
+  const term = site.taxonomy?.[kind]?.find((t) => t.id === id);
   const excludedByPolicy =
-    kind !== 'licenses' &&
     count > 0 &&
     !taxonomyTermIndexable(
       { count, description: term?.description },
@@ -1165,7 +1176,7 @@ export function getTaxonomyPageModel(
     ...(excludedByPolicy ? { noindex: true, robots: NOINDEX_FOLLOW } : {}),
     // `main` already names the site, so seoTitle appends nothing —
     // it still runs for the length/whitespace normalization.
-    title: seoTitle(main, site.name),
+    title: seoTitle(term?.seoTitle?.trim() || term?.heading?.trim() || main, site.name),
     description,
     image: ogPath(kind === 'categories' ? 'category' : kind === 'stacks' ? 'stack' : 'license', id),
     imageAlt: `${displayName} — ${site.name}`,
@@ -1188,6 +1199,10 @@ export function getTaxonomyPageModel(
     id,
     displayName,
     eyebrow: TAXONOMY_EYEBROW[kind],
+    /** Editorial H1 (`heading`), when the term has one. */
+    heading: term?.heading?.trim() || undefined,
+    /** Editorial lede (`description`), when the term has one. */
+    lede: term?.description?.trim() || undefined,
     records,
     count,
     seo,

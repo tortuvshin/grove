@@ -400,6 +400,13 @@ const PAGE_BODY_ALLOWLIST = [
   'pre',
   'blockquote',
   'img',
+  // Tables: comparison grids in guides (e.g. licence pages).
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
 ];
 
 /**

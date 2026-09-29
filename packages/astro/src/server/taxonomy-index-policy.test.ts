@@ -6,7 +6,7 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 
-function indexRecord(slug: string, category: string, stack: string) {
+function indexRecord(slug: string, category: string, stack: string, license: string) {
   return {
     kind: 'project',
     slug,
@@ -17,6 +17,7 @@ function indexRecord(slug: string, category: string, stack: string) {
     stack,
     stacks: [stack],
     platforms: ['linux'],
+    licenses: [license],
     projectType: 'real-app',
     bestFor: [],
     whyListed: [],
@@ -29,7 +30,10 @@ function indexRecord(slug: string, category: string, stack: string) {
   };
 }
 
-const visible = [indexRecord('a', 'finance', 'flutter'), indexRecord('b', 'games', 'svelte')];
+const visible = [
+  indexRecord('a', 'finance', 'flutter', 'mit'),
+  indexRecord('b', 'games', 'svelte', 'apache-2.0'),
+];
 
 vi.mock('@grove/generated/records.full.json', () => ({ default: { records: visible } }));
 vi.mock('@grove/generated/records.index.json', () => ({ default: { records: visible } }));
@@ -50,6 +54,16 @@ const site = {
     stacks: [
       { id: 'flutter', name: 'Flutter', description: 'Flutter apps with real codebases.' },
       { id: 'svelte', name: 'Svelte' },
+    ],
+    licenses: [
+      {
+        id: 'mit',
+        name: 'MIT License',
+        heading: 'Open Source MIT-Licensed Apps',
+        description: 'Apps under the permissive MIT License.',
+      },
+      { id: 'apache-2.0', name: 'Apache License 2.0' },
+      { id: 'gpl-3.0', name: 'GNU GPL v3.0' },
     ],
   },
 } satisfies Site;
@@ -85,12 +99,30 @@ describe('getTaxonomyPageModel index policy', () => {
     );
   });
 
-  it('leaves empty terms and licenses to the page', () => {
+  it('leaves empty terms to the page', () => {
     expect(getTaxonomyPageModel('categories', 'travel', 'Travel', editorial).seo.robots).toBe(
       undefined,
     );
-    expect(getTaxonomyPageModel('licenses', 'mit', 'MIT License', editorial).seo.robots).toBe(
+    expect(getTaxonomyPageModel('licenses', 'gpl-3.0', 'GNU GPL v3.0', editorial).seo.robots).toBe(
       undefined,
     );
+  });
+
+  it("applies 'editorial' to licence pages too", () => {
+    expect(
+      getTaxonomyPageModel('licenses', 'apache-2.0', 'Apache License 2.0', editorial).seo.robots,
+    ).toBe('noindex,follow');
+    expect(getTaxonomyPageModel('licenses', 'mit', 'MIT License', editorial).seo.noindex).toBe(
+      undefined,
+    );
+  });
+
+  it('returns the term heading and description as page copy', () => {
+    const model = getTaxonomyPageModel('licenses', 'mit', 'MIT License', site);
+    expect(model.heading).toBe('Open Source MIT-Licensed Apps');
+    expect(model.lede).toBe('Apps under the permissive MIT License.');
+    expect(model.seo.title).toContain('Open Source MIT-Licensed Apps');
+    expect(model.seo.description).toBe('Apps under the permissive MIT License.');
+    expect(getTaxonomyPageModel('stacks', 'svelte', 'Svelte', site).heading).toBeUndefined();
   });
 });

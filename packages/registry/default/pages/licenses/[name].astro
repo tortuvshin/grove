@@ -1,6 +1,6 @@
 ---
 import siteConfig from '@grove/generated/site-config.json';
-import { getTaxonomyPageModel, itemLabelPlural } from '@grove-dev/astro/server';
+import { getPageContentHtml, getTaxonomyPageModel, itemLabelPlural } from '@grove-dev/astro/server';
 import TaxonomyList from '../../components/grove/taxonomy-list.astro';
 import BaseLayout from '../../layouts/base-layout.astro';
 
@@ -20,6 +20,8 @@ export function getStaticPaths() {
 const { displayName } = Astro.props;
 const name = Astro.params.name;
 const model = getTaxonomyPageModel('licenses', name, displayName, siteConfig);
+// Optional plain-language guide under the list: content/pages/licenses/<id>.md.
+const guideHtml = getPageContentHtml(`licenses/${name}`);
 ---
 
 <BaseLayout
@@ -28,14 +30,23 @@ const model = getTaxonomyPageModel('licenses', name, displayName, siteConfig);
   image={model.seo.image}
   imageAlt={model.seo.imageAlt}
   jsonLd={model.seo.jsonLd}
+  noindex={model.seo.noindex}
+  robots={model.seo.robots}
   site={siteConfig}
 >
   <TaxonomyList
     eyebrow="License"
     displayName={displayName}
-    lede={`Browse ${itemLabelPlural()} in this directory licensed under ${displayName}.`}
+    heading={model.heading}
+    lede={model.lede ?? `Browse ${itemLabelPlural()} in this directory licensed under ${displayName}.`}
     scope={{ licenses: [name] }}
     count={model.records.length}
     pathPrefix={`/licenses/${name}`}
-  />
+  >
+    {guideHtml && (
+      <section class="mx-auto w-full max-w-container px-5 pb-4 pt-4 sm:px-7" aria-label={`About the ${displayName}`}>
+        <div class="grove-prose max-w-[72ch] border-t border-border pt-8" set:html={guideHtml} />
+      </section>
+    )}
+  </TaxonomyList>
 </BaseLayout>

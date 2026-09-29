@@ -100,6 +100,7 @@ describe('seo config', () => {
       recordIndexPolicy: 'all',
       collectionIndexPolicy: 'all',
       taxonomyIndexPolicy: 'all',
+      staticPaths: ['about/', 'contributors/'],
     });
   });
 

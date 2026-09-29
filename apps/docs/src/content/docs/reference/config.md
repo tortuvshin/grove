@@ -226,7 +226,7 @@ sitemap. See [SEO & social → Index policy](/outputs/seo/#index-policy).
 |---|---|---|---|
 | `recordIndexPolicy` | `"all" \| "editorial" \| "editorial-and-reviewed"` | `"all"` | Record detail pages. `editorial`: a non-empty Markdown body. `editorial-and-reviewed`: a body and `curation.reviewed: true`. |
 | `collectionIndexPolicy` | `"all" \| "editorial"` | `"all"` | Collection pages. `editorial`: an `editorial.introduction` or a Markdown `content` body. |
-| `taxonomyIndexPolicy` | `"all" \| "editorial"` | `"all"` | Category and stack pages. `editorial`: the term has a `description` in `data/taxonomy/*.yml`. |
+| `taxonomyIndexPolicy` | `"all" \| "editorial"` | `"all"` | Category, stack and licence pages. `editorial`: the term has a `description` in `data/taxonomy/*.yml`. A licence page also renders an optional guide from `content/pages/licenses/<id>.md` under its list. |
 | `staticPaths` | `string[]` | `["about/", "contributors/"]` | Site-relative static pages listed in `sitemap.xml` besides records, collections and taxonomy pages. Set it when you rename or add a static page, e.g. `["about/", "community/"]`. Never list noindex routes such as `submit/`. |
 
 ### `nav`

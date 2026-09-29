@@ -132,7 +132,7 @@ seo: {
 |---|---|---|
 | Record detail | a non-empty Markdown body (`content:` or `content/records/<slug>.md`) | `editorial-and-reviewed` also needs `curation.reviewed: true` |
 | Collection | `editorial.introduction`, or a Markdown `content` body | `seo.index: false` and empty collections stay noindex either way |
-| Category, stack | the term's `description` in `data/taxonomy/*.yml` | licenses are not covered |
+| Category, stack, licence | the term's `description` in `data/taxonomy/*.yml` | the term's `heading` and `seoTitle` override the H1 and `<title>` |
 
 A page the policy excludes still renders and still links onwards: the
 page model returns `seo.noindex: true` and `seo.robots: "noindex,follow"`,
