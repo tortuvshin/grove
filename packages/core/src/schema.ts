@@ -598,6 +598,13 @@ const navLinkSchema = z.object({
 export const navItemSchema = navLinkSchema.extend({
   children: z.array(navLinkSchema).optional(),
   menu: z.enum(['collections']).optional(),
+  /**
+   * With `menu: "collections"`: the collection slugs the menu shows, in
+   * order. Without it the menu shows the first ten collections by title.
+   * Either way the footer links to the full index, so the header stays
+   * the same size however many collections a site grows.
+   */
+  featured: z.array(z.string().min(1)).optional(),
 });
 
 export const footerNavItemSchema = navLinkSchema.extend({

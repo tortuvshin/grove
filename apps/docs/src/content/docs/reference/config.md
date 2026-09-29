@@ -231,14 +231,17 @@ sitemap. See [SEO & social → Index policy](/outputs/seo/#index-policy).
 
 ### `nav`
 
-**Type:** `Array<{ label: string; href: string; description?: string; children?: NavLink[]; menu?: "collections" }>`
+**Type:** `Array<{ label: string; href: string; description?: string; children?: NavLink[]; menu?: "collections"; featured?: string[] }>`
 **Default:** `[]`
 
 Top-navigation items, in order. Each item has a `label` (visible
 text) and an `href` (link target; can be a relative path or a full
 URL). An item with `children` opens a menu panel in the header;
-`menu: "collections"` fills the panel from `data/collections/` so a new
-collection appears without a config change. `description` is the line
+`menu: "collections"` fills the panel from `data/collections/`: the
+slugs in `featured`, in order, or the first ten collections by title,
+with a footer link to "All N collections". Alternatives hubs (collections
+with a `subject`) are listed by the product name and grouped apart from
+the other lists; the menu shows titles only. `description` is the line
 under a menu link. The item whose `href` (or a child's) prefixes the
 current path is marked `aria-current="page"`.
 
@@ -248,7 +251,8 @@ nav: [
     { label: "Categories", href: "/categories/", description: "By what the app does" },
     { label: "Stacks", href: "/stacks/" },
   ] },
-  { label: "Collections", href: "/collections/", menu: "collections" },
+  { label: "Collections", href: "/collections/", menu: "collections",
+    featured: ["open-source-notion-alternatives", "trending-open-source-apps"] },
   { label: "About", href: "/about/" },
 ],
 ```

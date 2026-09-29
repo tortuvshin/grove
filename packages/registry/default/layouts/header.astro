@@ -31,6 +31,13 @@ interface NavLink {
 interface NavItem extends NavLink {
   children?: NavLink[];
   menu?: 'collections';
+  /** Collection slugs the collections menu shows, in order. */
+  featured?: string[];
+}
+
+interface NavGroup {
+  label: string;
+  items: NavLink[];
 }
 
 interface Site {
@@ -48,6 +55,10 @@ interface Site {
   };
   blueprintConfig?: {
     routeSlug?: string;
+  };
+  /** Subjects name alternatives hubs in the collections menu ("Notion"). */
+  taxonomy?: {
+    subjects?: { id: string; name: string }[];
   };
 }
 
@@ -81,21 +92,41 @@ const navItems: NavItem[] = site.nav?.length ? site.nav : defaultNavItems;
 const collections = navItems.some((item) => item.menu === 'collections')
   ? await loadCollections(process.cwd())
   : [];
+// The collections menu is a shortcut, not the index: `featured` slugs (or
+// the first ten by title), titles only, and a footer link to all of them.
+// An alternatives hub (a collection with a `subject`) is named by the
+// product alone ("Notion") and grouped apart from the other lists.
+const MENU_COLLECTIONS = 10;
+const subjectNames = new Map((site.taxonomy?.subjects ?? []).map((s) => [s.id, s.name]));
+const collectionGroups = (featured?: string[]): NavGroup[] => {
+  const all = collections as { slug: string; title: string; subject?: string }[];
+  const picked = featured?.length
+    ? featured.flatMap((slug) => all.filter((c) => c.slug === slug))
+    : [...all].sort((a, b) => a.title.localeCompare(b.title)).slice(0, MENU_COLLECTIONS);
+  const hubs: NavLink[] = [];
+  const lists: NavLink[] = [];
+  for (const c of picked) {
+    const href = `/collections/${c.slug}/`;
+    const name = c.subject ? subjectNames.get(c.subject) : undefined;
+    if (name) hubs.push({ label: name, href });
+    else lists.push({ label: c.title, href });
+  }
+  return [
+    { label: 'Alternatives to', items: hubs },
+    { label: 'Curated lists', items: lists },
+  ].filter((g) => g.items.length > 0);
+};
 const menus = navItems.map((item) => {
-  const children: NavLink[] =
-    item.menu === 'collections'
-      ? collections
-          .map((c) => ({
-            label: c.title,
-            href: `/collections/${c.slug}/`,
-            description: c.description,
-          }))
-          .sort((a, b) => a.label.localeCompare(b.label))
-      : (item.children ?? []);
+  const groups = item.menu === 'collections' ? collectionGroups(item.featured) : undefined;
+  const children: NavLink[] = groups ? groups.flatMap((g) => g.items) : (item.children ?? []);
   return {
     ...item,
     children,
-    footer: item.menu === 'collections' ? { label: 'All collections', href: item.href } : undefined,
+    groups,
+    footer:
+      item.menu === 'collections'
+        ? { label: `All ${collections.length} collections`, href: item.href }
+        : undefined,
   };
 });
 const withSlash = (path: string) => (path.endsWith('/') ? path : `${path}/`);
@@ -159,18 +190,33 @@ const starsLabel = typeof stars === 'number' ? compact(stars) : null;
                   </summary>
                   <div class:list={[
                     "absolute left-0 top-[calc(100%+0.625rem)] z-50 rounded-[var(--radius-lg)] border border-border bg-popover p-2 shadow-lg",
-                    menu.children.length > 5 ? "w-[34rem]" : "w-80",
+                    menu.groups ? "w-[30rem]" : menu.children.length > 5 ? "w-[34rem]" : "w-80",
                   ]}>
-                    <ul class:list={["m-0 grid list-none gap-0.5 p-0", menu.children.length > 5 && "grid-cols-2"]}>
-                      {menu.children.map((item) => (
-                        <li>
-                          <a href={item.href} class="block rounded-[var(--radius)] px-3 py-2 no-underline outline-none hover:bg-accent focus-visible:bg-accent">
-                            <span class="block text-sm font-medium text-foreground">{item.label}</span>
-                            {item.description && <span class="mt-0.5 line-clamp-2 block text-2xs leading-snug text-muted-foreground">{item.description}</span>}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    {menu.groups ? (
+                      menu.groups.map((group) => (
+                        <div class="px-1 pb-1 pt-1.5">
+                          <p class="m-0 px-2 pb-1 text-2xs font-medium uppercase tracking-wide text-muted-foreground">{group.label}</p>
+                          <ul class:list={["m-0 grid list-none gap-0 p-0", group.items.length > 3 ? "grid-cols-2" : "grid-cols-1"]}>
+                            {group.items.map((item) => (
+                              <li>
+                                <a href={item.href} aria-current={pathname === item.href ? "page" : undefined} class="block truncate rounded-[var(--radius)] px-2 py-1.5 text-sm text-foreground no-underline outline-none hover:bg-accent focus-visible:bg-accent aria-[current=page]:bg-accent">{item.label}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))
+                    ) : (
+                      <ul class:list={["m-0 grid list-none gap-0.5 p-0", menu.children.length > 5 && "grid-cols-2"]}>
+                        {menu.children.map((item) => (
+                          <li>
+                            <a href={item.href} class="block rounded-[var(--radius)] px-3 py-2 no-underline outline-none hover:bg-accent focus-visible:bg-accent">
+                              <span class="block text-sm font-medium text-foreground">{item.label}</span>
+                              {item.description && <span class="mt-0.5 line-clamp-2 block text-2xs leading-snug text-muted-foreground">{item.description}</span>}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {menu.footer && (
                       <a href={menu.footer.href} class="mt-1 flex items-center justify-between rounded-[var(--radius)] border-t border-border px-3 pb-1 pt-2.5 text-sm font-medium text-foreground no-underline hover:underline">
                         {menu.footer.label}<span aria-hidden="true">→</span>
