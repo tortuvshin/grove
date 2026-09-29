@@ -112,7 +112,7 @@ interface Props {
   imageAlt?: string;
   /** Optional Google Analytics 4 Measurement ID (e.g. "G-XXXXXX"). */
   gaId?: string;
-  /** Path used for JSON-LD `SearchAction` target. Defaults to "/items". */
+  /** Directory browse path for "Browse all" links. Defaults to the blueprint route. */
   searchPath?: string;
   /** Submit button label rendered in the header. Omit to hide. */
   submitLabel?: string;
@@ -256,7 +256,6 @@ const favicon =
       {...(image ? { image } : {})}
       imageAlt={imageAlt}
       site={site}
-      searchPath={directoryPath}
     />
 
     <slot name="head" />

@@ -45,7 +45,8 @@ depends on what that page is.
 **Site graph** — a single node typed `["WebSite", "Organization"]` with
 `@id` `<site>#site`, carrying `name`, `description`, `inLanguage`, a
 `publisher` Organization (using `site.logo` and `site.repoUrl` as
-`sameAs` when set), and a `SearchAction` pointing at your browse path.
+`sameAs` when set). There is no `SearchAction`: Google retired the
+sitelinks search box in November 2024, so the markup has no effect.
 
 **Page graph** — built by `buildJsonLd`, which is overloaded on input shape:
 
@@ -153,12 +154,48 @@ Google renders JavaScript and honours a robots meta the page changes at
 runtime — adding `noindex` that way works; the reverse (removing a
 server-sent `noindex`) does not, because Google stops at a server
 `noindex` without rendering. Crawlers that do not render JavaScript see
-only the canonical. Where the host can set headers per request, an
-`X-Robots-Tag: noindex, follow` response header on requests that carry a
-query string is the stronger, static equivalent — on Cloudflare a
-Response Header Transform Rule matching `http.request.uri.query ne ""`
-does it without a Worker. Do not add `Disallow: /*?` to `robots.txt`
-instead: a crawler that may not fetch the URL never sees its `noindex`.
+only the canonical.
+
+In practice the script alone is not enough: a directory's filter URLs
+were indexed with stale counts because the HTML a crawler first
+receives is indexable. **Where the host can set headers per request, send
+`X-Robots-Tag: noindex, follow` on HTML responses that carry a query
+string.** On Cloudflare either:
+
+- add a Response Header Transform Rule matching
+  `http.request.uri.query ne ""` (no Worker), or
+- on Workers-with-Assets, run a few lines of Worker first on the browse
+  and taxonomy routes only — every other request is still answered by
+  the assets binding:
+
+```js title="worker/index.js"
+export default {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request);
+    if (!new URL(request.url).search) return response;
+    if (!(response.headers.get("content-type") ?? "").includes("text/html")) return response;
+    const headers = new Headers(response.headers);
+    headers.set("X-Robots-Tag", "noindex, follow");
+    return new Response(response.body, { status: response.status, headers });
+  },
+};
+```
+
+```jsonc title="wrangler.jsonc"
+{
+  "main": "worker/index.js",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/apps", "/apps/*", "/categories/*", "/stacks/*", "/licenses/*", "/collections", "/collections/*"]
+  }
+}
+```
+
+Replace `/apps` with your directory route. Static `_headers` files cannot
+match on the query string, so they do not help here. Do not add
+`Disallow: /*?` to `robots.txt` instead: a crawler that may not fetch the
+URL never sees its `noindex`.
 
 ## `robots.txt`
 

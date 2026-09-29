@@ -12,8 +12,7 @@
  *   - Open Graph (og:*) for Facebook, LinkedIn, Discord, Slack, etc.
  *   - Twitter Card (twitter:*) for X / Twitter
  *   - JSON-LD WebSite+Organization identity graph on every page
- *     (built by @grove-dev/core's `siteSchema`, with a SearchAction
- *     pointing at the directory's browse page)
+ *     (built by @grove-dev/core's `siteSchema`)
  *   - Per-page JSON-LD nodes when `jsonLd` is provided (SoftwareApplication
  *     on record pages, CollectionPage/ItemList/BreadcrumbList on
  *     collection and taxonomy pages, ...)
@@ -48,7 +47,6 @@ interface Props {
     /** Twitter/X handle (e.g. "@grove") — emitted as twitter:site. */
     twitter?: string;
   };
-  searchPath?: string;
   /** Open Graph / Twitter image. Default: /og-image.svg. Should be absolute or root-relative. */
   image?: string;
   /** Alt text for the OG/Twitter image. Default: "<site name> social preview". */
@@ -67,7 +65,6 @@ const {
   title,
   description,
   site: siteConfig,
-  searchPath = '/items',
   image = '/og-image.svg',
   imageAlt,
   type = 'website',
@@ -105,8 +102,7 @@ const shortDescription = truncate(description, 200);
 // WebSite+Organization identity graph — site-wide signals that appear on
 // every page (Google uses them for site links and the knowledge panel).
 // Built by core's `siteSchema` so the @id graph shape is shared with the
-// rest of the JSON-LD registry; the SearchAction is appended here because
-// the browse path is an adapter concern, not a core one.
+// rest of the JSON-LD registry.
 const bareSiteUrl = siteUrl.toString().replace(/\/$/, '');
 const [siteLd] = siteSchema({
   url: bareSiteUrl,
@@ -118,11 +114,8 @@ const [siteLd] = siteSchema({
   ...(siteConfig.logo ? { orgLogo: new URL(siteConfig.logo, siteUrl).toString() } : {}),
   ...(siteConfig.repoUrl ? { sameAs: [siteConfig.repoUrl] } : {}),
 });
-siteLd.potentialAction = {
-  '@type': 'SearchAction',
-  target: `${bareSiteUrl}${searchPath}?q={search_term_string}`,
-  'query-input': 'required name=search_term_string',
-};
+// No SearchAction: Google retired the sitelinks search box on
+// 2024-11-21 and the markup no longer has any effect in Search.
 
 const perPageNodes = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : null;
 
