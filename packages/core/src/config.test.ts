@@ -175,7 +175,9 @@ describe('nav featured collections', () => {
   it('keeps the featured slugs of a collections menu in order', () => {
     const config = defineConfig({
       site: { name: 'Directory' },
-      nav: [{ label: 'Collections', href: '/collections/', menu: 'collections', featured: ['b', 'a'] }],
+      nav: [
+        { label: 'Collections', href: '/collections/', menu: 'collections', featured: ['b', 'a'] },
+      ],
     });
     expect(config.nav[0]?.featured).toEqual(['b', 'a']);
   });
