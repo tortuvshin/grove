@@ -22,6 +22,24 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [1.1.0](https://github.com/tortuvshin/grove/compare/v1.0.1...v1.1.0) (2026-09-29)
+
+
+### Features
+
+* **core:** seo.staticPaths lists renamed or extra static pages in the sitemap ([19b665e](https://github.com/tortuvshin/grove/commit/19b665e2525ac14c4997bf7c436ef028c1ee67a3))
+* **core:** warn on editorial-only subjects and hub picks without a relation ([1400d1f](https://github.com/tortuvshin/grove/commit/1400d1fa9420cd1d2d29453a4b5ae5a79b8a1082))
+* grove seo — crawl the built site for cross-page SEO mistakes ([7513ebd](https://github.com/tortuvshin/grove/commit/7513ebdb454f91f41b6270d6f1425f9613cd4cce))
+* licence pages take heading, description and a guide; taxonomyIndexPolicy covers them ([d63be6d](https://github.com/tortuvshin/grove/commit/d63be6ddd25bae562ab9052a16715293c0f28af5))
+* **registry:** collections menu shows featured or ten collections, hubs by product name, no descriptions ([88443aa](https://github.com/tortuvshin/grove/commit/88443aac66bec211f31c9270800ad79181313120))
+* **registry:** tidier related records — collection chips first, equal-height sibling cards, compare link beside the heading ([e5b5efc](https://github.com/tortuvshin/grove/commit/e5b5efc7bd905c1e84a880d9f878935acaed80f2))
+
+
+### Bug Fixes
+
+* **registry:** drop the retired SearchAction; recommend an edge X-Robots-Tag for parameter URLs ([4ddd6b5](https://github.com/tortuvshin/grove/commit/4ddd6b502fdf6eff7b35390a86faa707b3714029))
+* **registry:** record details as a flat band, named review and data dates, missing space in 'Reviewed by' ([36c12eb](https://github.com/tortuvshin/grove/commit/36c12eb49966aa4700186cba6fab04c7d0662bd4))
+
 ## [1.0.1](https://github.com/tortuvshin/grove/compare/v1.0.0...v1.0.1) (2026-09-27)
 
 
