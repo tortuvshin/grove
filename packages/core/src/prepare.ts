@@ -213,6 +213,7 @@ export async function prepareDirectory(cwd = process.cwd()): Promise<PrepareDire
         stacks: (sitePayload.taxonomy?.stacks ?? []).filter(termIndexable).map((t) => t.id),
         licenses: (sitePayload.taxonomy?.licenses ?? []).filter(hasRecords).map((t) => t.id),
       },
+      staticPaths: config.seo.staticPaths,
     },
     root,
     config,

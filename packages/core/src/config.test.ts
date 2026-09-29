@@ -155,3 +155,18 @@ describe('press, outbound and nav menus', () => {
     ).toThrow(/YYYY-MM/);
   });
 });
+
+describe('seo.staticPaths', () => {
+  it('defaults to the scaffold about and contributors pages', () => {
+    const config = defineConfig({ site: { name: 'Directory' } });
+    expect(config.seo.staticPaths).toEqual(['about/', 'contributors/']);
+  });
+
+  it('accepts renamed static pages', () => {
+    const config = defineConfig({
+      site: { name: 'Directory' },
+      seo: { staticPaths: ['about/', 'community/'] },
+    });
+    expect(config.seo.staticPaths).toEqual(['about/', 'community/']);
+  });
+});

@@ -115,6 +115,32 @@ describe('buildSitemap', () => {
     expect(xml).not.toContain('/submit');
   });
 
+  it('lists the configured static routes instead of the scaffold defaults', async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'grove-sitemap-'));
+    roots.push(cwd);
+    const config = {
+      blueprint: 'project-directory',
+      site: { name: 'Open Apps', url: 'https://openappscout.com' },
+      routes: {},
+      labels: { singular: 'app', plural: 'apps' },
+      paths: { publicDir: 'public' },
+    } as GroveConfig;
+
+    const result = await buildSitemap(
+      {
+        generatedAt: '2026-06-24T00:00:00.000Z',
+        items: [],
+        staticPaths: ['about/', '/community/'],
+      },
+      cwd,
+      config,
+    );
+    const xml = await readFile(result.path, 'utf8');
+    expect(xml).toContain('<loc>https://openappscout.com/about/</loc>');
+    expect(xml).toContain('<loc>https://openappscout.com/community/</loc>');
+    expect(xml).not.toContain('/contributors/');
+  });
+
   it('leaves out a record page the index policy renders noindex', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'grove-sitemap-'));
     roots.push(cwd);

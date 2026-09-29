@@ -773,6 +773,14 @@ const seoConfigSchema = z
      * `description` in `data/taxonomy/*.yml`.
      */
     taxonomyIndexPolicy: z.enum(LISTING_INDEX_POLICIES).default('all'),
+    /**
+     * Site-relative static routes listed in the sitemap besides records,
+     * collections and taxonomy pages — the scaffold's `about/` and
+     * `contributors/` by default. Set it when a site renames or adds a
+     * static page (e.g. `['about/', 'community/']`). Never list noindex
+     * routes such as `submit/` or `404`.
+     */
+    staticPaths: z.array(z.string().min(1)).default(['about/', 'contributors/']),
   })
   .prefault({});
 
