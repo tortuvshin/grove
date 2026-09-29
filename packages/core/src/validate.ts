@@ -282,6 +282,10 @@ export async function validateProject(
   }
   /** Subject id → slugs of the records related to it. */
   const relatedRecords = new Map<string, Set<string>>();
+  /** Subjects with at least one relation backed by the project's own words or a topic. */
+  const evidencedSubjects = new Set<string>();
+  /** Record slug → subjects it relates to. */
+  const recordSubjects = new Map<string, Set<string>>();
 
   /** Every record that parsed — the stream collections are checked against. */
   const parsedRecords: Resource[] = [];
@@ -335,6 +339,13 @@ export async function validateProject(
       const related = relatedRecords.get(relation.to) ?? new Set<string>();
       related.add(fileSlug);
       relatedRecords.set(relation.to, related);
+      const subjects = recordSubjects.get(fileSlug) ?? new Set<string>();
+      subjects.add(relation.to);
+      recordSubjects.set(fileSlug, subjects);
+      const evidence = relation.evidence?.type;
+      if (evidence === 'self-described' || evidence === 'repo-topic') {
+        evidencedSubjects.add(relation.to);
+      }
     }
     // The file name is the slug; a different `slug` in the file is
     // ignored, and worth a warning.
@@ -611,6 +622,15 @@ export async function validateProject(
           message: `${where}: entries lists "${pick.slug}", which is hidden or removed and will not render`,
           severity: 'warning',
         });
+      } else if (collection.subject && !recordSubjects.get(pick.slug)?.has(collection.subject)) {
+        // A hub's picks should be the records that say they are an
+        // alternative to its subject; otherwise the record page shows
+        // no "Alternative to" link back to the hub.
+        warnings.push({
+          code: 'collection_entry_unrelated',
+          message: `${where}: entries lists "${pick.slug}", which has no relation to subject "${collection.subject}"`,
+          severity: 'warning',
+        });
       }
     }
     if (collection.content && !(await exists(resolve(process.cwd(), collection.content)))) {
@@ -637,6 +657,20 @@ export async function validateProject(
       warnings.push({
         code: 'subject_without_collection',
         message: `subject "${subject}" has ${related.size} related records and no collection declares \`subject: ${subject}\``,
+        severity: 'warning',
+      });
+    }
+  }
+
+  // A subject only the curator vouches for: no related record says so
+  // itself or carries the topic. Relations can be editorial, but a
+  // subject — and the hub built on it — should rest on at least one
+  // project's own claim.
+  for (const subject of relatedRecords.keys()) {
+    if (!evidencedSubjects.has(subject)) {
+      warnings.push({
+        code: 'subject_editorial_only',
+        message: `subject "${subject}" is supported only by editorial or unevidenced relations — add a self-described or repo-topic relation, or drop the subject`,
         severity: 'warning',
       });
     }

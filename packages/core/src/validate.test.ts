@@ -678,7 +678,11 @@ describe('validateProject — collections', () => {
 });
 
 describe('validateProject — subjects and relations', () => {
-  const record = (slug: string, relationTo?: string) =>
+  const record = (
+    slug: string,
+    relationTo?: string,
+    evidence: 'self-described' | 'editorial' = 'self-described',
+  ) =>
     [
       'kind: project',
       `slug: ${slug}`,
@@ -689,7 +693,14 @@ describe('validateProject — subjects and relations', () => {
       'links: {}',
       'curation: { reviewed: false, labels: [], lenses: [] }',
       'scores: {}',
-      ...(relationTo ? ['relations:', '  - type: alternative-to', `    to: ${relationTo}`] : []),
+      ...(relationTo
+        ? [
+            'relations:',
+            '  - type: alternative-to',
+            `    to: ${relationTo}`,
+            `    evidence: { type: ${evidence} }`,
+          ]
+        : []),
     ].join('\n');
 
   async function scaffold(
@@ -775,6 +786,50 @@ describe('validateProject — subjects and relations', () => {
       const result = await validateProject(makeConfig());
       expect(result.errors).toEqual([]);
       expect(result.warnings.map((w) => w.code)).toEqual(['subject_without_collection']);
+    });
+  });
+
+  it('warns when a subject rests only on editorial relations', async () => {
+    await withTmpCwd('grove-validate-editorial-subject-', async (cwd) => {
+      await scaffold(cwd, {
+        subjects: '- id: notion\n  name: Notion\n',
+        records: {
+          alpha: record('alpha', 'notion', 'editorial'),
+          beta: record('beta', 'notion', 'editorial'),
+        },
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.warnings.map((w) => w.code)).toEqual(['subject_editorial_only']);
+    });
+  });
+
+  it('accepts editorial relations once one record makes the claim itself', async () => {
+    await withTmpCwd('grove-validate-mixed-subject-', async (cwd) => {
+      await scaffold(cwd, {
+        subjects: '- id: notion\n  name: Notion\n',
+        records: {
+          alpha: record('alpha', 'notion'),
+          beta: record('beta', 'notion', 'editorial'),
+        },
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.warnings).toEqual([]);
+    });
+  });
+
+  it("warns when a hub's pick has no relation to the hub subject", async () => {
+    await withTmpCwd('grove-validate-hub-entry-', async (cwd) => {
+      await scaffold(cwd, {
+        subjects: '- id: notion\n  name: Notion\n',
+        records: { alpha: record('alpha', 'notion'), beta: record('beta') },
+        collections: {
+          'hub.yml':
+            'slug: hub\ntitle: Hub\ndescription: d\nsubject: notion\nquery: { relatedTo: { subjects: [notion] } }\nentries:\n  - slug: alpha\n  - slug: beta\n',
+        },
+      });
+      const result = await validateProject(makeConfig());
+      expect(result.errors).toEqual([]);
+      expect(result.warnings.map((w) => w.code)).toEqual(['collection_entry_unrelated']);
     });
   });
 });

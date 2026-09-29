@@ -63,6 +63,8 @@ grove check --strict   # also fail when there are warnings
 | `collection_unknown_subject` | error | A collection's `subject` or `query.relatedTo.subjects` names an unknown subject. |
 | `duplicate_subject_hub` | error | Two collections declare the same `subject`. |
 | `subject_without_collection` | warning | Three or more records relate to a subject and no collection declares it. |
+| `subject_editorial_only` | warning | Every relation to a subject is `editorial` or has no evidence — no record says it in its own words or topics. |
+| `collection_entry_unrelated` | warning | A hub (a collection with `subject`) picks a record that has no relation to that subject, so the record page shows no link back to the hub. |
 | `collection_empty` | warning | No record matches the collection's query, so the page would render an empty list. |
 
 Source: `packages/core/src/validate.ts`; `schema_error`, `zod_error`, `duplicate_slug_format`, `markdown_content_pointer`, `record_format_deprecated` and `github_cache_mismatch` come from the record normalizer in `packages/core/src/normalize-records.ts`.
