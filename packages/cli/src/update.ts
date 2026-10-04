@@ -36,6 +36,7 @@ import {
   type Sha256Hash,
   writeLockfile,
 } from './hash.js';
+import { addCommand, detectPackageManager } from './package-manager.js';
 import {
   itemLockEntries,
   loadItem,
@@ -405,7 +406,10 @@ export function formatPlan(summary: UpdateSummary): string {
       '',
       `This scaffold expects @grove-dev/* ${required}; this project has ${installed}.`,
       'The scaffold reads a typed model the packages build, so upgrade them too:',
-      `  pnpm add @grove-dev/core@${required} @grove-dev/astro@${required} @grove-dev/cli@${required}`,
+      `  ${addCommand(
+        detectPackageManager(),
+        ['core', 'astro', 'cli'].map((name) => `@grove-dev/${name}@${required}`),
+      )}`,
     );
   }
   for (const diff of diffs) {
