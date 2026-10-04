@@ -59,7 +59,7 @@ grove init my-directory
 
 This:
 
-1. Writes `package.json`, `tsconfig.json`, `grove.config.ts`, `astro.config.mjs`, an empty `data/records/`, and a `components.json` that points the `@grove` namespace at the registry:
+1. Writes `package.json`, `tsconfig.json`, `grove.config.ts`, `astro.config.mjs`, a sample record in `content/records/`, and a `components.json` that points the `@grove` namespace at the registry:
 
    ```json
    { "registries": { "@grove": "https://withgrove.dev/r/{name}.json" } }

@@ -11,7 +11,7 @@ A Grove content page is a Markdown file at `content/pages/<name>.md` (the direct
 
 ## How it differs from a record
 
-A record (`data/records/<slug>.yml`) is structured data: a `kind`, a `category`, taxonomy references, optionally a `content/records/<slug>.md` body attached to it. It gets a generated detail page, appears in browse filters, and can be synced from GitHub.
+A record (`content/records/<slug>.md`) is structured data in its frontmatter — a `category`, taxonomy references, links — with an optional review as its body. It gets a generated detail page, appears in browse filters, and can be synced from GitHub.
 
 A content page is just Markdown. It has no `kind`, no taxonomy, no generated route of its own — a `.astro` file under `src/pages/` decides where it renders and supplies its own title, description, and SEO.
 

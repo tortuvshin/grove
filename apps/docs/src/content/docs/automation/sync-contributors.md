@@ -6,7 +6,7 @@ description: Fetch the GitHub contributor list for the site's own repository int
 `grove sync contributors` fetches the contributor list and repo stats for **one** GitHub repository — the site's own — and writes `data/generated/contributors.json` and `data/generated/repo-stats.json`. The Astro integration reads those files to render the `/contributors/` page.
 
 :::caution[It syncs one repository, not every record's repository]
-`syncContributors` (`packages/core/src/contributors.ts`) resolves a single `owner/repo` pair — from the `repoUrl` option passed in, or from `data/generated/site-config.json`'s `repoUrl` (which is generated from `grove.config.ts`'s `site.repoUrl`) — and calls the GitHub contributors API for that one repository only. It does not iterate `data/records/*.yml`, and there's no per-record contributor aggregation anywhere in the function. If `site.repoUrl` (and no explicit `repoUrl` override) is unset, `syncContributors` throws: `` Cannot sync community metadata: <path> has no valid site repository URL. `` — `site.repoUrl` is effectively required for this command to succeed, not optional.
+`syncContributors` (`packages/core/src/contributors.ts`) resolves a single `owner/repo` pair — from the `repoUrl` option passed in, or from `data/generated/site-config.json`'s `repoUrl` (which is generated from `grove.config.ts`'s `site.repoUrl`) — and calls the GitHub contributors API for that one repository only. It does not iterate the record files, and there's no per-record contributor aggregation anywhere in the function. If `site.repoUrl` (and no explicit `repoUrl` override) is unset, `syncContributors` throws: `` Cannot sync community metadata: <path> has no valid site repository URL. `` — `site.repoUrl` is effectively required for this command to succeed, not optional.
 :::
 
 ## Prerequisites
@@ -65,7 +65,7 @@ If the repo-info request (`GET /repos/<owner>/<repo>`) fails, `syncContributors`
 
 ## What it does not do
 
-- It does not touch any `data/records/*.yml` file — contributor data lives only in `data/generated/`.
+- It does not touch any record file — contributor data lives only in `data/generated/`.
 - It does not store contributors' email addresses; `username` (the GitHub `login`) is the identity.
 - It does not read a config-level `showContributionCount` setting itself — that flag only affects rendering (see below), not what gets fetched or written.
 

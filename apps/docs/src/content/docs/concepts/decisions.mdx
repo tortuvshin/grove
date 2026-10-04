@@ -62,7 +62,7 @@ The record-level fields are usually enough. `data/decisions.yml` is for the case
 
 ## What lives on the record vs in `data/decisions.yml`
 
-`curation.labels`, `curation.lenses`, and `curation.notes` are editorial judgement that belongs on the record itself — edit `data/records/<slug>.yml` directly for these.
+`curation.labels`, `curation.lenses`, and `curation.notes` are editorial judgement that belongs on the record itself — edit the record file (`content/records/<slug>.md`) directly for these.
 
 Visibility is different for project records (the only blueprint Grove ships today). The index reads a project's effective visibility from `health.visibility`, not from a top-level `visibility:` key on the record — so adding `visibility: highlight` to the top of a project record's YAML has no effect on what's listed. `health.*` is not refreshed by any command — see [Health classification](/content/health-classification/). Use `data/decisions.yml` instead: a decision's `visibility` is folded into the record's effective `health.visibility` when the site is built.
 
@@ -77,7 +77,7 @@ Use `data/decisions.yml` when:
     Curation labels, lenses, and notes are editorial judgement — edit them directly on the record.
 
     ```yaml
-    # data/records/<slug>.yml
+    # content/records/<slug>.md (frontmatter)
     curation:
       labels: [hot]
       lenses: [good-to-learn]
@@ -166,7 +166,7 @@ A record can carry several labels. None of the four labels are computed automati
 </Aside>
 
 <Aside type="danger" title="Never delete a record to remove it">
-  Don't delete a record to "remove" it. Add a `data/decisions.yml` entry with `decision.visibility: remove` instead. The record YAML stays in git; only the effective visibility changes.
+  Don't delete a record to "remove" it. Add a `data/decisions.yml` entry with `decision.visibility: remove` instead. The record file stays in git; only the effective visibility changes.
 </Aside>
 
 ## See also

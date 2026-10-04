@@ -3,8 +3,8 @@ title: Outputs overview
 description: Every artifact Grove writes — the pages the scaffold routes, the files it publishes to public/, the JSON it keeps in data/generated/, and what it deliberately does not emit.
 ---
 
-Grove turns your source files — YAML records, taxonomy, decisions, Markdown
-bodies, `grove.config.ts` — into a coordinated set of outputs. Each one exists
+Grove turns your source files — Markdown records, taxonomy, decisions,
+collections, `grove.config.ts` — into a coordinated set of outputs. Each one exists
 for a specific consumer: people browsing, search engines indexing, AI
 assistants reading, social platforms previewing.
 
@@ -23,7 +23,7 @@ working set; they are yours to change or delete.
 | Paginated index | `/<prefix>/page/<n>/` | same, paginated |
 | Card view | `/<prefix>/page/cards/` | same |
 | Client index endpoint | `/<prefix>/page/records.json` | the visible record set, as JSON |
-| Record detail | `/<prefix>/<recordSlug>/` | record YAML + `content/records/<slug>.md` |
+| Record detail | `/<prefix>/<recordSlug>/` | the record file (`content/records/<slug>.md` or `data/records/<slug>.yml`) |
 | Collections index | `/collections/` | `data/collections/*.yml` |
 | Collection | `/collections/<slug>/` | `data/collections/<slug>.yml` |
 | Categories index | `/categories/` | `data/taxonomy/categories.yml` |

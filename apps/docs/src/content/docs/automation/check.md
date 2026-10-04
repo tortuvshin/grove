@@ -8,7 +8,7 @@ description: Validate records, regenerate every derived artifact, and run astro 
 ## What it does, in order
 
 1. Loads `grove.config.ts` (`loadConfig()`). If the config file itself fails to parse against the Zod schema, the command exits before any records are read.
-2. Runs `validateProject()` (`packages/core/src/validate.ts`) against every file in `paths.recordsDir` (default `data/records`) and prints one line per issue. Records come from the same normalizer the build uses (`loadNormalizedRecords`), so a record is checked with its GitHub sync cache, `data/overrides.yml` patch and `data/decisions.yml` visibility applied, exactly as the site renders it.
+2. Runs `validateProject()` (`packages/core/src/validate.ts`) against every record file — `.md` in `paths.bodiesDir` (default `content/records`) and `.yml` in `paths.recordsDir` (default `data/records`) — and prints one line per issue. Records come from the same normalizer the build uses (`loadNormalizedRecords`), so a record is checked with its GitHub sync cache, `data/overrides.yml` patch and `data/decisions.yml` visibility applied, exactly as the site renders it.
 3. If validation failed — or `--strict` was passed and any warnings were reported — the command stops here with exit code `1`. Nothing is regenerated.
 4. Otherwise it calls `prepareDirectory()` (`packages/core/src/prepare.ts`), which regenerates every derived artifact, and prints a one-line summary.
 5. Finally it runs `pnpm exec astro check` as a child process.

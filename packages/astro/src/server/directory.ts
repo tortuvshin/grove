@@ -1,7 +1,7 @@
 /**
  *  Source of truth: `data/generated/records.{full,index,json}` and
  *  `data/generated/site-config.json`, produced at build time by
- *  automatically from `data/records/*.yml` and `grove.config.ts`.
+ *  automatically from the record files (`content/records/*.md`, `data/records/*.yml`) and `grove.config.ts`.
  *
  *  Three flavors of records are written by the generator:
  *

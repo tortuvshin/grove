@@ -168,7 +168,7 @@ describe('docs homepage (standalone Astro route)', () => {
     // Grove is positioned". The first fold names the input and the
     // outputs, and does not widen to the use cases Grove only could serve.
     expect(hero).toContain('project directories, open-source catalogs, and curated resource sites');
-    expect(hero).toContain('YAML and Markdown');
+    expect(hero).toContain('Keep each record as a Markdown file');
     expect(hero).toContain('machine-readable outputs');
     for (const widened of ['knowledge base', 'content hub', 'publishing platform', 'CMS for']) {
       expect(hero, widened).not.toContain(widened);
@@ -269,8 +269,8 @@ describe('docs homepage (standalone Astro route)', () => {
     }
     expect(demo).not.toContain('id="hgw-system"');
 
-    // Scene 1 types the real CLI command; scene 2 mirrors the real
-    // `grove init` scaffold (packages/cli/src/init.ts copies apps/example).
+    // Scene 1 types the real CLI command; scene 2 shows the real
+    // `grove init` scaffold (packages/cli/src/init.ts) plus added content.
     expect(demo).toContain('grove init my-space');
     for (const path of ['data/', 'records/', 'collections/', 'taxonomy/', 'grove.config.ts']) {
       expect(demo, path).toContain(path);
@@ -361,7 +361,7 @@ describe('docs homepage (standalone Astro route)', () => {
     expect(pipeline).not.toContain('Statement.astro');
 
     // Inputs are the files users actually write.
-    for (const input of ['YAML records', 'Markdown', 'Collections', 'Taxonomy']) {
+    for (const input of ['Markdown records', 'YAML data', 'Collections', 'Taxonomy']) {
       expect(pipeline, input).toContain(input);
     }
 

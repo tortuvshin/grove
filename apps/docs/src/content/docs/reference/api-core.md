@@ -47,7 +47,8 @@ const config = await loadConfig("/path/to/space");
 ```ts
 import { generate } from "@grove-dev/core";
 
-// Read records from data/records/*.yml, write data/generated/*.json
+// Read records from content/records/*.md and data/records/*.yml,
+// write data/generated/*.json
 const result = await generate("/path/to/space");
 ```
 

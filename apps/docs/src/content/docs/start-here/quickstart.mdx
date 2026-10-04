@@ -29,25 +29,25 @@ The fastest path to a working Grove site — five commands, minimal explanation.
    pnpm dev
    ```
 
-   Open `http://localhost:4321` — the site renders with an empty directory; `grove init` seeds no sample data.
+   Open `http://localhost:4321` — the site renders with one sample record, `content/records/grove.md`. Open it to see the shape of a record; delete it once you have your own.
 
 3. ## Add your first record
 
-   Create a file under `data/records/`. The filename is the slug:
+   Create a Markdown file under `content/records/`. The filename is the slug; the fields go in the frontmatter and your notes go underneath:
 
-   ```yaml title="data/records/my-project.yml"
-   kind: project
-   slug: my-project
+   ```markdown title="content/records/my-project.md"
+   ---
    name: My Project
    description: One-line summary of what my-project does.
    repoUrl: https://github.com/me/my-project
    stack: typescript
    licenses: [mit]
+   ---
+
+   Why this project is on the list.
    ```
 
-   Prefer Markdown? The same record can be `content/records/my-project.md`, with these fields as frontmatter (no `slug` needed) and your notes underneath.
-
-   See [Add your first project](/getting-started/first-record/) for the full field reference.
+   See [Add your first record](/getting-started/first-record/) for the full field reference.
 
 4. ## Validate and build
 

@@ -3,8 +3,8 @@ title: Record schema
 description: Every field a record file may carry, its type, its default, and which ones a human writes versus which ones a command fills in.
 ---
 
-A record is one file: a YAML file under `data/records/`, or a Markdown file
-with YAML frontmatter under `content/records/` (see
+A record is one file: a Markdown file with YAML frontmatter under
+`content/records/`, or a YAML file under `data/records/` (see
 [Record formats](#record-formats)). `grove check` parses it with the Zod
 schema in `packages/core/src/schema.ts` and rejects the build if it does not
 validate. Both formats go through the same schema.
@@ -31,9 +31,9 @@ reads them the same way.
 
 | Format | Files | Use it for |
 |---|---|---|
+| Markdown (default) | `paths.bodiesDir/<slug>.md`: frontmatter plus body | One file per record: fields in the frontmatter, the review underneath. `grove init` writes its sample record this way. |
 | YAML only | `paths.recordsDir/<slug>.yml` | Data-only records with no review body. |
-| YAML + pointer | `paths.recordsDir/<slug>.yml` with `content: ./content/records/<slug>.md` | Existing sites. The body file has no frontmatter. |
-| Markdown | `paths.bodiesDir/<slug>.md`: frontmatter plus body | One file per record: fields in the frontmatter, the review underneath. |
+| YAML + pointer | `paths.recordsDir/<slug>.yml` with `content: ./content/records/<slug>.md` | Existing sites; convert with `grove migrate markdown-records`. The body file has no frontmatter. |
 
 A Markdown record looks like this:
 
@@ -82,11 +82,14 @@ These fields come from `resourceBaseSchema` and apply to every record.
 
 ### `slug`
 
-**Type:** `string`, min length 1 · **Required**
+**Type:** `string`, min length 1 · **Required in YAML; optional in Markdown**
 
 The unique identifier. It is the URL segment for the detail page, the key
 used by `data/decisions.yml` and `data/overrides.yml`, and the id carried
-into every generated output. Must equal the filename.
+into every generated output. The filename is always the canonical slug: a
+Markdown record takes it from the filename when `slug` is left out, and a
+YAML record whose `slug` differs from its filename gets a `slug_mismatch`
+warning, not an error.
 
 ### `submittedBy`
 

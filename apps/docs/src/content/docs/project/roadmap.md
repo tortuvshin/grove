@@ -103,9 +103,8 @@ the `README.md` sentinel block (`grove readme generate`).
 
 ### Schema constraints
 
-- One file is one record: `data/records/<slug>.yml`, or
-  `content/records/<slug>.md` with the fields as frontmatter and the notes
-  as the body. The filename is the canonical slug; a `slug:` field that
+- One file is one record: `content/records/<slug>.md` with the fields as
+  frontmatter and the notes as the body, or `data/records/<slug>.yml`. The filename is the canonical slug; a `slug:` field that
   disagrees is a warning and the filename wins.
 - Every record is `kind: project`. `resourceRecordSchema` and
   `entityRecordSchema` exist in the schema file but have no scaffold, no
@@ -161,7 +160,7 @@ space needs it.
   database, no scraping, no auth.
 - **AI-assisted curation, gated.** An optional CLI pass suggesting topics,
   tags, and descriptions for uncurated records. Always a suggestion, never
-  a write — the CLI would not modify `data/records/*.yml` without a human
+  a write — the CLI would not modify a record file without a human
   approving.
 - **Federation.** One space importing records from another, read-only, with
   no central write authority.

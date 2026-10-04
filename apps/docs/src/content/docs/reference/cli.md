@@ -49,7 +49,7 @@ request, so `init` works offline.
   (`"registries": { "@grove": "https://withgrove.dev/r/{name}.json" }`)
 - `<directory>/grove.config.ts`
 - `<directory>/astro.config.mjs`
-- `<directory>/data/records/` (empty)
+- `<directory>/content/records/grove.md` — one sample record
 - `<directory>/pnpm-workspace.yaml` — pnpm projects only; approves the
   dependency build scripts pnpm would otherwise refuse
 - `<directory>/src/**` — every file of `@grove/default`: components,
@@ -230,7 +230,7 @@ sitemap, `llms.txt`, `robots.txt`, and `og-image.svg`.
 **Reads:**
 
 - `grove.config.ts`
-- `data/records/*.yml` (every record file)
+- `content/records/*.md` and `data/records/*.yml` (every record file)
 - `data/decisions.yml`
 - `data/overrides.yml`
 
@@ -279,7 +279,7 @@ commit, license, language, topics).
 
 **Reads:**
 
-- `data/records/*.yml` (one at a time; never written)
+- `content/records/*.md` and `data/records/*.yml` (one at a time; never written)
 - `data/cache/github/*.json` (`paths.githubCache`) — the previous
   entry each merge starts from; a record's inline `github`/`health`
   seeds it when there is no entry yet
@@ -490,7 +490,7 @@ Write a report of records that need human review.
 
 **Reads:**
 
-- `data/records/*.yml`
+- `content/records/*.md` and `data/records/*.yml`
 - `data/generated/records.full.json` (if present)
 
 **Writes:**
@@ -712,7 +712,7 @@ and write it to `README.md` (or `--path`). Implementation in
 - `grove.config.ts` — `site.name`, `site.tagline?`, `site.description?`,
   `site.url?`, `site.repoUrl?`, and the `readme` block (title, tagline,
   intro, etc.).
-- `data/records/*.{yml,yaml}` — every record file. For each, the CLI
+- `content/records/*.md` and `data/records/*.yml` — every record file. For each, the CLI
   reads `slug`, `name`, `description`, `category`, `repoUrl` (falls
   back to `links.github`), `homepageUrl` (falls back to `links.website`),
   `visibility`, `stars` (from `github.stars` or `github.repository.stargazers_count`),

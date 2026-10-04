@@ -80,7 +80,7 @@ Every `candidates[]` entry has exactly these eight fields (`CleanupCandidate` in
 - **Keep as-is.** The report is informational; do nothing.
 - **Write a decision.** Add an entry to `data/decisions.yml` with `id`, and `decision: { visibility, reason, reviewedBy?, reviewedAt? }`. `visibility` is one of `highlight`, `keep`, `needs_review`, `hide`, `remove`, `historical` (`decisionVisibilitySchema`, `packages/core/src/schema.ts:55-63`). This is applied at build time via `generate()` — it changes what renders, not what `grove cleanup` reports next run.
 - **`hide` or `remove`.** Both are excluded from `data/generated/records.index.json` (the listing payload) and from `public/sitemap.xml` (`packages/core/src/build-data.ts:211-212`, `packages/core/src/sitemap.ts:120`). Both are still present in `data/generated/records.full.json`, which keeps every record "regardless of visibility" (`packages/core/src/build-data.ts:78`).
-- **Delete it for good.** There's no archive-directory convention in the framework — `generate()` and `cleanupStale()` only read whatever `.yml` files are inside `paths.recordsDir`. To drop a record entirely, delete or move its YAML file out of that directory.
+- **Delete it for good.** There's no archive-directory convention in the framework — `generate()` and `cleanupStale()` read whatever record files are in `paths.bodiesDir` (`.md`) and `paths.recordsDir` (`.yml`). To drop a record entirely, delete or move its file out of those directories.
 
 Re-running `grove cleanup` with no source changes produces the same JSON — it's a read-only report over whatever `health:` data is currently on disk.
 

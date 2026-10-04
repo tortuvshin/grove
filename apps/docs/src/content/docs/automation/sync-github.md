@@ -147,7 +147,7 @@ The file is only ever appended to, never truncated, so summaries from earlier st
 ## Run it
 
 ```bash
-grove sync github                # sync every record in data/records/
+grove sync github                # sync every record (content/records/*.md, data/records/*.yml)
 grove sync github --limit 10     # only the first 10 records, sorted by filename
 grove sync github --strict       # exit code 1 if any record ended up "unavailable"
 ```
