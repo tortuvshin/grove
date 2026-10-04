@@ -10,6 +10,8 @@
   "keywords": [
     "grove",
     "astro",
+    "astro-integration",
+    "withastro",
     "directory",
     "static-site"
   ],

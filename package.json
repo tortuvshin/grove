@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Grove monorepo — a file-first publishing system for structured knowledge. Sources in files, outputs to web, llms.txt, JSON-LD, OG images, JSON datasets.",
+  "description": "Grove monorepo — build a curated directory from files. Records in Markdown or YAML; outputs to web, README lists, llms.txt, JSON-LD, OG images and JSON datasets.",
   "license": "MIT",
   "packageManager": "pnpm@10.34.5",
   "engines": {
