@@ -1,6 +1,6 @@
 {
   "name": "grove",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "description": "Grove monorepo — build a curated directory from files. Records in Markdown or YAML; outputs to web, README lists, llms.txt, JSON-LD, OG images and JSON datasets.",
