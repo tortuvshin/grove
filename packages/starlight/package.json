@@ -1,6 +1,6 @@
 {
   "name": "@grove-dev/starlight",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "Grove's theme for Starlight (the Astro native documentation site generator)",
   "author": "grove-dev",
