@@ -1,12 +1,12 @@
 ---
 title: Author a record
-description: How a contributor writes a new YAML record, from "I found an app" to "it's on the site".
+description: How a contributor writes a new record, from "I found an app" to "it's on the site".
 ---
 
 import { Aside, CardGrid, FileTree, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Aside type="note" title="New to authoring records?">
-  If you want the minimum viable record, see [Author your first record](/getting-started/first-record/) first. Come back here when your record needs to be more than a stub.
+  If you want the minimum viable record, see [Add your first record](/getting-started/first-record/) first. Come back here when your record needs to be more than a stub.
 
   The companion [Record schema reference](/reference/record-schema/) lists every field; this guide covers *deciding* which fields matter.
 </Aside>
@@ -19,7 +19,7 @@ When you sit down to add a record, answer these in order:
 
 1. **Does a record already exist?**
 
-   `grep -r "repoUrl: " data/records/` or check the live site's index. If yes, edit the existing one.
+   `grep -r "repoUrl: " content/records/ data/records/` or check the live site's index. If yes, edit the existing one.
 
 2. **What is the canonical URL?**
 
@@ -39,12 +39,10 @@ When you sit down to add a record, answer these in order:
 
 The shape you'll write, in the common case:
 
-```yaml title="data/records/project.yml"
-kind: project
-slug: astro
+```markdown title="content/records/astro.md"
+---
 name: Astro
-description: |
-  Astro is a web framework for content-driven sites.
+description: Astro is a web framework for content-driven sites.
 category: frameworks
 tags: [web, static-site]
 repoUrl: https://github.com/withastro/astro
@@ -63,7 +61,15 @@ whyListed:
   - First-class MDX support
 caveats:
   - Newer than Next.js; smaller plugin ecosystem
+---
+
+## Why it's listed
+
+The review shown on the detail page.
 ```
+
+The same fields work as a YAML file, `data/records/astro.yml`, with
+`slug: astro` added — use that for a record with no body text.
 
 ### Field guide
 
@@ -205,7 +211,7 @@ scores:                                     # default {}
   overall: 0..100
 ```
 
-The slug must match the filename. `kind` is `project` for every record today — `grove init` always scaffolds the `project-directory` blueprint, the only one currently supported. `category` should be a valid id from `data/taxonomy/categories.yml`; an unknown id doesn't fail `grove check` — it prints an `unknown_taxonomy_value` warning — but it fails the build under `grove check --strict`, which CI does not currently run.
+The filename is the slug; a YAML record's `slug` should match it (a mismatch is a warning). `kind` is `project` for every record today — `grove init` always scaffolds the `project-directory` blueprint, the only one currently supported. `category` should be a valid id from `data/taxonomy/categories.yml`; an unknown id doesn't fail `grove check` — it prints an `unknown_taxonomy_value` warning — but it fails the build under `grove check --strict`, which CI does not currently run.
 
 ### Where the schema lives
 
@@ -246,8 +252,8 @@ sync cache at build time (see above).
 
 ### What you'll do day-to-day
 
-- **Add a record** — create `data/records/<slug>.yml` with at least `name` and `slug` (the filename wins if they differ), or `content/records/<slug>.md` with `name` in the frontmatter — a Markdown record takes its slug from the filename. `kind` is filled in for you.
-- **Add a Markdown body** — create `content/records/<slug>.md` and set `content:` to its relative path, or write the whole record as that one Markdown file, with the fields in its frontmatter (see [Record formats](/reference/record-schema/#record-formats)).
+- **Add a record** — create `content/records/<slug>.md` with at least `name` in the frontmatter; the filename is the slug. A data-only record can be `data/records/<slug>.yml` with `name` and `slug` instead (the filename wins if they differ). `kind` is filled in for you.
+- **Move a YAML record to Markdown** — `grove migrate markdown-records` turns each YAML record, and the body its `content:` points at, into one Markdown file (see [Record formats](/reference/record-schema/#record-formats)).
 - **Tag and categorize** — set `category`, `tags`, `stacks`, `platforms`, `licenses` from the matching `data/taxonomy/*.yml`.
 - **Curate** — set `curation.{reviewed,reviewedBy,labels,lenses}`, `scores.*`, or `visibility`.
 - **Add screenshots** — list `screenshots: [{ src, alt, source?, width?, height? }]`.

@@ -1,15 +1,16 @@
 ---
 title: Introduction
-description: Grove is a file-first publishing system for structured knowledge. One source of truth — many useful outputs.
+description: Build a curated directory from files. Grove publishes Markdown records into a site, SEO metadata, README lists and machine-readable outputs, and keeps them in sync.
 ---
 
 import { Aside, Card, CardGrid, LinkButton, LinkCard } from '@astrojs/starlight/components';
 
-Grove is a **file-first publishing system for structured knowledge**.
+Grove builds curated directories and catalogs from files. Underneath, it is a
+**file-first publishing system for structured knowledge**.
 
-You write the source of truth — YAML records, Markdown bodies, taxonomy files. Grove
-publishes it into a coordinated set of human- and machine-readable outputs, and keeps
-them in step with the files as they change.
+You write the source of truth — one Markdown file per record, plus YAML taxonomy and
+collection files. Grove publishes it into a coordinated set of human- and
+machine-readable outputs, and keeps them in step with the files as they change.
 
 <Aside type="tip" title="The Grove mental model">
   Maintain structured knowledge in files. Grove publishes it into useful human- and
@@ -18,7 +19,7 @@ them in step with the files as they change.
 
 ## One record, many outputs
 
-Add `data/records/my-project.yml` and run a build. That one file becomes all of this,
+Add `content/records/my-project.md` and run a build. That one file becomes all of this,
 without you writing any of it a second time:
 
 | Output | Where it lands | Who reads it |

@@ -509,9 +509,9 @@ you need.
 |---|---|---|
 | `dataDir` | `"data"` | Root for all data files |
 | `contentDir` | `"content"` | Root for Markdown content |
-| `recordsDir` | `"data/records"` | Where record YAML files live |
+| `recordsDir` | `"data/records"` | YAML records (`<slug>.yml`). Optional when every record is Markdown in `bodiesDir` |
 | `pagesDir` | `"content/pages"` | The scaffold ships `about.astro`, `contributors.astro`, `submit.astro`, and `404.astro` as Astro components under `src/pages/`. The `content/pages/` directory is reserved for consumer-authored Markdown content pages. |
-| `bodiesDir` | `"content/records"` | Markdown records (`<slug>.md`, frontmatter plus body), and bodies that YAML records point at with `content:` |
+| `bodiesDir` | `"content/records"` | Markdown records (`<slug>.md`, frontmatter plus body) — the default record format — and bodies that legacy YAML records point at with `content:` |
 | `publicDir` | `"public"` | Static assets served as-is |
 | `taxonomyDir` | `"data/taxonomy"` | Controlled category, stack, platform, and distribution-channel values |
 | `generatedDir` | `"data/generated"` | Auto-generated JSON; gitignored |

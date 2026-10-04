@@ -1,10 +1,25 @@
 ---
-title: "CrewAI — Coordinating Role-Playing AI Agents in Python"
-summary: "A Python framework for orchestrating role-playing autonomous agents, tasks, multi-step crews, and Flows with memory, tools, and human-in-the-loop guardrails."
-tags: [agents, multi-agent, orchestration, python, llm, automation]
-updated: 2026-08-10
+name: CrewAI
+repoUrl: https://github.com/crewAIInc/crewAI
+projectType: library
+category: agents
+stack: python
+stacks: [python]
+description: A Python framework for coordinating role-based autonomous agents, tasks, and multi-step crews.
+platforms: [linux, macos, windows]
+licenses: [mit]
+links: { github: https://github.com/crewAIInc/crewAI, website: https://crewai.com }
+distribution: { channels: [] }
+tags: [agents, multi-agent, automation]
+bestFor: [Multi-agent workflows, Role-based automation]
+whyListed: [Clear agent abstractions, Strong ecosystem]
+caveats: [Agent reliability depends heavily on model and tool design]
+difficulty: intermediate
+codebaseSize: large
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [hot], lenses: [good-to-learn] }
+visibility: keep
 ---
-
 CrewAI is a lean, fast Python framework for orchestrating **role-playing autonomous agents** that collaborate on a sequence of tasks. You define an `Agent` with a role, a goal, and a backstory; give it tools; bind it to one or more `Task`s; declare a `Crew` with a process; and call `.kickoff()`. The framework handles the message-passing loop, tool calling, memory, delegation, and checkpointing — all driven by [LiteLLM](https://github.com/BerriAI/litellm), so the same code can target GPT-4o, Claude 4.6, Llama 4, or a local Ollama model without changes.
 
 > "Frameworks like LangChain and AutoGen made it easy to build single-agent loops. CrewAI made it easy to build *teams* that pass work between each other."

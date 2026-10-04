@@ -38,7 +38,7 @@ Browse the full directory → https://example.com
 
 ## Contributing
 
-Contributions welcome — open a PR against `data/records/`.
+Contributions welcome — open a PR that adds a file to `content/records/`.
 ```
 
 Everything from `## Contributing` down in that example — license text, a Contributing section, custom badges, whatever you write — sits after `<!-- grove-readme:end -->` and is written once, never touched by `grove readme generate` again.
@@ -151,7 +151,7 @@ If the sentinel pair goes missing or gets edited so the pattern no longer matche
 - run: pnpm exec grove readme generate --check
 ```
 
-If the README is behind the latest `data/records/*.yml`, this step fails. The maintainer runs `grove readme generate` locally (or via the shipped `readme.yml` workflow — see [Scheduled maintenance](/automation/scheduled/)) and commits the result.
+If the README is behind the latest record files, this step fails. The maintainer runs `grove readme generate` locally (or via the shipped `readme.yml` workflow — see [Scheduled maintenance](/automation/scheduled/)) and commits the result.
 
 ## What this page does not promise
 

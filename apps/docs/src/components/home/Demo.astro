@@ -17,12 +17,12 @@ const steps = [
   {
     label: 'Initialize',
     heading: 'Start with one command.',
-    copy: 'grove init scaffolds a complete space — records, collections, taxonomy, and config included.',
+    copy: 'grove init scaffolds a working Astro site — config, pages, and a sample record to copy.',
   },
   {
     label: 'Add content',
     heading: 'Your content is just files.',
-    copy: 'YAML records for data, Markdown for rich pages, collections for curation. No database, no CMS.',
+    copy: 'One Markdown file per record, YAML for collections and taxonomy. No database, no CMS.',
   },
   {
     label: 'Publish',
@@ -41,23 +41,23 @@ const steps = [
   },
 ];
 
-// Scene 2 file tree mirrors what `grove init` actually scaffolds
-// (packages/cli/src/init.ts copies apps/example: data/records, collections,
-// taxonomy, content/records, grove.config.ts). `at` is the scroll progress
-// where each row reveals.
+// Scene 2 file tree: what `grove init` scaffolds (packages/cli/src/init.ts
+// writes grove.config.ts, src/ and the sample content/records/grove.md)
+// plus what a maintainer adds next — more records, a collection, a
+// taxonomy file. `at` is the scroll progress where each row reveals.
 const tree = [
   { depth: 0, label: 'my-space/', kind: 'folder', at: 0.25 },
-  { depth: 1, label: 'data/', kind: 'folder', at: 0.26 },
+  { depth: 1, label: 'content/', kind: 'folder', at: 0.26 },
   { depth: 2, label: 'records/', kind: 'folder', at: 0.27 },
-  { depth: 3, label: 'immich.yml', kind: 'yml', at: 0.28 },
-  { depth: 3, label: 'joplin.yml', kind: 'yml', at: 0.29 },
-  { depth: 3, label: 'excalidraw.yml', kind: 'yml', at: 0.3 },
-  { depth: 2, label: 'collections/', kind: 'folder', at: 0.31 },
-  { depth: 3, label: 'starter-picks.yml', kind: 'yml', at: 0.32 },
-  { depth: 2, label: 'taxonomy/', kind: 'folder', at: 0.33 },
-  { depth: 3, label: 'categories.yml', kind: 'yml', at: 0.34 },
-  { depth: 1, label: 'content/records/', kind: 'folder', at: 0.35 },
-  { depth: 2, label: 'immich.md', kind: 'md', at: 0.36 },
+  { depth: 3, label: 'grove.md', kind: 'md', at: 0.28 },
+  { depth: 3, label: 'immich.md', kind: 'md', at: 0.29 },
+  { depth: 3, label: 'joplin.md', kind: 'md', at: 0.3 },
+  { depth: 1, label: 'data/', kind: 'folder', at: 0.31 },
+  { depth: 2, label: 'collections/', kind: 'folder', at: 0.32 },
+  { depth: 3, label: 'starter-picks.yml', kind: 'yml', at: 0.33 },
+  { depth: 2, label: 'taxonomy/', kind: 'folder', at: 0.34 },
+  { depth: 3, label: 'categories.yml', kind: 'yml', at: 0.35 },
+  { depth: 1, label: 'src/', kind: 'folder', at: 0.36 },
   { depth: 0, label: 'grove.config.ts', kind: 'ts', at: 0.37 },
 ];
 
@@ -172,7 +172,7 @@ const pillClass = {
   <Statement
     eyebrow="How Grove works"
     titleId="demo-title"
-    lede="Start from a folder of YAML and Markdown, and Grove grows it into a searchable site with curated collections, machine-readable outputs, and maintenance built in. The window below is live — search it, switch views."
+    lede="Start from a folder of Markdown files, and Grove grows it into a searchable site with curated collections, machine-readable outputs, and maintenance built in. The window below is live — search it, switch views."
   >
     From a folder of files to a <span class="text-gradient">living site.</span>
   </Statement>

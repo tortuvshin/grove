@@ -17,7 +17,7 @@ rejected, and how to write a PR that lands on the first try.
   template asks for the URL, the category, and a one-line description.
   A maintainer reviews the issue and either asks for more context or
   scaffolds the record PR for you.
-- **Open a PR directly** with a new `data/records/<slug>.yml` file.
+- **Open a PR directly** with a new `content/records/<slug>.md` file.
   This is faster for experienced contributors. If your PR is
   well-formed, a maintainer reviews and merges.
 

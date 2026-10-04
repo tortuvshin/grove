@@ -31,7 +31,7 @@ export const SIDEBAR = [
       {
         label: 'Author',
         items: [
-          { label: 'Author your first record', slug: 'getting-started/first-record' },
+          { label: 'Add your first record', slug: 'getting-started/first-record' },
           { label: 'Add a record', slug: 'content/author-a-record' },
           { label: 'Organize with taxonomy', slug: 'content/taxonomy-files' },
           { label: 'Add content pages', slug: 'concepts/content-pages' },

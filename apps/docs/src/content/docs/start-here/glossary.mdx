@@ -19,7 +19,7 @@ This page is the single source of truth for Grove terminology. When a term first
 
     | Term | Definition |
     |---|---|
-    | **record** | One typed entity in a Grove space, stored as one file: `data/records/<slug>.yml`, or `content/records/<slug>.md` with the fields as frontmatter and the notes as the body. The filename is the slug. |
+    | **record** | One typed entity in a Grove space, stored as one file: `content/records/<slug>.md` with the fields as frontmatter and the notes as the body, or `data/records/<slug>.yml`. The filename is the slug. |
     | **kind** | The discriminator on a record: `project`, `resource`, or `entity`. One kind per blueprint. |
     | **blueprint** | A schema family set in `grove.config.ts` as a flat string: `project-directory`, `resource-hub`, or `ecosystem-map`. No init-time choice; `grove init` always scaffolds `project-directory`. |
   </Card>

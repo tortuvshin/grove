@@ -24,6 +24,14 @@ describe('docs Astro config', () => {
     expect(config).not.toContain('./src/styles/custom.css');
   });
 
+  it('points "Edit page" at the docs app root, not at its content directory', async () => {
+    // Starlight appends `src/content/docs/<page>` itself; a base that
+    // already ends there doubles the segment and every link 404s.
+    const config = await readFile(resolve(repoRoot, 'apps/docs/astro.config.mjs'), 'utf8');
+    expect(config).toContain("baseUrl: 'https://github.com/tortuvshin/grove/edit/main/apps/docs/'");
+    expect(config).not.toMatch(/baseUrl: '[^']*src\/content\/docs/);
+  });
+
   it('declares 9 sidebar sections matching the IA redesign', async () => {
     const config = await readConfigWithSidebar();
 

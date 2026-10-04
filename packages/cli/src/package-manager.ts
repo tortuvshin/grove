@@ -138,6 +138,11 @@ export function installCommand(pm: PackageManager): [command: string, args: stri
   return [pm.name, ['install']];
 }
 
+/** `npm install <pkgs>`, or `<pm> add <pkgs>` for pnpm, yarn and bun. */
+export function addCommand(pm: PackageManager, packages: string[]): string {
+  return [pm.name, pm.name === 'npm' ? 'install' : 'add', ...packages].join(' ');
+}
+
 /** How the user runs a package.json script: always `<pm> run <script>`. */
 export function runScriptCommand(pm: PackageManager, script: string): string {
   return `${pm.name} run ${script}`;

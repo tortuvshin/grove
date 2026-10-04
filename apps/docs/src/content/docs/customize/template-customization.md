@@ -70,14 +70,25 @@ Add a nav link in `grove.config.ts`. See [Custom pages](/customize/pages/) for M
 
 ### Adding a body to a record
 
-Add a `content` path to the record's YAML:
+A Markdown record's body is everything below its frontmatter — write the
+review there and the detail page renders it below the curated fields:
 
-```yaml
-# data/records/astro.yml
-content: ./content/records/astro.md
+```markdown
+---
+name: Astro
+category: frameworks
+---
+
+## Why it's listed
+
+Astro is the framework this directory is built on.
 ```
 
-`content` is a literal relative path resolved against your project root at build time (`resolveContentPath` in `packages/core/src/content-body.ts`) — it isn't joined with a config directory, so write the path exactly as it should resolve. The scaffold convention is `content/records/<slug>.md`. Write the body in Markdown; the detail page renders it below the curated fields.
+A YAML record (`data/records/<slug>.yml`) has no body. Older sites gave it
+one with a `content: ./content/records/<slug>.md` pointer; that still
+builds, but `records.deprecateContentPointer` can flag it, and
+`grove migrate markdown-records` folds each YAML record and its body into
+one Markdown file.
 
 ### Editing copy
 

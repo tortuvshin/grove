@@ -1,3 +1,32 @@
+---
+name: Open WebUI
+repoUrl: https://github.com/open-webui/open-webui
+projectType: real-app
+category: interfaces
+stack: typescript
+stacks: [typescript, python]
+description: A self-hosted AI interface supporting Ollama and OpenAI-compatible model providers.
+platforms: [web, linux]
+licenses: [mit]
+links: { github: https://github.com/open-webui/open-webui, website: https://openwebui.com }
+distribution: { channels: [] }
+tags: [chat, self-host, llm]
+bestFor: [Team AI chat, Self-hosted model access]
+whyListed: [Polished interface, Multiple model providers, Active community]
+caveats: []
+difficulty: beginner
+codebaseSize: large
+relations:
+  - type: alternative-to
+    to: chatgpt
+    note: A self-hosted chat interface for local and remote models.
+    evidence:
+      type: editorial
+      checkedAt: "2026-09-01"
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [hot], lenses: [production-like] }
+visibility: keep
+---
 Open WebUI is a self-hosted ChatGPT-style interface for talking to local models (Ollama, llama.cpp) and remote APIs (OpenAI, Anthropic, Google, OpenRouter) through a single web app. It ships as a Python package plus a Docker image and is the de facto front end for an Ollama install on a home server.
 
 ## Why it matters

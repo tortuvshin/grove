@@ -1,3 +1,25 @@
+---
+name: LlamaIndex
+repoUrl: https://github.com/run-llama/llama_index
+projectType: library
+category: data-tools
+stack: python
+stacks: [python, typescript]
+description: Data framework for connecting private and public data to language-model applications and agents.
+platforms: [linux, macos, windows]
+licenses: [mit]
+links: { github: https://github.com/run-llama/llama_index, website: https://www.llamaindex.ai }
+distribution: { channels: [] }
+tags: [rag, data, agents]
+bestFor: [Retrieval applications, Data-connected agents]
+whyListed: [Broad connector ecosystem, Mature RAG primitives]
+caveats: [Large API surface takes time to learn]
+difficulty: intermediate
+codebaseSize: huge
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [good-to-learn] }
+visibility: keep
+---
 LlamaIndex is a data framework for connecting custom data to large language models. The premise: an LLM is only as useful as the context it can pull, and most production applications need that context from a corpus the model never saw at training time. LlamaIndex provides the connectors, parsers, chunking strategies, retrieval modes, and query engines that turn a pile of files into a usable RAG pipeline.
 
 ## Why it matters

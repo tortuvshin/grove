@@ -9,7 +9,7 @@ This split is deliberate: data and presentation evolve at different speeds, and 
 
 ## Where the components live
 
-After `grove init`, your `src/` has the full structure the registry ships — `components/`, `layouts/`, `lib/`, `styles/`, **and** `pages/`. Pages are registry-shipped like everything else: `grove init` gives you a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, contributors, 404) with zero records in it, not just a component library you have to build pages around yourself.
+After `grove init`, your `src/` has the full structure the registry ships — `components/`, `layouts/`, `lib/`, `styles/`, **and** `pages/`. Pages are registry-shipped like everything else: `grove init` gives you a fully routable site (home, browse, record detail, taxonomy, collections, submit, about, contributors, 404) with one sample record in it, not just a component library you have to build pages around yourself.
 
 `grove init` also writes a `components.json` at the project root that maps the `@grove` namespace to the hosted registry (`https://withgrove.dev/r/{name}.json`). That file is what lets the standard shadcn CLI add or restore individual items later; the files themselves are grouped into registry blocks, one per feature — see [Registry items](#registry-items) below.
 

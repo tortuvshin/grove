@@ -1,12 +1,12 @@
 ---
-title: Add your first project
-description: Write a record — YAML or Markdown — save it, and see it render in your local directory.
+title: Add your first record
+description: Write one Markdown file, save it, and see it render as a page in your local directory.
 ---
 
 import { Aside, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="tip" title="5 minutes from YAML to a rendered page">
-  Write a single record file (`data/records/my-project.yml`), save it, and watch the dev server render it as a project detail page at `/projects/<slug>/`. Three actions: create the file, validate, push.
+<Aside type="tip" title="5 minutes from a Markdown file to a rendered page">
+  Write a single record file (`content/records/my-project.md`), save it, and watch the dev server render it as a project detail page at `/projects/<slug>/`. Three actions: create the file, validate, push.
 </Aside>
 
 <Aside type="note" title="Prerequisites">
@@ -19,12 +19,11 @@ import { Aside, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@as
 
 1. ### Create the record
 
-   Create `data/records/my-project.yml`. The filename (minus `.yml`) is the canonical slug and appears in URLs.
+   Create `content/records/my-project.md`. The filename (minus `.md`) is the canonical slug and appears in URLs. The fields go in the YAML frontmatter; everything below it is shown on the detail page.
 
-   ```yaml title="data/records/my-project.yml"
-   kind: project
+   ```markdown title="content/records/my-project.md"
+   ---
    name: My Project
-   slug: my-project
    description: A short description of what the project does and who it is for.
    category: developer-tools
    tags: [open-source, typescript]
@@ -34,29 +33,19 @@ import { Aside, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@as
      github: https://github.com/example/project
    bestFor: [Team workflow, Quick start]
    whyListed: [Active maintenance, Clean API]
-   caveats: []
-   visibility: keep
+   addedAt: 2026-09-27
+   submittedBy: your-github-login
+   ---
+
+   ## Why it's listed
+
+   The notes shown on the detail page.
    ```
 
-   <Aside type="tip" title="Prefer Markdown?">
-     The same record can be one Markdown file, `content/records/my-project.md`: the fields go in the frontmatter (you can leave `slug` out — the filename is the slug) and the notes shown on the detail page go underneath.
+   `addedAt` orders "Recently added"; `submittedBy` shows "Submitted by @login" on the page. The sample record `grove init` wrote, `content/records/grove.md`, has the same shape — copy it if you prefer.
 
-     ```markdown title="content/records/my-project.md"
-     ---
-     name: My Project
-     description: A short description of what the project does and who it is for.
-     category: developer-tools
-     repoUrl: https://github.com/example/project
-     addedAt: 2026-09-27
-     submittedBy: your-github-login
-     ---
-
-     ## Why it's listed
-
-     The notes shown on the detail page.
-     ```
-
-     `addedAt` orders "Recently added"; `submittedBy` shows "Submitted by @login" on the page. Both work in YAML too.
+   <Aside type="tip" title="Data only, no notes?">
+     A record can also be a YAML file, `data/records/my-project.yml`, with the same fields plus `slug: my-project`. Use it for records that have no body text; both formats can live in one site.
    </Aside>
 
    <Aside type="note" title="What you should see">
@@ -98,7 +87,7 @@ import { Aside, CardGrid, LinkButton, LinkCard, Steps, Tabs, TabItem } from '@as
    When you're happy with the record:
 
    ```bash
-   git add data/records/my-project.yml
+   git add content/records/my-project.md
    git commit -m "Add My Project"
    git push
    ```
@@ -115,9 +104,9 @@ For the `project-directory` blueprint (`kind: project`):
 
 | Field          | Required | What it is |
 | -------------- | -------- | ---------- |
-| `kind`         | auto     | Grove fills in `project` for you if you omit it — it always matches the `project-directory` blueprint. Real records write it anyway, for clarity. |
+| `kind`         | auto     | Grove fills in `project` for you if you omit it — it always matches the `project-directory` blueprint. |
 | `name`         | yes      | Human-readable name. Shown in cards and headings. |
-| `slug`         | YAML: yes · Markdown: no | In a YAML record it must be a non-empty string, but the build always uses the filename as the canonical slug — a mismatch only produces a warning, not a failure. Keep them the same to avoid confusing the next contributor. |
+| `slug`         | Markdown: no · YAML: yes | A Markdown record takes its slug from the filename. A YAML record must carry a non-empty `slug`, but the build still uses the filename — a mismatch only produces a warning, not a failure. |
 | `description`  | optional | One-sentence summary. Shown in lists and search snippets. Defaults to an empty string if omitted — write one anyway. |
 | `category`     | optional | One of your taxonomy categories. Defaults to `uncategorized`. |
 | `tags`         | optional | Free-form labels for filtering. |

@@ -1,3 +1,25 @@
+---
+name: Dify
+repoUrl: https://github.com/langgenius/dify
+projectType: real-app
+category: orchestration
+stack: python
+stacks: [python, typescript]
+description: A visual platform for building and operating LLM applications, workflows, agents, and retrieval pipelines.
+platforms: [web, linux]
+licenses: [mit]
+links: { github: https://github.com/langgenius/dify, website: https://dify.ai }
+distribution: { channels: [] }
+tags: [workflow, agents, rag]
+bestFor: [LLM application teams, Visual workflows, RAG products]
+whyListed: [Complete application lifecycle, Self-hostable, Provider-neutral]
+caveats: [Operational footprint is larger than a library]
+difficulty: intermediate
+codebaseSize: huge
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [mature], lenses: [production-like] }
+visibility: keep
+---
 Dify is an open-source platform for building production LLM applications. The name is a riff on "Define + Modify" — the product is built around a visual workflow editor that turns prompt chains, retrieval pipelines, and tool calls into a node graph, plus an agent runtime that hosts the resulting application as an API and a chat UI.
 
 ## Why it matters

@@ -154,7 +154,7 @@ tool — just read the file.
   `records.index.json`. If it is in `records.full.json` but not the index, its
   visibility excluded it.
 - **Do not** fix a record by editing the JSON. Edit
-  `data/records/<slug>.yml` and rebuild.
+  the record file (`content/records/<slug>.md`) and rebuild.
 
 ## Related
 
