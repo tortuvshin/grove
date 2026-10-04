@@ -22,6 +22,24 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [1.2.0](https://github.com/tortuvshin/grove/compare/v1.1.0...v1.2.0) (2026-10-04)
+
+
+### Features
+
+* **cli:** init writes a sample Markdown record ([fe6f913](https://github.com/tortuvshin/grove/commit/fe6f9134aa5a94173e28c07e6d2cd3703073aed5))
+
+
+### Bug Fixes
+
+* **cli:** grove update suggests the project's package manager ([a3ba589](https://github.com/tortuvshin/grove/commit/a3ba58957e5696c2c329aef4217c538040e8410a))
+* **docs:** edit links, footer links and a stale anchor ([ec0f75a](https://github.com/tortuvshin/grove/commit/ec0f75afcb087d19ed4ceead6c7ea49c91778cdc))
+
+
+### Documentation
+
+* Markdown-first records across guides and reference ([ea276e6](https://github.com/tortuvshin/grove/commit/ea276e630d774dab26a29a8507b2ab00bdbae4f5))
+
 ## [1.1.0](https://github.com/tortuvshin/grove/compare/v1.0.1...v1.1.0) (2026-09-29)
 
 
