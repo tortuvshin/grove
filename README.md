@@ -5,8 +5,8 @@
 **Build a curated directory from files. Publish it everywhere. Keep it in sync.**
 
 Grove is an open-source Astro framework for project directories, open-source
-catalogs, and curated resource sites. Keep records in YAML and Markdown; Grove
-generates the searchable site, detail pages, collections, README lists, SEO
+catalogs, and curated resource sites. Keep each record as a Markdown file;
+Grove generates the searchable site, detail pages, collections, README lists, SEO
 metadata, GitHub-enriched data, and machine-readable outputs. No database, no
 CMS, and no runtime server required.
 
@@ -42,8 +42,9 @@ editorial judgment away from maintainers.
 - **A complete static site.** One command scaffolds an Astro project with
   search, filters, lenses, curated collections, record pages, submission
   guidance, and contributor pages.
-- **Structured, portable content.** Records, taxonomy, collections, decisions,
-  and overrides live in reviewable YAML; long-form content lives in Markdown.
+- **Structured, portable content.** Each record is one Markdown file —
+  frontmatter fields plus the notes shown on its page. Taxonomy, collections,
+  decisions and overrides live in reviewable YAML.
 - **Multiple outputs from the same files.** A build produces the website,
   normalized JSON datasets, `sitemap.xml`, `robots.txt`, Open Graph images,
   `llms.txt`, `llms-full.txt`, and optionally a generated README section.
@@ -73,11 +74,11 @@ cd my-space
 pnpm dev
 ```
 
-The scaffold is a real, complete Grove site — not a separate demo template.
-Start by editing these three surfaces:
+The scaffold is a real, complete Grove site — not a separate demo template —
+and starts with one sample record. Start by editing these three surfaces:
 
 ```text
-data/records/       one YAML file per record (or content/records/*.md — frontmatter + notes)
+content/records/    one Markdown file per record — frontmatter + notes (YAML in data/records/ also works)
 grove.config.ts     identity, routes, facets, theme, integrations, audit pages
 src/pages/          site-owned routes and page composition
 ```
@@ -102,11 +103,11 @@ promotion, import, icon synchronization, and Lighthouse audit commands.
 
 [Open App Scout](https://openappscout.com/) is the production reference that
 shaped Grove — featured in [Astro's August 2026 roundup](https://astro.build/blog/whats-new-august-2026/):
-100+ apps as Markdown records, searchable views, editor's picks and live
+nearly 200 apps as Markdown records, searchable views, editor's picks and live
 collections, repository refreshes, health signals, credited community
 submissions, a sitemap, and AI-readable outputs. Grove turns that proven operating model into
-reusable packages and a project scaffold for other kinds of structured
-knowledge.
+reusable packages and a project scaffold, and Open App Scout runs on the
+published packages.
 
 <table align="center">
   <tr>
@@ -165,9 +166,8 @@ knowledge.
   </tr>
 </table>
 
-The example matters because Grove is not defined by directories. A directory
-is one useful presentation; the product is the publishing and maintenance
-system underneath it.
+Directories are the front door; the same data layer — files in, many outputs
+out, kept in sync — also serves other structured catalogs.
 
 ## Repository
 
