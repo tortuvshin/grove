@@ -16,7 +16,8 @@
  *      and components.json (registers the `@grove` registry URL so
  *      `npx shadcn add @grove/<item>` works later) — plus the files
  *      the scaffold does not ship because they are project-specific:
- *      grove.config.ts, astro.config.mjs, and an empty data/records/.
+ *      grove.config.ts, astro.config.mjs, and one sample record in
+ *      content/records/.
  *      Last of these, for pnpm projects only, is pnpm-workspace.yaml,
  *      which approves the dependency build scripts pnpm 11 refuses to
  *      skip silently.
@@ -36,9 +37,10 @@
  *   6. Write `.grove/registry.lock.json` with the install-time hashes
  *      of the item's files, which `grove update` diffs against later.
  *
- * `grove init` does NOT scaffold `content/`, `public/`, `.github/`, or
- * anything under `data/` besides the empty `records/` directory —
- * those are content/workflow concerns, not UI-registry concerns. The
+ * `grove init` does NOT scaffold `public/`, `.github/`, `data/`, or
+ * anything under `content/` besides one sample record in
+ * `content/records/` — those are content/workflow concerns, not
+ * UI-registry concerns. The
  * CLI wrapper in index.ts runs `<pm> install` and `git init` after
  * this returns, per its own `--no-install`/`--no-git` flags.
  *
@@ -73,6 +75,29 @@ const SKIP_NAMES = new Set(['node_modules', 'dist', '.astro', '.DS_Store', '.gro
 // source into `src/`, so the consumer owns those files outright and never
 // imports a registry package at runtime.
 const GROVE_PACKAGES = ['@grove-dev/core', '@grove-dev/astro', '@grove-dev/cli'] as const;
+// The one record a fresh scaffold ships with: a real project, so the
+// first `dev` renders a complete detail page. Fields beyond `name` are
+// optional; they are here to show the common ones.
+const SAMPLE_RECORD_SLUG = 'grove';
+const sampleRecord = (addedAt: string) => `---
+name: Grove
+description: Build a curated directory from files. Publish it everywhere. Keep it in sync.
+category: developer-tools
+tags: [astro, directory, static-site]
+links:
+  website: https://withgrove.dev
+addedAt: ${addedAt}
+bestFor: [Curated directories, Awesome lists that outgrew a README]
+---
+
+This is a sample record. Each file in \`content/records/\` is one entry
+in your directory: the frontmatter holds the fields, and everything
+below it is shown on the detail page.
+
+Copy this file to add your next record — the filename becomes the URL
+slug — or delete it once you have your own.
+`;
+
 const PROJECT_SCRIPTS = {
   dev: 'astro dev',
   build: 'astro build',
@@ -232,7 +257,7 @@ function parseDependencySpec(spec: string): [name: string, range: string] {
  * writing anything. Nothing it does here is out of reach: the bundled
  * item inlines all of its files and names its own npm dependencies, and
  * `writeItemFiles` is the same writer `grove update` already trusts. So
- * record the dependencies and let the `pnpm install` that follows
+ * record the dependencies and let the `<pm> install` that follows
  * resolve them.
  */
 async function installScaffoldDirectly(
@@ -484,15 +509,16 @@ export default defineConfig({
     'utf8',
   );
 
-  // 3e. Empty data/records/. `validateProject()` treats an ABSENT
-  //     records directory as a hard error — deliberately — but a fresh
-  //     scaffold with zero records is a supported starting state.
-  //     Empty directories aren't tracked by git, hence the placeholder.
-  const recordsDir = resolve(target, 'data', 'records');
+  // 3e. One sample record, as Markdown under content/records/. A first
+  //     `dev` then shows a working detail page instead of an empty grid,
+  //     and the file doubles as the template for the next record.
+  //     `validateProject()` accepts a missing data/records/ once any
+  //     Markdown record exists, so no YAML directory is created.
+  const recordsDir = resolve(target, 'content', 'records');
   await mkdir(recordsDir, { recursive: true });
   await writeFile(
-    resolve(recordsDir, '.gitkeep'),
-    '# Add one YAML file per record here — see /getting-started/first-record/.\n',
+    resolve(recordsDir, `${SAMPLE_RECORD_SLUG}.md`),
+    sampleRecord(new Date().toISOString().slice(0, 10)),
     'utf8',
   );
 

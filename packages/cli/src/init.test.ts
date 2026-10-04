@@ -68,7 +68,7 @@ describe('grove init (registry scaffold)', () => {
       'src/pages/[slug]/[recordSlug].astro',
       'src/components/grove/project-card.astro',
       'src/styles/system.css',
-      'data/records/.gitkeep',
+      'content/records/grove.md',
     ]) {
       expect(existsSync(join(target, file)), file).toBe(true);
     }

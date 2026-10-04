@@ -81,6 +81,6 @@ describe('grove init integration', () => {
     expect(lock.fileCount).toBe(81);
 
     expect(existsSync(join(target, 'data/generated/records.json'))).toBe(false);
-    expect(existsSync(join(target, 'data/records/.gitkeep'))).toBe(true);
+    expect(existsSync(join(target, 'content/records/grove.md'))).toBe(true);
   });
 });
