@@ -1,3 +1,38 @@
+---
+name: Ollama
+repoUrl: https://github.com/ollama/ollama
+projectType: tool
+category: local-models
+stack: go
+stacks: [go]
+description: Run and manage open language models locally through a small command-line and HTTP interface.
+platforms: [macos, linux, windows]
+licenses: [mit]
+links:
+  github: https://github.com/ollama/ollama
+  website: https://ollama.com
+distribution: { channels: [] }
+tags: [llm, local-ai, inference]
+bestFor: [Local model inference, Private AI prototypes]
+whyListed: [Simple local workflow, Broad model library, Useful API]
+caveats: [Large models still need capable hardware]
+difficulty: beginner
+codebaseSize: large
+relations:
+  - type: alternative-to
+    to: chatgpt
+    evidence:
+      type: editorial
+      checkedAt: "2026-09-01"
+source: { type: manual }
+curation:
+  reviewed: true
+  reviewedBy: grove
+  reviewedAt: "2026-07-20"
+  labels: [hot]
+  lenses: [production-like, good-to-learn]
+visibility: keep
+---
 Ollama is a single-binary tool that pulls, runs, and serves open-weights language models on a developer laptop. It exposes a small REST API and a familiar `ollama run <model>` CLI, so swapping between Llama, Mistral, Qwen, Phi, Gemma, or a custom GGUF takes one command.
 
 ## Why it matters

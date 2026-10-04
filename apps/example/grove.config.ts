@@ -115,8 +115,8 @@ export default defineConfig({
       '## Why this list',
       '',
       'Each tool below is **actively maintained**, **well documented**, and',
-      '**useful in production**. Submit a new entry via `pnpm exec grove`',
-      'or by opening a pull request against `data/records/`.',
+      '**useful in production**. Submit a new entry by opening a pull',
+      'request that adds one Markdown file to `content/records/`.',
     ].join('\n'),
   },
 });

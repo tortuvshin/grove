@@ -1,3 +1,25 @@
+---
+name: Flowise
+repoUrl: https://github.com/FlowiseAI/Flowise
+projectType: real-app
+category: orchestration
+stack: typescript
+stacks: [typescript]
+description: A visual builder for AI agents and LLM workflows based on composable nodes.
+platforms: [web, linux]
+licenses: [mit]
+links: { github: https://github.com/FlowiseAI/Flowise, website: https://flowiseai.com }
+distribution: { channels: [] }
+tags: [workflow, low-code, agents]
+bestFor: [Rapid agent prototypes, Visual LLM pipelines]
+whyListed: [Approachable node editor, Large integration catalog]
+caveats: [Complex production flows still require careful testing]
+difficulty: beginner
+codebaseSize: large
+source: { type: manual }
+curation: { reviewed: true, reviewedBy: grove, reviewedAt: "2026-07-20", labels: [new], lenses: [production-like, good-to-learn] }
+visibility: keep
+---
 Flowise is a drag-and-drop UI for building LLM applications on top of LangChain. Each "node" in the canvas is a LangChain component — a prompt template, a model, a retriever, a chain, a tool — and the edges between them define the data flow. The result exports to a LangChain Python file, an API endpoint, or an embeddable chat widget.
 
 ## Why it matters
