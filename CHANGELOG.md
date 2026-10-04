@@ -22,6 +22,13 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [1.2.1](https://github.com/tortuvshin/grove/compare/v1.2.0...v1.2.1) (2026-10-04)
+
+
+### Documentation
+
+* **readme:** Markdown-first records, current Open App Scout numbers ([#128](https://github.com/tortuvshin/grove/issues/128)) ([da9a923](https://github.com/tortuvshin/grove/commit/da9a9236373e92d5d01d02384ffd180924f2c19c))
+
 ## [1.2.0](https://github.com/tortuvshin/grove/compare/v1.1.0...v1.2.0) (2026-10-04)
 
 
