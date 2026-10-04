@@ -6,7 +6,7 @@ description: Refresh every record's GitHub data — stars, forks, language, topi
 import { Aside, Card, CardGrid, FileTree, LinkButton, LinkCard, Steps, TabItem, Tabs } from '@astrojs/starlight/components';
 
 <Aside type="note" title="Before you start">
-  By the end of this walkthrough every record that has a `repoUrl` will have a cache entry in `data/cache/github/<slug>.json` with its live GitHub data. The walkthrough assumes you have at least one record with `repoUrl` set — if not, complete [Walkthrough: add your first record](/getting-started/first-record/) first.
+  By the end of this walkthrough every record that has a `repoUrl` will have a cache entry in `data/cache/github/<slug>.json` with its live GitHub data. The walkthrough assumes you have at least one record with `repoUrl` set — if not, [add your first record](/getting-started/first-record/) first.
 
   A token is not strictly required. Without one the sync calls the GitHub API unauthenticated, which is heavily rate-limited, and falls back to scraping the repo page when the API call fails. With more than a handful of records you want a token.
 </Aside>

@@ -88,14 +88,13 @@ export default defineConfig({
         // Starlight's default head.
         Head: './src/starlight/Head.astro',
       },
-      // Starlight's default `editLink.baseUrl` would be inferred
-      // from the GitHub repo metadata and produce a path under
-      // `docs/src/content/docs/...` — but our content actually lives
-      // at `apps/docs/src/content/docs/...`. Without this override,
-      // every "Edit this page" link in production resolves to a
-      // 404. Implementation-checklist.md #29.
+      // Starlight appends each entry's project-relative path
+      // (`src/content/docs/<page>.mdx`) to `baseUrl`, so the base
+      // stops at the docs app's root — `apps/docs/`, where this site
+      // lives in the monorepo. Adding `src/content/docs` here doubles
+      // that segment and every "Edit page" link 404s.
       editLink: {
-        baseUrl: 'https://github.com/tortuvshin/grove/edit/main/apps/docs/src/content/docs',
+        baseUrl: 'https://github.com/tortuvshin/grove/edit/main/apps/docs/',
       },
       plugins: [
         grove({

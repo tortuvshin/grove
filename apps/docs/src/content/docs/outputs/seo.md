@@ -216,7 +216,7 @@ meant to be indexed. The `Sitemap:` line always points at
 the file.
 
 Edit the file and delete the marker line to take ownership; Grove then stops
-regenerating it. See [Outputs overview](/outputs/overview/#ownership-how-robotstxt-and-og-imagesvg-stop-regenerating).
+regenerating it. See [Outputs overview](/outputs/overview/#ownership-how-robotstxt-og-imagesvg-and-the-badges-stop-regenerating).
 
 ## Social cards
 

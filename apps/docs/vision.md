@@ -1,7 +1,7 @@
 # Vision
 
 > **Historical document — preserved for context.** Grove's current
-> shipping surface is described in [Roadmap](/roadmap/) and the
+> shipping surface is described in [Roadmap](https://withgrove.dev/project/roadmap/) and the
 > [CLI reference](/reference/cli/). This page captures the original
 > framing that shaped v0.1.0 through v0.4.0 and remains a useful
 > read for contributors, but it is not the canonical description of

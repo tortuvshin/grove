@@ -1,6 +1,6 @@
 # Releasing Grove
 
-This is the **operational** release doc. The framing — "what we ship, in what order, and why" — lives in [`vision.md`](./vision.md) and the [Roadmap](/roadmap/) page on the docs site. Come here when you're about to push the button.
+This is the **operational** release doc. The framing — "what we ship, in what order, and why" — lives in [`vision.md`](./vision.md) and the [Roadmap](https://withgrove.dev/project/roadmap/) page on the docs site. Come here when you're about to push the button.
 
 ## TL;DR
 
@@ -199,11 +199,11 @@ If you genuinely shipped something that is unsafe (security), see [`SECURITY.md`
 - [ ] Bump [Open Apps](https://github.com/tortuvshin/open-apps) to the new version — it pins exact versions on purpose, so it is the reproducibility canary.
 - [ ] Write the narrative release post in `changelogs/` if the release deserves one. `CHANGELOG.md` is now the mechanical record; `changelogs/` is where the story goes.
 - [ ] Post a short note in the GitHub Discussions "Announcements" category.
-- [ ] Update the [Roadmap](/roadmap/) page — close out the items that the release shipped.
+- [ ] Update the [Roadmap](https://withgrove.dev/project/roadmap/) page — close out the items that the release shipped.
 
 ## See also
 
 - [`vision.md`](./vision.md) — why Grove exists and the broader direction.
-- The [Roadmap](/roadmap/) page on the docs site — what's queued, what shipped, what's deferred.
+- The [Roadmap](https://withgrove.dev/project/roadmap/) page on the docs site — what's queued, what shipped, what's deferred.
 - [`.ignite/ARCHITECTURE.md`](../../.ignite/ARCHITECTURE.md) — how the packages and private applications fit together.
 - [`CONTRIBUTING.md`](../../CONTRIBUTING.md) — what to expect from a PR.
