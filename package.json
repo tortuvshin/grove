@@ -29,6 +29,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:scaffold": "node scripts/test-scaffold.mjs",
+    "test:scaffold:npm": "node scripts/test-scaffold.mjs --pm=npm",
+    "test:scaffold:bun": "node scripts/test-scaffold.mjs --pm=bun",
     "dev": "pnpm --dir apps/example dev",
     "dev:docs": "pnpm --filter @grove-dev/docs dev",
     "postinstall": "pnpm --filter @grove-dev/cli... build"
