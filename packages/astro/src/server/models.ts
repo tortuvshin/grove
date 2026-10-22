@@ -406,7 +406,9 @@ export function getDirectoryIndexModel(
     };
   });
   const seo: PageSeo = {
-    title: seoTitle(`Browse ${pluralTitle}`, siteName),
+    // The count tells a search result what the page holds; "Browse
+    // Apps" alone says nothing a snippet can use.
+    title: seoTitle(`Browse ${items.length} ${pluralTitle}`, siteName),
     // Build the page-aware description BEFORE seoDescription truncates,
     // so the page suffix fits inside the 160-char cap rather than
     // pushing the sentence over and getting clipped mid-word.
@@ -509,7 +511,7 @@ export function getContributorsPageModel(site: DirectorySiteConfig) {
   );
   const repo = site.repoUrl?.replace(/\/$/, '');
   const siteUrl = siteUrlOf(site);
-  const title = seoTitle('Contributors', site.name);
+  const title = seoTitle(`Contributors to ${site.name}`, site.name);
   const description = seoDescription(
     undefined,
     sorted.length > 0
@@ -815,14 +817,15 @@ export function getRecordDetailModel(
 
   // "<Name> — <descriptor> | <Site>": the descriptor gives the search
   // snippet a reason to exist beyond the bare project name. A curator's
-  // `record.seo.title` (when set) is used verbatim, same override
-  // pattern as `getCollectionPageModel`'s `collection.seo?.title`.
+  // `record.seo.title` (when set) replaces the main part; the site
+  // suffix is still added when it fits, so every page carries the brand.
   const descriptor = recordSeoDescriptor({
     summary: record.summary,
+    description: record.description,
     ...(categoryLabel ? { categoryLabel } : {}),
     singular,
   });
-  const title = record.seo?.title ?? seoTitle(`${name} — ${descriptor}`, site.name);
+  const title = seoTitle(record.seo?.title?.trim() || `${name} — ${descriptor}`, site.name);
   const pluralTitle = titleCaseFirst(site.blueprintConfig?.labelPlural ?? itemLabelPlural());
   const jsonLd = [
     recordLd,
@@ -1224,7 +1227,10 @@ export function getTaxonomyIndexSeo(
     .map((entry) => entry.name)
     .join(', ');
   const siteUrl = siteUrlOf(site);
-  const title = seoTitle(kind === 'categories' ? 'Categories' : 'Stacks', site.name);
+  const title = seoTitle(
+    `${titleCaseFirst(plural)} by ${kind === 'categories' ? 'Category' : 'Stack'}`,
+    site.name,
+  );
   const description = seoDescription(
     undefined,
     kind === 'categories'
@@ -1258,7 +1264,7 @@ export function getTaxonomyIndexSeo(
  */
 export function getAboutPageSeo(site: DirectorySiteConfig): PageSeo {
   const siteUrl = siteUrlOf(site);
-  const title = seoTitle('About', site.name);
+  const title = seoTitle(`About ${site.name}`, site.name);
   const description = seoDescription(
     undefined,
     `About ${site.name}: ${site.tagline ?? site.description ?? 'a file-first knowledge site.'}`,

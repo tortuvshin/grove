@@ -47,13 +47,23 @@ export function seoTitle(main: string, siteName: string): string {
   return suffixed.length <= TITLE_SUFFIX_MAX ? suffixed : cleaned;
 }
 
+/** A cut on a sentence end must keep at least this much of the text. */
+const SENTENCE_CUT_MIN = 90;
+
 /**
  * Normalize a meta description: prefer `raw`, fall back, collapse
- * whitespace, and truncate on a word boundary near 160 chars.
+ * whitespace, and keep it within ~160 chars. Too-long text ends on its
+ * last full sentence that fits; only when no sentence ends late enough
+ * is it cut on a word boundary with an ellipsis — a snippet that stops
+ * mid-thought reads as broken.
  */
 export function seoDescription(raw: string | undefined, fallback: string): string {
   const source = (raw ?? '').replace(/\s+/g, ' ').trim() || fallback.replace(/\s+/g, ' ').trim();
   if (source.length <= DESCRIPTION_MAX) return source;
+  const sentenceEnd = Math.max(
+    ...['. ', '! ', '? '].map((end) => source.lastIndexOf(end, DESCRIPTION_MAX - 1)),
+  );
+  if (sentenceEnd + 1 >= SENTENCE_CUT_MIN) return source.slice(0, sentenceEnd + 1);
   const cut = source.slice(0, DESCRIPTION_MAX - 1);
   const lastSpace = cut.lastIndexOf(' ');
   return `${(lastSpace > 80 ? cut.slice(0, lastSpace) : cut).replace(/[,;:\s]+$/, '')}…`;
@@ -67,23 +77,32 @@ export function titleCaseFirst(value: string): string {
 /**
  * Short record descriptor for `<Name> — <descriptor> | <Site>` titles.
  * Prefers the curator-written summary's first clause when it is short
- * enough to fit a title; otherwise falls back to a generated
- * "Open-source <category> <singular>" phrase.
+ * enough to fit a title, then the description's; otherwise falls back
+ * to the category label, or the item noun when there is none.
  */
 export function recordSeoDescriptor(input: {
   summary?: string;
+  description?: string;
   categoryLabel?: string;
   singular: string;
 }): string {
-  const clause = (input.summary ?? '')
-    .split(/[.!?\n]|\s[—–]\s/)[0]
-    ?.replace(/\s+/g, ' ')
-    .trim();
-  if (clause && clause.length > 0 && clause.length <= 45) return clause;
+  const firstClause = (text?: string) =>
+    (text ?? '')
+      .split(/[.!?\n]|\s[—–]\s/)[0]
+      ?.replace(/\s+/g, ' ')
+      .trim();
+  // The short card description often has a usable first clause when the
+  // summary's runs long.
+  for (const clause of [firstClause(input.summary), firstClause(input.description)]) {
+    if (clause && clause.length <= 45) return clause;
+  }
+  // Last resort: the category on its own ("Flip — Games"), never glued
+  // to the item noun — "Games app" and "Open-source Games app" read as
+  // broken, and not every directory lists open-source software.
   const category = input.categoryLabel?.trim();
   return category && category.toLowerCase() !== 'uncategorized'
-    ? `Open-source ${category} ${input.singular}`
-    : `Open-source ${input.singular}`;
+    ? category
+    : titleCaseFirst(input.singular);
 }
 
 export type OgKind =

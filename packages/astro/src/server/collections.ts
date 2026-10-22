@@ -14,7 +14,14 @@ import {
   runCollection,
   toCollectionEntries,
 } from '@grove-dev/core';
-import { absoluteUrl, ogPath, type PageSeo, seoDescription, seoTitle } from './seo.js';
+import {
+  absoluteUrl,
+  ogPath,
+  type PageSeo,
+  seoDescription,
+  seoTitle,
+  titleCaseFirst,
+} from './seo.js';
 
 // Collection YAML loading lives in @grove-dev/core (it also feeds the
 // sitemap and OG-image pipelines there); re-exported for page code.
@@ -221,7 +228,7 @@ export function getCollectionIndexModel(
     const siteUrl = (site.siteUrl ?? site.url ?? 'https://example.com').replace(/\/$/, '');
     const siteName = site.name ?? '';
     const plural = site.blueprintConfig?.labelPlural ?? 'items';
-    const title = seoTitle('Collections', siteName);
+    const title = seoTitle(`Curated Collections of ${titleCaseFirst(plural)}`, siteName);
     const description = seoDescription(
       undefined,
       `${rows.length} curated and generated collections of ${plural} on ${siteName || 'this site'} — hand-picked lists kept in sync with the source files.`,

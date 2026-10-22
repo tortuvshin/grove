@@ -34,8 +34,19 @@ silently ignored by every social platform. Set
 | `twitter:site` | `site.twitter`, emitted only when set |
 | `twitter:title`, `twitter:description`, `twitter:image` | mirror the OG values |
 
-The description is truncated for the social tags only — the
-`<meta name="description">` keeps your full text.
+The layout truncates the description for the social tags only — the
+`<meta name="description">` keeps the text you pass. The page models
+that build that text (`getRecordDetailModel` and the collection,
+taxonomy and listing models) keep it within 160 characters: longer
+copy ends on its last full sentence that fits, and only falls back to
+a word cut with an ellipsis when no sentence ends late enough. `grove
+seo` warns about a description clipped that way — shorten the source
+copy, usually a record's `seo.description`.
+
+A record's `<title>` is its `seo.title` when set, otherwise its name
+and the first clause of its summary or description, otherwise its
+category. The site name is appended when the whole title stays within
+65 characters.
 
 ## JSON-LD
 

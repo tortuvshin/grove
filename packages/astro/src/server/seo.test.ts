@@ -51,6 +51,19 @@ describe('seoDescription', () => {
     expect(out.endsWith('…')).toBe(true);
     expect(out).not.toMatch(/\swor…$/);
   });
+
+  it('ends on the last full sentence that fits instead of clipping', () => {
+    const first =
+      'AFFiNE puts docs, databases and a whiteboard on one canvas, local-first with sync, desktop apps and Docker self-hosting.';
+    const out = seoDescription(`${first} MIT client, open-core server with paid seats.`, '');
+    expect(out).toBe(first);
+  });
+
+  it('still clips on a word when the only sentence end is too early', () => {
+    const out = seoDescription(`Short one. ${'word '.repeat(40).trim()}`, '');
+    expect(out.endsWith('…')).toBe(true);
+    expect(out.length).toBeLessThanOrEqual(160);
+  });
 });
 
 describe('recordSeoDescriptor', () => {
@@ -63,20 +76,30 @@ describe('recordSeoDescriptor', () => {
     ).toBe('Self-hosted photo backup');
   });
 
-  it('falls back to the category phrase when the summary is too long', () => {
+  it("uses the description's first clause when the summary's is too long", () => {
     expect(
       recordSeoDescriptor({
         summary: 'A very long first clause that keeps going and going far past the cap',
-        categoryLabel: 'Photos',
+        description: 'Reversi against the computer. Plays offline.',
         singular: 'app',
       }),
-    ).toBe('Open-source Photos app');
+    ).toBe('Reversi against the computer');
   });
 
-  it('omits the category when it is missing or uncategorized', () => {
-    expect(recordSeoDescriptor({ singular: 'project' })).toBe('Open-source project');
+  it('falls back to the bare category label, never "<Category> app"', () => {
+    expect(
+      recordSeoDescriptor({
+        summary: 'A very long first clause that keeps going and going far past the cap',
+        categoryLabel: 'Games',
+        singular: 'app',
+      }),
+    ).toBe('Games');
+  });
+
+  it('uses the item noun when the category is missing or uncategorized', () => {
+    expect(recordSeoDescriptor({ singular: 'project' })).toBe('Project');
     expect(recordSeoDescriptor({ categoryLabel: 'Uncategorized', singular: 'project' })).toBe(
-      'Open-source project',
+      'Project',
     );
   });
 });

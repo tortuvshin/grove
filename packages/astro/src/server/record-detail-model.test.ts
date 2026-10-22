@@ -132,13 +132,13 @@ describe('getRecordDetailModel date fields', () => {
 });
 
 describe('getRecordDetailModel seo override', () => {
-  it('uses record.seo.title verbatim instead of the computed descriptor', () => {
+  it('uses record.seo.title instead of the computed descriptor, with the site suffix', () => {
     const detail = getRecordDetailModel(
       'with-seo',
       site as Parameters<typeof getRecordDetailModel>[1],
     );
     expect(detail).not.toBeNull();
-    expect(detail!.seo.title).toBe('A hand-written title');
+    expect(detail!.seo.title).toBe('A hand-written title | Test Directory');
   });
 
   it('uses record.seo.description over the curated summary and GitHub description', () => {
