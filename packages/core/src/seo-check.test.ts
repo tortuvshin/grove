@@ -90,6 +90,27 @@ describe('checkBuiltSite', () => {
     );
   });
 
+  it('warns about a clipped description and a repository-slug H1', async () => {
+    const root = await site(
+      {
+        '/apps/my-app/': page({
+          path: '/apps/my-app/',
+          title: 'My App',
+          description: 'A tool that does many things and then stops in the middle of…',
+          body: '<h1 class="x">my-cool_app</h1>',
+        }),
+        '/apps/glim/': page({ path: '/apps/glim/', title: 'Glim', body: '<h1>Glim</h1>' }),
+      },
+      ['/apps/my-app/', '/apps/glim/'],
+    );
+    const { errors, warnings } = await checkBuiltSite({ root });
+    expect(errors).toEqual([]);
+    expect(warnings).toEqual([
+      '/apps/my-app/: description is clipped — shorten its source copy',
+      '/apps/my-app/: H1 "my-cool_app" looks like a repository slug — set the record\'s name',
+    ]);
+  });
+
   it('flags a noindex page the sitemap still lists', async () => {
     const root = await site(
       { '/hidden/': page({ path: '/hidden/', title: 'Hidden', robots: 'noindex,follow' }) },

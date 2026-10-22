@@ -616,7 +616,9 @@ Implementation in `packages/cli/src/seo-cli.ts`; the checks in
   `downloadUrl` that is not a verified channel;
 - a name from `seo.retiredBrands` in a title, `og:site_name` or page text.
 
-**Warnings:** titles over 65 characters and descriptions over 160.
+**Warnings:** titles over 65 characters, descriptions over 160, a
+description clipped with an ellipsis, and an `<h1>` that is a
+repository slug (`my-cool_app` — the record has no `name`).
 
 **Reads:** `dist/`, `data/generated/site-config.json`,
 `data/generated/records.full.json`, `data/collections/`.

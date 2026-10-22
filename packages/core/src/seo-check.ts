@@ -24,7 +24,8 @@
  *     `og:site_name` or visible page text
  *
  * Over-long titles and descriptions are warnings: search engines truncate
- * them, nothing breaks.
+ * them, nothing breaks. So are a description clipped with an ellipsis
+ * and an H1 that is a repository slug — copy a reader sees as broken.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
@@ -364,6 +365,18 @@ export async function checkBuiltSite(
     if (title.length > titleMax) warnings.push(`${path}: title is ${title.length} chars`);
     if (description.length > descriptionMax + 1) {
       warnings.push(`${path}: description is ${description.length} chars`);
+    } else if (description.endsWith('…')) {
+      // `seoDescription` clipped the source copy mid-sentence. The fix is
+      // shorter source copy (a record's `seo.description`), not a wider cap.
+      warnings.push(`${path}: description is clipped — shorten its source copy`);
+    }
+    // An H1 that is a repository slug ("my-cool_app") means the record
+    // has no `name` and the page shows its file name to readers.
+    const h1 = decode(
+      (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ?? '').replace(/<[^>]+>/g, '').trim(),
+    );
+    if (/^[a-z0-9]+(?:[-_][a-z0-9]+)+$/.test(h1)) {
+      warnings.push(`${path}: H1 "${h1}" looks like a repository slug — set the record's name`);
     }
 
     indexable.push(path);
