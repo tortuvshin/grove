@@ -6,10 +6,16 @@
  */
 
 /**
- * Format a number compactly: 1234 → "1.2k", 12345 → "12k", 79 → "79".
- * Used for hero/header star counts and other large-num displays.
+ * Format a number compactly: 1234 → "1.2k", 12345 → "12k", 79 → "79",
+ * 3374800 → "3.4M". Used for hero/header star counts and other
+ * large-num displays — a directory-wide star total runs into millions.
  */
 export function compact(n: number): string {
+  // 999_950 would round to "1000k"; it reads as "1.0M" instead.
+  if (n >= 999_950) {
+    const m = n / 1_000_000;
+    return (m >= 10 ? Math.round(m).toString() : m.toFixed(1)) + 'M';
+  }
   if (n >= 1000) {
     const k = n / 1000;
     return (k >= 10 ? Math.round(k).toString() : k.toFixed(1)) + 'k';

@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { formatCount, pluralize, truncateWords } from './directory-format.js';
+import { compact, formatCount, pluralize, truncateWords } from './directory-format.js';
+
+describe('compact numbers', () => {
+  it('keeps small numbers and abbreviates thousands', () => {
+    expect(compact(79)).toBe('79');
+    expect(compact(1234)).toBe('1.2k');
+    expect(compact(12_345)).toBe('12k');
+    expect(compact(999_000)).toBe('999k');
+  });
+
+  it('switches to millions instead of growing the k count', () => {
+    expect(compact(3_374_800)).toBe('3.4M');
+    expect(compact(999_950)).toBe('1.0M');
+    expect(compact(12_400_000)).toBe('12M');
+  });
+});
 
 describe('count formatting', () => {
   it('picks the singular form for exactly one', () => {
