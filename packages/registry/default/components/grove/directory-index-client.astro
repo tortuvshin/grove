@@ -67,7 +67,7 @@ const clientConfigJson = JSON.stringify({
 <script is:inline id="grove-index-config" type="application/json" set:html={clientConfigJson}></script>
 <script>
   import type { IndexFilters, IndexRecord } from "@grove-dev/core";
-  import type { DirectoryFilterGroupKey } from "@grove-dev/core/directory";
+  import type { DirectoryFilterGroupKey, LensId } from "@grove-dev/core/directory";
   import {
     PAGE_SIZE,
     activeFilterChips,
@@ -84,6 +84,8 @@ const clientConfigJson = JSON.stringify({
     isDirectoryFilterGroupKey,
     hrefForClearedFilters,
     hrefForFilters,
+    hrefForLens,
+    isLensActive,
     pagePathHref,
     paginationPageList,
     searchParamsFromFilters,
@@ -96,6 +98,7 @@ const clientConfigJson = JSON.stringify({
     buttonClass,
     chipClass,
     filterTriggerClass,
+    lensTabClass,
   } from "../../lib/classnames.ts";
   import {
     FilterHistorySession,
@@ -539,7 +542,26 @@ const clientConfigJson = JSON.stringify({
         });
       }
 
+      /**
+       * The lens tabs are prerendered for the bare URL, so "All" is the
+       * one marked current in the HTML whatever the query says. Re-mark
+       * them from the live params, and carry the current filters into
+       * each tab's link the way the server render would.
+       */
+      function renderLensTabs() {
+        document.querySelectorAll<HTMLAnchorElement>(".grove-lens-tabs a[data-lens-id]").forEach((tab) => {
+          // Rendered from the LENSES registry by SmartLensTabs.
+          const id = (tab.dataset.lensId ?? "all") as LensId;
+          const active = isLensActive(id, params);
+          tab.href = hrefForLens(id, params, pathPrefix);
+          tab.className = lensTabClass(active);
+          if (active) tab.setAttribute("aria-current", "page");
+          else tab.removeAttribute("aria-current");
+        });
+      }
+
       function renderAll() {
+        renderLensTabs();
         renderChips();
         renderFilterTriggers();
         if (searchClear instanceof HTMLElement) searchClear.hidden = !(filters.q || "").length;

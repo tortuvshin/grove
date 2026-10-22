@@ -1,7 +1,7 @@
 {
   "scaffold": "@grove/default",
   "scaffoldVersion": "1.6.0",
-  "installedAt": "2026-09-29",
+  "installedAt": "2026-10-22",
   "fileCount": 81,
   "files": [
     {
@@ -79,14 +79,14 @@
     {
       "target": "src/components/grove/directory-browse.astro",
       "source": "default/components/grove/directory-browse.astro",
-      "hash": "sha256-247d7063a893d11efc9c30ed0696ba9ede38017f9e8b8cb74f19ed806ce4bd17",
-      "bytes": 4148
+      "hash": "sha256-38cc3796391591420dfdac8d4272a14fb920421711cc81d9e1d4b2e00afa217c",
+      "bytes": 4194
     },
     {
       "target": "src/components/grove/directory-index-client.astro",
       "source": "default/components/grove/directory-index-client.astro",
-      "hash": "sha256-c66d73484767b3699f7038b930ab3b916ba42396993328f6405003e3bfc82f95",
-      "bytes": 32287
+      "hash": "sha256-8020f17685bc3c0519eae1319b7b10b2a9b26e4911ef93d6782e5c7becb4abce",
+      "bytes": 33232
     },
     {
       "target": "src/components/grove/editorial-summary.astro",

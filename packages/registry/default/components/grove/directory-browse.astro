@@ -84,6 +84,7 @@ const description = seo.description;
         currentParams={Astro.url.searchParams}
         pathPrefix={`/${slug}`}
         lensIds={["all", "hot", "new", "mature"]}
+        allLabel={`All ${itemLabelPlural()}`}
         class="mt-6"
       />
     </Fragment>
