@@ -53,15 +53,15 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - name: Install Chromium
-        # Pin the Chromium version (Ubuntu 24.04's chromium-browser
-        # metapackage currently resolves to 140.*) so an Ubuntu
-        # snapshot change can't silently shift the audit scores.
+      - name: Use the runner's Chrome
+        # The ubuntu-latest image ships Google Chrome. Installing
+        # `chromium-browser` instead went through apt, which on Ubuntu
+        # 24.04 is only a stub for the snap: a snap store outage hung
+        # this step until the 30-minute job timeout. The version is
+        # printed so a score shift can be traced to a Chrome update.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-          chromium-browser --version
-          echo "CHROME_PATH=$(which chromium-browser)" >> $GITHUB_ENV
+          google-chrome --version
+          echo "CHROME_PATH=$(which google-chrome)" >> $GITHUB_ENV
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @grove-dev/core --filter @grove-dev/cli --filter @grove-dev/astro -r build
       - run: pnpm --dir apps/example build
