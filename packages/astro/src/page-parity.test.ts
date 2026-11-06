@@ -78,7 +78,7 @@ describe('SEO + page-structure parity', () => {
       label: 'collection index',
       page: 'collections/index.html',
       mustInclude: [
-        /<title>Collections/,
+        /<title>Curated Collections of /,
         /<meta\s+property="og:type"\s+content="website"/,
         /<meta\s+name="twitter:card"\s+content="summary_large_image"/,
       ],
