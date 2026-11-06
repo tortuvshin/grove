@@ -22,6 +22,21 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [1.3.0](https://github.com/tortuvshin/grove/compare/v1.2.1...v1.3.0) (2026-11-06)
+
+
+### Features
+
+* **core:** grove seo warns about clipped descriptions and slug headings ([ba77cc0](https://github.com/tortuvshin/grove/commit/ba77cc0cc7a45ab19e3b32e3c5eb734aa8c7f4fb))
+
+
+### Bug Fixes
+
+* **astro:** readable default page titles and meta descriptions ([ed9d9fe](https://github.com/tortuvshin/grove/commit/ed9d9fee393452b89b99cb36afe686f49b3c0cef))
+* **core:** abbreviate millions in compact numbers ([ccd33ba](https://github.com/tortuvshin/grove/commit/ccd33ba2b0fc67a2e842d4a35f942904dad38a95))
+* **deps:** resolve pnpm audit advisories ([570e204](https://github.com/tortuvshin/grove/commit/570e204ee81fa89e8996059fa9e4553f20de0760))
+* **registry:** mark the current view tab on filtered lists ([e8eb6cb](https://github.com/tortuvshin/grove/commit/e8eb6cb9e3433227f9cb0f15551692d77d864afc))
+
 ## [1.2.1](https://github.com/tortuvshin/grove/compare/v1.2.0...v1.2.1) (2026-10-04)
 
 
