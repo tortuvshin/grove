@@ -115,6 +115,13 @@ const PROJECT_SCRIPTS = {
  */
 const APPROVED_BUILD_SCRIPTS = ['esbuild'] as const;
 
+/**
+ * The @emnapi/runtime that matches the @emnapi/core @astrojs/astro2tsx
+ * pins (1.11.3 in astro2tsx 0.1.3). Bump both together if astro2tsx
+ * moves; drop the extension once rolldown stops pinning a 2.0 beta.
+ */
+const ASTRO2TSX_EMNAPI_RUNTIME = '1.11.3';
+
 export interface InstallScaffoldContext {
   /** The project directory (absolute). */
   target: string;
@@ -217,6 +224,16 @@ function pnpmWorkspaceYaml(): string {
     ...APPROVED_BUILD_SCRIPTS.map((name) => `  ${name}: true`),
     'onlyBuiltDependencies:',
     ...APPROVED_BUILD_SCRIPTS.map((name) => `  - ${name}`),
+    '',
+    '# rolldown 1.3 (via astro) pins @emnapi/runtime 2.0.0-beta.2, and pnpm',
+    "# then hands that beta to the wasm runtime @astrojs/check's astro2tsx",
+    '# loads next to @emnapi/core 1.x. The pair is incompatible and',
+    '# `astro check` dies with "this.bridge.setLastError is not a function".',
+    '# Giving astro2tsx its own matching runtime keeps the two in step.',
+    'packageExtensions:',
+    "  '@astrojs/astro2tsx':",
+    '    dependencies:',
+    `      '@emnapi/runtime': ${ASTRO2TSX_EMNAPI_RUNTIME}`,
     '',
   ].join('\n');
 }

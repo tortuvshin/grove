@@ -89,6 +89,11 @@ describe('grove init (registry scaffold)', () => {
     const workspace = parseYaml(await readFile(join(target, 'pnpm-workspace.yaml'), 'utf8'));
     expect(workspace.allowBuilds.esbuild).toBe(true); // pnpm 11's spelling
     expect(workspace.onlyBuiltDependencies).toContain('esbuild'); // pnpm 10's
+    // astro2tsx gets an @emnapi/runtime matching its @emnapi/core, so the
+    // 2.0 beta rolldown pins never reaches it and `astro check` loads.
+    expect(
+      workspace.packageExtensions['@astrojs/astro2tsx'].dependencies['@emnapi/runtime'],
+    ).toMatch(/^1\./);
 
     // Return value surfaces what was installed.
     expect(result.installedScaffold.name).toBe('default');
