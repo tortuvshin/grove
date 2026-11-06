@@ -19,6 +19,15 @@ auditConfig:
     # for its image-fetch cache at build time on URLs the site author
     # chose. Revisit when a patched version ships.
     - GHSA-ch52-4w7c-c8xp
+    # zod 3 (via lighthouse > puppeteer-core > chromium-bidi) has no fixed
+    # 3.x release; the fix is only in zod >=4.6.6. chromium-bidi validates
+    # CDP messages from the local Chrome that `grove audit` launches, not
+    # user input. zod 4 is held at >=4.6.6 by the override below. Revisit
+    # when chromium-bidi moves to zod 4.
+    - GHSA-mrhx-c7xc-m3w5
+    # deepmerge (via shadcn) has no fixed release. shadcn merges its own
+    # registry config at `grove init` time. Revisit when shadcn drops it.
+    - GHSA-gcqx-w48m-w2h4
 
 linkWorkspacePackages: true
 
@@ -35,5 +44,8 @@ overrides:
   undici@>=8.0.0 <8.10.2: ^8.10.2
   brace-expansion@>=2.0.0 <2.1.6: ^2.1.6
   basic-ftp@<6.2.1: ^6.2.1
+  fflate@>=0.7.0 <0.7.5: ^0.7.5
+  zod@>=4.0.0 <4.6.6: ^4.6.6
+  minimatch@>=10.0.0 <11.0.1: ^11.0.1
 
 preferWorkspacePackages: true

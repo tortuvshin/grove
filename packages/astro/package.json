@@ -56,7 +56,7 @@
   "dependencies": {
     "@grove-dev/core": "workspace:*",
     "marked": "^18.0.0",
-    "sanitize-html": "^2.17.7",
+    "sanitize-html": "^2.18.0",
     "shiki": "^4.4.3",
     "yaml": "^2.9.0"
   },
