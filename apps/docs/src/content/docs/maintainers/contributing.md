@@ -179,7 +179,7 @@ gates applies. What actually blocks a merge today, from
 `.github/workflows/ci.yml`:
 
 - **Build** — every workspace package builds.
-- **Unit tests** — `pnpm test` (Vitest) must pass.
+- **Unit tests** — `pnpm test` (Vitest) must pass. CI also runs the integration projects (`pnpm test:all`); run `pnpm test:integration` locally only when you touch `grove init` or `grove audit`, since it installs and builds a site and launches Chrome.
 - **Scaffold test** — `pnpm test:scaffold` verifies `grove init`
   produces a working space.
 - **Repo hygiene** — no committed `.DS_Store`, no stray

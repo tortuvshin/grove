@@ -13,7 +13,7 @@ This page covers the CI pipeline for Grove itself — the `@grove-dev/*` package
 |---|---|
 | **Build & type-check** | `pnpm install --frozen-lockfile`, `pnpm -r build`, `pnpm -r check` |
 | **Scaffold smoke test** | rebuilds, then `pnpm test:scaffold` (needs Build) |
-| **Unit tests (vitest)** | rebuilds, then `pnpm test` — the Vitest 4 `projects` suite across `@grove-dev/{core,astro,cli,starlight}` (needs Build) |
+| **Unit tests (vitest)** | rebuilds, then `pnpm test:all` — every Vitest 4 project (unit plus integration; plain `pnpm test` runs only the unit projects) across `@grove-dev/{core,astro,cli,starlight}` (needs Build) |
 | **Repo hygiene** | four checks, listed below |
 
 The "Repo hygiene" job (`lint` in the workflow file) runs:
