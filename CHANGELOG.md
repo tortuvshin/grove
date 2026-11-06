@@ -22,6 +22,13 @@ For the developer workflow that produces these entries, see
 
 ---
 
+## [1.3.1](https://github.com/tortuvshin/grove/compare/v1.3.0...v1.3.1) (2026-11-06)
+
+
+### Bug Fixes
+
+* **cli:** keep astro check loadable in pnpm scaffolds ([f520088](https://github.com/tortuvshin/grove/commit/f5200881489f8a86bc2a49dd57e72b0d5fa727cf))
+
 ## [1.3.0](https://github.com/tortuvshin/grove/compare/v1.2.1...v1.3.0) (2026-11-06)
 
 
