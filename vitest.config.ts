@@ -3,7 +3,9 @@
  *
  * Single source of truth for "how to run tests in this repo":
  *
- *   pnpm test              # run everything (root)
+ *   pnpm test              # unit + starlight (fast, low memory)
+ *   pnpm test:integration  # grove init scaffold + grove audit (heavy)
+ *   pnpm test:all          # every project (what CI runs)
  *   pnpm test:watch        # interactive watch mode
  *   pnpm test:coverage     # v8 coverage report
  *   pnpm --filter @grove-dev/core test   # one package only

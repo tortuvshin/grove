@@ -17,7 +17,8 @@ Do not add framework adapters, runtime UI subpath exports, or out-of-band templa
 pnpm install
 pnpm dev
 pnpm check
-pnpm test
+pnpm test               # unit tests
+pnpm test:integration   # scaffold + Lighthouse audit (heavy; CI runs it)
 pnpm build
 pnpm test:scaffold
 pnpm inventory
