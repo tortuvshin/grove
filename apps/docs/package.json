@@ -14,7 +14,7 @@
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/starlight": "^0.42.9",
     "@grove-dev/starlight": "workspace:*",
-    "@tailwindcss/vite": "^4.3.2",
+    "@tailwindcss/vite": "^4.3.5",
     "astro": "^7.3.3",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3"
