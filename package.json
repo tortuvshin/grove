@@ -41,7 +41,7 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@astrojs/check": "^0.9.10",
     "@biomejs/biome": "^2.5.8",
-    "@iconify-json/logos": "^1.2.13",
+    "@iconify-json/logos": "^1.2.19",
     "@iconify-json/simple-icons": "^1.2.93",
     "@types/node": "^26.4.1",
     "@vitest/coverage-v8": "^4.1.12",
