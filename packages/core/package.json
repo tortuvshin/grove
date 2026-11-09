@@ -54,7 +54,7 @@
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "jiti": "^2.6.1",
-    "mdast-util-from-markdown": "^2.0.3",
+    "mdast-util-from-markdown": "^2.1.0",
     "satori": "^0.33.5",
     "unist-util-visit": "^5.1.0",
     "yaml": "^2.9.0",
